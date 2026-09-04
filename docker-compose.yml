@@ -14,6 +14,9 @@ services:
     restart: unless-stopped
 
     environment:
+      # ---------------------------------------------------
+      # APPLICATION
+      # ---------------------------------------------------
       APP_NAME: ${APP_NAME}
       APP_ENV: ${APP_ENV}
       APP_KEY: ${APP_KEY}
@@ -28,11 +31,17 @@ services:
 
       BCRYPT_ROUNDS: ${BCRYPT_ROUNDS}
 
+      # ---------------------------------------------------
+      # LOG
+      # ---------------------------------------------------
       LOG_CHANNEL: ${LOG_CHANNEL}
       LOG_STACK: ${LOG_STACK}
       LOG_DEPRECATIONS_CHANNEL: ${LOG_DEPRECATIONS_CHANNEL}
       LOG_LEVEL: ${LOG_LEVEL}
 
+      # ---------------------------------------------------
+      # DATABASE
+      # ---------------------------------------------------
       DB_CONNECTION: ${DB_CONNECTION}
       DB_HOST: ${DB_HOST}
       DB_PORT: ${DB_PORT}
@@ -40,6 +49,9 @@ services:
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
 
+      # ---------------------------------------------------
+      # SESSION
+      # ---------------------------------------------------
       SESSION_DRIVER: ${SESSION_DRIVER}
       SESSION_LIFETIME: ${SESSION_LIFETIME}
       SESSION_ENCRYPT: ${SESSION_ENCRYPT}
@@ -49,15 +61,30 @@ services:
       SESSION_HTTP_ONLY: ${SESSION_HTTP_ONLY}
       SESSION_SAME_SITE: ${SESSION_SAME_SITE}
 
+      # ---------------------------------------------------
+      # CACHE
+      # ---------------------------------------------------
       CACHE_STORE: ${CACHE_STORE}
       CACHE_PREFIX: ${CACHE_PREFIX}
 
+      # ---------------------------------------------------
+      # QUEUE
+      # ---------------------------------------------------
       QUEUE_CONNECTION: ${QUEUE_CONNECTION}
 
+      # ---------------------------------------------------
+      # BROADCAST
+      # ---------------------------------------------------
       BROADCAST_CONNECTION: ${BROADCAST_CONNECTION}
 
+      # ---------------------------------------------------
+      # FILE STORAGE
+      # ---------------------------------------------------
       FILESYSTEM_DISK: ${FILESYSTEM_DISK}
 
+      # ---------------------------------------------------
+      # SUPABASE S3
+      # ---------------------------------------------------
       SUPABASE_S3_ACCESS_KEY_ID: ${SUPABASE_S3_ACCESS_KEY_ID}
       SUPABASE_S3_SECRET_ACCESS_KEY: ${SUPABASE_S3_SECRET_ACCESS_KEY}
       SUPABASE_S3_REGION: ${SUPABASE_S3_REGION}
@@ -66,6 +93,9 @@ services:
 
       AWS_USE_PATH_STYLE_ENDPOINT: ${AWS_USE_PATH_STYLE_ENDPOINT}
 
+      # ---------------------------------------------------
+      # VITE
+      # ---------------------------------------------------
       VITE_APP_NAME: ${VITE_APP_NAME}
 
     depends_on:
@@ -76,8 +106,8 @@ services:
       - e-arsip-network
 
     volumes:
+      # Laravel writable storage
       - e-arsip-storage:/var/www/html/storage
-      - e-arsip-build:/var/www/html/public/build
 
     expose:
       - "9000"
@@ -98,19 +128,24 @@ services:
       - app
 
     ports:
+      # Hanya bisa diakses dari server sendiri.
+      # Nginx utama akan meneruskan domain ke port ini.
       - "127.0.0.1:8088:80"
 
     volumes:
-      # Project Laravel
+      # ---------------------------------------------------
+      # Laravel project
+      # ---------------------------------------------------
       - ./:/var/www/html
 
-      # Persistent Laravel storage
+      # ---------------------------------------------------
+      # Laravel writable storage
+      # ---------------------------------------------------
       - e-arsip-storage:/var/www/html/storage
 
-      # Persistent compiled frontend
-      - e-arsip-build:/var/www/html/public/build
-
-      # Nginx configuration directory
+      # ---------------------------------------------------
+      # Nginx configuration
+      # ---------------------------------------------------
       - ./docker/nginx:/etc/nginx/conf.d:ro
 
     networks:
@@ -135,6 +170,9 @@ services:
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
 
     volumes:
+      # ---------------------------------------------------
+      # DATABASE PERSISTENCE
+      # ---------------------------------------------------
       - e-arsip-mysql-data:/var/lib/mysql
 
     networks:
@@ -151,9 +189,11 @@ services:
           "-u${DB_USERNAME}",
           "-p${DB_PASSWORD}"
         ]
+
       interval: 10s
       timeout: 5s
       retries: 10
+      start_period: 30s
 
 
 # =========================================================
@@ -172,11 +212,14 @@ networks:
 
 volumes:
 
+  # -------------------------------------------------------
+  # Laravel storage
+  # -------------------------------------------------------
   e-arsip-storage:
     name: e-arsip-storage
 
-  e-arsip-build:
-    name: e-arsip-build
-
+  # -------------------------------------------------------
+  # MySQL database
+  # -------------------------------------------------------
   e-arsip-mysql-data:
     name: e-arsip-mysql-data
