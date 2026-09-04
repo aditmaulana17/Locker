@@ -101,10 +101,17 @@ services:
       - "127.0.0.1:8088:80"
 
     volumes:
+      # Project Laravel
       - ./:/var/www/html
+
+      # Persistent Laravel storage
       - e-arsip-storage:/var/www/html/storage
+
+      # Persistent compiled frontend
       - e-arsip-build:/var/www/html/public/build
-      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+
+      # Nginx configuration directory
+      - ./docker/nginx:/etc/nginx/conf.d:ro
 
     networks:
       - e-arsip-network
