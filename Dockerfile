@@ -6,7 +6,7 @@ FROM node:22-alpine AS frontend
 
 WORKDIR /app
 
-ARG VITE_APP_NAME=E-Arsip
+ARG VITE_APP_NAME=Locker
 ENV VITE_APP_NAME=$VITE_APP_NAME
 
 COPY package*.json ./

@@ -9,7 +9,7 @@ services:
       context: .
       dockerfile: Dockerfile
 
-    container_name: e-arsip-app
+    container_name: locker-app
 
     restart: unless-stopped
 
@@ -103,11 +103,11 @@ services:
         condition: service_healthy
 
     networks:
-      - e-arsip-network
+      - locker-network
 
     volumes:
       # Laravel writable storage
-      - e-arsip-storage:/var/www/html/storage
+      - locker-storage:/var/www/html/storage
 
     expose:
       - "9000"
@@ -120,7 +120,7 @@ services:
   nginx:
     image: nginx:alpine
 
-    container_name: e-arsip-nginx
+    container_name: locker-nginx
 
     restart: unless-stopped
 
@@ -141,7 +141,7 @@ services:
       # ---------------------------------------------------
       # Laravel writable storage
       # ---------------------------------------------------
-      - e-arsip-storage:/var/www/html/storage
+      - locker-storage:/var/www/html/storage
 
       # ---------------------------------------------------
       # Nginx configuration
@@ -149,7 +149,7 @@ services:
       - ./docker/nginx:/etc/nginx/conf.d:ro
 
     networks:
-      - e-arsip-network
+      - locker-network
 
 
   # =======================================================
@@ -159,7 +159,7 @@ services:
   db:
     image: mysql:8.4
 
-    container_name: e-arsip-db
+    container_name: locker-db
 
     restart: unless-stopped
 
@@ -173,10 +173,10 @@ services:
       # ---------------------------------------------------
       # DATABASE PERSISTENCE
       # ---------------------------------------------------
-      - e-arsip-mysql-data:/var/lib/mysql
+      - locker-mysql-data:/var/lib/mysql
 
     networks:
-      - e-arsip-network
+      - locker-network
 
     healthcheck:
       test:
@@ -202,7 +202,7 @@ services:
 
 networks:
 
-  e-arsip-network:
+  locker-network:
     driver: bridge
 
 
@@ -215,11 +215,11 @@ volumes:
   # -------------------------------------------------------
   # Laravel storage
   # -------------------------------------------------------
-  e-arsip-storage:
-    name: e-arsip-storage
+  locker-storage:
+    name: locker-storage
 
   # -------------------------------------------------------
   # MySQL database
   # -------------------------------------------------------
-  e-arsip-mysql-data:
-    name: e-arsip-mysql-data
+  locker-mysql-data:
+    name: locker-mysql-data
