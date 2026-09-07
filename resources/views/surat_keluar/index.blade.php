@@ -534,9 +534,9 @@
                             <td class="px-4 py-3.5 text-slate-700 sm:px-6 sm:py-4">
                                 <span
                                     class="inline-block max-w-[220px] truncate rounded-lg border border-slate-200/60 bg-slate-100 px-2.5 py-1 font-medium text-slate-700"
-                                    title="{{ $s->instansi_tujuan ?? '-' }}"
+                                    title="{{ $s->pengirim ?? '-' }}"
                                 >
-                                    {{ $s->instansi_tujuan ?? '-' }}
+                                    {{ $s->pengirim ?? '-' }}
                                 </span>
                             </td>
 
