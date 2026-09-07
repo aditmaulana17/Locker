@@ -16,62 +16,82 @@ return new class extends Migration
         | Surat Masuk
         |--------------------------------------------------------------------------
         |
-        | Tambahkan index hanya pada kolom yang memang tersedia
-        | di tabel surat_masuks.
+        | Hanya membuat index jika index tersebut belum tersedia.
+        | Ini diperlukan karena percobaan migration sebelumnya sempat
+        | membuat sebagian index sebelum gagal pada instansi_id.
         |
         */
-        Schema::table('surat_masuks', function (Blueprint $table) {
-            $table->index(
-                'created_at',
-                'surat_masuks_created_at_index'
-            );
+        $suratMasukIndexes = array_column(
+            Schema::getIndexes('surat_masuks'),
+            'name'
+        );
 
-            $table->index(
-                'kategori_surat_id',
-                'surat_masuks_kategori_index'
-            );
+        Schema::table('surat_masuks', function (Blueprint $table) use ($suratMasukIndexes) {
+            if (! in_array('surat_masuks_created_at_index', $suratMasukIndexes, true)) {
+                $table->index(
+                    'created_at',
+                    'surat_masuks_created_at_index'
+                );
+            }
+
+            if (! in_array('surat_masuks_kategori_index', $suratMasukIndexes, true)) {
+                $table->index(
+                    'kategori_surat_id',
+                    'surat_masuks_kategori_index'
+                );
+            }
         });
 
         /*
         |--------------------------------------------------------------------------
         | Surat Keluar
         |--------------------------------------------------------------------------
-        |
-        | Tambahkan index hanya pada kolom yang memang tersedia
-        | di tabel surat_keluars.
-        |
         */
-        Schema::table('surat_keluars', function (Blueprint $table) {
-            $table->index(
-                'created_at',
-                'surat_keluars_created_at_index'
-            );
+        $suratKeluarIndexes = array_column(
+            Schema::getIndexes('surat_keluars'),
+            'name'
+        );
 
-            $table->index(
-                'kategori_surat_id',
-                'surat_keluars_kategori_index'
-            );
+        Schema::table('surat_keluars', function (Blueprint $table) use ($suratKeluarIndexes) {
+            if (! in_array('surat_keluars_created_at_index', $suratKeluarIndexes, true)) {
+                $table->index(
+                    'created_at',
+                    'surat_keluars_created_at_index'
+                );
+            }
+
+            if (! in_array('surat_keluars_kategori_index', $suratKeluarIndexes, true)) {
+                $table->index(
+                    'kategori_surat_id',
+                    'surat_keluars_kategori_index'
+                );
+            }
         });
 
         /*
         |--------------------------------------------------------------------------
         | Disposisi
         |--------------------------------------------------------------------------
-        |
-        | Index gabungan untuk pencarian disposisi berdasarkan
-        | user tujuan dan status.
-        |
         */
-        Schema::table('disposisis', function (Blueprint $table) {
-            $table->index(
-                ['kepada_user_id', 'status'],
-                'disposisis_user_status_index'
-            );
+        $disposisiIndexes = array_column(
+            Schema::getIndexes('disposisis'),
+            'name'
+        );
 
-            $table->index(
-                'created_at',
-                'disposisis_created_at_index'
-            );
+        Schema::table('disposisis', function (Blueprint $table) use ($disposisiIndexes) {
+            if (! in_array('disposisis_user_status_index', $disposisiIndexes, true)) {
+                $table->index(
+                    ['kepada_user_id', 'status'],
+                    'disposisis_user_status_index'
+                );
+            }
+
+            if (! in_array('disposisis_created_at_index', $disposisiIndexes, true)) {
+                $table->index(
+                    'created_at',
+                    'disposisis_created_at_index'
+                );
+            }
         });
     }
 
@@ -85,14 +105,19 @@ return new class extends Migration
         | Surat Masuk
         |--------------------------------------------------------------------------
         */
-        Schema::table('surat_masuks', function (Blueprint $table) {
-            $table->dropIndex(
-                'surat_masuks_created_at_index'
-            );
+        $suratMasukIndexes = array_column(
+            Schema::getIndexes('surat_masuks'),
+            'name'
+        );
 
-            $table->dropIndex(
-                'surat_masuks_kategori_index'
-            );
+        Schema::table('surat_masuks', function (Blueprint $table) use ($suratMasukIndexes) {
+            if (in_array('surat_masuks_created_at_index', $suratMasukIndexes, true)) {
+                $table->dropIndex('surat_masuks_created_at_index');
+            }
+
+            if (in_array('surat_masuks_kategori_index', $suratMasukIndexes, true)) {
+                $table->dropIndex('surat_masuks_kategori_index');
+            }
         });
 
         /*
@@ -100,14 +125,19 @@ return new class extends Migration
         | Surat Keluar
         |--------------------------------------------------------------------------
         */
-        Schema::table('surat_keluars', function (Blueprint $table) {
-            $table->dropIndex(
-                'surat_keluars_created_at_index'
-            );
+        $suratKeluarIndexes = array_column(
+            Schema::getIndexes('surat_keluars'),
+            'name'
+        );
 
-            $table->dropIndex(
-                'surat_keluars_kategori_index'
-            );
+        Schema::table('surat_keluars', function (Blueprint $table) use ($suratKeluarIndexes) {
+            if (in_array('surat_keluars_created_at_index', $suratKeluarIndexes, true)) {
+                $table->dropIndex('surat_keluars_created_at_index');
+            }
+
+            if (in_array('surat_keluars_kategori_index', $suratKeluarIndexes, true)) {
+                $table->dropIndex('surat_keluars_kategori_index');
+            }
         });
 
         /*
@@ -115,14 +145,19 @@ return new class extends Migration
         | Disposisi
         |--------------------------------------------------------------------------
         */
-        Schema::table('disposisis', function (Blueprint $table) {
-            $table->dropIndex(
-                'disposisis_user_status_index'
-            );
+        $disposisiIndexes = array_column(
+            Schema::getIndexes('disposisis'),
+            'name'
+        );
 
-            $table->dropIndex(
-                'disposisis_created_at_index'
-            );
+        Schema::table('disposisis', function (Blueprint $table) use ($disposisiIndexes) {
+            if (in_array('disposisis_user_status_index', $disposisiIndexes, true)) {
+                $table->dropIndex('disposisis_user_status_index');
+            }
+
+            if (in_array('disposisis_created_at_index', $disposisiIndexes, true)) {
+                $table->dropIndex('disposisis_created_at_index');
+            }
         });
     }
 };
