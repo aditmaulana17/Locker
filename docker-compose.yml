@@ -14,9 +14,11 @@ services:
     restart: unless-stopped
 
     environment:
+
       # ---------------------------------------------------
       # APPLICATION
       # ---------------------------------------------------
+
       APP_NAME: ${APP_NAME}
       APP_ENV: ${APP_ENV}
       APP_KEY: ${APP_KEY}
@@ -34,6 +36,7 @@ services:
       # ---------------------------------------------------
       # LOG
       # ---------------------------------------------------
+
       LOG_CHANNEL: ${LOG_CHANNEL}
       LOG_STACK: ${LOG_STACK}
       LOG_DEPRECATIONS_CHANNEL: ${LOG_DEPRECATIONS_CHANNEL}
@@ -42,6 +45,7 @@ services:
       # ---------------------------------------------------
       # DATABASE
       # ---------------------------------------------------
+
       DB_CONNECTION: ${DB_CONNECTION}
       DB_HOST: ${DB_HOST}
       DB_PORT: ${DB_PORT}
@@ -52,6 +56,7 @@ services:
       # ---------------------------------------------------
       # SESSION
       # ---------------------------------------------------
+
       SESSION_DRIVER: ${SESSION_DRIVER}
       SESSION_LIFETIME: ${SESSION_LIFETIME}
       SESSION_ENCRYPT: ${SESSION_ENCRYPT}
@@ -64,27 +69,32 @@ services:
       # ---------------------------------------------------
       # CACHE
       # ---------------------------------------------------
+
       CACHE_STORE: ${CACHE_STORE}
       CACHE_PREFIX: ${CACHE_PREFIX}
 
       # ---------------------------------------------------
       # QUEUE
       # ---------------------------------------------------
+
       QUEUE_CONNECTION: ${QUEUE_CONNECTION}
 
       # ---------------------------------------------------
       # BROADCAST
       # ---------------------------------------------------
+
       BROADCAST_CONNECTION: ${BROADCAST_CONNECTION}
 
       # ---------------------------------------------------
       # FILE STORAGE
       # ---------------------------------------------------
+
       FILESYSTEM_DISK: ${FILESYSTEM_DISK}
 
       # ---------------------------------------------------
       # SUPABASE S3
       # ---------------------------------------------------
+
       SUPABASE_S3_ACCESS_KEY_ID: ${SUPABASE_S3_ACCESS_KEY_ID}
       SUPABASE_S3_SECRET_ACCESS_KEY: ${SUPABASE_S3_SECRET_ACCESS_KEY}
       SUPABASE_S3_REGION: ${SUPABASE_S3_REGION}
@@ -96,6 +106,7 @@ services:
       # ---------------------------------------------------
       # VITE
       # ---------------------------------------------------
+
       VITE_APP_NAME: ${VITE_APP_NAME}
 
     depends_on:
@@ -106,7 +117,14 @@ services:
       - locker-network
 
     volumes:
+
+      # ---------------------------------------------------
       # Laravel writable storage
+      # ---------------------------------------------------
+      #
+      # Hanya storage yang dibuat persistent.
+      # Source code berasal dari image.
+      #
       - locker-storage:/var/www/html/storage
 
     expose:
@@ -128,24 +146,39 @@ services:
       - app
 
     ports:
-      # Hanya bisa diakses dari server sendiri.
-      # Nginx utama akan meneruskan domain ke port ini.
+
+      # ---------------------------------------------------
+      # INTERNAL ONLY
+      # ---------------------------------------------------
+      #
+      # Tidak membuka port 8088 ke internet.
+      # Hanya localhost/server yang dapat mengakses.
+      #
       - "127.0.0.1:8088:80"
 
     volumes:
-      # ---------------------------------------------------
-      # Laravel project
-      # ---------------------------------------------------
-      - ./:/var/www/html
 
       # ---------------------------------------------------
-      # Laravel writable storage
+      # LARAVEL APPLICATION CODE
       # ---------------------------------------------------
+      #
+      # Source Laravel berasal dari volume ini.
+      # Volume ini sudah kita isi dari locker-app.
+      #
+      - locker-app-code:/var/www/html:ro
+
+      # ---------------------------------------------------
+      # LARAVEL STORAGE
+      # ---------------------------------------------------
+      #
+      # Storage dibuat writable dan persistent.
+      #
       - locker-storage:/var/www/html/storage
 
       # ---------------------------------------------------
-      # Nginx configuration
+      # NGINX CONFIGURATION
       # ---------------------------------------------------
+      #
       - ./docker/nginx:/etc/nginx/conf.d:ro
 
     networks:
@@ -164,21 +197,27 @@ services:
     restart: unless-stopped
 
     environment:
+
       MYSQL_DATABASE: ${DB_DATABASE}
       MYSQL_USER: ${DB_USERNAME}
       MYSQL_PASSWORD: ${DB_PASSWORD}
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
 
     volumes:
+
       # ---------------------------------------------------
       # DATABASE PERSISTENCE
       # ---------------------------------------------------
+      #
+      # JANGAN DIHAPUS.
+      #
       - locker-mysql-data:/var/lib/mysql
 
     networks:
       - locker-network
 
     healthcheck:
+
       test:
         [
           "CMD",
@@ -196,9 +235,9 @@ services:
       start_period: 30s
 
 
-# =========================================================
+# =======================================================
 # NETWORK
-# =========================================================
+# =======================================================
 
 networks:
 
@@ -206,20 +245,35 @@ networks:
     driver: bridge
 
 
-# =========================================================
+# =======================================================
 # VOLUMES
-# =========================================================
+# =======================================================
 
 volumes:
 
   # -------------------------------------------------------
-  # Laravel storage
+  # LARAVEL APPLICATION CODE
   # -------------------------------------------------------
+  #
+  # Source code Laravel untuk Nginx.
+  #
+  locker-app-code:
+    name: locker-app-code
+
+  # -------------------------------------------------------
+  # LARAVEL STORAGE
+  # -------------------------------------------------------
+  #
+  # Persistent storage Laravel.
+  #
   locker-storage:
     name: locker-storage
 
   # -------------------------------------------------------
-  # MySQL database
+  # MYSQL DATABASE
   # -------------------------------------------------------
+  #
+  # Persistent database.
+  #
   locker-mysql-data:
     name: locker-mysql-data
