@@ -66,22 +66,12 @@ class SuratMasuk extends Model
         $maxUrutan = 0;
 
         foreach ($records as $nomor) {
-            if (preg_match(
-                '/^AG\/(\d+)\/\d{2}\/\d{4}$/',
-                (string) $nomor,
-                $matches
-            )) {
-                $urutan = (int) $matches[1];
-                $maxUrutan = max($maxUrutan, $urutan);
+            if (preg_match('/^AG\/(\d+)\/\d{2}\/\d{4}$/', (string) $nomor, $matches)) {
+                $maxUrutan = max($maxUrutan, (int) $matches[1]);
             }
         }
 
-        return sprintf(
-            'AG/%04d/%s/%s',
-            $maxUrutan + 1,
-            $bulan,
-            $tahun
-        );
+        return sprintf('AG/%04d/%s/%s', $maxUrutan + 1, $bulan, $tahun);
     }
 
     public function scopeFilter(Builder $query, array $filters): Builder
@@ -108,7 +98,7 @@ class SuratMasuk extends Model
             ->values()
             ->all();
 
-        if (!empty($kategoriIds)) {
+        if ($kategoriIds) {
             $query->whereIn('kategori_surat_id', $kategoriIds);
         }
 
@@ -128,32 +118,26 @@ class SuratMasuk extends Model
             ->values()
             ->all();
 
-        if (!empty($statuses)) {
+        if ($statuses) {
             $query->whereIn('status', $statuses);
         }
 
-        $query->when(
-            $filters['dari_tanggal'] ?? null,
-            fn (Builder $query, $value) =>
-                $query->whereDate('tanggal_terima', '>=', $value)
-        );
+        if (!empty($filters['dari_tanggal'])) {
+            $query->whereDate('tanggal_terima', '>=', $filters['dari_tanggal']);
+        }
 
-        $query->when(
-            $filters['sampai_tanggal'] ?? null,
-            fn (Builder $query, $value) =>
-                $query->whereDate('tanggal_terima', '<=', $value)
-        );
+        if (!empty($filters['sampai_tanggal'])) {
+            $query->whereDate('tanggal_terima', '<=', $filters['sampai_tanggal']);
+        }
 
         return $query;
     }
 
     public function scopeUntukStaff(Builder $query, int $userId): Builder
     {
-        return $query->whereHas(
-            'disposisi',
-            fn (Builder $query) =>
-                $query->where('kepada_user_id', $userId)
-        );
+        return $query->whereHas('disposisi', function (Builder $query) use ($userId) {
+            $query->where('kepada_user_id', $userId);
+        });
     }
 
     public function scopeStatus(Builder $query, ?string $status): Builder
@@ -162,10 +146,7 @@ class SuratMasuk extends Model
             return $query;
         }
 
-        return $query->where(
-            'status',
-            strtolower(trim($status))
-        );
+        return $query->where('status', strtolower(trim($status)));
     }
 
     public function scopeKategori(Builder $query, ?int $kategoriId): Builder
@@ -174,10 +155,7 @@ class SuratMasuk extends Model
             return $query;
         }
 
-        return $query->where(
-            'kategori_surat_id',
-            $kategoriId
-        );
+        return $query->where('kategori_surat_id', $kategoriId);
     }
 
     public function scopeTerbaru(Builder $query): Builder

@@ -128,24 +128,34 @@ class SuratMasukRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $this->merge([
-            'nomor_agenda' => $this->filled('nomor_agenda')
-                ? trim((string) $this->input('nomor_agenda'))
-                : null,
-            'nomor_surat' => $this->filled('nomor_surat')
-                ? trim((string) $this->input('nomor_surat'))
-                : $this->input('nomor_surat'),
-            'pengirim' => $this->filled('pengirim')
-                ? trim((string) $this->input('pengirim'))
-                : $this->input('pengirim'),
-            'perihal' => $this->filled('perihal')
-                ? trim((string) $this->input('perihal'))
-                : $this->input('perihal'),
-            'status' => $this->filled('status')
-                ? strtolower(trim((string) $this->input('status')))
-                : $this->input('status'),
-            'lokasi_arsip_fisik' => $this->filled('lokasi_arsip_fisik')
-                ? trim((string) $this->input('lokasi_arsip_fisik'))
-                : $this->input('lokasi_arsip_fisik'),
+            'nomor_agenda' => $this->cleanInput('nomor_agenda'),
+            'nomor_surat' => $this->cleanInput('nomor_surat'),
+            'pengirim' => $this->cleanInput('pengirim'),
+            'perihal' => $this->cleanInput('perihal'),
+            'status' => $this->cleanStatus(),
+            'lokasi_arsip_fisik' => $this->cleanInput('lokasi_arsip_fisik'),
         ]);
+    }
+
+    private function cleanInput(string $key): ?string
+    {
+        if (!$this->filled($key)) {
+            return $this->input($key);
+        }
+
+        $value = trim((string) $this->input($key));
+
+        return $value !== '' ? $value : null;
+    }
+
+    private function cleanStatus(): ?string
+    {
+        if (!$this->filled('status')) {
+            return $this->input('status');
+        }
+
+        return strtolower(
+            trim((string) $this->input('status'))
+        );
     }
 }
