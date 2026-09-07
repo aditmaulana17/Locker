@@ -5,7 +5,6 @@ services:
   # =======================================================
 
   app:
-    image: locker-app:latest
 
     build:
       context: .
@@ -21,10 +20,6 @@ services:
 
     environment:
 
-      # ---------------------------------------------------
-      # APPLICATION
-      # ---------------------------------------------------
-
       APP_NAME: ${APP_NAME:-Locker}
       APP_ENV: ${APP_ENV:-production}
       APP_KEY: ${APP_KEY}
@@ -39,132 +34,64 @@ services:
 
       BCRYPT_ROUNDS: ${BCRYPT_ROUNDS:-12}
 
-
-      # ---------------------------------------------------
-      # LOG
-      # ---------------------------------------------------
-
       LOG_CHANNEL: ${LOG_CHANNEL:-stack}
       LOG_STACK: ${LOG_STACK:-single}
       LOG_DEPRECATIONS_CHANNEL: ${LOG_DEPRECATIONS_CHANNEL:-null}
       LOG_LEVEL: ${LOG_LEVEL:-error}
 
-
-      # ---------------------------------------------------
-      # DATABASE
-      # ---------------------------------------------------
-
       DB_CONNECTION: mysql
-
-      # PENTING:
-      # Jangan gunakan 127.0.0.1
-      # Karena MySQL berada di container db.
-
       DB_HOST: db
       DB_PORT: 3306
-
       DB_DATABASE: ${DB_DATABASE}
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
-
-
-      # ---------------------------------------------------
-      # SESSION
-      # ---------------------------------------------------
 
       SESSION_DRIVER: ${SESSION_DRIVER:-database}
       SESSION_LIFETIME: ${SESSION_LIFETIME:-120}
       SESSION_ENCRYPT: ${SESSION_ENCRYPT:-false}
       SESSION_PATH: ${SESSION_PATH:-/}
       SESSION_DOMAIN: ${SESSION_DOMAIN:-}
-
       SESSION_SECURE_COOKIE: ${SESSION_SECURE_COOKIE:-true}
       SESSION_HTTP_ONLY: ${SESSION_HTTP_ONLY:-true}
       SESSION_SAME_SITE: ${SESSION_SAME_SITE:-lax}
 
-
-      # ---------------------------------------------------
-      # CACHE
-      # ---------------------------------------------------
-
       CACHE_STORE: ${CACHE_STORE:-database}
       CACHE_PREFIX: ${CACHE_PREFIX:-}
 
-
-      # ---------------------------------------------------
-      # QUEUE
-      # ---------------------------------------------------
-
       QUEUE_CONNECTION: ${QUEUE_CONNECTION:-database}
-
-
-      # ---------------------------------------------------
-      # BROADCAST
-      # ---------------------------------------------------
 
       BROADCAST_CONNECTION: ${BROADCAST_CONNECTION:-log}
 
-
-      # ---------------------------------------------------
-      # FILE STORAGE
-      # ---------------------------------------------------
-
       FILESYSTEM_DISK: ${FILESYSTEM_DISK:-supabase}
-
-
-      # ---------------------------------------------------
-      # SUPABASE STORAGE
-      # ---------------------------------------------------
 
       SUPABASE_S3_ACCESS_KEY_ID: ${SUPABASE_S3_ACCESS_KEY_ID}
       SUPABASE_S3_SECRET_ACCESS_KEY: ${SUPABASE_S3_SECRET_ACCESS_KEY}
-
       SUPABASE_S3_REGION: ${SUPABASE_S3_REGION:-ap-northeast-2}
-
       SUPABASE_STORAGE_BUCKET: ${SUPABASE_STORAGE_BUCKET}
-
       SUPABASE_S3_ENDPOINT: ${SUPABASE_S3_ENDPOINT}
-
       AWS_USE_PATH_STYLE_ENDPOINT: ${AWS_USE_PATH_STYLE_ENDPOINT:-true}
-
-
-      # ---------------------------------------------------
-      # VITE
-      # ---------------------------------------------------
 
       VITE_APP_NAME: ${VITE_APP_NAME:-Locker}
 
-
     depends_on:
-
       db:
         condition: service_healthy
 
-
     volumes:
-
-      # Persistent Laravel storage
       - locker-storage:/var/www/html/storage
 
-
     networks:
-
       - locker-network
 
-
     expose:
-
       - "9000"
 
-
     healthcheck:
-
       test:
         [
           "CMD-SHELL",
           "php -r '$fp = @fsockopen(\"127.0.0.1\", 9000); exit($fp ? 0 : 1);'"
         ]
-
       interval: 10s
       timeout: 5s
       retries: 10
@@ -177,10 +104,7 @@ services:
 
   nginx:
 
-    image: locker-nginx:latest
-
     build:
-
       context: .
       dockerfile: Dockerfile
       target: nginx
@@ -189,106 +113,12 @@ services:
 
     restart: unless-stopped
 
-
     depends_on:
-
       app:
         condition: service_healthy
 
-
     ports:
-
-      # Hanya bisa diakses dari server itu sendiri.
-      # Cloudflare Tunnel yang meneruskan trafik ke sini.
-
       - "127.0.0.1:8088:80"
 
-
     networks:
-
       - locker-network
-
-
-  # =======================================================
-  # MYSQL
-  # =======================================================
-
-  db:
-
-    image: mysql:8.4
-
-    container_name: locker-db
-
-    restart: unless-stopped
-
-
-    environment:
-
-      MYSQL_DATABASE: ${DB_DATABASE}
-
-      MYSQL_USER: ${DB_USERNAME}
-
-      MYSQL_PASSWORD: ${DB_PASSWORD}
-
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-
-
-    volumes:
-
-      - locker-mysql-data:/var/lib/mysql
-
-
-    networks:
-
-      - locker-network
-
-
-    healthcheck:
-
-      test:
-        [
-          "CMD-SHELL",
-          "mysqladmin ping -h localhost -u$${MYSQL_USER} -p$${MYSQL_PASSWORD} --silent"
-        ]
-
-      interval: 10s
-
-      timeout: 5s
-
-      retries: 15
-
-      start_period: 30s
-
-
-# =========================================================
-# NETWORK
-# =========================================================
-
-networks:
-
-  locker-network:
-
-    # HARUS menggunakan network yang sekarang
-    # sudah terhubung ke cloudflared.
-
-    name: locker_locker-network
-
-    external: true
-
-
-# =========================================================
-# VOLUMES
-# =========================================================
-
-volumes:
-
-  # File Laravel yang persistent
-  locker-storage:
-
-    name: locker-storage
-
-
-  # Database persistent
-  locker-mysql-data:
-
-    name: locker-mysql-data
