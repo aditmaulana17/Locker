@@ -32,14 +32,17 @@ class DisposisiController extends Controller
         if ($search !== '') {
             $query->where(function (Builder $query) use ($search) {
                 $query->where('isi_disposisi', 'like', "%{$search}%")
+                    ->orWhere('instruksi', 'like', "%{$search}%")
                     ->orWhere('catatan', 'like', "%{$search}%")
                     ->orWhereHas('suratMasuk', function (Builder $suratQuery) use ($search) {
-                        $suratQuery->where('nomor_surat', 'like', "%{$search}%")
+                        $suratQuery
+                            ->where('nomor_surat', 'like', "%{$search}%")
                             ->orWhere('nomor_agenda', 'like', "%{$search}%")
                             ->orWhere('perihal', 'like', "%{$search}%");
                     })
                     ->orWhereHas('kepada', function (Builder $userQuery) use ($search) {
-                        $userQuery->where('name', 'like', "%{$search}%")
+                        $userQuery
+                            ->where('name', 'like', "%{$search}%")
                             ->orWhere('nama', 'like', "%{$search}%")
                             ->orWhere('jabatan', 'like', "%{$search}%");
                     });
@@ -93,8 +96,10 @@ class DisposisiController extends Controller
         return view('disposisi.index', compact('disposisis'));
     }
 
-    public function create(Request $request, ?SuratMasuk $suratMasuk = null)
-    {
+    public function create(
+        Request $request,
+        ?SuratMasuk $suratMasuk = null
+    ) {
         $this->authorizeManageAccess();
 
         if (!$suratMasuk || !$suratMasuk->exists) {
@@ -103,7 +108,10 @@ class DisposisiController extends Controller
             if (!$suratMasukId) {
                 return redirect()
                     ->route('surat-masuk.index')
-                    ->with('warning', 'Silakan pilih surat masuk terlebih dahulu.');
+                    ->with(
+                        'warning',
+                        'Silakan pilih surat masuk terlebih dahulu.'
+                    );
             }
 
             $suratMasuk = SuratMasuk::findOrFail($suratMasukId);
@@ -111,7 +119,10 @@ class DisposisiController extends Controller
 
         $users = $this->getStaffUsers();
 
-        return view('disposisi.create', compact('suratMasuk', 'users'));
+        return view(
+            'disposisi.create',
+            compact('suratMasuk', 'users')
+        );
     }
 
     public function store(DisposisiRequest $request)
@@ -120,8 +131,46 @@ class DisposisiController extends Controller
 
         $data = $request->validated();
 
+        /*
+         * ==========================================================
+         * NORMALISASI INSTRUKSI DISPOSISI
+         * ==========================================================
+         *
+         * Form saat ini menggunakan:
+         *
+         *     name="instruksi"
+         *
+         * Sedangkan aplikasi/database juga menggunakan:
+         *
+         *     isi_disposisi
+         *
+         * Supaya keduanya tetap kompatibel, kita jadikan
+         * isi_disposisi sebagai sumber utama lalu salin nilainya
+         * ke instruksi.
+         */
+
+        $isiDisposisi = $data['isi_disposisi']
+            ?? $data['instruksi']
+            ?? $data['catatan']
+            ?? '';
+
+        $isiDisposisi = trim((string) $isiDisposisi);
+
+        $data['isi_disposisi'] = $isiDisposisi;
+
+        /*
+         * Database production masih memiliki kolom instruksi
+         * yang NOT NULL dan tidak memiliki default value.
+         *
+         * Karena itu instruksi harus tetap dikirim.
+         */
+        $data['instruksi'] = $isiDisposisi;
+
+        /*
+         * Field berikut bukan kolom yang perlu disimpan langsung
+         * melalui mass assignment.
+         */
         unset(
-            $data['instruksi'],
             $data['penerima'],
             $data['catatan']
         );
@@ -136,6 +185,7 @@ class DisposisiController extends Controller
 
         $disposisi = DB::transaction(function () use ($data) {
             $disposisi = Disposisi::create($data);
+
             $suratMasuk = $disposisi->suratMasuk;
 
             if ($suratMasuk) {
@@ -167,7 +217,10 @@ class DisposisiController extends Controller
 
         return redirect()
             ->route('disposisi.index')
-            ->with('success', 'Disposisi berhasil dikirim.');
+            ->with(
+                'success',
+                'Disposisi berhasil dikirim.'
+            );
     }
 
     public function show(Disposisi $disposisi)
@@ -180,7 +233,10 @@ class DisposisiController extends Controller
             'kepada',
         ]);
 
-        return view('disposisi.show', compact('disposisi'));
+        return view(
+            'disposisi.show',
+            compact('disposisi')
+        );
     }
 
     public function edit(Disposisi $disposisi)
@@ -201,7 +257,11 @@ class DisposisiController extends Controller
 
         return view(
             'disposisi.edit',
-            compact('disposisi', 'users', 'suratMasuk')
+            compact(
+                'disposisi',
+                'users',
+                'suratMasuk'
+            )
         );
     }
 
@@ -213,8 +273,29 @@ class DisposisiController extends Controller
 
         $data = $request->validated();
 
+        /*
+         * ==========================================================
+         * NORMALISASI INSTRUKSI UNTUK UPDATE
+         * ==========================================================
+         */
+
+        if (
+            array_key_exists('isi_disposisi', $data) ||
+            array_key_exists('instruksi', $data)
+        ) {
+            $isiDisposisi = $data['isi_disposisi']
+                ?? $data['instruksi']
+                ?? $disposisi->isi_disposisi
+                ?? $disposisi->instruksi
+                ?? '';
+
+            $isiDisposisi = trim((string) $isiDisposisi);
+
+            $data['isi_disposisi'] = $isiDisposisi;
+            $data['instruksi'] = $isiDisposisi;
+        }
+
         unset(
-            $data['instruksi'],
             $data['penerima'],
             $data['catatan']
         );
@@ -228,7 +309,10 @@ class DisposisiController extends Controller
 
         $oldStatus = $disposisi->status;
 
-        DB::transaction(function () use ($disposisi, $data) {
+        DB::transaction(function () use (
+            $disposisi,
+            $data
+        ) {
             $disposisi->update($data);
 
             $this->syncSuratMasukStatus(
@@ -255,7 +339,10 @@ class DisposisiController extends Controller
 
         return redirect()
             ->route('disposisi.index')
-            ->with('success', 'Data disposisi berhasil diperbarui.');
+            ->with(
+                'success',
+                'Data disposisi berhasil diperbarui.'
+            );
     }
 
     public function updateStatus(
@@ -282,7 +369,10 @@ class DisposisiController extends Controller
             );
         }
 
-        DB::transaction(function () use ($disposisi, $newStatus) {
+        DB::transaction(function () use (
+            $disposisi,
+            $newStatus
+        ) {
             $disposisi->update([
                 'status' => $newStatus,
             ]);
@@ -333,7 +423,10 @@ class DisposisiController extends Controller
 
         return redirect()
             ->route('disposisi.index')
-            ->with('success', 'Disposisi berhasil dihapus.');
+            ->with(
+                'success',
+                'Disposisi berhasil dihapus.'
+            );
     }
 
     private function role(): string
@@ -344,14 +437,22 @@ class DisposisiController extends Controller
             return '';
         }
 
-        $role = strtolower(trim((string) $user->role));
+        $role = strtolower(
+            trim((string) $user->role)
+        );
 
-        return $role === 'staff' ? 'staf' : $role;
+        return $role === 'staff'
+            ? 'staf'
+            : $role;
     }
 
     private function authorizeManageAccess(): void
     {
-        if (!in_array($this->role(), ['admin', 'pimpinan'], true)) {
+        if (!in_array(
+            $this->role(),
+            ['admin', 'pimpinan'],
+            true
+        )) {
             abort(
                 403,
                 'Anda tidak memiliki hak akses untuk mengelola disposisi.'
@@ -364,7 +465,11 @@ class DisposisiController extends Controller
     ): void {
         $role = $this->role();
 
-        if (in_array($role, ['admin', 'pimpinan'], true)) {
+        if (in_array(
+            $role,
+            ['admin', 'pimpinan'],
+            true
+        )) {
             return;
         }
 
@@ -388,8 +493,9 @@ class DisposisiController extends Controller
         );
     }
 
-    private function getStaffUsers(?int $selectedId = null)
-    {
+    private function getStaffUsers(
+        ?int $selectedId = null
+    ) {
         $currentUserId = Auth::id();
 
         $query = User::query()
@@ -407,18 +513,26 @@ class DisposisiController extends Controller
             });
 
         if ($currentUserId) {
-            $query->where('id', '!=', $currentUserId);
+            $query->where(
+                'id',
+                '!=',
+                $currentUserId
+            );
         }
 
         if ($selectedId) {
-            $query->orWhere(function (Builder $query) use (
+            $query->orWhere(function (
+                Builder $query
+            ) use (
                 $selectedId,
                 $currentUserId
             ) {
                 $query
                     ->whereKey($selectedId)
                     ->where('is_active', true)
-                    ->where(function (Builder $query) {
+                    ->where(function (
+                        Builder $query
+                    ) {
                         $query
                             ->whereRaw(
                                 'LOWER(role) IN (?, ?)',
@@ -431,7 +545,11 @@ class DisposisiController extends Controller
                     });
 
                 if ($currentUserId) {
-                    $query->where('id', '!=', $currentUserId);
+                    $query->where(
+                        'id',
+                        '!=',
+                        $currentUserId
+                    );
                 }
             });
         }
