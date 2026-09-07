@@ -7,21 +7,25 @@ FROM node:22-alpine AS frontend
 WORKDIR /app
 
 ARG VITE_APP_NAME=Locker
-ENV VITE_APP_NAME=$VITE_APP_NAME
+ENV VITE_APP_NAME=${VITE_APP_NAME}
 
+# Copy dependency files terlebih dahulu
+# supaya Docker build cache tetap optimal
 COPY package*.json ./
 
 RUN npm ci
 
+# Copy file yang dibutuhkan Vite
 COPY resources ./resources
 COPY public ./public
 COPY vite.config.* ./
 
+# Build frontend production
 RUN npm run build
 
 
 # =========================================================
-# STAGE 2 - LARAVEL / PHP
+# STAGE 2 - LARAVEL / PHP-FPM
 # =========================================================
 
 FROM php:8.3-fpm
@@ -81,7 +85,7 @@ RUN composer install \
 
 
 # =========================================================
-# COPY APPLICATION
+# COPY LARAVEL APPLICATION
 # =========================================================
 
 COPY . .
@@ -95,7 +99,7 @@ COPY --from=frontend /app/public/build ./public/build
 
 
 # =========================================================
-# LARAVEL DIRECTORIES & PERMISSIONS
+# LARAVEL DIRECTORIES
 # =========================================================
 
 RUN mkdir -p \
@@ -103,8 +107,14 @@ RUN mkdir -p \
     storage/framework/sessions \
     storage/framework/views \
     storage/logs \
-    bootstrap/cache \
-    && chown -R www-data:www-data \
+    bootstrap/cache
+
+
+# =========================================================
+# PERMISSIONS
+# =========================================================
+
+RUN chown -R www-data:www-data \
         storage \
         bootstrap/cache \
     && chmod -R 775 \
@@ -117,6 +127,17 @@ RUN mkdir -p \
 # =========================================================
 
 RUN php artisan package:discover --ansi
+
+
+# =========================================================
+# ENTRYPOINT
+# =========================================================
+
+COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
 
 # =========================================================
