@@ -13,8 +13,14 @@ class Disposisi extends Model
 {
     use HasFactory, SoftDeletes;
 
+    /**
+     * Nama tabel.
+     */
     protected $table = 'disposisis';
 
+    /**
+     * Kolom yang boleh diisi secara mass assignment.
+     */
     protected $fillable = [
         'surat_masuk_id',
         'dari_user_id',
@@ -26,6 +32,9 @@ class Disposisi extends Model
         'status',
     ];
 
+    /**
+     * Casting atribut.
+     */
     protected function casts(): array
     {
         return [
@@ -33,6 +42,9 @@ class Disposisi extends Model
         ];
     }
 
+    /**
+     * Relasi ke surat masuk.
+     */
     public function suratMasuk(): BelongsTo
     {
         return $this->belongsTo(
@@ -41,6 +53,9 @@ class Disposisi extends Model
         );
     }
 
+    /**
+     * Relasi ke user pembuat disposisi.
+     */
     public function dari(): BelongsTo
     {
         return $this->belongsTo(
@@ -49,6 +64,9 @@ class Disposisi extends Model
         );
     }
 
+    /**
+     * Relasi ke user penerima disposisi.
+     */
     public function kepada(): BelongsTo
     {
         return $this->belongsTo(
@@ -57,10 +75,18 @@ class Disposisi extends Model
         );
     }
 
+    /**
+     * Scope filter pencarian, status, dan tanggal.
+     */
     public function scopeFilter(
         Builder $query,
         array $filters = []
     ): Builder {
+        /*
+         * =====================================================
+         * SEARCH
+         * =====================================================
+         */
         $search = isset($filters['search'])
             ? trim((string) $filters['search'])
             : '';
@@ -69,36 +95,112 @@ class Disposisi extends Model
             $keyword = "%{$search}%";
 
             $query->where(function (Builder $q) use ($keyword) {
-                $q->where('instruksi', 'like', $keyword)
-                    ->orWhere('isi_disposisi', 'like', $keyword)
-                    ->orWhere('catatan', 'like', $keyword)
-                    ->orWhereHas('suratMasuk', function (Builder $surat) use ($keyword) {
+                /*
+                 * Field pada tabel disposisis.
+                 */
+                $q->where(
+                    'instruksi',
+                    'like',
+                    $keyword
+                )
+                ->orWhere(
+                    'isi_disposisi',
+                    'like',
+                    $keyword
+                )
+                ->orWhere(
+                    'catatan',
+                    'like',
+                    $keyword
+                )
+
+                /*
+                 * Field pada SuratMasuk.
+                 */
+                ->orWhereHas(
+                    'suratMasuk',
+                    function (Builder $surat) use ($keyword) {
                         $surat
-                            ->where('nomor_surat', 'like', $keyword)
-                            ->orWhere('nomor_agenda', 'like', $keyword)
-                            ->orWhere('pengirim', 'like', $keyword)
-                            ->orWhere('perihal', 'like', $keyword);
-                    })
-                    ->orWhereHas('kepada', function (Builder $user) use ($keyword) {
+                            ->where(
+                                'nomor_surat',
+                                'like',
+                                $keyword
+                            )
+                            ->orWhere(
+                                'nomor_agenda',
+                                'like',
+                                $keyword
+                            )
+                            ->orWhere(
+                                'pengirim',
+                                'like',
+                                $keyword
+                            )
+                            ->orWhere(
+                                'perihal',
+                                'like',
+                                $keyword
+                            );
+                    }
+                )
+
+                /*
+                 * Field pada user penerima.
+                 */
+                ->orWhereHas(
+                    'kepada',
+                    function (Builder $user) use ($keyword) {
                         $user
-                            ->where('name', 'like', $keyword)
-                            ->orWhere('nama', 'like', $keyword)
-                            ->orWhere('jabatan', 'like', $keyword);
-                    });
+                            ->where(
+                                'name',
+                                'like',
+                                $keyword
+                            )
+                            ->orWhere(
+                                'nama',
+                                'like',
+                                $keyword
+                            )
+                            ->orWhere(
+                                'jabatan',
+                                'like',
+                                $keyword
+                            );
+                    }
+                );
             });
         }
 
+        /*
+         * =====================================================
+         * STATUS
+         * =====================================================
+         */
         $allowedStatuses = [
             'menunggu',
             'diproses',
             'selesai',
         ];
 
-        $statuses = collect($filters['status'] ?? [])
+        $statuses = collect(
+            $filters['status'] ?? []
+        )
             ->flatten()
-            ->filter(fn ($status) => is_scalar($status))
-            ->map(fn ($status) => strtolower(trim((string) $status)))
-            ->filter(fn ($status) => in_array($status, $allowedStatuses, true))
+            ->filter(
+                fn ($status) => is_scalar($status)
+            )
+            ->map(
+                fn ($status) => strtolower(
+                    trim((string) $status)
+                )
+            )
+            ->filter(
+                fn ($status) => in_array(
+                    $status,
+                    $allowedStatuses,
+                    true
+                )
+            )
             ->unique()
             ->values()
             ->all();
@@ -110,12 +212,55 @@ class Disposisi extends Model
             );
         }
 
-        $dateColumn = self::getFilterDateColumn();
+        /*
+         * =====================================================
+         * FILTER TANGGAL DISPOSISI
+         * =====================================================
+         *
+         * Jika tabel mempunyai:
+         *   tanggal_disposisi
+         *
+         * maka kolom tersebut dipakai.
+         *
+         * Jika tidak mempunyai:
+         *   created_at
+         *
+         * digunakan sebagai fallback.
+         */
+        $dateColumn =
+            self::getFilterDateColumn();
 
-        $dariTanggal = $filters['dari_tanggal'] ?? null;
-        $sampaiTanggal = $filters['sampai_tanggal'] ?? null;
+        $dariTanggal =
+            $filters['dari_tanggal'] ?? null;
 
-        if ($this->validDate($dariTanggal)) {
+        $sampaiTanggal =
+            $filters['sampai_tanggal'] ?? null;
+
+        $validDariTanggal =
+            self::validDate($dariTanggal);
+
+        $validSampaiTanggal =
+            self::validDate($sampaiTanggal);
+
+        /*
+         * Jika user memasukkan tanggal terbalik,
+         * otomatis ditukar.
+         */
+        if (
+            $validDariTanggal &&
+            $validSampaiTanggal &&
+            $dariTanggal > $sampaiTanggal
+        ) {
+            [
+                $dariTanggal,
+                $sampaiTanggal
+            ] = [
+                $sampaiTanggal,
+                $dariTanggal
+            ];
+        }
+
+        if ($validDariTanggal) {
             $query->whereDate(
                 $dateColumn,
                 '>=',
@@ -123,7 +268,7 @@ class Disposisi extends Model
             );
         }
 
-        if ($this->validDate($sampaiTanggal)) {
+        if ($validSampaiTanggal) {
             $query->whereDate(
                 $dateColumn,
                 '<=',
@@ -134,6 +279,10 @@ class Disposisi extends Model
         return $query;
     }
 
+    /**
+     * Menentukan kolom tanggal yang digunakan
+     * untuk filter tanggal disposisi.
+     */
     public static function getFilterDateColumn(): string
     {
         return Schema::hasColumn(
@@ -144,6 +293,9 @@ class Disposisi extends Model
             : 'created_at';
     }
 
+    /**
+     * Scope untuk disposisi yang belum selesai.
+     */
     public function scopeBelumSelesai(
         Builder $query
     ): Builder {
@@ -153,6 +305,9 @@ class Disposisi extends Model
         );
     }
 
+    /**
+     * Scope untuk disposisi selesai.
+     */
     public function scopeSelesai(
         Builder $query
     ): Builder {
@@ -162,6 +317,9 @@ class Disposisi extends Model
         );
     }
 
+    /**
+     * Scope berdasarkan user penerima.
+     */
     public function scopeUntukUser(
         Builder $query,
         int $userId
@@ -172,6 +330,9 @@ class Disposisi extends Model
         );
     }
 
+    /**
+     * Scope berdasarkan user pembuat.
+     */
     public function scopeDibuatOleh(
         Builder $query,
         int $userId
@@ -182,6 +343,9 @@ class Disposisi extends Model
         );
     }
 
+    /**
+     * Scope berdasarkan satu status.
+     */
     public function scopeStatus(
         Builder $query,
         ?string $status
@@ -212,18 +376,28 @@ class Disposisi extends Model
         );
     }
 
+    /**
+     * Mengecek apakah disposisi sudah selesai.
+     */
     public function isSelesai(): bool
     {
         return strtolower(
-            trim((string) $this->status)
+            trim(
+                (string) $this->status
+            )
         ) === 'selesai';
     }
 
+    /**
+     * Mengecek apakah disposisi masih aktif.
+     */
     public function isAktif(): bool
     {
         return in_array(
             strtolower(
-                trim((string) $this->status)
+                trim(
+                    (string) $this->status
+                )
             ),
             [
                 'menunggu',
@@ -233,11 +407,17 @@ class Disposisi extends Model
         );
     }
 
+    /**
+     * Mengecek apakah memiliki batas waktu.
+     */
     public function memilikiBatasWaktu(): bool
     {
         return $this->batas_waktu !== null;
     }
 
+    /**
+     * Mengecek apakah sudah melewati batas waktu.
+     */
     public function sudahLewatBatasWaktu(): bool
     {
         if (!$this->batas_waktu) {
@@ -248,14 +428,19 @@ class Disposisi extends Model
             && $this->batas_waktu->isPast();
     }
 
-    private function validDate(
+    /**
+     * Validasi tanggal YYYY-MM-DD.
+     */
+    private static function validDate(
         mixed $value
     ): bool {
-        if (!$value) {
+        if ($value === null) {
             return false;
         }
 
-        $value = trim((string) $value);
+        $value = trim(
+            (string) $value
+        );
 
         if (!preg_match(
             '/^\d{4}-\d{2}-\d{2}$/',
@@ -264,7 +449,11 @@ class Disposisi extends Model
             return false;
         }
 
-        [$year, $month, $day] = array_map(
+        [
+            $year,
+            $month,
+            $day
+        ] = array_map(
             'intval',
             explode('-', $value)
         );
