@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Masuk - Arsip Surat</title>
+    <title>Masuk - Locker</title>
     @vite(['resources/css/app.css'])
 
     <!-- Fonts -->
@@ -37,7 +37,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                     </svg>
                 </div>
-                <span class="text-xl font-bold text-white tracking-wide">Arsip<span class="text-brand-400">Surat</span></span>
+                <span class="text-xl font-bold text-white tracking-wide">Loc<span class="text-brand-400">ker</span></span>
             </div>
 
             <div class="relative z-10 max-w-lg space-y-4 my-auto py-12">
