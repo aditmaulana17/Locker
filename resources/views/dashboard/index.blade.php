@@ -39,7 +39,7 @@
 
                 <div class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[10px] font-semibold text-blue-100 backdrop-blur-md sm:text-xs">
                     <span class="h-2 w-2 animate-pulse rounded-full bg-emerald-400"></span>
-                    Sistem E-Arsip Aktif
+                    Sistem Locker Aktif
                 </div>
 
                 <h1 class="text-xl font-bold leading-snug tracking-tight sm:text-2xl lg:text-3xl">

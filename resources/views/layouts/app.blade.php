@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Dashboard') - E-Arsip</title>
+    <title>@yield('title', 'Dashboard') - Locker</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @stack('styles')
@@ -35,7 +35,7 @@
                     <span class="absolute -right-1 -top-1 h-3 w-3 rounded-full border-2 border-slate-900 bg-emerald-400"></span>
                 </div>
                 <div class="min-w-0">
-                    <div class="truncate text-base font-extrabold tracking-wider text-white">E-ARSIP</div>
+                    <div class="truncate text-base font-extrabold tracking-wider text-white">Locker</div>
                     <div class="truncate text-[10px] font-medium tracking-wide text-slate-400">Sistem Manajemen Arsip</div>
                 </div>
             </a>
@@ -112,7 +112,7 @@
 
         {{-- SIDEBAR FOOTER --}}
         <div class="shrink-0 border-t border-slate-800/80 px-4 py-4 text-center">
-            <p class="text-[11px] font-medium text-slate-500">E-Arsip &copy; {{ date('Y') }}</p>
+            <p class="text-[11px] font-medium text-slate-500">Locker &copy; {{ date('Y') }}</p>
         </div>
     </aside>
 
