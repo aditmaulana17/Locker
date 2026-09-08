@@ -1,4 +1,3 @@
-```blade
 @extends('layouts.app')
 
 @section('title', 'Surat Keluar')
@@ -27,20 +26,6 @@
     /* ================================================================
        FILTER STATUS
     ================================================================ */
-    $selectedStatus = collect(request('status', []))
-        ->filter(fn ($status) => is_scalar($status))
-        ->map(fn ($status) => strtolower(trim((string) $status)))
-        ->filter(fn ($status) => in_array($status, [
-            'draf',
-            'diproses',
-            'disetujui',
-            'dikirim',
-            'diarsipkan',
-        ], true))
-        ->unique()
-        ->values()
-        ->all();
-
     $statusOptions = [
         'draf' => 'Draf',
         'diproses' => 'Diproses',
@@ -49,6 +34,17 @@
         'diarsipkan' => 'Diarsipkan',
     ];
 
+    $selectedStatus = collect(request('status', []))
+        ->filter(fn ($status) => is_scalar($status))
+        ->map(fn ($status) => strtolower(trim((string) $status)))
+        ->filter(fn ($status) => array_key_exists($status, $statusOptions))
+        ->unique()
+        ->values()
+        ->all();
+
+    /* ================================================================
+       STATUS BADGE
+    ================================================================ */
     $statusBadgeClasses = [
         'draf' => 'bg-slate-50 text-slate-700 border-slate-200',
         'diproses' => 'bg-amber-50 text-amber-700 border-amber-200',
@@ -62,6 +58,7 @@
     ================================================================ */
     $dariTanggal = request('dari_tanggal');
     $sampaiTanggal = request('sampai_tanggal');
+
     $visibleDateRange = '';
 
     try {
@@ -71,311 +68,386 @@
                 . ' - ' .
                 \Illuminate\Support\Carbon::parse($sampaiTanggal)->format('d/m/Y');
         } elseif ($dariTanggal) {
-            $visibleDateRange = \Illuminate\Support\Carbon::parse($dariTanggal)->format('d/m/Y');
+            $visibleDateRange =
+                \Illuminate\Support\Carbon::parse($dariTanggal)->format('d/m/Y');
         } elseif ($sampaiTanggal) {
-            $visibleDateRange = \Illuminate\Support\Carbon::parse($sampaiTanggal)->format('d/m/Y');
+            $visibleDateRange =
+                \Illuminate\Support\Carbon::parse($sampaiTanggal)->format('d/m/Y');
         }
     } catch (\Throwable $e) {
         $visibleDateRange = '';
     }
 
     $hasFilters =
-        request()->filled('search')
-        || !empty($selectedKategori)
-        || !empty($selectedStatus)
-        || request()->filled('dari_tanggal')
-        || request()->filled('sampai_tanggal');
+        request()->filled('search') ||
+        !empty($selectedKategori) ||
+        !empty($selectedStatus) ||
+        request()->filled('dari_tanggal') ||
+        request()->filled('sampai_tanggal');
 @endphp
 
 @push('styles')
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css">
-
 <style>
 /* ================================================================
    DATE PICKER
 ================================================================ */
+.date-range-wrapper {
+    position: relative;
+}
+
 .date-range-input {
     cursor: pointer;
 }
 
-.date-range-input::selection {
-    background: transparent;
-}
-
-.daterangepicker {
-    z-index: 99999 !important;
-    width: auto;
+.custom-date-picker {
+    position: fixed;
+    z-index: 999999;
+    width: 720px;
+    max-width: calc(100vw - 20px);
+    overflow: hidden;
     border: 1px solid #e2e8f0;
     border-radius: 18px;
     background: #fff;
     box-shadow:
         0 24px 70px rgba(15, 23, 42, .18),
         0 8px 24px rgba(15, 23, 42, .08);
-    padding: 11px;
-    font-family: inherit;
 }
 
-.daterangepicker .calendar-table {
-    border: 0;
-    background: transparent;
+.custom-date-picker.hidden {
+    display: none;
 }
 
-.daterangepicker .calendar-table table {
-    border-collapse: separate;
-    border-spacing: 3px;
-}
-
-.daterangepicker .calendar {
-    min-width: 280px;
-}
-
-.daterangepicker .calendar-table th {
-    color: #94a3b8;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-}
-
-.daterangepicker .calendar-table th.month {
-    height: 42px;
-    padding: 0;
-}
-
-.daterangepicker .calendar-table td {
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
-    color: #475569;
-    font-size: 12px;
-    font-weight: 600;
-    transition: background-color .15s ease, color .15s ease;
-}
-
-.daterangepicker td.available:hover,
-.daterangepicker th.available:hover {
-    background: #eff6ff;
-    color: #2563eb;
-}
-
-.daterangepicker td.in-range {
-    background: #eff6ff;
-    color: #2563eb;
-}
-
-.daterangepicker td.active,
-.daterangepicker td.active:hover {
-    background: #2563eb;
-    color: #fff;
-    border-radius: 999px;
-}
-
-.daterangepicker td.start-date {
-    border-radius: 999px 0 0 999px;
-}
-
-.daterangepicker td.end-date {
-    border-radius: 0 999px 999px 0;
-}
-
-.daterangepicker td.start-date.end-date {
-    border-radius: 999px;
-}
-
-.daterangepicker td.off,
-.daterangepicker td.off.in-range {
-    background: transparent;
-    color: #cbd5e1;
-}
-
-.daterangepicker .prev,
-.daterangepicker .next {
-    border-radius: 9px;
-    color: #64748b;
-    transition: background-color .15s ease, color .15s ease;
-}
-
-.daterangepicker .prev:hover,
-.daterangepicker .next:hover {
-    background: #eff6ff;
-    color: #2563eb;
-}
-
-.daterangepicker .drp-buttons {
+.custom-date-picker-header {
     display: flex;
     align-items: center;
-    justify-content: flex-end;
-    gap: 7px;
-    border-top: 1px solid #e2e8f0;
-    margin-top: 8px;
-    padding: 11px 4px 2px;
+    justify-content: space-between;
+    gap: 12px;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 13px 15px;
+    background: #fff;
 }
 
-.daterangepicker .drp-selected {
-    margin-right: auto;
-    color: #64748b;
-    font-size: 11px;
-    font-weight: 600;
-}
-
-.daterangepicker .applyBtn,
-.daterangepicker .cancelBtn {
-    border-radius: 10px;
-    padding: 9px 14px;
-    font-family: inherit;
-    font-size: 11px;
-    font-weight: 700;
-}
-
-.daterangepicker .applyBtn {
-    border: 0;
-    background: #2563eb;
-    color: #fff;
-}
-
-.daterangepicker .applyBtn:hover {
-    background: #1d4ed8;
-}
-
-.daterangepicker .cancelBtn {
-    border: 1px solid #e2e8f0;
-    background: #f8fafc;
-    color: #475569;
-}
-
-.daterangepicker .cancelBtn:hover {
-    background: #f1f5f9;
+.custom-date-picker-title {
     color: #334155;
+    font-size: 13px;
+    font-weight: 800;
 }
 
-/* ================================================================
-   CUSTOM MONTH / YEAR HEADER
-================================================================ */
-.custom-date-header {
+.custom-date-picker-close {
+    display: inline-flex;
+    width: 32px;
+    height: 32px;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border: 0;
+    border-radius: 9px;
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.custom-date-picker-close:hover {
+    background: #f1f5f9;
+    color: #ef4444;
+}
+
+.custom-date-calendars {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.custom-calendar {
+    padding: 15px 17px 13px;
+}
+
+.custom-calendar + .custom-calendar {
+    border-left: 1px solid #e2e8f0;
+}
+
+.custom-calendar-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    margin-bottom: 7px;
+}
+
+.custom-calendar-nav {
+    display: inline-flex;
+    width: 34px;
+    height: 34px;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 34px;
+    border: 0;
+    border-radius: 9px;
+    background: transparent;
+    color: #475569;
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.custom-calendar-nav:hover {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.custom-calendar-heading {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 5px;
-    width: 100%;
-    min-height: 38px;
+    flex: 1;
+    gap: 4px;
 }
 
-.custom-date-header-button {
+.custom-calendar-month-button,
+.custom-calendar-year-button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 32px;
+    gap: 6px;
+    min-height: 33px;
     border: 1px solid transparent;
     border-radius: 9px;
     background: #f8fafc;
     color: #334155;
-    padding: 7px 10px;
+    padding: 6px 10px;
     font-family: inherit;
     font-size: 12px;
     font-weight: 800;
-    line-height: 1;
-    cursor: pointer !important;
-    user-select: none;
-    transition:
-        background-color .15s ease,
-        color .15s ease,
-        border-color .15s ease,
-        transform .15s ease;
+    cursor: pointer;
 }
 
-.custom-date-header-button:hover {
+.custom-calendar-month-button:hover,
+.custom-calendar-year-button:hover {
     border-color: #bfdbfe;
     background: #eff6ff;
     color: #2563eb;
 }
 
-.custom-date-header-button:active {
-    transform: scale(.96);
+.custom-calendar-month-button::after,
+.custom-calendar-year-button::after {
+    content: '';
+    width: 5px;
+    height: 5px;
+    margin-top: -3px;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    transform: rotate(45deg);
 }
 
-.custom-date-header-button.month {
-    min-width: 96px;
+.custom-calendar-weekdays,
+.custom-calendar-days {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 3px;
 }
 
-.custom-date-header-button.year {
-    min-width: 64px;
+.custom-calendar-weekday {
+    height: 27px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
 }
 
-/* ================================================================
-   CUSTOM MONTH / YEAR PANEL
-================================================================ */
-.custom-date-panel {
-    position: fixed;
-    z-index: 100001;
-    width: 320px;
-    max-width: calc(100vw - 24px);
-    border: 1px solid #e2e8f0;
-    border-radius: 16px;
-    background: #fff;
-    box-shadow:
-        0 24px 65px rgba(15, 23, 42, .18),
-        0 8px 24px rgba(15, 23, 42, .08);
-    padding: 14px;
-    animation: customDatePanelShow .12s ease-out;
+.custom-calendar-day {
+    display: flex;
+    height: 36px;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: #475569;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
 }
 
-@keyframes customDatePanelShow {
-    from {
-        opacity: 0;
-        transform: translateY(-4px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+.custom-calendar-day:hover {
+    background: #eff6ff;
+    color: #2563eb;
 }
 
-.custom-date-panel-header {
+.custom-calendar-day.other-month {
+    color: #cbd5e1;
+}
+
+.custom-calendar-day.today {
+    box-shadow: inset 0 0 0 1px #93c5fd;
+    color: #2563eb;
+}
+
+.custom-calendar-day.in-range {
+    border-radius: 0;
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.custom-calendar-day.range-start {
+    border-radius: 999px 0 0 999px;
+    background: #2563eb;
+    color: #fff;
+}
+
+.custom-calendar-day.range-end {
+    border-radius: 0 999px 999px 0;
+    background: #2563eb;
+    color: #fff;
+}
+
+.custom-calendar-day.range-start.range-end {
+    border-radius: 999px;
+}
+
+.custom-calendar-day.range-start:hover,
+.custom-calendar-day.range-end:hover {
+    background: #1d4ed8;
+    color: #fff;
+}
+
+.custom-date-picker-footer {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 8px;
+    gap: 12px;
+    border-top: 1px solid #e2e8f0;
+    padding: 10px 14px;
+    background: #fff;
+}
+
+.custom-date-picker-selected {
+    min-width: 0;
+    color: #64748b;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.custom-date-picker-actions {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.custom-date-picker-button {
+    height: 36px;
+    border: 1px solid #e2e8f0;
+    border-radius: 9px;
+    background: #f8fafc;
+    color: #475569;
+    padding: 0 14px;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.custom-date-picker-button:hover {
+    background: #f1f5f9;
+}
+
+.custom-date-picker-button.apply {
+    border-color: #2563eb;
+    background: #2563eb;
+    color: #fff;
+}
+
+.custom-date-picker-button.apply:hover {
+    background: #1d4ed8;
+}
+
+/* ================================================================
+   MONTH / YEAR PANEL
+================================================================ */
+.custom-picker-panel {
+    position: fixed;
+    z-index: 1000000;
+    width: 320px;
+    max-width: calc(100vw - 20px);
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    background: #fff;
+    padding: 14px;
+    box-shadow:
+        0 24px 60px rgba(15, 23, 42, .18),
+        0 8px 24px rgba(15, 23, 42, .08);
+}
+
+.custom-picker-panel.hidden {
+    display: none;
+}
+
+.custom-picker-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 7px;
     margin-bottom: 12px;
 }
 
-.custom-date-panel-title {
+.custom-picker-panel-title {
     flex: 1;
-    min-width: 0;
     color: #334155;
     font-size: 13px;
     font-weight: 800;
     text-align: center;
 }
 
-.custom-date-panel-nav {
+.custom-picker-panel-nav {
     display: inline-flex;
     width: 32px;
     height: 32px;
-    flex-shrink: 0;
     align-items: center;
     justify-content: center;
+    flex: 0 0 32px;
     border: 0;
     border-radius: 9px;
     background: #f8fafc;
     color: #64748b;
     font-size: 21px;
-    line-height: 1;
     cursor: pointer;
-    transition: background-color .15s ease, color .15s ease;
 }
 
-.custom-date-panel-nav:hover {
+.custom-picker-panel-nav:hover {
     background: #eff6ff;
     color: #2563eb;
 }
 
-.custom-date-grid {
+.custom-picker-panel-close {
+    display: inline-flex;
+    width: 32px;
+    height: 32px;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 32px;
+    border: 0;
+    border-radius: 9px;
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 19px;
+    cursor: pointer;
+}
+
+.custom-picker-panel-close:hover {
+    background: #f1f5f9;
+    color: #ef4444;
+}
+
+.custom-picker-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 8px;
 }
 
-.custom-date-option {
+.custom-picker-option {
     min-height: 42px;
     border: 1px solid #e2e8f0;
     border-radius: 10px;
@@ -389,33 +461,23 @@
     transition:
         background-color .15s ease,
         border-color .15s ease,
-        color .15s ease,
-        transform .15s ease;
+        color .15s ease;
 }
 
-.custom-date-option:hover:not(:disabled) {
+.custom-picker-option:hover {
     border-color: #bfdbfe;
     background: #eff6ff;
     color: #2563eb;
 }
 
-.custom-date-option:active:not(:disabled) {
-    transform: scale(.97);
-}
-
-.custom-date-option.active {
+.custom-picker-option.active {
     border-color: #2563eb;
     background: #2563eb;
     color: #fff;
 }
 
-.custom-date-option.current:not(.active) {
+.custom-picker-option.current:not(.active) {
     box-shadow: inset 0 0 0 1px #93c5fd;
-}
-
-.custom-date-option:disabled {
-    opacity: .35;
-    cursor: not-allowed;
 }
 
 /* ================================================================
@@ -480,9 +542,9 @@
     display: inline-flex;
     width: 36px;
     height: 36px;
-    flex: 0 0 36px;
     align-items: center;
     justify-content: center;
+    flex: 0 0 36px;
     border-radius: 10px;
     background: #eff6ff;
     color: #2563eb;
@@ -525,9 +587,9 @@
     display: inline-flex;
     min-width: 72px;
     min-height: 25px;
-    flex: 0 0 auto;
     align-items: center;
     justify-content: center;
+    flex: 0 0 auto;
     border-radius: 999px;
     padding: 0 9px;
     font-size: 10px;
@@ -580,19 +642,6 @@
 
 .filter-dropdown.open .filter-dropdown-menu {
     display: block;
-    animation: filterDropdownShow .12s ease-out;
-}
-
-@keyframes filterDropdownShow {
-    from {
-        opacity: 0;
-        transform: translateY(-4px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
 }
 
 .filter-dropdown-menu-header {
@@ -730,7 +779,6 @@
 .filter-dropdown-option input {
     width: 16px;
     height: 16px;
-    flex: 0 0 16px;
     margin: 0;
     accent-color: #2563eb;
     cursor: pointer;
@@ -791,52 +839,53 @@
         grid-template-columns: 1fr;
     }
 
-    .filter-dropdown-options {
-        max-height: calc(80vh - 150px);
-        grid-template-columns: 1fr 1fr;
-    }
-
-    .daterangepicker {
-        position: fixed !important;
-        top: 50% !important;
-        left: 50% !important;
-        right: auto !important;
-        bottom: auto !important;
-        width: calc(100vw - 20px) !important;
-        max-width: 430px;
-        max-height: calc(100vh - 24px);
+    .custom-date-picker {
+        top: 50%;
+        left: 50%;
+        width: calc(100vw - 16px);
+        max-height: calc(100vh - 16px);
         overflow-y: auto;
         transform: translate(-50%, -50%);
     }
 
-    .daterangepicker .calendar {
-        float: none !important;
-        width: 100% !important;
-        min-width: 0 !important;
-        max-width: 100% !important;
-        margin: 0 !important;
+    .custom-date-calendars {
+        grid-template-columns: 1fr;
     }
 
-    .daterangepicker .calendar.right {
-        margin-top: 10px !important;
+    .custom-calendar + .custom-calendar {
+        border-top: 1px solid #e2e8f0;
+        border-left: 0;
     }
 
-    .daterangepicker .calendar-table td {
-        width: 38px;
-        height: 38px;
+    .custom-calendar-day {
+        height: 39px;
     }
 
-    .custom-date-panel {
-        position: fixed !important;
+    .custom-picker-panel {
         top: 50% !important;
         left: 50% !important;
-        right: auto !important;
-        width: calc(100vw - 28px);
+        width: calc(100vw - 24px);
         max-width: 380px;
         transform: translate(-50%, -50%);
     }
 
-    body.daterangepicker-open {
+    .filter-dropdown-menu {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        right: auto;
+        width: calc(100vw - 24px);
+        max-width: 430px;
+        max-height: 80vh;
+        transform: translate(-50%, -50%);
+    }
+
+    .filter-dropdown-options {
+        max-height: calc(80vh - 155px);
+        grid-template-columns: 1fr 1fr;
+    }
+
+    body.date-picker-lock {
         overflow: hidden;
     }
 }
@@ -845,30 +894,18 @@
     .filter-dropdown-options {
         grid-template-columns: 1fr;
     }
-
-    .filter-dropdown-menu-header,
-    .filter-dropdown-menu-footer {
-        padding-left: 12px;
-        padding-right: 12px;
-    }
-
-    .filter-dropdown-count {
-        min-width: 62px;
-        padding-left: 7px;
-        padding-right: 7px;
-    }
 }
 </style>
 @endpush
 
 <div class="space-y-4 sm:space-y-6">
+
     {{-- PAGE HEADER --}}
     <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div class="min-w-0">
             <h1 class="text-xl font-bold tracking-tight text-slate-800 sm:text-2xl">
                 Surat Keluar
             </h1>
-
             <p class="mt-0.5 text-xs text-slate-500 sm:text-sm">
                 Kelola dan pantau seluruh arsip surat keluar organisasi Anda.
             </p>
@@ -907,8 +944,6 @@
                     </svg>
                     <span>Surat Keluar</span>
                 </a>
-            @else
-                <div></div>
             @endif
         </div>
     </div>
@@ -923,6 +958,7 @@
         >
             {{-- SEARCH + DATE + FILTER --}}
             <div class="grid grid-cols-1 gap-2.5 lg:grid-cols-12">
+
                 {{-- SEARCH --}}
                 <div class="lg:col-span-5">
                     <label for="search" class="sr-only">
@@ -950,49 +986,51 @@
 
                 {{-- DATE RANGE --}}
                 <div class="lg:col-span-4">
-                    <div class="relative">
-                        <div class="pointer-events-none absolute inset-y-0 left-0 z-10 flex items-center pl-3 text-slate-400">
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5v12a2 2 0 002 2z"/>
-                            </svg>
+                    <div class="date-range-wrapper">
+                        <div class="relative">
+                            <div class="pointer-events-none absolute inset-y-0 left-0 z-10 flex items-center pl-3 text-slate-400">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5v12a2 2 0 002 2z"/>
+                                </svg>
+                            </div>
+
+                            <input
+                                type="text"
+                                id="date-range"
+                                value="{{ $visibleDateRange }}"
+                                readonly
+                                autocomplete="off"
+                                placeholder="Pilih rentang tanggal..."
+                                class="date-range-input h-11 w-full rounded-xl border border-slate-200 bg-slate-50 pl-9 pr-10 text-xs font-medium text-slate-700 outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 sm:text-sm"
+                            >
+
+                            <button
+                                type="button"
+                                id="clearDateRange"
+                                title="Hapus tanggal"
+                                aria-label="Hapus tanggal"
+                                class="{{ $visibleDateRange ? 'flex' : 'hidden' }} absolute inset-y-0 right-0 z-20 w-10 items-center justify-center text-slate-400 transition hover:text-rose-500"
+                            >
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </button>
                         </div>
 
                         <input
-                            type="text"
-                            id="date-range"
-                            value="{{ $visibleDateRange }}"
-                            readonly
-                            autocomplete="off"
-                            placeholder="Pilih rentang tanggal..."
-                            class="date-range-input h-11 w-full rounded-xl border border-slate-200 bg-slate-50 pl-9 pr-10 text-xs font-medium text-slate-700 outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 sm:text-sm"
+                            type="hidden"
+                            name="dari_tanggal"
+                            id="dari_tanggal"
+                            value="{{ $dariTanggal }}"
                         >
 
-                        <button
-                            type="button"
-                            id="clearDateRange"
-                            title="Hapus tanggal"
-                            aria-label="Hapus tanggal"
-                            class="{{ $visibleDateRange ? 'flex' : 'hidden' }} absolute inset-y-0 right-0 z-20 w-10 items-center justify-center text-slate-400 transition hover:text-rose-500"
+                        <input
+                            type="hidden"
+                            name="sampai_tanggal"
+                            id="sampai_tanggal"
+                            value="{{ $sampaiTanggal }}"
                         >
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                            </svg>
-                        </button>
                     </div>
-
-                    <input
-                        type="hidden"
-                        name="dari_tanggal"
-                        id="dari_tanggal"
-                        value="{{ $dariTanggal }}"
-                    >
-
-                    <input
-                        type="hidden"
-                        name="sampai_tanggal"
-                        id="sampai_tanggal"
-                        value="{{ $sampaiTanggal }}"
-                    >
                 </div>
 
                 {{-- FILTER BUTTON --}}
@@ -1005,7 +1043,7 @@
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 00-.293.707l-6.414 6.414a1 1 0 00-.293.707L13 17v4l-4-4v-4.293a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
                             </svg>
-                            <span>Filter</span>
+                            Filter
                         </button>
 
                         @if($hasFilters)
@@ -1026,6 +1064,7 @@
 
             {{-- KATEGORI + STATUS --}}
             <div class="filter-row">
+
                 {{-- KATEGORI --}}
                 <div class="filter-dropdown" id="kategoriDropdown">
                     <button
@@ -1081,7 +1120,6 @@
                     <div
                         id="kategoriDropdownMenu"
                         class="filter-dropdown-menu"
-                        role="menu"
                     >
                         <div class="filter-dropdown-menu-header">
                             <div class="filter-dropdown-menu-title-wrap">
@@ -1209,7 +1247,6 @@
                     <div
                         id="statusDropdownMenu"
                         class="filter-dropdown-menu"
-                        role="menu"
                     >
                         <div class="filter-dropdown-menu-header">
                             <div class="filter-dropdown-menu-title-wrap">
@@ -1322,11 +1359,7 @@
                         <tr class="transition duration-150 hover:bg-slate-50/60">
                             <td class="px-4 py-3.5 text-slate-500 sm:px-6 sm:py-4">
                                 @if($s->tanggal_surat)
-                                    @try
-                                        {{ \Illuminate\Support\Carbon::parse($s->tanggal_surat)->format('d/m/Y') }}
-                                    @catch(\Throwable $e)
-                                        -
-                                    @endtry
+                                    {{ \Illuminate\Support\Carbon::parse($s->tanggal_surat)->format('d/m/Y') }}
                                 @else
                                     -
                                 @endif
@@ -1465,1380 +1498,2166 @@
     </div>
 </div>
 
+{{-- ================================================================
+     CUSTOM DATE PICKER
+================================================================ --}}
+<div
+    id="customDatePicker"
+    class="custom-date-picker hidden"
+>
+    <div class="custom-date-picker-header">
+        <div class="custom-date-picker-title">
+            Pilih Rentang Tanggal
+        </div>
+
+        <button
+            type="button"
+            id="datePickerClose"
+            class="custom-date-picker-close"
+            aria-label="Tutup"
+        >
+            &times;
+        </button>
+    </div>
+
+    <div
+        id="customDateCalendars"
+        class="custom-date-calendars"
+    ></div>
+
+    <div class="custom-date-picker-footer">
+        <div
+            id="datePickerSelected"
+            class="custom-date-picker-selected"
+        >
+            Pilih tanggal awal
+        </div>
+
+        <div class="custom-date-picker-actions">
+            <button
+                type="button"
+                id="datePickerClear"
+                class="custom-date-picker-button"
+            >
+                Bersihkan
+            </button>
+
+            <button
+                type="button"
+                id="datePickerApply"
+                class="custom-date-picker-button apply"
+            >
+                Terapkan
+            </button>
+        </div>
+    </div>
+</div>
+
+{{-- MONTH / YEAR PANEL --}}
+<div
+    id="customPickerPanel"
+    class="custom-picker-panel hidden"
+></div>
+
 @push('scripts')
 <script>
 (function () {
     'use strict';
 
     /* ================================================================
-       LOAD SCRIPT
+       CONSTANT
     ================================================================ */
-    function loadScript(src) {
-        return new Promise(function (resolve, reject) {
-            const existingScript = document.querySelector(
-                'script[src="' + src + '"]'
-            );
+    const MONTHS = [
+        'Januari',
+        'Februari',
+        'Maret',
+        'April',
+        'Mei',
+        'Juni',
+        'Juli',
+        'Agustus',
+        'September',
+        'Oktober',
+        'November',
+        'Desember'
+    ];
 
-            if (existingScript) {
-                if (
-                    (src.includes('jquery') && window.jQuery) ||
-                    (src.includes('moment') && window.moment) ||
-                    (
-                        src.includes('daterangepicker') &&
-                        window.jQuery?.fn?.daterangepicker
-                    )
-                ) {
-                    resolve();
-                    return;
-                }
+    const WEEKDAYS = [
+        'Sn',
+        'Sl',
+        'Rb',
+        'Km',
+        'Jm',
+        'Sb',
+        'Mg'
+    ];
 
-                existingScript.addEventListener('load', resolve, { once: true });
-                existingScript.addEventListener('error', reject, { once: true });
-                return;
-            }
-
-            const script = document.createElement('script');
-            script.src = src;
-            script.async = false;
-            script.onload = resolve;
-            script.onerror = reject;
-
-            document.head.appendChild(script);
-        });
-    }
+    const MIN_YEAR = 2000;
+    const MAX_YEAR = new Date().getFullYear() + 20;
 
     /* ================================================================
-       INIT ASSETS
+       ELEMENTS
     ================================================================ */
-    async function initializePageAssets() {
-        try {
-            if (!window.jQuery) {
-                await loadScript(
-                    'https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js'
-                );
-            }
+    const dateInput =
+        document.getElementById('date-range');
 
-            if (!window.moment) {
-                await loadScript(
-                    'https://cdn.jsdelivr.net/momentjs/latest/moment.min.js'
-                );
-            }
+    const dariInput =
+        document.getElementById('dari_tanggal');
 
-            if (!window.jQuery.fn.daterangepicker) {
-                await loadScript(
-                    'https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js'
-                );
-            }
+    const sampaiInput =
+        document.getElementById('sampai_tanggal');
 
-            initializePage();
-        } catch (error) {
-            console.error(
-                'Gagal memuat komponen Surat Keluar:',
-                error
-            );
-        }
-    }
+    const clearDateRangeButton =
+        document.getElementById('clearDateRange');
+
+    const datePicker =
+        document.getElementById('customDatePicker');
+
+    const calendarsContainer =
+        document.getElementById('customDateCalendars');
+
+    const datePickerClose =
+        document.getElementById('datePickerClose');
+
+    const datePickerClear =
+        document.getElementById('datePickerClear');
+
+    const datePickerApply =
+        document.getElementById('datePickerApply');
+
+    const selectedLabel =
+        document.getElementById('datePickerSelected');
+
+    const pickerPanel =
+        document.getElementById('customPickerPanel');
 
     /* ================================================================
-       PAGE
+       DATE STATE
     ================================================================ */
-    function initializePage() {
-        const $ = window.jQuery;
+    let selectedStart =
+        parseDate(
+            dariInput?.value || ''
+        );
 
-        /* ============================================================
-           FILTER DROPDOWN
-        ============================================================ */
-        const kategoriDropdown = document.getElementById('kategoriDropdown');
-        const statusDropdown = document.getElementById('statusDropdown');
-        const kategoriButton = document.getElementById('kategoriDropdownButton');
-        const statusButton = document.getElementById('statusDropdownButton');
-        const kategoriCount = document.getElementById('kategoriCount');
-        const statusCount = document.getElementById('statusCount');
-        const kategoriSummary = document.getElementById('kategoriSummary');
-        const statusSummary = document.getElementById('statusSummary');
-        const kategoriFooterCount = document.getElementById('kategoriFooterCount');
-        const statusFooterCount = document.getElementById('statusFooterCount');
+    let selectedEnd =
+        parseDate(
+            sampaiInput?.value || ''
+        );
 
-        const kategoriCheckboxes =
-            document.querySelectorAll('.kategori-checkbox');
+    let tempStart =
+        selectedStart
+            ? cloneDate(selectedStart)
+            : null;
 
-        const statusCheckboxes =
-            document.querySelectorAll('.status-checkbox');
+    let tempEnd =
+        selectedEnd
+            ? cloneDate(selectedEnd)
+            : null;
 
-        function closeFilterDropdown(dropdown) {
-            if (!dropdown) {
-                return;
-            }
-
-            dropdown.classList.remove('open');
-
-            const button =
-                dropdown.querySelector('.filter-dropdown-trigger');
-
-            if (button) {
-                button.setAttribute('aria-expanded', 'false');
-            }
-        }
-
-        function closeAllFilterDropdowns() {
-            closeFilterDropdown(kategoriDropdown);
-            closeFilterDropdown(statusDropdown);
-        }
-
-        function openFilterDropdown(dropdown) {
-            if (!dropdown) {
-                return;
-            }
-
-            if (dropdown === kategoriDropdown) {
-                closeFilterDropdown(statusDropdown);
-            }
-
-            if (dropdown === statusDropdown) {
-                closeFilterDropdown(kategoriDropdown);
-            }
-
-            dropdown.classList.add('open');
-
-            const button =
-                dropdown.querySelector('.filter-dropdown-trigger');
-
-            if (button) {
-                button.setAttribute('aria-expanded', 'true');
-            }
-        }
-
-        function getCheckedLabels(selector) {
-            return Array.from(
-                document.querySelectorAll(selector + ':checked')
+    let viewMonth =
+        selectedStart
+            ? new Date(
+                selectedStart.getFullYear(),
+                selectedStart.getMonth(),
+                1
             )
-                .map(function (checkbox) {
-                    const label = checkbox.closest('label');
-                    const span = label?.querySelector('span');
+            : new Date();
 
-                    return span?.textContent.trim() || '';
-                })
-                .filter(Boolean);
+    viewMonth.setDate(1);
+
+    let activePanelType = null;
+    let activePanelSide = 'left';
+    let activePanelYear = new Date().getFullYear();
+
+    /* ================================================================
+       DATE HELPERS
+    ================================================================ */
+    function cloneDate(date) {
+        return new Date(
+            date.getFullYear(),
+            date.getMonth(),
+            date.getDate()
+        );
+    }
+
+    function parseDate(value) {
+        if (!value) {
+            return null;
         }
 
-        function updateKategoriFilter() {
-            const checked =
-                document.querySelectorAll(
-                    '.kategori-checkbox:checked'
-                );
+        const match =
+            String(value).match(
+                /^(\d{4})-(\d{2})-(\d{2})$/
+            );
 
-            const count = checked.length;
-
-            if (kategoriCount) {
-                kategoriCount.textContent = count + ' dipilih';
-            }
-
-            if (kategoriFooterCount) {
-                kategoriFooterCount.textContent =
-                    count + ' kategori dipilih';
-            }
-
-            if (kategoriSummary) {
-                const labels =
-                    getCheckedLabels('.kategori-checkbox');
-
-                if (!labels.length) {
-                    kategoriSummary.textContent = 'Semua kategori';
-                } else if (labels.length <= 2) {
-                    kategoriSummary.textContent = labels.join(', ');
-                } else {
-                    kategoriSummary.textContent =
-                        labels.length + ' kategori dipilih';
-                }
-            }
+        if (!match) {
+            return null;
         }
 
-        function updateStatusFilter() {
-            const checked =
-                document.querySelectorAll(
-                    '.status-checkbox:checked'
-                );
+        const year =
+            Number(match[1]);
 
-            const count = checked.length;
+        const month =
+            Number(match[2]) - 1;
 
-            if (statusCount) {
-                statusCount.textContent = count + ' dipilih';
-            }
+        const day =
+            Number(match[3]);
 
-            if (statusFooterCount) {
-                statusFooterCount.textContent =
-                    count + ' status dipilih';
-            }
-
-            if (statusSummary) {
-                const labels =
-                    getCheckedLabels('.status-checkbox');
-
-                if (!labels.length) {
-                    statusSummary.textContent = 'Semua status';
-                } else if (labels.length <= 2) {
-                    statusSummary.textContent = labels.join(', ');
-                } else {
-                    statusSummary.textContent =
-                        labels.length + ' status dipilih';
-                }
-            }
-        }
-
-        kategoriButton?.addEventListener('click', function (event) {
-            event.preventDefault();
-            event.stopPropagation();
-
-            if (
-                kategoriDropdown?.classList.contains('open')
-            ) {
-                closeFilterDropdown(kategoriDropdown);
-            } else {
-                openFilterDropdown(kategoriDropdown);
-            }
-        });
-
-        statusButton?.addEventListener('click', function (event) {
-            event.preventDefault();
-            event.stopPropagation();
-
-            if (
-                statusDropdown?.classList.contains('open')
-            ) {
-                closeFilterDropdown(statusDropdown);
-            } else {
-                openFilterDropdown(statusDropdown);
-            }
-        });
-
-        kategoriCheckboxes.forEach(function (checkbox) {
-            checkbox.addEventListener('change', updateKategoriFilter);
-        });
-
-        statusCheckboxes.forEach(function (checkbox) {
-            checkbox.addEventListener('change', updateStatusFilter);
-        });
-
-        document
-            .getElementById('selectAllKategori')
-            ?.addEventListener('click', function (event) {
-                event.preventDefault();
-                event.stopPropagation();
-
-                kategoriCheckboxes.forEach(function (checkbox) {
-                    checkbox.checked = true;
-                });
-
-                updateKategoriFilter();
-            });
-
-        document
-            .getElementById('clearAllKategori')
-            ?.addEventListener('click', function (event) {
-                event.preventDefault();
-                event.stopPropagation();
-
-                kategoriCheckboxes.forEach(function (checkbox) {
-                    checkbox.checked = false;
-                });
-
-                updateKategoriFilter();
-            });
-
-        document
-            .getElementById('selectAllStatus')
-            ?.addEventListener('click', function (event) {
-                event.preventDefault();
-                event.stopPropagation();
-
-                statusCheckboxes.forEach(function (checkbox) {
-                    checkbox.checked = true;
-                });
-
-                updateStatusFilter();
-            });
-
-        document
-            .getElementById('clearAllStatus')
-            ?.addEventListener('click', function (event) {
-                event.preventDefault();
-                event.stopPropagation();
-
-                statusCheckboxes.forEach(function (checkbox) {
-                    checkbox.checked = false;
-                });
-
-                updateStatusFilter();
-            });
-
-        document.addEventListener('click', function (event) {
-            const target = event.target;
-
-            if (!(target instanceof Element)) {
-                return;
-            }
-
-            if (!target.closest('.filter-dropdown')) {
-                closeAllFilterDropdowns();
-            }
-        });
-
-        document.addEventListener('keydown', function (event) {
-            if (event.key === 'Escape') {
-                closeAllFilterDropdowns();
-            }
-        });
-
-        updateKategoriFilter();
-        updateStatusFilter();
-
-        /* ============================================================
-           DATE PICKER
-        ============================================================ */
-        const dateInput = $('#date-range');
-        const dariTanggal = $('#dari_tanggal');
-        const sampaiTanggal = $('#sampai_tanggal');
-        const clearDateButton = $('#clearDateRange');
+        const date =
+            new Date(
+                year,
+                month,
+                day
+            );
 
         if (
-            !dateInput.length ||
-            !$.fn.daterangepicker
+            date.getFullYear() !== year ||
+            date.getMonth() !== month ||
+            date.getDate() !== day
         ) {
+            return null;
+        }
+
+        return date;
+    }
+
+    function pad(value) {
+        return String(value).padStart(2, '0');
+    }
+
+    function toISO(date) {
+        if (!date) {
+            return '';
+        }
+
+        return [
+            date.getFullYear(),
+            pad(date.getMonth() + 1),
+            pad(date.getDate())
+        ].join('-');
+    }
+
+    function formatDate(date) {
+        if (!date) {
+            return '';
+        }
+
+        return [
+            pad(date.getDate()),
+            pad(date.getMonth() + 1),
+            date.getFullYear()
+        ].join('/');
+    }
+
+    function sameDate(a, b) {
+        return !!(
+            a &&
+            b &&
+            a.getFullYear() === b.getFullYear() &&
+            a.getMonth() === b.getMonth() &&
+            a.getDate() === b.getDate()
+        );
+    }
+
+    function isBetween(date, start, end) {
+        if (!date || !start || !end) {
+            return false;
+        }
+
+        const value =
+            toISO(date);
+
+        const from =
+            toISO(start);
+
+        const to =
+            toISO(end);
+
+        return value > from && value < to;
+    }
+
+    function addMonths(date, amount) {
+        return new Date(
+            date.getFullYear(),
+            date.getMonth() + amount,
+            1
+        );
+    }
+
+    /* ================================================================
+       DATE PICKER RENDER
+    ================================================================ */
+    function renderCalendars() {
+        if (!calendarsContainer) {
             return;
         }
 
-        const monthNames = [
-            'Januari',
-            'Februari',
-            'Maret',
-            'April',
-            'Mei',
-            'Juni',
-            'Juli',
-            'Agustus',
-            'September',
-            'Oktober',
-            'November',
-            'Desember'
-        ];
+        calendarsContainer.innerHTML = '';
 
-        const dayNames = [
-            'Mg',
-            'Sn',
-            'Sl',
-            'Rb',
-            'Km',
-            'Jm',
-            'Sb'
-        ];
+        const leftDate =
+            new Date(
+                viewMonth.getFullYear(),
+                viewMonth.getMonth(),
+                1
+            );
 
-        const MIN_YEAR = 2000;
-        const MAX_YEAR = new Date().getFullYear() + 10;
+        const rightDate =
+            addMonths(
+                leftDate,
+                1
+            );
 
-        const pickerOptions = {
-            autoUpdateInput: false,
-            showDropdowns: false,
-            minYear: MIN_YEAR,
-            maxYear: MAX_YEAR,
-            linkedCalendars: true,
-            alwaysShowCalendars: true,
-            autoApply: false,
-            opens: 'left',
-            drops: 'down',
-            parentEl: 'body',
-            locale: {
-                format: 'DD/MM/YYYY',
-                separator: ' - ',
-                applyLabel: 'Terapkan',
-                cancelLabel: 'Bersihkan',
-                fromLabel: 'Dari',
-                toLabel: 'Sampai',
-                customRangeLabel: 'Pilih Rentang',
-                weekLabel: 'Mg',
-                daysOfWeek: dayNames,
-                monthNames: monthNames,
-                firstDay: 1
+        calendarsContainer.appendChild(
+            createCalendar(
+                leftDate,
+                'left'
+            )
+        );
+
+        calendarsContainer.appendChild(
+            createCalendar(
+                rightDate,
+                'right'
+            )
+        );
+
+        updateSelectedLabel();
+
+        requestAnimationFrame(
+            positionDatePicker
+        );
+    }
+
+    function createCalendar(date, side) {
+        const calendar =
+            document.createElement('div');
+
+        calendar.className =
+            'custom-calendar';
+
+        const header =
+            document.createElement('div');
+
+        header.className =
+            'custom-calendar-head';
+
+        const previous =
+            document.createElement('button');
+
+        previous.type = 'button';
+        previous.className =
+            'custom-calendar-nav';
+
+        previous.innerHTML =
+            '&#8249;';
+
+        previous.setAttribute(
+            'aria-label',
+            'Bulan sebelumnya'
+        );
+
+        const heading =
+            document.createElement('div');
+
+        heading.className =
+            'custom-calendar-heading';
+
+        const monthButton =
+            document.createElement('button');
+
+        monthButton.type = 'button';
+        monthButton.className =
+            'custom-calendar-month-button';
+
+        monthButton.textContent =
+            MONTHS[date.getMonth()];
+
+        const yearButton =
+            document.createElement('button');
+
+        yearButton.type = 'button';
+        yearButton.className =
+            'custom-calendar-year-button';
+
+        yearButton.textContent =
+            String(date.getFullYear());
+
+        heading.appendChild(
+            monthButton
+        );
+
+        heading.appendChild(
+            yearButton
+        );
+
+        const next =
+            document.createElement('button');
+
+        next.type = 'button';
+        next.className =
+            'custom-calendar-nav';
+
+        next.innerHTML =
+            '&#8250;';
+
+        next.setAttribute(
+            'aria-label',
+            'Bulan berikutnya'
+        );
+
+        header.appendChild(previous);
+        header.appendChild(heading);
+        header.appendChild(next);
+
+        monthButton.addEventListener(
+            'click',
+            function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+
+                closePickerPanel();
+
+                showMonthPanel(
+                    date,
+                    monthButton,
+                    side
+                );
             }
-        };
+        );
 
-        const startValue = dariTanggal.val();
-        const endValue = sampaiTanggal.val();
+        yearButton.addEventListener(
+            'click',
+            function (event) {
+                event.preventDefault();
+                event.stopPropagation();
 
-        if (startValue && endValue) {
-            const startMoment =
-                moment(startValue, 'YYYY-MM-DD', true);
+                closePickerPanel();
 
-            const endMoment =
-                moment(endValue, 'YYYY-MM-DD', true);
+                showYearPanel(
+                    date,
+                    yearButton,
+                    side
+                );
+            }
+        );
+
+        previous.addEventListener(
+            'click',
+            function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+
+                viewMonth =
+                    addMonths(
+                        viewMonth,
+                        -1
+                    );
+
+                renderCalendars();
+            }
+        );
+
+        next.addEventListener(
+            'click',
+            function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+
+                viewMonth =
+                    addMonths(
+                        viewMonth,
+                        1
+                    );
+
+                renderCalendars();
+            }
+        );
+
+        calendar.appendChild(header);
+
+        const weekdays =
+            document.createElement('div');
+
+        weekdays.className =
+            'custom-calendar-weekdays';
+
+        WEEKDAYS.forEach(
+            function (day) {
+                const element =
+                    document.createElement('div');
+
+                element.className =
+                    'custom-calendar-weekday';
+
+                element.textContent =
+                    day;
+
+                weekdays.appendChild(
+                    element
+                );
+            }
+        );
+
+        calendar.appendChild(
+            weekdays
+        );
+
+        const days =
+            document.createElement('div');
+
+        days.className =
+            'custom-calendar-days';
+
+        const year =
+            date.getFullYear();
+
+        const month =
+            date.getMonth();
+
+        const firstDay =
+            new Date(
+                year,
+                month,
+                1
+            ).getDay();
+
+        const mondayOffset =
+            firstDay === 0
+                ? 6
+                : firstDay - 1;
+
+        const daysInMonth =
+            new Date(
+                year,
+                month + 1,
+                0
+            ).getDate();
+
+        const daysInPreviousMonth =
+            new Date(
+                year,
+                month,
+                0
+            ).getDate();
+
+        for (
+            let index = 0;
+            index < 42;
+            index++
+        ) {
+            let cellDate;
+            let dayNumber;
+            let otherMonth = false;
 
             if (
-                startMoment.isValid() &&
-                endMoment.isValid()
+                index < mondayOffset
             ) {
-                pickerOptions.startDate = startMoment;
-                pickerOptions.endDate = endMoment;
-            }
-        }
+                dayNumber =
+                    daysInPreviousMonth -
+                    mondayOffset +
+                    index +
+                    1;
 
-        dateInput.daterangepicker(pickerOptions);
+                cellDate =
+                    new Date(
+                        year,
+                        month - 1,
+                        dayNumber
+                    );
 
-        const picker =
-            dateInput.data('daterangepicker');
-
-        if (!picker) {
-            return;
-        }
-
-        let customPanel = null;
-        let activePanel = null;
-        let renderingHeader = false;
-
-        /* ============================================================
-           PANEL HELPERS
-        ============================================================ */
-        function removeCustomPanel() {
-            if (customPanel) {
-                customPanel.remove();
-                customPanel = null;
-            }
-
-            activePanel = null;
-        }
-
-        function getCalendarMoment(side) {
-            if (
-                side === 'right' &&
-                picker.rightCalendar?.month
+                otherMonth = true;
+            } else if (
+                index >=
+                mondayOffset +
+                daysInMonth
             ) {
-                return picker.rightCalendar.month.clone();
+                dayNumber =
+                    index -
+                    mondayOffset -
+                    daysInMonth +
+                    1;
+
+                cellDate =
+                    new Date(
+                        year,
+                        month + 1,
+                        dayNumber
+                    );
+
+                otherMonth = true;
+            } else {
+                dayNumber =
+                    index -
+                    mondayOffset +
+                    1;
+
+                cellDate =
+                    new Date(
+                        year,
+                        month,
+                        dayNumber
+                    );
             }
 
-            if (picker.leftCalendar?.month) {
-                return picker.leftCalendar.month.clone();
-            }
-
-            return moment();
-        }
-
-        function createHeaderButton(text, type, side) {
-            const button = document.createElement('button');
+            const button =
+                document.createElement('button');
 
             button.type = 'button';
             button.className =
-                'custom-date-header-button ' + type;
+                'custom-calendar-day';
 
-            button.dataset.type = type;
-            button.dataset.side = side;
-            button.textContent = text;
+            button.textContent =
+                String(dayNumber);
 
-            return button;
-        }
-
-        /* ============================================================
-           RENDER HEADER
-        ============================================================ */
-        function renderHeaderButtons() {
-            if (
-                !picker ||
-                !picker.container ||
-                renderingHeader
-            ) {
-                return;
-            }
-
-            renderingHeader = true;
-
-            try {
-                const headers =
-                    picker.container.find(
-                        '.calendar thead tr:first-child th.month'
-                    );
-
-                headers.each(function (index) {
-                    const side =
-                        index === 0 ? 'left' : 'right';
-
-                    const calendarMoment =
-                        getCalendarMoment(side);
-
-                    this.innerHTML = '';
-                    this.classList.add(
-                        'custom-month-year-header'
-                    );
-
-                    const wrapper =
-                        document.createElement('div');
-
-                    wrapper.className =
-                        'custom-date-header';
-
-                    const monthButton =
-                        createHeaderButton(
-                            monthNames[calendarMoment.month()],
-                            'month',
-                            side
-                        );
-
-                    const yearButton =
-                        createHeaderButton(
-                            calendarMoment.year(),
-                            'year',
-                            side
-                        );
-
-                    wrapper.appendChild(monthButton);
-                    wrapper.appendChild(yearButton);
-                    this.appendChild(wrapper);
-                });
-            } finally {
-                renderingHeader = false;
-            }
-        }
-
-        /* ============================================================
-           POSITION CUSTOM PANEL
-        ============================================================ */
-        function positionPanel(panelElement, anchor) {
-            if (window.innerWidth <= 767) {
-                panelElement.style.left = '50%';
-                panelElement.style.top = '50%';
-                return;
-            }
-
-            const rect = anchor.getBoundingClientRect();
-            const panelWidth = panelElement.offsetWidth || 320;
-            const panelHeight = panelElement.offsetHeight || 280;
-
-            let left = rect.left;
-            let top = rect.bottom + 8;
-
-            if (
-                left + panelWidth >
-                window.innerWidth - 12
-            ) {
-                left =
-                    window.innerWidth -
-                    panelWidth -
-                    12;
-            }
-
-            if (left < 12) {
-                left = 12;
-            }
-
-            if (
-                top + panelHeight >
-                window.innerHeight - 12
-            ) {
-                top =
-                    rect.top -
-                    panelHeight -
-                    8;
-            }
-
-            if (top < 12) {
-                top = 12;
-            }
-
-            panelElement.style.left = left + 'px';
-            panelElement.style.top = top + 'px';
-        }
-
-        /* ============================================================
-           CREATE PANEL
-        ============================================================ */
-        function createPanelBase(title, isYearPanel) {
-            removeCustomPanel();
-
-            customPanel =
-                document.createElement('div');
-
-            customPanel.className =
-                'custom-date-panel' +
-                (isYearPanel ? ' year-panel' : '');
-
-            customPanel.setAttribute('role', 'dialog');
-            customPanel.setAttribute('aria-modal', 'false');
-
-            const header =
-                document.createElement('div');
-
-            header.className =
-                'custom-date-panel-header';
-
-            const previous =
-                document.createElement('button');
-
-            previous.type = 'button';
-            previous.className = 'custom-date-panel-nav';
-            previous.dataset.action = 'previous';
-            previous.setAttribute(
-                'aria-label',
-                'Sebelumnya'
-            );
-            previous.innerHTML = '&lsaquo;';
-
-            const titleElement =
-                document.createElement('div');
-
-            titleElement.className =
-                'custom-date-panel-title';
-
-            titleElement.textContent =
-                title;
-
-            const next =
-                document.createElement('button');
-
-            next.type = 'button';
-            next.className = 'custom-date-panel-nav';
-            next.dataset.action = 'next';
-            next.setAttribute(
-                'aria-label',
-                'Berikutnya'
-            );
-            next.innerHTML = '&rsaquo;';
-
-            header.appendChild(previous);
-            header.appendChild(titleElement);
-            header.appendChild(next);
-
-            const grid =
-                document.createElement('div');
-
-            grid.className =
-                'custom-date-grid';
-
-            customPanel.appendChild(header);
-            customPanel.appendChild(grid);
-
-            document.body.appendChild(customPanel);
-
-            return {
-                panel: customPanel,
-                grid,
-                title: titleElement,
-                previous,
-                next
-            };
-        }
-
-        /* ============================================================
-           MONTH PANEL
-        ============================================================ */
-        function openMonthPanel(side, anchor) {
-            const current =
-                getCalendarMoment(side);
-
-            const ui =
-                createPanelBase(
-                    String(current.year()),
-                    false
-                );
-
-            activePanel = {
-                type: 'month',
-                side,
-                year: current.year()
-            };
-
-            function renderMonths() {
-                ui.title.textContent =
-                    String(activePanel.year);
-
-                ui.grid.innerHTML = '';
-
-                monthNames.forEach(
-                    function (monthName, monthIndex) {
-                        const button =
-                            document.createElement(
-                                'button'
-                            );
-
-                        button.type = 'button';
-                        button.className =
-                            'custom-date-option';
-
-                        if (
-                            activePanel.year === current.year() &&
-                            monthIndex === current.month()
-                        ) {
-                            button.classList.add('active');
-                        }
-
-                        button.textContent =
-                            monthName;
-
-                        button.dataset.action =
-                            'select-month';
-
-                        button.dataset.side =
-                            side;
-
-                        button.dataset.year =
-                            activePanel.year;
-
-                        button.dataset.month =
-                            monthIndex;
-
-                        ui.grid.appendChild(button);
-                    }
-                );
-
-                positionPanel(
-                    ui.panel,
-                    anchor
+            if (otherMonth) {
+                button.classList.add(
+                    'other-month'
                 );
             }
 
-            ui.previous.addEventListener(
+            if (
+                sameDate(
+                    cellDate,
+                    new Date()
+                )
+            ) {
+                button.classList.add(
+                    'today'
+                );
+            }
+
+            if (
+                isBetween(
+                    cellDate,
+                    tempStart,
+                    tempEnd
+                )
+            ) {
+                button.classList.add(
+                    'in-range'
+                );
+            }
+
+            if (
+                tempStart &&
+                sameDate(
+                    cellDate,
+                    tempStart
+                )
+            ) {
+                button.classList.add(
+                    'range-start'
+                );
+            }
+
+            if (
+                tempEnd &&
+                sameDate(
+                    cellDate,
+                    tempEnd
+                )
+            ) {
+                button.classList.add(
+                    'range-end'
+                );
+            }
+
+            button.addEventListener(
                 'click',
                 function (event) {
                     event.preventDefault();
                     event.stopPropagation();
 
-                    activePanel.year--;
-
-                    if (
-                        activePanel.year <
-                        MIN_YEAR
-                    ) {
-                        activePanel.year =
-                            MIN_YEAR;
-                    }
-
-                    renderMonths();
+                    selectDate(
+                        cellDate
+                    );
                 }
             );
 
-            ui.next.addEventListener(
-                'click',
-                function (event) {
-                    event.preventDefault();
-                    event.stopPropagation();
-
-                    activePanel.year++;
-
-                    if (
-                        activePanel.year >
-                        MAX_YEAR
-                    ) {
-                        activePanel.year =
-                            MAX_YEAR;
-                    }
-
-                    renderMonths();
-                }
+            days.appendChild(
+                button
             );
-
-            renderMonths();
         }
 
-        /* ============================================================
-           YEAR PANEL
-        ============================================================ */
-        function openYearPanel(side, anchor) {
-            const current =
-                getCalendarMoment(side);
+        calendar.appendChild(days);
 
-            const pageSize = 12;
+        return calendar;
+    }
 
-            let pageStart =
-                Math.floor(
-                    current.year() /
-                    pageSize
-                ) * pageSize;
+    function selectDate(date) {
+        const chosen =
+            cloneDate(date);
 
-            if (pageStart < MIN_YEAR) {
-                pageStart = MIN_YEAR;
-            }
+        if (
+            !tempStart ||
+            tempEnd
+        ) {
+            tempStart =
+                chosen;
 
-            const ui =
-                createPanelBase(
-                    pageStart +
-                    ' - ' +
-                    (pageStart + pageSize - 1),
-                    true
+            tempEnd =
+                null;
+        } else if (
+            toISO(chosen) <
+            toISO(tempStart)
+        ) {
+            tempEnd =
+                cloneDate(tempStart);
+
+            tempStart =
+                chosen;
+        } else {
+            tempEnd =
+                chosen;
+        }
+
+        renderCalendars();
+    }
+
+    function updateSelectedLabel() {
+        if (!selectedLabel) {
+            return;
+        }
+
+        if (
+            tempStart &&
+            tempEnd
+        ) {
+            selectedLabel.textContent =
+                formatDate(tempStart) +
+                ' - ' +
+                formatDate(tempEnd);
+
+            return;
+        }
+
+        if (tempStart) {
+            selectedLabel.textContent =
+                formatDate(tempStart) +
+                ' - pilih tanggal akhir';
+
+            return;
+        }
+
+        selectedLabel.textContent =
+            'Pilih tanggal awal';
+    }
+
+    /* ================================================================
+       DATE PICKER POSITION
+    ================================================================ */
+    function positionDatePicker() {
+        if (
+            !datePicker ||
+            !dateInput ||
+            window.innerWidth <= 767
+        ) {
+            return;
+        }
+
+        const rect =
+            dateInput.getBoundingClientRect();
+
+        const width =
+            datePicker.offsetWidth || 720;
+
+        const height =
+            datePicker.offsetHeight || 500;
+
+        let left =
+            rect.left +
+            rect.width / 2 -
+            width / 2;
+
+        let top =
+            rect.bottom + 8;
+
+        if (
+            left + width >
+            window.innerWidth - 10
+        ) {
+            left =
+                window.innerWidth -
+                width -
+                10;
+        }
+
+        if (left < 10) {
+            left = 10;
+        }
+
+        if (
+            top + height >
+            window.innerHeight - 10
+        ) {
+            top =
+                rect.top -
+                height -
+                8;
+        }
+
+        if (top < 10) {
+            top = 10;
+        }
+
+        datePicker.style.left =
+            left + 'px';
+
+        datePicker.style.top =
+            top + 'px';
+    }
+
+    /* ================================================================
+       SHOW / HIDE DATE PICKER
+    ================================================================ */
+    function showDatePicker() {
+        if (!datePicker) {
+            return;
+        }
+
+        closePickerPanel();
+
+        tempStart =
+            selectedStart
+                ? cloneDate(selectedStart)
+                : null;
+
+        tempEnd =
+            selectedEnd
+                ? cloneDate(selectedEnd)
+                : null;
+
+        if (tempStart) {
+            viewMonth =
+                new Date(
+                    tempStart.getFullYear(),
+                    tempStart.getMonth(),
+                    1
                 );
+        }
 
-            activePanel = {
-                type: 'year',
-                side
-            };
+        renderCalendars();
 
-            function renderYears() {
-                ui.title.textContent =
-                    pageStart +
-                    ' - ' +
-                    (pageStart + pageSize - 1);
+        datePicker.classList.remove(
+            'hidden'
+        );
 
-                ui.grid.innerHTML = '';
+        document.body.classList.add(
+            'date-picker-lock'
+        );
 
-                for (
-                    let index = 0;
-                    index < pageSize;
-                    index++
+        requestAnimationFrame(
+            positionDatePicker
+        );
+    }
+
+    function hideDatePicker() {
+        if (!datePicker) {
+            return;
+        }
+
+        datePicker.classList.add(
+            'hidden'
+        );
+
+        closePickerPanel();
+
+        document.body.classList.remove(
+            'date-picker-lock'
+        );
+    }
+
+    /* ================================================================
+       MONTH PANEL
+    ================================================================ */
+    function showMonthPanel(
+        calendarDate,
+        anchor,
+        side
+    ) {
+        if (!pickerPanel) {
+            return;
+        }
+
+        closePickerPanel();
+
+        activePanelType =
+            'month';
+
+        activePanelSide =
+            side;
+
+        activePanelYear =
+            calendarDate.getFullYear();
+
+        pickerPanel.innerHTML = '';
+
+        pickerPanel.classList.remove(
+            'hidden'
+        );
+
+        const header =
+            document.createElement('div');
+
+        header.className =
+            'custom-picker-panel-header';
+
+        const previous =
+            document.createElement('button');
+
+        previous.type = 'button';
+        previous.className =
+            'custom-picker-panel-nav';
+
+        previous.innerHTML =
+            '&#8249;';
+
+        const title =
+            document.createElement('div');
+
+        title.className =
+            'custom-picker-panel-title';
+
+        const next =
+            document.createElement('button');
+
+        next.type = 'button';
+        next.className =
+            'custom-picker-panel-nav';
+
+        next.innerHTML =
+            '&#8250;';
+
+        const close =
+            document.createElement('button');
+
+        close.type = 'button';
+        close.className =
+            'custom-picker-panel-close';
+
+        close.innerHTML =
+            '&times;';
+
+        header.appendChild(previous);
+        header.appendChild(title);
+        header.appendChild(next);
+        header.appendChild(close);
+
+        pickerPanel.appendChild(
+            header
+        );
+
+        const grid =
+            document.createElement('div');
+
+        grid.className =
+            'custom-picker-grid';
+
+        pickerPanel.appendChild(
+            grid
+        );
+
+        function renderMonths() {
+            title.textContent =
+                String(activePanelYear);
+
+            grid.innerHTML = '';
+
+            MONTHS.forEach(
+                function (
+                    monthName,
+                    monthIndex
                 ) {
-                    const year =
-                        pageStart + index;
-
                     const button =
-                        document.createElement(
-                            'button'
-                        );
+                        document.createElement('button');
 
                     button.type = 'button';
                     button.className =
-                        'custom-date-option';
+                        'custom-picker-option';
 
                     button.textContent =
-                        String(year);
-
-                    button.dataset.action =
-                        'select-year';
-
-                    button.dataset.side =
-                        side;
-
-                    button.dataset.year =
-                        year;
-
-                    if (year === current.year()) {
-                        button.classList.add('active');
-                    }
+                        monthName;
 
                     if (
-                        year ===
-                        new Date().getFullYear()
+                        activePanelYear ===
+                            calendarDate.getFullYear() &&
+                        monthIndex ===
+                            calendarDate.getMonth()
                     ) {
-                        button.classList.add('current');
+                        button.classList.add(
+                            'active'
+                        );
                     }
 
-                    if (
-                        year < MIN_YEAR ||
-                        year > MAX_YEAR
-                    ) {
-                        button.disabled = true;
-                    }
+                    button.addEventListener(
+                        'click',
+                        function (event) {
+                            event.preventDefault();
+                            event.stopPropagation();
 
-                    ui.grid.appendChild(button);
-                }
+                            const target =
+                                new Date(
+                                    activePanelYear,
+                                    monthIndex,
+                                    1
+                                );
 
-                positionPanel(
-                    ui.panel,
-                    anchor
-                );
-            }
+                            if (
+                                activePanelSide ===
+                                'left'
+                            ) {
+                                viewMonth =
+                                    target;
+                            } else {
+                                viewMonth =
+                                    addMonths(
+                                        target,
+                                        -1
+                                    );
+                            }
 
-            ui.previous.addEventListener(
-                'click',
-                function (event) {
-                    event.preventDefault();
-                    event.stopPropagation();
+                            closePickerPanel();
+                            renderCalendars();
+                        }
+                    );
 
-                    pageStart -= pageSize;
-
-                    if (pageStart < MIN_YEAR) {
-                        pageStart = MIN_YEAR;
-                    }
-
-                    renderYears();
+                    grid.appendChild(
+                        button
+                    );
                 }
             );
 
-            ui.next.addEventListener(
-                'click',
-                function (event) {
-                    event.preventDefault();
-                    event.stopPropagation();
-
-                    pageStart += pageSize;
-
-                    const maxPageStart =
-                        Math.floor(
-                            MAX_YEAR /
-                            pageSize
-                        ) * pageSize;
-
-                    if (pageStart > maxPageStart) {
-                        pageStart =
-                            maxPageStart;
-                    }
-
-                    renderYears();
-                }
-            );
-
-            renderYears();
-        }
-
-        /* ============================================================
-           SET CALENDAR MONTH
-        ============================================================ */
-        function setCalendarMonth(
-            side,
-            year,
-            month
-        ) {
-            year = parseInt(year, 10);
-            month = parseInt(month, 10);
-
-            if (
-                Number.isNaN(year) ||
-                Number.isNaN(month)
-            ) {
-                return;
-            }
-
-            if (
-                year < MIN_YEAR ||
-                year > MAX_YEAR ||
-                month < 0 ||
-                month > 11
-            ) {
-                return;
-            }
-
-            const target =
-                moment([year, month, 1]);
-
-            if (!target.isValid()) {
-                return;
-            }
-
-            if (side === 'right') {
-                picker.rightCalendar.month =
-                    target.clone();
-
-                if (picker.linkedCalendars) {
-                    picker.leftCalendar.month =
-                        target.clone().subtract(1, 'month');
-                }
-            } else {
-                picker.leftCalendar.month =
-                    target.clone();
-
-                if (picker.linkedCalendars) {
-                    picker.rightCalendar.month =
-                        target.clone().add(1, 'month');
-                }
-            }
-
-            removeCustomPanel();
-            picker.updateCalendars();
-
-            setTimeout(
-                renderHeaderButtons,
-                0
+            positionPickerPanel(
+                pickerPanel,
+                anchor
             );
         }
 
-        /* ============================================================
-           SET CALENDAR YEAR
-        ============================================================ */
-        function setCalendarYear(side, year) {
-            year = parseInt(year, 10);
-
-            if (Number.isNaN(year)) {
-                return;
-            }
-
-            const current =
-                getCalendarMoment(side);
-
-            setCalendarMonth(
-                side,
-                year,
-                current.month()
-            );
-        }
-
-        /* ============================================================
-           PATCH CALENDAR UPDATE
-        ============================================================ */
-        const originalUpdateCalendars =
-            picker.updateCalendars.bind(picker);
-
-        picker.updateCalendars =
-            function () {
-                originalUpdateCalendars();
-
-                setTimeout(
-                    renderHeaderButtons,
-                    0
-                );
-            };
-
-        /* ============================================================
-           CUSTOM HEADER CLICK
-        ============================================================ */
-        document.addEventListener(
-            'click',
-            function (event) {
-                const target =
-                    event.target;
-
-                if (!(target instanceof Element)) {
-                    return;
-                }
-
-                const monthButton =
-                    target.closest(
-                        '.custom-date-header-button.month'
-                    );
-
-                if (monthButton) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    event.stopImmediatePropagation();
-
-                    openMonthPanel(
-                        monthButton.dataset.side,
-                        monthButton
-                    );
-
-                    return;
-                }
-
-                const yearButton =
-                    target.closest(
-                        '.custom-date-header-button.year'
-                    );
-
-                if (yearButton) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    event.stopImmediatePropagation();
-
-                    openYearPanel(
-                        yearButton.dataset.side,
-                        yearButton
-                    );
-
-                    return;
-                }
-
-                const monthOption =
-                    target.closest(
-                        '[data-action="select-month"]'
-                    );
-
-                if (monthOption) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    event.stopImmediatePropagation();
-
-                    setCalendarMonth(
-                        monthOption.dataset.side,
-                        monthOption.dataset.year,
-                        monthOption.dataset.month
-                    );
-
-                    return;
-                }
-
-                const yearOption =
-                    target.closest(
-                        '[data-action="select-year"]'
-                    );
-
-                if (yearOption) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    event.stopImmediatePropagation();
-
-                    setCalendarYear(
-                        yearOption.dataset.side,
-                        yearOption.dataset.year
-                    );
-
-                    return;
-                }
-
-                if (
-                    customPanel &&
-                    !customPanel.contains(target)
-                ) {
-                    removeCustomPanel();
-                }
-            },
-            true
-        );
-
-        /* ============================================================
-           SHOW
-        ============================================================ */
-        dateInput.on(
-            'show.daterangepicker',
-            function () {
-                document.body.classList.add(
-                    'daterangepicker-open'
-                );
-
-                setTimeout(
-                    function () {
-                        picker.updateCalendars();
-                        renderHeaderButtons();
-                    },
-                    0
-                );
-            }
-        );
-
-        /* ============================================================
-           HIDE
-        ============================================================ */
-        dateInput.on(
-            'hide.daterangepicker',
-            function () {
-                removeCustomPanel();
-
-                document.body.classList.remove(
-                    'daterangepicker-open'
-                );
-            }
-        );
-
-        /* ============================================================
-           APPLY
-        ============================================================ */
-        dateInput.on(
-            'apply.daterangepicker',
-            function (event, selectedPicker) {
-                const start =
-                    selectedPicker.startDate;
-
-                const end =
-                    selectedPicker.endDate;
-
-                if (!start || !end) {
-                    return;
-                }
-
-                dariTanggal.val(
-                    start.format('YYYY-MM-DD')
-                );
-
-                sampaiTanggal.val(
-                    end.format('YYYY-MM-DD')
-                );
-
-                dateInput.val(
-                    start.format('DD/MM/YYYY') +
-                    ' - ' +
-                    end.format('DD/MM/YYYY')
-                );
-
-                clearDateButton
-                    .removeClass('hidden')
-                    .addClass('flex');
-
-                removeCustomPanel();
-            }
-        );
-
-        /* ============================================================
-           CANCEL
-        ============================================================ */
-        dateInput.on(
-            'cancel.daterangepicker',
-            function () {
-                dariTanggal.val('');
-                sampaiTanggal.val('');
-                dateInput.val('');
-
-                clearDateButton
-                    .removeClass('flex')
-                    .addClass('hidden');
-
-                removeCustomPanel();
-            }
-        );
-
-        /* ============================================================
-           CLEAR DATE
-        ============================================================ */
-        clearDateButton.on(
+        previous.addEventListener(
             'click',
             function (event) {
                 event.preventDefault();
                 event.stopPropagation();
 
-                dariTanggal.val('');
-                sampaiTanggal.val('');
-                dateInput.val('');
+                activePanelYear--;
 
-                clearDateButton
-                    .removeClass('flex')
-                    .addClass('hidden');
+                if (
+                    activePanelYear <
+                    MIN_YEAR
+                ) {
+                    activePanelYear =
+                        MIN_YEAR;
+                }
 
-                removeCustomPanel();
-
-                const today =
-                    moment();
-
-                picker.setStartDate(
-                    today.clone()
-                );
-
-                picker.setEndDate(
-                    today.clone()
-                );
-
-                picker.updateCalendars();
+                renderMonths();
             }
         );
 
-        /* ============================================================
-           RESTORE DATE VALUE
-        ============================================================ */
-        function updateVisibleDate() {
-            const start =
-                dariTanggal.val();
+        next.addEventListener(
+            'click',
+            function (event) {
+                event.preventDefault();
+                event.stopPropagation();
 
-            const end =
-                sampaiTanggal.val();
-
-            if (start && end) {
-                const startDate =
-                    moment(
-                        start,
-                        'YYYY-MM-DD',
-                        true
-                    );
-
-                const endDate =
-                    moment(
-                        end,
-                        'YYYY-MM-DD',
-                        true
-                    );
+                activePanelYear++;
 
                 if (
-                    startDate.isValid() &&
-                    endDate.isValid()
+                    activePanelYear >
+                    MAX_YEAR
                 ) {
-                    dateInput.val(
-                        startDate.format('DD/MM/YYYY') +
-                        ' - ' +
-                        endDate.format('DD/MM/YYYY')
-                    );
-
-                    clearDateButton
-                        .removeClass('hidden')
-                        .addClass('flex');
-
-                    return;
+                    activePanelYear =
+                        MAX_YEAR;
                 }
+
+                renderMonths();
             }
+        );
 
-            dateInput.val('');
+        close.addEventListener(
+            'click',
+            closePickerPanel
+        );
 
-            clearDateButton
-                .removeClass('flex')
-                .addClass('hidden');
+        renderMonths();
+    }
+
+    /* ================================================================
+       YEAR PANEL
+    ================================================================ */
+    function showYearPanel(
+        calendarDate,
+        anchor,
+        side
+    ) {
+        if (!pickerPanel) {
+            return;
         }
 
-        updateVisibleDate();
+        closePickerPanel();
 
-        /* ============================================================
-           INITIAL HEADER
-        ============================================================ */
-        setTimeout(
-            function () {
-                picker.updateCalendars();
-                renderHeaderButtons();
-            },
-            100
+        activePanelType =
+            'year';
+
+        activePanelSide =
+            side;
+
+        const pageSize =
+            12;
+
+        let startYear =
+            Math.floor(
+                calendarDate.getFullYear() /
+                pageSize
+            ) *
+            pageSize;
+
+        if (
+            startYear <
+            MIN_YEAR
+        ) {
+            startYear =
+                MIN_YEAR;
+        }
+
+        pickerPanel.innerHTML = '';
+
+        pickerPanel.classList.remove(
+            'hidden'
         );
 
-        /* ============================================================
-           RESIZE
-        ============================================================ */
-        window.addEventListener(
-            'resize',
-            function () {
-                if (customPanel) {
-                    removeCustomPanel();
-                }
-            }
+        const header =
+            document.createElement('div');
+
+        header.className =
+            'custom-picker-panel-header';
+
+        const previous =
+            document.createElement('button');
+
+        previous.type = 'button';
+        previous.className =
+            'custom-picker-panel-nav';
+
+        previous.innerHTML =
+            '&#8249;';
+
+        const title =
+            document.createElement('div');
+
+        title.className =
+            'custom-picker-panel-title';
+
+        const next =
+            document.createElement('button');
+
+        next.type = 'button';
+        next.className =
+            'custom-picker-panel-nav';
+
+        next.innerHTML =
+            '&#8250;';
+
+        const close =
+            document.createElement('button');
+
+        close.type = 'button';
+        close.className =
+            'custom-picker-panel-close';
+
+        close.innerHTML =
+            '&times;';
+
+        header.appendChild(previous);
+        header.appendChild(title);
+        header.appendChild(next);
+        header.appendChild(close);
+
+        pickerPanel.appendChild(
+            header
         );
 
-        /* ============================================================
-           FILTER VALIDATION
-        ============================================================ */
-        const filterForm =
-            document.getElementById('filterForm');
+        const grid =
+            document.createElement('div');
 
-        filterForm?.addEventListener(
-            'submit',
-            function (event) {
-                const start =
-                    dariTanggal.val();
+        grid.className =
+            'custom-picker-grid';
 
-                const end =
-                    sampaiTanggal.val();
+        pickerPanel.appendChild(
+            grid
+        );
+
+        function renderYears() {
+            title.textContent =
+                startYear +
+                ' - ' +
+                (startYear + 11);
+
+            grid.innerHTML = '';
+
+            for (
+                let index = 0;
+                index < pageSize;
+                index++
+            ) {
+                const year =
+                    startYear + index;
+
+                const button =
+                    document.createElement('button');
+
+                button.type = 'button';
+                button.className =
+                    'custom-picker-option';
+
+                button.textContent =
+                    String(year);
 
                 if (
-                    start &&
-                    end &&
-                    start > end
+                    year ===
+                    calendarDate.getFullYear()
                 ) {
-                    event.preventDefault();
+                    button.classList.add(
+                        'active'
+                    );
+                }
 
-                    if (
-                        typeof window.Swal !==
-                        'undefined'
-                    ) {
-                        window.Swal.fire({
-                            icon: 'warning',
-                            title: 'Rentang tanggal tidak valid',
-                            text: 'Tanggal mulai tidak boleh lebih besar dari tanggal akhir.',
-                            confirmButtonText: 'Mengerti',
-                            confirmButtonColor: '#2563eb',
-                            customClass: {
-                                popup: 'rounded-2xl',
-                                confirmButton:
-                                    'rounded-xl text-xs font-semibold px-4 py-2.5'
+                if (
+                    year ===
+                    new Date().getFullYear()
+                ) {
+                    button.classList.add(
+                        'current'
+                    );
+                }
+
+                if (
+                    year >= MIN_YEAR &&
+                    year <= MAX_YEAR
+                ) {
+                    button.addEventListener(
+                        'click',
+                        function (event) {
+                            event.preventDefault();
+                            event.stopPropagation();
+
+                            const month =
+                                calendarDate.getMonth();
+
+                            if (
+                                activePanelSide ===
+                                'left'
+                            ) {
+                                viewMonth =
+                                    new Date(
+                                        year,
+                                        month,
+                                        1
+                                    );
+                            } else {
+                                viewMonth =
+                                    new Date(
+                                        year,
+                                        month - 1,
+                                        1
+                                    );
                             }
-                        });
-                    } else {
-                        window.alert(
-                            'Tanggal mulai tidak boleh lebih besar dari tanggal akhir.'
-                        );
-                    }
+
+                            closePickerPanel();
+                            renderCalendars();
+                        }
+                    );
+                } else {
+                    button.disabled = true;
+                }
+
+                grid.appendChild(
+                    button
+                );
+            }
+
+            positionPickerPanel(
+                pickerPanel,
+                anchor
+            );
+        }
+
+        previous.addEventListener(
+            'click',
+            function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+
+                startYear -=
+                    pageSize;
+
+                if (
+                    startYear <
+                    MIN_YEAR
+                ) {
+                    startYear =
+                        MIN_YEAR;
+                }
+
+                renderYears();
+            }
+        );
+
+        next.addEventListener(
+            'click',
+            function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+
+                startYear +=
+                    pageSize;
+
+                const maxStart =
+                    Math.floor(
+                        MAX_YEAR /
+                        pageSize
+                    ) *
+                    pageSize;
+
+                if (
+                    startYear >
+                    maxStart
+                ) {
+                    startYear =
+                        maxStart;
+                }
+
+                renderYears();
+            }
+        );
+
+        close.addEventListener(
+            'click',
+            closePickerPanel
+        );
+
+        renderYears();
+    }
+
+    /* ================================================================
+       PANEL POSITION
+    ================================================================ */
+    function positionPickerPanel(
+        element,
+        anchor
+    ) {
+        if (!element || !anchor) {
+            return;
+        }
+
+        if (
+            window.innerWidth <=
+            767
+        ) {
+            element.style.left = '50%';
+            element.style.top = '50%';
+            return;
+        }
+
+        const rect =
+            anchor.getBoundingClientRect();
+
+        const width =
+            element.offsetWidth || 320;
+
+        const height =
+            element.offsetHeight || 280;
+
+        let left =
+            rect.left;
+
+        let top =
+            rect.bottom + 8;
+
+        if (
+            left + width >
+            window.innerWidth - 10
+        ) {
+            left =
+                window.innerWidth -
+                width -
+                10;
+        }
+
+        if (left < 10) {
+            left = 10;
+        }
+
+        if (
+            top + height >
+            window.innerHeight - 10
+        ) {
+            top =
+                rect.top -
+                height -
+                8;
+        }
+
+        if (top < 10) {
+            top = 10;
+        }
+
+        element.style.left =
+            left + 'px';
+
+        element.style.top =
+            top + 'px';
+    }
+
+    function closePickerPanel() {
+        if (!pickerPanel) {
+            return;
+        }
+
+        pickerPanel.classList.add(
+            'hidden'
+        );
+
+        pickerPanel.innerHTML = '';
+
+        activePanelType =
+            null;
+    }
+
+    /* ================================================================
+       APPLY DATE
+    ================================================================ */
+    function applyDateRange() {
+        if (
+            !tempStart ||
+            !tempEnd
+        ) {
+            return;
+        }
+
+        selectedStart =
+            cloneDate(tempStart);
+
+        selectedEnd =
+            cloneDate(tempEnd);
+
+        if (dariInput) {
+            dariInput.value =
+                toISO(selectedStart);
+        }
+
+        if (sampaiInput) {
+            sampaiInput.value =
+                toISO(selectedEnd);
+        }
+
+        if (dateInput) {
+            dateInput.value =
+                formatDate(selectedStart) +
+                ' - ' +
+                formatDate(selectedEnd);
+        }
+
+        if (clearDateRangeButton) {
+            clearDateRangeButton.classList.remove(
+                'hidden'
+            );
+
+            clearDateRangeButton.classList.add(
+                'flex'
+            );
+        }
+
+        hideDatePicker();
+    }
+
+    /* ================================================================
+       CLEAR DATE
+    ================================================================ */
+    function clearDateRange() {
+        selectedStart = null;
+        selectedEnd = null;
+        tempStart = null;
+        tempEnd = null;
+
+        if (dariInput) {
+            dariInput.value = '';
+        }
+
+        if (sampaiInput) {
+            sampaiInput.value = '';
+        }
+
+        if (dateInput) {
+            dateInput.value = '';
+        }
+
+        if (clearDateRangeButton) {
+            clearDateRangeButton.classList.remove(
+                'flex'
+            );
+
+            clearDateRangeButton.classList.add(
+                'hidden'
+            );
+        }
+
+        viewMonth =
+            new Date();
+
+        viewMonth.setDate(1);
+
+        hideDatePicker();
+    }
+
+    /* ================================================================
+       DATE EVENTS
+    ================================================================ */
+    if (
+        dateInput &&
+        datePicker
+    ) {
+        dateInput.addEventListener(
+            'click',
+            function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+
+                if (
+                    datePicker.classList.contains(
+                        'hidden'
+                    )
+                ) {
+                    showDatePicker();
+                } else {
+                    hideDatePicker();
                 }
             }
         );
 
-        /* ============================================================
-           DELETE CONFIRMATION
-        ============================================================ */
-        document
-            .querySelectorAll('.delete-btn')
-            .forEach(function (button) {
+        dateInput.addEventListener(
+            'focus',
+            function () {
+                if (
+                    datePicker.classList.contains(
+                        'hidden'
+                    )
+                ) {
+                    showDatePicker();
+                }
+            }
+        );
+
+        datePickerClose?.addEventListener(
+            'click',
+            function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+
+                hideDatePicker();
+            }
+        );
+
+        datePickerClear?.addEventListener(
+            'click',
+            function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+
+                clearDateRange();
+            }
+        );
+
+        datePickerApply?.addEventListener(
+            'click',
+            function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+
+                applyDateRange();
+            }
+        );
+
+        clearDateRangeButton?.addEventListener(
+            'click',
+            function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+
+                clearDateRange();
+            }
+        );
+
+        document.addEventListener(
+            'mousedown',
+            function (event) {
+                if (
+                    datePicker.classList.contains(
+                        'hidden'
+                    )
+                ) {
+                    return;
+                }
+
+                if (
+                    datePicker.contains(
+                        event.target
+                    )
+                ) {
+                    return;
+                }
+
+                if (
+                    pickerPanel &&
+                    pickerPanel.contains(
+                        event.target
+                    )
+                ) {
+                    return;
+                }
+
+                if (
+                    dateInput.contains(
+                        event.target
+                    )
+                ) {
+                    return;
+                }
+
+                if (
+                    clearDateRangeButton &&
+                    clearDateRangeButton.contains(
+                        event.target
+                    )
+                ) {
+                    return;
+                }
+
+                hideDatePicker();
+            }
+        );
+    }
+
+    /* ================================================================
+       DATE RESIZE / SCROLL
+    ================================================================ */
+    window.addEventListener(
+        'resize',
+        function () {
+            if (
+                datePicker &&
+                !datePicker.classList.contains(
+                    'hidden'
+                )
+            ) {
+                positionDatePicker();
+            }
+
+            if (
+                pickerPanel &&
+                !pickerPanel.classList.contains(
+                    'hidden'
+                )
+            ) {
+                closePickerPanel();
+            }
+        }
+    );
+
+    window.addEventListener(
+        'scroll',
+        function () {
+            if (
+                datePicker &&
+                !datePicker.classList.contains(
+                    'hidden'
+                )
+            ) {
+                positionDatePicker();
+            }
+        },
+        true
+    );
+
+    /* ================================================================
+       FILTER DROPDOWN
+    ================================================================ */
+    const kategoriDropdown =
+        document.getElementById(
+            'kategoriDropdown'
+        );
+
+    const statusDropdown =
+        document.getElementById(
+            'statusDropdown'
+        );
+
+    const kategoriButton =
+        document.getElementById(
+            'kategoriDropdownButton'
+        );
+
+    const statusButton =
+        document.getElementById(
+            'statusDropdownButton'
+        );
+
+    const kategoriCount =
+        document.getElementById(
+            'kategoriCount'
+        );
+
+    const statusCount =
+        document.getElementById(
+            'statusCount'
+        );
+
+    const kategoriSummary =
+        document.getElementById(
+            'kategoriSummary'
+        );
+
+    const statusSummary =
+        document.getElementById(
+            'statusSummary'
+        );
+
+    const kategoriFooterCount =
+        document.getElementById(
+            'kategoriFooterCount'
+        );
+
+    const statusFooterCount =
+        document.getElementById(
+            'statusFooterCount'
+        );
+
+    const kategoriCheckboxes =
+        document.querySelectorAll(
+            '.kategori-checkbox'
+        );
+
+    const statusCheckboxes =
+        document.querySelectorAll(
+            '.status-checkbox'
+        );
+
+    function closeDropdown(dropdown) {
+        if (!dropdown) {
+            return;
+        }
+
+        dropdown.classList.remove(
+            'open'
+        );
+
+        const button =
+            dropdown.querySelector(
+                '.filter-dropdown-trigger'
+            );
+
+        if (button) {
+            button.setAttribute(
+                'aria-expanded',
+                'false'
+            );
+        }
+    }
+
+    function closeAllDropdowns() {
+        closeDropdown(
+            kategoriDropdown
+        );
+
+        closeDropdown(
+            statusDropdown
+        );
+    }
+
+    function openDropdown(dropdown) {
+        if (!dropdown) {
+            return;
+        }
+
+        if (
+            dropdown ===
+            kategoriDropdown
+        ) {
+            closeDropdown(
+                statusDropdown
+            );
+        }
+
+        if (
+            dropdown ===
+            statusDropdown
+        ) {
+            closeDropdown(
+                kategoriDropdown
+            );
+        }
+
+        dropdown.classList.add(
+            'open'
+        );
+
+        const button =
+            dropdown.querySelector(
+                '.filter-dropdown-trigger'
+            );
+
+        if (button) {
+            button.setAttribute(
+                'aria-expanded',
+                'true'
+            );
+        }
+    }
+
+    function getCheckedLabels(
+        selector
+    ) {
+        return Array.from(
+            document.querySelectorAll(
+                selector + ':checked'
+            )
+        )
+            .map(
+                function (checkbox) {
+                    const label =
+                        checkbox.closest(
+                            'label'
+                        );
+
+                    const span =
+                        label?.querySelector(
+                            'span'
+                        );
+
+                    return (
+                        span?.textContent
+                            .trim() ||
+                        ''
+                    );
+                }
+            )
+            .filter(Boolean);
+    }
+
+    function updateKategoriFilter() {
+        const checked =
+            document.querySelectorAll(
+                '.kategori-checkbox:checked'
+            );
+
+        const count =
+            checked.length;
+
+        if (kategoriCount) {
+            kategoriCount.textContent =
+                count +
+                ' dipilih';
+        }
+
+        if (kategoriFooterCount) {
+            kategoriFooterCount.textContent =
+                count +
+                ' kategori dipilih';
+        }
+
+        if (kategoriSummary) {
+            const labels =
+                getCheckedLabels(
+                    '.kategori-checkbox'
+                );
+
+            if (!labels.length) {
+                kategoriSummary.textContent =
+                    'Semua kategori';
+            } else if (
+                labels.length <= 2
+            ) {
+                kategoriSummary.textContent =
+                    labels.join(', ');
+            } else {
+                kategoriSummary.textContent =
+                    labels.length +
+                    ' kategori dipilih';
+            }
+        }
+    }
+
+    function updateStatusFilter() {
+        const checked =
+            document.querySelectorAll(
+                '.status-checkbox:checked'
+            );
+
+        const count =
+            checked.length;
+
+        if (statusCount) {
+            statusCount.textContent =
+                count +
+                ' dipilih';
+        }
+
+        if (statusFooterCount) {
+            statusFooterCount.textContent =
+                count +
+                ' status dipilih';
+        }
+
+        if (statusSummary) {
+            const labels =
+                getCheckedLabels(
+                    '.status-checkbox'
+                );
+
+            if (!labels.length) {
+                statusSummary.textContent =
+                    'Semua status';
+            } else if (
+                labels.length <= 2
+            ) {
+                statusSummary.textContent =
+                    labels.join(', ');
+            } else {
+                statusSummary.textContent =
+                    labels.length +
+                    ' status dipilih';
+            }
+        }
+    }
+
+    kategoriButton?.addEventListener(
+        'click',
+        function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            if (
+                kategoriDropdown?.classList.contains(
+                    'open'
+                )
+            ) {
+                closeDropdown(
+                    kategoriDropdown
+                );
+            } else {
+                openDropdown(
+                    kategoriDropdown
+                );
+            }
+        }
+    );
+
+    statusButton?.addEventListener(
+        'click',
+        function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            if (
+                statusDropdown?.classList.contains(
+                    'open'
+                )
+            ) {
+                closeDropdown(
+                    statusDropdown
+                );
+            } else {
+                openDropdown(
+                    statusDropdown
+                );
+            }
+        }
+    );
+
+    kategoriCheckboxes.forEach(
+        function (checkbox) {
+            checkbox.addEventListener(
+                'change',
+                updateKategoriFilter
+            );
+        }
+    );
+
+    statusCheckboxes.forEach(
+        function (checkbox) {
+            checkbox.addEventListener(
+                'change',
+                updateStatusFilter
+            );
+        }
+    );
+
+    document
+        .getElementById('selectAllKategori')
+        ?.addEventListener(
+            'click',
+            function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+
+                kategoriCheckboxes.forEach(
+                    function (checkbox) {
+                        checkbox.checked =
+                            true;
+                    }
+                );
+
+                updateKategoriFilter();
+            }
+        );
+
+    document
+        .getElementById('clearAllKategori')
+        ?.addEventListener(
+            'click',
+            function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+
+                kategoriCheckboxes.forEach(
+                    function (checkbox) {
+                        checkbox.checked =
+                            false;
+                    }
+                );
+
+                updateKategoriFilter();
+            }
+        );
+
+    document
+        .getElementById('selectAllStatus')
+        ?.addEventListener(
+            'click',
+            function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+
+                statusCheckboxes.forEach(
+                    function (checkbox) {
+                        checkbox.checked =
+                            true;
+                    }
+                );
+
+                updateStatusFilter();
+            }
+        );
+
+    document
+        .getElementById('clearAllStatus')
+        ?.addEventListener(
+            'click',
+            function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+
+                statusCheckboxes.forEach(
+                    function (checkbox) {
+                        checkbox.checked =
+                            false;
+                    }
+                );
+
+                updateStatusFilter();
+            }
+        );
+
+    document.addEventListener(
+        'click',
+        function (event) {
+            const target =
+                event.target;
+
+            if (
+                !(target instanceof Element)
+            ) {
+                return;
+            }
+
+            if (
+                !target.closest(
+                    '.filter-dropdown'
+                )
+            ) {
+                closeAllDropdowns();
+            }
+        }
+    );
+
+    document.addEventListener(
+        'keydown',
+        function (event) {
+            if (
+                event.key ===
+                'Escape'
+            ) {
+                closeAllDropdowns();
+
+                if (
+                    datePicker &&
+                    !datePicker.classList.contains(
+                        'hidden'
+                    )
+                ) {
+                    hideDatePicker();
+                }
+            }
+        }
+    );
+
+    updateKategoriFilter();
+    updateStatusFilter();
+
+    /* ================================================================
+       DELETE CONFIRMATION
+    ================================================================ */
+    document
+        .querySelectorAll('.delete-btn')
+        .forEach(
+            function (button) {
                 button.addEventListener(
                     'click',
                     function () {
                         const form =
-                            this.closest('.delete-form');
+                            this.closest(
+                                '.delete-form'
+                            );
+
+                        if (!form) {
+                            return;
+                        }
 
                         if (
                             typeof window.Swal !==
                             'undefined'
                         ) {
                             window.Swal.fire({
-                                title: 'Hapus Surat Keluar?',
-                                text: 'Data yang dihapus akan dipindahkan ke tempat sampah.',
-                                icon: 'warning',
-                                showCancelButton: true,
-                                confirmButtonColor: '#ef4444',
-                                cancelButtonColor: '#64748b',
-                                confirmButtonText: 'Ya, Hapus!',
-                                cancelButtonText: 'Batal',
-                                reverseButtons: true,
+                                title:
+                                    'Hapus Surat Keluar?',
+                                text:
+                                    'Data yang dihapus akan dipindahkan ke tempat sampah.',
+                                icon:
+                                    'warning',
+                                showCancelButton:
+                                    true,
+                                confirmButtonColor:
+                                    '#ef4444',
+                                cancelButtonColor:
+                                    '#64748b',
+                                confirmButtonText:
+                                    'Ya, Hapus!',
+                                cancelButtonText:
+                                    'Batal',
+                                reverseButtons:
+                                    true,
                                 customClass: {
-                                    popup: 'rounded-2xl',
+                                    popup:
+                                        'rounded-2xl',
                                     confirmButton:
                                         'rounded-xl text-xs font-semibold px-4 py-2.5',
                                     cancelButton:
@@ -2847,19 +3666,13 @@
                             }).then(
                                 function (result) {
                                     if (
-                                        result.isConfirmed &&
-                                        form
+                                        result.isConfirmed
                                     ) {
                                         form.submit();
                                     }
                                 }
                             );
-
-                            return;
-                        }
-
-                        if (
-                            form &&
+                        } else if (
                             window.confirm(
                                 'Yakin ingin menghapus surat keluar ini?'
                             )
@@ -2868,26 +3681,36 @@
                         }
                     }
                 );
-            });
-    }
+            }
+        );
 
     /* ================================================================
-       START
+       INITIAL DATE DISPLAY
     ================================================================ */
-    if (document.readyState === 'loading') {
-        document.addEventListener(
-            'DOMContentLoaded',
-            initializePageAssets,
-            { once: true }
+    if (
+        selectedStart &&
+        selectedEnd &&
+        dateInput &&
+        clearDateRangeButton
+    ) {
+        dateInput.value =
+            formatDate(selectedStart) +
+            ' - ' +
+            formatDate(selectedEnd);
+
+        clearDateRangeButton.classList.remove(
+            'hidden'
         );
-    } else {
-        initializePageAssets();
+
+        clearDateRangeButton.classList.add(
+            'flex'
+        );
     }
 })();
 </script>
 
+{{-- SWEETALERT --}}
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 @endpush
 
 @endsection
-```
