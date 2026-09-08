@@ -12,7 +12,7 @@ class DisposisiRequest extends FormRequest
     /**
      * Hak akses request.
      *
-     * Hanya admin dan pimpinan yang boleh
+     * Hanya admin dan pimpinan yang dapat
      * membuat atau mengubah disposisi.
      */
     public function authorize(): bool
@@ -33,9 +33,6 @@ class DisposisiRequest extends FormRequest
             )
         );
 
-        /*
-         * Normalisasi staff menjadi staf.
-         */
         if ($role === 'staff') {
             $role = 'staf';
         }
@@ -86,8 +83,9 @@ class DisposisiRequest extends FormRequest
         }
 
         if ($instruksi !== null) {
-            $instruksi =
-                trim((string) $instruksi);
+            $instruksi = trim(
+                (string) $instruksi
+            );
 
             $data['instruksi'] =
                 $instruksi;
@@ -168,11 +166,8 @@ class DisposisiRequest extends FormRequest
 
         /*
          * =====================================================
-         * FIELD PENERIMA TAMPILAN
+         * PENERIMA UNTUK KOMPATIBILITAS FORM
          * =====================================================
-         *
-         * Dipertahankan untuk kompatibilitas form,
-         * tetapi controller tidak menyimpannya ke database.
          */
         if ($this->has('penerima')) {
             $penerima =
@@ -199,14 +194,12 @@ class DisposisiRequest extends FormRequest
 
         return [
             /*
-             * Surat masuk wajib dipilih
-             * pada saat create.
+             * Surat masuk.
              */
             'surat_masuk_id' => [
                 $isUpdate
                     ? 'sometimes'
                     : 'required',
-
                 'integer',
                 'exists:surat_masuks,id',
             ],
@@ -232,14 +225,10 @@ class DisposisiRequest extends FormRequest
                                 true
                             )
                             ->where(
-                                function (
-                                    $query
-                                ) {
+                                function ($query) {
                                     $query
                                         ->where(
-                                            function (
-                                                $query
-                                            ) {
+                                            function ($query) {
                                                 $query
                                                     ->whereNotNull(
                                                         'role'
@@ -254,9 +243,7 @@ class DisposisiRequest extends FormRequest
                                             }
                                         )
                                         ->orWhere(
-                                            function (
-                                                $query
-                                            ) {
+                                            function ($query) {
                                                 $query
                                                     ->whereNotNull(
                                                         'jabatan'
@@ -274,9 +261,6 @@ class DisposisiRequest extends FormRequest
                             )
                             ->first();
 
-                    /*
-                     * Harus staf aktif.
-                     */
                     if (!$recipient) {
                         $fail(
                             'Penerima disposisi harus merupakan staf aktif.'
@@ -286,7 +270,8 @@ class DisposisiRequest extends FormRequest
                     }
 
                     /*
-                     * Tidak boleh mengirim ke diri sendiri.
+                     * User tidak boleh mengirim
+                     * disposisi kepada dirinya sendiri.
                      */
                     if (
                         (int) $recipient->getKey() ===
@@ -344,7 +329,7 @@ class DisposisiRequest extends FormRequest
             ],
 
             /*
-             * Status disposisi.
+             * Status.
              */
             'status' => [
                 'nullable',
@@ -355,7 +340,7 @@ class DisposisiRequest extends FormRequest
     }
 
     /**
-     * Validasi tambahan setelah rules utama.
+     * Validasi tambahan setelah rule utama.
      */
     public function withValidator(
         Validator $validator
@@ -372,7 +357,9 @@ class DisposisiRequest extends FormRequest
                  */
                 if (
                     !$this->isUpdateRequest() &&
-                    !$this->filled('surat_masuk_id')
+                    !$this->filled(
+                        'surat_masuk_id'
+                    )
                 ) {
                     $validator
                         ->errors()
@@ -388,12 +375,18 @@ class DisposisiRequest extends FormRequest
                  * =================================================
                  */
                 $instruksi =
-                    $this->input('instruksi')
-                    ?? $this->input('isi_disposisi')
+                    $this->input(
+                        'instruksi'
+                    )
+                    ?? $this->input(
+                        'isi_disposisi'
+                    )
                     ?? '';
 
                 $instruksi =
-                    trim((string) $instruksi);
+                    trim(
+                        (string) $instruksi
+                    );
 
                 if ($instruksi === '') {
                     $validator
@@ -420,46 +413,6 @@ class DisposisiRequest extends FormRequest
                             'kepada_user_id',
                             'Staf penerima disposisi wajib dipilih.'
                         );
-                }
-
-                /*
-                 * =================================================
-                 * BATAS WAKTU
-                 * =================================================
-                 */
-                if (
-                    $this->filled(
-                        'batas_waktu'
-                    )
-                ) {
-                    try {
-                        $tanggalBatas =
-                            \Carbon\Carbon::parse(
-                                $this->input(
-                                    'batas_waktu'
-                                )
-                            );
-
-                        if (
-                            !$tanggalBatas->isValid()
-                        ) {
-                            $validator
-                                ->errors()
-                                ->add(
-                                    'batas_waktu',
-                                    'Batas waktu tidak valid.'
-                                );
-                        }
-                    } catch (
-                        \Throwable
-                    ) {
-                        $validator
-                            ->errors()
-                            ->add(
-                                'batas_waktu',
-                                'Format batas waktu tidak valid.'
-                            );
-                    }
                 }
 
                 /*

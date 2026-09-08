@@ -94,81 +94,88 @@ class Disposisi extends Model
         if ($search !== '') {
             $keyword = "%{$search}%";
 
-            $query->where(function (Builder $q) use ($keyword) {
-                /*
-                 * Field pada tabel disposisis.
-                 */
-                $q->where(
-                    'instruksi',
-                    'like',
-                    $keyword
-                )
-                ->orWhere(
-                    'isi_disposisi',
-                    'like',
-                    $keyword
-                )
-                ->orWhere(
-                    'catatan',
-                    'like',
-                    $keyword
-                )
+            $query->where(
+                function (Builder $q) use ($keyword) {
 
-                /*
-                 * Field pada SuratMasuk.
-                 */
-                ->orWhereHas(
-                    'suratMasuk',
-                    function (Builder $surat) use ($keyword) {
-                        $surat
-                            ->where(
-                                'nomor_surat',
-                                'like',
-                                $keyword
-                            )
-                            ->orWhere(
-                                'nomor_agenda',
-                                'like',
-                                $keyword
-                            )
-                            ->orWhere(
-                                'pengirim',
-                                'like',
-                                $keyword
-                            )
-                            ->orWhere(
-                                'perihal',
-                                'like',
-                                $keyword
-                            );
-                    }
-                )
+                    /*
+                     * Field pada tabel disposisis.
+                     */
+                    $q->where(
+                        'instruksi',
+                        'like',
+                        $keyword
+                    )
+                    ->orWhere(
+                        'isi_disposisi',
+                        'like',
+                        $keyword
+                    )
+                    ->orWhere(
+                        'catatan',
+                        'like',
+                        $keyword
+                    )
 
-                /*
-                 * Field pada user penerima.
-                 */
-                ->orWhereHas(
-                    'kepada',
-                    function (Builder $user) use ($keyword) {
-                        $user
-                            ->where(
-                                'name',
-                                'like',
-                                $keyword
-                            )
-                            ->orWhere(
-                                'nama',
-                                'like',
-                                $keyword
-                            )
-                            ->orWhere(
-                                'jabatan',
-                                'like',
-                                $keyword
-                            );
-                    }
-                );
-            });
+                    /*
+                     * Field pada SuratMasuk.
+                     */
+                    ->orWhereHas(
+                        'suratMasuk',
+                        function (
+                            Builder $surat
+                        ) use ($keyword) {
+                            $surat
+                                ->where(
+                                    'nomor_surat',
+                                    'like',
+                                    $keyword
+                                )
+                                ->orWhere(
+                                    'nomor_agenda',
+                                    'like',
+                                    $keyword
+                                )
+                                ->orWhere(
+                                    'pengirim',
+                                    'like',
+                                    $keyword
+                                )
+                                ->orWhere(
+                                    'perihal',
+                                    'like',
+                                    $keyword
+                                );
+                        }
+                    )
+
+                    /*
+                     * Field user penerima.
+                     */
+                    ->orWhereHas(
+                        'kepada',
+                        function (
+                            Builder $user
+                        ) use ($keyword) {
+                            $user
+                                ->where(
+                                    'name',
+                                    'like',
+                                    $keyword
+                                )
+                                ->orWhere(
+                                    'nama',
+                                    'like',
+                                    $keyword
+                                )
+                                ->orWhere(
+                                    'jabatan',
+                                    'like',
+                                    $keyword
+                                );
+                        }
+                    );
+                }
+            );
         }
 
         /*
@@ -214,18 +221,11 @@ class Disposisi extends Model
 
         /*
          * =====================================================
-         * FILTER TANGGAL DISPOSISI
+         * FILTER TANGGAL
          * =====================================================
          *
-         * Jika tabel mempunyai:
-         *   tanggal_disposisi
-         *
-         * maka kolom tersebut dipakai.
-         *
-         * Jika tidak mempunyai:
-         *   created_at
-         *
-         * digunakan sebagai fallback.
+         * Gunakan tanggal_disposisi jika kolom tersedia.
+         * Jika tidak, gunakan created_at.
          */
         $dateColumn =
             self::getFilterDateColumn();
@@ -236,15 +236,29 @@ class Disposisi extends Model
         $sampaiTanggal =
             $filters['sampai_tanggal'] ?? null;
 
+        $dariTanggal =
+            is_scalar($dariTanggal)
+                ? trim((string) $dariTanggal)
+                : '';
+
+        $sampaiTanggal =
+            is_scalar($sampaiTanggal)
+                ? trim((string) $sampaiTanggal)
+                : '';
+
         $validDariTanggal =
-            self::validDate($dariTanggal);
+            self::validDate(
+                $dariTanggal
+            );
 
         $validSampaiTanggal =
-            self::validDate($sampaiTanggal);
+            self::validDate(
+                $sampaiTanggal
+            );
 
         /*
-         * Jika user memasukkan tanggal terbalik,
-         * otomatis ditukar.
+         * Jika tanggal awal lebih besar,
+         * tukarkan secara otomatis.
          */
         if (
             $validDariTanggal &&
@@ -256,7 +270,7 @@ class Disposisi extends Model
                 $sampaiTanggal
             ] = [
                 $sampaiTanggal,
-                $dariTanggal
+                $dariTanggal,
             ];
         }
 
@@ -354,9 +368,10 @@ class Disposisi extends Model
             return $query;
         }
 
-        $status = strtolower(
-            trim($status)
-        );
+        $status =
+            strtolower(
+                trim($status)
+            );
 
         if (!in_array(
             $status,
@@ -438,9 +453,10 @@ class Disposisi extends Model
             return false;
         }
 
-        $value = trim(
-            (string) $value
-        );
+        $value =
+            trim(
+                (string) $value
+            );
 
         if (!preg_match(
             '/^\d{4}-\d{2}-\d{2}$/',
@@ -455,7 +471,10 @@ class Disposisi extends Model
             $day
         ] = array_map(
             'intval',
-            explode('-', $value)
+            explode(
+                '-',
+                $value
+            )
         );
 
         return checkdate(

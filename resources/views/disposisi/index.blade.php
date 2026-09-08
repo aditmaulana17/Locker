@@ -289,12 +289,19 @@
         font-size: 10px;
         font-weight: 600;
         cursor: pointer;
-        transition: .15s;
+        transition:
+            background .15s,
+            color .15s,
+            transform .1s;
     }
 
     .archive-calendar-day:hover {
         background: #eff6ff;
         color: #2563eb;
+    }
+
+    .archive-calendar-day:active {
+        transform: scale(.95);
     }
 
     .archive-calendar-day.other-month {
@@ -349,9 +356,12 @@
 
     .archive-date-footer-info {
         min-width: 0;
+        overflow: hidden;
         color: #64748b;
         font-size: 9px;
         font-weight: 700;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     .archive-date-footer-actions {
@@ -709,6 +719,7 @@
     <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
 
         <div class="min-w-0">
+
             <h1 class="text-xl font-bold tracking-tight text-slate-800 sm:text-2xl">
                 Disposisi Surat
             </h1>
@@ -716,6 +727,7 @@
             <p class="mt-0.5 text-xs text-slate-500 sm:text-sm">
                 Kelola dan pantau instruksi disposisi dari pimpinan ke unit kerja.
             </p>
+
         </div>
 
         <div class="grid w-full grid-cols-3 gap-2 sm:flex sm:w-auto">
@@ -739,6 +751,7 @@
                     </svg>
 
                     <span>Excel</span>
+
                 </a>
 
             @else
@@ -768,6 +781,7 @@
                     </svg>
 
                     <span>PDF</span>
+
                 </a>
 
             @else
@@ -803,6 +817,7 @@
                     </svg>
 
                     <span>Disposisi</span>
+
                 </a>
 
             @else
@@ -812,10 +827,11 @@
             @endif
 
         </div>
+
     </div>
 
     {{-- =====================================================
-         FILTER CARD
+         FILTER
     ====================================================== --}}
     <div class="rounded-2xl border border-slate-200/80 bg-white p-3 shadow-sm sm:p-5">
 
@@ -856,6 +872,7 @@
                                class="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 pl-9 pr-3 text-xs text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 sm:text-sm">
 
                     </div>
+
                 </div>
 
                 {{-- DATE RANGE --}}
@@ -907,6 +924,7 @@
                                 </svg>
 
                             </button>
+
                         </div>
 
                         <input type="hidden"
@@ -919,7 +937,7 @@
                                id="sampai_tanggal"
                                value="{{ $sampaiTanggal }}">
 
-                        {{-- DATE PICKER PANEL --}}
+                        {{-- DATE PICKER --}}
                         <div id="datePickerPanel"
                              class="archive-date-panel hidden">
 
@@ -1007,7 +1025,9 @@
                             </div>
 
                         </div>
+
                     </div>
+
                 </div>
 
                 {{-- FILTER BUTTON --}}
@@ -1057,11 +1077,12 @@
                         @endif
 
                     </div>
+
                 </div>
 
             </div>
 
-            {{-- STATUS --}}
+            {{-- STATUS DROPDOWN --}}
             <div class="archive-status-dropdown">
 
                 <button type="button"
@@ -1131,11 +1152,15 @@
                     <div class="archive-status-head">
 
                         <div class="archive-status-head-title">
-                            <strong>Pilih Status</strong>
+
+                            <strong>
+                                Pilih Status
+                            </strong>
 
                             <span>
                                 Satu atau beberapa status dapat dipilih
                             </span>
+
                         </div>
 
                         <span id="statusPanelCount"
@@ -1206,6 +1231,7 @@
             </div>
 
         </form>
+
     </div>
 
     {{-- =====================================================
@@ -1218,6 +1244,7 @@
             <table class="w-full min-w-[950px] border-collapse whitespace-nowrap text-left text-xs sm:text-sm">
 
                 <thead>
+
                     <tr class="border-b border-slate-200 bg-slate-50/80 text-[10px] font-bold uppercase tracking-wider text-slate-400 sm:text-[11px]">
 
                         <th class="px-4 py-3 sm:px-5 sm:py-4">
@@ -1249,6 +1276,7 @@
                         </th>
 
                     </tr>
+
                 </thead>
 
                 <tbody class="divide-y divide-slate-100 text-xs">
@@ -1286,8 +1314,11 @@
 
                             $isLate = false;
 
-                            if ($batasWaktu !== '-') {
+                            if (
+                                $batasWaktu !== '-'
+                            ) {
                                 try {
+
                                     $tanggalBatas =
                                         data_get(
                                             $d,
@@ -1304,8 +1335,11 @@
                                         )->isPast()
                                         &&
                                         $status !== 'selesai';
+
                                 } catch (\Throwable) {
+
                                     $isLate = false;
+
                                 }
                             }
                         @endphp
@@ -1317,14 +1351,18 @@
 
                                 <span class="inline-block max-w-[190px] truncate font-medium"
                                       title="{{ $nomorSurat }}">
+
                                     {{ $nomorSurat }}
+
                                 </span>
 
                             </td>
 
                             {{-- TANGGAL DISPOSISI --}}
                             <td class="px-4 py-3.5 text-slate-500 sm:px-5 sm:py-4">
+
                                 {{ $tanggalDisposisi }}
+
                             </td>
 
                             {{-- PENERIMA --}}
@@ -1371,7 +1409,9 @@
                             <td class="px-4 py-3.5 sm:px-5 sm:py-4">
 
                                 <span class="inline-flex rounded-full border px-2.5 py-1 text-[10px] font-bold {{ $badgeClass }}">
+
                                     {{ $statusOptions[$status] ?? ucfirst($status) }}
+
                                 </span>
 
                             </td>
@@ -1498,7 +1538,9 @@
                                     @endif
 
                                 </div>
+
                             </td>
+
                         </tr>
 
                     @empty
@@ -1545,22 +1587,29 @@
                 </tbody>
 
             </table>
+
         </div>
 
         {{-- PAGINATION --}}
         @if(
             isset($disposisis) &&
-            method_exists($disposisis, 'hasPages') &&
+            method_exists(
+                $disposisis,
+                'hasPages'
+            ) &&
             $disposisis->hasPages()
         )
 
             <div class="border-t border-slate-100 px-4 py-3 sm:px-6 sm:py-4">
+
                 {{ $disposisis->withQueryString()->links() }}
+
             </div>
 
         @endif
 
     </div>
+
 </div>
 
 @push('scripts')
@@ -1598,54 +1647,88 @@
     ];
 
     const dateInput =
-        document.getElementById('date-range');
+        document.getElementById(
+            'date-range'
+        );
 
     const dariInput =
-        document.getElementById('dari_tanggal');
+        document.getElementById(
+            'dari_tanggal'
+        );
 
     const sampaiInput =
-        document.getElementById('sampai_tanggal');
+        document.getElementById(
+            'sampai_tanggal'
+        );
 
     const clearDateRange =
-        document.getElementById('clearDateRange');
+        document.getElementById(
+            'clearDateRange'
+        );
 
     const datePanel =
-        document.getElementById('datePickerPanel');
+        document.getElementById(
+            'datePickerPanel'
+        );
 
     const dateContent =
-        document.getElementById('datePickerContent');
+        document.getElementById(
+            'datePickerContent'
+        );
 
     const monthPickerView =
-        document.getElementById('monthPickerView');
+        document.getElementById(
+            'monthPickerView'
+        );
 
     const yearPickerView =
-        document.getElementById('yearPickerView');
+        document.getElementById(
+            'yearPickerView'
+        );
 
     const dateInfo =
-        document.getElementById('datePickerInfo');
+        document.getElementById(
+            'datePickerInfo'
+        );
 
     const datePrev =
-        document.getElementById('datePrev');
+        document.getElementById(
+            'datePrev'
+        );
 
     const dateNext =
-        document.getElementById('dateNext');
+        document.getElementById(
+            'dateNext'
+        );
 
     const applyPickerButton =
-        document.getElementById('applyPickerButton');
+        document.getElementById(
+            'applyPickerButton'
+        );
 
     const clearPickerButton =
-        document.getElementById('clearPickerButton');
+        document.getElementById(
+            'clearPickerButton'
+        );
 
     let viewDate =
-        parseDate(dariInput?.value) ||
-        parseDate(sampaiInput?.value) ||
+        parseDate(
+            dariInput?.value
+        ) ||
+        parseDate(
+            sampaiInput?.value
+        ) ||
         today();
 
     let tempStart =
-        parseDate(dariInput?.value);
+        parseDate(
+            dariInput?.value
+        );
 
     let tempEnd =
-        parseDate(sampaiInput?.value);
+        parseDate(
+            sampaiInput?.value
+        );
 
     let pickerView =
         'calendar';
@@ -1655,6 +1738,10 @@
 
     let pickerMonth =
         viewDate.getMonth();
+
+    /* =========================================================
+       DATE HELPERS
+    ========================================================= */
 
     function today() {
         const date =
@@ -1808,7 +1895,12 @@
             dateKey(second);
     }
 
+    /* =========================================================
+       INPUT DISPLAY
+    ========================================================= */
+
     function updateInputDisplay() {
+
         const start =
             parseDate(
                 dariInput.value
@@ -1819,7 +1911,11 @@
                 sampaiInput.value
             );
 
-        if (start && end) {
+        if (
+            start &&
+            end
+        ) {
+
             dateInput.value =
                 formatRange(
                     start,
@@ -1830,6 +1926,7 @@
                 'flex';
 
         } else {
+
             dateInput.value = '';
 
             clearDateRange.style.display =
@@ -1838,7 +1935,12 @@
     }
 
     function updateDateInfo() {
-        if (tempStart && tempEnd) {
+
+        if (
+            tempStart &&
+            tempEnd
+        ) {
+
             dateInfo.textContent =
                 formatRange(
                     tempStart,
@@ -1849,6 +1951,7 @@
         }
 
         if (tempStart) {
+
             dateInfo.textContent =
                 formatDisplay(
                     tempStart
@@ -1862,10 +1965,15 @@
             'Pilih tanggal mulai';
     }
 
+    /* =========================================================
+       DAY BUTTON
+    ========================================================= */
+
     function buildDayButton(
         date,
         otherMonth
     ) {
+
         const classes = [
             'archive-calendar-day'
         ];
@@ -1937,10 +2045,15 @@
         `;
     }
 
+    /* =========================================================
+       CALENDAR
+    ========================================================= */
+
     function renderCalendar(
         year,
         month
     ) {
+
         let html = `
             <div class="archive-date-month">
 
@@ -1998,12 +2111,14 @@
         `;
 
         weekdays.forEach(
-            function(day) {
+            function (day) {
+
                 html += `
                     <div class="archive-calendar-weekday">
                         ${day}
                     </div>
                 `;
+
             }
         );
 
@@ -2034,11 +2149,16 @@
                 0
             ).getDate();
 
+        /*
+         * Hari dari bulan sebelumnya.
+         */
         for (
-            let index = firstWeekday - 1;
+            let index =
+                firstWeekday - 1;
             index >= 0;
             index--
         ) {
+
             const day =
                 daysInPreviousMonth -
                 index;
@@ -2057,11 +2177,15 @@
                 );
         }
 
+        /*
+         * Hari bulan aktif.
+         */
         for (
             let day = 1;
             day <= daysInMonth;
             day++
         ) {
+
             const date =
                 new Date(
                     year,
@@ -2076,6 +2200,9 @@
                 );
         }
 
+        /*
+         * Hari bulan berikutnya.
+         */
         const totalDays =
             firstWeekday +
             daysInMonth;
@@ -2093,6 +2220,7 @@
             day <= remaining;
             day++
         ) {
+
             const date =
                 new Date(
                     year,
@@ -2122,21 +2250,25 @@
                 '[data-date]'
             )
             .forEach(
-                function(button) {
+                function (button) {
 
                     button.addEventListener(
                         'click',
-                        function() {
+                        function (event) {
 
-                            selectDate(
+                            event.preventDefault();
+                            event.stopPropagation();
+
+                            const selectedDate =
                                 parseDate(
                                     this.dataset.date
-                                )
-                            );
+                                );
 
+                            selectDate(
+                                selectedDate
+                            );
                         }
                     );
-
                 }
             );
 
@@ -2145,11 +2277,11 @@
                 '[data-action="month"]'
             )
             .forEach(
-                function(button) {
+                function (button) {
 
                     button.addEventListener(
                         'click',
-                        function(event) {
+                        function (event) {
 
                             event.preventDefault();
                             event.stopPropagation();
@@ -2168,10 +2300,8 @@
                                 'month';
 
                             renderPicker();
-
                         }
                     );
-
                 }
             );
 
@@ -2180,11 +2310,11 @@
                 '[data-action="year"]'
             )
             .forEach(
-                function(button) {
+                function (button) {
 
                     button.addEventListener(
                         'click',
-                        function(event) {
+                        function (event) {
 
                             event.preventDefault();
                             event.stopPropagation();
@@ -2203,10 +2333,8 @@
                                 'year';
 
                             renderPicker();
-
                         }
                     );
-
                 }
             );
     }
@@ -2253,6 +2381,10 @@
         updateDateInfo();
     }
 
+    /* =========================================================
+       MONTH PICKER
+    ========================================================= */
+
     function renderMonthPicker() {
 
         dateContent.classList.add(
@@ -2269,10 +2401,15 @@
 
         monthPickerView.innerHTML = `
             <div class="archive-picker-toolbar">
-                <span>${pickerYear}</span>
+
+                <span>
+                    ${pickerYear}
+                </span>
+
             </div>
 
             <div class="archive-picker-grid">
+
                 ${months.map(
                     function(month, index) {
 
@@ -2291,6 +2428,7 @@
                         `;
                     }
                 ).join('')}
+
             </div>
         `;
 
@@ -2299,15 +2437,19 @@
                 '[data-picker-month]'
             )
             .forEach(
-                function(button) {
+                function (button) {
 
                     button.addEventListener(
                         'click',
-                        function() {
+                        function (event) {
+
+                            event.preventDefault();
+                            event.stopPropagation();
 
                             const month =
                                 Number(
-                                    this.dataset.pickerMonth
+                                    this.dataset
+                                        .pickerMonth
                                 );
 
                             viewDate =
@@ -2317,17 +2459,22 @@
                                     1
                                 );
 
+                            pickerMonth =
+                                month;
+
                             pickerView =
                                 'calendar';
 
                             renderPicker();
-
                         }
                     );
-
                 }
             );
     }
+
+    /* =========================================================
+       YEAR PICKER
+    ========================================================= */
 
     function renderYearPicker() {
 
@@ -2345,7 +2492,10 @@
 
         const startYear =
             Math.floor(
-                (pickerYear - 2000) / 12
+                (
+                    pickerYear -
+                    2000
+                ) / 12
             ) * 12 + 2000;
 
         const endYear =
@@ -2417,13 +2567,15 @@
             )
             ?.addEventListener(
                 'click',
-                function() {
+                function (event) {
+
+                    event.preventDefault();
+                    event.stopPropagation();
 
                     pickerYear =
                         startYear - 1;
 
                     renderYearPicker();
-
                 }
             );
 
@@ -2433,13 +2585,15 @@
             )
             ?.addEventListener(
                 'click',
-                function() {
+                function (event) {
+
+                    event.preventDefault();
+                    event.stopPropagation();
 
                     pickerYear =
                         endYear + 1;
 
                     renderYearPicker();
-
                 }
             );
 
@@ -2448,15 +2602,19 @@
                 '[data-picker-year]'
             )
             .forEach(
-                function(button) {
+                function (button) {
 
                     button.addEventListener(
                         'click',
-                        function() {
+                        function (event) {
+
+                            event.preventDefault();
+                            event.stopPropagation();
 
                             pickerYear =
                                 Number(
-                                    this.dataset.pickerYear
+                                    this.dataset
+                                        .pickerYear
                                 );
 
                             viewDate =
@@ -2470,13 +2628,15 @@
                                 'calendar';
 
                             renderPicker();
-
                         }
                     );
-
                 }
             );
     }
+
+    /* =========================================================
+       RENDER PICKER
+    ========================================================= */
 
     function renderPicker() {
 
@@ -2519,6 +2679,10 @@
         renderCalendarView();
     }
 
+    /* =========================================================
+       SELECT DATE
+    ========================================================= */
+
     function selectDate(date) {
 
         if (!date) {
@@ -2526,9 +2690,8 @@
         }
 
         /*
-         * Klik pertama = tanggal mulai.
-         * Klik kedua = tanggal akhir.
-         * Klik ketiga = mulai range baru.
+         * Klik pertama:
+         * menentukan tanggal mulai.
          */
         if (
             !tempStart ||
@@ -2538,9 +2701,16 @@
             tempStart =
                 cloneDate(date);
 
-            tempEnd = null;
+            tempEnd =
+                null;
 
-        } else {
+        }
+
+        /*
+         * Klik kedua:
+         * menentukan tanggal akhir.
+         */
+        else {
 
             if (
                 isBefore(
@@ -2555,16 +2725,23 @@
                     );
 
                 tempStart =
-                    cloneDate(date);
+                    cloneDate(
+                        date
+                    );
 
             } else {
 
                 tempEnd =
-                    cloneDate(date);
-
+                    cloneDate(
+                        date
+                    );
             }
         }
 
+        /*
+         * Pindah ke bulan
+         * tanggal yang diklik.
+         */
         viewDate =
             new Date(
                 date.getFullYear(),
@@ -2572,65 +2749,79 @@
                 1
             );
 
+        pickerYear =
+            date.getFullYear();
+
+        pickerMonth =
+            date.getMonth();
+
         pickerView =
             'calendar';
 
+        /*
+         * Penting:
+         * panel TIDAK ditutup.
+         *
+         * Jadi user dapat klik tanggal
+         * kedua untuk membuat range.
+         */
         renderPicker();
         updateDateInfo();
     }
+
+    /* =========================================================
+       OPEN DATE PICKER
+    ========================================================= */
 
     function openDatePicker() {
 
         closeStatusDropdownPanel();
 
-        if (
-            datePanel.classList.contains(
-                'hidden'
-            )
-        ) {
-
-            tempStart =
-                parseDate(
-                    dariInput.value
-                );
-
-            tempEnd =
-                parseDate(
-                    sampaiInput.value
-                );
-
-            viewDate =
-                cloneDate(tempStart) ||
-                cloneDate(tempEnd) ||
-                today();
-
-            viewDate =
-                new Date(
-                    viewDate.getFullYear(),
-                    viewDate.getMonth(),
-                    1
-                );
-
-            pickerYear =
-                viewDate.getFullYear();
-
-            pickerMonth =
-                viewDate.getMonth();
-
-            pickerView =
-                'calendar';
-
-            datePanel.classList.remove(
-                'hidden'
+        /*
+         * Ambil nilai yang sudah diterapkan.
+         */
+        tempStart =
+            parseDate(
+                dariInput.value
             );
 
-            renderPicker();
+        tempEnd =
+            parseDate(
+                sampaiInput.value
+            );
 
-            return;
-        }
+        viewDate =
+            cloneDate(tempStart) ||
+            cloneDate(tempEnd) ||
+            today();
 
-        closeDatePicker();
+        viewDate =
+            new Date(
+                viewDate.getFullYear(),
+                viewDate.getMonth(),
+                1
+            );
+
+        pickerYear =
+            viewDate.getFullYear();
+
+        pickerMonth =
+            viewDate.getMonth();
+
+        pickerView =
+            'calendar';
+
+        datePanel.classList.remove(
+            'hidden'
+        );
+
+        renderPicker();
+        updateDateInfo();
     }
+
+    /* =========================================================
+       CLOSE DATE PICKER
+    ========================================================= */
 
     function closeDatePicker() {
 
@@ -2641,6 +2832,10 @@
         pickerView =
             'calendar';
     }
+
+    /* =========================================================
+       WARNING
+    ========================================================= */
 
     function showWarning(
         title,
@@ -2672,6 +2867,10 @@
 
         alert(text);
     }
+
+    /* =========================================================
+       APPLY RANGE
+    ========================================================= */
 
     function applyDateRange() {
 
@@ -2720,6 +2919,10 @@
         closeDatePicker();
     }
 
+    /* =========================================================
+       CLEAR RANGE
+    ========================================================= */
+
     function clearDateValue() {
 
         tempStart = null;
@@ -2727,6 +2930,7 @@
 
         dariInput.value = '';
         sampaiInput.value = '';
+
         dateInput.value = '';
 
         clearDateRange.style.display =
@@ -2752,35 +2956,44 @@
         updateDateInfo();
     }
 
+    /* =========================================================
+       DATE INPUT CLICK
+       =========================================================
+       HANYA menggunakan CLICK.
+       Tidak menggunakan FOCUS agar tidak
+       terjadi buka -> tutup.
+    ========================================================= */
+
     dateInput?.addEventListener(
         'click',
-        function(event) {
+        function (event) {
 
             event.preventDefault();
-
-            openDatePicker();
-
-        }
-    );
-
-    dateInput?.addEventListener(
-        'focus',
-        function() {
+            event.stopPropagation();
 
             if (
                 datePanel.classList.contains(
                     'hidden'
                 )
             ) {
-                openDatePicker();
-            }
 
+                openDatePicker();
+
+            } else {
+
+                closeDatePicker();
+
+            }
         }
     );
 
+    /* =========================================================
+       CLEAR DATE
+    ========================================================= */
+
     clearDateRange?.addEventListener(
         'click',
-        function(event) {
+        function (event) {
 
             event.preventDefault();
             event.stopPropagation();
@@ -2790,11 +3003,16 @@
         }
     );
 
+    /* =========================================================
+       PREVIOUS MONTH
+    ========================================================= */
+
     datePrev?.addEventListener(
         'click',
-        function(event) {
+        function (event) {
 
             event.preventDefault();
+            event.stopPropagation();
 
             if (
                 pickerView !==
@@ -2821,11 +3039,16 @@
         }
     );
 
+    /* =========================================================
+       NEXT MONTH
+    ========================================================= */
+
     dateNext?.addEventListener(
         'click',
-        function(event) {
+        function (event) {
 
             event.preventDefault();
+            event.stopPropagation();
 
             if (
                 pickerView !==
@@ -2852,9 +3075,13 @@
         }
     );
 
+    /* =========================================================
+       APPLY BUTTON
+    ========================================================= */
+
     applyPickerButton?.addEventListener(
         'click',
-        function(event) {
+        function (event) {
 
             event.preventDefault();
             event.stopPropagation();
@@ -2864,9 +3091,13 @@
         }
     );
 
+    /* =========================================================
+       CLEAR BUTTON
+    ========================================================= */
+
     clearPickerButton?.addEventListener(
         'click',
-        function(event) {
+        function (event) {
 
             event.preventDefault();
             event.stopPropagation();
@@ -2876,9 +3107,12 @@
         }
     );
 
+    /* =========================================================
+       INITIALIZE DATE PICKER
+    ========================================================= */
+
     updateInputDisplay();
     updateDateInfo();
-    renderPicker();
 
     /* =========================================================
        STATUS DROPDOWN
@@ -2967,12 +3201,12 @@
         const checked =
             statusCheckboxes
                 .filter(
-                    function(checkbox) {
+                    function (checkbox) {
                         return checkbox.checked;
                     }
                 )
                 .map(
-                    function(checkbox) {
+                    function (checkbox) {
 
                         const label =
                             checkbox.parentElement
@@ -3026,7 +3260,7 @@
 
     statusDropdownButton?.addEventListener(
         'click',
-        function(event) {
+        function (event) {
 
             event.preventDefault();
             event.stopPropagation();
@@ -3036,16 +3270,19 @@
                     'hidden'
                 )
             ) {
-                openStatusDropdownPanel();
-            } else {
-                closeStatusDropdownPanel();
-            }
 
+                openStatusDropdownPanel();
+
+            } else {
+
+                closeStatusDropdownPanel();
+
+            }
         }
     );
 
     statusCheckboxes.forEach(
-        function(checkbox) {
+        function (checkbox) {
 
             checkbox.addEventListener(
                 'change',
@@ -3057,12 +3294,14 @@
 
     selectAllStatus?.addEventListener(
         'click',
-        function() {
+        function (event) {
+
+            event.preventDefault();
+            event.stopPropagation();
 
             statusCheckboxes.forEach(
-                function(checkbox) {
-                    checkbox.checked =
-                        true;
+                function (checkbox) {
+                    checkbox.checked = true;
                 }
             );
 
@@ -3073,12 +3312,14 @@
 
     clearAllStatus?.addEventListener(
         'click',
-        function() {
+        function (event) {
+
+            event.preventDefault();
+            event.stopPropagation();
 
             statusCheckboxes.forEach(
-                function(checkbox) {
-                    checkbox.checked =
-                        false;
+                function (checkbox) {
+                    checkbox.checked = false;
                 }
             );
 
@@ -3089,7 +3330,10 @@
 
     closeStatusDropdown?.addEventListener(
         'click',
-        function() {
+        function (event) {
+
+            event.preventDefault();
+            event.stopPropagation();
 
             closeStatusDropdownPanel();
 
@@ -3102,14 +3346,16 @@
 
     document.addEventListener(
         'click',
-        function(event) {
+        function (event) {
 
             if (
                 !event.target.closest(
                     '.archive-date-picker'
                 )
             ) {
+
                 closeDatePicker();
+
             }
 
             if (
@@ -3117,14 +3363,16 @@
                     '.archive-status-dropdown'
                 )
             ) {
+
                 closeStatusDropdownPanel();
+
             }
 
         }
     );
 
     /* =========================================================
-       FILTER VALIDATION
+       FILTER SUBMIT
     ========================================================= */
 
     document
@@ -3133,7 +3381,7 @@
         )
         ?.addEventListener(
             'submit',
-            function(event) {
+            function (event) {
 
                 const start =
                     parseDate(
@@ -3145,6 +3393,9 @@
                         sampaiInput.value
                     );
 
+                /*
+                 * Tidak menggunakan tanggal.
+                 */
                 if (
                     !start &&
                     !end
@@ -3152,6 +3403,9 @@
                     return;
                 }
 
+                /*
+                 * Hanya salah satu tanggal diisi.
+                 */
                 if (
                     !start ||
                     !end
@@ -3167,6 +3421,9 @@
                     return;
                 }
 
+                /*
+                 * Tanggal awal > tanggal akhir.
+                 */
                 if (
                     isAfter(
                         start,
@@ -3180,8 +3437,8 @@
                         'Rentang tanggal tidak valid',
                         'Tanggal mulai tidak boleh lebih besar dari tanggal akhir.'
                     );
-                }
 
+                }
             }
         );
 
@@ -3196,11 +3453,14 @@
                 '.delete-btn'
             )
             .forEach(
-                function(button) {
+                function (button) {
 
                     button.addEventListener(
                         'click',
-                        function() {
+                        function (event) {
+
+                            event.preventDefault();
+                            event.stopPropagation();
 
                             const form =
                                 this.closest(
@@ -3256,12 +3516,14 @@
                                     }
 
                                 }).then(
-                                    function(result) {
+                                    function (result) {
 
                                         if (
                                             result.isConfirmed
                                         ) {
+
                                             form.submit();
+
                                         }
 
                                     }
@@ -3274,14 +3536,14 @@
                                         'Yakin ingin menghapus disposisi ini?'
                                     )
                                 ) {
+
                                     form.submit();
+
                                 }
 
                             }
-
                         }
                     );
-
                 }
             );
     }

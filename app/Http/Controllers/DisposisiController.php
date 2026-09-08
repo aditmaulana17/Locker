@@ -31,8 +31,8 @@ class DisposisiController extends Controller
             ]);
 
         /*
-         * STAF hanya melihat disposisi
-         * yang ditujukan kepada dirinya.
+         * Staf hanya melihat disposisi
+         * yang ditujukan kepada dirinya sendiri.
          */
         if ($role === 'staf') {
             $query->where(
@@ -42,7 +42,9 @@ class DisposisiController extends Controller
         }
 
         /*
-         * Normalisasi status.
+         * =====================================================
+         * FILTER STATUS
+         * =====================================================
          */
         $allowedStatuses = [
             'menunggu',
@@ -50,7 +52,10 @@ class DisposisiController extends Controller
             'selesai',
         ];
 
-        $statuses = $request->input('status', []);
+        $statuses = $request->input(
+            'status',
+            []
+        );
 
         if (!is_array($statuses)) {
             $statuses = [$statuses];
@@ -76,86 +81,6 @@ class DisposisiController extends Controller
             ->values()
             ->all();
 
-        /*
-         * Pencarian.
-         */
-        $search = trim(
-            (string) $request->input('search', '')
-        );
-
-        if ($search !== '') {
-            $keyword = "%{$search}%";
-
-            $query->where(function (Builder $query) use ($keyword) {
-                $query
-                    ->where(
-                        'instruksi',
-                        'like',
-                        $keyword
-                    )
-                    ->orWhere(
-                        'isi_disposisi',
-                        'like',
-                        $keyword
-                    )
-                    ->orWhere(
-                        'catatan',
-                        'like',
-                        $keyword
-                    )
-                    ->orWhereHas(
-                        'suratMasuk',
-                        function (Builder $suratQuery) use ($keyword) {
-                            $suratQuery
-                                ->where(
-                                    'nomor_surat',
-                                    'like',
-                                    $keyword
-                                )
-                                ->orWhere(
-                                    'nomor_agenda',
-                                    'like',
-                                    $keyword
-                                )
-                                ->orWhere(
-                                    'pengirim',
-                                    'like',
-                                    $keyword
-                                )
-                                ->orWhere(
-                                    'perihal',
-                                    'like',
-                                    $keyword
-                                );
-                        }
-                    )
-                    ->orWhereHas(
-                        'kepada',
-                        function (Builder $userQuery) use ($keyword) {
-                            $userQuery
-                                ->where(
-                                    'name',
-                                    'like',
-                                    $keyword
-                                )
-                                ->orWhere(
-                                    'nama',
-                                    'like',
-                                    $keyword
-                                )
-                                ->orWhere(
-                                    'jabatan',
-                                    'like',
-                                    $keyword
-                                );
-                        }
-                    );
-            });
-        }
-
-        /*
-         * Filter status.
-         */
         if (!empty($statuses)) {
             $query->whereIn(
                 'status',
@@ -164,15 +89,106 @@ class DisposisiController extends Controller
         }
 
         /*
-         * Filter tanggal disposisi.
-         *
-         * Jika kolom tanggal_disposisi tersedia,
-         * maka digunakan.
-         *
-         * Jika tidak tersedia,
-         * otomatis menggunakan created_at.
+         * =====================================================
+         * SEARCH
+         * =====================================================
          */
-        $dateColumn = $this->getDateColumn();
+        $search = trim(
+            (string) $request->input(
+                'search',
+                ''
+            )
+        );
+
+        if ($search !== '') {
+            $keyword = "%{$search}%";
+
+            $query->where(
+                function (Builder $query) use ($keyword) {
+                    $query
+                        ->where(
+                            'instruksi',
+                            'like',
+                            $keyword
+                        )
+                        ->orWhere(
+                            'isi_disposisi',
+                            'like',
+                            $keyword
+                        )
+                        ->orWhere(
+                            'catatan',
+                            'like',
+                            $keyword
+                        )
+                        ->orWhereHas(
+                            'suratMasuk',
+                            function (
+                                Builder $suratQuery
+                            ) use ($keyword) {
+                                $suratQuery
+                                    ->where(
+                                        'nomor_surat',
+                                        'like',
+                                        $keyword
+                                    )
+                                    ->orWhere(
+                                        'nomor_agenda',
+                                        'like',
+                                        $keyword
+                                    )
+                                    ->orWhere(
+                                        'pengirim',
+                                        'like',
+                                        $keyword
+                                    )
+                                    ->orWhere(
+                                        'perihal',
+                                        'like',
+                                        $keyword
+                                    );
+                            }
+                        )
+                        ->orWhereHas(
+                            'kepada',
+                            function (
+                                Builder $userQuery
+                            ) use ($keyword) {
+                                $userQuery
+                                    ->where(
+                                        'name',
+                                        'like',
+                                        $keyword
+                                    )
+                                    ->orWhere(
+                                        'nama',
+                                        'like',
+                                        $keyword
+                                    )
+                                    ->orWhere(
+                                        'jabatan',
+                                        'like',
+                                        $keyword
+                                    );
+                            }
+                        );
+                }
+            );
+        }
+
+        /*
+         * =====================================================
+         * FILTER TANGGAL DISPOSISI
+         * =====================================================
+         *
+         * Prioritas:
+         * tanggal_disposisi
+         *
+         * Jika kolom tidak tersedia:
+         * created_at
+         */
+        $dateColumn =
+            $this->getDateColumn();
 
         $dariTanggal = trim(
             (string) $request->input(
@@ -189,14 +205,18 @@ class DisposisiController extends Controller
         );
 
         $validDariTanggal =
-            $this->isValidDate($dariTanggal);
+            $this->isValidDate(
+                $dariTanggal
+            );
 
         $validSampaiTanggal =
-            $this->isValidDate($sampaiTanggal);
+            $this->isValidDate(
+                $sampaiTanggal
+            );
 
         /*
-         * Jika tanggal terbalik,
-         * otomatis ditukar.
+         * Jika tanggal awal lebih besar
+         * dari tanggal akhir, tukarkan.
          */
         if (
             $validDariTanggal &&
@@ -208,7 +228,7 @@ class DisposisiController extends Controller
                 $sampaiTanggal
             ] = [
                 $sampaiTanggal,
-                $dariTanggal
+                $dariTanggal,
             ];
         }
 
@@ -229,7 +249,9 @@ class DisposisiController extends Controller
         }
 
         /*
-         * Pagination.
+         * =====================================================
+         * HASIL DATA
+         * =====================================================
          */
         $disposisis = $query
             ->orderByDesc($dateColumn)
@@ -253,8 +275,8 @@ class DisposisiController extends Controller
         $this->authorizeManageAccess();
 
         /*
-         * Jika route tidak langsung membawa
-         * model SuratMasuk, ambil dari query string.
+         * Jika model SuratMasuk belum tersedia,
+         * ambil dari query string.
          */
         if (
             !$suratMasuk ||
@@ -267,7 +289,9 @@ class DisposisiController extends Controller
 
             if (!$suratMasukId) {
                 return redirect()
-                    ->route('surat-masuk.index')
+                    ->route(
+                        'surat-masuk.index'
+                    )
                     ->with(
                         'warning',
                         'Silakan pilih surat masuk terlebih dahulu.'
@@ -280,7 +304,11 @@ class DisposisiController extends Controller
                 );
         }
 
-        $users = $this->getStaffUsers();
+        /*
+         * Ambil daftar staf aktif.
+         */
+        $users =
+            $this->getStaffUsers();
 
         return view(
             'disposisi.create',
@@ -299,10 +327,13 @@ class DisposisiController extends Controller
     ) {
         $this->authorizeManageAccess();
 
-        $data = $request->validated();
+        $data =
+            $request->validated();
 
         /*
-         * Ambil instruksi dari field yang tersedia.
+         * =====================================================
+         * INSTRUKSI
+         * =====================================================
          */
         $isiDisposisi =
             $data['isi_disposisi']
@@ -311,7 +342,9 @@ class DisposisiController extends Controller
             ?? '';
 
         $isiDisposisi =
-            trim((string) $isiDisposisi);
+            trim(
+                (string) $isiDisposisi
+            );
 
         if ($isiDisposisi === '') {
             return back()
@@ -323,8 +356,7 @@ class DisposisiController extends Controller
         }
 
         /*
-         * Simpan instruksi ke dua field
-         * agar kompatibel dengan struktur lama/baru.
+         * Simpan ke kedua field.
          */
         $data['isi_disposisi'] =
             $isiDisposisi;
@@ -333,8 +365,8 @@ class DisposisiController extends Controller
             $isiDisposisi;
 
         /*
-         * Field tampilan/form
-         * tidak disimpan langsung.
+         * Field form yang bukan kolom
+         * yang perlu disimpan.
          */
         unset(
             $data['penerima'],
@@ -342,33 +374,40 @@ class DisposisiController extends Controller
         );
 
         /*
-         * User yang membuat disposisi.
+         * User pembuat disposisi.
          */
         $data['dari_user_id'] =
             (int) Auth::id();
 
         /*
-         * Pastikan penerima merupakan staf aktif.
+         * =====================================================
+         * VALIDASI PENERIMA
+         * =====================================================
          */
-        $kepadaUserId = (int) (
-            $data['kepada_user_id'] ?? 0
-        );
+        $kepadaUserId =
+            (int) (
+                $data['kepada_user_id']
+                ?? 0
+            );
 
         $this->validateStaffRecipient(
             $kepadaUserId
         );
 
         /*
-         * Validasi status.
+         * =====================================================
+         * STATUS
+         * =====================================================
          */
-        $status = strtolower(
-            trim(
-                (string) (
-                    $data['status']
-                    ?? 'menunggu'
+        $status =
+            strtolower(
+                trim(
+                    (string) (
+                        $data['status']
+                        ?? 'menunggu'
+                    )
                 )
-            )
-        );
+            );
 
         if (!in_array(
             $status,
@@ -382,18 +421,25 @@ class DisposisiController extends Controller
             $status = 'menunggu';
         }
 
-        $data['status'] = $status;
+        $data['status'] =
+            $status;
 
         /*
-         * Simpan dalam transaction.
+         * =====================================================
+         * TRANSACTION
+         * =====================================================
          */
         $disposisi = DB::transaction(
             function () use ($data) {
+
                 $disposisi =
-                    Disposisi::create($data);
+                    Disposisi::create(
+                        $data
+                    );
 
                 /*
-                 * Sinkronisasi status surat masuk.
+                 * Sinkronisasi status
+                 * surat masuk.
                  */
                 $this->syncSuratMasukStatus(
                     $disposisi->fresh([
@@ -410,7 +456,9 @@ class DisposisiController extends Controller
         );
 
         /*
-         * Activity log.
+         * =====================================================
+         * ACTIVITY LOG
+         * =====================================================
          */
         $nomorSurat =
             $disposisi->suratMasuk?->nomor_agenda
@@ -433,7 +481,9 @@ class DisposisiController extends Controller
         );
 
         return redirect()
-            ->route('disposisi.index')
+            ->route(
+                'disposisi.index'
+            )
             ->with(
                 'success',
                 'Disposisi berhasil dikirim.'
@@ -476,9 +526,10 @@ class DisposisiController extends Controller
             'kepada',
         ]);
 
-        $users = $this->getStaffUsers(
-            (int) $disposisi->kepada_user_id
-        );
+        $users =
+            $this->getStaffUsers(
+                (int) $disposisi->kepada_user_id
+            );
 
         $suratMasuk =
             $disposisi->suratMasuk;
@@ -502,10 +553,13 @@ class DisposisiController extends Controller
     ) {
         $this->authorizeManageAccess();
 
-        $data = $request->validated();
+        $data =
+            $request->validated();
 
         /*
-         * Apakah ada field instruksi yang dikirim?
+         * =====================================================
+         * INSTRUKSI
+         * =====================================================
          */
         $hasInstruction =
             array_key_exists(
@@ -524,6 +578,7 @@ class DisposisiController extends Controller
             );
 
         if ($hasInstruction) {
+
             $isiDisposisi =
                 $data['isi_disposisi']
                 ?? $data['instruksi']
@@ -533,7 +588,9 @@ class DisposisiController extends Controller
                 ?? '';
 
             $isiDisposisi =
-                trim((string) $isiDisposisi);
+                trim(
+                    (string) $isiDisposisi
+                );
 
             if ($isiDisposisi === '') {
                 return back()
@@ -552,7 +609,7 @@ class DisposisiController extends Controller
         }
 
         /*
-         * Field form yang tidak disimpan.
+         * Jangan simpan field tampilan.
          */
         unset(
             $data['penerima'],
@@ -560,10 +617,14 @@ class DisposisiController extends Controller
         );
 
         /*
-         * Validasi penerima jika diubah.
+         * =====================================================
+         * VALIDASI PENERIMA
+         * =====================================================
          */
         if (
-            isset($data['kepada_user_id'])
+            isset(
+                $data['kepada_user_id']
+            )
         ) {
             $this->validateStaffRecipient(
                 (int) $data['kepada_user_id'],
@@ -572,9 +633,13 @@ class DisposisiController extends Controller
         }
 
         /*
-         * Validasi status.
+         * =====================================================
+         * VALIDASI STATUS
+         * =====================================================
          */
-        if (isset($data['status'])) {
+        if (
+            isset($data['status'])
+        ) {
             $data['status'] =
                 strtolower(
                     trim(
@@ -608,18 +673,20 @@ class DisposisiController extends Controller
             );
 
         /*
-         * Update transaction.
+         * =====================================================
+         * UPDATE TRANSACTION
+         * =====================================================
          */
         DB::transaction(
             function () use (
                 $disposisi,
                 $data
             ) {
-                $disposisi->update($data);
 
-                /*
-                 * Sinkronisasi surat masuk.
-                 */
+                $disposisi->update(
+                    $data
+                );
+
                 $this->syncSuratMasukStatus(
                     $disposisi->fresh([
                         'suratMasuk',
@@ -629,7 +696,7 @@ class DisposisiController extends Controller
         );
 
         /*
-         * Activity log update.
+         * Activity log.
          */
         $this->logActivity(
             'update',
@@ -638,7 +705,7 @@ class DisposisiController extends Controller
         );
 
         /*
-         * Activity log perubahan status.
+         * Log perubahan status.
          */
         if (
             isset($data['status']) &&
@@ -652,7 +719,9 @@ class DisposisiController extends Controller
         }
 
         return redirect()
-            ->route('disposisi.index')
+            ->route(
+                'disposisi.index'
+            )
             ->with(
                 'success',
                 'Data disposisi berhasil diperbarui.'
@@ -662,9 +731,8 @@ class DisposisiController extends Controller
     /**
      * Update status oleh staf.
      *
-     * Method ini sengaja menggunakan Request biasa,
-     * bukan DisposisiRequest, supaya staf dapat
-     * mengubah status disposisinya sendiri.
+     * Admin/pimpinan juga dapat menggunakan endpoint ini,
+     * sedangkan staf hanya dapat mengubah disposisinya sendiri.
      */
     public function updateStatus(
         Request $request,
@@ -674,13 +742,14 @@ class DisposisiController extends Controller
             $disposisi
         );
 
-        $validated = $request->validate([
-            'status' => [
-                'required',
-                'string',
-                'in:menunggu,diproses,selesai',
-            ],
-        ]);
+        $validated =
+            $request->validate([
+                'status' => [
+                    'required',
+                    'string',
+                    'in:menunggu,diproses,selesai',
+                ],
+            ]);
 
         $oldStatus =
             strtolower(
@@ -696,7 +765,10 @@ class DisposisiController extends Controller
                 )
             );
 
-        if ($oldStatus === $newStatus) {
+        if (
+            $oldStatus ===
+            $newStatus
+        ) {
             return back()->with(
                 'info',
                 'Status disposisi tidak berubah.'
@@ -708,8 +780,10 @@ class DisposisiController extends Controller
                 $disposisi,
                 $newStatus
             ) {
+
                 $disposisi->update([
-                    'status' => $newStatus,
+                    'status' =>
+                        $newStatus,
                 ]);
 
                 $this->syncSuratMasukStatus(
@@ -751,6 +825,7 @@ class DisposisiController extends Controller
                 $disposisi,
                 $suratMasuk
             ) {
+
                 $disposisi->delete();
 
                 /*
@@ -775,7 +850,9 @@ class DisposisiController extends Controller
         );
 
         return redirect()
-            ->route('disposisi.index')
+            ->route(
+                'disposisi.index'
+            )
             ->with(
                 'success',
                 'Disposisi berhasil dihapus.'
@@ -787,21 +864,23 @@ class DisposisiController extends Controller
      */
     private function role(): string
     {
-        $user = Auth::user();
+        $user =
+            Auth::user();
 
         if (!$user) {
             return '';
         }
 
-        $role = strtolower(
-            trim(
-                (string) (
-                    $user->role
-                    ?? $user->jabatan
-                    ?? ''
+        $role =
+            strtolower(
+                trim(
+                    (string) (
+                        $user->role
+                        ?? $user->jabatan
+                        ?? ''
+                    )
                 )
-            )
-        );
+            );
 
         return $role === 'staff'
             ? 'staf'
@@ -809,7 +888,7 @@ class DisposisiController extends Controller
     }
 
     /**
-     * Hak akses admin/pimpinan.
+     * Hak akses pengelolaan disposisi.
      */
     private function authorizeManageAccess(): void
     {
@@ -834,10 +913,11 @@ class DisposisiController extends Controller
     private function authorizeViewAccess(
         Disposisi $disposisi
     ): void {
-        $role = $this->role();
+        $role =
+            $this->role();
 
         /*
-         * Admin dan pimpinan boleh melihat semua.
+         * Admin dan pimpinan dapat melihat semua.
          */
         if (in_array(
             $role,
@@ -851,10 +931,11 @@ class DisposisiController extends Controller
         }
 
         /*
-         * Staf hanya boleh melihat
-         * disposisi miliknya.
+         * Staf hanya dapat melihat
+         * disposisi yang ditujukan kepadanya.
          */
         if ($role === 'staf') {
+
             if (
                 (int) $disposisi->kepada_user_id !==
                 (int) Auth::id()
@@ -875,7 +956,7 @@ class DisposisiController extends Controller
     }
 
     /**
-     * Ambil user staf aktif untuk penerima disposisi.
+     * Mengambil user staf aktif.
      */
     private function getStaffUsers(
         ?int $selectedId = null
@@ -883,37 +964,57 @@ class DisposisiController extends Controller
         $currentUserId =
             Auth::id();
 
-        $query = User::query()
-            ->where('is_active', true)
-            ->where(function (Builder $query) {
-                $query
-                    ->where(function (Builder $query) {
+        $query =
+            User::query()
+                ->where(
+                    'is_active',
+                    true
+                )
+                ->where(
+                    function (
+                        Builder $query
+                    ) {
                         $query
-                            ->whereNotNull('role')
-                            ->whereRaw(
-                                'LOWER(TRIM(role)) IN (?, ?)',
-                                [
-                                    'staf',
-                                    'staff',
-                                ]
+                            ->where(
+                                function (
+                                    Builder $query
+                                ) {
+                                    $query
+                                        ->whereNotNull(
+                                            'role'
+                                        )
+                                        ->whereRaw(
+                                            'LOWER(TRIM(role)) IN (?, ?)',
+                                            [
+                                                'staf',
+                                                'staff',
+                                            ]
+                                        );
+                                }
+                            )
+                            ->orWhere(
+                                function (
+                                    Builder $query
+                                ) {
+                                    $query
+                                        ->whereNotNull(
+                                            'jabatan'
+                                        )
+                                        ->whereRaw(
+                                            'LOWER(TRIM(jabatan)) IN (?, ?)',
+                                            [
+                                                'staf',
+                                                'staff',
+                                            ]
+                                        );
+                                }
                             );
-                    })
-                    ->orWhere(function (Builder $query) {
-                        $query
-                            ->whereNotNull('jabatan')
-                            ->whereRaw(
-                                'LOWER(TRIM(jabatan)) IN (?, ?)',
-                                [
-                                    'staf',
-                                    'staff',
-                                ]
-                            );
-                    });
-            });
+                    }
+                );
 
         /*
-         * Jangan tampilkan user yang sedang login
-         * sebagai penerima.
+         * Jangan masukkan user yang sedang login
+         * sebagai penerima baru.
          */
         if ($currentUserId) {
             $query->where(
@@ -924,75 +1025,105 @@ class DisposisiController extends Controller
         }
 
         /*
-         * Jika selectedId adalah staf aktif,
-         * pastikan tetap tersedia pada form edit.
+         * Pada mode edit, pastikan penerima lama
+         * tetap ada pada pilihan selama masih valid.
          */
-        if ($selectedId) {
+        if (
+            $selectedId &&
+            $selectedId !== (int) $currentUserId
+        ) {
             $selectedUser =
                 User::query()
-                    ->whereKey($selectedId)
-                    ->where('is_active', true)
-                    ->where(function (Builder $query) {
-                        $query
-                            ->where(function (Builder $query) {
-                                $query
-                                    ->whereNotNull('role')
-                                    ->whereRaw(
-                                        'LOWER(TRIM(role)) IN (?, ?)',
-                                        [
-                                            'staf',
-                                            'staff',
-                                        ]
-                                    );
-                            })
-                            ->orWhere(function (Builder $query) {
-                                $query
-                                    ->whereNotNull('jabatan')
-                                    ->whereRaw(
-                                        'LOWER(TRIM(jabatan)) IN (?, ?)',
-                                        [
-                                            'staf',
-                                            'staff',
-                                        ]
-                                    );
-                            });
-                    })
+                    ->whereKey(
+                        $selectedId
+                    )
+                    ->where(
+                        'is_active',
+                        true
+                    )
+                    ->where(
+                        function (
+                            Builder $query
+                        ) {
+                            $query
+                                ->where(
+                                    function (
+                                        Builder $query
+                                    ) {
+                                        $query
+                                            ->whereNotNull(
+                                                'role'
+                                            )
+                                            ->whereRaw(
+                                                'LOWER(TRIM(role)) IN (?, ?)',
+                                                [
+                                                    'staf',
+                                                    'staff',
+                                                ]
+                                            );
+                                    }
+                                )
+                                ->orWhere(
+                                    function (
+                                        Builder $query
+                                    ) {
+                                        $query
+                                            ->whereNotNull(
+                                                'jabatan'
+                                            )
+                                            ->whereRaw(
+                                                'LOWER(TRIM(jabatan)) IN (?, ?)',
+                                                [
+                                                    'staf',
+                                                    'staff',
+                                                ]
+                                            );
+                                    }
+                                );
+                        }
+                    )
                     ->first();
 
-            if (
-                $selectedUser &&
-                (int) $selectedUser->id !==
-                (int) $currentUserId
-            ) {
-                $alreadyIncluded =
+            /*
+             * Tambahkan selected user secara manual
+             * jika belum masuk hasil utama.
+             */
+            if ($selectedUser) {
+
+                $exists =
                     $query
                         ->clone()
                         ->whereKey(
-                            $selectedUser->id
+                            $selectedId
                         )
                         ->exists();
 
-                if (!$alreadyIncluded) {
-                    $query->orWhere(
-                        function (Builder $query) use (
-                            $selectedUser
-                        ) {
-                            $query->whereKey(
-                                $selectedUser->id
-                            );
-                        }
-                    );
+                if (!$exists) {
+                    $users =
+                        $query
+                            ->orderBy(
+                                'name'
+                            )
+                            ->get();
+
+                    return $users
+                        ->push($selectedUser)
+                        ->unique('id')
+                        ->sortBy('name')
+                        ->values();
                 }
             }
         }
 
         return $query
-            ->orderBy('name')
+            ->orderBy(
+                'name'
+            )
             ->get();
     }
 
     /**
-     * Validasi penerima disposisi.
+     * Memastikan penerima merupakan staf aktif.
      */
     private function validateStaffRecipient(
         int $userId,
@@ -1005,35 +1136,55 @@ class DisposisiController extends Controller
             );
         }
 
-        $recipient = User::query()
-            ->whereKey($userId)
-            ->where('is_active', true)
-            ->where(function (Builder $query) {
-                $query
-                    ->where(function (Builder $query) {
+        $recipient =
+            User::query()
+                ->whereKey($userId)
+                ->where(
+                    'is_active',
+                    true
+                )
+                ->where(
+                    function (
+                        Builder $query
+                    ) {
                         $query
-                            ->whereNotNull('role')
-                            ->whereRaw(
-                                'LOWER(TRIM(role)) IN (?, ?)',
-                                [
-                                    'staf',
-                                    'staff',
-                                ]
+                            ->where(
+                                function (
+                                    Builder $query
+                                ) {
+                                    $query
+                                        ->whereNotNull(
+                                            'role'
+                                        )
+                                        ->whereRaw(
+                                            'LOWER(TRIM(role)) IN (?, ?)',
+                                            [
+                                                'staf',
+                                                'staff',
+                                            ]
+                                        );
+                                }
+                            )
+                            ->orWhere(
+                                function (
+                                    Builder $query
+                                ) {
+                                    $query
+                                        ->whereNotNull(
+                                            'jabatan'
+                                        )
+                                        ->whereRaw(
+                                            'LOWER(TRIM(jabatan)) IN (?, ?)',
+                                            [
+                                                'staf',
+                                                'staff',
+                                            ]
+                                        );
+                                }
                             );
-                    })
-                    ->orWhere(function (Builder $query) {
-                        $query
-                            ->whereNotNull('jabatan')
-                            ->whereRaw(
-                                'LOWER(TRIM(jabatan)) IN (?, ?)',
-                                [
-                                    'staf',
-                                    'staff',
-                                ]
-                            );
-                    });
-            })
-            ->first();
+                    }
+                )
+                ->first();
 
         if (!$recipient) {
             abort(
@@ -1043,11 +1194,8 @@ class DisposisiController extends Controller
         }
 
         /*
-         * Pada saat update, penerima lama
-         * boleh tetap menjadi penerima.
-         *
-         * Pada saat create, user tidak boleh
-         * mengirim ke dirinya sendiri.
+         * Saat create, user tidak boleh mengirim
+         * disposisi kepada dirinya sendiri.
          */
         if (
             $userId === (int) Auth::id() &&
@@ -1061,7 +1209,7 @@ class DisposisiController extends Controller
     }
 
     /**
-     * Tentukan kolom tanggal disposisi.
+     * Menentukan kolom tanggal disposisi.
      */
     private function getDateColumn(): string
     {
@@ -1075,7 +1223,18 @@ class DisposisiController extends Controller
 
     /**
      * Sinkronisasi status surat masuk
-     * berdasarkan seluruh disposisinya.
+     * berdasarkan status seluruh disposisi.
+     *
+     * Aturan:
+     *
+     * Tidak ada disposisi
+     *      -> baru
+     *
+     * Ada disposisi dan masih ada yang belum selesai
+     *      -> didisposisikan
+     *
+     * Semua disposisi selesai
+     *      -> selesai
      */
     private function syncSuratMasukStatus(
         Disposisi $disposisi
@@ -1084,7 +1243,7 @@ class DisposisiController extends Controller
             $disposisi->suratMasuk;
 
         /*
-         * Fallback apabila relasi belum tersedia.
+         * Fallback jika relasi belum termuat.
          */
         if (
             !$suratMasuk &&
@@ -1101,16 +1260,16 @@ class DisposisiController extends Controller
         }
 
         /*
-         * Ambil disposisi aktif milik surat tersebut.
-         */
-        $disposisiQuery =
-            $suratMasuk->disposisi();
-
-        /*
-         * Tidak ada disposisi.
+         * Cek apakah surat memiliki disposisi.
+         *
+         * Relasi menggunakan SoftDeletes,
+         * sehingga disposisi yang sudah dihapus
+         * tidak ikut dihitung.
          */
         $hasDisposisi =
-            $disposisiQuery->exists();
+            $suratMasuk
+                ->disposisi()
+                ->exists();
 
         if (!$hasDisposisi) {
             $suratMasuk->update([
@@ -1121,7 +1280,8 @@ class DisposisiController extends Controller
         }
 
         /*
-         * Masih ada disposisi yang belum selesai.
+         * Cek apakah masih ada disposisi
+         * yang belum selesai.
          */
         $hasUnfinished =
             $suratMasuk
@@ -1150,7 +1310,7 @@ class DisposisiController extends Controller
     }
 
     /**
-     * Validasi tanggal format YYYY-MM-DD.
+     * Validasi format tanggal YYYY-MM-DD.
      */
     private function isValidDate(
         mixed $value
@@ -1159,16 +1319,15 @@ class DisposisiController extends Controller
             return false;
         }
 
-        $value = trim(
-            (string) $value
-        );
+        $value =
+            trim(
+                (string) $value
+            );
 
-        if (
-            !preg_match(
-                '/^\d{4}-\d{2}-\d{2}$/',
-                $value
-            )
-        ) {
+        if (!preg_match(
+            '/^\d{4}-\d{2}-\d{2}$/',
+            $value
+        )) {
             return false;
         }
 
@@ -1178,7 +1337,10 @@ class DisposisiController extends Controller
             $day
         ] = array_map(
             'intval',
-            explode('-', $value)
+            explode(
+                '-',
+                $value
+            )
         );
 
         return checkdate(
@@ -1189,14 +1351,16 @@ class DisposisiController extends Controller
     }
 
     /**
-     * Catat activity log.
+     * Mencatat activity log.
      */
     private function logActivity(
         string $action,
         string $module,
         string $description
     ): void {
-        if (!class_exists(ActivityLog::class)) {
+        if (!class_exists(
+            ActivityLog::class
+        )) {
             return;
         }
 
@@ -1208,7 +1372,7 @@ class DisposisiController extends Controller
             );
         } catch (\Throwable) {
             /*
-             * Activity log tidak boleh
+             * Kegagalan activity log tidak boleh
              * menggagalkan proses utama.
              */
         }
