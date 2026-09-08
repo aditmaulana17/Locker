@@ -78,7 +78,7 @@ class SuratKeluar extends Model
         return sprintf(
             '%03d/%s/%s/%d',
             $urutan,
-            strtoupper($kodeKategori),
+            strtoupper(trim($kodeKategori)),
             $bulan,
             $tahun
         );
@@ -86,53 +86,61 @@ class SuratKeluar extends Model
 
     public function scopeFilter(Builder $query, array $filters): Builder
     {
-        $query->when($filters['search'] ?? null, function (Builder $query, $value) {
-            $search = trim((string) $value);
+        $search = isset($filters['search'])
+            ? trim((string) $filters['search'])
+            : '';
 
-            $query->where(function (Builder $query) use ($search) {
-                $query->where('nomor_surat', 'like', "%{$search}%")
-                    ->orWhere('perihal', 'like', "%{$search}%")
-                    ->orWhere('pengirim', 'like', "%{$search}%");
+        $kategoriIds = collect($filters['kategori_id'] ?? [])
+            ->filter(fn ($id) => is_scalar($id) && $id !== '')
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->values()
+            ->all();
+
+        $statuses = collect($filters['status'] ?? [])
+            ->filter(fn ($status) => is_scalar($status) && $status !== '')
+            ->map(fn ($status) => strtolower(trim((string) $status)))
+            ->filter(fn ($status) => in_array($status, [
+                'draf',
+                'diproses',
+                'disetujui',
+                'dikirim',
+                'diarsipkan',
+            ], true))
+            ->unique()
+            ->values()
+            ->all();
+
+        $pengirim = isset($filters['pengirim'])
+            ? trim((string) $filters['pengirim'])
+            : '';
+
+        $dariTanggal = $filters['dari_tanggal'] ?? null;
+        $sampaiTanggal = $filters['sampai_tanggal'] ?? null;
+
+        $query
+            ->when($search !== '', function (Builder $query) use ($search) {
+                $query->where(function (Builder $query) use ($search) {
+                    $query->where('nomor_surat', 'like', "%{$search}%")
+                        ->orWhere('perihal', 'like', "%{$search}%")
+                        ->orWhere('pengirim', 'like', "%{$search}%");
+                });
+            })
+            ->when(!empty($kategoriIds), function (Builder $query) use ($kategoriIds) {
+                $query->whereIn('kategori_surat_id', $kategoriIds);
+            })
+            ->when(!empty($statuses), function (Builder $query) use ($statuses) {
+                $query->whereIn('status', $statuses);
+            })
+            ->when($pengirim !== '', function (Builder $query) use ($pengirim) {
+                $query->where('pengirim', 'like', "%{$pengirim}%");
+            })
+            ->when($dariTanggal, function (Builder $query) use ($dariTanggal) {
+                $query->whereDate('tanggal_surat', '>=', $dariTanggal);
+            })
+            ->when($sampaiTanggal, function (Builder $query) use ($sampaiTanggal) {
+                $query->whereDate('tanggal_surat', '<=', $sampaiTanggal);
             });
-        });
-
-        if (!empty($filters['kategori_id'])) {
-            $query->whereIn(
-                'kategori_surat_id',
-                (array) $filters['kategori_id']
-            );
-        }
-
-        if (!empty($filters['status'])) {
-            $query->whereIn(
-                'status',
-                (array) $filters['status']
-            );
-        }
-
-        if (!empty($filters['pengirim'])) {
-            $query->where(
-                'pengirim',
-                'like',
-                '%' . $filters['pengirim'] . '%'
-            );
-        }
-
-        if (!empty($filters['dari_tanggal'])) {
-            $query->whereDate(
-                'tanggal_surat',
-                '>=',
-                $filters['dari_tanggal']
-            );
-        }
-
-        if (!empty($filters['sampai_tanggal'])) {
-            $query->whereDate(
-                'tanggal_surat',
-                '<=',
-                $filters['sampai_tanggal']
-            );
-        }
 
         return $query;
     }

@@ -71,36 +71,26 @@ class SuratMasuk extends Model
             }
         }
 
-        return sprintf('AG/%04d/%s/%s', $maxUrutan + 1, $bulan, $tahun);
+        return sprintf(
+            'AG/%04d/%s/%s',
+            $maxUrutan + 1,
+            $bulan,
+            $tahun
+        );
     }
 
     public function scopeFilter(Builder $query, array $filters): Builder
     {
-        $query->when($filters['search'] ?? null, function (Builder $query, $value) {
-            $value = trim((string) $value);
+        $search = isset($filters['search'])
+            ? trim((string) $filters['search'])
+            : '';
 
-            if ($value === '') {
-                return;
-            }
-
-            $query->where(function (Builder $query) use ($value) {
-                $query->where('perihal', 'like', "%{$value}%")
-                    ->orWhere('nomor_surat', 'like', "%{$value}%")
-                    ->orWhere('nomor_agenda', 'like', "%{$value}%")
-                    ->orWhere('pengirim', 'like', "%{$value}%");
-            });
-        });
-
-        $kategoriIds = collect((array) ($filters['kategori_id'] ?? []))
+        $kategoriIds = collect($filters['kategori_id'] ?? [])
             ->filter(fn ($id) => is_scalar($id) && ctype_digit((string) $id))
             ->map(fn ($id) => (int) $id)
             ->unique()
             ->values()
             ->all();
-
-        if ($kategoriIds) {
-            $query->whereIn('kategori_surat_id', $kategoriIds);
-        }
 
         $statusOptions = [
             'baru',
@@ -110,7 +100,7 @@ class SuratMasuk extends Model
             'diarsipkan',
         ];
 
-        $statuses = collect((array) ($filters['status'] ?? []))
+        $statuses = collect($filters['status'] ?? [])
             ->filter(fn ($status) => is_scalar($status))
             ->map(fn ($status) => strtolower(trim((string) $status)))
             ->filter(fn ($status) => in_array($status, $statusOptions, true))
@@ -118,17 +108,30 @@ class SuratMasuk extends Model
             ->values()
             ->all();
 
-        if ($statuses) {
-            $query->whereIn('status', $statuses);
-        }
+        $dariTanggal = $filters['dari_tanggal'] ?? null;
+        $sampaiTanggal = $filters['sampai_tanggal'] ?? null;
 
-        if (!empty($filters['dari_tanggal'])) {
-            $query->whereDate('tanggal_terima', '>=', $filters['dari_tanggal']);
-        }
-
-        if (!empty($filters['sampai_tanggal'])) {
-            $query->whereDate('tanggal_terima', '<=', $filters['sampai_tanggal']);
-        }
+        $query
+            ->when($search !== '', function (Builder $query) use ($search) {
+                $query->where(function (Builder $query) use ($search) {
+                    $query->where('perihal', 'like', "%{$search}%")
+                        ->orWhere('nomor_surat', 'like', "%{$search}%")
+                        ->orWhere('nomor_agenda', 'like', "%{$search}%")
+                        ->orWhere('pengirim', 'like', "%{$search}%");
+                });
+            })
+            ->when(!empty($kategoriIds), function (Builder $query) use ($kategoriIds) {
+                $query->whereIn('kategori_surat_id', $kategoriIds);
+            })
+            ->when(!empty($statuses), function (Builder $query) use ($statuses) {
+                $query->whereIn('status', $statuses);
+            })
+            ->when($dariTanggal, function (Builder $query) use ($dariTanggal) {
+                $query->whereDate('tanggal_terima', '>=', $dariTanggal);
+            })
+            ->when($sampaiTanggal, function (Builder $query) use ($sampaiTanggal) {
+                $query->whereDate('tanggal_terima', '<=', $sampaiTanggal);
+            });
 
         return $query;
     }
@@ -146,7 +149,10 @@ class SuratMasuk extends Model
             return $query;
         }
 
-        return $query->where('status', strtolower(trim($status)));
+        return $query->where(
+            'status',
+            strtolower(trim($status))
+        );
     }
 
     public function scopeKategori(Builder $query, ?int $kategoriId): Builder
@@ -155,7 +161,10 @@ class SuratMasuk extends Model
             return $query;
         }
 
-        return $query->where('kategori_surat_id', $kategoriId);
+        return $query->where(
+            'kategori_surat_id',
+            $kategoriId
+        );
     }
 
     public function scopeTerbaru(Builder $query): Builder

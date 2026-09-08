@@ -9,7 +9,19 @@ class SuratKeluarRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user() !== null;
+        $user = $this->user();
+
+        if (!$user) {
+            return false;
+        }
+
+        $role = strtolower(trim((string) ($user->role ?? $user->jabatan ?? '')));
+
+        if ($role === 'staff') {
+            $role = 'staf';
+        }
+
+        return in_array($role, ['admin', 'pimpinan'], true);
     }
 
     public function rules(): array
@@ -63,7 +75,7 @@ class SuratKeluarRequest extends FormRequest
                 'string',
             ],
             'status' => [
-                'required',
+                'nullable',
                 Rule::in([
                     'draf',
                     'diproses',
@@ -100,11 +112,11 @@ class SuratKeluarRequest extends FormRequest
             'perihal.required' => 'Perihal surat wajib diisi.',
             'perihal.string' => 'Perihal surat harus berupa teks.',
             'perihal.max' => 'Perihal surat maksimal 255 karakter.',
+            'ringkasan.string' => 'Ringkasan harus berupa teks.',
             'lampiran_file.file' => 'Lampiran harus berupa file yang valid.',
             'lampiran_file.mimes' => 'Lampiran harus berformat PDF, JPG, JPEG, PNG, atau WEBP.',
-            'lampiran_file.max' => 'Ukuran file lampiran maksimal adalah 10MB.',
+            'lampiran_file.max' => 'Ukuran file lampiran maksimal 10MB.',
             'captured_image.string' => 'Hasil scan kamera tidak valid.',
-            'status.required' => 'Status surat wajib ditentukan.',
             'status.in' => 'Status surat yang dipilih tidak valid.',
             'ditandatangani_oleh.integer' => 'Data penandatangan tidak valid.',
             'ditandatangani_oleh.exists' => 'Pengguna penandatangan tidak ditemukan.',
@@ -140,9 +152,12 @@ class SuratKeluarRequest extends FormRequest
             'perihal' => $this->filled('perihal')
                 ? trim((string) $this->input('perihal'))
                 : null,
+            'ringkasan' => $this->filled('ringkasan')
+                ? trim((string) $this->input('ringkasan'))
+                : null,
             'status' => $this->filled('status')
                 ? strtolower(trim((string) $this->input('status')))
-                : $this->input('status'),
+                : 'draf',
         ]);
     }
 }

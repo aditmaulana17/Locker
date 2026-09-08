@@ -6,52 +6,332 @@ use App\Models\Disposisi;
 use App\Models\SuratKeluar;
 use App\Models\SuratMasuk;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
     /**
-     * Menampilkan data utama untuk Dashboard
+     * Menampilkan dashboard sesuai role pengguna.
      */
     public function index()
     {
-        $userId = Auth::id();
         $user = Auth::user();
-        $role = strtolower($user->role ?? '');
-        $isStaf = in_array($role, ['staf', 'staff']);
+        $userId = $user->id;
 
-        // 1. Logika Jika User adalah Staf
+        /*
+        |--------------------------------------------------------------------------
+        | ROLE
+        |--------------------------------------------------------------------------
+        */
+        $role = strtolower(
+            trim(
+                (string) ($user->role ?? $user->jabatan ?? '')
+            )
+        );
+
+        $isStaf = in_array(
+            $role,
+            ['staf', 'staff'],
+            true
+        );
+
+        /*
+        |--------------------------------------------------------------------------
+        | DEFAULT VALUE
+        |--------------------------------------------------------------------------
+        |
+        | Variabel ini dibuat terlebih dahulu agar view tetap aman.
+        |
+        */
+        $totalSuratMasuk = 0;
+        $totalSuratKeluar = 0;
+        $suratPending = 0;
+        $suratSelesai = 0;
+
+        $disposisiMenunggu = 0;
+        $disposisiSelesai = 0;
+
+        $listDisposisi = collect();
+        $suratMasukTerbaru = collect();
+
+        $chartLabels = [];
+        $chartDataMasuk = [];
+        $chartDataKeluar = [];
+
+        /*
+        |--------------------------------------------------------------------------
+        | DASHBOARD STAF
+        |--------------------------------------------------------------------------
+        */
         if ($isStaf) {
-            // Disposisi Menunggu/Belum Selesai milik staf yang login
-            $disposisiMenunggu = Disposisi::where('kepada_user_id', $userId)
-                ->where('status', 'menunggu')
-                ->count();
-
-            // Disposisi Selesai milik staf
-            $disposisiSelesai = Disposisi::where('kepada_user_id', $userId)
-                ->where('status', 'selesai')
-                ->count();
-
-            // List Disposisi Tugas Untuk Saya
-            $listDisposisi = Disposisi::with(['suratMasuk', 'dari'])
+            /*
+             * Disposisi yang ditujukan kepada staf yang sedang login
+             * dan masih menunggu untuk ditindaklanjuti.
+             */
+            $disposisiMenunggu = Disposisi::query()
                 ->where('kepada_user_id', $userId)
-                ->where('status', 'menunggu')
-                ->latest()
-                ->take(5)
+                ->whereRaw(
+                    'LOWER(TRIM(status)) = ?',
+                    ['menunggu']
+                )
+                ->count();
+
+            /*
+             * Disposisi yang sudah selesai milik staf.
+             */
+            $disposisiSelesai = Disposisi::query()
+                ->where('kepada_user_id', $userId)
+                ->whereRaw(
+                    'LOWER(TRIM(status)) = ?',
+                    ['selesai']
+                )
+                ->count();
+
+            /*
+             * Daftar disposisi yang masih menunggu.
+             * Maksimal 5 data ditampilkan di dashboard.
+             */
+            $listDisposisi = Disposisi::query()
+                ->with([
+                    'suratMasuk',
+                    'dari',
+                ])
+                ->where('kepada_user_id', $userId)
+                ->whereRaw(
+                    'LOWER(TRIM(status)) = ?',
+                    ['menunggu']
+                )
+                ->latest('created_at')
+                ->limit(5)
                 ->get();
 
-            // Kosongkan variabel non-staf agar aman dipanggil di view
-            $totalSuratMasuk = 0;
-            $totalSuratKeluar = 0;
-            $suratPending = 0;
-            $suratSelesai = 0;
-            $suratMasukTerbaru = collect();
-            $chartLabels = [];
-            $chartDataMasuk = [];
-            $chartDataKeluar = [];
+            /*
+             * Staf tidak membutuhkan statistik surat utama.
+             */
+            return view(
+                'dashboard.index',
+                compact(
+                    'totalSuratMasuk',
+                    'totalSuratKeluar',
+                    'suratPending',
+                    'suratSelesai',
+                    'disposisiMenunggu',
+                    'disposisiSelesai',
+                    'listDisposisi',
+                    'suratMasukTerbaru',
+                    'chartLabels',
+                    'chartDataMasuk',
+                    'chartDataKeluar',
+                    'isStaf'
+                )
+            );
+        }
 
-            return view('dashboard.index', compact(
+        /*
+        |--------------------------------------------------------------------------
+        | DASHBOARD ADMIN / PIMPINAN
+        |--------------------------------------------------------------------------
+        */
+
+        /*
+         * TOTAL SEMUA SURAT MASUK
+         */
+        $totalSuratMasuk = SuratMasuk::query()
+            ->count();
+
+        /*
+         * TOTAL SEMUA SURAT KELUAR
+         */
+        $totalSuratKeluar = SuratKeluar::query()
+            ->count();
+
+        /*
+        |--------------------------------------------------------------------------
+        | SURAT BELUM DIPROSES
+        |--------------------------------------------------------------------------
+        |
+        | Hanya status "baru".
+        |
+        */
+        $suratPending = SuratMasuk::query()
+            ->whereRaw(
+                'LOWER(TRIM(status)) = ?',
+                ['baru']
+            )
+            ->count();
+
+        /*
+        |--------------------------------------------------------------------------
+        | SURAT SELESAI DIPROSES
+        |--------------------------------------------------------------------------
+        |
+        | Hanya status "selesai".
+        |
+        */
+        $suratSelesai = SuratMasuk::query()
+            ->whereRaw(
+                'LOWER(TRIM(status)) = ?',
+                ['selesai']
+            )
+            ->count();
+
+        /*
+        |--------------------------------------------------------------------------
+        | DISPOSISI
+        |--------------------------------------------------------------------------
+        |
+        | Admin dan pimpinan tidak menggunakan scorecard disposisi staf.
+        |
+        */
+        $disposisiMenunggu = 0;
+        $disposisiSelesai = 0;
+
+        $listDisposisi = collect();
+
+        /*
+        |--------------------------------------------------------------------------
+        | SURAT MASUK TERBARU
+        |--------------------------------------------------------------------------
+        */
+        $suratMasukTerbaru = SuratMasuk::query()
+            ->with([
+                'kategori',
+                'instansi',
+            ])
+            ->orderByDesc('tanggal_terima')
+            ->orderByDesc('created_at')
+            ->limit(5)
+            ->get();
+
+        /*
+        |--------------------------------------------------------------------------
+        | GRAFIK 12 BULAN TERAKHIR
+        |--------------------------------------------------------------------------
+        |
+        | Surat Masuk  = tanggal_terima
+        | Surat Keluar = tanggal_surat
+        |
+        | Tidak menggunakan created_at agar grafik berdasarkan tanggal surat
+        | yang sebenarnya.
+        |
+        */
+
+        $startMonth = Carbon::now()
+            ->startOfMonth()
+            ->subMonths(11);
+
+        $endMonth = Carbon::now()
+            ->endOfMonth();
+
+        /*
+        |--------------------------------------------------------------------------
+        | DATA SURAT MASUK PER BULAN
+        |--------------------------------------------------------------------------
+        */
+        $masukPerBulan = SuratMasuk::query()
+            ->selectRaw(
+                'YEAR(tanggal_terima) as tahun,
+                 MONTH(tanggal_terima) as bulan,
+                 COUNT(*) as total'
+            )
+            ->whereNotNull('tanggal_terima')
+            ->whereBetween(
+                'tanggal_terima',
+                [
+                    $startMonth->copy()->startOfDay(),
+                    $endMonth->copy()->endOfDay(),
+                ]
+            )
+            ->groupByRaw(
+                'YEAR(tanggal_terima),
+                 MONTH(tanggal_terima)'
+            )
+            ->get()
+            ->keyBy(
+                fn ($row) => sprintf(
+                    '%04d-%02d',
+                    $row->tahun,
+                    $row->bulan
+                )
+            );
+
+        /*
+        |--------------------------------------------------------------------------
+        | DATA SURAT KELUAR PER BULAN
+        |--------------------------------------------------------------------------
+        */
+        $keluarPerBulan = SuratKeluar::query()
+            ->selectRaw(
+                'YEAR(tanggal_surat) as tahun,
+                 MONTH(tanggal_surat) as bulan,
+                 COUNT(*) as total'
+            )
+            ->whereNotNull('tanggal_surat')
+            ->whereBetween(
+                'tanggal_surat',
+                [
+                    $startMonth->copy()->startOfDay(),
+                    $endMonth->copy()->endOfDay(),
+                ]
+            )
+            ->groupByRaw(
+                'YEAR(tanggal_surat),
+                 MONTH(tanggal_surat)'
+            )
+            ->get()
+            ->keyBy(
+                fn ($row) => sprintf(
+                    '%04d-%02d',
+                    $row->tahun,
+                    $row->bulan
+                )
+            );
+
+        /*
+        |--------------------------------------------------------------------------
+        | SUSUN DATA CHART
+        |--------------------------------------------------------------------------
+        */
+        for ($i = 0; $i < 12; $i++) {
+            $currentMonth = $startMonth
+                ->copy()
+                ->addMonths($i);
+
+            $key = $currentMonth->format('Y-m');
+
+            /*
+             * Label bulan.
+             */
+            $chartLabels[] =
+                $currentMonth->translatedFormat('M');
+
+            /*
+             * Jumlah surat masuk.
+             */
+            $chartDataMasuk[] =
+                (int) (
+                    $masukPerBulan[$key]->total
+                    ?? 0
+                );
+
+            /*
+             * Jumlah surat keluar.
+             */
+            $chartDataKeluar[] =
+                (int) (
+                    $keluarPerBulan[$key]->total
+                    ?? 0
+                );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | RETURN DASHBOARD
+        |--------------------------------------------------------------------------
+        */
+        return view(
+            'dashboard.index',
+            compact(
                 'totalSuratMasuk',
                 'totalSuratKeluar',
                 'suratPending',
@@ -62,69 +342,9 @@ class DashboardController extends Controller
                 'suratMasukTerbaru',
                 'chartLabels',
                 'chartDataMasuk',
-                'chartDataKeluar'
-            ));
-        }
-
-        // 2. Logika Jika User BUKAN Staf (Admin / Pimpinan)
-        $totalSuratMasuk   = SuratMasuk::count();
-        $totalSuratKeluar  = SuratKeluar::count();
-        $suratPending      = SuratMasuk::whereIn('status', ['pending', 'baru', 'proses'])->count();
-        $suratSelesai      = SuratMasuk::where('status', 'selesai')->count();
-        
-        // Karena admin/pimpinan tidak ada disposisi masuk, set nilai default 0 / kosong
-        $disposisiMenunggu = 0;
-        $disposisiSelesai  = 0;
-        $listDisposisi     = collect();
-
-        $suratMasukTerbaru = SuratMasuk::with(['kategori'])
-            ->latest()
-            ->take(5)
-            ->get();
-
-        // Data Grafik Chart.js (12 Bulan Terakhir)
-        $startDate = Carbon::now()->startOfMonth()->subMonths(11);
-
-        $masukPerBulan = SuratMasuk::query()
-            ->selectRaw('YEAR(created_at) as tahun, MONTH(created_at) as bulan, COUNT(*) as total')
-            ->where('created_at', '>=', $startDate)
-            ->groupByRaw('YEAR(created_at), MONTH(created_at)')
-            ->get()
-            ->keyBy(fn ($row) => sprintf('%04d-%02d', $row->tahun, $row->bulan));
-
-        $keluarPerBulan = SuratKeluar::query()
-            ->selectRaw('YEAR(created_at) as tahun, MONTH(created_at) as bulan, COUNT(*) as total')
-            ->where('created_at', '>=', $startDate)
-            ->groupByRaw('YEAR(created_at), MONTH(created_at)')
-            ->get()
-            ->keyBy(fn ($row) => sprintf('%04d-%02d', $row->tahun, $row->bulan));
-
-        $chartLabels = [];
-        $chartDataMasuk = [];
-        $chartDataKeluar = [];
-
-        for ($i = 11; $i >= 0; $i--) {
-            $date = Carbon::now()->startOfMonth()->subMonths($i);
-            $key = $date->format('Y-m');
-
-            $chartLabels[] = $date->translatedFormat('M');
-            $chartDataMasuk[] = (int) ($masukPerBulan[$key]->total ?? 0);
-            $chartDataKeluar[] = (int) ($keluarPerBulan[$key]->total ?? 0);
-        }
-
-        // Return ke view
-        return view('dashboard.index', compact(
-            'totalSuratMasuk',
-            'totalSuratKeluar',
-            'suratPending',
-            'suratSelesai',
-            'disposisiMenunggu',
-            'disposisiSelesai',
-            'listDisposisi',
-            'suratMasukTerbaru',
-            'chartLabels',
-            'chartDataMasuk',
-            'chartDataKeluar'
-        ));
+                'chartDataKeluar',
+                'isStaf'
+            )
+        );
     }
 }

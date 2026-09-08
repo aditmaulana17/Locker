@@ -9,7 +9,19 @@ class SuratMasukRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user() !== null;
+        $user = $this->user();
+
+        if (!$user) {
+            return false;
+        }
+
+        $role = strtolower(trim((string) ($user->role ?? $user->jabatan ?? '')));
+
+        if ($role === 'staff') {
+            $role = 'staf';
+        }
+
+        return in_array($role, ['admin', 'pimpinan'], true);
     }
 
     public function rules(): array
@@ -67,7 +79,7 @@ class SuratMasukRequest extends FormRequest
                 'string',
             ],
             'status' => [
-                'required',
+                'nullable',
                 Rule::in([
                     'baru',
                     'diproses',
@@ -89,21 +101,29 @@ class SuratMasukRequest extends FormRequest
         return [
             'nomor_agenda.unique' => 'Nomor agenda ini sudah digunakan oleh surat lain.',
             'nomor_surat.required' => ':attribute wajib diisi.',
+            'nomor_surat.string' => ':attribute harus berupa teks.',
+            'nomor_surat.max' => ':attribute maksimal 255 karakter.',
             'pengirim.required' => ':attribute wajib diisi.',
+            'pengirim.string' => ':attribute harus berupa teks.',
+            'pengirim.max' => ':attribute maksimal 255 karakter.',
             'tanggal_surat.required' => ':attribute wajib diisi.',
             'tanggal_surat.date' => ':attribute harus berupa tanggal yang valid.',
             'tanggal_terima.required' => ':attribute wajib diisi.',
             'tanggal_terima.date' => ':attribute harus berupa tanggal yang valid.',
             'kategori_surat_id.required' => ':attribute wajib dipilih.',
             'kategori_surat_id.integer' => ':attribute tidak valid.',
-            'kategori_surat_id.exists' => ':attribute yang dipilih tidak valid.',
+            'kategori_surat_id.exists' => ':attribute yang dipilih tidak tersedia.',
             'perihal.required' => ':attribute wajib diisi.',
+            'perihal.string' => ':attribute harus berupa teks.',
+            'perihal.max' => ':attribute maksimal 255 karakter.',
+            'ringkasan.string' => ':attribute harus berupa teks.',
             'lampiran_file.file' => ':attribute harus berupa file yang valid.',
             'lampiran_file.mimes' => ':attribute harus berformat PDF, JPG, JPEG, PNG, atau WEBP.',
             'lampiran_file.max' => ':attribute maksimal berukuran 10 MB.',
             'captured_image.string' => ':attribute tidak valid.',
-            'status.required' => ':attribute wajib dipilih.',
             'status.in' => 'Pilihan :attribute tidak valid.',
+            'lokasi_arsip_fisik.string' => ':attribute harus berupa teks.',
+            'lokasi_arsip_fisik.max' => ':attribute maksimal 255 karakter.',
         ];
     }
 
@@ -132,6 +152,7 @@ class SuratMasukRequest extends FormRequest
             'nomor_surat' => $this->cleanInput('nomor_surat'),
             'pengirim' => $this->cleanInput('pengirim'),
             'perihal' => $this->cleanInput('perihal'),
+            'ringkasan' => $this->cleanInput('ringkasan'),
             'status' => $this->cleanStatus(),
             'lokasi_arsip_fisik' => $this->cleanInput('lokasi_arsip_fisik'),
         ]);
@@ -140,7 +161,7 @@ class SuratMasukRequest extends FormRequest
     private function cleanInput(string $key): ?string
     {
         if (!$this->filled($key)) {
-            return $this->input($key);
+            return null;
         }
 
         $value = trim((string) $this->input($key));
@@ -151,11 +172,11 @@ class SuratMasukRequest extends FormRequest
     private function cleanStatus(): ?string
     {
         if (!$this->filled('status')) {
-            return $this->input('status');
+            return 'baru';
         }
 
-        return strtolower(
-            trim((string) $this->input('status'))
-        );
+        $status = strtolower(trim((string) $this->input('status')));
+
+        return $status !== '' ? $status : 'baru';
     }
 }
