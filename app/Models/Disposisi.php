@@ -12,29 +12,8 @@ class Disposisi extends Model
 {
     use HasFactory, SoftDeletes;
 
-    /**
-     * Nama tabel database.
-     */
     protected $table = 'disposisis';
 
-    /**
-     * Kolom yang boleh diisi melalui mass assignment.
-     *
-     * Sesuai dengan struktur tabel production:
-     *
-     * id
-     * surat_masuk_id
-     * dari_user_id
-     * kepada_user_id
-     * instruksi
-     * isi_disposisi
-     * catatan
-     * batas_waktu
-     * status
-     * created_at
-     * updated_at
-     * deleted_at
-     */
     protected $fillable = [
         'surat_masuk_id',
         'dari_user_id',
@@ -46,9 +25,6 @@ class Disposisi extends Model
         'status',
     ];
 
-    /**
-     * Casting atribut.
-     */
     protected function casts(): array
     {
         return [
@@ -56,9 +32,6 @@ class Disposisi extends Model
         ];
     }
 
-    /**
-     * Relasi ke Surat Masuk.
-     */
     public function suratMasuk(): BelongsTo
     {
         return $this->belongsTo(
@@ -67,9 +40,6 @@ class Disposisi extends Model
         );
     }
 
-    /**
-     * Relasi ke user yang membuat/mengirim disposisi.
-     */
     public function dari(): BelongsTo
     {
         return $this->belongsTo(
@@ -78,9 +48,6 @@ class Disposisi extends Model
         );
     }
 
-    /**
-     * Relasi ke user penerima disposisi.
-     */
     public function kepada(): BelongsTo
     {
         return $this->belongsTo(
@@ -89,202 +56,99 @@ class Disposisi extends Model
         );
     }
 
-    /**
-     * Scope filter data disposisi.
-     *
-     * Contoh:
-     *
-     * Disposisi::filter([
-     *     'search' => 'surat',
-     *     'status' => 'menunggu',
-     *     'dari_tanggal' => '2026-01-01',
-     *     'sampai_tanggal' => '2026-12-31',
-     * ])->get();
-     */
     public function scopeFilter(
         Builder $query,
         array $filters = []
     ): Builder {
-        /*
-         * ==============================
-         * PENCARIAN
-         * ==============================
-         */
-        if (!empty($filters['search'])) {
-            $search = trim(
-                (string) $filters['search']
-            );
+        $search = isset($filters['search'])
+            ? trim((string) $filters['search'])
+            : '';
 
-            $query->where(function (Builder $q) use ($search) {
-                $keyword = "%{$search}%";
+        if ($search !== '') {
+            $keyword = "%{$search}%";
 
-                /*
-                 * Cari berdasarkan instruksi.
-                 */
-                $q->where(
-                    'instruksi',
-                    'like',
-                    $keyword
-                )
-
-                /*
-                 * Cari berdasarkan isi_disposisi.
-                 */
-                ->orWhere(
-                    'isi_disposisi',
-                    'like',
-                    $keyword
-                )
-
-                /*
-                 * Cari berdasarkan catatan.
-                 */
-                ->orWhere(
-                    'catatan',
-                    'like',
-                    $keyword
-                )
-
-                /*
-                 * Cari berdasarkan data surat masuk.
-                 */
-                ->orWhereHas(
-                    'suratMasuk',
-                    function (Builder $surat) use ($keyword) {
+            $query->where(function (Builder $q) use ($keyword) {
+                $q->where('instruksi', 'like', $keyword)
+                    ->orWhere('isi_disposisi', 'like', $keyword)
+                    ->orWhere('catatan', 'like', $keyword)
+                    ->orWhereHas('suratMasuk', function (Builder $surat) use ($keyword) {
                         $surat
-                            ->where(
-                                'nomor_surat',
-                                'like',
-                                $keyword
-                            )
-                            ->orWhere(
-                                'nomor_agenda',
-                                'like',
-                                $keyword
-                            )
-                            ->orWhere(
-                                'perihal',
-                                'like',
-                                $keyword
-                            );
-                    }
-                )
-
-                /*
-                 * Cari berdasarkan penerima.
-                 */
-                ->orWhereHas(
-                    'kepada',
-                    function (Builder $user) use ($keyword) {
+                            ->where('nomor_surat', 'like', $keyword)
+                            ->orWhere('nomor_agenda', 'like', $keyword)
+                            ->orWhere('pengirim', 'like', $keyword)
+                            ->orWhere('perihal', 'like', $keyword);
+                    })
+                    ->orWhereHas('kepada', function (Builder $user) use ($keyword) {
                         $user
-                            ->where(
-                                'name',
-                                'like',
-                                $keyword
-                            )
-                            ->orWhere(
-                                'nama',
-                                'like',
-                                $keyword
-                            )
-                            ->orWhere(
-                                'jabatan',
-                                'like',
-                                $keyword
-                            );
-                    }
-                );
+                            ->where('name', 'like', $keyword)
+                            ->orWhere('nama', 'like', $keyword)
+                            ->orWhere('jabatan', 'like', $keyword);
+                    });
             });
         }
 
-        /*
-         * ==============================
-         * FILTER STATUS
-         * ==============================
-         */
-        if (!empty($filters['status'])) {
-            $statuses = is_array($filters['status'])
-                ? $filters['status']
-                : [$filters['status']];
+        $allowedStatuses = [
+            'menunggu',
+            'diproses',
+            'selesai',
+        ];
 
-            $statuses = array_values(
-                array_filter(
-                    array_map(
-                        static function ($status) {
-                            return strtolower(
-                                trim((string) $status)
-                            );
-                        },
-                        $statuses
-                    )
-                )
+        $statuses = collect($filters['status'] ?? [])
+            ->flatten()
+            ->filter(fn ($status) => is_scalar($status))
+            ->map(fn ($status) => strtolower(trim((string) $status)))
+            ->filter(fn ($status) => in_array($status, $allowedStatuses, true))
+            ->unique()
+            ->values()
+            ->all();
+
+        if (!empty($statuses)) {
+            $query->whereIn(
+                'status',
+                $statuses
             );
-
-            if (!empty($statuses)) {
-                $query->whereIn(
-                    'status',
-                    $statuses
-                );
-            }
         }
 
-        /*
-         * ==============================
-         * FILTER TANGGAL MULAI
-         * ==============================
-         */
-        if (!empty($filters['dari_tanggal'])) {
+        $dariTanggal = $filters['dari_tanggal'] ?? null;
+        $sampaiTanggal = $filters['sampai_tanggal'] ?? null;
+
+        if ($dariTanggal) {
             $query->whereDate(
                 'batas_waktu',
                 '>=',
-                $filters['dari_tanggal']
+                $dariTanggal
             );
         }
 
-        /*
-         * ==============================
-         * FILTER TANGGAL SELESAI
-         * ==============================
-         */
-        if (!empty($filters['sampai_tanggal'])) {
+        if ($sampaiTanggal) {
             $query->whereDate(
                 'batas_waktu',
                 '<=',
-                $filters['sampai_tanggal']
+                $sampaiTanggal
             );
         }
 
         return $query;
     }
 
-    /**
-     * Scope untuk disposisi yang belum selesai.
-     */
     public function scopeBelumSelesai(
         Builder $query
     ): Builder {
-        return $query->where(
-            'status',
-            '!=',
-            'selesai'
+        return $query->whereRaw(
+            'LOWER(TRIM(status)) != ?',
+            ['selesai']
         );
     }
 
-    /**
-     * Scope untuk disposisi yang sudah selesai.
-     */
     public function scopeSelesai(
         Builder $query
     ): Builder {
-        return $query->where(
-            'status',
-            'selesai'
+        return $query->whereRaw(
+            'LOWER(TRIM(status)) = ?',
+            ['selesai']
         );
     }
 
-    /**
-     * Scope berdasarkan user penerima.
-     */
     public function scopeUntukUser(
         Builder $query,
         int $userId
@@ -295,9 +159,6 @@ class Disposisi extends Model
         );
     }
 
-    /**
-     * Scope berdasarkan user pengirim.
-     */
     public function scopeDibuatOleh(
         Builder $query,
         int $userId
@@ -308,21 +169,19 @@ class Disposisi extends Model
         );
     }
 
-    /**
-     * Mengecek apakah disposisi sudah selesai.
-     */
     public function isSelesai(): bool
     {
-        return $this->status === 'selesai';
+        return strtolower(
+            trim((string) $this->status)
+        ) === 'selesai';
     }
 
-    /**
-     * Mengecek apakah disposisi masih aktif.
-     */
     public function isAktif(): bool
     {
         return in_array(
-            $this->status,
+            strtolower(
+                trim((string) $this->status)
+            ),
             [
                 'menunggu',
                 'diproses',
@@ -331,17 +190,11 @@ class Disposisi extends Model
         );
     }
 
-    /**
-     * Mengecek apakah mempunyai batas waktu.
-     */
     public function memilikiBatasWaktu(): bool
     {
         return $this->batas_waktu !== null;
     }
 
-    /**
-     * Mengecek apakah batas waktu sudah lewat.
-     */
     public function sudahLewatBatasWaktu(): bool
     {
         if (!$this->batas_waktu) {
