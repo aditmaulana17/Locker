@@ -131,7 +131,7 @@
                     </button>
                     <div class="min-w-0">
                         <h1 class="truncate text-base font-bold tracking-tight text-slate-800 sm:text-lg">@yield('title', 'Dashboard')</h1>
-                        <p class="hidden text-[11px] text-slate-400 sm:block">Sistem Manajemen Arsip Surat</p>
+                        <p class="hidden text-[11px] text-slate-400 sm:block">Sistem Manajemen Arsip</p>
                     </div>
                 </div>
 
