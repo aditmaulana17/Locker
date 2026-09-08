@@ -3,178 +3,678 @@
 @section('title', 'Edit Pengguna')
 
 @section('content')
-<div class="max-w-4xl mx-auto space-y-4 sm:space-y-6 pb-12">
 
-    <!-- Header Section -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 bg-white p-4 sm:p-6 rounded-xl sm:rounded-2xl shadow-sm border border-slate-200/80">
-        <div>
+@php
+    /*
+     * ============================================================
+     * NORMALISASI DATA USER
+     * ============================================================
+     */
+    $currentRole = strtolower(
+        trim(
+            (string) ($user->role ?? '')
+        )
+    );
+
+    /*
+     * Database menggunakan "staff".
+     * "staf" hanya dianggap sebagai alias.
+     */
+    if ($currentRole === 'staf') {
+        $currentRole = 'staff';
+    }
+
+    /*
+     * Status utama menggunakan is_active.
+     *
+     * true  = aktif
+     * false = nonaktif
+     */
+    $currentIsActive = (bool) (
+        $user->is_active ?? true
+    );
+@endphp
+
+<div class="mx-auto max-w-4xl space-y-4 pb-12 sm:space-y-6">
+
+    {{-- ============================================================
+       HEADER
+    ============================================================ --}}
+    <div class="flex flex-col gap-3 rounded-xl border border-slate-200/80 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:rounded-2xl sm:p-6">
+
+        <div class="min-w-0">
+
             <div class="flex items-center gap-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
-                <h1 class="text-xl sm:text-2xl font-bold text-slate-800 tracking-tight">Edit Pengguna: {{ $user->name }}</h1>
+
+                <span class="h-2.5 w-2.5 shrink-0 animate-pulse rounded-full bg-amber-500"></span>
+
+                <h1 class="truncate text-xl font-bold tracking-tight text-slate-800 sm:text-2xl">
+                    Edit Pengguna:
+                    {{ $user->name }}
+                </h1>
+
             </div>
-            <p class="text-xs sm:text-sm text-slate-500 mt-1">Perbarui informasi akun, hak akses, dan status pengguna di dalam sistem.</p>
+
+            <p class="mt-1 text-xs leading-relaxed text-slate-500 sm:text-sm">
+                Perbarui informasi akun, hak akses, dan status pengguna di dalam sistem.
+            </p>
+
         </div>
-        <a href="{{ route('users.index') }}" class="inline-flex items-center justify-center px-4 py-2 sm:py-2 text-xs font-semibold text-slate-700 bg-slate-100 border border-slate-200 rounded-xl shadow-xs hover:bg-slate-200 focus:outline-none transition w-full sm:w-auto shrink-0">
-            <svg class="w-4 h-4 mr-1.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+
+        <a
+            href="{{ route('users.index') }}"
+            class="inline-flex w-full shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-200 sm:w-auto"
+        >
+            <svg
+                class="mr-1.5 h-4 w-4 text-slate-500"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                viewBox="0 0 24 24"
+            >
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M15 19l-7-7 7-7"
+                />
+            </svg>
+
             Kembali ke Daftar
         </a>
+
     </div>
 
-    <!-- Form Container -->
-    <div class="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
-        <form method="POST" action="{{ route('users.update', $user->id) }}">
+
+    {{-- ============================================================
+       FORM
+    ============================================================ --}}
+    <div class="overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm sm:rounded-2xl">
+
+        <form
+            method="POST"
+            action="{{ route('users.update', $user->id) }}"
+        >
             @csrf
             @method('PUT')
 
-            <div class="p-4 sm:p-8 space-y-5 sm:space-y-6">
-                
-                <!-- Section 1: Informasi Personal -->
-                <div>
-                    <h3 class="text-xs font-bold uppercase tracking-wider text-blue-600 mb-3 sm:mb-4 flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                        Informasi Personal
-                    </h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
-                        <!-- Nama Lengkap -->
-                        <div class="sm:col-span-2">
-                            <label for="name" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
-                                Nama Lengkap <span class="text-rose-500">*</span>
-                            </label>
-                            <input type="text" name="name" id="name" value="{{ old('name', $user->name) }}" required placeholder="Contoh: Budi Santoso, S.Kom"
-                                class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2 sm:py-2.5 text-xs sm:text-sm text-slate-700 placeholder-slate-400 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition duration-150 @error('name') border-rose-500 bg-rose-50/30 @enderror">
-                            @error('name') 
-                                <p class="text-rose-500 text-xs mt-1.5 font-medium">{{ $message }}</p> 
-                            @enderror
+            <div class="space-y-6 p-4 sm:p-8">
+
+                {{-- ==================================================
+                   INFORMASI PERSONAL
+                ================================================== --}}
+                <section>
+
+                    <div class="mb-4 flex items-center gap-2">
+
+                        <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                            <svg
+                                class="h-4 w-4"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="1.8"
+                                viewBox="0 0 24 24"
+                            >
+                                <circle
+                                    cx="12"
+                                    cy="8"
+                                    r="3.5"
+                                />
+
+                                <path
+                                    stroke-linecap="round"
+                                    d="M5 20a7 7 0 0114 0"
+                                />
+                            </svg>
                         </div>
 
-                        <!-- Email -->
-                        <div>
-                            <label for="email" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
-                                Alamat Email <span class="text-rose-500">*</span>
-                            </label>
-                            <input type="email" name="email" id="email" value="{{ old('email', $user->email) }}" required placeholder="budi@domain.com"
-                                class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2 sm:py-2.5 text-xs sm:text-sm text-slate-700 placeholder-slate-400 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition duration-150 @error('email') border-rose-500 bg-rose-50/30 @enderror">
-                            @error('email') 
-                                <p class="text-rose-500 text-xs mt-1.5 font-medium">{{ $message }}</p> 
-                            @enderror
-                        </div>
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-blue-600">
+                            Informasi Personal
+                        </h3>
 
-                        <!-- Jabatan (Diubah Menjadi Required) -->
-                        <div>
-                            <label for="jabatan" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
-                                Jabatan / Posisi <span class="text-rose-500">*</span>
-                            </label>
-                            <input type="text" name="jabatan" id="jabatan" value="{{ old('jabatan', $user->jabatan) }}" required placeholder="Contoh: Kepala Bagian / Staf Agenda"
-                                class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2 sm:py-2.5 text-xs sm:text-sm text-slate-700 placeholder-slate-400 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition duration-150 @error('jabatan') border-rose-500 bg-rose-50/30 @enderror">
-                            @error('jabatan') 
-                                <p class="text-rose-500 text-xs mt-1.5 font-medium">{{ $message }}</p> 
-                            @enderror
-                        </div>
                     </div>
-                </div>
+
+
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
+
+                        {{-- NAMA --}}
+                        <div class="sm:col-span-2">
+
+                            <label
+                                for="name"
+                                class="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-600"
+                            >
+                                Nama Lengkap
+                                <span class="text-rose-500">*</span>
+                            </label>
+
+                            <input
+                                type="text"
+                                name="name"
+                                id="name"
+                                value="{{ old('name', $user->name) }}"
+                                required
+                                autocomplete="name"
+                                placeholder="Contoh: Budi Santoso, S.Kom"
+                                class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2 text-xs text-slate-700 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 sm:py-2.5 sm:text-sm @error('name') border-rose-500 bg-rose-50/30 @enderror"
+                            >
+
+                            @error('name')
+                                <p class="mt-1.5 text-xs font-medium text-rose-500">
+                                    {{ $message }}
+                                </p>
+                            @enderror
+
+                        </div>
+
+
+                        {{-- EMAIL --}}
+                        <div>
+
+                            <label
+                                for="email"
+                                class="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-600"
+                            >
+                                Alamat Email
+                                <span class="text-rose-500">*</span>
+                            </label>
+
+                            <input
+                                type="email"
+                                name="email"
+                                id="email"
+                                value="{{ old('email', $user->email) }}"
+                                required
+                                autocomplete="email"
+                                placeholder="budi@domain.com"
+                                class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2 text-xs text-slate-700 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 sm:py-2.5 sm:text-sm @error('email') border-rose-500 bg-rose-50/30 @enderror"
+                            >
+
+                            @error('email')
+                                <p class="mt-1.5 text-xs font-medium text-rose-500">
+                                    {{ $message }}
+                                </p>
+                            @enderror
+
+                        </div>
+
+
+                        {{-- JABATAN --}}
+                        <div>
+
+                            <label
+                                for="jabatan"
+                                class="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-600"
+                            >
+                                Jabatan / Posisi
+                                <span class="text-rose-500">*</span>
+                            </label>
+
+                            <input
+                                type="text"
+                                name="jabatan"
+                                id="jabatan"
+                                value="{{ old('jabatan', $user->jabatan) }}"
+                                required
+                                placeholder="Contoh: Kepala Bagian / Staf Agenda"
+                                class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2 text-xs text-slate-700 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 sm:py-2.5 sm:text-sm @error('jabatan') border-rose-500 bg-rose-50/30 @enderror"
+                            >
+
+                            @error('jabatan')
+                                <p class="mt-1.5 text-xs font-medium text-rose-500">
+                                    {{ $message }}
+                                </p>
+                            @enderror
+
+                        </div>
+
+                    </div>
+
+                </section>
+
 
                 <hr class="border-slate-100">
 
-                <!-- Section 2: Hak Akses & Keamanan -->
-                <div>
-                    <h3 class="text-xs font-bold uppercase tracking-wider text-blue-600 mb-3 sm:mb-4 flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                        Hak Akses & Keamanan Akun
-                    </h3>
-                    
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 mb-4 sm:mb-5">
-                        <!-- Role -->
-                        <div>
-                            <label for="role" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
-                                Role / Hak Akses <span class="text-rose-500">*</span>
-                            </label>
-                            <select name="role" id="role" required
-                                class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2 sm:py-2.5 text-xs sm:text-sm text-slate-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition duration-150 font-medium">
-                                <option value="admin" {{ old('role', $user->role) == 'admin' ? 'selected' : '' }}>Admin (Akses Penuh)</option>
-                                <option value="pimpinan" {{ old('role', $user->role) == 'pimpinan' ? 'selected' : '' }}>Pimpinan (Akses Eksekutif)</option>
-                                <option value="staf" {{ in_array(old('role', $user->role), ['staf', 'staff']) ? 'selected' : '' }}>Staf (Akses Operator)</option>
-                            </select>
-                            @error('role') 
-                                <p class="text-rose-500 text-xs mt-1.5 font-medium">{{ $message }}</p> 
-                            @enderror
+
+                {{-- ==================================================
+                   HAK AKSES & KEAMANAN
+                ================================================== --}}
+                <section>
+
+                    <div class="mb-4 flex items-center gap-2">
+
+                        <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                            <svg
+                                class="h-4 w-4"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="1.8"
+                                viewBox="0 0 24 24"
+                            >
+                                <rect
+                                    x="4"
+                                    y="10"
+                                    width="16"
+                                    height="10"
+                                    rx="2"
+                                />
+
+                                <path
+                                    stroke-linecap="round"
+                                    d="M8 10V7a4 4 0 018 0v3"
+                                />
+                            </svg>
                         </div>
 
-                        <!-- Status -->
-                        <div>
-                            <label for="status" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
-                                Status Akun <span class="text-rose-500">*</span>
-                            </label>
-                            <select name="status" id="status" required
-                                class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2 sm:py-2.5 text-xs sm:text-sm text-slate-700 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition duration-150 font-medium">
-                                <option value="aktif" {{ old('status', $user->status ?? 'aktif') == 'aktif' ? 'selected' : '' }}>Aktif (Dapat Login)</option>
-                                <option value="nonaktif" {{ old('status', $user->status) == 'nonaktif' ? 'selected' : '' }}>Nonaktif (Diblokir)</option>
-                            </select>
-                            @error('status') 
-                                <p class="text-rose-500 text-xs mt-1.5 font-medium">{{ $message }}</p> 
-                            @enderror
-                        </div>
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-blue-600">
+                            Hak Akses & Keamanan Akun
+                        </h3>
+
                     </div>
 
-                    <!-- Password Baru dengan Toggle Show/Hide -->
-                    <div>
-                        <label for="password" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
-                            Password Baru <span class="text-slate-400 font-normal lowercase">(kosongkan jika tidak ingin mengubah)</span>
+
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
+
+                        {{-- ROLE --}}
+                        <div>
+
+                            <label
+                                for="role"
+                                class="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-600"
+                            >
+                                Role / Hak Akses
+                                <span class="text-rose-500">*</span>
+                            </label>
+
+                            <select
+                                name="role"
+                                id="role"
+                                required
+                                class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2 text-xs font-medium text-slate-700 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 sm:py-2.5 sm:text-sm"
+                            >
+                                <option
+                                    value="admin"
+                                    {{ old('role', $currentRole) === 'admin' ? 'selected' : '' }}
+                                >
+                                    Admin (Akses Penuh)
+                                </option>
+
+                                <option
+                                    value="pimpinan"
+                                    {{ old('role', $currentRole) === 'pimpinan' ? 'selected' : '' }}
+                                >
+                                    Pimpinan (Akses Eksekutif)
+                                </option>
+
+                                <option
+                                    value="staff"
+                                    {{ in_array(old('role', $currentRole), ['staff', 'staf'], true) ? 'selected' : '' }}
+                                >
+                                    Staf (Akses Operator)
+                                </option>
+                            </select>
+
+                            @error('role')
+                                <p class="mt-1.5 text-xs font-medium text-rose-500">
+                                    {{ $message }}
+                                </p>
+                            @enderror
+
+                            <p class="mt-1.5 text-[10px] leading-relaxed text-slate-400 sm:text-[11px]">
+                                Nilai Staf akan disimpan sebagai <strong class="font-semibold text-slate-500">staff</strong> di database.
+                            </p>
+
+                        </div>
+
+
+                        {{-- STATUS --}}
+                        <div>
+
+                            <label
+                                for="status"
+                                class="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-600"
+                            >
+                                Status Akun
+                                <span class="text-rose-500">*</span>
+                            </label>
+
+                            <select
+                                name="status"
+                                id="status"
+                                required
+                                class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2 text-xs font-medium text-slate-700 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 sm:py-2.5 sm:text-sm"
+                            >
+                                <option
+                                    value="aktif"
+                                    {{ old('status', $currentIsActive ? 'aktif' : 'nonaktif') === 'aktif' ? 'selected' : '' }}
+                                >
+                                    Aktif (Dapat Login)
+                                </option>
+
+                                <option
+                                    value="nonaktif"
+                                    {{ old('status', $currentIsActive ? 'aktif' : 'nonaktif') === 'nonaktif' ? 'selected' : '' }}
+                                >
+                                    Nonaktif (Diblokir)
+                                </option>
+                            </select>
+
+                            @error('status')
+                                <p class="mt-1.5 text-xs font-medium text-rose-500">
+                                    {{ $message }}
+                                </p>
+                            @enderror
+
+                        </div>
+
+                    </div>
+
+
+                    {{-- PASSWORD --}}
+                    <div class="mt-4 sm:mt-5">
+
+                        <label
+                            for="password"
+                            class="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-600"
+                        >
+                            Password Baru
+
+                            <span class="font-normal normal-case text-slate-400">
+                                (kosongkan jika tidak ingin mengubah)
+                            </span>
                         </label>
+
                         <div class="relative">
-                            <input type="password" name="password" id="password" placeholder="••••••••"
-                                class="w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-3.5 pr-10 py-2 sm:py-2.5 text-xs sm:text-sm text-slate-700 placeholder-slate-400 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition duration-150 @error('password') border-rose-500 bg-rose-50/30 @enderror">
-                            
-                            <button type="button" id="togglePassword" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 focus:outline-none">
-                                <svg id="eyeOpen" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+
+                            <input
+                                type="password"
+                                name="password"
+                                id="password"
+                                autocomplete="new-password"
+                                placeholder="Masukkan password baru"
+                                class="w-full rounded-xl border border-slate-200 bg-slate-50/50 py-2 pl-3.5 pr-11 text-xs text-slate-700 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 sm:py-2.5 sm:text-sm @error('password') border-rose-500 bg-rose-50/30 @enderror"
+                            >
+
+                            <button
+                                type="button"
+                                id="togglePassword"
+                                aria-label="Tampilkan atau sembunyikan password"
+                                class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 transition hover:text-slate-600 focus:outline-none"
+                            >
+
+                                <svg
+                                    id="eyeOpen"
+                                    class="h-5 w-5"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="1.8"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M2.5 12s3.5-6 9.5-6s9.5 6 9.5 6s-3.5 6-9.5 6s-9.5-6-9.5-6z"
+                                    />
+
+                                    <circle
+                                        cx="12"
+                                        cy="12"
+                                        r="3"
+                                    />
                                 </svg>
-                                <svg id="eyeClosed" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a10.027 10.027 0 014.132-5.411m3.618-1.516A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21M3 3l18 18"/>
+
+                                <svg
+                                    id="eyeClosed"
+                                    class="hidden h-5 w-5"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="1.8"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M3 3l18 18"
+                                    />
+
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M10.58 10.58A3 3 0 0013.42 13.42"
+                                    />
+
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M9.88 5.1A10.5 10.5 0 0112 4.75c6 0 9.5 6 9.5 6a17.4 17.4 0 01-2.1 2.8M6.1 6.1C3.5 8.3 2.5 10.75 2.5 10.75s3.5 6 9.5 6c1.24 0 2.35-.24 3.33-.61"
+                                    />
                                 </svg>
+
                             </button>
+
                         </div>
-                        @error('password') 
-                            <p class="text-rose-500 text-xs mt-1.5 font-medium">{{ $message }}</p> 
+
+                        @error('password')
+                            <p class="mt-1.5 text-xs font-medium text-rose-500">
+                                {{ $message }}
+                            </p>
                         @enderror
+
+                        <p class="mt-1.5 text-[10px] leading-relaxed text-slate-400 sm:text-[11px]">
+                            Minimal 6 karakter. Kosongkan untuk mempertahankan password lama.
+                        </p>
+
                     </div>
-                </div>
+
+
+                    {{-- KONFIRMASI PASSWORD --}}
+                    <div class="mt-4 sm:mt-5">
+
+                        <label
+                            for="password_confirmation"
+                            class="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-600"
+                        >
+                            Konfirmasi Password Baru
+                        </label>
+
+                        <div class="relative">
+
+                            <input
+                                type="password"
+                                name="password_confirmation"
+                                id="password_confirmation"
+                                autocomplete="new-password"
+                                placeholder="Ulangi password baru"
+                                class="w-full rounded-xl border border-slate-200 bg-slate-50/50 py-2.5 pl-3.5 pr-11 text-xs text-slate-700 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 sm:text-sm"
+                            >
+
+                            <button
+                                type="button"
+                                id="togglePasswordConfirmation"
+                                aria-label="Tampilkan atau sembunyikan konfirmasi password"
+                                class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 transition hover:text-slate-600 focus:outline-none"
+                            >
+
+                                <svg
+                                    id="eyeConfirmationOpen"
+                                    class="h-5 w-5"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="1.8"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M2.5 12s3.5-6 9.5-6s9.5 6 9.5 6s-3.5 6-9.5 6s-9.5-6-9.5-6z"
+                                    />
+
+                                    <circle
+                                        cx="12"
+                                        cy="12"
+                                        r="3"
+                                    />
+                                </svg>
+
+                                <svg
+                                    id="eyeConfirmationClosed"
+                                    class="hidden h-5 w-5"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="1.8"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M3 3l18 18"
+                                    />
+
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M10.58 10.58A3 3 0 0013.42 13.42"
+                                    />
+                                </svg>
+
+                            </button>
+
+                        </div>
+
+                        @error('password_confirmation')
+                            <p class="mt-1.5 text-xs font-medium text-rose-500">
+                                {{ $message }}
+                            </p>
+                        @enderror
+
+                    </div>
+
+                </section>
 
             </div>
 
-            <!-- Action Buttons Footer -->
-            <div class="flex flex-col-reverse sm:flex-row items-center justify-end gap-2.5 sm:gap-3 px-4 sm:px-8 py-3.5 sm:py-4 bg-slate-50 border-t border-slate-100">
-                <a href="{{ route('users.index') }}" class="w-full sm:w-auto px-5 py-2.5 text-xs font-semibold text-slate-600 bg-white border border-slate-300 rounded-xl hover:bg-slate-100 hover:text-slate-800 transition shadow-xs text-center">
+
+            {{-- ====================================================
+               FOOTER ACTION
+            ==================================================== --}}
+            <div class="flex flex-col-reverse items-center justify-end gap-2.5 border-t border-slate-100 bg-slate-50 px-4 py-3.5 sm:flex-row sm:px-8 sm:py-4">
+
+                <a
+                    href="{{ route('users.index') }}"
+                    class="w-full rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-center text-xs font-semibold text-slate-600 shadow-sm transition hover:bg-slate-100 hover:text-slate-800 sm:w-auto"
+                >
                     Batal
                 </a>
-                <button type="submit" class="w-full sm:w-auto inline-flex items-center justify-center px-5 py-2.5 text-xs font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 shadow-md shadow-blue-600/30 transition">
+
+                <button
+                    type="submit"
+                    class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-xs font-semibold text-white shadow-md shadow-blue-600/30 transition hover:bg-blue-700 sm:w-auto"
+                >
+                    <svg
+                        class="h-4 w-4"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M5 12.5l4 4L19 7"
+                        />
+                    </svg>
+
                     Simpan Perubahan
                 </button>
+
             </div>
 
         </form>
+
     </div>
 
 </div>
+
 @endsection
 
-@push('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const togglePassword = document.getElementById('togglePassword');
-        const passwordInput = document.getElementById('password');
-        const eyeOpen = document.getElementById('eyeOpen');
-        const eyeClosed = document.getElementById('eyeClosed');
 
-        if (togglePassword && passwordInput) {
-            togglePassword.addEventListener('click', function () {
-                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-                passwordInput.setAttribute('type', type);
-                
-                eyeOpen.classList.toggle('hidden');
-                eyeClosed.classList.toggle('hidden');
-            });
+@push('scripts')
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    /*
+     * ============================================================
+     * TOGGLE PASSWORD
+     * ============================================================
+     */
+    function setupPasswordToggle(
+        buttonId,
+        inputId,
+        openIconId,
+        closedIconId
+    ) {
+        const button =
+            document.getElementById(buttonId);
+
+        const input =
+            document.getElementById(inputId);
+
+        const openIcon =
+            document.getElementById(openIconId);
+
+        const closedIcon =
+            document.getElementById(closedIconId);
+
+        if (
+            !button ||
+            !input ||
+            !openIcon ||
+            !closedIcon
+        ) {
+            return;
         }
-    });
+
+        button.addEventListener(
+            'click',
+            function () {
+                const isPassword =
+                    input.type === 'password';
+
+                input.type =
+                    isPassword
+                        ? 'text'
+                        : 'password';
+
+                openIcon.classList.toggle(
+                    'hidden',
+                    isPassword
+                );
+
+                closedIcon.classList.toggle(
+                    'hidden',
+                    !isPassword
+                );
+            }
+        );
+    }
+
+
+    setupPasswordToggle(
+        'togglePassword',
+        'password',
+        'eyeOpen',
+        'eyeClosed'
+    );
+
+
+    setupPasswordToggle(
+        'togglePasswordConfirmation',
+        'password_confirmation',
+        'eyeConfirmationOpen',
+        'eyeConfirmationClosed'
+    );
+
+});
 </script>
+
 @endpush

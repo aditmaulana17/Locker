@@ -3,190 +3,582 @@
 @section('title', 'Manajemen Pengguna')
 
 @section('content')
-<div class="space-y-4 sm:space-y-6 pb-12">
 
-    <!-- Header Section (Judul & Tombol Tambah) -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
-        <div>
-            <h1 class="text-xl sm:text-2xl font-bold text-slate-800 tracking-tight">Manajemen Pengguna</h1>
-            <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Kelola akun pengguna sistem, hak akses, dan peranan jabatan.</p>
+@php
+    $roleFilter = strtolower(
+        trim(
+            (string) request('role', '')
+        )
+    );
+
+    /*
+     * Database menggunakan:
+     * admin
+     * pimpinan
+     * staff
+     */
+    if ($roleFilter === 'staf') {
+        $roleFilter = 'staff';
+    }
+@endphp
+
+<div class="space-y-4 pb-12 sm:space-y-6">
+
+    {{-- ============================================================
+       HEADER
+    ============================================================ --}}
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+
+        <div class="min-w-0">
+            <h1 class="text-xl font-bold tracking-tight text-slate-800 sm:text-2xl">
+                Manajemen Pengguna
+            </h1>
+
+            <p class="mt-0.5 text-xs text-slate-500 sm:text-sm">
+                Kelola akun pengguna sistem, hak akses, dan peranan jabatan.
+            </p>
         </div>
 
-        <a href="{{ route('users.create') }}" 
-           class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm shadow-md shadow-blue-500/20 transition-all duration-200 shrink-0 w-full sm:w-auto">
-            <svg class="w-4 h-4 sm:w-5 sm:h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        <a
+            href="{{ route('users.create') }}"
+            class="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-semibold text-white shadow-md shadow-blue-500/20 transition-all duration-200 hover:bg-blue-700 sm:w-auto sm:text-sm"
+        >
+            <svg
+                class="h-4 w-4 sm:h-5 sm:w-5"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+            >
+                <path
+                    stroke-linecap="round"
+                    d="M12 4v16M4 12h16"
+                />
             </svg>
+
             <span>Tambah Pengguna</span>
         </a>
+
     </div>
 
-    <!-- Filter & Search Bar Container -->
-    <div class="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-slate-200/80 shadow-sm">
-        <form method="GET" action="{{ route('users.index') }}" class="flex flex-col md:flex-row items-center gap-2.5 sm:gap-3">
-            
-            <!-- Search Input -->
-            <div class="relative flex-1 w-full">
-                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+
+    {{-- ============================================================
+       FILTER & PENCARIAN
+    ============================================================ --}}
+    <div class="rounded-xl border border-slate-200/80 bg-white p-3 shadow-sm sm:rounded-2xl sm:p-4">
+
+        <form
+            method="GET"
+            action="{{ route('users.index') }}"
+            class="flex flex-col gap-2.5 md:flex-row md:items-center sm:gap-3"
+        >
+
+            {{-- SEARCH --}}
+            <div class="relative w-full flex-1">
+
+                <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+                    <svg
+                        class="h-4 w-4"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        viewBox="0 0 24 24"
+                    >
+                        <circle
+                            cx="11"
+                            cy="11"
+                            r="7"
+                        />
+
+                        <path
+                            stroke-linecap="round"
+                            d="M20 20l-4-4"
+                        />
                     </svg>
                 </div>
-                <input type="text" 
-                       name="search" 
-                       value="{{ request('search') }}" 
-                       placeholder="Cari nama, email, atau jabatan..." 
-                       class="w-full pl-10 pr-4 py-2 sm:py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all duration-150">
+
+                <input
+                    type="text"
+                    name="search"
+                    value="{{ request('search') }}"
+                    placeholder="Cari nama, email, atau jabatan..."
+                    class="w-full rounded-xl border border-slate-200 bg-slate-50/50 py-2 pl-10 pr-4 text-xs text-slate-800 placeholder-slate-400 transition-all duration-150 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10 sm:py-2.5 sm:text-sm"
+                >
+
             </div>
 
-            <div class="flex items-center gap-2 w-full md:w-auto">
-                <!-- Filter Role (Admin, Pimpinan, Staf) -->
-                <div class="flex-1 md:w-48 shrink-0">
-                    <select name="role" onchange="this.form.submit()" class="w-full px-3.5 py-2 sm:py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-700 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-medium">
-                        <option value="">Semua Role</option>
-                        <option value="admin" {{ request('role') == 'admin' ? 'selected' : '' }}>Admin</option>
-                        <option value="pimpinan" {{ request('role') == 'pimpinan' ? 'selected' : '' }}>Pimpinan</option>
-                        <option value="staf" {{ in_array(request('role'), ['staf', 'staff']) ? 'selected' : '' }}>Staf</option>
+
+            {{-- ROLE + BUTTON --}}
+            <div class="flex w-full items-center gap-2 md:w-auto">
+
+                <div class="min-w-0 flex-1 md:w-48">
+
+                    <select
+                        name="role"
+                        onchange="this.form.submit()"
+                        class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2 text-xs font-medium text-slate-700 transition-all focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10 sm:py-2.5 sm:text-sm"
+                    >
+                        <option value="">
+                            Semua Role
+                        </option>
+
+                        <option
+                            value="admin"
+                            {{ $roleFilter === 'admin' ? 'selected' : '' }}
+                        >
+                            Admin
+                        </option>
+
+                        <option
+                            value="pimpinan"
+                            {{ $roleFilter === 'pimpinan' ? 'selected' : '' }}
+                        >
+                            Pimpinan
+                        </option>
+
+                        <option
+                            value="staff"
+                            {{ $roleFilter === 'staff' ? 'selected' : '' }}
+                        >
+                            Staf
+                        </option>
                     </select>
+
                 </div>
 
-                <!-- Button Submit Search -->
-                <button type="submit" class="px-4 sm:px-5 py-2 sm:py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs sm:text-sm rounded-xl transition duration-150 shadow-sm shrink-0">
+
+                <button
+                    type="submit"
+                    class="shrink-0 rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-slate-800 sm:px-5 sm:py-2.5 sm:text-sm"
+                >
                     Cari
                 </button>
 
-                <!-- Reset Button -->
+
                 @if(request('search') || request('role'))
-                    <a href="{{ route('users.index') }}" class="px-3.5 sm:px-4 py-2 sm:py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-600 font-semibold text-xs sm:text-sm rounded-xl transition duration-150 text-center shrink-0 shadow-xs">
+
+                    <a
+                        href="{{ route('users.index') }}"
+                        class="shrink-0 rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-center text-xs font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50 sm:px-4 sm:py-2.5 sm:text-sm"
+                    >
                         Reset
                     </a>
+
                 @endif
+
             </div>
+
         </form>
+
     </div>
 
-    <!-- Table Data Pengguna -->
-    <div class="bg-white rounded-xl sm:rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+
+    {{-- ============================================================
+       TABLE
+    ============================================================ --}}
+    <div class="overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm sm:rounded-2xl">
+
         <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse min-w-[600px] sm:min-w-full">
+
+            <table class="w-full min-w-[680px] border-collapse text-left">
+
                 <thead>
-                    <tr class="bg-slate-50/80 border-b border-slate-200/80 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                        <th class="py-3 sm:py-3.5 px-4 sm:px-6">Pengguna</th>
-                        <th class="py-3 sm:py-3.5 px-4 sm:px-6">Role</th>
-                        <th class="py-3 sm:py-3.5 px-4 sm:px-6">Jabatan</th>
-                        <th class="py-3 sm:py-3.5 px-4 sm:px-6">Status</th>
-                        <th class="py-3 sm:py-3.5 px-4 sm:px-6 text-right">Aksi</th>
+
+                    <tr class="border-b border-slate-200/80 bg-slate-50/80 text-[10px] font-bold uppercase tracking-wider text-slate-500 sm:text-[11px]">
+
+                        <th class="px-4 py-3 sm:px-6 sm:py-3.5">
+                            Pengguna
+                        </th>
+
+                        <th class="px-4 py-3 sm:px-6 sm:py-3.5">
+                            Role
+                        </th>
+
+                        <th class="px-4 py-3 sm:px-6 sm:py-3.5">
+                            Jabatan
+                        </th>
+
+                        <th class="px-4 py-3 sm:px-6 sm:py-3.5">
+                            Status
+                        </th>
+
+                        <th class="px-4 py-3 text-right sm:px-6 sm:py-3.5">
+                            Aksi
+                        </th>
+
                     </tr>
+
                 </thead>
+
+
                 <tbody class="divide-y divide-slate-100 text-xs sm:text-sm">
+
                     @forelse($users as $user)
-                        <tr class="hover:bg-slate-50/60 transition-colors duration-150">
-                            <!-- Pengguna (Avatar, Nama, Email) -->
-                            <td class="py-3 sm:py-4 px-4 sm:px-6">
+
+                        @php
+                            $userRole = strtolower(
+                                trim(
+                                    (string) ($user->role ?? '')
+                                )
+                            );
+
+                            $userName = trim(
+                                (string) ($user->name ?? '')
+                            );
+
+                            $avatarText = strtoupper(
+                                mb_substr(
+                                    $userName !== ''
+                                        ? $userName
+                                        : 'US',
+                                    0,
+                                    2
+                                )
+                            );
+
+                            $isActive = (bool) (
+                                $user->is_active
+                                ?? (
+                                    strtolower(
+                                        (string) ($user->status ?? 'aktif')
+                                    ) === 'aktif'
+                                )
+                            );
+                        @endphp
+
+
+                        <tr class="transition-colors duration-150 hover:bg-slate-50/60">
+
+                            {{-- =================================================
+                               PENGGUNA
+                            ================================================= --}}
+                            <td class="px-4 py-3 sm:px-6 sm:py-4">
+
                                 <div class="flex items-center gap-2.5 sm:gap-3">
-                                    <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-blue-50 border border-blue-200/60 flex items-center justify-center text-blue-600 font-bold text-xs sm:text-sm shadow-xs shrink-0">
-                                        {{ strtoupper(substr($user->name, 0, 2)) }}
+
+                                    <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-blue-200/60 bg-blue-50 text-xs font-bold text-blue-600 shadow-sm sm:h-10 sm:w-10 sm:text-sm">
+                                        {{ $avatarText }}
                                     </div>
-                                    <div class="flex flex-col">
-                                        <span class="font-bold text-slate-800 leading-snug">{{ $user->name }}</span>
-                                        <span class="text-[11px] sm:text-xs text-slate-400 font-medium">{{ $user->email }}</span>
+
+                                    <div class="flex min-w-0 flex-col">
+
+                                        <span class="truncate font-bold leading-snug text-slate-800">
+                                            {{ $user->name ?? '-' }}
+                                        </span>
+
+                                        <span class="truncate text-[11px] font-medium text-slate-400 sm:text-xs">
+                                            {{ $user->email ?? '-' }}
+                                        </span>
+
                                     </div>
+
                                 </div>
+
                             </td>
 
-                            <!-- Role Badge (Admin, Pimpinan, Staf) -->
-                            <td class="py-3 sm:py-4 px-4 sm:px-6 whitespace-nowrap">
-                                @if(strtolower($user->role) === 'admin')
-                                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] sm:text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200/60">
+
+                            {{-- =================================================
+                               ROLE
+                            ================================================= --}}
+                            <td class="whitespace-nowrap px-4 py-3 sm:px-6 sm:py-4">
+
+                                @if($userRole === 'admin')
+
+                                    <span class="inline-flex items-center rounded-lg border border-purple-200/60 bg-purple-50 px-2.5 py-1 text-[11px] font-semibold text-purple-700 sm:text-xs">
                                         Admin
                                     </span>
-                                @elseif(strtolower($user->role) === 'pimpinan')
-                                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] sm:text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200/60">
+
+                                @elseif($userRole === 'pimpinan')
+
+                                    <span class="inline-flex items-center rounded-lg border border-amber-200/60 bg-amber-50 px-2.5 py-1 text-[11px] font-semibold text-amber-700 sm:text-xs">
                                         Pimpinan
                                     </span>
-                                @elseif(in_array(strtolower($user->role), ['staf', 'staff']))
-                                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] sm:text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200/60">
+
+                                @elseif(in_array($userRole, ['staff', 'staf'], true))
+
+                                    <span class="inline-flex items-center rounded-lg border border-blue-200/60 bg-blue-50 px-2.5 py-1 text-[11px] font-semibold text-blue-700 sm:text-xs">
                                         Staf
                                     </span>
+
                                 @else
-                                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] sm:text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200/80">
-                                        {{ ucfirst($user->role ?? 'User') }}
+
+                                    <span class="inline-flex items-center rounded-lg border border-slate-200/80 bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-600 sm:text-xs">
+                                        {{ ucfirst($userRole ?: 'User') }}
                                     </span>
+
                                 @endif
+
                             </td>
 
-                            <!-- Jabatan -->
-                            <td class="py-3 sm:py-4 px-4 sm:px-6 text-slate-600 font-medium whitespace-nowrap">
+
+                            {{-- =================================================
+                               JABATAN
+                            ================================================= --}}
+                            <td class="whitespace-nowrap px-4 py-3 font-medium text-slate-600 sm:px-6 sm:py-4">
                                 {{ $user->jabatan ?? '-' }}
                             </td>
 
-                            <!-- Status Badge -->
-                            <td class="py-3 sm:py-4 px-4 sm:px-6 whitespace-nowrap">
-                                @if(isset($user->is_active) ? $user->is_active : (strtolower($user->status ?? 'aktif') === 'aktif'))
-                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/60">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+
+                            {{-- =================================================
+                               STATUS
+                            ================================================= --}}
+                            <td class="whitespace-nowrap px-4 py-3 sm:px-6 sm:py-4">
+
+                                @if($isActive)
+
+                                    <span class="inline-flex items-center gap-1.5 rounded-full border border-emerald-200/60 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700 sm:text-xs">
+
+                                        <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+
                                         <span>Aktif</span>
+
                                     </span>
+
                                 @else
-                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200/60">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+
+                                    <span class="inline-flex items-center gap-1.5 rounded-full border border-rose-200/60 bg-rose-50 px-2.5 py-1 text-[11px] font-semibold text-rose-700 sm:text-xs">
+
+                                        <span class="h-1.5 w-1.5 rounded-full bg-rose-500"></span>
+
                                         <span>Nonaktif</span>
+
                                     </span>
+
                                 @endif
+
                             </td>
 
-                            <!-- Action Buttons -->
-                            <td class="py-3 sm:py-4 px-4 sm:px-6 text-right whitespace-nowrap">
+
+                            {{-- =================================================
+                               AKSI
+                            ================================================= --}}
+                            <td class="whitespace-nowrap px-4 py-3 text-right sm:px-6 sm:py-4">
+
                                 <div class="flex items-center justify-end gap-1">
-                                    <!-- Edit Button -->
-                                    <a href="{{ route('users.edit', $user->id) }}" 
-                                       title="Edit User"
-                                       class="p-1.5 sm:p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-xl transition-all duration-150">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+
+                                    {{-- EDIT --}}
+                                    <a
+                                        href="{{ route('users.edit', $user->id) }}"
+                                        title="Edit User"
+                                        class="rounded-xl p-1.5 text-slate-400 transition-all duration-150 hover:bg-amber-50 hover:text-amber-600 sm:p-2"
+                                    >
+                                        <svg
+                                            class="h-4 w-4"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            stroke-width="1.8"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                d="M12 20h9"
+                                            />
+
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                d="M16.5 3.5a2.12 2.12 0 013 3L8 18l-4 1 1-4L16.5 3.5z"
+                                            />
                                         </svg>
                                     </a>
 
-                                    <!-- Delete Button (Cegah Hapus Akun Sendiri) -->
-                                    @if(auth()->id() !== $user->id)
-                                        <form method="POST" action="{{ route('users.destroy', $user->id) }}" class="inline-block delete-form">
+
+                                    {{-- DELETE --}}
+                                    @if((int) auth()->id() !== (int) $user->id)
+
+                                        <form
+                                            method="POST"
+                                            action="{{ route('users.destroy', $user->id) }}"
+                                            class="delete-form inline-block"
+                                        >
                                             @csrf
                                             @method('DELETE')
-                                            <button type="button" 
+
+                                            <button
+                                                type="button"
                                                 title="Hapus User"
-                                                class="p-1.5 sm:p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all duration-150 delete-btn">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                class="delete-btn rounded-xl p-1.5 text-slate-400 transition-all duration-150 hover:bg-rose-50 hover:text-rose-600 sm:p-2"
+                                            >
+                                                <svg
+                                                    class="h-4 w-4"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    stroke-width="1.8"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                        d="M4 7h16"
+                                                    />
+
+                                                    <path
+                                                        stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                        d="M10 11v6M14 11v6"
+                                                    />
+
+                                                    <path
+                                                        stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                        d="M6 7l1 13h10l1-13"
+                                                    />
+
+                                                    <path
+                                                        stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                        d="M9 7V4h6v3"
+                                                    />
                                                 </svg>
                                             </button>
+
                                         </form>
+
                                     @endif
+
                                 </div>
+
                             </td>
+
                         </tr>
+
                     @empty
+
                         <tr>
-                            <td colspan="5" class="py-10 sm:py-12 text-center text-slate-400">
+
+                            <td
+                                colspan="5"
+                                class="px-4 py-10 text-center text-slate-400 sm:px-6 sm:py-12"
+                            >
+
                                 <div class="flex flex-col items-center justify-center gap-2">
-                                    <svg class="w-8 h-8 sm:w-10 sm:h-10 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
-                                    </svg>
-                                    <p class="font-medium text-xs sm:text-sm">Tidak ada data pengguna yang ditemukan.</p>
+
+                                    <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-300">
+
+                                        <svg
+                                            class="h-7 w-7"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            stroke-width="1.6"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <circle
+                                                cx="9"
+                                                cy="8"
+                                                r="3"
+                                            />
+
+                                            <path
+                                                stroke-linecap="round"
+                                                d="M3 20a6 6 0 0112 0"
+                                            />
+
+                                            <circle
+                                                cx="17"
+                                                cy="8"
+                                                r="2"
+                                            />
+
+                                            <path
+                                                stroke-linecap="round"
+                                                d="M15 19a5 5 0 014-3.87"
+                                            />
+                                        </svg>
+
+                                    </div>
+
+                                    <p class="text-xs font-medium sm:text-sm">
+                                        Tidak ada data pengguna yang ditemukan.
+                                    </p>
+
                                 </div>
+
                             </td>
+
                         </tr>
+
                     @endforelse
+
                 </tbody>
+
             </table>
+
         </div>
 
-        <!-- Pagination Footer -->
+
+        {{-- ============================================================
+           PAGINATION
+        ============================================================ --}}
         @if(method_exists($users, 'hasPages') && $users->hasPages())
-            <div class="px-4 sm:px-6 py-3 sm:py-4 border-t border-slate-100 bg-slate-50/50">
+
+            <div class="border-t border-slate-100 bg-slate-50/50 px-4 py-3 sm:px-6 sm:py-4">
                 {{ $users->appends(request()->query())->links() }}
             </div>
+
         @endif
+
     </div>
 
 </div>
+
+
+{{-- ================================================================
+   SWEETALERT DELETE
+================================================================ --}}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const deleteButtons =
+        document.querySelectorAll('.delete-btn');
+
+    if (!deleteButtons.length) {
+        return;
+    }
+
+    deleteButtons.forEach(function (button) {
+        button.addEventListener('click', function () {
+            const form =
+                button.closest('.delete-form');
+
+            if (!form) {
+                return;
+            }
+
+            if (typeof Swal === 'undefined') {
+                if (
+                    confirm(
+                        'Apakah Anda yakin ingin menghapus pengguna ini?'
+                    )
+                ) {
+                    form.submit();
+                }
+
+                return;
+            }
+
+            Swal.fire({
+                title: 'Hapus pengguna?',
+                text: 'Data pengguna akan dihapus dari sistem.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, hapus',
+                cancelButtonText: 'Batal',
+                reverseButtons: true,
+                buttonsStyling: false,
+                customClass: {
+                    confirmButton:
+                        'rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white mx-1',
+                    cancelButton:
+                        'rounded-lg bg-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 mx-1'
+                }
+            }).then(function (result) {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
+    });
+});
+</script>
+
 @endsection
