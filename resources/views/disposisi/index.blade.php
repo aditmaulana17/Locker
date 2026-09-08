@@ -7,8 +7,15 @@
 @php
     $user = auth()->user();
 
-    $userRole = strtolower(trim((string) ($user->role ?? $user->jabatan ?? '')));
-    $userRole = $userRole === 'staff' ? 'staf' : $userRole;
+    $userRole = strtolower(
+        trim(
+            (string) ($user->role ?? $user->jabatan ?? '')
+        )
+    );
+
+    $userRole = $userRole === 'staff'
+        ? 'staf'
+        : $userRole;
 
     $statusOptions = [
         'menunggu' => 'Menunggu',
@@ -22,10 +29,23 @@
         'selesai' => 'border-emerald-200 bg-emerald-50 text-emerald-700',
     ];
 
-    $selectedStatus = collect(request('status', []))
-        ->filter(fn ($status) => is_scalar($status))
-        ->map(fn ($status) => strtolower(trim((string) $status)))
-        ->filter(fn ($status) => array_key_exists($status, $statusOptions))
+    $selectedStatus = collect(
+        request('status', [])
+    )
+        ->filter(
+            fn ($status) => is_scalar($status)
+        )
+        ->map(
+            fn ($status) => strtolower(
+                trim((string) $status)
+            )
+        )
+        ->filter(
+            fn ($status) => array_key_exists(
+                $status,
+                $statusOptions
+            )
+        )
         ->unique()
         ->values()
         ->all();
@@ -71,8 +91,12 @@
         }
 
         return [
-            'nama' => $penerima->name ?? $penerima->nama ?? '-',
-            'jabatan' => $penerima->jabatan ?? null,
+            'nama' => $penerima->name
+                ?? $penerima->nama
+                ?? '-',
+
+            'jabatan' => $penerima->jabatan
+                ?? null,
         ];
     };
 
@@ -93,7 +117,8 @@
         }
 
         try {
-            return \Carbon\Carbon::parse($tanggal)->format('d/m/Y');
+            return \Carbon\Carbon::parse($tanggal)
+                ->format('d/m/Y');
         } catch (\Throwable) {
             return '-';
         }
@@ -109,7 +134,8 @@
         }
 
         try {
-            return \Carbon\Carbon::parse($tanggal)->format('d/m/Y');
+            return \Carbon\Carbon::parse($tanggal)
+                ->format('d/m/Y');
         } catch (\Throwable) {
             return '-';
         }
@@ -118,24 +144,33 @@
 
 @push('styles')
 <style>
+    /* =========================================================
+       BASE
+    ========================================================= */
+
     .archive-date-picker,
     .archive-status-dropdown {
         position: relative;
     }
+
+    /* =========================================================
+       DATE PICKER
+    ========================================================= */
 
     .archive-date-panel {
         position: absolute;
         top: calc(100% + 8px);
         left: 0;
         z-index: 9999;
-        width: min(800px, calc(100vw - 24px));
+        width: 620px;
+        max-width: calc(100vw - 24px);
         overflow: hidden;
         border: 1px solid #e2e8f0;
-        border-radius: 18px;
+        border-radius: 16px;
         background: #fff;
         box-shadow:
-            0 20px 50px rgba(15, 23, 42, .14),
-            0 8px 22px rgba(15, 23, 42, .07);
+            0 16px 40px rgba(15, 23, 42, .12),
+            0 6px 18px rgba(15, 23, 42, .06);
     }
 
     .archive-date-panel.hidden,
@@ -148,27 +183,27 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 10px;
-        padding: 13px 15px;
+        gap: 8px;
+        padding: 10px 12px;
         border-bottom: 1px solid #e2e8f0;
         background: #f8fafc;
     }
 
     .archive-date-header-title {
         color: #334155;
-        font-size: 13px;
+        font-size: 12px;
         font-weight: 800;
     }
 
     .archive-date-nav {
-        width: 36px;
-        height: 36px;
+        width: 32px;
+        height: 32px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
         flex: none;
         border: 1px solid #e2e8f0;
-        border-radius: 10px;
+        border-radius: 9px;
         background: #fff;
         color: #64748b;
         cursor: pointer;
@@ -188,7 +223,7 @@
 
     .archive-date-month {
         min-width: 0;
-        padding: 15px;
+        padding: 12px;
         border-right: 1px solid #e2e8f0;
     }
 
@@ -200,20 +235,20 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 3px;
-        margin-bottom: 11px;
+        gap: 2px;
+        margin-bottom: 8px;
     }
 
     .archive-month-header button {
         display: inline-flex;
         align-items: center;
-        gap: 3px;
+        gap: 2px;
         border: 0;
-        border-radius: 9px;
+        border-radius: 8px;
         background: transparent;
-        padding: 7px 8px;
+        padding: 5px 6px;
         color: #334155;
-        font-size: 12px;
+        font-size: 11px;
         font-weight: 800;
         cursor: pointer;
         transition: .15s;
@@ -227,30 +262,31 @@
     .archive-month-grid {
         display: grid;
         grid-template-columns: repeat(7, minmax(0, 1fr));
-        gap: 3px;
+        gap: 2px;
     }
 
     .archive-calendar-weekday {
         display: flex;
         align-items: center;
         justify-content: center;
-        height: 28px;
+        height: 24px;
         color: #94a3b8;
-        font-size: 9px;
+        font-size: 8px;
         font-weight: 800;
         text-transform: uppercase;
     }
 
     .archive-calendar-day {
-        height: 36px;
+        width: 100%;
+        height: 31px;
         display: flex;
         align-items: center;
         justify-content: center;
         border: 0;
-        border-radius: 9px;
+        border-radius: 8px;
         background: transparent;
         color: #475569;
-        font-size: 11px;
+        font-size: 10px;
         font-weight: 600;
         cursor: pointer;
         transition: .15s;
@@ -279,13 +315,13 @@
     .archive-calendar-day.start-date {
         background: #2563eb;
         color: #fff;
-        border-radius: 999px 8px 8px 999px;
+        border-radius: 999px 6px 6px 999px;
     }
 
     .archive-calendar-day.end-date {
         background: #2563eb;
         color: #fff;
-        border-radius: 8px 999px 999px 8px;
+        border-radius: 6px 999px 999px 6px;
     }
 
     .archive-calendar-day.start-date.end-date {
@@ -298,34 +334,38 @@
         color: #fff;
     }
 
+    /* =========================================================
+       DATE FOOTER
+    ========================================================= */
+
     .archive-date-footer {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 10px;
-        padding: 11px 14px 14px;
+        gap: 8px;
+        padding: 9px 12px 11px;
         border-top: 1px solid #e2e8f0;
     }
 
     .archive-date-footer-info {
         min-width: 0;
         color: #64748b;
-        font-size: 10px;
+        font-size: 9px;
         font-weight: 700;
     }
 
     .archive-date-footer-actions {
         display: flex;
         align-items: center;
-        gap: 6px;
+        gap: 5px;
         flex: none;
     }
 
     .archive-date-btn {
-        min-height: 35px;
-        padding: 0 13px;
-        border-radius: 10px;
-        font-size: 10px;
+        min-height: 32px;
+        padding: 0 11px;
+        border-radius: 9px;
+        font-size: 9px;
         font-weight: 800;
         cursor: pointer;
         transition: .15s;
@@ -352,37 +392,41 @@
         background: #1d4ed8;
     }
 
+    /* =========================================================
+       MONTH / YEAR PICKER
+    ========================================================= */
+
     .archive-picker-view {
-        padding: 16px;
+        padding: 12px;
     }
 
     .archive-picker-toolbar {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 10px;
-        margin-bottom: 12px;
+        gap: 8px;
+        margin-bottom: 9px;
         color: #475569;
-        font-size: 11px;
+        font-size: 10px;
         font-weight: 800;
     }
 
     .archive-picker-grid {
         display: grid;
         grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 8px;
+        gap: 6px;
     }
 
     .archive-picker-item {
-        min-height: 42px;
+        min-height: 36px;
         display: flex;
         align-items: center;
         justify-content: center;
         border: 1px solid #e2e8f0;
-        border-radius: 11px;
+        border-radius: 9px;
         background: #fff;
         color: #475569;
-        font-size: 11px;
+        font-size: 10px;
         font-weight: 700;
         cursor: pointer;
         transition: .15s;
@@ -404,33 +448,33 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 10px;
-        margin-bottom: 12px;
+        gap: 8px;
+        margin-bottom: 9px;
     }
 
     .archive-year-range {
         color: #475569;
-        font-size: 11px;
+        font-size: 10px;
         font-weight: 800;
     }
 
     .archive-year-nav {
         display: flex;
         align-items: center;
-        gap: 6px;
+        gap: 5px;
     }
 
     .archive-year-nav button {
-        width: 32px;
-        height: 32px;
+        width: 29px;
+        height: 29px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
         border: 1px solid #e2e8f0;
-        border-radius: 9px;
+        border-radius: 8px;
         background: #fff;
         color: #64748b;
-        font-size: 15px;
+        font-size: 14px;
         cursor: pointer;
     }
 
@@ -440,6 +484,10 @@
         color: #2563eb;
     }
 
+    /* =========================================================
+       STATUS DROPDOWN
+    ========================================================= */
+
     .archive-status-panel {
         position: absolute;
         top: calc(100% + 8px);
@@ -448,11 +496,11 @@
         width: 370px;
         overflow: hidden;
         border: 1px solid #e2e8f0;
-        border-radius: 18px;
+        border-radius: 16px;
         background: #fff;
         box-shadow:
-            0 20px 50px rgba(15, 23, 42, .14),
-            0 8px 22px rgba(15, 23, 42, .07);
+            0 16px 40px rgba(15, 23, 42, .12),
+            0 6px 18px rgba(15, 23, 42, .06);
     }
 
     .archive-status-head {
@@ -460,7 +508,7 @@
         align-items: center;
         justify-content: space-between;
         gap: 10px;
-        padding: 13px 15px;
+        padding: 12px 14px;
         border-bottom: 1px solid #e2e8f0;
         background: #f8fafc;
     }
@@ -472,7 +520,7 @@
     .archive-status-head-title strong {
         display: block;
         color: #334155;
-        font-size: 12px;
+        font-size: 11px;
         font-weight: 800;
     }
 
@@ -480,20 +528,20 @@
         display: block;
         margin-top: 2px;
         color: #94a3b8;
-        font-size: 10px;
+        font-size: 9px;
     }
 
     .archive-status-count {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        min-height: 27px;
-        padding: 0 10px;
+        min-height: 25px;
+        padding: 0 9px;
         border: 1px solid #fde68a;
         border-radius: 999px;
         background: #fffbeb;
         color: #d97706;
-        font-size: 10px;
+        font-size: 9px;
         font-weight: 800;
         white-space: nowrap;
     }
@@ -503,7 +551,7 @@
         align-items: center;
         justify-content: space-between;
         gap: 8px;
-        padding: 10px 15px;
+        padding: 9px 14px;
         border-bottom: 1px solid #f1f5f9;
     }
 
@@ -512,7 +560,7 @@
         background: transparent;
         padding: 0;
         color: #2563eb;
-        font-size: 10px;
+        font-size: 9px;
         font-weight: 800;
         cursor: pointer;
     }
@@ -526,20 +574,20 @@
     }
 
     .archive-status-options {
-        max-height: 240px;
+        max-height: 210px;
         overflow-y: auto;
-        padding: 11px 15px 13px;
+        padding: 9px 14px 11px;
     }
 
     .archive-status-item {
         display: flex;
         align-items: center;
-        gap: 10px;
-        min-height: 48px;
-        margin-bottom: 7px;
-        padding: 9px 11px;
+        gap: 9px;
+        min-height: 43px;
+        margin-bottom: 6px;
+        padding: 8px 10px;
         border: 1px solid #e2e8f0;
-        border-radius: 12px;
+        border-radius: 10px;
         background: #fff;
         cursor: pointer;
         transition: .15s;
@@ -555,8 +603,8 @@
     }
 
     .archive-status-item input {
-        width: 17px;
-        height: 17px;
+        width: 16px;
+        height: 16px;
         flex: none;
         accent-color: #2563eb;
     }
@@ -565,13 +613,13 @@
         min-width: 0;
         flex: 1;
         color: #475569;
-        font-size: 11px;
+        font-size: 10px;
         font-weight: 700;
     }
 
     .archive-status-dot {
-        width: 8px;
-        height: 8px;
+        width: 7px;
+        height: 7px;
         flex: none;
         border-radius: 999px;
     }
@@ -591,19 +639,19 @@
     .archive-status-footer {
         display: flex;
         justify-content: flex-end;
-        padding: 10px 15px;
+        padding: 9px 14px;
         border-top: 1px solid #e2e8f0;
         background: #f8fafc;
     }
 
     .archive-status-close {
-        min-height: 35px;
-        padding: 0 14px;
+        min-height: 32px;
+        padding: 0 12px;
         border: 1px solid #e2e8f0;
-        border-radius: 10px;
+        border-radius: 9px;
         background: #fff;
         color: #475569;
-        font-size: 10px;
+        font-size: 9px;
         font-weight: 800;
         cursor: pointer;
         transition: .15s;
@@ -614,6 +662,10 @@
         color: #334155;
     }
 
+    /* =========================================================
+       MOBILE
+    ========================================================= */
+
     @media (max-width: 767px) {
         .archive-date-panel,
         .archive-status-panel {
@@ -622,14 +674,14 @@
             left: 50%;
             right: auto;
             width: calc(100vw - 24px);
-            max-width: 430px;
+            max-width: 410px;
             max-height: calc(100vh - 24px);
             transform: translate(-50%, -50%);
         }
 
         .archive-date-months {
             grid-template-columns: 1fr;
-            max-height: 58vh;
+            max-height: 55vh;
             overflow-y: auto;
         }
 
@@ -651,8 +703,11 @@
 
 <div class="space-y-4 sm:space-y-6">
 
-    {{-- HEADER --}}
+    {{-- =====================================================
+         HEADER
+    ====================================================== --}}
     <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+
         <div class="min-w-0">
             <h1 class="text-xl font-bold tracking-tight text-slate-800 sm:text-2xl">
                 Disposisi Surat
@@ -665,7 +720,9 @@
 
         <div class="grid w-full grid-cols-3 gap-2 sm:flex sm:w-auto">
 
+            {{-- EXPORT EXCEL --}}
             @if(Route::has('export.disposisi.excel'))
+
                 <a href="{{ route('export.disposisi.excel', request()->query()) }}"
                    class="inline-flex items-center justify-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-2.5 py-2 text-xs font-semibold text-emerald-700 shadow-sm transition hover:bg-emerald-100 sm:px-3.5">
 
@@ -673,19 +730,26 @@
                          fill="none"
                          stroke="currentColor"
                          viewBox="0 0 24 24">
+
                         <path stroke-linecap="round"
                               stroke-linejoin="round"
                               stroke-width="2"
-                              d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                              d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 00.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+
                     </svg>
 
                     <span>Excel</span>
                 </a>
+
             @else
+
                 <div></div>
+
             @endif
 
+            {{-- EXPORT PDF --}}
             @if(Route::has('export.disposisi.pdf'))
+
                 <a href="{{ route('export.disposisi.pdf', request()->query()) }}"
                    target="_blank"
                    rel="noopener noreferrer"
@@ -695,19 +759,33 @@
                          fill="none"
                          stroke="currentColor"
                          viewBox="0 0 24 24">
+
                         <path stroke-linecap="round"
                               stroke-linejoin="round"
                               stroke-width="2"
                               d="M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+
                     </svg>
 
                     <span>PDF</span>
                 </a>
+
             @else
+
                 <div></div>
+
             @endif
 
-            @if(in_array($userRole, ['admin', 'pimpinan'], true) && Route::has('surat-masuk.index'))
+            {{-- BUAT DISPOSISI --}}
+            @if(
+                in_array(
+                    $userRole,
+                    ['admin', 'pimpinan'],
+                    true
+                ) &&
+                Route::has('surat-masuk.index')
+            )
+
                 <a href="{{ route('surat-masuk.index') }}"
                    title="Pilih surat masuk untuk membuat disposisi"
                    class="inline-flex items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-2.5 py-2 text-xs font-semibold text-white shadow-md shadow-blue-600/20 transition hover:bg-blue-700 sm:px-4">
@@ -716,22 +794,29 @@
                          fill="none"
                          stroke="currentColor"
                          viewBox="0 0 24 24">
+
                         <path stroke-linecap="round"
                               stroke-linejoin="round"
                               stroke-width="2"
                               d="M12 4v16m8-8H4"/>
+
                     </svg>
 
                     <span>Disposisi</span>
                 </a>
+
             @else
+
                 <div></div>
+
             @endif
 
         </div>
     </div>
 
-    {{-- FILTER --}}
+    {{-- =====================================================
+         FILTER CARD
+    ====================================================== --}}
     <div class="rounded-2xl border border-slate-200/80 bg-white p-3 shadow-sm sm:p-5">
 
         <form id="filterForm"
@@ -739,23 +824,27 @@
               action="{{ route('disposisi.index') }}"
               class="space-y-3">
 
-            {{-- SEARCH + DATE + FILTER --}}
             <div class="grid grid-cols-1 gap-2.5 lg:grid-cols-12">
 
                 {{-- SEARCH --}}
                 <div class="lg:col-span-5">
+
                     <div class="relative">
 
                         <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+
                             <svg class="h-4 w-4"
                                  fill="none"
                                  stroke="currentColor"
                                  viewBox="0 0 24 24">
+
                                 <path stroke-linecap="round"
                                       stroke-linejoin="round"
                                       stroke-width="2"
                                       d="M21 21l-6-6m2-5a7 7 0 11-14 0a7 7 0 0114 0z"/>
+
                             </svg>
+
                         </div>
 
                         <input id="search"
@@ -769,7 +858,7 @@
                     </div>
                 </div>
 
-                {{-- DATE PICKER --}}
+                {{-- DATE RANGE --}}
                 <div class="lg:col-span-4">
 
                     <div class="archive-date-picker">
@@ -777,15 +866,19 @@
                         <div class="relative">
 
                             <div class="pointer-events-none absolute inset-y-0 left-0 z-10 flex items-center pl-3 text-slate-400">
+
                                 <svg class="h-4 w-4"
                                      fill="none"
                                      stroke="currentColor"
                                      viewBox="0 0 24 24">
+
                                     <path stroke-linecap="round"
                                           stroke-linejoin="round"
                                           stroke-width="2"
                                           d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5v12a2 2 0 002 2z"/>
+
                                 </svg>
+
                             </div>
 
                             <input id="date-range"
@@ -805,14 +898,15 @@
                                      fill="none"
                                      stroke="currentColor"
                                      viewBox="0 0 24 24">
+
                                     <path stroke-linecap="round"
                                           stroke-linejoin="round"
                                           stroke-width="2"
                                           d="M6 18L18 6M6 6l12 12"/>
+
                                 </svg>
 
                             </button>
-
                         </div>
 
                         <input type="hidden"
@@ -825,7 +919,7 @@
                                id="sampai_tanggal"
                                value="{{ $sampaiTanggal }}">
 
-                        {{-- DATE PANEL --}}
+                        {{-- DATE PICKER PANEL --}}
                         <div id="datePickerPanel"
                              class="archive-date-panel hidden">
 
@@ -840,10 +934,12 @@
                                          fill="none"
                                          stroke="currentColor"
                                          viewBox="0 0 24 24">
+
                                         <path stroke-linecap="round"
                                               stroke-linejoin="round"
                                               stroke-width="2"
                                               d="M15 19l-7-7 7-7"/>
+
                                     </svg>
 
                                 </button>
@@ -861,10 +957,12 @@
                                          fill="none"
                                          stroke="currentColor"
                                          viewBox="0 0 24 24">
+
                                         <path stroke-linecap="round"
                                               stroke-linejoin="round"
                                               stroke-width="2"
                                               d="M9 5l7 7-7 7"/>
+
                                     </svg>
 
                                 </button>
@@ -924,16 +1022,20 @@
                                  fill="none"
                                  stroke="currentColor"
                                  viewBox="0 0 24 24">
+
                                 <path stroke-linecap="round"
                                       stroke-linejoin="round"
                                       stroke-width="2"
                                       d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707L13 17v4l-4-4v-4.293a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+
                             </svg>
 
                             <span>Filter</span>
+
                         </button>
 
                         @if($hasFilters)
+
                             <a href="{{ route('disposisi.index') }}"
                                title="Reset Filter"
                                class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500 transition hover:bg-slate-200 hover:text-slate-700">
@@ -942,13 +1044,16 @@
                                      fill="none"
                                      stroke="currentColor"
                                      viewBox="0 0 24 24">
+
                                     <path stroke-linecap="round"
                                           stroke-linejoin="round"
                                           stroke-width="2"
                                           d="M6 18L18 6M6 6l12 12"/>
+
                                 </svg>
 
                             </a>
+
                         @endif
 
                     </div>
@@ -966,15 +1071,19 @@
                     <div class="flex min-w-0 items-center gap-3">
 
                         <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-600">
+
                             <svg class="h-4 w-4"
                                  fill="none"
                                  stroke="currentColor"
                                  viewBox="0 0 24 24">
+
                                 <path stroke-linecap="round"
                                       stroke-linejoin="round"
                                       stroke-width="2"
                                       d="M9 12l2 2l4-4m6 2a9 9 0 11-18 0a9 9 0 0118 0z"/>
+
                             </svg>
+
                         </div>
 
                         <div class="min-w-0">
@@ -989,6 +1098,7 @@
                             </div>
 
                         </div>
+
                     </div>
 
                     <div class="flex shrink-0 items-center gap-2">
@@ -1012,6 +1122,7 @@
                         </svg>
 
                     </div>
+
                 </button>
 
                 <div id="statusDropdownPanel"
@@ -1021,7 +1132,10 @@
 
                         <div class="archive-status-head-title">
                             <strong>Pilih Status</strong>
-                            <span>Satu atau beberapa status dapat dipilih</span>
+
+                            <span>
+                                Satu atau beberapa status dapat dipilih
+                            </span>
                         </div>
 
                         <span id="statusPanelCount"
@@ -1050,13 +1164,20 @@
                     <div class="archive-status-options">
 
                         @foreach($statusOptions as $value => $label)
+
                             <label class="archive-status-item">
 
                                 <input type="checkbox"
                                        name="status[]"
                                        value="{{ $value }}"
                                        class="status-checkbox"
-                                       @checked(in_array($value, $selectedStatus, true))>
+                                       @checked(
+                                           in_array(
+                                               $value,
+                                               $selectedStatus,
+                                               true
+                                           )
+                                       )>
 
                                 <span class="archive-status-dot {{ $value }}"></span>
 
@@ -1065,6 +1186,7 @@
                                 </span>
 
                             </label>
+
                         @endforeach
 
                     </div>
@@ -1086,7 +1208,9 @@
         </form>
     </div>
 
-    {{-- TABLE --}}
+    {{-- =====================================================
+         TABLE
+    ====================================================== --}}
     <div class="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
 
         <div class="overflow-x-auto">
@@ -1132,29 +1256,54 @@
                     @forelse($disposisis ?? [] as $d)
 
                         @php
-                            $status = strtolower(trim((string) ($d->status ?? 'menunggu')));
+                            $status = strtolower(
+                                trim(
+                                    (string) (
+                                        $d->status
+                                        ?? 'menunggu'
+                                    )
+                                )
+                            );
 
                             $badgeClass =
                                 $statusBadgeClasses[$status]
                                 ?? 'border-slate-200 bg-slate-100 text-slate-600';
 
-                            $nomorSurat = $getNomorSurat($d);
-                            $penerimaData = $getPenerima($d);
-                            $instruksi = $getInstruksi($d);
-                            $tanggalDisposisi = $getTanggalDisposisi($d);
-                            $batasWaktu = $getBatasWaktu($d);
+                            $nomorSurat =
+                                $getNomorSurat($d);
+
+                            $penerimaData =
+                                $getPenerima($d);
+
+                            $instruksi =
+                                $getInstruksi($d);
+
+                            $tanggalDisposisi =
+                                $getTanggalDisposisi($d);
+
+                            $batasWaktu =
+                                $getBatasWaktu($d);
 
                             $isLate = false;
 
                             if ($batasWaktu !== '-') {
                                 try {
                                     $tanggalBatas =
-                                        data_get($d, 'batas_waktu')
-                                        ?? data_get($d, 'tanggal_batas');
+                                        data_get(
+                                            $d,
+                                            'batas_waktu'
+                                        )
+                                        ?? data_get(
+                                            $d,
+                                            'tanggal_batas'
+                                        );
 
                                     $isLate =
-                                        \Carbon\Carbon::parse($tanggalBatas)->isPast()
-                                        && $status !== 'selesai';
+                                        \Carbon\Carbon::parse(
+                                            $tanggalBatas
+                                        )->isPast()
+                                        &&
+                                        $status !== 'selesai';
                                 } catch (\Throwable) {
                                     $isLate = false;
                                 }
@@ -1163,6 +1312,7 @@
 
                         <tr class="transition duration-150 hover:bg-slate-50/60">
 
+                            {{-- NOMOR SURAT --}}
                             <td class="px-4 py-3.5 text-slate-700 sm:px-5 sm:py-4">
 
                                 <span class="inline-block max-w-[190px] truncate font-medium"
@@ -1172,25 +1322,29 @@
 
                             </td>
 
+                            {{-- TANGGAL DISPOSISI --}}
                             <td class="px-4 py-3.5 text-slate-500 sm:px-5 sm:py-4">
                                 {{ $tanggalDisposisi }}
                             </td>
 
+                            {{-- PENERIMA --}}
                             <td class="px-4 py-3.5 sm:px-5 sm:py-4">
 
                                 @if($penerimaData['nama'] !== '-')
 
                                     <div class="flex min-w-[150px] max-w-[200px] flex-col rounded-lg border border-slate-200/60 bg-slate-100 px-2.5 py-1.5"
-                                         title="{{ $penerimaData['nama'] }}{{ $penerimaData['jabatan'] ? ' - '.$penerimaData['jabatan'] : '' }}">
+                                         title="{{ $penerimaData['nama'] }}{{ $penerimaData['jabatan'] ? ' - ' . $penerimaData['jabatan'] : '' }}">
 
                                         <span class="truncate font-semibold text-slate-700">
                                             {{ $penerimaData['nama'] }}
                                         </span>
 
                                         @if($penerimaData['jabatan'])
+
                                             <span class="truncate text-[10px] text-slate-400">
                                                 {{ $penerimaData['jabatan'] }}
                                             </span>
+
                                         @endif
 
                                     </div>
@@ -1205,6 +1359,7 @@
 
                             </td>
 
+                            {{-- INSTRUKSI --}}
                             <td class="max-w-[260px] truncate px-4 py-3.5 font-medium text-slate-700 sm:px-5 sm:py-4"
                                 title="{{ $instruksi }}">
 
@@ -1212,6 +1367,7 @@
 
                             </td>
 
+                            {{-- STATUS --}}
                             <td class="px-4 py-3.5 sm:px-5 sm:py-4">
 
                                 <span class="inline-flex rounded-full border px-2.5 py-1 text-[10px] font-bold {{ $badgeClass }}">
@@ -1220,6 +1376,7 @@
 
                             </td>
 
+                            {{-- BATAS WAKTU --}}
                             <td class="px-4 py-3.5 text-slate-500 sm:px-5 sm:py-4">
 
                                 @if($batasWaktu !== '-')
@@ -1238,6 +1395,7 @@
 
                             </td>
 
+                            {{-- AKSI --}}
                             <td class="px-4 py-3.5 text-center sm:px-5 sm:py-4">
 
                                 <div class="inline-flex items-center gap-1">
@@ -1271,7 +1429,14 @@
                                     @endif
 
                                     {{-- EDIT --}}
-                                    @if(in_array($userRole, ['admin', 'pimpinan'], true) && Route::has('disposisi.edit'))
+                                    @if(
+                                        in_array(
+                                            $userRole,
+                                            ['admin', 'pimpinan'],
+                                            true
+                                        ) &&
+                                        Route::has('disposisi.edit')
+                                    )
 
                                         <a href="{{ route('disposisi.edit', $d) }}"
                                            title="Ubah Disposisi"
@@ -1294,7 +1459,14 @@
                                     @endif
 
                                     {{-- DELETE --}}
-                                    @if(in_array($userRole, ['admin', 'pimpinan'], true) && Route::has('disposisi.destroy'))
+                                    @if(
+                                        in_array(
+                                            $userRole,
+                                            ['admin', 'pimpinan'],
+                                            true
+                                        ) &&
+                                        Route::has('disposisi.destroy')
+                                    )
 
                                         <form action="{{ route('disposisi.destroy', $d) }}"
                                               method="POST"
@@ -1326,9 +1498,7 @@
                                     @endif
 
                                 </div>
-
                             </td>
-
                         </tr>
 
                     @empty
@@ -1375,11 +1545,14 @@
                 </tbody>
 
             </table>
-
         </div>
 
         {{-- PAGINATION --}}
-        @if(isset($disposisis) && method_exists($disposisis, 'hasPages') && $disposisis->hasPages())
+        @if(
+            isset($disposisis) &&
+            method_exists($disposisis, 'hasPages') &&
+            $disposisis->hasPages()
+        )
 
             <div class="border-t border-slate-100 px-4 py-3 sm:px-6 sm:py-4">
                 {{ $disposisis->withQueryString()->links() }}
@@ -1388,7 +1561,6 @@
         @endif
 
     </div>
-
 </div>
 
 @push('scripts')
@@ -1465,9 +1637,9 @@
         document.getElementById('clearPickerButton');
 
     let viewDate =
-        parseDate(dariInput?.value)
-        || parseDate(sampaiInput?.value)
-        || today();
+        parseDate(dariInput?.value) ||
+        parseDate(sampaiInput?.value) ||
+        today();
 
     let tempStart =
         parseDate(dariInput?.value);
@@ -1475,7 +1647,8 @@
     let tempEnd =
         parseDate(sampaiInput?.value);
 
-    let pickerView = 'calendar';
+    let pickerView =
+        'calendar';
 
     let pickerYear =
         viewDate.getFullYear();
@@ -1484,15 +1657,22 @@
         viewDate.getMonth();
 
     function today() {
-        const date = new Date();
+        const date =
+            new Date();
 
-        date.setHours(0, 0, 0, 0);
+        date.setHours(
+            0,
+            0,
+            0,
+            0
+        );
 
         return date;
     }
 
     function pad(number) {
-        return String(number).padStart(2, '0');
+        return String(number)
+            .padStart(2, '0');
     }
 
     function cloneDate(date) {
@@ -1515,9 +1695,13 @@
         return (
             date.getFullYear() +
             '-' +
-            pad(date.getMonth() + 1) +
+            pad(
+                date.getMonth() + 1
+            ) +
             '-' +
-            pad(date.getDate())
+            pad(
+                date.getDate()
+            )
         );
     }
 
@@ -1545,7 +1729,11 @@
             Number(match[3]);
 
         const date =
-            new Date(year, month, day);
+            new Date(
+                year,
+                month,
+                day
+            );
 
         if (
             date.getFullYear() !== year ||
@@ -1555,7 +1743,12 @@
             return null;
         }
 
-        date.setHours(0, 0, 0, 0);
+        date.setHours(
+            0,
+            0,
+            0,
+            0
+        );
 
         return date;
     }
@@ -1574,7 +1767,10 @@
         );
     }
 
-    function formatRange(start, end) {
+    function formatRange(
+        start,
+        end
+    ) {
         if (!start || !end) {
             return '';
         }
@@ -1586,33 +1782,53 @@
         );
     }
 
-    function isSameDay(first, second) {
+    function isSameDay(
+        first,
+        second
+    ) {
         return !!first &&
             !!second &&
-            dateKey(first) === dateKey(second);
+            dateKey(first) ===
+                dateKey(second);
     }
 
-    function isBefore(first, second) {
-        return dateKey(first) < dateKey(second);
+    function isBefore(
+        first,
+        second
+    ) {
+        return dateKey(first) <
+            dateKey(second);
     }
 
-    function isAfter(first, second) {
-        return dateKey(first) > dateKey(second);
+    function isAfter(
+        first,
+        second
+    ) {
+        return dateKey(first) >
+            dateKey(second);
     }
 
     function updateInputDisplay() {
         const start =
-            parseDate(dariInput.value);
+            parseDate(
+                dariInput.value
+            );
 
         const end =
-            parseDate(sampaiInput.value);
+            parseDate(
+                sampaiInput.value
+            );
 
         if (start && end) {
             dateInput.value =
-                formatRange(start, end);
+                formatRange(
+                    start,
+                    end
+                );
 
             clearDateRange.style.display =
                 'flex';
+
         } else {
             dateInput.value = '';
 
@@ -1634,7 +1850,9 @@
 
         if (tempStart) {
             dateInfo.textContent =
-                formatDisplay(tempStart) +
+                formatDisplay(
+                    tempStart
+                ) +
                 ' - pilih tanggal akhir';
 
             return;
@@ -1653,29 +1871,60 @@
         ];
 
         if (otherMonth) {
-            classes.push('other-month');
+            classes.push(
+                'other-month'
+            );
         }
 
-        if (isSameDay(date, today())) {
-            classes.push('today');
+        if (
+            isSameDay(
+                date,
+                today()
+            )
+        ) {
+            classes.push(
+                'today'
+            );
         }
 
         const inRange =
             tempStart &&
             tempEnd &&
-            !isBefore(date, tempStart) &&
-            !isAfter(date, tempEnd);
+            !isBefore(
+                date,
+                tempStart
+            ) &&
+            !isAfter(
+                date,
+                tempEnd
+            );
 
         if (inRange) {
-            classes.push('in-range');
+            classes.push(
+                'in-range'
+            );
         }
 
-        if (isSameDay(date, tempStart)) {
-            classes.push('start-date');
+        if (
+            isSameDay(
+                date,
+                tempStart
+            )
+        ) {
+            classes.push(
+                'start-date'
+            );
         }
 
-        if (isSameDay(date, tempEnd)) {
-            classes.push('end-date');
+        if (
+            isSameDay(
+                date,
+                tempEnd
+            )
+        ) {
+            classes.push(
+                'end-date'
+            );
         }
 
         return `
@@ -1702,6 +1951,7 @@
                         data-action="month"
                         data-month="${month}"
                         data-year="${year}">
+
                         ${months[month]}
 
                         <svg class="h-3 w-3"
@@ -1714,7 +1964,9 @@
                                 stroke-linejoin="round"
                                 stroke-width="2"
                                 d="M19 9l-7 7-7-7"/>
+
                         </svg>
+
                     </button>
 
                     <button
@@ -1722,6 +1974,7 @@
                         data-action="year"
                         data-month="${month}"
                         data-year="${year}">
+
                         ${year}
 
                         <svg class="h-3 w-3"
@@ -1734,7 +1987,9 @@
                                 stroke-linejoin="round"
                                 stroke-width="2"
                                 d="M19 9l-7 7-7-7"/>
+
                         </svg>
+
                     </button>
 
                 </div>
@@ -1742,25 +1997,42 @@
                 <div class="archive-month-grid">
         `;
 
-        weekdays.forEach(function(day) {
-            html += `
-                <div class="archive-calendar-weekday">
-                    ${day}
-                </div>
-            `;
-        });
+        weekdays.forEach(
+            function(day) {
+                html += `
+                    <div class="archive-calendar-weekday">
+                        ${day}
+                    </div>
+                `;
+            }
+        );
 
         const firstDay =
-            new Date(year, month, 1);
+            new Date(
+                year,
+                month,
+                1
+            );
 
         const firstWeekday =
-            (firstDay.getDay() + 6) % 7;
+            (
+                firstDay.getDay() +
+                6
+            ) % 7;
 
         const daysInMonth =
-            new Date(year, month + 1, 0).getDate();
+            new Date(
+                year,
+                month + 1,
+                0
+            ).getDate();
 
         const daysInPreviousMonth =
-            new Date(year, month, 0).getDate();
+            new Date(
+                year,
+                month,
+                0
+            ).getDate();
 
         for (
             let index = firstWeekday - 1;
@@ -1768,7 +2040,8 @@
             index--
         ) {
             const day =
-                daysInPreviousMonth - index;
+                daysInPreviousMonth -
+                index;
 
             const date =
                 new Date(
@@ -1808,7 +2081,12 @@
             daysInMonth;
 
         const remaining =
-            (7 - (totalDays % 7)) % 7;
+            (
+                7 -
+                (
+                    totalDays % 7
+                )
+            ) % 7;
 
         for (
             let day = 1;
@@ -1840,85 +2118,97 @@
     function bindCalendarEvents() {
 
         dateContent
-            .querySelectorAll('[data-date]')
-            .forEach(function(button) {
+            .querySelectorAll(
+                '[data-date]'
+            )
+            .forEach(
+                function(button) {
 
-                button.addEventListener(
-                    'click',
-                    function() {
+                    button.addEventListener(
+                        'click',
+                        function() {
 
-                        selectDate(
-                            parseDate(
-                                this.dataset.date
-                            )
-                        );
+                            selectDate(
+                                parseDate(
+                                    this.dataset.date
+                                )
+                            );
 
-                    }
-                );
+                        }
+                    );
 
-            });
+                }
+            );
 
         dateContent
-            .querySelectorAll('[data-action="month"]')
-            .forEach(function(button) {
+            .querySelectorAll(
+                '[data-action="month"]'
+            )
+            .forEach(
+                function(button) {
 
-                button.addEventListener(
-                    'click',
-                    function(event) {
+                    button.addEventListener(
+                        'click',
+                        function(event) {
 
-                        event.preventDefault();
-                        event.stopPropagation();
+                            event.preventDefault();
+                            event.stopPropagation();
 
-                        pickerMonth =
-                            Number(
-                                this.dataset.month
-                            );
+                            pickerMonth =
+                                Number(
+                                    this.dataset.month
+                                );
 
-                        pickerYear =
-                            Number(
-                                this.dataset.year
-                            );
+                            pickerYear =
+                                Number(
+                                    this.dataset.year
+                                );
 
-                        pickerView =
-                            'month';
+                            pickerView =
+                                'month';
 
-                        renderPicker();
+                            renderPicker();
 
-                    }
-                );
+                        }
+                    );
 
-            });
+                }
+            );
 
         dateContent
-            .querySelectorAll('[data-action="year"]')
-            .forEach(function(button) {
+            .querySelectorAll(
+                '[data-action="year"]'
+            )
+            .forEach(
+                function(button) {
 
-                button.addEventListener(
-                    'click',
-                    function(event) {
+                    button.addEventListener(
+                        'click',
+                        function(event) {
 
-                        event.preventDefault();
-                        event.stopPropagation();
+                            event.preventDefault();
+                            event.stopPropagation();
 
-                        pickerMonth =
-                            Number(
-                                this.dataset.month
-                            );
+                            pickerMonth =
+                                Number(
+                                    this.dataset.month
+                                );
 
-                        pickerYear =
-                            Number(
-                                this.dataset.year
-                            );
+                            pickerYear =
+                                Number(
+                                    this.dataset.year
+                                );
 
-                        pickerView =
-                            'year';
+                            pickerView =
+                                'year';
 
-                        renderPicker();
+                            renderPicker();
 
-                    }
-                );
+                        }
+                    );
 
-            });
+                }
+            );
     }
 
     function renderCalendarView() {
@@ -1983,55 +2273,60 @@
             </div>
 
             <div class="archive-picker-grid">
-                ${months.map(function(month, index) {
+                ${months.map(
+                    function(month, index) {
 
-                    const active =
-                        index === pickerMonth
-                            ? 'active'
-                            : '';
+                        const active =
+                            index === pickerMonth
+                                ? 'active'
+                                : '';
 
-                    return `
-                        <button
-                            type="button"
-                            class="archive-picker-item ${active}"
-                            data-picker-month="${index}">
-                            ${month}
-                        </button>
-                    `;
-
-                }).join('')}
+                        return `
+                            <button
+                                type="button"
+                                class="archive-picker-item ${active}"
+                                data-picker-month="${index}">
+                                ${month}
+                            </button>
+                        `;
+                    }
+                ).join('')}
             </div>
         `;
 
         monthPickerView
-            .querySelectorAll('[data-picker-month]')
-            .forEach(function(button) {
+            .querySelectorAll(
+                '[data-picker-month]'
+            )
+            .forEach(
+                function(button) {
 
-                button.addEventListener(
-                    'click',
-                    function() {
+                    button.addEventListener(
+                        'click',
+                        function() {
 
-                        const month =
-                            Number(
-                                this.dataset.pickerMonth
-                            );
+                            const month =
+                                Number(
+                                    this.dataset.pickerMonth
+                                );
 
-                        viewDate =
-                            new Date(
-                                pickerYear,
-                                month,
-                                1
-                            );
+                            viewDate =
+                                new Date(
+                                    pickerYear,
+                                    month,
+                                    1
+                                );
 
-                        pickerView =
-                            'calendar';
+                            pickerView =
+                                'calendar';
 
-                        renderPicker();
+                            renderPicker();
 
-                    }
-                );
+                        }
+                    );
 
-            });
+                }
+            );
     }
 
     function renderYearPicker() {
@@ -2060,11 +2355,13 @@
             <div class="archive-year-toolbar">
 
                 <div class="archive-year-nav">
+
                     <button
                         type="button"
                         id="yearPrev">
                         ‹
                     </button>
+
                 </div>
 
                 <span class="archive-year-range">
@@ -2072,11 +2369,13 @@
                 </span>
 
                 <div class="archive-year-nav">
+
                     <button
                         type="button"
                         id="yearNext">
                         ›
                     </button>
+
                 </div>
 
             </div>
@@ -2113,7 +2412,9 @@
             html;
 
         document
-            .getElementById('yearPrev')
+            .getElementById(
+                'yearPrev'
+            )
             ?.addEventListener(
                 'click',
                 function() {
@@ -2127,7 +2428,9 @@
             );
 
         document
-            .getElementById('yearNext')
+            .getElementById(
+                'yearNext'
+            )
             ?.addEventListener(
                 'click',
                 function() {
@@ -2141,34 +2444,38 @@
             );
 
         yearPickerView
-            .querySelectorAll('[data-picker-year]')
-            .forEach(function(button) {
+            .querySelectorAll(
+                '[data-picker-year]'
+            )
+            .forEach(
+                function(button) {
 
-                button.addEventListener(
-                    'click',
-                    function() {
+                    button.addEventListener(
+                        'click',
+                        function() {
 
-                        pickerYear =
-                            Number(
-                                this.dataset.pickerYear
-                            );
+                            pickerYear =
+                                Number(
+                                    this.dataset.pickerYear
+                                );
 
-                        viewDate =
-                            new Date(
-                                pickerYear,
-                                pickerMonth,
-                                1
-                            );
+                            viewDate =
+                                new Date(
+                                    pickerYear,
+                                    pickerMonth,
+                                    1
+                                );
 
-                        pickerView =
-                            'calendar';
+                            pickerView =
+                                'calendar';
 
-                        renderPicker();
+                            renderPicker();
 
-                    }
-                );
+                        }
+                    );
 
-            });
+                }
+            );
     }
 
     function renderPicker() {
@@ -2218,7 +2525,15 @@
             return;
         }
 
-        if (!tempStart || tempEnd) {
+        /*
+         * Klik pertama = tanggal mulai.
+         * Klik kedua = tanggal akhir.
+         * Klik ketiga = mulai range baru.
+         */
+        if (
+            !tempStart ||
+            tempEnd
+        ) {
 
             tempStart =
                 cloneDate(date);
@@ -2235,7 +2550,9 @@
             ) {
 
                 tempEnd =
-                    cloneDate(tempStart);
+                    cloneDate(
+                        tempStart
+                    );
 
                 tempStart =
                     cloneDate(date);
@@ -2294,6 +2611,12 @@
                     1
                 );
 
+            pickerYear =
+                viewDate.getFullYear();
+
+            pickerMonth =
+                viewDate.getMonth();
+
             pickerView =
                 'calendar';
 
@@ -2330,12 +2653,15 @@
 
             Swal.fire({
                 icon: 'warning',
-                title: title,
-                text: text,
-                confirmButtonText: 'Mengerti',
-                confirmButtonColor: '#2563eb',
+                title,
+                text,
+                confirmButtonText:
+                    'Mengerti',
+                confirmButtonColor:
+                    '#2563eb',
                 customClass: {
-                    popup: 'rounded-2xl',
+                    popup:
+                        'rounded-2xl',
                     confirmButton:
                         'rounded-xl text-xs font-semibold px-4 py-2.5'
                 }
@@ -2370,10 +2696,14 @@
         ) {
 
             const oldStart =
-                cloneDate(tempStart);
+                cloneDate(
+                    tempStart
+                );
 
             tempStart =
-                cloneDate(tempEnd);
+                cloneDate(
+                    tempEnd
+                );
 
             tempEnd =
                 oldStart;
@@ -2408,6 +2738,12 @@
                 today().getMonth(),
                 1
             );
+
+        pickerYear =
+            viewDate.getFullYear();
+
+        pickerMonth =
+            viewDate.getMonth();
 
         pickerView =
             'calendar';
@@ -2461,7 +2797,8 @@
             event.preventDefault();
 
             if (
-                pickerView !== 'calendar'
+                pickerView !==
+                'calendar'
             ) {
                 return;
             }
@@ -2472,6 +2809,12 @@
                     viewDate.getMonth() - 1,
                     1
                 );
+
+            pickerYear =
+                viewDate.getFullYear();
+
+            pickerMonth =
+                viewDate.getMonth();
 
             renderPicker();
 
@@ -2485,7 +2828,8 @@
             event.preventDefault();
 
             if (
-                pickerView !== 'calendar'
+                pickerView !==
+                'calendar'
             ) {
                 return;
             }
@@ -2496,6 +2840,12 @@
                     viewDate.getMonth() + 1,
                     1
                 );
+
+            pickerYear =
+                viewDate.getFullYear();
+
+            pickerMonth =
+                viewDate.getMonth();
 
             renderPicker();
 
@@ -2616,22 +2966,26 @@
 
         const checked =
             statusCheckboxes
-                .filter(function(checkbox) {
-                    return checkbox.checked;
-                })
-                .map(function(checkbox) {
+                .filter(
+                    function(checkbox) {
+                        return checkbox.checked;
+                    }
+                )
+                .map(
+                    function(checkbox) {
 
-                    const label =
-                        checkbox.parentElement
-                            ?.querySelector(
-                                '.archive-status-item-label'
-                            );
+                        const label =
+                            checkbox.parentElement
+                                ?.querySelector(
+                                    '.archive-status-item-label'
+                                );
 
-                    return label
-                        ? label.textContent.trim()
-                        : '';
+                        return label
+                            ? label.textContent.trim()
+                            : '';
 
-                })
+                    }
+                )
                 .filter(Boolean);
 
         const count =
@@ -2682,13 +3036,9 @@
                     'hidden'
                 )
             ) {
-
                 openStatusDropdownPanel();
-
             } else {
-
                 closeStatusDropdownPanel();
-
             }
 
         }
@@ -2711,7 +3061,8 @@
 
             statusCheckboxes.forEach(
                 function(checkbox) {
-                    checkbox.checked = true;
+                    checkbox.checked =
+                        true;
                 }
             );
 
@@ -2726,7 +3077,8 @@
 
             statusCheckboxes.forEach(
                 function(checkbox) {
-                    checkbox.checked = false;
+                    checkbox.checked =
+                        false;
                 }
             );
 
@@ -2738,12 +3090,14 @@
     closeStatusDropdown?.addEventListener(
         'click',
         function() {
+
             closeStatusDropdownPanel();
+
         }
     );
 
     /* =========================================================
-       CLOSE PANEL WHEN CLICK OUTSIDE
+       CLICK OUTSIDE
     ========================================================= */
 
     document.addEventListener(
@@ -2755,9 +3109,7 @@
                     '.archive-date-picker'
                 )
             ) {
-
                 closeDatePicker();
-
             }
 
             if (
@@ -2765,9 +3117,7 @@
                     '.archive-status-dropdown'
                 )
             ) {
-
                 closeStatusDropdownPanel();
-
             }
 
         }
@@ -2778,7 +3128,9 @@
     ========================================================= */
 
     document
-        .getElementById('filterForm')
+        .getElementById(
+            'filterForm'
+        )
         ?.addEventListener(
             'submit',
             function(event) {
@@ -2828,7 +3180,6 @@
                         'Rentang tanggal tidak valid',
                         'Tanggal mulai tidak boleh lebih besar dari tanggal akhir.'
                     );
-
                 }
 
             }
@@ -2841,72 +3192,98 @@
     function initializeDeleteConfirmation() {
 
         document
-            .querySelectorAll('.delete-btn')
-            .forEach(function(button) {
+            .querySelectorAll(
+                '.delete-btn'
+            )
+            .forEach(
+                function(button) {
 
-                button.addEventListener(
-                    'click',
-                    function() {
+                    button.addEventListener(
+                        'click',
+                        function() {
 
-                        const form =
-                            this.closest(
-                                '.delete-form'
-                            );
+                            const form =
+                                this.closest(
+                                    '.delete-form'
+                                );
 
-                        if (!form) {
-                            return;
-                        }
-
-                        if (
-                            typeof Swal !== 'undefined'
-                        ) {
-
-                            Swal.fire({
-                                title: 'Hapus Disposisi?',
-                                text: 'Data disposisi akan dipindahkan ke tempat sampah.',
-                                icon: 'warning',
-                                showCancelButton: true,
-                                confirmButtonColor: '#ef4444',
-                                cancelButtonColor: '#64748b',
-                                confirmButtonText: 'Ya, Hapus!',
-                                cancelButtonText: 'Batal',
-                                reverseButtons: true,
-                                customClass: {
-                                    popup: 'rounded-2xl',
-                                    confirmButton:
-                                        'rounded-xl text-xs font-semibold px-4 py-2.5',
-                                    cancelButton:
-                                        'rounded-xl text-xs font-semibold px-4 py-2.5'
-                                }
-                            }).then(
-                                function(result) {
-
-                                    if (
-                                        result.isConfirmed
-                                    ) {
-                                        form.submit();
-                                    }
-
-                                }
-                            );
-
-                        } else {
+                            if (!form) {
+                                return;
+                            }
 
                             if (
-                                confirm(
-                                    'Yakin ingin menghapus disposisi ini?'
-                                )
+                                typeof Swal !==
+                                'undefined'
                             ) {
-                                form.submit();
+
+                                Swal.fire({
+                                    title:
+                                        'Hapus Disposisi?',
+
+                                    text:
+                                        'Data disposisi akan dipindahkan ke tempat sampah.',
+
+                                    icon:
+                                        'warning',
+
+                                    showCancelButton:
+                                        true,
+
+                                    confirmButtonColor:
+                                        '#ef4444',
+
+                                    cancelButtonColor:
+                                        '#64748b',
+
+                                    confirmButtonText:
+                                        'Ya, Hapus!',
+
+                                    cancelButtonText:
+                                        'Batal',
+
+                                    reverseButtons:
+                                        true,
+
+                                    customClass: {
+                                        popup:
+                                            'rounded-2xl',
+
+                                        confirmButton:
+                                            'rounded-xl text-xs font-semibold px-4 py-2.5',
+
+                                        cancelButton:
+                                            'rounded-xl text-xs font-semibold px-4 py-2.5'
+                                    }
+
+                                }).then(
+                                    function(result) {
+
+                                        if (
+                                            result.isConfirmed
+                                        ) {
+                                            form.submit();
+                                        }
+
+                                    }
+                                );
+
+                            } else {
+
+                                if (
+                                    confirm(
+                                        'Yakin ingin menghapus disposisi ini?'
+                                    )
+                                ) {
+                                    form.submit();
+                                }
+
                             }
 
                         }
+                    );
 
-                    }
-                );
-
-            });
-
+                }
+            );
     }
 
     updateStatusSummary();
