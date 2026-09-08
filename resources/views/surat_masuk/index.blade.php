@@ -1,78 +1,71 @@
 @extends('layouts.app')
 
-@section('title', 'Surat Masuk')
+@section('title','Surat Masuk')
 
 @section('content')
 
 @php
-    $user = auth()->user();
+    $user=auth()->user();
+    $userRole=strtolower(trim((string)($user->role??$user->jabatan??'')));
+    $userRole=$userRole==='staff'?'staf':$userRole;
+    $canManage=in_array($userRole,['admin','pimpinan'],true);
 
-    $userRole = strtolower(trim((string) ($user->role ?? $user->jabatan ?? '')));
-    $userRole = $userRole === 'staff' ? 'staf' : $userRole;
-    $canManage = in_array($userRole, ['admin', 'pimpinan'], true);
-
-    $selectedKategori = collect(request('kategori_id', []))
-        ->filter(fn ($id) => is_scalar($id) && ctype_digit((string) $id))
-        ->map(fn ($id) => (string) $id)
+    $selectedKategori=collect(request('kategori_id',[]))
+        ->filter(fn($id)=>is_scalar($id)&&ctype_digit((string)$id))
+        ->map(fn($id)=>(string)$id)
         ->unique()
         ->values()
         ->all();
 
-    $statusOptions = [
-        'baru' => 'Baru',
-        'diproses' => 'Diproses',
-        'didisposisikan' => 'Didisposisikan',
-        'selesai' => 'Selesai',
-        'diarsipkan' => 'Diarsipkan',
+    $statusOptions=[
+        'baru'=>'Baru',
+        'diproses'=>'Diproses',
+        'didisposisikan'=>'Didisposisikan',
+        'selesai'=>'Selesai',
+        'diarsipkan'=>'Diarsipkan',
     ];
 
-    $selectedStatus = collect(request('status', []))
-        ->filter(fn ($status) => is_scalar($status))
-        ->map(fn ($status) => strtolower(trim((string) $status)))
-        ->filter(fn ($status) => array_key_exists($status, $statusOptions))
+    $selectedStatus=collect(request('status',[]))
+        ->filter(fn($status)=>is_scalar($status))
+        ->map(fn($status)=>strtolower(trim((string)$status)))
+        ->filter(fn($status)=>array_key_exists($status,$statusOptions))
         ->unique()
         ->values()
         ->all();
 
-    $statusBadgeClasses = [
-        'baru' => 'bg-blue-50 text-blue-700 border-blue-200',
-        'diproses' => 'bg-amber-50 text-amber-700 border-amber-200',
-        'didisposisikan' => 'bg-purple-50 text-purple-700 border-purple-200',
-        'selesai' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
-        'diarsipkan' => 'bg-slate-100 text-slate-700 border-slate-200',
+    $statusBadgeClasses=[
+        'baru'=>'bg-blue-50 text-blue-700 border-blue-200',
+        'diproses'=>'bg-amber-50 text-amber-700 border-amber-200',
+        'didisposisikan'=>'bg-purple-50 text-purple-700 border-purple-200',
+        'selesai'=>'bg-emerald-50 text-emerald-700 border-emerald-200',
+        'diarsipkan'=>'bg-slate-100 text-slate-700 border-slate-200',
     ];
 
-    $dariTanggal = request('dari_tanggal');
-    $sampaiTanggal = request('sampai_tanggal');
-    $visibleDateRange = '';
+    $dariTanggal=request('dari_tanggal');
+    $sampaiTanggal=request('sampai_tanggal');
+    $visibleDateRange='';
 
-    if ($dariTanggal && $sampaiTanggal) {
-        try {
-            $start = \Illuminate\Support\Carbon::createFromFormat('Y-m-d', $dariTanggal);
-            $end = \Illuminate\Support\Carbon::createFromFormat('Y-m-d', $sampaiTanggal);
-            $visibleDateRange = $start->format('d/m/Y') . ' - ' . $end->format('d/m/Y');
-        } catch (\Throwable $e) {
-            $visibleDateRange = '';
-        }
-    } elseif ($dariTanggal) {
-        try {
-            $visibleDateRange = \Illuminate\Support\Carbon::createFromFormat('Y-m-d', $dariTanggal)->format('d/m/Y');
-        } catch (\Throwable $e) {
-            $visibleDateRange = '';
-        }
-    } elseif ($sampaiTanggal) {
-        try {
-            $visibleDateRange = \Illuminate\Support\Carbon::createFromFormat('Y-m-d', $sampaiTanggal)->format('d/m/Y');
-        } catch (\Throwable $e) {
-            $visibleDateRange = '';
-        }
+    if($dariTanggal&&$sampaiTanggal){
+        try{
+            $start=\Illuminate\Support\Carbon::createFromFormat('Y-m-d',$dariTanggal);
+            $end=\Illuminate\Support\Carbon::createFromFormat('Y-m-d',$sampaiTanggal);
+            $visibleDateRange=$start->format('d/m/Y').' - '.$end->format('d/m/Y');
+        }catch(\Throwable $e){}
+    }elseif($dariTanggal){
+        try{
+            $visibleDateRange=\Illuminate\Support\Carbon::createFromFormat('Y-m-d',$dariTanggal)->format('d/m/Y');
+        }catch(\Throwable $e){}
+    }elseif($sampaiTanggal){
+        try{
+            $visibleDateRange=\Illuminate\Support\Carbon::createFromFormat('Y-m-d',$sampaiTanggal)->format('d/m/Y');
+        }catch(\Throwable $e){}
     }
 
-    $hasFilters =
-        request()->filled('search') ||
-        !empty($selectedKategori) ||
-        !empty($selectedStatus) ||
-        request()->filled('dari_tanggal') ||
+    $hasFilters=
+        request()->filled('search')||
+        !empty($selectedKategori)||
+        !empty($selectedStatus)||
+        request()->filled('dari_tanggal')||
         request()->filled('sampai_tanggal');
 @endphp
 
@@ -150,7 +143,7 @@
 .archive-filter-count.status{border:1px solid #fde68a;background:#fffbeb;color:#d97706}
 .archive-filter-chevron{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;flex:0 0 20px;color:#94a3b8;transition:transform .2s ease}
 .archive-filter-trigger.is-open .archive-filter-chevron{transform:rotate(180deg)}
-.archive-filter-menu{position:absolute;top:calc(100% + 8px);right:0;left:0;z-index:9998;overflow:hidden;border:1px solid #cbd5e1;border-radius:14px;background:#fff;box-shadow:0 20px 50px rgba(15,23,42,.14),0 5px 15px rgba(15,23,42,.08)}
+.archive-filter-menu{position:absolute;top:calc(100% + 8px);right:0;left:0;z-index:9998;overflow:hidden;border:1px solid #94a3b8;border-radius:14px;background:#fff;box-shadow:0 20px 50px rgba(15,23,42,.14),0 5px 15px rgba(15,23,42,.08)}
 .archive-filter-menu-header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-bottom:1px solid #cbd5e1;background:#f8fafc}
 .archive-filter-menu-heading{min-width:0}
 .archive-filter-menu-title{display:block;color:#334155;font-size:12px;font-weight:800}
@@ -176,13 +169,15 @@
 .archive-filter-footer-hint{color:#cbd5e1}
 .archive-filter-empty{grid-column:1/-1;padding:20px 10px;color:#94a3b8;font-size:11px;text-align:center}
 
-.archive-table-wrapper{overflow:hidden;border:1px solid #94a3b8;border-radius:16px;background:#fff;box-shadow:0 1px 3px rgba(15,23,42,.06),0 8px 24px rgba(15,23,42,.04)}
+/* TABLE BORDER TEGAS */
+.archive-table-wrapper{overflow:hidden;border:1px solid #64748b;border-radius:16px;background:#fff;box-shadow:0 1px 3px rgba(15,23,42,.06),0 8px 24px rgba(15,23,42,.04)}
 .archive-table-scroll{overflow-x:auto}
 .archive-table{width:100%;min-width:850px;border-collapse:collapse;border-spacing:0;background:#fff}
-.archive-table thead tr{border-bottom:2px solid #94a3b8;background:#f1f5f9}
-.archive-table thead th{padding:13px 16px;border-right:1px solid #cbd5e1;border-bottom:2px solid #94a3b8;color:#475569;font-size:10px;font-weight:800;letter-spacing:.05em;line-height:1.4;text-align:left;text-transform:uppercase;vertical-align:middle}
+.archive-table thead{background:#e2e8f0}
+.archive-table thead tr{border-bottom:2px solid #64748b}
+.archive-table thead th{padding:13px 16px;border-right:1px solid #94a3b8;border-bottom:2px solid #64748b;color:#334155;font-size:10px;font-weight:800;letter-spacing:.05em;line-height:1.4;text-align:left;text-transform:uppercase;vertical-align:middle}
 .archive-table thead th:last-child{border-right:0;text-align:center}
-.archive-table tbody tr{background:#fff}
+.archive-table tbody tr{background:#fff;transition:background-color .15s ease}
 .archive-table tbody tr:nth-child(even){background:#f8fafc}
 .archive-table tbody tr:hover{background:#eff6ff}
 .archive-table tbody td{padding:14px 16px;border-right:1px solid #cbd5e1;border-bottom:1px solid #cbd5e1;color:#475569;font-size:12px;line-height:1.5;vertical-align:middle}
@@ -193,8 +188,8 @@
 .archive-table .cell-subject{color:#1e293b;font-weight:700}
 .archive-table .cell-category{color:#64748b}
 .archive-table .cell-status{white-space:nowrap}
-.archive-table .sender-badge{display:inline-block;max-width:220px;overflow:hidden;padding:5px 9px;border:1px solid #cbd5e1;border-radius:8px;background:#f1f5f9;color:#334155;font-weight:600;text-overflow:ellipsis;vertical-align:middle;white-space:nowrap}
-.archive-table .status-badge{display:inline-flex;align-items:center;border-radius:999px;border-width:1px;padding:5px 10px;font-size:10px;font-weight:800}
+.archive-table .sender-badge{display:inline-block;max-width:220px;overflow:hidden;padding:5px 9px;border:1px solid #94a3b8;border-radius:8px;background:#f1f5f9;color:#334155;font-weight:600;text-overflow:ellipsis;vertical-align:middle;white-space:nowrap}
+.archive-table .status-badge{display:inline-flex;align-items:center;border-width:1px;border-radius:999px;padding:5px 10px;font-size:10px;font-weight:800}
 .archive-table .action-cell{width:130px}
 .archive-table .action-buttons{display:inline-flex;align-items:center;justify-content:center;gap:3px}
 .archive-table .action-button{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:8px;transition:background .15s ease,color .15s ease}
@@ -206,7 +201,7 @@
 .archive-table .action-button.delete:hover{background:#ffe4e6;color:#e11d48}
 .archive-table-empty{padding:48px 16px;text-align:center}
 
-@media (max-width:767px){
+@media(max-width:767px){
     .custom-date-picker{top:50%;left:50%;width:calc(100vw - 16px);max-height:calc(100vh - 16px);overflow-y:auto;transform:translate(-50%,-50%)}
     .custom-date-picker-calendars{grid-template-columns:1fr}
     .custom-calendar+.custom-calendar{border-top:1px solid #cbd5e1;border-left:0}
@@ -216,8 +211,9 @@
     .archive-filter-menu{position:fixed;top:50%;left:50%;right:auto;width:calc(100vw - 24px);max-width:430px;max-height:80vh;transform:translate(-50%,-50%)}
     .archive-filter-options{max-height:calc(80vh - 155px);grid-template-columns:1fr 1fr}
     body.date-picker-lock{overflow:hidden}
+    .archive-table thead th,.archive-table tbody td{padding:12px 13px}
 }
-@media (max-width:480px){
+@media(max-width:480px){
     .archive-filter-options{grid-template-columns:1fr}
 }
 </style>
@@ -225,6 +221,7 @@
 
 <div class="space-y-4 sm:space-y-6">
 
+    {{-- HEADER --}}
     <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div class="min-w-0">
             <h1 class="text-xl font-bold tracking-tight text-slate-800 sm:text-2xl">Surat Masuk</h1>
@@ -232,64 +229,54 @@
         </div>
 
         <div class="grid w-full grid-cols-3 gap-2 sm:flex sm:w-auto">
-            <a href="{{ route('export.surat-masuk.excel', request()->query()) }}" class="inline-flex items-center justify-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-2.5 py-2 text-xs font-semibold text-emerald-700 shadow-sm transition hover:bg-emerald-100 sm:px-3.5">
-                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 00.707.293l5.414 5.414a1 1 0 00.293.707V19a2 2 0 01-2 2z"/>
-                </svg>
+            <a href="{{ route('export.surat-masuk.excel',request()->query()) }}" class="inline-flex items-center justify-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-2.5 py-2 text-xs font-semibold text-emerald-700 shadow-sm transition hover:bg-emerald-100 sm:px-3.5">
+                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 00.707.293l5.414 5.414a1 1 0 00.293.707V19a2 2 0 01-2 2z"/></svg>
                 Excel
             </a>
 
-            <a href="{{ route('export.surat-masuk.pdf', request()->query()) }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-2.5 py-2 text-xs font-semibold text-rose-700 shadow-sm transition hover:bg-rose-100 sm:px-3.5">
-                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                </svg>
+            <a href="{{ route('export.surat-masuk.pdf',request()->query()) }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-2.5 py-2 text-xs font-semibold text-rose-700 shadow-sm transition hover:bg-rose-100 sm:px-3.5">
+                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
                 PDF
             </a>
 
             @if($canManage)
                 <a href="{{ route('surat-masuk.create') }}" class="inline-flex items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-2.5 py-2 text-xs font-semibold text-white shadow-md shadow-blue-600/20 transition hover:bg-blue-700 sm:px-4">
-                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                    </svg>
+                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                     Surat Masuk
                 </a>
             @endif
         </div>
     </div>
 
+    {{-- FILTER --}}
     <div class="rounded-2xl border border-slate-300 bg-white p-3 shadow-sm sm:p-5">
         <form id="filterForm" method="GET" action="{{ route('surat-masuk.index') }}" class="space-y-3">
 
             <div class="grid grid-cols-1 gap-2.5 lg:grid-cols-12">
-                <div class="lg:col-span-5">
-                    <label for="search" class="sr-only">Pencarian</label>
 
+                {{-- SEARCH --}}
+                <div class="lg:col-span-5">
                     <div class="relative">
                         <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0a7 7 0 0114 0z"/>
-                            </svg>
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0a7 7 0 0114 0z"/></svg>
                         </div>
 
                         <input type="text" id="search" name="search" value="{{ request('search') }}" placeholder="Cari perihal atau nomor surat..." autocomplete="off" class="h-11 w-full rounded-xl border border-slate-300 bg-slate-50 pl-9 pr-3 text-xs text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 sm:text-sm">
                     </div>
                 </div>
 
+                {{-- DATE --}}
                 <div class="lg:col-span-4">
                     <div class="date-range-wrapper">
                         <div class="relative">
                             <div class="pointer-events-none absolute inset-y-0 left-0 z-10 flex items-center pl-3 text-slate-400">
-                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5v12a2 2 0 002 2z"/>
-                                </svg>
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5v12a2 2 0 002 2z"/></svg>
                             </div>
 
                             <input type="text" id="date-range" value="{{ $visibleDateRange }}" readonly autocomplete="off" placeholder="Pilih rentang tanggal..." class="date-range-input h-11 w-full rounded-xl border border-slate-300 bg-slate-50 pl-9 pr-10 text-xs font-medium text-slate-700 outline-none transition placeholder:text-slate-400 hover:border-slate-400 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 sm:text-sm">
 
-                            <button type="button" id="clearDateRange" title="Hapus tanggal" aria-label="Hapus tanggal" class="{{ $visibleDateRange ? 'flex' : 'hidden' }} absolute inset-y-0 right-0 z-20 w-10 items-center justify-center text-slate-400 transition hover:text-rose-500">
-                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                </svg>
+                            <button type="button" id="clearDateRange" title="Hapus tanggal" aria-label="Hapus tanggal" class="{{ $visibleDateRange?'flex':'hidden' }} absolute inset-y-0 right-0 z-20 w-10 items-center justify-center text-slate-400 transition hover:text-rose-500">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                             </button>
                         </div>
 
@@ -298,33 +285,33 @@
                     </div>
                 </div>
 
+                {{-- FILTER BUTTON --}}
                 <div class="lg:col-span-3">
                     <div class="flex h-11 gap-2">
                         <button type="submit" class="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-slate-900 px-3 text-xs font-semibold text-white shadow-sm transition hover:bg-slate-800 sm:text-sm">
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 00-.293.707l-6.414 6.414a1 1 0 00-.293.707l-1.293.707V17l-4-4v-4.293a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
-                            </svg>
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 00-.293.707l-6.414 6.414a1 1 0 00-.293.707l-1.293.707V17l-4-4v-4.293a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
                             Filter
                         </button>
 
                         @if($hasFilters)
                             <a href="{{ route('surat-masuk.index') }}" title="Reset Filter" aria-label="Reset Filter" class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500 transition hover:bg-slate-200 hover:text-slate-700">
-                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                </svg>
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                             </a>
                         @endif
                     </div>
                 </div>
+
             </div>
 
+            {{-- CATEGORY + STATUS --}}
             <div class="grid grid-cols-1 gap-3 lg:grid-cols-2">
+
+                {{-- CATEGORY --}}
                 <div class="archive-filter-dropdown" data-filter-dropdown="kategori">
+
                     <button type="button" class="archive-filter-trigger" data-dropdown-trigger aria-expanded="false" aria-haspopup="true">
                         <span class="archive-filter-icon category">
-                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h10"/>
-                            </svg>
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h10"/></svg>
                         </span>
 
                         <span class="archive-filter-trigger-content">
@@ -335,13 +322,12 @@
                         <span class="archive-filter-count category" data-filter-count>{{ count($selectedKategori) }} dipilih</span>
 
                         <span class="archive-filter-chevron">
-                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 9l6 6l6-6"/>
-                            </svg>
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 9l6 6l6-6"/></svg>
                         </span>
                     </button>
 
                     <div class="archive-filter-menu hidden" data-dropdown-menu>
+
                         <div class="archive-filter-menu-header">
                             <div class="archive-filter-menu-heading">
                                 <span class="archive-filter-menu-title">Pilih Kategori</span>
@@ -355,10 +341,10 @@
                         </div>
 
                         <div class="archive-filter-options">
-                            @if(isset($kategoris) && $kategoris->count())
+                            @if(isset($kategoris)&&$kategoris->count())
                                 @foreach($kategoris as $kategori)
                                     <label class="archive-filter-option">
-                                        <input type="checkbox" name="kategori_id[]" value="{{ $kategori->id }}" class="kategori-checkbox" @checked(in_array((string) $kategori->id, $selectedKategori, true))>
+                                        <input type="checkbox" name="kategori_id[]" value="{{ $kategori->id }}" class="kategori-checkbox" @checked(in_array((string)$kategori->id,$selectedKategori,true))>
                                         <span class="archive-filter-option-text" title="{{ $kategori->nama_kategori }}">{{ $kategori->nama_kategori }}</span>
                                     </label>
                                 @endforeach
@@ -371,15 +357,16 @@
                             <span class="archive-filter-footer-count" data-footer-count>{{ count($selectedKategori) }} kategori dipilih</span>
                             <span class="archive-filter-footer-hint">Klik Filter untuk menerapkan</span>
                         </div>
+
                     </div>
                 </div>
 
+                {{-- STATUS --}}
                 <div class="archive-filter-dropdown" data-filter-dropdown="status">
+
                     <button type="button" class="archive-filter-trigger" data-dropdown-trigger aria-expanded="false" aria-haspopup="true">
                         <span class="archive-filter-icon status">
-                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2l4-4m6 2a9 9 0 11-18 0a9 9 0 0118 0z"/>
-                            </svg>
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2l4-4m6 2a9 9 0 11-18 0a9 9 0 0118 0z"/></svg>
                         </span>
 
                         <span class="archive-filter-trigger-content">
@@ -390,13 +377,12 @@
                         <span class="archive-filter-count status" data-filter-count>{{ count($selectedStatus) }} dipilih</span>
 
                         <span class="archive-filter-chevron">
-                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 9l6 6l6-6"/>
-                            </svg>
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 9l6 6l6-6"/></svg>
                         </span>
                     </button>
 
                     <div class="archive-filter-menu hidden" data-dropdown-menu>
+
                         <div class="archive-filter-menu-header">
                             <div class="archive-filter-menu-heading">
                                 <span class="archive-filter-menu-title">Pilih Status</span>
@@ -410,9 +396,9 @@
                         </div>
 
                         <div class="archive-filter-options">
-                            @foreach($statusOptions as $value => $label)
+                            @foreach($statusOptions as $value=>$label)
                                 <label class="archive-filter-option">
-                                    <input type="checkbox" name="status[]" value="{{ $value }}" class="status-checkbox" @checked(in_array($value, $selectedStatus, true))>
+                                    <input type="checkbox" name="status[]" value="{{ $value }}" class="status-checkbox" @checked(in_array($value,$selectedStatus,true))>
                                     <span class="archive-filter-option-text">{{ $label }}</span>
                                 </label>
                             @endforeach
@@ -422,15 +408,20 @@
                             <span class="archive-filter-footer-count" data-footer-count>{{ count($selectedStatus) }} status dipilih</span>
                             <span class="archive-filter-footer-hint">Klik Filter untuk menerapkan</span>
                         </div>
+
                     </div>
                 </div>
+
             </div>
         </form>
     </div>
 
+    {{-- TABLE --}}
     <div class="archive-table-wrapper">
         <div class="archive-table-scroll">
+
             <table class="archive-table">
+
                 <thead>
                     <tr>
                         <th>Tanggal Terima</th>
@@ -443,62 +434,69 @@
                 </thead>
 
                 <tbody>
-                    @forelse($suratMasuks ?? [] as $surat)
-                        @php
-                            $status = strtolower(trim((string) ($surat->status ?? 'baru')));
-                            $badgeClass = $statusBadgeClasses[$status] ?? 'bg-slate-100 text-slate-600 border-slate-200';
-                            $pengirim = $surat->asal_surat ?? $surat->pengirim ?? '-';
-                            $tanggalTerima = '-';
 
-                            if ($surat->tanggal_terima) {
-                                try {
-                                    $tanggalTerima = \Illuminate\Support\Carbon::parse($surat->tanggal_terima)->format('d/m/Y');
-                                } catch (\Throwable $e) {
-                                    $tanggalTerima = '-';
-                                }
+                    @forelse($suratMasuks??[] as $surat)
+
+                        @php
+                            $status=strtolower(trim((string)($surat->status??'baru')));
+                            $badgeClass=$statusBadgeClasses[$status]??'bg-slate-100 text-slate-600 border-slate-200';
+                            $pengirim=$surat->asal_surat??$surat->pengirim??'-';
+                            $tanggalTerima='-';
+
+                            if($surat->tanggal_terima){
+                                try{
+                                    $tanggalTerima=\Illuminate\Support\Carbon::parse($surat->tanggal_terima)->format('d/m/Y');
+                                }catch(\Throwable $e){}
                             }
                         @endphp
 
                         <tr>
-                            <td class="cell-date">{{ $tanggalTerima }}</td>
 
-                            <td class="cell-sender">
-                                <span class="sender-badge" title="{{ $pengirim }}">{{ $pengirim }}</span>
+                            <td class="cell-date">
+                                {{ $tanggalTerima }}
                             </td>
 
-                            <td class="cell-subject max-w-xs truncate" title="{{ $surat->perihal ?? '-' }}">
-                                {{ $surat->perihal ?? '-' }}
+                            <td class="cell-sender">
+                                <span class="sender-badge" title="{{ $pengirim }}">
+                                    {{ $pengirim }}
+                                </span>
+                            </td>
+
+                            <td class="cell-subject max-w-xs truncate" title="{{ $surat->perihal??'-' }}">
+                                {{ $surat->perihal??'-' }}
                             </td>
 
                             <td class="cell-category">
-                                {{ $surat->kategori?->nama_kategori ?? '-' }}
+                                {{ $surat->kategori?->nama_kategori??'-' }}
                             </td>
 
                             <td class="cell-status">
                                 <span class="status-badge {{ $badgeClass }}">
-                                    {{ $statusOptions[$status] ?? ucfirst($status) }}
+                                    {{ $statusOptions[$status]??ucfirst($status) }}
                                 </span>
                             </td>
 
                             <td class="action-cell">
+
                                 <div class="action-buttons">
 
-                                    <a href="{{ route('surat-masuk.show', $surat) }}" class="action-button detail" title="Lihat Detail & Disposisi" aria-label="Lihat detail surat">
+                                    <a href="{{ route('surat-masuk.show',$surat) }}" class="action-button detail" title="Lihat Detail & Disposisi" aria-label="Lihat detail surat">
                                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0a3 3 0 016 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0a3 3 0 006 0z"/>
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7z"/>
                                         </svg>
                                     </a>
 
                                     @if($canManage)
-                                        <a href="{{ route('surat-masuk.edit', $surat) }}" class="action-button edit" title="Ubah Data" aria-label="Ubah data surat">
+
+                                        <a href="{{ route('surat-masuk.edit',$surat) }}" class="action-button edit" title="Ubah Data" aria-label="Ubah data surat">
                                             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5"/>
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.5 2.5a2.121 2.121 0 013 3L11.828 15H9v-2.828L18.5 2.5z"/>
                                             </svg>
                                         </a>
 
-                                        <form action="{{ route('surat-masuk.destroy', $surat) }}" method="POST" class="delete-form inline">
+                                        <form action="{{ route('surat-masuk.destroy',$surat) }}" method="POST" class="delete-form inline">
                                             @csrf
                                             @method('DELETE')
 
@@ -510,16 +508,21 @@
                                                 </svg>
                                             </button>
                                         </form>
+
                                     @endif
 
                                 </div>
                             </td>
+
                         </tr>
 
                     @empty
+
                         <tr>
                             <td colspan="6" class="archive-table-empty">
+
                                 <div class="flex flex-col items-center justify-center">
+
                                     <div class="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
                                         <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-1.414 0l-2.414-2.414A1 1 0 006.586 13H4"/>
@@ -539,33 +542,42 @@
                                     </p>
 
                                     @if($hasFilters)
+
                                         <a href="{{ route('surat-masuk.index') }}" class="mt-3 inline-flex items-center rounded-lg bg-slate-900 px-3 py-2 text-[11px] font-semibold text-white transition hover:bg-slate-800">
                                             Reset Filter
                                         </a>
+
                                     @elseif($canManage)
+
                                         <a href="{{ route('surat-masuk.create') }}" class="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-2 text-[11px] font-semibold text-white transition hover:bg-blue-700">
                                             <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                             </svg>
                                             Tambah Surat Masuk
                                         </a>
+
                                     @endif
+
                                 </div>
                             </td>
                         </tr>
+
                     @endforelse
+
                 </tbody>
             </table>
         </div>
 
-        @if(isset($suratMasuks) && method_exists($suratMasuks, 'hasPages') && $suratMasuks->hasPages())
+        @if(isset($suratMasuks)&&method_exists($suratMasuks,'hasPages')&&$suratMasuks->hasPages())
             <div class="border-t border-slate-300 px-4 py-3 sm:px-6 sm:py-4">
                 {{ $suratMasuks->withQueryString()->links() }}
             </div>
         @endif
     </div>
+
 </div>
 
+{{-- DATE PICKER --}}
 <div id="customDatePicker" class="custom-date-picker hidden">
     <div class="custom-date-picker-header">
         <div class="custom-date-picker-title">Pilih Rentang Tanggal</div>
@@ -591,29 +603,29 @@
 (function(){
     'use strict';
 
-    const MONTHS = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
-    const WEEKDAYS = ['Sn','Sl','Rb','Km','Jm','Sb','Mg'];
-    const MIN_YEAR = 2000;
-    const MAX_YEAR = new Date().getFullYear() + 20;
+    const MONTHS=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+    const WEEKDAYS=['Sn','Sl','Rb','Km','Jm','Sb','Mg'];
+    const MIN_YEAR=2000;
+    const MAX_YEAR=new Date().getFullYear()+20;
 
-    const dateInput = document.getElementById('date-range');
-    const dariInput = document.getElementById('dari_tanggal');
-    const sampaiInput = document.getElementById('sampai_tanggal');
-    const clearButton = document.getElementById('clearDateRange');
-    const picker = document.getElementById('customDatePicker');
-    const calendars = document.getElementById('customDateCalendars');
-    const panel = document.getElementById('customPickerPanel');
-    const closePickerButton = document.getElementById('datePickerClose');
-    const clearPickerButton = document.getElementById('datePickerClear');
-    const applyPickerButton = document.getElementById('datePickerApply');
-    const selectedLabel = document.getElementById('datePickerSelected');
+    const dateInput=document.getElementById('date-range');
+    const dariInput=document.getElementById('dari_tanggal');
+    const sampaiInput=document.getElementById('sampai_tanggal');
+    const clearButton=document.getElementById('clearDateRange');
+    const picker=document.getElementById('customDatePicker');
+    const calendars=document.getElementById('customDateCalendars');
+    const panel=document.getElementById('customPickerPanel');
+    const closePickerButton=document.getElementById('datePickerClose');
+    const clearPickerButton=document.getElementById('datePickerClear');
+    const applyPickerButton=document.getElementById('datePickerApply');
+    const selectedLabel=document.getElementById('datePickerSelected');
 
-    let selectedStart = parseDate(dariInput?.value || '');
-    let selectedEnd = parseDate(sampaiInput?.value || '');
-    let tempStart = selectedStart ? cloneDate(selectedStart) : null;
-    let tempEnd = selectedEnd ? cloneDate(selectedEnd) : null;
-    let viewLeft = selectedStart ? new Date(selectedStart.getFullYear(), selectedStart.getMonth(), 1) : new Date();
-    let panelSide = 'left';
+    let selectedStart=parseDate(dariInput?.value||'');
+    let selectedEnd=parseDate(sampaiInput?.value||'');
+    let tempStart=selectedStart?cloneDate(selectedStart):null;
+    let tempEnd=selectedEnd?cloneDate(selectedEnd):null;
+    let viewLeft=selectedStart?new Date(selectedStart.getFullYear(),selectedStart.getMonth(),1):new Date();
+    let panelSide='left';
 
     viewLeft.setDate(1);
 
@@ -624,15 +636,15 @@
     function parseDate(value){
         if(!value)return null;
 
-        const match = String(value).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+        const match=String(value).match(/^(\d{4})-(\d{2})-(\d{2})$/);
         if(!match)return null;
 
-        const year = Number(match[1]);
-        const month = Number(match[2]) - 1;
-        const day = Number(match[3]);
-        const date = new Date(year,month,day);
+        const year=Number(match[1]);
+        const month=Number(match[2])-1;
+        const day=Number(match[3]);
+        const date=new Date(year,month,day);
 
-        if(date.getFullYear() !== year || date.getMonth() !== month || date.getDate() !== day)return null;
+        if(date.getFullYear()!==year||date.getMonth()!==month||date.getDate()!==day)return null;
 
         return date;
     }
@@ -652,7 +664,7 @@
     }
 
     function sameDate(a,b){
-        return !!(a && b && a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate());
+        return !!(a&&b&&a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate());
     }
 
     function addMonths(date,amount){
@@ -660,18 +672,19 @@
     }
 
     function isBetween(date,start,end){
-        if(!date || !start || !end)return false;
-        const value = toISO(date);
-        return value > toISO(start) && value < toISO(end);
+        if(!date||!start||!end)return false;
+
+        const value=toISO(date);
+        return value>toISO(start)&&value<toISO(end);
     }
 
     function renderCalendars(){
         if(!calendars)return;
 
-        calendars.innerHTML = '';
+        calendars.innerHTML='';
 
-        const leftDate = new Date(viewLeft.getFullYear(),viewLeft.getMonth(),1);
-        const rightDate = addMonths(leftDate,1);
+        const leftDate=new Date(viewLeft.getFullYear(),viewLeft.getMonth(),1);
+        const rightDate=addMonths(leftDate,1);
 
         calendars.appendChild(createCalendar(leftDate,'left'));
         calendars.appendChild(createCalendar(rightDate,'right'));
@@ -681,36 +694,36 @@
     }
 
     function createCalendar(date,side){
-        const calendar = document.createElement('div');
-        calendar.className = 'custom-calendar';
+        const calendar=document.createElement('div');
+        calendar.className='custom-calendar';
 
-        const header = document.createElement('div');
-        header.className = 'custom-calendar-head';
+        const header=document.createElement('div');
+        header.className='custom-calendar-head';
 
-        const prev = document.createElement('button');
-        prev.type = 'button';
-        prev.className = 'custom-calendar-nav';
-        prev.innerHTML = '&#8249;';
+        const prev=document.createElement('button');
+        prev.type='button';
+        prev.className='custom-calendar-nav';
+        prev.innerHTML='&#8249;';
         prev.setAttribute('aria-label','Bulan sebelumnya');
 
-        const next = document.createElement('button');
-        next.type = 'button';
-        next.className = 'custom-calendar-nav';
-        next.innerHTML = '&#8250;';
+        const next=document.createElement('button');
+        next.type='button';
+        next.className='custom-calendar-nav';
+        next.innerHTML='&#8250;';
         next.setAttribute('aria-label','Bulan berikutnya');
 
-        const monthButtons = document.createElement('div');
-        monthButtons.className = 'custom-calendar-month-buttons';
+        const monthButtons=document.createElement('div');
+        monthButtons.className='custom-calendar-month-buttons';
 
-        const monthButton = document.createElement('button');
-        monthButton.type = 'button';
-        monthButton.className = 'custom-calendar-month';
-        monthButton.textContent = MONTHS[date.getMonth()];
+        const monthButton=document.createElement('button');
+        monthButton.type='button';
+        monthButton.className='custom-calendar-month';
+        monthButton.textContent=MONTHS[date.getMonth()];
 
-        const yearButton = document.createElement('button');
-        yearButton.type = 'button';
-        yearButton.className = 'custom-calendar-year';
-        yearButton.textContent = String(date.getFullYear());
+        const yearButton=document.createElement('button');
+        yearButton.type='button';
+        yearButton.className='custom-calendar-year';
+        yearButton.textContent=String(date.getFullYear());
 
         monthButtons.append(monthButton,yearButton);
         header.append(prev,monthButtons,next);
@@ -730,78 +743,69 @@
         prev.addEventListener('click',function(e){
             e.preventDefault();
             e.stopPropagation();
-            viewLeft = addMonths(viewLeft,-1);
+            viewLeft=addMonths(viewLeft,-1);
             renderCalendars();
         });
 
         next.addEventListener('click',function(e){
             e.preventDefault();
             e.stopPropagation();
-            viewLeft = addMonths(viewLeft,1);
+            viewLeft=addMonths(viewLeft,1);
             renderCalendars();
         });
 
         calendar.appendChild(header);
 
-        const weekdays = document.createElement('div');
-        weekdays.className = 'custom-calendar-weekdays';
+        const weekdays=document.createElement('div');
+        weekdays.className='custom-calendar-weekdays';
 
         WEEKDAYS.forEach(day=>{
-            const element = document.createElement('div');
-            element.className = 'custom-calendar-weekday';
-            element.textContent = day;
+            const element=document.createElement('div');
+            element.className='custom-calendar-weekday';
+            element.textContent=day;
             weekdays.appendChild(element);
         });
 
         calendar.appendChild(weekdays);
 
-        const days = document.createElement('div');
-        days.className = 'custom-calendar-days';
+        const days=document.createElement('div');
+        days.className='custom-calendar-days';
 
-        const year = date.getFullYear();
-        const month = date.getMonth();
-        const firstDay = new Date(year,month,1).getDay();
-        const mondayOffset = firstDay === 0 ? 6 : firstDay - 1;
-        const daysInMonth = new Date(year,month+1,0).getDate();
-        const daysInPreviousMonth = new Date(year,month,0).getDate();
+        const year=date.getFullYear();
+        const month=date.getMonth();
+        const firstDay=new Date(year,month,1).getDay();
+        const mondayOffset=firstDay===0?6:firstDay-1;
+        const daysInMonth=new Date(year,month+1,0).getDate();
+        const daysInPreviousMonth=new Date(year,month,0).getDate();
 
         for(let index=0;index<42;index++){
             let dayNumber;
             let cellDate;
-            let otherMonth = false;
+            let otherMonth=false;
 
-            if(index < mondayOffset){
-                dayNumber = daysInPreviousMonth - mondayOffset + index + 1;
-                cellDate = new Date(year,month-1,dayNumber);
-                otherMonth = true;
-            }else if(index >= mondayOffset + daysInMonth){
-                dayNumber = index - mondayOffset - daysInMonth + 1;
-                cellDate = new Date(year,month+1,dayNumber);
-                otherMonth = true;
+            if(index<mondayOffset){
+                dayNumber=daysInPreviousMonth-mondayOffset+index+1;
+                cellDate=new Date(year,month-1,dayNumber);
+                otherMonth=true;
+            }else if(index>=mondayOffset+daysInMonth){
+                dayNumber=index-mondayOffset-daysInMonth+1;
+                cellDate=new Date(year,month+1,dayNumber);
+                otherMonth=true;
             }else{
-                dayNumber = index - mondayOffset + 1;
-                cellDate = new Date(year,month,dayNumber);
+                dayNumber=index-mondayOffset+1;
+                cellDate=new Date(year,month,dayNumber);
             }
 
-            const button = document.createElement('button');
-            button.type = 'button';
-            button.className = 'custom-calendar-day';
-            button.textContent = String(dayNumber);
+            const button=document.createElement('button');
+            button.type='button';
+            button.className='custom-calendar-day';
+            button.textContent=String(dayNumber);
 
             if(otherMonth)button.classList.add('other-month');
             if(sameDate(cellDate,new Date()))button.classList.add('today');
-
-            if(tempStart && tempEnd && isBetween(cellDate,tempStart,tempEnd)){
-                button.classList.add('in-range');
-            }
-
-            if(tempStart && sameDate(cellDate,tempStart)){
-                button.classList.add('range-start');
-            }
-
-            if(tempEnd && sameDate(cellDate,tempEnd)){
-                button.classList.add('range-end');
-            }
+            if(tempStart&&tempEnd&&isBetween(cellDate,tempStart,tempEnd))button.classList.add('in-range');
+            if(tempStart&&sameDate(cellDate,tempStart))button.classList.add('range-start');
+            if(tempEnd&&sameDate(cellDate,tempEnd))button.classList.add('range-end');
 
             button.addEventListener('click',function(e){
                 e.preventDefault();
@@ -817,16 +821,16 @@
     }
 
     function selectDate(date){
-        const chosen = cloneDate(date);
+        const chosen=cloneDate(date);
 
-        if(!tempStart || tempEnd){
-            tempStart = chosen;
-            tempEnd = null;
-        }else if(toISO(chosen) < toISO(tempStart)){
-            tempEnd = cloneDate(tempStart);
-            tempStart = chosen;
+        if(!tempStart||tempEnd){
+            tempStart=chosen;
+            tempEnd=null;
+        }else if(toISO(chosen)<toISO(tempStart)){
+            tempEnd=cloneDate(tempStart);
+            tempStart=chosen;
         }else{
-            tempEnd = chosen;
+            tempEnd=chosen;
         }
 
         renderCalendars();
@@ -835,36 +839,36 @@
     function updateSelectedLabel(){
         if(!selectedLabel)return;
 
-        if(tempStart && tempEnd){
-            selectedLabel.textContent = formatDate(tempStart) + ' - ' + formatDate(tempEnd);
+        if(tempStart&&tempEnd){
+            selectedLabel.textContent=formatDate(tempStart)+' - '+formatDate(tempEnd);
             return;
         }
 
         if(tempStart){
-            selectedLabel.textContent = formatDate(tempStart) + ' - pilih tanggal akhir';
+            selectedLabel.textContent=formatDate(tempStart)+' - pilih tanggal akhir';
             return;
         }
 
-        selectedLabel.textContent = 'Pilih tanggal awal';
+        selectedLabel.textContent='Pilih tanggal awal';
     }
 
     function positionPicker(){
-        if(!picker || !dateInput || window.innerWidth <= 767)return;
+        if(!picker||!dateInput||window.innerWidth<=767)return;
 
-        const rect = dateInput.getBoundingClientRect();
-        const width = picker.offsetWidth || 720;
-        const height = picker.offsetHeight || 500;
+        const rect=dateInput.getBoundingClientRect();
+        const width=picker.offsetWidth||720;
+        const height=picker.offsetHeight||500;
 
-        let left = rect.left + rect.width / 2 - width / 2;
-        let top = rect.bottom + 8;
+        let left=rect.left+rect.width/2-width/2;
+        let top=rect.bottom+8;
 
-        if(left + width > window.innerWidth - 10)left = window.innerWidth - width - 10;
-        if(left < 10)left = 10;
-        if(top + height > window.innerHeight - 10)top = rect.top - height - 8;
-        if(top < 10)top = 10;
+        if(left+width>window.innerWidth-10)left=window.innerWidth-width-10;
+        if(left<10)left=10;
+        if(top+height>window.innerHeight-10)top=rect.top-height-8;
+        if(top<10)top=10;
 
-        picker.style.left = left + 'px';
-        picker.style.top = top + 'px';
+        picker.style.left=left+'px';
+        picker.style.top=top+'px';
     }
 
     function showPicker(){
@@ -872,11 +876,11 @@
 
         closePanel();
 
-        tempStart = selectedStart ? cloneDate(selectedStart) : null;
-        tempEnd = selectedEnd ? cloneDate(selectedEnd) : null;
+        tempStart=selectedStart?cloneDate(selectedStart):null;
+        tempEnd=selectedEnd?cloneDate(selectedEnd):null;
 
         if(tempStart){
-            viewLeft = new Date(tempStart.getFullYear(),tempStart.getMonth(),1);
+            viewLeft=new Date(tempStart.getFullYear(),tempStart.getMonth(),1);
         }
 
         renderCalendars();
@@ -897,36 +901,36 @@
     function showMonthPanel(calendarDate,anchor,side){
         if(!panel)return;
 
-        panelSide = side;
-        panel.innerHTML = '';
+        panelSide=side;
+        panel.innerHTML='';
         panel.classList.remove('hidden');
 
-        const header = document.createElement('div');
-        header.className = 'custom-picker-panel-header';
+        const header=document.createElement('div');
+        header.className='custom-picker-panel-header';
 
-        const title = document.createElement('div');
-        title.className = 'custom-picker-panel-title';
-        title.textContent = 'Pilih Bulan ' + calendarDate.getFullYear();
+        const title=document.createElement('div');
+        title.className='custom-picker-panel-title';
+        title.textContent='Pilih Bulan '+calendarDate.getFullYear();
 
-        const close = document.createElement('button');
-        close.type = 'button';
-        close.className = 'custom-picker-panel-close';
-        close.innerHTML = '&times;';
+        const close=document.createElement('button');
+        close.type='button';
+        close.className='custom-picker-panel-close';
+        close.innerHTML='&times;';
         close.addEventListener('click',closePanel);
 
         header.append(title,close);
         panel.appendChild(header);
 
-        const grid = document.createElement('div');
-        grid.className = 'custom-picker-month-grid';
+        const grid=document.createElement('div');
+        grid.className='custom-picker-month-grid';
 
         MONTHS.forEach((monthName,monthIndex)=>{
-            const button = document.createElement('button');
-            button.type = 'button';
-            button.className = 'custom-picker-option';
-            button.textContent = monthName;
+            const button=document.createElement('button');
+            button.type='button';
+            button.className='custom-picker-option';
+            button.textContent=monthName;
 
-            if(monthIndex === calendarDate.getMonth()){
+            if(monthIndex===calendarDate.getMonth()){
                 button.classList.add('active');
             }
 
@@ -934,10 +938,10 @@
                 e.preventDefault();
                 e.stopPropagation();
 
-                if(panelSide === 'left'){
-                    viewLeft = new Date(calendarDate.getFullYear(),monthIndex,1);
+                if(panelSide==='left'){
+                    viewLeft=new Date(calendarDate.getFullYear(),monthIndex,1);
                 }else{
-                    viewLeft = addMonths(new Date(calendarDate.getFullYear(),monthIndex,1),-1);
+                    viewLeft=addMonths(new Date(calendarDate.getFullYear(),monthIndex,1),-1);
                 }
 
                 closePanel();
@@ -954,51 +958,51 @@
     function showYearPanel(calendarDate,anchor,side){
         if(!panel)return;
 
-        panelSide = side;
+        panelSide=side;
 
-        const startYear = Math.floor(calendarDate.getFullYear() / 12) * 12;
+        const startYear=Math.floor(calendarDate.getFullYear()/12)*12;
         renderYearPanel(calendarDate,anchor,startYear);
     }
 
     function renderYearPanel(calendarDate,anchor,startYear){
-        panel.innerHTML = '';
+        panel.innerHTML='';
         panel.classList.remove('hidden');
 
-        const header = document.createElement('div');
-        header.className = 'custom-picker-panel-header';
+        const header=document.createElement('div');
+        header.className='custom-picker-panel-header';
 
-        const title = document.createElement('div');
-        title.className = 'custom-picker-panel-title';
-        title.textContent = startYear + ' - ' + (startYear + 11);
+        const title=document.createElement('div');
+        title.className='custom-picker-panel-title';
+        title.textContent=startYear+' - '+(startYear+11);
 
-        const navigation = document.createElement('div');
-        navigation.className = 'custom-picker-year-navigation';
+        const navigation=document.createElement('div');
+        navigation.className='custom-picker-year-navigation';
 
-        const previous = document.createElement('button');
-        previous.type = 'button';
-        previous.className = 'custom-picker-year-nav';
-        previous.innerHTML = '&#8249;';
+        const previous=document.createElement('button');
+        previous.type='button';
+        previous.className='custom-picker-year-nav';
+        previous.innerHTML='&#8249;';
 
-        const next = document.createElement('button');
-        next.type = 'button';
-        next.className = 'custom-picker-year-nav';
-        next.innerHTML = '&#8250;';
+        const next=document.createElement('button');
+        next.type='button';
+        next.className='custom-picker-year-nav';
+        next.innerHTML='&#8250;';
 
-        const close = document.createElement('button');
-        close.type = 'button';
-        close.className = 'custom-picker-panel-close';
-        close.innerHTML = '&times;';
+        const close=document.createElement('button');
+        close.type='button';
+        close.className='custom-picker-panel-close';
+        close.innerHTML='&times;';
 
         previous.addEventListener('click',function(e){
             e.preventDefault();
             e.stopPropagation();
-            renderYearPanel(calendarDate,anchor,startYear - 12);
+            renderYearPanel(calendarDate,anchor,startYear-12);
         });
 
         next.addEventListener('click',function(e){
             e.preventDefault();
             e.stopPropagation();
-            renderYearPanel(calendarDate,anchor,startYear + 12);
+            renderYearPanel(calendarDate,anchor,startYear+12);
         });
 
         close.addEventListener('click',closePanel);
@@ -1007,36 +1011,31 @@
         header.append(title,navigation);
         panel.appendChild(header);
 
-        const grid = document.createElement('div');
-        grid.className = 'custom-picker-year-grid';
+        const grid=document.createElement('div');
+        grid.className='custom-picker-year-grid';
 
         for(let year=startYear;year<startYear+12;year++){
-            const button = document.createElement('button');
-            button.type = 'button';
-            button.className = 'custom-picker-option';
-            button.textContent = String(year);
+            const button=document.createElement('button');
+            button.type='button';
+            button.className='custom-picker-option';
+            button.textContent=String(year);
 
-            if(year === calendarDate.getFullYear()){
-                button.classList.add('active');
-            }
+            if(year===calendarDate.getFullYear())button.classList.add('active');
+            if(year===new Date().getFullYear())button.classList.add('current');
 
-            if(year === new Date().getFullYear()){
-                button.classList.add('current');
-            }
-
-            button.disabled = year < MIN_YEAR || year > MAX_YEAR;
+            button.disabled=year<MIN_YEAR||year>MAX_YEAR;
 
             if(!button.disabled){
                 button.addEventListener('click',function(e){
                     e.preventDefault();
                     e.stopPropagation();
 
-                    const month = calendarDate.getMonth();
+                    const month=calendarDate.getMonth();
 
-                    if(panelSide === 'left'){
-                        viewLeft = new Date(year,month,1);
+                    if(panelSide==='left'){
+                        viewLeft=new Date(year,month,1);
                     }else{
-                        viewLeft = new Date(year,month-1,1);
+                        viewLeft=new Date(year,month-1,1);
                     }
 
                     closePanel();
@@ -1052,39 +1051,39 @@
     }
 
     function positionPanel(element,anchor){
-        if(!element || !anchor)return;
+        if(!element||!anchor)return;
 
-        if(window.innerWidth <= 767){
-            element.style.left = '';
-            element.style.top = '';
+        if(window.innerWidth<=767){
+            element.style.left='';
+            element.style.top='';
             return;
         }
 
-        const rect = anchor.getBoundingClientRect();
-        const width = element.offsetWidth || 320;
-        const height = element.offsetHeight || 300;
+        const rect=anchor.getBoundingClientRect();
+        const width=element.offsetWidth||320;
+        const height=element.offsetHeight||300;
 
-        let left = rect.left + rect.width / 2 - width / 2;
-        let top = rect.bottom + 8;
+        let left=rect.left+rect.width/2-width/2;
+        let top=rect.bottom+8;
 
-        if(left + width > window.innerWidth - 10)left = window.innerWidth - width - 10;
-        if(left < 10)left = 10;
-        if(top + height > window.innerHeight - 10)top = rect.top - height - 8;
-        if(top < 10)top = 10;
+        if(left+width>window.innerWidth-10)left=window.innerWidth-width-10;
+        if(left<10)left=10;
+        if(top+height>window.innerHeight-10)top=rect.top-height-8;
+        if(top<10)top=10;
 
-        element.style.left = left + 'px';
-        element.style.top = top + 'px';
+        element.style.left=left+'px';
+        element.style.top=top+'px';
     }
 
     function closePanel(){
         if(!panel)return;
         panel.classList.add('hidden');
-        panel.innerHTML = '';
+        panel.innerHTML='';
     }
 
     function applyDateRange(){
-        if(!tempStart || !tempEnd){
-            if(typeof window.Swal !== 'undefined'){
+        if(!tempStart||!tempEnd){
+            if(typeof window.Swal!=='undefined'){
                 window.Swal.fire({
                     icon:'info',
                     title:'Pilih rentang tanggal',
@@ -1096,15 +1095,12 @@
             return;
         }
 
-        selectedStart = cloneDate(tempStart);
-        selectedEnd = cloneDate(tempEnd);
+        selectedStart=cloneDate(tempStart);
+        selectedEnd=cloneDate(tempEnd);
 
-        if(dariInput)dariInput.value = toISO(selectedStart);
-        if(sampaiInput)sampaiInput.value = toISO(selectedEnd);
-
-        if(dateInput){
-            dateInput.value = formatDate(selectedStart) + ' - ' + formatDate(selectedEnd);
-        }
+        if(dariInput)dariInput.value=toISO(selectedStart);
+        if(sampaiInput)sampaiInput.value=toISO(selectedEnd);
+        if(dateInput)dateInput.value=formatDate(selectedStart)+' - '+formatDate(selectedEnd);
 
         if(clearButton){
             clearButton.classList.remove('hidden');
@@ -1115,27 +1111,27 @@
     }
 
     function clearDateRange(){
-        selectedStart = null;
-        selectedEnd = null;
-        tempStart = null;
-        tempEnd = null;
+        selectedStart=null;
+        selectedEnd=null;
+        tempStart=null;
+        tempEnd=null;
 
-        if(dariInput)dariInput.value = '';
-        if(sampaiInput)sampaiInput.value = '';
-        if(dateInput)dateInput.value = '';
+        if(dariInput)dariInput.value='';
+        if(sampaiInput)sampaiInput.value='';
+        if(dateInput)dateInput.value='';
 
         if(clearButton){
             clearButton.classList.remove('flex');
             clearButton.classList.add('hidden');
         }
 
-        viewLeft = new Date();
+        viewLeft=new Date();
         viewLeft.setDate(1);
 
         hidePicker();
     }
 
-    if(dateInput && picker){
+    if(dateInput&&picker){
         dateInput.addEventListener('click',function(e){
             e.preventDefault();
             e.stopPropagation();
@@ -1178,33 +1174,34 @@
         document.addEventListener('mousedown',function(event){
             if(picker.classList.contains('hidden'))return;
             if(picker.contains(event.target))return;
-            if(panel && panel.contains(event.target))return;
+            if(panel&&panel.contains(event.target))return;
             if(dateInput.contains(event.target))return;
-            if(clearButton && clearButton.contains(event.target))return;
+            if(clearButton&&clearButton.contains(event.target))return;
+
             hidePicker();
         });
     }
 
     window.addEventListener('resize',function(){
-        if(picker && !picker.classList.contains('hidden'))positionPicker();
-        if(panel && !panel.classList.contains('hidden'))closePanel();
+        if(picker&&!picker.classList.contains('hidden'))positionPicker();
+        if(panel&&!panel.classList.contains('hidden'))closePanel();
     });
 
     window.addEventListener('scroll',function(){
-        if(picker && !picker.classList.contains('hidden') && window.innerWidth > 767){
+        if(picker&&!picker.classList.contains('hidden')&&window.innerWidth>767){
             positionPicker();
         }
     },true);
 
     function initializeFilterDropdowns(){
-        const dropdowns = document.querySelectorAll('[data-filter-dropdown]');
+        const dropdowns=document.querySelectorAll('[data-filter-dropdown]');
         if(!dropdowns.length)return;
 
         function closeDropdown(dropdown){
-            const trigger = dropdown.querySelector('[data-dropdown-trigger]');
-            const menu = dropdown.querySelector('[data-dropdown-menu]');
+            const trigger=dropdown.querySelector('[data-dropdown-trigger]');
+            const menu=dropdown.querySelector('[data-dropdown-menu]');
 
-            if(!trigger || !menu)return;
+            if(!trigger||!menu)return;
 
             menu.classList.add('hidden');
             trigger.classList.remove('is-open','is-active');
@@ -1213,54 +1210,57 @@
 
         function closeAllDropdowns(except=null){
             dropdowns.forEach(dropdown=>{
-                if(dropdown !== except)closeDropdown(dropdown);
+                if(dropdown!==except)closeDropdown(dropdown);
             });
         }
 
         function updateDropdown(dropdown){
-            const type = dropdown.dataset.filterDropdown;
-            const selector = type === 'kategori' ? '.kategori-checkbox' : '.status-checkbox';
-            const checkboxes = dropdown.querySelectorAll(selector);
-            const checked = dropdown.querySelectorAll(selector + ':checked');
-            const count = checked.length;
+            const type=dropdown.dataset.filterDropdown;
+            const selector=type==='kategori'?'.kategori-checkbox':'.status-checkbox';
+            const checkboxes=dropdown.querySelectorAll(selector);
+            const checked=dropdown.querySelectorAll(selector+':checked');
+            const count=checked.length;
 
-            const countElement = dropdown.querySelector('[data-filter-count]');
-            const footerCount = dropdown.querySelector('[data-footer-count]');
-            const trigger = dropdown.querySelector('[data-dropdown-trigger]');
+            const countElement=dropdown.querySelector('[data-filter-count]');
+            const footerCount=dropdown.querySelector('[data-footer-count]');
+            const trigger=dropdown.querySelector('[data-dropdown-trigger]');
 
-            if(countElement)countElement.textContent = count + ' dipilih';
+            if(countElement)countElement.textContent=count+' dipilih';
 
             if(footerCount){
-                footerCount.textContent = count + ' ' + (type === 'kategori' ? 'kategori' : 'status') + ' dipilih';
+                footerCount.textContent=count+' '+(type==='kategori'?'kategori':'status')+' dipilih';
             }
 
             checkboxes.forEach(checkbox=>{
-                const option = checkbox.closest('.archive-filter-option');
-                if(option)option.classList.toggle('is-selected',checkbox.checked);
+                const option=checkbox.closest('.archive-filter-option');
+
+                if(option){
+                    option.classList.toggle('is-selected',checkbox.checked);
+                }
             });
 
             if(trigger){
-                trigger.classList.toggle('is-active',count > 0);
+                trigger.classList.toggle('is-active',count>0);
             }
         }
 
         dropdowns.forEach(dropdown=>{
-            const trigger = dropdown.querySelector('[data-dropdown-trigger]');
-            const menu = dropdown.querySelector('[data-dropdown-menu]');
+            const trigger=dropdown.querySelector('[data-dropdown-trigger]');
+            const menu=dropdown.querySelector('[data-dropdown-menu]');
 
-            if(!trigger || !menu)return;
+            if(!trigger||!menu)return;
 
-            const type = dropdown.dataset.filterDropdown;
-            const selector = type === 'kategori' ? '.kategori-checkbox' : '.status-checkbox';
-            const checkboxes = dropdown.querySelectorAll(selector);
-            const selectAll = dropdown.querySelector('[data-action="select-all"]');
-            const clearAll = dropdown.querySelector('[data-action="clear-all"]');
+            const type=dropdown.dataset.filterDropdown;
+            const selector=type==='kategori'?'.kategori-checkbox':'.status-checkbox';
+            const checkboxes=dropdown.querySelectorAll(selector);
+            const selectAll=dropdown.querySelector('[data-action="select-all"]');
+            const clearAll=dropdown.querySelector('[data-action="clear-all"]');
 
             trigger.addEventListener('click',function(event){
                 event.preventDefault();
                 event.stopPropagation();
 
-                const isOpen = !menu.classList.contains('hidden');
+                const isOpen=!menu.classList.contains('hidden');
 
                 closeAllDropdowns(dropdown);
 
@@ -1305,20 +1305,20 @@
         });
 
         document.addEventListener('keydown',function(event){
-            if(event.key === 'Escape')closeAllDropdowns();
+            if(event.key==='Escape')closeAllDropdowns();
         });
     }
 
-    const filterForm = document.getElementById('filterForm');
+    const filterForm=document.getElementById('filterForm');
 
     filterForm?.addEventListener('submit',function(event){
-        const start = dariInput?.value || '';
-        const end = sampaiInput?.value || '';
+        const start=dariInput?.value||'';
+        const end=sampaiInput?.value||'';
 
-        if(start && end && start > end){
+        if(start&&end&&start>end){
             event.preventDefault();
 
-            if(typeof window.Swal !== 'undefined'){
+            if(typeof window.Swal!=='undefined'){
                 window.Swal.fire({
                     icon:'warning',
                     title:'Rentang tanggal tidak valid',
@@ -1338,10 +1338,11 @@
 
     document.querySelectorAll('.delete-btn').forEach(button=>{
         button.addEventListener('click',function(){
-            const form = this.closest('.delete-form');
+            const form=this.closest('.delete-form');
+
             if(!form)return;
 
-            if(typeof window.Swal !== 'undefined'){
+            if(typeof window.Swal!=='undefined'){
                 window.Swal.fire({
                     title:'Hapus Surat Masuk?',
                     text:'Data yang dihapus akan dipindahkan ke tempat sampah.',
@@ -1372,8 +1373,8 @@
 
     initializeFilterDropdowns();
 
-    if(selectedStart && selectedEnd && dateInput && clearButton){
-        dateInput.value = formatDate(selectedStart) + ' - ' + formatDate(selectedEnd);
+    if(selectedStart&&selectedEnd&&dateInput&&clearButton){
+        dateInput.value=formatDate(selectedStart)+' - '+formatDate(selectedEnd);
         clearButton.classList.remove('hidden');
         clearButton.classList.add('flex');
     }
