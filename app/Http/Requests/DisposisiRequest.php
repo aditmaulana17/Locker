@@ -18,7 +18,9 @@ class DisposisiRequest extends FormRequest
         }
 
         $role = strtolower(
-            trim((string) ($user->role ?? $user->jabatan ?? ''))
+            trim(
+                (string) ($user->role ?? $user->jabatan ?? '')
+            )
         );
 
         if ($role === 'staff') {
@@ -36,10 +38,21 @@ class DisposisiRequest extends FormRequest
     {
         $data = [];
 
-        $instruksi =
-            $this->input('instruksi')
-            ?? $this->input('isi_disposisi')
-            ?? $this->input('catatan');
+        $instruksi = $this->input('instruksi');
+
+        if (
+            $instruksi === null ||
+            trim((string) $instruksi) === ''
+        ) {
+            $instruksi = $this->input('isi_disposisi');
+        }
+
+        if (
+            $instruksi === null ||
+            trim((string) $instruksi) === ''
+        ) {
+            $instruksi = $this->input('catatan');
+        }
 
         if ($instruksi !== null) {
             $instruksi = trim((string) $instruksi);
@@ -51,45 +64,48 @@ class DisposisiRequest extends FormRequest
         if ($this->has('catatan')) {
             $catatan = $this->input('catatan');
 
-            $data['catatan'] = $catatan !== null
-                ? trim((string) $catatan)
-                : null;
-        }
-
-        if ($this->filled('kepada_user_id')) {
-            $data['kepada_user_id'] = (int) $this->input(
-                'kepada_user_id'
-            );
+            $data['catatan'] =
+                $catatan !== null
+                    ? trim((string) $catatan)
+                    : null;
         }
 
         if ($this->filled('surat_masuk_id')) {
-            $data['surat_masuk_id'] = (int) $this->input(
-                'surat_masuk_id'
-            );
+            $data['surat_masuk_id'] =
+                (int) $this->input('surat_masuk_id');
+        }
+
+        if ($this->filled('kepada_user_id')) {
+            $data['kepada_user_id'] =
+                (int) $this->input('kepada_user_id');
         }
 
         if ($this->has('batas_waktu')) {
             $batasWaktu = $this->input('batas_waktu');
 
-            $data['batas_waktu'] = $batasWaktu !== null
-                ? trim((string) $batasWaktu)
-                : null;
+            $data['batas_waktu'] =
+                $batasWaktu !== null
+                    ? trim((string) $batasWaktu)
+                    : null;
         }
 
-        if ($this->filled('status')) {
-            $data['status'] = strtolower(
-                trim((string) $this->input('status'))
-            );
-        } else {
-            $data['status'] = 'menunggu';
-        }
+        $status = $this->input('status');
+
+        $data['status'] =
+            $status === null ||
+            trim((string) $status) === ''
+                ? 'menunggu'
+                : strtolower(
+                    trim((string) $status)
+                );
 
         if ($this->has('penerima')) {
             $penerima = $this->input('penerima');
 
-            $data['penerima'] = $penerima !== null
-                ? trim((string) $penerima)
-                : null;
+            $data['penerima'] =
+                $penerima !== null
+                    ? trim((string) $penerima)
+                    : null;
         }
 
         if (!empty($data)) {
@@ -127,7 +143,10 @@ class DisposisiRequest extends FormRequest
                                         ->whereNotNull('role')
                                         ->whereRaw(
                                             'LOWER(TRIM(role)) IN (?, ?)',
-                                            ['staf', 'staff']
+                                            [
+                                                'staf',
+                                                'staff',
+                                            ]
                                         );
                                 })
                                 ->orWhere(function ($query) {
@@ -135,7 +154,10 @@ class DisposisiRequest extends FormRequest
                                         ->whereNotNull('jabatan')
                                         ->whereRaw(
                                             'LOWER(TRIM(jabatan)) IN (?, ?)',
-                                            ['staf', 'staff']
+                                            [
+                                                'staf',
+                                                'staff',
+                                            ]
                                         );
                                 });
                         })
@@ -213,11 +235,13 @@ class DisposisiRequest extends FormRequest
                 }
 
                 $instruksi =
-                    trim((string) (
-                        $this->input('instruksi')
-                        ?? $this->input('isi_disposisi')
-                        ?? ''
-                    ));
+                    $this->input('instruksi')
+                    ?? $this->input('isi_disposisi')
+                    ?? '';
+
+                $instruksi = trim(
+                    (string) $instruksi
+                );
 
                 if ($instruksi === '') {
                     $validator->errors()->add(
@@ -226,9 +250,7 @@ class DisposisiRequest extends FormRequest
                     );
                 }
 
-                if (
-                    !$this->filled('kepada_user_id')
-                ) {
+                if (!$this->filled('kepada_user_id')) {
                     $validator->errors()->add(
                         'kepada_user_id',
                         'Staf penerima disposisi wajib dipilih.'
@@ -237,9 +259,10 @@ class DisposisiRequest extends FormRequest
 
                 if ($this->filled('batas_waktu')) {
                     try {
-                        $tanggalBatas = \Carbon\Carbon::parse(
-                            $this->input('batas_waktu')
-                        );
+                        $tanggalBatas =
+                            \Carbon\Carbon::parse(
+                                $this->input('batas_waktu')
+                            );
 
                         if (!$tanggalBatas->isValid()) {
                             $validator->errors()->add(
@@ -255,25 +278,28 @@ class DisposisiRequest extends FormRequest
                     }
                 }
 
-                if ($this->filled('status')) {
-                    $status = strtolower(
-                        trim((string) $this->input('status'))
-                    );
+                $status = strtolower(
+                    trim(
+                        (string) (
+                            $this->input('status')
+                            ?? 'menunggu'
+                        )
+                    )
+                );
 
-                    if (!in_array(
-                        $status,
-                        [
-                            'menunggu',
-                            'diproses',
-                            'selesai',
-                        ],
-                        true
-                    )) {
-                        $validator->errors()->add(
-                            'status',
-                            'Status disposisi tidak valid.'
-                        );
-                    }
+                if (!in_array(
+                    $status,
+                    [
+                        'menunggu',
+                        'diproses',
+                        'selesai',
+                    ],
+                    true
+                )) {
+                    $validator->errors()->add(
+                        'status',
+                        'Status disposisi tidak valid.'
+                    );
                 }
             }
         );
@@ -281,8 +307,8 @@ class DisposisiRequest extends FormRequest
 
     private function isUpdateRequest(): bool
     {
-        return $this->isMethod('put')
-            || $this->isMethod('patch');
+        return $this->isMethod('put') ||
+            $this->isMethod('patch');
     }
 
     public function messages(): array
