@@ -20,12 +20,11 @@ class DisposisiController extends Controller
         $user = Auth::user();
         $role = $this->role();
 
-        $query = Disposisi::query()
-            ->with([
-                'suratMasuk',
-                'dari',
-                'kepada',
-            ]);
+        $query = Disposisi::query()->with([
+            'suratMasuk',
+            'dari',
+            'kepada',
+        ]);
 
         if ($role === 'staf') {
             $query->where(
@@ -40,30 +39,26 @@ class DisposisiController extends Controller
 
         if ($search !== '') {
             $query->where(function (Builder $query) use ($search) {
+                $keyword = "%{$search}%";
+
                 $query
-                    ->where('isi_disposisi', 'like', "%{$search}%")
-                    ->orWhere('instruksi', 'like', "%{$search}%")
-                    ->orWhere('catatan', 'like', "%{$search}%")
-                    ->orWhereHas('suratMasuk', function (Builder $suratQuery) use ($search) {
+                    ->where('instruksi', 'like', $keyword)
+                    ->orWhere('isi_disposisi', 'like', $keyword)
+                    ->orWhere('catatan', 'like', $keyword)
+                    ->orWhereHas('suratMasuk', function (Builder $suratQuery) use ($keyword) {
                         $suratQuery
-                            ->where('nomor_surat', 'like', "%{$search}%")
-                            ->orWhere('nomor_agenda', 'like', "%{$search}%")
-                            ->orWhere('pengirim', 'like', "%{$search}%")
-                            ->orWhere('perihal', 'like', "%{$search}%");
+                            ->where('nomor_surat', 'like', $keyword)
+                            ->orWhere('nomor_agenda', 'like', $keyword)
+                            ->orWhere('pengirim', 'like', $keyword)
+                            ->orWhere('perihal', 'like', $keyword);
                     })
-                    ->orWhereHas('kepada', function (Builder $userQuery) use ($search) {
+                    ->orWhereHas('kepada', function (Builder $userQuery) use ($keyword) {
                         $userQuery
-                            ->where('name', 'like', "%{$search}%")
-                            ->orWhere('nama', 'like', "%{$search}%")
-                            ->orWhere('jabatan', 'like', "%{$search}%");
+                            ->where('name', 'like', $keyword)
+                            ->orWhere('nama', 'like', $keyword)
+                            ->orWhere('jabatan', 'like', $keyword);
                     });
             });
-        }
-
-        $statuses = $request->input('status', []);
-
-        if (!is_array($statuses)) {
-            $statuses = [$statuses];
         }
 
         $allowedStatuses = [
@@ -71,6 +66,12 @@ class DisposisiController extends Controller
             'diproses',
             'selesai',
         ];
+
+        $statuses = $request->input('status', []);
+
+        if (!is_array($statuses)) {
+            $statuses = [$statuses];
+        }
 
         $statuses = collect($statuses)
             ->filter(fn ($status) => is_scalar($status))
@@ -106,6 +107,73 @@ class DisposisiController extends Controller
                 '<=',
                 $sampaiTanggal
             );
+        }
+
+        if (
+            $this->isValidDate($dariTanggal) &&
+            $this->isValidDate($sampaiTanggal) &&
+            $dariTanggal > $sampaiTanggal
+        ) {
+            [$dariTanggal, $sampaiTanggal] = [
+                $sampaiTanggal,
+                $dariTanggal,
+            ];
+
+            $query = Disposisi::query()->with([
+                'suratMasuk',
+                'dari',
+                'kepada',
+            ]);
+
+            if ($role === 'staf') {
+                $query->where(
+                    'kepada_user_id',
+                    $user->id
+                );
+            }
+
+            if ($search !== '') {
+                $query->where(function (Builder $query) use ($search) {
+                    $keyword = "%{$search}%";
+
+                    $query
+                        ->where('instruksi', 'like', $keyword)
+                        ->orWhere('isi_disposisi', 'like', $keyword)
+                        ->orWhere('catatan', 'like', $keyword)
+                        ->orWhereHas('suratMasuk', function (Builder $suratQuery) use ($keyword) {
+                            $suratQuery
+                                ->where('nomor_surat', 'like', $keyword)
+                                ->orWhere('nomor_agenda', 'like', $keyword)
+                                ->orWhere('pengirim', 'like', $keyword)
+                                ->orWhere('perihal', 'like', $keyword);
+                        })
+                        ->orWhereHas('kepada', function (Builder $userQuery) use ($keyword) {
+                            $userQuery
+                                ->where('name', 'like', $keyword)
+                                ->orWhere('nama', 'like', $keyword)
+                                ->orWhere('jabatan', 'like', $keyword);
+                        });
+                });
+            }
+
+            if (!empty($statuses)) {
+                $query->whereIn(
+                    'status',
+                    $statuses
+                );
+            }
+
+            $query
+                ->whereDate(
+                    $dateColumn,
+                    '>=',
+                    $dariTanggal
+                )
+                ->whereDate(
+                    $dateColumn,
+                    '<=',
+                    $sampaiTanggal
+                );
         }
 
         $disposisis = $query
@@ -154,13 +222,15 @@ class DisposisiController extends Controller
         );
     }
 
-    public function store(DisposisiRequest $request)
-    {
+    public function store(
+        DisposisiRequest $request
+    ) {
         $this->authorizeManageAccess();
 
         $data = $request->validated();
 
-        $isiDisposisi = $data['isi_disposisi']
+        $isiDisposisi =
+            $data['isi_disposisi']
             ?? $data['instruksi']
             ?? $data['catatan']
             ?? '';
@@ -173,7 +243,8 @@ class DisposisiController extends Controller
             return back()
                 ->withInput()
                 ->withErrors([
-                    'instruksi' => 'Instruksi disposisi wajib diisi.',
+                    'instruksi' =>
+                        'Instruksi disposisi wajib diisi.',
                 ]);
         }
 
@@ -195,7 +266,7 @@ class DisposisiController extends Controller
             $kepadaUserId
         );
 
-        $data['status'] = strtolower(
+        $status = strtolower(
             trim(
                 (string) (
                     $data['status'] ?? 'menunggu'
@@ -204,7 +275,7 @@ class DisposisiController extends Controller
         );
 
         if (!in_array(
-            $data['status'],
+            $status,
             [
                 'menunggu',
                 'diproses',
@@ -212,24 +283,30 @@ class DisposisiController extends Controller
             ],
             true
         )) {
-            $data['status'] = 'menunggu';
+            $status = 'menunggu';
         }
 
-        $disposisi = DB::transaction(function () use ($data) {
-            $disposisi = Disposisi::create($data);
+        $data['status'] = $status;
 
-            $this->syncSuratMasukStatus(
-                $disposisi->fresh([
+        $disposisi = DB::transaction(
+            function () use ($data) {
+                $disposisi = Disposisi::create(
+                    $data
+                );
+
+                $this->syncSuratMasukStatus(
+                    $disposisi->fresh([
+                        'suratMasuk',
+                    ])
+                );
+
+                return $disposisi->load([
                     'suratMasuk',
-                ])
-            );
-
-            return $disposisi->load([
-                'suratMasuk',
-                'dari',
-                'kepada',
-            ]);
-        });
+                    'dari',
+                    'kepada',
+                ]);
+            }
+        );
 
         $this->logActivity(
             'create',
@@ -253,8 +330,9 @@ class DisposisiController extends Controller
             );
     }
 
-    public function show(Disposisi $disposisi)
-    {
+    public function show(
+        Disposisi $disposisi
+    ) {
         $this->authorizeViewAccess(
             $disposisi
         );
@@ -271,8 +349,9 @@ class DisposisiController extends Controller
         );
     }
 
-    public function edit(Disposisi $disposisi)
-    {
+    public function edit(
+        Disposisi $disposisi
+    ) {
         $this->authorizeManageAccess();
 
         $disposisi->load([
@@ -305,11 +384,21 @@ class DisposisiController extends Controller
 
         $data = $request->validated();
 
-        if (
-            array_key_exists('isi_disposisi', $data) ||
-            array_key_exists('instruksi', $data) ||
-            array_key_exists('catatan', $data)
-        ) {
+        $hasInstruction =
+            array_key_exists(
+                'isi_disposisi',
+                $data
+            ) ||
+            array_key_exists(
+                'instruksi',
+                $data
+            ) ||
+            array_key_exists(
+                'catatan',
+                $data
+            );
+
+        if ($hasInstruction) {
             $isiDisposisi =
                 $data['isi_disposisi']
                 ?? $data['instruksi']
@@ -326,7 +415,8 @@ class DisposisiController extends Controller
                 return back()
                     ->withInput()
                     ->withErrors([
-                        'instruksi' => 'Instruksi disposisi wajib diisi.',
+                        'instruksi' =>
+                            'Instruksi disposisi wajib diisi.',
                     ]);
             }
 
@@ -365,7 +455,8 @@ class DisposisiController extends Controller
                 return back()
                     ->withInput()
                     ->withErrors([
-                        'status' => 'Status disposisi tidak valid.',
+                        'status' =>
+                            'Status disposisi tidak valid.',
                     ]);
             }
         }
@@ -376,18 +467,22 @@ class DisposisiController extends Controller
             )
         );
 
-        DB::transaction(function () use (
-            $disposisi,
-            $data
-        ) {
-            $disposisi->update($data);
+        DB::transaction(
+            function () use (
+                $disposisi,
+                $data
+            ) {
+                $disposisi->update(
+                    $data
+                );
 
-            $this->syncSuratMasukStatus(
-                $disposisi->fresh([
-                    'suratMasuk',
-                ])
-            );
-        });
+                $this->syncSuratMasukStatus(
+                    $disposisi->fresh([
+                        'suratMasuk',
+                    ])
+                );
+            }
+        );
 
         $this->logActivity(
             'update',
@@ -449,20 +544,22 @@ class DisposisiController extends Controller
             );
         }
 
-        DB::transaction(function () use (
-            $disposisi,
-            $newStatus
-        ) {
-            $disposisi->update([
-                'status' => $newStatus,
-            ]);
+        DB::transaction(
+            function () use (
+                $disposisi,
+                $newStatus
+            ) {
+                $disposisi->update([
+                    'status' => $newStatus,
+                ]);
 
-            $this->syncSuratMasukStatus(
-                $disposisi->fresh([
-                    'suratMasuk',
-                ])
-            );
-        });
+                $this->syncSuratMasukStatus(
+                    $disposisi->fresh([
+                        'suratMasuk',
+                    ])
+                );
+            }
+        );
 
         $this->logActivity(
             'update',
@@ -476,25 +573,32 @@ class DisposisiController extends Controller
         );
     }
 
-    public function destroy(Disposisi $disposisi)
-    {
+    public function destroy(
+        Disposisi $disposisi
+    ) {
         $this->authorizeManageAccess();
 
         $disposisiId = $disposisi->id;
 
-        DB::transaction(function () use ($disposisi) {
-            $suratMasuk = $disposisi->suratMasuk;
+        $suratMasuk = $disposisi->suratMasuk;
 
-            $disposisi->delete();
+        DB::transaction(
+            function () use (
+                $disposisi,
+                $suratMasuk
+            ) {
+                $disposisi->delete();
 
-            if ($suratMasuk) {
-                $this->syncSuratMasukStatus(
-                    $disposisi->fresh([
-                        'suratMasuk',
-                    ])
-                );
+                if ($suratMasuk) {
+                    $this->syncSuratMasukStatus(
+                        new Disposisi([
+                            'surat_masuk_id' =>
+                                $suratMasuk->id,
+                        ])
+                    );
+                }
             }
-        });
+        );
 
         $this->logActivity(
             'delete',
@@ -528,11 +632,9 @@ class DisposisiController extends Controller
             )
         );
 
-        if ($role === 'staff') {
-            $role = 'staf';
-        }
-
-        return $role;
+        return $role === 'staff'
+            ? 'staf'
+            : $role;
     }
 
     private function authorizeManageAccess(): void
@@ -596,27 +698,29 @@ class DisposisiController extends Controller
         $query = User::query()
             ->where('is_active', true)
             ->where(function (Builder $query) {
-                $query->where(function (Builder $query) {
-                    $query
-                        ->whereNotNull('role')
-                        ->whereRaw(
-                            'LOWER(TRIM(role)) IN (?, ?)',
-                            [
-                                'staf',
-                                'staff',
-                            ]
-                        );
-                })->orWhere(function (Builder $query) {
-                    $query
-                        ->whereNotNull('jabatan')
-                        ->whereRaw(
-                            'LOWER(TRIM(jabatan)) IN (?, ?)',
-                            [
-                                'staf',
-                                'staff',
-                            ]
-                        );
-                });
+                $query
+                    ->where(function (Builder $query) {
+                        $query
+                            ->whereNotNull('role')
+                            ->whereRaw(
+                                'LOWER(TRIM(role)) IN (?, ?)',
+                                [
+                                    'staf',
+                                    'staff',
+                                ]
+                            );
+                    })
+                    ->orWhere(function (Builder $query) {
+                        $query
+                            ->whereNotNull('jabatan')
+                            ->whereRaw(
+                                'LOWER(TRIM(jabatan)) IN (?, ?)',
+                                [
+                                    'staf',
+                                    'staff',
+                                ]
+                            );
+                    });
             });
 
         if ($currentUserId) {
@@ -628,45 +732,88 @@ class DisposisiController extends Controller
         }
 
         if ($selectedId) {
-            $query->orWhere(function (Builder $query) use (
-                $selectedId,
-                $currentUserId
-            ) {
-                $query
+            $selectedExists = $query
+                ->clone()
+                ->whereKey($selectedId)
+                ->exists();
+
+            if (!$selectedExists) {
+                $selectedUser = User::query()
                     ->whereKey($selectedId)
                     ->where('is_active', true)
                     ->where(function (Builder $query) {
-                        $query->where(function (Builder $query) {
-                            $query
-                                ->whereNotNull('role')
-                                ->whereRaw(
-                                    'LOWER(TRIM(role)) IN (?, ?)',
-                                    [
-                                        'staf',
-                                        'staff',
-                                    ]
-                                );
-                        })->orWhere(function (Builder $query) {
-                            $query
-                                ->whereNotNull('jabatan')
-                                ->whereRaw(
-                                    'LOWER(TRIM(jabatan)) IN (?, ?)',
-                                    [
-                                        'staf',
-                                        'staff',
-                                    ]
-                                );
-                        });
-                    });
+                        $query
+                            ->where(function (Builder $query) {
+                                $query
+                                    ->whereNotNull('role')
+                                    ->whereRaw(
+                                        'LOWER(TRIM(role)) IN (?, ?)',
+                                        [
+                                            'staf',
+                                            'staff',
+                                        ]
+                                    );
+                            })
+                            ->orWhere(function (Builder $query) {
+                                $query
+                                    ->whereNotNull('jabatan')
+                                    ->whereRaw(
+                                        'LOWER(TRIM(jabatan)) IN (?, ?)',
+                                        [
+                                            'staf',
+                                            'staff',
+                                        ]
+                                    );
+                            });
+                    })
+                    ->first();
 
-                if ($currentUserId) {
-                    $query->where(
-                        'id',
-                        '!=',
-                        $currentUserId
-                    );
+                if ($selectedUser) {
+                    $query = User::query()
+                        ->where(function (Builder $query) use ($selectedId) {
+                            $query
+                                ->whereKey($selectedId)
+                                ->orWhere(function (Builder $query) {
+                                    $query
+                                        ->where('is_active', true)
+                                        ->where(function (Builder $query) {
+                                            $query
+                                                ->where(function (Builder $query) {
+                                                    $query
+                                                        ->whereNotNull('role')
+                                                        ->whereRaw(
+                                                            'LOWER(TRIM(role)) IN (?, ?)',
+                                                            [
+                                                                'staf',
+                                                                'staff',
+                                                            ]
+                                                        );
+                                                })
+                                                ->orWhere(function (Builder $query) {
+                                                    $query
+                                                        ->whereNotNull('jabatan')
+                                                        ->whereRaw(
+                                                            'LOWER(TRIM(jabatan)) IN (?, ?)',
+                                                            [
+                                                                'staf',
+                                                                'staff',
+                                                            ]
+                                                        );
+                                                });
+                                        });
+                                });
+                        })
+                        ->where('is_active', true);
+
+                    if ($currentUserId) {
+                        $query->where(
+                            'id',
+                            '!=',
+                            $currentUserId
+                        );
+                    }
                 }
-            });
+            }
         }
 
         return $query
@@ -682,27 +829,29 @@ class DisposisiController extends Controller
             ->whereKey($userId)
             ->where('is_active', true)
             ->where(function (Builder $query) {
-                $query->where(function (Builder $query) {
-                    $query
-                        ->whereNotNull('role')
-                        ->whereRaw(
-                            'LOWER(TRIM(role)) IN (?, ?)',
-                            [
-                                'staf',
-                                'staff',
-                            ]
-                        );
-                })->orWhere(function (Builder $query) {
-                    $query
-                        ->whereNotNull('jabatan')
-                        ->whereRaw(
-                            'LOWER(TRIM(jabatan)) IN (?, ?)',
-                            [
-                                'staf',
-                                'staff',
-                            ]
-                        );
-                });
+                $query
+                    ->where(function (Builder $query) {
+                        $query
+                            ->whereNotNull('role')
+                            ->whereRaw(
+                                'LOWER(TRIM(role)) IN (?, ?)',
+                                [
+                                    'staf',
+                                    'staff',
+                                ]
+                            );
+                    })
+                    ->orWhere(function (Builder $query) {
+                        $query
+                            ->whereNotNull('jabatan')
+                            ->whereRaw(
+                                'LOWER(TRIM(jabatan)) IN (?, ?)',
+                                [
+                                    'staf',
+                                    'staff',
+                                ]
+                            );
+                    });
             })
             ->first();
 
@@ -739,6 +888,12 @@ class DisposisiController extends Controller
     ): void {
         $suratMasuk = $disposisi->suratMasuk;
 
+        if (!$suratMasuk && $disposisi->surat_masuk_id) {
+            $suratMasuk = SuratMasuk::find(
+                $disposisi->surat_masuk_id
+            );
+        }
+
         if (!$suratMasuk) {
             return;
         }
@@ -758,7 +913,7 @@ class DisposisiController extends Controller
         $hasUnfinished = $suratMasuk
             ->disposisi()
             ->whereRaw(
-                "LOWER(TRIM(status)) != ?",
+                'LOWER(TRIM(status)) != ?',
                 ['selesai']
             )
             ->exists();
@@ -820,7 +975,7 @@ class DisposisiController extends Controller
                 $description
             );
         } catch (\Throwable) {
-            // Log aktivitas tidak boleh menggagalkan proses utama.
+            // Activity log tidak boleh menggagalkan proses utama.
         }
     }
 }

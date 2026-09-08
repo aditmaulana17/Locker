@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Schema;
 
 class Disposisi extends Model
 {
@@ -109,26 +110,38 @@ class Disposisi extends Model
             );
         }
 
+        $dateColumn = self::getFilterDateColumn();
+
         $dariTanggal = $filters['dari_tanggal'] ?? null;
         $sampaiTanggal = $filters['sampai_tanggal'] ?? null;
 
-        if ($dariTanggal) {
+        if ($this->validDate($dariTanggal)) {
             $query->whereDate(
-                'batas_waktu',
+                $dateColumn,
                 '>=',
                 $dariTanggal
             );
         }
 
-        if ($sampaiTanggal) {
+        if ($this->validDate($sampaiTanggal)) {
             $query->whereDate(
-                'batas_waktu',
+                $dateColumn,
                 '<=',
                 $sampaiTanggal
             );
         }
 
         return $query;
+    }
+
+    public static function getFilterDateColumn(): string
+    {
+        return Schema::hasColumn(
+            'disposisis',
+            'tanggal_disposisi'
+        )
+            ? 'tanggal_disposisi'
+            : 'created_at';
     }
 
     public function scopeBelumSelesai(
@@ -169,6 +182,36 @@ class Disposisi extends Model
         );
     }
 
+    public function scopeStatus(
+        Builder $query,
+        ?string $status
+    ): Builder {
+        if (!$status) {
+            return $query;
+        }
+
+        $status = strtolower(
+            trim($status)
+        );
+
+        if (!in_array(
+            $status,
+            [
+                'menunggu',
+                'diproses',
+                'selesai',
+            ],
+            true
+        )) {
+            return $query;
+        }
+
+        return $query->where(
+            'status',
+            $status
+        );
+    }
+
     public function isSelesai(): bool
     {
         return strtolower(
@@ -203,5 +246,33 @@ class Disposisi extends Model
 
         return !$this->isSelesai()
             && $this->batas_waktu->isPast();
+    }
+
+    private function validDate(
+        mixed $value
+    ): bool {
+        if (!$value) {
+            return false;
+        }
+
+        $value = trim((string) $value);
+
+        if (!preg_match(
+            '/^\d{4}-\d{2}-\d{2}$/',
+            $value
+        )) {
+            return false;
+        }
+
+        [$year, $month, $day] = array_map(
+            'intval',
+            explode('-', $value)
+        );
+
+        return checkdate(
+            $month,
+            $day,
+            $year
+        );
     }
 }
