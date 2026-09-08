@@ -377,7 +377,268 @@
         min-width: 250px;
     }
 
+    /* Filter dropdown */
+    .filter-dropdown {
+        position: relative;
+        min-width: 0;
+    }
+
+    .filter-dropdown-trigger {
+        display: flex;
+        width: 100%;
+        min-height: 46px;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        background: #f8fafc;
+        padding: 8px 12px;
+        color: #334155;
+        text-align: left;
+        transition: border-color .15s ease, background-color .15s ease, box-shadow .15s ease;
+    }
+
+    .filter-dropdown-trigger:hover,
+    .filter-dropdown-trigger[aria-expanded="true"] {
+        border-color: #bfdbfe;
+        background: #fff;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, .08);
+    }
+
+    .filter-dropdown-trigger.status-trigger:hover,
+    .filter-dropdown-trigger.status-trigger[aria-expanded="true"] {
+        border-color: #fde68a;
+        box-shadow: 0 0 0 3px rgba(245, 158, 11, .08);
+    }
+
+    .filter-dropdown-trigger-content {
+        display: flex;
+        min-width: 0;
+        align-items: center;
+        gap: 9px;
+    }
+
+    .filter-dropdown-icon {
+        display: inline-flex;
+        width: 30px;
+        height: 30px;
+        flex: 0 0 30px;
+        align-items: center;
+        justify-content: center;
+        border-radius: 9px;
+        background: #dbeafe;
+        color: #2563eb;
+    }
+
+    .filter-dropdown-icon.status {
+        background: #fef3c7;
+        color: #d97706;
+    }
+
+    .filter-dropdown-text {
+        min-width: 0;
+    }
+
+    .filter-dropdown-title {
+        display: block;
+        overflow: hidden;
+        color: #334155;
+        font-size: 11px;
+        font-weight: 700;
+        line-height: 1.2;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .filter-dropdown-subtitle {
+        display: block;
+        margin-top: 2px;
+        overflow: hidden;
+        color: #94a3b8;
+        font-size: 9px;
+        line-height: 1.2;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .filter-dropdown-arrow {
+        flex: 0 0 auto;
+        color: #94a3b8;
+        transition: transform .15s ease, color .15s ease;
+    }
+
+    .filter-dropdown-trigger[aria-expanded="true"] .filter-dropdown-arrow {
+        color: #2563eb;
+        transform: rotate(180deg);
+    }
+
+    .filter-dropdown-trigger.status-trigger[aria-expanded="true"] .filter-dropdown-arrow {
+        color: #d97706;
+    }
+
+    .filter-dropdown-menu {
+        position: absolute;
+        top: calc(100% + 7px);
+        right: 0;
+        left: 0;
+        z-index: 10020;
+        display: none;
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        background: #fff;
+        box-shadow: 0 18px 45px rgba(15, 23, 42, .13), 0 6px 16px rgba(15, 23, 42, .06);
+    }
+
+    .filter-dropdown.open .filter-dropdown-menu {
+        display: block;
+        animation: filterDropdownShow .12s ease-out;
+    }
+
+    @keyframes filterDropdownShow {
+        from {
+            opacity: 0;
+            transform: translateY(-4px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .filter-dropdown-menu-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        border-bottom: 1px solid #f1f5f9;
+        background: #f8fafc;
+        padding: 9px 10px;
+    }
+
+    .filter-dropdown-menu-count {
+        color: #64748b;
+        font-size: 10px;
+        font-weight: 600;
+    }
+
+    .filter-dropdown-actions {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .filter-dropdown-action {
+        border: 0;
+        background: transparent;
+        padding: 0;
+        font-size: 10px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .filter-dropdown-action.category {
+        color: #2563eb;
+    }
+
+    .filter-dropdown-action.status {
+        color: #d97706;
+    }
+
+    .filter-dropdown-action.clear {
+        color: #64748b;
+    }
+
+    .filter-dropdown-divider {
+        color: #cbd5e1;
+        font-size: 10px;
+    }
+
+    .filter-dropdown-options {
+        display: grid;
+        max-height: 230px;
+        grid-template-columns: 1fr;
+        gap: 5px;
+        overflow-y: auto;
+        padding: 8px;
+    }
+
+    .filter-dropdown-option {
+        display: flex;
+        min-width: 0;
+        align-items: center;
+        gap: 9px;
+        min-height: 38px;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        background: #fff;
+        padding: 7px 9px;
+        cursor: pointer;
+        transition: border-color .15s ease, background-color .15s ease;
+    }
+
+    .filter-dropdown-option:hover {
+        border-color: #bfdbfe;
+        background: #eff6ff;
+    }
+
+    .filter-dropdown-option.status-option:hover {
+        border-color: #fde68a;
+        background: #fffbeb;
+    }
+
+    .filter-dropdown-option input {
+        width: 15px;
+        height: 15px;
+        flex: 0 0 15px;
+        margin: 0;
+    }
+
+    .filter-dropdown-option span {
+        min-width: 0;
+        overflow: hidden;
+        color: #475569;
+        font-size: 11px;
+        font-weight: 600;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .filter-dropdown-empty {
+        padding: 12px;
+        color: #94a3b8;
+        font-size: 10px;
+        text-align: center;
+    }
+
+    .filter-row {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .filter-control {
+        min-width: 0;
+    }
+
+    @media (min-width: 640px) {
+        .filter-dropdown-options {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media (min-width: 1024px) {
+        .filter-dropdown-options {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
     @media (max-width: 767px) {
+        .filter-row {
+            grid-template-columns: 1fr;
+        }
+
         .daterangepicker {
             position: fixed !important;
             top: 50% !important;
@@ -478,13 +739,13 @@
         </div>
     </div>
 
-    <div class="rounded-2xl border border-slate-200/80 bg-white p-3 shadow-sm sm:p-5">
+    <div class="rounded-2xl border border-slate-200/80 bg-white p-3 shadow-sm sm:p-4">
 
         <form
             method="GET"
             action="{{ route('surat-keluar.index') }}"
             id="filterForm"
-            class="space-y-3"
+            class="space-y-2.5"
         >
 
             <div class="grid grid-cols-1 gap-2.5 lg:grid-cols-12">
@@ -596,193 +857,134 @@
 
             </div>
 
-            <div class="overflow-hidden rounded-xl border border-slate-200">
+            <div class="filter-row">
+                <div class="filter-control filter-dropdown" id="kategoriDropdown">
+                    <button
+                        type="button"
+                        id="kategoriDropdownButton"
+                        class="filter-dropdown-trigger"
+                        aria-expanded="false"
+                        aria-controls="kategoriDropdownMenu"
+                    >
+                        <span class="filter-dropdown-trigger-content">
+                            <span class="filter-dropdown-icon">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                                </svg>
+                            </span>
+                            <span class="filter-dropdown-text">
+                                <span class="filter-dropdown-title">Kategori Surat</span>
+                                <span class="filter-dropdown-subtitle" id="kategoriSummary">Semua kategori</span>
+                            </span>
+                        </span>
+                        <svg class="filter-dropdown-arrow h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 9l6 6l6-6"/>
+                        </svg>
+                    </button>
 
-                <div class="flex flex-col justify-between gap-2 border-b border-slate-200 bg-slate-50/80 px-3 py-2.5 sm:flex-row sm:items-center sm:px-3.5">
-
-                    <div class="flex min-w-0 items-center gap-2">
-
-                        <div class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
-                            <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                            </svg>
+                    <div
+                        id="kategoriDropdownMenu"
+                        class="filter-dropdown-menu"
+                        role="menu"
+                    >
+                        <div class="filter-dropdown-menu-header">
+                            <span id="kategoriCount" class="filter-dropdown-menu-count">
+                                {{ count($selectedKategori) }} dipilih
+                            </span>
+                            <div class="filter-dropdown-actions">
+                                <button type="button" id="selectAllKategori" class="filter-dropdown-action category">
+                                    Pilih Semua
+                                </button>
+                                <span class="filter-dropdown-divider">|</span>
+                                <button type="button" id="clearAllKategori" class="filter-dropdown-action clear">
+                                    Batalkan
+                                </button>
+                            </div>
                         </div>
 
-                        <div class="min-w-0">
-
-                            <h3 class="text-[11px] font-bold text-slate-700 sm:text-xs">
-                                Kategori Surat
-                            </h3>
-
-                            <p class="text-[9px] text-slate-400 sm:text-[10px]">
-                                Pilih satu atau beberapa kategori
-                            </p>
-
-                        </div>
-                    </div>
-
-                    <div class="flex items-center gap-2 pl-8 sm:pl-0">
-
-                        <span
-                            id="kategoriCount"
-                            class="inline-flex items-center rounded-full border border-blue-100 bg-blue-50 px-2 py-0.5 text-[9px] font-semibold text-blue-600"
-                        >
-                            {{ count($selectedKategori) }} dipilih
-                        </span>
-
-                        <button
-                            type="button"
-                            id="selectAllKategori"
-                            class="text-[10px] font-semibold text-blue-600 transition hover:text-blue-700"
-                        >
-                            Pilih Semua
-                        </button>
-
-                        <span class="text-[10px] text-slate-300">
-                            |
-                        </span>
-
-                        <button
-                            type="button"
-                            id="clearAllKategori"
-                            class="text-[10px] font-semibold text-slate-500 transition hover:text-slate-700"
-                        >
-                            Batalkan
-                        </button>
-
+                        @if(isset($kategoris) && $kategoris->count())
+                            <div class="filter-dropdown-options">
+                                @foreach($kategoris as $k)
+                                    <label class="filter-dropdown-option">
+                                        <input
+                                            type="checkbox"
+                                            name="kategori_id[]"
+                                            value="{{ $k->id }}"
+                                            class="kategori-checkbox rounded border-slate-300 text-blue-600 focus:ring-1 focus:ring-blue-500/30"
+                                            @checked(in_array((string) $k->id, $selectedKategori, true))
+                                        >
+                                        <span title="{{ $k->nama_kategori }}">{{ $k->nama_kategori }}</span>
+                                    </label>
+                                @endforeach
+                            </div>
+                        @else
+                            <div class="filter-dropdown-empty">
+                                Belum ada kategori surat.
+                            </div>
+                        @endif
                     </div>
                 </div>
 
-                <div class="p-2.5 sm:p-3">
+                <div class="filter-control filter-dropdown" id="statusDropdown">
+                    <button
+                        type="button"
+                        id="statusDropdownButton"
+                        class="filter-dropdown-trigger status-trigger"
+                        aria-expanded="false"
+                        aria-controls="statusDropdownMenu"
+                    >
+                        <span class="filter-dropdown-trigger-content">
+                            <span class="filter-dropdown-icon status">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2l4-4m6 2a9 9 0 11-18 0a9 9 0 0118 0z"/>
+                                </svg>
+                            </span>
+                            <span class="filter-dropdown-text">
+                                <span class="filter-dropdown-title">Status Surat</span>
+                                <span class="filter-dropdown-subtitle" id="statusSummary">Semua status</span>
+                            </span>
+                        </span>
+                        <svg class="filter-dropdown-arrow h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 9l6 6l6-6"/>
+                        </svg>
+                    </button>
 
-                    @if(isset($kategoris) && $kategoris->count())
+                    <div
+                        id="statusDropdownMenu"
+                        class="filter-dropdown-menu"
+                        role="menu"
+                    >
+                        <div class="filter-dropdown-menu-header">
+                            <span id="statusCount" class="filter-dropdown-menu-count">
+                                {{ count($selectedStatus) }} dipilih
+                            </span>
+                            <div class="filter-dropdown-actions">
+                                <button type="button" id="selectAllStatus" class="filter-dropdown-action status">
+                                    Pilih Semua
+                                </button>
+                                <span class="filter-dropdown-divider">|</span>
+                                <button type="button" id="clearAllStatus" class="filter-dropdown-action clear">
+                                    Batalkan
+                                </button>
+                            </div>
+                        </div>
 
-                        <div class="grid grid-cols-2 gap-1.5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-
-                            @foreach($kategoris as $k)
-
-                                <label class="group flex h-9 min-w-0 cursor-pointer items-center gap-2 rounded-lg border border-slate-200 bg-white px-2.5 transition hover:border-blue-200 hover:bg-blue-50/60">
-
+                        <div class="filter-dropdown-options">
+                            @foreach($statusOptions as $value => $label)
+                                <label class="filter-dropdown-option status-option">
                                     <input
                                         type="checkbox"
-                                        name="kategori_id[]"
-                                        value="{{ $k->id }}"
-                                        class="kategori-checkbox h-3.5 w-3.5 shrink-0 rounded border-slate-300 text-blue-600 focus:ring-1 focus:ring-blue-500/30"
-                                        @checked(in_array((string) $k->id, $selectedKategori, true))
+                                        name="status[]"
+                                        value="{{ $value }}"
+                                        class="status-checkbox rounded border-slate-300 text-blue-600 focus:ring-1 focus:ring-blue-500/30"
+                                        @checked(in_array($value, $selectedStatus, true))
                                     >
-
-                                    <span
-                                        class="truncate text-[11px] font-medium text-slate-700 transition group-hover:text-blue-700"
-                                        title="{{ $k->nama_kategori }}"
-                                    >
-                                        {{ $k->nama_kategori }}
-                                    </span>
-
+                                    <span>{{ $label }}</span>
                                 </label>
-
                             @endforeach
-
                         </div>
-
-                    @else
-
-                        <div class="rounded-lg border border-dashed border-slate-200 px-3 py-3 text-center text-[10px] text-slate-400">
-                            Belum ada kategori surat.
-                        </div>
-
-                    @endif
-
-                </div>
-
-            </div>
-
-            <div class="overflow-hidden rounded-xl border border-slate-200">
-
-                <div class="flex flex-col justify-between gap-2 border-b border-slate-200 bg-slate-50/80 px-3 py-2.5 sm:flex-row sm:items-center sm:px-3.5">
-
-                    <div class="flex min-w-0 items-center gap-2">
-
-                        <div class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-600">
-                            <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2l4-4m6 2a9 9 0 11-18 0a9 9 0 0118 0z"/>
-                            </svg>
-                        </div>
-
-                        <div>
-
-                            <h3 class="text-[11px] font-bold text-slate-700 sm:text-xs">
-                                Status Surat
-                            </h3>
-
-                            <p class="text-[9px] text-slate-400 sm:text-[10px]">
-                                Pilih satu atau beberapa status
-                            </p>
-
-                        </div>
-
                     </div>
-
-                    <div class="flex items-center gap-2 pl-8 sm:pl-0">
-
-                        <span
-                            id="statusCount"
-                            class="inline-flex items-center rounded-full border border-amber-100 bg-amber-50 px-2 py-0.5 text-[9px] font-semibold text-amber-600"
-                        >
-                            {{ count($selectedStatus) }} dipilih
-                        </span>
-
-                        <button
-                            type="button"
-                            id="selectAllStatus"
-                            class="text-[10px] font-semibold text-amber-600 transition hover:text-amber-700"
-                        >
-                            Pilih Semua
-                        </button>
-
-                        <span class="text-[10px] text-slate-300">
-                            |
-                        </span>
-
-                        <button
-                            type="button"
-                            id="clearAllStatus"
-                            class="text-[10px] font-semibold text-slate-500 transition hover:text-slate-700"
-                        >
-                            Batalkan
-                        </button>
-
-                    </div>
-
                 </div>
-
-                <div class="p-2.5 sm:p-3">
-
-                    <div class="grid grid-cols-2 gap-1.5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-
-                        @foreach($statusOptions as $value => $label)
-
-                            <label class="group flex h-9 min-w-0 cursor-pointer items-center gap-2 rounded-lg border border-slate-200 bg-white px-2.5 transition hover:border-blue-200 hover:bg-blue-50/60">
-
-                                <input
-                                    type="checkbox"
-                                    name="status[]"
-                                    value="{{ $value }}"
-                                    class="status-checkbox h-3.5 w-3.5 shrink-0 rounded border-slate-300 text-blue-600 focus:ring-1 focus:ring-blue-500/30"
-                                    @checked(in_array($value, $selectedStatus, true))
-                                >
-
-                                <span class="truncate text-[11px] font-medium text-slate-700 transition group-hover:text-blue-700">
-                                    {{ $label }}
-                                </span>
-
-                            </label>
-
-                        @endforeach
-
-                    </div>
-
-                </div>
-
             </div>
 
         </form>
@@ -1183,6 +1385,139 @@
 
                 updateStatusCount();
             });
+
+        /*
+        |--------------------------------------------------------------------------
+        | FILTER DROPDOWN
+        |--------------------------------------------------------------------------
+        */
+
+        const kategoriDropdown = document.getElementById('kategoriDropdown');
+        const statusDropdown = document.getElementById('statusDropdown');
+        const kategoriButton = document.getElementById('kategoriDropdownButton');
+        const statusButton = document.getElementById('statusDropdownButton');
+        const kategoriSummary = document.getElementById('kategoriSummary');
+        const statusSummary = document.getElementById('statusSummary');
+
+        function updateFilterSummary() {
+            const kategoriChecked = document.querySelectorAll('.kategori-checkbox:checked');
+            const statusChecked = document.querySelectorAll('.status-checkbox:checked');
+
+            if (kategoriSummary) {
+                if (!kategoriChecked.length) {
+                    kategoriSummary.textContent = 'Semua kategori';
+                } else if (kategoriChecked.length === 1) {
+                    const label = kategoriChecked[0].closest('label')?.querySelector('span');
+                    kategoriSummary.textContent = label?.textContent.trim() || '1 kategori dipilih';
+                } else {
+                    kategoriSummary.textContent = kategoriChecked.length + ' kategori dipilih';
+                }
+            }
+
+            if (statusSummary) {
+                if (!statusChecked.length) {
+                    statusSummary.textContent = 'Semua status';
+                } else if (statusChecked.length === 1) {
+                    const label = statusChecked[0].closest('label')?.querySelector('span');
+                    statusSummary.textContent = label?.textContent.trim() || '1 status dipilih';
+                } else {
+                    statusSummary.textContent = statusChecked.length + ' status dipilih';
+                }
+            }
+        }
+
+        function closeFilterDropdown(dropdown) {
+            if (!dropdown) {
+                return;
+            }
+
+            dropdown.classList.remove('open');
+
+            const button = dropdown.querySelector('.filter-dropdown-trigger');
+
+            if (button) {
+                button.setAttribute('aria-expanded', 'false');
+            }
+        }
+
+        function openFilterDropdown(dropdown) {
+            if (!dropdown) {
+                return;
+            }
+
+            [kategoriDropdown, statusDropdown].forEach(function (item) {
+                if (item && item !== dropdown) {
+                    closeFilterDropdown(item);
+                }
+            });
+
+            dropdown.classList.add('open');
+
+            const button = dropdown.querySelector('.filter-dropdown-trigger');
+
+            if (button) {
+                button.setAttribute('aria-expanded', 'true');
+            }
+        }
+
+        kategoriButton?.addEventListener('click', function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            if (kategoriDropdown?.classList.contains('open')) {
+                closeFilterDropdown(kategoriDropdown);
+            } else {
+                openFilterDropdown(kategoriDropdown);
+            }
+        });
+
+        statusButton?.addEventListener('click', function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            if (statusDropdown?.classList.contains('open')) {
+                closeFilterDropdown(statusDropdown);
+            } else {
+                openFilterDropdown(statusDropdown);
+            }
+        });
+
+        document.addEventListener('click', function (event) {
+            const target = event.target;
+
+            if (!(target instanceof Element)) {
+                return;
+            }
+
+            if (
+                kategoriDropdown &&
+                !kategoriDropdown.contains(target)
+            ) {
+                closeFilterDropdown(kategoriDropdown);
+            }
+
+            if (
+                statusDropdown &&
+                !statusDropdown.contains(target)
+            ) {
+                closeFilterDropdown(statusDropdown);
+            }
+        });
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key !== 'Escape') {
+                return;
+            }
+
+            closeFilterDropdown(kategoriDropdown);
+            closeFilterDropdown(statusDropdown);
+        });
+
+        document.querySelectorAll('.kategori-checkbox, .status-checkbox').forEach(function (checkbox) {
+            checkbox.addEventListener('change', updateFilterSummary);
+        });
+
+        updateFilterSummary();
 
         /*
         |--------------------------------------------------------------------------
