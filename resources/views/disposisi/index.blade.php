@@ -7,15 +7,8 @@
 @php
     $user = auth()->user();
 
-    $userRole = strtolower(
-        trim(
-            (string) ($user->role ?? $user->jabatan ?? '')
-        )
-    );
-
-    $userRole = $userRole === 'staff'
-        ? 'staf'
-        : $userRole;
+    $userRole = strtolower(trim((string) ($user->role ?? $user->jabatan ?? '')));
+    $userRole = $userRole === 'staff' ? 'staf' : $userRole;
 
     $statusOptions = [
         'menunggu' => 'Menunggu',
@@ -29,30 +22,16 @@
         'selesai' => 'border-emerald-200 bg-emerald-50 text-emerald-700',
     ];
 
-    $selectedStatus = collect(
-        request('status', [])
-    )
-        ->filter(
-            fn ($status) => is_scalar($status)
-        )
-        ->map(
-            fn ($status) => strtolower(
-                trim((string) $status)
-            )
-        )
-        ->filter(
-            fn ($status) => array_key_exists(
-                $status,
-                $statusOptions
-            )
-        )
+    $selectedStatus = collect(request('status', []))
+        ->filter(fn ($status) => is_scalar($status))
+        ->map(fn ($status) => strtolower(trim((string) $status)))
+        ->filter(fn ($status) => array_key_exists($status, $statusOptions))
         ->unique()
         ->values()
         ->all();
 
     $dariTanggal = request('dari_tanggal');
     $sampaiTanggal = request('sampai_tanggal');
-
     $dateRangeValue = '';
 
     try {
@@ -61,8 +40,14 @@
                 \Carbon\Carbon::parse($dariTanggal)->format('d/m/Y') .
                 ' - ' .
                 \Carbon\Carbon::parse($sampaiTanggal)->format('d/m/Y');
+        } elseif ($dariTanggal) {
+            $dateRangeValue =
+                \Carbon\Carbon::parse($dariTanggal)->format('d/m/Y');
+        } elseif ($sampaiTanggal) {
+            $dateRangeValue =
+                \Carbon\Carbon::parse($sampaiTanggal)->format('d/m/Y');
         }
-    } catch (\Throwable) {
+    } catch (\Throwable $e) {
         $dateRangeValue = '';
     }
 
@@ -91,12 +76,8 @@
         }
 
         return [
-            'nama' => $penerima->name
-                ?? $penerima->nama
-                ?? '-',
-
-            'jabatan' => $penerima->jabatan
-                ?? null,
+            'nama' => $penerima->name ?? $penerima->nama ?? '-',
+            'jabatan' => $penerima->jabatan ?? null,
         ];
     };
 
@@ -117,9 +98,8 @@
         }
 
         try {
-            return \Carbon\Carbon::parse($tanggal)
-                ->format('d/m/Y');
-        } catch (\Throwable) {
+            return \Carbon\Carbon::parse($tanggal)->format('d/m/Y');
+        } catch (\Throwable $e) {
             return '-';
         }
     };
@@ -134,9 +114,8 @@
         }
 
         try {
-            return \Carbon\Carbon::parse($tanggal)
-                ->format('d/m/Y');
-        } catch (\Throwable) {
+            return \Carbon\Carbon::parse($tanggal)->format('d/m/Y');
+        } catch (\Throwable $e) {
             return '-';
         }
     };
@@ -144,582 +123,749 @@
 
 @push('styles')
 <style>
-    /* =========================================================
-       BASE
-    ========================================================= */
+/* ==========================================================================
+   DATE PICKER
+   ========================================================================== */
 
-    .archive-date-picker,
-    .archive-status-dropdown {
-        position: relative;
-    }
+.archive-date-picker,
+.archive-status-dropdown {
+    position: relative;
+}
 
-    /* =========================================================
-       DATE PICKER
-    ========================================================= */
+.archive-date-panel,
+.archive-status-panel {
+    border: 1px solid #cbd5e1;
+    background: #fff;
+    box-shadow:
+        0 18px 45px rgba(15,23,42,.14),
+        0 6px 18px rgba(15,23,42,.07);
+}
 
-    .archive-date-panel {
-        position: absolute;
-        top: calc(100% + 8px);
-        left: 0;
-        z-index: 9999;
-        width: 620px;
-        max-width: calc(100vw - 24px);
-        overflow: hidden;
-        border: 1px solid #e2e8f0;
-        border-radius: 16px;
-        background: #fff;
-        box-shadow:
-            0 16px 40px rgba(15, 23, 42, .12),
-            0 6px 18px rgba(15, 23, 42, .06);
-    }
+.archive-date-panel {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    z-index: 9999;
+    width: 620px;
+    max-width: calc(100vw - 24px);
+    overflow: hidden;
+    border-radius: 16px;
+}
 
-    .archive-date-panel.hidden,
-    .archive-status-panel.hidden,
-    .archive-picker-view.hidden {
-        display: none;
-    }
+.archive-date-panel.hidden,
+.archive-status-panel.hidden,
+.archive-picker-view.hidden {
+    display: none;
+}
 
-    .archive-date-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 8px;
-        padding: 10px 12px;
-        border-bottom: 1px solid #e2e8f0;
-        background: #f8fafc;
-    }
+.archive-date-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 10px 12px;
+    border-bottom: 1px solid #cbd5e1;
+    background: #f8fafc;
+}
 
-    .archive-date-header-title {
-        color: #334155;
-        font-size: 12px;
-        font-weight: 800;
-    }
+.archive-date-header-title {
+    color: #334155;
+    font-size: 12px;
+    font-weight: 800;
+}
 
-    .archive-date-nav {
-        width: 32px;
-        height: 32px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        flex: none;
-        border: 1px solid #e2e8f0;
-        border-radius: 9px;
-        background: #fff;
-        color: #64748b;
-        cursor: pointer;
-        transition: .15s;
-    }
+.archive-date-nav {
+    display: inline-flex;
+    width: 32px;
+    height: 32px;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    border: 1px solid #cbd5e1;
+    border-radius: 9px;
+    background: #fff;
+    color: #64748b;
+    cursor: pointer;
+    transition: .15s;
+}
 
-    .archive-date-nav:hover {
-        border-color: #bfdbfe;
-        background: #eff6ff;
-        color: #2563eb;
+.archive-date-nav:hover {
+    border-color: #93c5fd;
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.archive-date-months {
+    display: grid;
+    grid-template-columns: repeat(2,minmax(0,1fr));
+}
+
+.archive-date-month {
+    min-width: 0;
+    padding: 12px;
+    border-right: 1px solid #cbd5e1;
+}
+
+.archive-date-month:last-child {
+    border-right: 0;
+}
+
+.archive-month-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    margin-bottom: 8px;
+}
+
+.archive-month-header button {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    padding: 5px 6px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: #334155;
+    font-size: 11px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: .15s;
+}
+
+.archive-month-header button:hover {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.archive-month-grid {
+    display: grid;
+    grid-template-columns: repeat(7,minmax(0,1fr));
+    gap: 2px;
+}
+
+.archive-calendar-weekday {
+    display: flex;
+    height: 24px;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    font-size: 8px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.archive-calendar-day {
+    display: flex;
+    width: 100%;
+    height: 31px;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: #475569;
+    font-size: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: .15s;
+}
+
+.archive-calendar-day:hover {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.archive-calendar-day:active {
+    transform: scale(.95);
+}
+
+.archive-calendar-day.other-month {
+    color: #cbd5e1;
+}
+
+.archive-calendar-day.today {
+    box-shadow: inset 0 0 0 1px #93c5fd;
+    color: #2563eb;
+}
+
+.archive-calendar-day.in-range {
+    border-radius: 0;
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.archive-calendar-day.start-date {
+    border-radius: 999px 6px 6px 999px;
+    background: #2563eb;
+    color: #fff;
+}
+
+.archive-calendar-day.end-date {
+    border-radius: 6px 999px 999px 6px;
+    background: #2563eb;
+    color: #fff;
+}
+
+.archive-calendar-day.start-date.end-date {
+    border-radius: 999px;
+}
+
+.archive-calendar-day.start-date:hover,
+.archive-calendar-day.end-date:hover {
+    background: #1d4ed8;
+    color: #fff;
+}
+
+.archive-date-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 9px 12px 11px;
+    border-top: 1px solid #cbd5e1;
+}
+
+.archive-date-footer-info {
+    min-width: 0;
+    overflow: hidden;
+    color: #64748b;
+    font-size: 9px;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.archive-date-footer-actions {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex: none;
+}
+
+.archive-date-btn {
+    min-height: 32px;
+    padding: 0 11px;
+    border-radius: 9px;
+    font-size: 9px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: .15s;
+}
+
+.archive-date-btn.secondary {
+    border: 1px solid #cbd5e1;
+    background: #f8fafc;
+    color: #475569;
+}
+
+.archive-date-btn.secondary:hover {
+    background: #f1f5f9;
+    color: #334155;
+}
+
+.archive-date-btn.primary {
+    border: 1px solid #2563eb;
+    background: #2563eb;
+    color: #fff;
+}
+
+.archive-date-btn.primary:hover {
+    background: #1d4ed8;
+}
+
+/* ==========================================================================
+   MONTH / YEAR PICKER
+   ========================================================================== */
+
+.archive-picker-view {
+    padding: 12px;
+}
+
+.archive-picker-toolbar,
+.archive-year-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 9px;
+}
+
+.archive-picker-toolbar {
+    color: #475569;
+    font-size: 10px;
+    font-weight: 800;
+}
+
+.archive-picker-grid {
+    display: grid;
+    grid-template-columns: repeat(4,minmax(0,1fr));
+    gap: 6px;
+}
+
+.archive-picker-item {
+    display: flex;
+    min-height: 36px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #cbd5e1;
+    border-radius: 9px;
+    background: #fff;
+    color: #475569;
+    font-size: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: .15s;
+}
+
+.archive-picker-item:hover {
+    border-color: #93c5fd;
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.archive-picker-item.active {
+    border-color: #2563eb;
+    background: #2563eb;
+    color: #fff;
+}
+
+.archive-picker-item.current:not(.active) {
+    box-shadow: inset 0 0 0 1px #93c5fd;
+}
+
+.archive-year-range {
+    color: #475569;
+    font-size: 10px;
+    font-weight: 800;
+}
+
+.archive-year-nav {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.archive-year-nav button {
+    display: inline-flex;
+    width: 29px;
+    height: 29px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #fff;
+    color: #64748b;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.archive-year-nav button:hover {
+    border-color: #93c5fd;
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+/* ==========================================================================
+   STATUS DROPDOWN
+   ========================================================================== */
+
+.archive-status-panel {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    z-index: 9999;
+    width: 370px;
+    overflow: hidden;
+    border-radius: 16px;
+}
+
+.archive-status-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 12px 14px;
+    border-bottom: 1px solid #cbd5e1;
+    background: #f8fafc;
+}
+
+.archive-status-head-title {
+    min-width: 0;
+}
+
+.archive-status-head-title strong {
+    display: block;
+    color: #334155;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.archive-status-head-title span {
+    display: block;
+    margin-top: 2px;
+    color: #94a3b8;
+    font-size: 9px;
+}
+
+.archive-status-count {
+    display: inline-flex;
+    min-height: 25px;
+    align-items: center;
+    justify-content: center;
+    padding: 0 9px;
+    border: 1px solid #fde68a;
+    border-radius: 999px;
+    background: #fffbeb;
+    color: #d97706;
+    font-size: 9px;
+    font-weight: 800;
+}
+
+.archive-status-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 9px 14px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.archive-status-action {
+    border: 0;
+    background: transparent;
+    padding: 0;
+    color: #2563eb;
+    font-size: 9px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.archive-status-action:hover {
+    color: #1d4ed8;
+}
+
+.archive-status-action.muted {
+    color: #64748b;
+}
+
+.archive-status-options {
+    max-height: 210px;
+    overflow-y: auto;
+    padding: 9px 14px 11px;
+}
+
+.archive-status-item {
+    display: flex;
+    min-height: 43px;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 6px;
+    padding: 8px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    background: #fff;
+    cursor: pointer;
+    transition: .15s;
+}
+
+.archive-status-item:last-child {
+    margin-bottom: 0;
+}
+
+.archive-status-item:hover {
+    border-color: #93c5fd;
+    background: #eff6ff;
+}
+
+.archive-status-item input {
+    width: 16px;
+    height: 16px;
+    flex: none;
+    accent-color: #2563eb;
+}
+
+.archive-status-item-label {
+    min-width: 0;
+    flex: 1;
+    color: #475569;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.archive-status-dot {
+    width: 7px;
+    height: 7px;
+    flex: none;
+    border-radius: 999px;
+}
+
+.archive-status-dot.menunggu {
+    background: #f59e0b;
+}
+
+.archive-status-dot.diproses {
+    background: #3b82f6;
+}
+
+.archive-status-dot.selesai {
+    background: #10b981;
+}
+
+.archive-status-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding: 9px 14px;
+    border-top: 1px solid #cbd5e1;
+    background: #f8fafc;
+}
+
+.archive-status-close {
+    min-height: 32px;
+    padding: 0 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 9px;
+    background: #fff;
+    color: #475569;
+    font-size: 9px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.archive-status-close:hover {
+    background: #f1f5f9;
+}
+
+/* ==========================================================================
+   TABLE
+   ========================================================================== */
+
+.disposition-table-wrapper {
+    overflow: hidden;
+    border: 1px solid #94a3b8;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow:
+        0 1px 3px rgba(15,23,42,.06),
+        0 8px 24px rgba(15,23,42,.04);
+}
+
+.disposition-table-scroll {
+    overflow-x: auto;
+}
+
+.disposition-table {
+    width: 100%;
+    min-width: 950px;
+    border-collapse: collapse;
+    border-spacing: 0;
+    background: #fff;
+}
+
+.disposition-table thead {
+    background: #f1f5f9;
+}
+
+.disposition-table thead th {
+    padding: 13px 16px;
+    border-right: 1px solid #cbd5e1;
+    border-bottom: 2px solid #94a3b8;
+    color: #475569;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .05em;
+    line-height: 1.4;
+    text-align: left;
+    text-transform: uppercase;
+    vertical-align: middle;
+}
+
+.disposition-table thead th:last-child {
+    border-right: 0;
+    text-align: center;
+}
+
+.disposition-table tbody tr {
+    background: #fff;
+    transition: background-color .15s ease;
+}
+
+.disposition-table tbody tr:nth-child(even) {
+    background: #f8fafc;
+}
+
+.disposition-table tbody tr:hover {
+    background: #eff6ff;
+}
+
+.disposition-table tbody td {
+    padding: 14px 16px;
+    border-right: 1px solid #cbd5e1;
+    border-bottom: 1px solid #cbd5e1;
+    color: #475569;
+    font-size: 12px;
+    line-height: 1.5;
+    vertical-align: middle;
+}
+
+.disposition-table tbody td:last-child {
+    border-right: 0;
+    text-align: center;
+}
+
+.disposition-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.disposition-table .cell-number {
+    color: #334155;
+    font-weight: 600;
+}
+
+.disposition-table .cell-date {
+    color: #475569;
+    font-weight: 600;
+}
+
+.disposition-table .cell-instruction {
+    max-width: 280px;
+    color: #334155;
+    font-weight: 600;
+    white-space: normal;
+}
+
+.disposition-table .cell-deadline {
+    white-space: nowrap;
+}
+
+.disposition-table .cell-status {
+    white-space: nowrap;
+}
+
+.disposition-table .receiver-box {
+    display: flex;
+    min-width: 150px;
+    max-width: 210px;
+    flex-direction: column;
+    gap: 1px;
+    padding: 6px 9px;
+    border: 1px solid #cbd5e1;
+    border-radius: 9px;
+    background: #f1f5f9;
+}
+
+.disposition-table .receiver-name {
+    overflow: hidden;
+    color: #334155;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.disposition-table .receiver-position {
+    overflow: hidden;
+    color: #94a3b8;
+    font-size: 10px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.disposition-table .status-badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    border-width: 1px;
+    padding: 5px 10px;
+    font-size: 10px;
+    font-weight: 800;
+}
+
+.disposition-table .action-cell {
+    width: 125px;
+}
+
+.disposition-table .action-buttons {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+}
+
+.disposition-table .action-button {
+    display: inline-flex;
+    width: 30px;
+    height: 30px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    color: #64748b;
+    transition: .15s;
+}
+
+.disposition-table .action-button.detail:hover {
+    background: #dbeafe;
+    color: #2563eb;
+}
+
+.disposition-table .action-button.edit:hover {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.disposition-table .action-button.delete:hover {
+    background: #ffe4e6;
+    color: #e11d48;
+}
+
+.disposition-table-empty {
+    padding: 48px 16px;
+    text-align: center;
+}
+
+/* ==========================================================================
+   MOBILE
+   ========================================================================== */
+
+@media (max-width: 767px) {
+    .archive-date-panel,
+    .archive-status-panel {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        right: auto;
+        width: calc(100vw - 24px);
+        max-width: 410px;
+        max-height: calc(100vh - 24px);
+        transform: translate(-50%, -50%);
     }
 
     .archive-date-months {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: 1fr;
+        max-height: 55vh;
+        overflow-y: auto;
     }
 
     .archive-date-month {
-        min-width: 0;
-        padding: 12px;
-        border-right: 1px solid #e2e8f0;
+        border-right: 0;
+        border-bottom: 1px solid #cbd5e1;
     }
 
     .archive-date-month:last-child {
-        border-right: 0;
-    }
-
-    .archive-month-header {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 2px;
-        margin-bottom: 8px;
-    }
-
-    .archive-month-header button {
-        display: inline-flex;
-        align-items: center;
-        gap: 2px;
-        border: 0;
-        border-radius: 8px;
-        background: transparent;
-        padding: 5px 6px;
-        color: #334155;
-        font-size: 11px;
-        font-weight: 800;
-        cursor: pointer;
-        transition: .15s;
-    }
-
-    .archive-month-header button:hover {
-        background: #eff6ff;
-        color: #2563eb;
-    }
-
-    .archive-month-grid {
-        display: grid;
-        grid-template-columns: repeat(7, minmax(0, 1fr));
-        gap: 2px;
-    }
-
-    .archive-calendar-weekday {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 24px;
-        color: #94a3b8;
-        font-size: 8px;
-        font-weight: 800;
-        text-transform: uppercase;
-    }
-
-    .archive-calendar-day {
-        width: 100%;
-        height: 31px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: 0;
-        border-radius: 8px;
-        background: transparent;
-        color: #475569;
-        font-size: 10px;
-        font-weight: 600;
-        cursor: pointer;
-        transition:
-            background .15s,
-            color .15s,
-            transform .1s;
-    }
-
-    .archive-calendar-day:hover {
-        background: #eff6ff;
-        color: #2563eb;
-    }
-
-    .archive-calendar-day:active {
-        transform: scale(.95);
-    }
-
-    .archive-calendar-day.other-month {
-        color: #cbd5e1;
-    }
-
-    .archive-calendar-day.today {
-        box-shadow: inset 0 0 0 1px #93c5fd;
-        color: #2563eb;
-    }
-
-    .archive-calendar-day.in-range {
-        background: #eff6ff;
-        color: #2563eb;
-        border-radius: 0;
-    }
-
-    .archive-calendar-day.start-date {
-        background: #2563eb;
-        color: #fff;
-        border-radius: 999px 6px 6px 999px;
-    }
-
-    .archive-calendar-day.end-date {
-        background: #2563eb;
-        color: #fff;
-        border-radius: 6px 999px 999px 6px;
-    }
-
-    .archive-calendar-day.start-date.end-date {
-        border-radius: 999px;
-    }
-
-    .archive-calendar-day.start-date:hover,
-    .archive-calendar-day.end-date:hover {
-        background: #1d4ed8;
-        color: #fff;
-    }
-
-    /* =========================================================
-       DATE FOOTER
-    ========================================================= */
-
-    .archive-date-footer {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 8px;
-        padding: 9px 12px 11px;
-        border-top: 1px solid #e2e8f0;
-    }
-
-    .archive-date-footer-info {
-        min-width: 0;
-        overflow: hidden;
-        color: #64748b;
-        font-size: 9px;
-        font-weight: 700;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-
-    .archive-date-footer-actions {
-        display: flex;
-        align-items: center;
-        gap: 5px;
-        flex: none;
-    }
-
-    .archive-date-btn {
-        min-height: 32px;
-        padding: 0 11px;
-        border-radius: 9px;
-        font-size: 9px;
-        font-weight: 800;
-        cursor: pointer;
-        transition: .15s;
-    }
-
-    .archive-date-btn.secondary {
-        border: 1px solid #e2e8f0;
-        background: #f8fafc;
-        color: #475569;
-    }
-
-    .archive-date-btn.secondary:hover {
-        background: #f1f5f9;
-        color: #334155;
-    }
-
-    .archive-date-btn.primary {
-        border: 1px solid #2563eb;
-        background: #2563eb;
-        color: #fff;
-    }
-
-    .archive-date-btn.primary:hover {
-        background: #1d4ed8;
-    }
-
-    /* =========================================================
-       MONTH / YEAR PICKER
-    ========================================================= */
-
-    .archive-picker-view {
-        padding: 12px;
-    }
-
-    .archive-picker-toolbar {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 8px;
-        margin-bottom: 9px;
-        color: #475569;
-        font-size: 10px;
-        font-weight: 800;
+        border-bottom: 0;
     }
 
     .archive-picker-grid {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 6px;
+        grid-template-columns: repeat(3,minmax(0,1fr));
     }
-
-    .archive-picker-item {
-        min-height: 36px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: 1px solid #e2e8f0;
-        border-radius: 9px;
-        background: #fff;
-        color: #475569;
-        font-size: 10px;
-        font-weight: 700;
-        cursor: pointer;
-        transition: .15s;
-    }
-
-    .archive-picker-item:hover {
-        border-color: #bfdbfe;
-        background: #eff6ff;
-        color: #2563eb;
-    }
-
-    .archive-picker-item.active {
-        border-color: #2563eb;
-        background: #2563eb;
-        color: #fff;
-    }
-
-    .archive-year-toolbar {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 8px;
-        margin-bottom: 9px;
-    }
-
-    .archive-year-range {
-        color: #475569;
-        font-size: 10px;
-        font-weight: 800;
-    }
-
-    .archive-year-nav {
-        display: flex;
-        align-items: center;
-        gap: 5px;
-    }
-
-    .archive-year-nav button {
-        width: 29px;
-        height: 29px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        background: #fff;
-        color: #64748b;
-        font-size: 14px;
-        cursor: pointer;
-    }
-
-    .archive-year-nav button:hover {
-        border-color: #bfdbfe;
-        background: #eff6ff;
-        color: #2563eb;
-    }
-
-    /* =========================================================
-       STATUS DROPDOWN
-    ========================================================= */
-
-    .archive-status-panel {
-        position: absolute;
-        top: calc(100% + 8px);
-        right: 0;
-        z-index: 9999;
-        width: 370px;
-        overflow: hidden;
-        border: 1px solid #e2e8f0;
-        border-radius: 16px;
-        background: #fff;
-        box-shadow:
-            0 16px 40px rgba(15, 23, 42, .12),
-            0 6px 18px rgba(15, 23, 42, .06);
-    }
-
-    .archive-status-head {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 10px;
-        padding: 12px 14px;
-        border-bottom: 1px solid #e2e8f0;
-        background: #f8fafc;
-    }
-
-    .archive-status-head-title {
-        min-width: 0;
-    }
-
-    .archive-status-head-title strong {
-        display: block;
-        color: #334155;
-        font-size: 11px;
-        font-weight: 800;
-    }
-
-    .archive-status-head-title span {
-        display: block;
-        margin-top: 2px;
-        color: #94a3b8;
-        font-size: 9px;
-    }
-
-    .archive-status-count {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 25px;
-        padding: 0 9px;
-        border: 1px solid #fde68a;
-        border-radius: 999px;
-        background: #fffbeb;
-        color: #d97706;
-        font-size: 9px;
-        font-weight: 800;
-        white-space: nowrap;
-    }
-
-    .archive-status-actions {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 8px;
-        padding: 9px 14px;
-        border-bottom: 1px solid #f1f5f9;
-    }
-
-    .archive-status-action {
-        border: 0;
-        background: transparent;
-        padding: 0;
-        color: #2563eb;
-        font-size: 9px;
-        font-weight: 800;
-        cursor: pointer;
-    }
-
-    .archive-status-action:hover {
-        color: #1d4ed8;
-    }
-
-    .archive-status-action.muted {
-        color: #64748b;
-    }
-
-    .archive-status-options {
-        max-height: 210px;
-        overflow-y: auto;
-        padding: 9px 14px 11px;
-    }
-
-    .archive-status-item {
-        display: flex;
-        align-items: center;
-        gap: 9px;
-        min-height: 43px;
-        margin-bottom: 6px;
-        padding: 8px 10px;
-        border: 1px solid #e2e8f0;
-        border-radius: 10px;
-        background: #fff;
-        cursor: pointer;
-        transition: .15s;
-    }
-
-    .archive-status-item:last-child {
-        margin-bottom: 0;
-    }
-
-    .archive-status-item:hover {
-        border-color: #bfdbfe;
-        background: #eff6ff;
-    }
-
-    .archive-status-item input {
-        width: 16px;
-        height: 16px;
-        flex: none;
-        accent-color: #2563eb;
-    }
-
-    .archive-status-item-label {
-        min-width: 0;
-        flex: 1;
-        color: #475569;
-        font-size: 10px;
-        font-weight: 700;
-    }
-
-    .archive-status-dot {
-        width: 7px;
-        height: 7px;
-        flex: none;
-        border-radius: 999px;
-    }
-
-    .archive-status-dot.menunggu {
-        background: #f59e0b;
-    }
-
-    .archive-status-dot.diproses {
-        background: #3b82f6;
-    }
-
-    .archive-status-dot.selesai {
-        background: #10b981;
-    }
-
-    .archive-status-footer {
-        display: flex;
-        justify-content: flex-end;
-        padding: 9px 14px;
-        border-top: 1px solid #e2e8f0;
-        background: #f8fafc;
-    }
-
-    .archive-status-close {
-        min-height: 32px;
-        padding: 0 12px;
-        border: 1px solid #e2e8f0;
-        border-radius: 9px;
-        background: #fff;
-        color: #475569;
-        font-size: 9px;
-        font-weight: 800;
-        cursor: pointer;
-        transition: .15s;
-    }
-
-    .archive-status-close:hover {
-        background: #f1f5f9;
-        color: #334155;
-    }
-
-    /* =========================================================
-       MOBILE
-    ========================================================= */
-
-    @media (max-width: 767px) {
-        .archive-date-panel,
-        .archive-status-panel {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            right: auto;
-            width: calc(100vw - 24px);
-            max-width: 410px;
-            max-height: calc(100vh - 24px);
-            transform: translate(-50%, -50%);
-        }
-
-        .archive-date-months {
-            grid-template-columns: 1fr;
-            max-height: 55vh;
-            overflow-y: auto;
-        }
-
-        .archive-date-month {
-            border-right: 0;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        .archive-date-month:last-child {
-            border-bottom: 0;
-        }
-
-        .archive-picker-grid {
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-        }
-    }
+}
 </style>
 @endpush
 
 <div class="space-y-4 sm:space-y-6">
 
-    {{-- =====================================================
-         HEADER
-    ====================================================== --}}
+    {{-- HEADER --}}
     <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-
         <div class="min-w-0">
-
             <h1 class="text-xl font-bold tracking-tight text-slate-800 sm:text-2xl">
                 Disposisi Surat
             </h1>
@@ -727,845 +873,470 @@
             <p class="mt-0.5 text-xs text-slate-500 sm:text-sm">
                 Kelola dan pantau instruksi disposisi dari pimpinan ke unit kerja.
             </p>
-
         </div>
 
         <div class="grid w-full grid-cols-3 gap-2 sm:flex sm:w-auto">
 
-            {{-- EXPORT EXCEL --}}
             @if(Route::has('export.disposisi.excel'))
-
-                <a href="{{ route('export.disposisi.excel', request()->query()) }}"
-                   class="inline-flex items-center justify-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-2.5 py-2 text-xs font-semibold text-emerald-700 shadow-sm transition hover:bg-emerald-100 sm:px-3.5">
-
-                    <svg class="h-4 w-4 shrink-0"
-                         fill="none"
-                         stroke="currentColor"
-                         viewBox="0 0 24 24">
-
-                        <path stroke-linecap="round"
-                              stroke-linejoin="round"
-                              stroke-width="2"
-                              d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 00.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-
+                <a
+                    href="{{ route('export.disposisi.excel', request()->query()) }}"
+                    class="inline-flex items-center justify-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-2.5 py-2 text-xs font-semibold text-emerald-700 shadow-sm transition hover:bg-emerald-100 sm:px-3.5"
+                >
+                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 00.707.293l5.414 5.414a1 1 0 00.293.707V19a2 2 0 01-2 2z"/>
                     </svg>
-
                     <span>Excel</span>
-
                 </a>
-
             @else
-
                 <div></div>
-
             @endif
 
-            {{-- EXPORT PDF --}}
             @if(Route::has('export.disposisi.pdf'))
-
-                <a href="{{ route('export.disposisi.pdf', request()->query()) }}"
-                   target="_blank"
-                   rel="noopener noreferrer"
-                   class="inline-flex items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-2.5 py-2 text-xs font-semibold text-rose-700 shadow-sm transition hover:bg-rose-100 sm:px-3.5">
-
-                    <svg class="h-4 w-4 shrink-0"
-                         fill="none"
-                         stroke="currentColor"
-                         viewBox="0 0 24 24">
-
-                        <path stroke-linecap="round"
-                              stroke-linejoin="round"
-                              stroke-width="2"
-                              d="M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-
+                <a
+                    href="{{ route('export.disposisi.pdf', request()->query()) }}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="inline-flex items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-2.5 py-2 text-xs font-semibold text-rose-700 shadow-sm transition hover:bg-rose-100 sm:px-3.5"
+                >
+                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
                     </svg>
-
                     <span>PDF</span>
-
                 </a>
-
             @else
-
                 <div></div>
-
             @endif
 
-            {{-- BUAT DISPOSISI --}}
             @if(
-                in_array(
-                    $userRole,
-                    ['admin', 'pimpinan'],
-                    true
-                ) &&
+                in_array($userRole, ['admin', 'pimpinan'], true) &&
                 Route::has('surat-masuk.index')
             )
-
-                <a href="{{ route('surat-masuk.index') }}"
-                   title="Pilih surat masuk untuk membuat disposisi"
-                   class="inline-flex items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-2.5 py-2 text-xs font-semibold text-white shadow-md shadow-blue-600/20 transition hover:bg-blue-700 sm:px-4">
-
-                    <svg class="h-4 w-4 shrink-0"
-                         fill="none"
-                         stroke="currentColor"
-                         viewBox="0 0 24 24">
-
-                        <path stroke-linecap="round"
-                              stroke-linejoin="round"
-                              stroke-width="2"
-                              d="M12 4v16m8-8H4"/>
-
+                <a
+                    href="{{ route('surat-masuk.index') }}"
+                    title="Pilih surat masuk untuk membuat disposisi"
+                    class="inline-flex items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-2.5 py-2 text-xs font-semibold text-white shadow-md shadow-blue-600/20 transition hover:bg-blue-700 sm:px-4"
+                >
+                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                     </svg>
-
                     <span>Disposisi</span>
-
                 </a>
-
             @else
-
                 <div></div>
-
             @endif
-
         </div>
-
     </div>
 
-    {{-- =====================================================
-         FILTER
-    ====================================================== --}}
-    <div class="rounded-2xl border border-slate-200/80 bg-white p-3 shadow-sm sm:p-5">
-
-        <form id="filterForm"
-              method="GET"
-              action="{{ route('disposisi.index') }}"
-              class="space-y-3">
-
+    {{-- FILTER --}}
+    <div class="rounded-2xl border border-slate-300 bg-white p-3 shadow-sm sm:p-4">
+        <form
+            id="filterForm"
+            method="GET"
+            action="{{ route('disposisi.index') }}"
+            class="space-y-3"
+        >
             <div class="grid grid-cols-1 gap-2.5 lg:grid-cols-12">
 
                 {{-- SEARCH --}}
                 <div class="lg:col-span-5">
-
                     <div class="relative">
-
                         <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-
-                            <svg class="h-4 w-4"
-                                 fill="none"
-                                 stroke="currentColor"
-                                 viewBox="0 0 24 24">
-
-                                <path stroke-linecap="round"
-                                      stroke-linejoin="round"
-                                      stroke-width="2"
-                                      d="M21 21l-6-6m2-5a7 7 0 11-14 0a7 7 0 0114 0z"/>
-
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0a7 7 0 0114 0z"/>
                             </svg>
-
                         </div>
 
-                        <input id="search"
-                               name="search"
-                               type="text"
-                               value="{{ request('search') }}"
-                               placeholder="Cari nomor surat, penerima atau isi instruksi..."
-                               autocomplete="off"
-                               class="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 pl-9 pr-3 text-xs text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 sm:text-sm">
-
+                        <input
+                            id="search"
+                            name="search"
+                            type="text"
+                            value="{{ request('search') }}"
+                            placeholder="Cari nomor surat, penerima atau isi instruksi..."
+                            autocomplete="off"
+                            class="h-11 w-full rounded-xl border border-slate-300 bg-slate-50 pl-9 pr-3 text-xs text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 sm:text-sm"
+                        >
                     </div>
-
                 </div>
 
                 {{-- DATE RANGE --}}
                 <div class="lg:col-span-4">
-
                     <div class="archive-date-picker">
-
                         <div class="relative">
-
                             <div class="pointer-events-none absolute inset-y-0 left-0 z-10 flex items-center pl-3 text-slate-400">
-
-                                <svg class="h-4 w-4"
-                                     fill="none"
-                                     stroke="currentColor"
-                                     viewBox="0 0 24 24">
-
-                                    <path stroke-linecap="round"
-                                          stroke-linejoin="round"
-                                          stroke-width="2"
-                                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5v12a2 2 0 002 2z"/>
-
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5v12a2 2 0 002 2z"/>
                                 </svg>
-
                             </div>
 
-                            <input id="date-range"
-                                   type="text"
-                                   value="{{ $dateRangeValue }}"
-                                   readonly
-                                   autocomplete="off"
-                                   placeholder="Pilih rentang tanggal..."
-                                   class="h-11 w-full cursor-pointer rounded-xl border border-slate-200 bg-slate-50 pl-9 pr-10 text-xs font-medium text-slate-700 outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 sm:text-sm">
+                            <input
+                                id="date-range"
+                                type="text"
+                                value="{{ $dateRangeValue }}"
+                                readonly
+                                autocomplete="off"
+                                placeholder="Pilih rentang tanggal..."
+                                class="h-11 w-full cursor-pointer rounded-xl border border-slate-300 bg-slate-50 pl-9 pr-10 text-xs font-medium text-slate-700 outline-none transition placeholder:text-slate-400 hover:border-slate-400 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 sm:text-sm"
+                            >
 
-                            <button type="button"
-                                    id="clearDateRange"
-                                    title="Hapus tanggal"
-                                    class="absolute inset-y-0 right-0 z-10 hidden w-10 items-center justify-center text-slate-400 transition hover:text-rose-500">
-
-                                <svg class="h-4 w-4"
-                                     fill="none"
-                                     stroke="currentColor"
-                                     viewBox="0 0 24 24">
-
-                                    <path stroke-linecap="round"
-                                          stroke-linejoin="round"
-                                          stroke-width="2"
-                                          d="M6 18L18 6M6 6l12 12"/>
-
+                            <button
+                                type="button"
+                                id="clearDateRange"
+                                title="Hapus tanggal"
+                                aria-label="Hapus tanggal"
+                                class="{{ $dateRangeValue ? 'flex' : 'hidden' }} absolute inset-y-0 right-0 z-10 w-10 items-center justify-center text-slate-400 transition hover:text-rose-500"
+                            >
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                 </svg>
-
                             </button>
-
                         </div>
 
-                        <input type="hidden"
-                               name="dari_tanggal"
-                               id="dari_tanggal"
-                               value="{{ $dariTanggal }}">
+                        <input type="hidden" name="dari_tanggal" id="dari_tanggal" value="{{ $dariTanggal }}">
+                        <input type="hidden" name="sampai_tanggal" id="sampai_tanggal" value="{{ $sampaiTanggal }}">
 
-                        <input type="hidden"
-                               name="sampai_tanggal"
-                               id="sampai_tanggal"
-                               value="{{ $sampaiTanggal }}">
-
-                        {{-- DATE PICKER --}}
-                        <div id="datePickerPanel"
-                             class="archive-date-panel hidden">
-
+                        <div id="datePickerPanel" class="archive-date-panel hidden">
                             <div class="archive-date-header">
-
-                                <button type="button"
-                                        id="datePrev"
-                                        class="archive-date-nav"
-                                        aria-label="Bulan sebelumnya">
-
-                                    <svg class="h-4 w-4"
-                                         fill="none"
-                                         stroke="currentColor"
-                                         viewBox="0 0 24 24">
-
-                                        <path stroke-linecap="round"
-                                              stroke-linejoin="round"
-                                              stroke-width="2"
-                                              d="M15 19l-7-7 7-7"/>
-
+                                <button type="button" id="datePrev" class="archive-date-nav" aria-label="Bulan sebelumnya">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                                     </svg>
-
                                 </button>
 
                                 <div class="archive-date-header-title">
                                     Pilih Rentang Tanggal
                                 </div>
 
-                                <button type="button"
-                                        id="dateNext"
-                                        class="archive-date-nav"
-                                        aria-label="Bulan berikutnya">
-
-                                    <svg class="h-4 w-4"
-                                         fill="none"
-                                         stroke="currentColor"
-                                         viewBox="0 0 24 24">
-
-                                        <path stroke-linecap="round"
-                                              stroke-linejoin="round"
-                                              stroke-width="2"
-                                              d="M9 5l7 7-7 7"/>
-
+                                <button type="button" id="dateNext" class="archive-date-nav" aria-label="Bulan berikutnya">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                                     </svg>
-
                                 </button>
-
                             </div>
 
-                            <div id="datePickerContent"
-                                 class="archive-date-months">
-                            </div>
-
-                            <div id="monthPickerView"
-                                 class="archive-picker-view hidden">
-                            </div>
-
-                            <div id="yearPickerView"
-                                 class="archive-picker-view hidden">
-                            </div>
+                            <div id="datePickerContent" class="archive-date-months"></div>
+                            <div id="monthPickerView" class="archive-picker-view hidden"></div>
+                            <div id="yearPickerView" class="archive-picker-view hidden"></div>
 
                             <div class="archive-date-footer">
-
-                                <div id="datePickerInfo"
-                                     class="archive-date-footer-info">
+                                <div id="datePickerInfo" class="archive-date-footer-info">
                                     Pilih tanggal mulai
                                 </div>
 
                                 <div class="archive-date-footer-actions">
-
-                                    <button type="button"
-                                            id="clearPickerButton"
-                                            class="archive-date-btn secondary">
+                                    <button type="button" id="clearPickerButton" class="archive-date-btn secondary">
                                         Bersihkan
                                     </button>
 
-                                    <button type="button"
-                                            id="applyPickerButton"
-                                            class="archive-date-btn primary">
+                                    <button type="button" id="applyPickerButton" class="archive-date-btn primary">
                                         Terapkan
                                     </button>
-
                                 </div>
-
                             </div>
-
                         </div>
-
                     </div>
-
                 </div>
 
                 {{-- FILTER BUTTON --}}
                 <div class="lg:col-span-3">
-
                     <div class="flex h-11 gap-2">
-
-                        <button type="submit"
-                                class="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-slate-900 px-3 text-xs font-semibold text-white shadow-sm transition hover:bg-slate-800 sm:text-sm">
-
-                            <svg class="h-4 w-4"
-                                 fill="none"
-                                 stroke="currentColor"
-                                 viewBox="0 0 24 24">
-
-                                <path stroke-linecap="round"
-                                      stroke-linejoin="round"
-                                      stroke-width="2"
-                                      d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707L13 17v4l-4-4v-4.293a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
-
+                        <button
+                            type="submit"
+                            class="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-slate-900 px-3 text-xs font-semibold text-white shadow-sm transition hover:bg-slate-800 sm:text-sm"
+                        >
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 00-.293.707l-6.414 6.414a1 1 0 00-.293.707L13 17v4l-4-4v-4.293a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
                             </svg>
-
                             <span>Filter</span>
-
                         </button>
 
                         @if($hasFilters)
-
-                            <a href="{{ route('disposisi.index') }}"
-                               title="Reset Filter"
-                               class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500 transition hover:bg-slate-200 hover:text-slate-700">
-
-                                <svg class="h-4 w-4"
-                                     fill="none"
-                                     stroke="currentColor"
-                                     viewBox="0 0 24 24">
-
-                                    <path stroke-linecap="round"
-                                          stroke-linejoin="round"
-                                          stroke-width="2"
-                                          d="M6 18L18 6M6 6l12 12"/>
-
+                            <a
+                                href="{{ route('disposisi.index') }}"
+                                title="Reset Filter"
+                                aria-label="Reset Filter"
+                                class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500 transition hover:bg-slate-200 hover:text-slate-700"
+                            >
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                 </svg>
-
                             </a>
-
                         @endif
-
                     </div>
-
                 </div>
-
             </div>
 
             {{-- STATUS DROPDOWN --}}
             <div class="archive-status-dropdown">
-
-                <button type="button"
-                        id="statusDropdownButton"
-                        class="flex w-full items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-left transition hover:border-slate-300 hover:bg-slate-50 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
-
+                <button
+                    type="button"
+                    id="statusDropdownButton"
+                    class="flex w-full items-center justify-between gap-3 rounded-xl border border-slate-300 bg-white px-3.5 py-3 text-left transition hover:border-slate-400 hover:bg-slate-50 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                >
                     <div class="flex min-w-0 items-center gap-3">
-
                         <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-600">
-
-                            <svg class="h-4 w-4"
-                                 fill="none"
-                                 stroke="currentColor"
-                                 viewBox="0 0 24 24">
-
-                                <path stroke-linecap="round"
-                                      stroke-linejoin="round"
-                                      stroke-width="2"
-                                      d="M9 12l2 2l4-4m6 2a9 9 0 11-18 0a9 9 0 0118 0z"/>
-
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2l4-4m6 2a9 9 0 11-18 0a9 9 0 0118 0z"/>
                             </svg>
-
                         </div>
 
                         <div class="min-w-0">
-
                             <div class="text-xs font-bold text-slate-700 sm:text-sm">
                                 Status Disposisi
                             </div>
 
-                            <div id="statusSummary"
-                                 class="mt-0.5 truncate text-[10px] text-slate-400 sm:text-xs">
+                            <div id="statusSummary" class="mt-0.5 truncate text-[10px] text-slate-400 sm:text-xs">
                                 Semua status
                             </div>
-
                         </div>
-
                     </div>
 
                     <div class="flex shrink-0 items-center gap-2">
-
-                        <span id="statusCount"
-                              class="inline-flex min-h-7 items-center rounded-full border border-amber-100 bg-amber-50 px-2.5 text-[10px] font-bold text-amber-600">
+                        <span id="statusCount" class="inline-flex min-h-7 items-center rounded-full border border-amber-100 bg-amber-50 px-2.5 text-[10px] font-bold text-amber-600">
                             {{ count($selectedStatus) }} dipilih
                         </span>
 
-                        <svg id="statusDropdownIcon"
-                             class="h-4 w-4 text-slate-400 transition-transform"
-                             fill="none"
-                             stroke="currentColor"
-                             viewBox="0 0 24 24">
-
-                            <path stroke-linecap="round"
-                                  stroke-linejoin="round"
-                                  stroke-width="2"
-                                  d="M19 9l-7 7-7-7"/>
-
+                        <svg id="statusDropdownIcon" class="h-4 w-4 text-slate-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
-
                     </div>
-
                 </button>
 
-                <div id="statusDropdownPanel"
-                     class="archive-status-panel hidden">
-
+                <div id="statusDropdownPanel" class="archive-status-panel hidden">
                     <div class="archive-status-head">
-
                         <div class="archive-status-head-title">
-
-                            <strong>
-                                Pilih Status
-                            </strong>
-
-                            <span>
-                                Satu atau beberapa status dapat dipilih
-                            </span>
-
+                            <strong>Pilih Status</strong>
+                            <span>Satu atau beberapa status dapat dipilih</span>
                         </div>
 
-                        <span id="statusPanelCount"
-                              class="archive-status-count">
+                        <span id="statusPanelCount" class="archive-status-count">
                             {{ count($selectedStatus) }} dipilih
                         </span>
-
                     </div>
 
                     <div class="archive-status-actions">
-
-                        <button type="button"
-                                id="selectAllStatus"
-                                class="archive-status-action">
+                        <button type="button" id="selectAllStatus" class="archive-status-action">
                             Pilih Semua
                         </button>
 
-                        <button type="button"
-                                id="clearAllStatus"
-                                class="archive-status-action muted">
+                        <button type="button" id="clearAllStatus" class="archive-status-action muted">
                             Batalkan
                         </button>
-
                     </div>
 
                     <div class="archive-status-options">
-
                         @foreach($statusOptions as $value => $label)
-
                             <label class="archive-status-item">
-
-                                <input type="checkbox"
-                                       name="status[]"
-                                       value="{{ $value }}"
-                                       class="status-checkbox"
-                                       @checked(
-                                           in_array(
-                                               $value,
-                                               $selectedStatus,
-                                               true
-                                           )
-                                       )>
+                                <input
+                                    type="checkbox"
+                                    name="status[]"
+                                    value="{{ $value }}"
+                                    class="status-checkbox"
+                                    @checked(in_array($value, $selectedStatus, true))
+                                >
 
                                 <span class="archive-status-dot {{ $value }}"></span>
 
                                 <span class="archive-status-item-label">
                                     {{ $label }}
                                 </span>
-
                             </label>
-
                         @endforeach
-
                     </div>
 
                     <div class="archive-status-footer">
-
-                        <button type="button"
-                                id="closeStatusDropdown"
-                                class="archive-status-close">
+                        <button type="button" id="closeStatusDropdown" class="archive-status-close">
                             Selesai
                         </button>
-
                     </div>
-
                 </div>
-
             </div>
-
         </form>
-
     </div>
 
-    {{-- =====================================================
-         TABLE
-    ====================================================== --}}
-    <div class="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
-
-        <div class="overflow-x-auto">
-
-            <table class="w-full min-w-[950px] border-collapse whitespace-nowrap text-left text-xs sm:text-sm">
-
+    {{-- TABLE --}}
+    <div class="disposition-table-wrapper">
+        <div class="disposition-table-scroll">
+            <table class="disposition-table">
                 <thead>
-
-                    <tr class="border-b border-slate-200 bg-slate-50/80 text-[10px] font-bold uppercase tracking-wider text-slate-400 sm:text-[11px]">
-
-                        <th class="px-4 py-3 sm:px-5 sm:py-4">
-                            No. Surat
-                        </th>
-
-                        <th class="px-4 py-3 sm:px-5 sm:py-4">
-                            Tanggal Disposisi
-                        </th>
-
-                        <th class="px-4 py-3 sm:px-5 sm:py-4">
-                            Tujuan / Penerima
-                        </th>
-
-                        <th class="px-4 py-3 sm:px-5 sm:py-4">
-                            Isi Instruksi
-                        </th>
-
-                        <th class="px-4 py-3 sm:px-5 sm:py-4">
-                            Status
-                        </th>
-
-                        <th class="px-4 py-3 sm:px-5 sm:py-4">
-                            Batas Waktu
-                        </th>
-
-                        <th class="px-4 py-3 text-center sm:px-5 sm:py-4">
-                            Aksi
-                        </th>
-
+                    <tr>
+                        <th>No. Surat</th>
+                        <th>Tanggal Disposisi</th>
+                        <th>Tujuan / Penerima</th>
+                        <th>Isi Instruksi</th>
+                        <th>Status</th>
+                        <th>Batas Waktu</th>
+                        <th class="action-cell">Aksi</th>
                     </tr>
-
                 </thead>
 
-                <tbody class="divide-y divide-slate-100 text-xs">
-
+                <tbody>
                     @forelse($disposisis ?? [] as $d)
-
                         @php
-                            $status = strtolower(
-                                trim(
-                                    (string) (
-                                        $d->status
-                                        ?? 'menunggu'
-                                    )
-                                )
-                            );
+                            $status = strtolower(trim((string) ($d->status ?? 'menunggu')));
 
                             $badgeClass =
                                 $statusBadgeClasses[$status]
                                 ?? 'border-slate-200 bg-slate-100 text-slate-600';
 
-                            $nomorSurat =
-                                $getNomorSurat($d);
-
-                            $penerimaData =
-                                $getPenerima($d);
-
-                            $instruksi =
-                                $getInstruksi($d);
-
-                            $tanggalDisposisi =
-                                $getTanggalDisposisi($d);
-
-                            $batasWaktu =
-                                $getBatasWaktu($d);
-
+                            $nomorSurat = $getNomorSurat($d);
+                            $penerimaData = $getPenerima($d);
+                            $instruksi = $getInstruksi($d);
+                            $tanggalDisposisi = $getTanggalDisposisi($d);
+                            $batasWaktu = $getBatasWaktu($d);
                             $isLate = false;
 
-                            if (
-                                $batasWaktu !== '-'
-                            ) {
+                            if ($batasWaktu !== '-') {
                                 try {
-
                                     $tanggalBatas =
-                                        data_get(
-                                            $d,
-                                            'batas_waktu'
-                                        )
-                                        ?? data_get(
-                                            $d,
-                                            'tanggal_batas'
-                                        );
+                                        data_get($d, 'batas_waktu')
+                                        ?? data_get($d, 'tanggal_batas');
 
                                     $isLate =
-                                        \Carbon\Carbon::parse(
-                                            $tanggalBatas
-                                        )->isPast()
-                                        &&
-                                        $status !== 'selesai';
-
-                                } catch (\Throwable) {
-
+                                        \Carbon\Carbon::parse($tanggalBatas)->isPast()
+                                        && $status !== 'selesai';
+                                } catch (\Throwable $e) {
                                     $isLate = false;
-
                                 }
                             }
                         @endphp
 
-                        <tr class="transition duration-150 hover:bg-slate-50/60">
+                        <tr>
 
                             {{-- NOMOR SURAT --}}
-                            <td class="px-4 py-3.5 text-slate-700 sm:px-5 sm:py-4">
-
-                                <span class="inline-block max-w-[190px] truncate font-medium"
-                                      title="{{ $nomorSurat }}">
-
+                            <td class="cell-number">
+                                <span
+                                    class="inline-block max-w-[190px] truncate"
+                                    title="{{ $nomorSurat }}"
+                                >
                                     {{ $nomorSurat }}
-
                                 </span>
-
                             </td>
 
-                            {{-- TANGGAL DISPOSISI --}}
-                            <td class="px-4 py-3.5 text-slate-500 sm:px-5 sm:py-4">
-
+                            {{-- TANGGAL --}}
+                            <td class="cell-date">
                                 {{ $tanggalDisposisi }}
-
                             </td>
 
                             {{-- PENERIMA --}}
-                            <td class="px-4 py-3.5 sm:px-5 sm:py-4">
-
+                            <td>
                                 @if($penerimaData['nama'] !== '-')
-
-                                    <div class="flex min-w-[150px] max-w-[200px] flex-col rounded-lg border border-slate-200/60 bg-slate-100 px-2.5 py-1.5"
-                                         title="{{ $penerimaData['nama'] }}{{ $penerimaData['jabatan'] ? ' - ' . $penerimaData['jabatan'] : '' }}">
-
-                                        <span class="truncate font-semibold text-slate-700">
+                                    <div
+                                        class="receiver-box"
+                                        title="{{ $penerimaData['nama'] }}{{ $penerimaData['jabatan'] ? ' - ' . $penerimaData['jabatan'] : '' }}"
+                                    >
+                                        <span class="receiver-name">
                                             {{ $penerimaData['nama'] }}
                                         </span>
 
                                         @if($penerimaData['jabatan'])
-
-                                            <span class="truncate text-[10px] text-slate-400">
+                                            <span class="receiver-position">
                                                 {{ $penerimaData['jabatan'] }}
                                             </span>
-
                                         @endif
-
                                     </div>
-
                                 @else
-
-                                    <span class="text-slate-400">
-                                        -
-                                    </span>
-
+                                    <span class="text-slate-400">-</span>
                                 @endif
-
                             </td>
 
                             {{-- INSTRUKSI --}}
-                            <td class="max-w-[260px] truncate px-4 py-3.5 font-medium text-slate-700 sm:px-5 sm:py-4"
-                                title="{{ $instruksi }}">
-
+                            <td
+                                class="cell-instruction"
+                                title="{{ $instruksi }}"
+                            >
                                 {{ $instruksi }}
-
                             </td>
 
                             {{-- STATUS --}}
-                            <td class="px-4 py-3.5 sm:px-5 sm:py-4">
-
-                                <span class="inline-flex rounded-full border px-2.5 py-1 text-[10px] font-bold {{ $badgeClass }}">
-
+                            <td class="cell-status">
+                                <span class="status-badge {{ $badgeClass }}">
                                     {{ $statusOptions[$status] ?? ucfirst($status) }}
-
                                 </span>
-
                             </td>
 
                             {{-- BATAS WAKTU --}}
-                            <td class="px-4 py-3.5 text-slate-500 sm:px-5 sm:py-4">
-
+                            <td class="cell-deadline">
                                 @if($batasWaktu !== '-')
-
                                     <span class="{{ $isLate ? 'font-semibold text-rose-600' : '' }}">
                                         {{ $batasWaktu }}
                                     </span>
-
                                 @else
-
-                                    <span class="text-slate-400">
-                                        -
-                                    </span>
-
+                                    <span class="text-slate-400">-</span>
                                 @endif
-
                             </td>
 
                             {{-- AKSI --}}
-                            <td class="px-4 py-3.5 text-center sm:px-5 sm:py-4">
+                            <td class="action-cell">
+                                <div class="action-buttons">
 
-                                <div class="inline-flex items-center gap-1">
-
-                                    {{-- DETAIL --}}
                                     @if(Route::has('disposisi.show'))
-
-                                        <a href="{{ route('disposisi.show', $d) }}"
-                                           title="Lihat Detail"
-                                           class="rounded-lg p-1.5 text-slate-400 transition hover:bg-blue-50 hover:text-blue-600">
-
-                                            <svg class="h-4 w-4"
-                                                 fill="none"
-                                                 stroke="currentColor"
-                                                 viewBox="0 0 24 24">
-
-                                                <path stroke-linecap="round"
-                                                      stroke-linejoin="round"
-                                                      stroke-width="2"
-                                                      d="M15 12a3 3 0 11-6 0a3 3 0 016 0z"/>
-
-                                                <path stroke-linecap="round"
-                                                      stroke-linejoin="round"
-                                                      stroke-width="2"
-                                                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7z"/>
-
+                                        <a
+                                            href="{{ route('disposisi.show', $d) }}"
+                                            title="Lihat Detail"
+                                            aria-label="Lihat detail disposisi"
+                                            class="action-button detail"
+                                        >
+                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0a3 3 0 016 0z"/>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7z"/>
                                             </svg>
-
                                         </a>
-
                                     @endif
 
-                                    {{-- EDIT --}}
                                     @if(
-                                        in_array(
-                                            $userRole,
-                                            ['admin', 'pimpinan'],
-                                            true
-                                        ) &&
+                                        in_array($userRole, ['admin', 'pimpinan'], true) &&
                                         Route::has('disposisi.edit')
                                     )
-
-                                        <a href="{{ route('disposisi.edit', $d) }}"
-                                           title="Ubah Disposisi"
-                                           class="rounded-lg p-1.5 text-slate-400 transition hover:bg-amber-50 hover:text-amber-600">
-
-                                            <svg class="h-4 w-4"
-                                                 fill="none"
-                                                 stroke="currentColor"
-                                                 viewBox="0 0 24 24">
-
-                                                <path stroke-linecap="round"
-                                                      stroke-linejoin="round"
-                                                      stroke-width="2"
-                                                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-
+                                        <a
+                                            href="{{ route('disposisi.edit', $d) }}"
+                                            title="Ubah Disposisi"
+                                            aria-label="Ubah disposisi"
+                                            class="action-button edit"
+                                        >
+                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                             </svg>
-
                                         </a>
-
                                     @endif
 
-                                    {{-- DELETE --}}
                                     @if(
-                                        in_array(
-                                            $userRole,
-                                            ['admin', 'pimpinan'],
-                                            true
-                                        ) &&
+                                        in_array($userRole, ['admin', 'pimpinan'], true) &&
                                         Route::has('disposisi.destroy')
                                     )
-
-                                        <form action="{{ route('disposisi.destroy', $d) }}"
-                                              method="POST"
-                                              class="delete-form inline">
-
+                                        <form
+                                            action="{{ route('disposisi.destroy', $d) }}"
+                                            method="POST"
+                                            class="delete-form inline"
+                                        >
                                             @csrf
                                             @method('DELETE')
 
-                                            <button type="button"
-                                                    title="Hapus Disposisi"
-                                                    class="delete-btn rounded-lg p-1.5 text-slate-400 transition hover:bg-rose-50 hover:text-rose-600">
-
-                                                <svg class="h-4 w-4"
-                                                     fill="none"
-                                                     stroke="currentColor"
-                                                     viewBox="0 0 24 24">
-
-                                                    <path stroke-linecap="round"
-                                                          stroke-linejoin="round"
-                                                          stroke-width="2"
-                                                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 01-1-1h-4a1 1 0 01-1 1v3M4 7h16"/>
-
+                                            <button
+                                                type="button"
+                                                title="Hapus Disposisi"
+                                                aria-label="Hapus disposisi"
+                                                class="action-button delete delete-btn"
+                                            >
+                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 01-1-1h-4a1 1 0 01-1 1v3M4 7h16"/>
                                                 </svg>
-
                                             </button>
-
                                         </form>
-
                                     @endif
 
                                 </div>
-
                             </td>
-
                         </tr>
 
                     @empty
-
                         <tr>
-
-                            <td colspan="7"
-                                class="py-10 text-center sm:py-12">
-
+                            <td colspan="7" class="disposition-table-empty">
                                 <div class="flex flex-col items-center justify-center">
 
                                     <div class="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
-
-                                        <svg class="h-5 w-5"
-                                             fill="none"
-                                             stroke="currentColor"
-                                             viewBox="0 0 24 24">
-
-                                            <path stroke-linecap="round"
-                                                  stroke-linejoin="round"
-                                                  stroke-width="2"
-                                                  d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-1.414 0l-2.414-2.414A1 1 0 006.586 13H4"/>
-
+                                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-1.414 0l-2.414-2.414A1 1 0 006.586 13H4"/>
                                         </svg>
-
                                     </div>
 
                                     <p class="text-sm font-semibold text-slate-700 sm:text-base">
@@ -1573,53 +1344,46 @@
                                     </p>
 
                                     <p class="mt-0.5 max-w-md px-4 text-[11px] text-slate-400 sm:text-xs">
-                                        Coba sesuaikan pencarian atau filter yang digunakan.
+                                        @if($hasFilters)
+                                            Tidak ada disposisi yang sesuai dengan filter yang digunakan.
+                                        @else
+                                            Belum ada data disposisi yang tersimpan.
+                                        @endif
                                     </p>
 
+                                    @if($hasFilters)
+                                        <a
+                                            href="{{ route('disposisi.index') }}"
+                                            class="mt-3 inline-flex items-center rounded-lg bg-slate-900 px-3 py-2 text-[11px] font-semibold text-white transition hover:bg-slate-800"
+                                        >
+                                            Reset Filter
+                                        </a>
+                                    @endif
+
                                 </div>
-
                             </td>
-
                         </tr>
-
                     @endforelse
-
                 </tbody>
-
             </table>
-
         </div>
 
-        {{-- PAGINATION --}}
         @if(
             isset($disposisis) &&
-            method_exists(
-                $disposisis,
-                'hasPages'
-            ) &&
+            method_exists($disposisis, 'hasPages') &&
             $disposisis->hasPages()
         )
-
-            <div class="border-t border-slate-100 px-4 py-3 sm:px-6 sm:py-4">
-
+            <div class="border-t border-slate-300 px-4 py-3 sm:px-6 sm:py-4">
                 {{ $disposisis->withQueryString()->links() }}
-
             </div>
-
         @endif
-
     </div>
-
 </div>
 
 @push('scripts')
 <script>
 (function () {
     'use strict';
-
-    /* =========================================================
-       DATE PICKER
-    ========================================================= */
 
     const months = [
         'Januari',
@@ -1646,106 +1410,44 @@
         'Min'
     ];
 
-    const dateInput =
-        document.getElementById(
-            'date-range'
-        );
+    const dateInput = document.getElementById('date-range');
+    const dariInput = document.getElementById('dari_tanggal');
+    const sampaiInput = document.getElementById('sampai_tanggal');
+    const clearDateRange = document.getElementById('clearDateRange');
 
-    const dariInput =
-        document.getElementById(
-            'dari_tanggal'
-        );
+    const datePanel = document.getElementById('datePickerPanel');
+    const dateContent = document.getElementById('datePickerContent');
+    const monthPickerView = document.getElementById('monthPickerView');
+    const yearPickerView = document.getElementById('yearPickerView');
+    const dateInfo = document.getElementById('datePickerInfo');
 
-    const sampaiInput =
-        document.getElementById(
-            'sampai_tanggal'
-        );
+    const datePrev = document.getElementById('datePrev');
+    const dateNext = document.getElementById('dateNext');
 
-    const clearDateRange =
-        document.getElementById(
-            'clearDateRange'
-        );
+    const applyPickerButton = document.getElementById('applyPickerButton');
+    const clearPickerButton = document.getElementById('clearPickerButton');
 
-    const datePanel =
-        document.getElementById(
-            'datePickerPanel'
-        );
-
-    const dateContent =
-        document.getElementById(
-            'datePickerContent'
-        );
-
-    const monthPickerView =
-        document.getElementById(
-            'monthPickerView'
-        );
-
-    const yearPickerView =
-        document.getElementById(
-            'yearPickerView'
-        );
-
-    const dateInfo =
-        document.getElementById(
-            'datePickerInfo'
-        );
-
-    const datePrev =
-        document.getElementById(
-            'datePrev'
-        );
-
-    const dateNext =
-        document.getElementById(
-            'dateNext'
-        );
-
-    const applyPickerButton =
-        document.getElementById(
-            'applyPickerButton'
-        );
-
-    const clearPickerButton =
-        document.getElementById(
-            'clearPickerButton'
-        );
+    let tempStart = parseDate(dariInput?.value);
+    let tempEnd = parseDate(sampaiInput?.value);
 
     let viewDate =
-        parseDate(
-            dariInput?.value
-        ) ||
-        parseDate(
-            sampaiInput?.value
-        ) ||
+        cloneDate(tempStart) ||
+        cloneDate(tempEnd) ||
         today();
 
-    let tempStart =
-        parseDate(
-            dariInput?.value
+    viewDate =
+        new Date(
+            viewDate.getFullYear(),
+            viewDate.getMonth(),
+            1
         );
 
-    let tempEnd =
-        parseDate(
-            sampaiInput?.value
-        );
-
-    let pickerView =
-        'calendar';
-
-    let pickerYear =
-        viewDate.getFullYear();
-
-    let pickerMonth =
-        viewDate.getMonth();
-
-    /* =========================================================
-       DATE HELPERS
-    ========================================================= */
+    let pickerView = 'calendar';
+    let pickerYear = viewDate.getFullYear();
+    let pickerMonth = viewDate.getMonth();
 
     function today() {
-        const date =
-            new Date();
+        const date = new Date();
 
         date.setHours(
             0,
@@ -1758,8 +1460,7 @@
     }
 
     function pad(number) {
-        return String(number)
-            .padStart(2, '0');
+        return String(number).padStart(2, '0');
     }
 
     function cloneDate(date) {
@@ -1771,24 +1472,6 @@
             date.getFullYear(),
             date.getMonth(),
             date.getDate()
-        );
-    }
-
-    function dateKey(date) {
-        if (!date) {
-            return '';
-        }
-
-        return (
-            date.getFullYear() +
-            '-' +
-            pad(
-                date.getMonth() + 1
-            ) +
-            '-' +
-            pad(
-                date.getDate()
-            )
         );
     }
 
@@ -1806,14 +1489,9 @@
             return null;
         }
 
-        const year =
-            Number(match[1]);
-
-        const month =
-            Number(match[2]) - 1;
-
-        const day =
-            Number(match[3]);
+        const year = Number(match[1]);
+        const month = Number(match[2]) - 1;
+        const day = Number(match[3]);
 
         const date =
             new Date(
@@ -1840,6 +1518,20 @@
         return date;
     }
 
+    function dateKey(date) {
+        if (!date) {
+            return '';
+        }
+
+        return (
+            date.getFullYear() +
+            '-' +
+            pad(date.getMonth() + 1) +
+            '-' +
+            pad(date.getDate())
+        );
+    }
+
     function formatDisplay(date) {
         if (!date) {
             return '';
@@ -1854,10 +1546,7 @@
         );
     }
 
-    function formatRange(
-        start,
-        end
-    ) {
+    function formatRange(start, end) {
         if (!start || !end) {
             return '';
         }
@@ -1869,38 +1558,30 @@
         );
     }
 
-    function isSameDay(
-        first,
-        second
-    ) {
-        return !!first &&
-            !!second &&
+    function isSameDay(first, second) {
+        return !!(
+            first &&
+            second &&
             dateKey(first) ===
-                dateKey(second);
+                dateKey(second)
+        );
     }
 
-    function isBefore(
-        first,
-        second
-    ) {
-        return dateKey(first) <
-            dateKey(second);
+    function isBefore(first, second) {
+        return (
+            dateKey(first) <
+            dateKey(second)
+        );
     }
 
-    function isAfter(
-        first,
-        second
-    ) {
-        return dateKey(first) >
-            dateKey(second);
+    function isAfter(first, second) {
+        return (
+            dateKey(first) >
+            dateKey(second)
+        );
     }
-
-    /* =========================================================
-       INPUT DISPLAY
-    ========================================================= */
 
     function updateInputDisplay() {
-
         const start =
             parseDate(
                 dariInput.value
@@ -1915,32 +1596,27 @@
             start &&
             end
         ) {
-
             dateInput.value =
                 formatRange(
                     start,
                     end
                 );
 
-            clearDateRange.style.display =
-                'flex';
-
+            clearDateRange.classList.remove('hidden');
+            clearDateRange.classList.add('flex');
         } else {
-
             dateInput.value = '';
 
-            clearDateRange.style.display =
-                'none';
+            clearDateRange.classList.remove('flex');
+            clearDateRange.classList.add('hidden');
         }
     }
 
     function updateDateInfo() {
-
         if (
             tempStart &&
             tempEnd
         ) {
-
             dateInfo.textContent =
                 formatRange(
                     tempStart,
@@ -1951,11 +1627,8 @@
         }
 
         if (tempStart) {
-
             dateInfo.textContent =
-                formatDisplay(
-                    tempStart
-                ) +
+                formatDisplay(tempStart) +
                 ' - pilih tanggal akhir';
 
             return;
@@ -1965,15 +1638,7 @@
             'Pilih tanggal mulai';
     }
 
-    /* =========================================================
-       DAY BUTTON
-    ========================================================= */
-
-    function buildDayButton(
-        date,
-        otherMonth
-    ) {
-
+    function buildDayButton(date, otherMonth) {
         const classes = [
             'archive-calendar-day'
         ];
@@ -1995,19 +1660,12 @@
             );
         }
 
-        const inRange =
+        if (
             tempStart &&
             tempEnd &&
-            !isBefore(
-                date,
-                tempStart
-            ) &&
-            !isAfter(
-                date,
-                tempEnd
-            );
-
-        if (inRange) {
+            !isBefore(date, tempStart) &&
+            !isAfter(date, tempEnd)
+        ) {
             classes.push(
                 'in-range'
             );
@@ -2045,18 +1703,9 @@
         `;
     }
 
-    /* =========================================================
-       CALENDAR
-    ========================================================= */
-
-    function renderCalendar(
-        year,
-        month
-    ) {
-
+    function renderCalendar(year, month) {
         let html = `
             <div class="archive-date-month">
-
                 <div class="archive-month-header">
 
                     <button
@@ -2064,22 +1713,11 @@
                         data-action="month"
                         data-month="${month}"
                         data-year="${year}">
-
                         ${months[month]}
 
-                        <svg class="h-3 w-3"
-                             fill="none"
-                             stroke="currentColor"
-                             viewBox="0 0 24 24">
-
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M19 9l-7 7-7-7"/>
-
+                        <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
-
                     </button>
 
                     <button
@@ -2087,22 +1725,11 @@
                         data-action="year"
                         data-month="${month}"
                         data-year="${year}">
-
                         ${year}
 
-                        <svg class="h-3 w-3"
-                             fill="none"
-                             stroke="currentColor"
-                             viewBox="0 0 24 24">
-
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M19 9l-7 7-7-7"/>
-
+                        <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
-
                     </button>
 
                 </div>
@@ -2110,17 +1737,13 @@
                 <div class="archive-month-grid">
         `;
 
-        weekdays.forEach(
-            function (day) {
-
-                html += `
-                    <div class="archive-calendar-weekday">
-                        ${day}
-                    </div>
-                `;
-
-            }
-        );
+        weekdays.forEach(function (day) {
+            html += `
+                <div class="archive-calendar-weekday">
+                    ${day}
+                </div>
+            `;
+        });
 
         const firstDay =
             new Date(
@@ -2149,16 +1772,11 @@
                 0
             ).getDate();
 
-        /*
-         * Hari dari bulan sebelumnya.
-         */
         for (
-            let index =
-                firstWeekday - 1;
+            let index = firstWeekday - 1;
             index >= 0;
             index--
         ) {
-
             const day =
                 daysInPreviousMonth -
                 index;
@@ -2177,15 +1795,11 @@
                 );
         }
 
-        /*
-         * Hari bulan aktif.
-         */
         for (
             let day = 1;
             day <= daysInMonth;
             day++
         ) {
-
             const date =
                 new Date(
                     year,
@@ -2200,9 +1814,6 @@
                 );
         }
 
-        /*
-         * Hari bulan berikutnya.
-         */
         const totalDays =
             firstWeekday +
             daysInMonth;
@@ -2211,7 +1822,8 @@
             (
                 7 -
                 (
-                    totalDays % 7
+                    totalDays %
+                    7
                 )
             ) % 7;
 
@@ -2220,7 +1832,6 @@
             day <= remaining;
             day++
         ) {
-
             const date =
                 new Date(
                     year,
@@ -2244,103 +1855,84 @@
     }
 
     function bindCalendarEvents() {
-
         dateContent
-            .querySelectorAll(
-                '[data-date]'
-            )
-            .forEach(
-                function (button) {
+            .querySelectorAll('[data-date]')
+            .forEach(function (button) {
+                button.addEventListener(
+                    'click',
+                    function (event) {
+                        event.preventDefault();
+                        event.stopPropagation();
 
-                    button.addEventListener(
-                        'click',
-                        function (event) {
-
-                            event.preventDefault();
-                            event.stopPropagation();
-
-                            const selectedDate =
-                                parseDate(
-                                    this.dataset.date
-                                );
-
-                            selectDate(
-                                selectedDate
-                            );
-                        }
-                    );
-                }
-            );
+                        selectDate(
+                            parseDate(
+                                this.dataset.date
+                            )
+                        );
+                    }
+                );
+            });
 
         dateContent
             .querySelectorAll(
                 '[data-action="month"]'
             )
-            .forEach(
-                function (button) {
+            .forEach(function (button) {
+                button.addEventListener(
+                    'click',
+                    function (event) {
+                        event.preventDefault();
+                        event.stopPropagation();
 
-                    button.addEventListener(
-                        'click',
-                        function (event) {
+                        pickerMonth =
+                            Number(
+                                this.dataset.month
+                            );
 
-                            event.preventDefault();
-                            event.stopPropagation();
+                        pickerYear =
+                            Number(
+                                this.dataset.year
+                            );
 
-                            pickerMonth =
-                                Number(
-                                    this.dataset.month
-                                );
+                        pickerView =
+                            'month';
 
-                            pickerYear =
-                                Number(
-                                    this.dataset.year
-                                );
-
-                            pickerView =
-                                'month';
-
-                            renderPicker();
-                        }
-                    );
-                }
-            );
+                        renderPicker();
+                    }
+                );
+            });
 
         dateContent
             .querySelectorAll(
                 '[data-action="year"]'
             )
-            .forEach(
-                function (button) {
+            .forEach(function (button) {
+                button.addEventListener(
+                    'click',
+                    function (event) {
+                        event.preventDefault();
+                        event.stopPropagation();
 
-                    button.addEventListener(
-                        'click',
-                        function (event) {
+                        pickerMonth =
+                            Number(
+                                this.dataset.month
+                            );
 
-                            event.preventDefault();
-                            event.stopPropagation();
+                        pickerYear =
+                            Number(
+                                this.dataset.year
+                            );
 
-                            pickerMonth =
-                                Number(
-                                    this.dataset.month
-                                );
+                        pickerView =
+                            'year';
 
-                            pickerYear =
-                                Number(
-                                    this.dataset.year
-                                );
-
-                            pickerView =
-                                'year';
-
-                            renderPicker();
-                        }
-                    );
-                }
-            );
+                        renderPicker();
+                    }
+                );
+            });
     }
 
     function renderCalendarView() {
-
         dateContent.classList.remove(
             'hidden'
         );
@@ -2377,16 +1969,10 @@
             );
 
         bindCalendarEvents();
-
         updateDateInfo();
     }
 
-    /* =========================================================
-       MONTH PICKER
-    ========================================================= */
-
     function renderMonthPicker() {
-
         dateContent.classList.add(
             'hidden'
         );
@@ -2401,34 +1987,25 @@
 
         monthPickerView.innerHTML = `
             <div class="archive-picker-toolbar">
-
-                <span>
-                    ${pickerYear}
-                </span>
-
+                <span>${pickerYear}</span>
             </div>
 
             <div class="archive-picker-grid">
+                ${months.map(function (month, index) {
+                    const active =
+                        index === pickerMonth
+                            ? 'active'
+                            : '';
 
-                ${months.map(
-                    function(month, index) {
-
-                        const active =
-                            index === pickerMonth
-                                ? 'active'
-                                : '';
-
-                        return `
-                            <button
-                                type="button"
-                                class="archive-picker-item ${active}"
-                                data-picker-month="${index}">
-                                ${month}
-                            </button>
-                        `;
-                    }
-                ).join('')}
-
+                    return `
+                        <button
+                            type="button"
+                            class="archive-picker-item ${active}"
+                            data-picker-month="${index}">
+                            ${month}
+                        </button>
+                    `;
+                }).join('')}
             </div>
         `;
 
@@ -2436,48 +2013,38 @@
             .querySelectorAll(
                 '[data-picker-month]'
             )
-            .forEach(
-                function (button) {
+            .forEach(function (button) {
+                button.addEventListener(
+                    'click',
+                    function (event) {
+                        event.preventDefault();
+                        event.stopPropagation();
 
-                    button.addEventListener(
-                        'click',
-                        function (event) {
+                        const month =
+                            Number(
+                                this.dataset.pickerMonth
+                            );
 
-                            event.preventDefault();
-                            event.stopPropagation();
+                        viewDate =
+                            new Date(
+                                pickerYear,
+                                month,
+                                1
+                            );
 
-                            const month =
-                                Number(
-                                    this.dataset
-                                        .pickerMonth
-                                );
+                        pickerMonth =
+                            month;
 
-                            viewDate =
-                                new Date(
-                                    pickerYear,
-                                    month,
-                                    1
-                                );
+                        pickerView =
+                            'calendar';
 
-                            pickerMonth =
-                                month;
-
-                            pickerView =
-                                'calendar';
-
-                            renderPicker();
-                        }
-                    );
-                }
-            );
+                        renderPicker();
+                    }
+                );
+            });
     }
 
-    /* =========================================================
-       YEAR PICKER
-    ========================================================= */
-
     function renderYearPicker() {
-
         dateContent.classList.add(
             'hidden'
         );
@@ -2492,10 +2059,7 @@
 
         const startYear =
             Math.floor(
-                (
-                    pickerYear -
-                    2000
-                ) / 12
+                (pickerYear - 2000) / 12
             ) * 12 + 2000;
 
         const endYear =
@@ -2503,15 +2067,8 @@
 
         let html = `
             <div class="archive-year-toolbar">
-
                 <div class="archive-year-nav">
-
-                    <button
-                        type="button"
-                        id="yearPrev">
-                        ‹
-                    </button>
-
+                    <button type="button" id="yearPrev">‹</button>
                 </div>
 
                 <span class="archive-year-range">
@@ -2519,15 +2076,8 @@
                 </span>
 
                 <div class="archive-year-nav">
-
-                    <button
-                        type="button"
-                        id="yearNext">
-                        ›
-                    </button>
-
+                    <button type="button" id="yearNext">›</button>
                 </div>
-
             </div>
 
             <div class="archive-picker-grid">
@@ -2538,7 +2088,6 @@
             year <= endYear;
             year++
         ) {
-
             const active =
                 year === pickerYear
                     ? 'active'
@@ -2562,13 +2111,10 @@
             html;
 
         document
-            .getElementById(
-                'yearPrev'
-            )
+            .getElementById('yearPrev')
             ?.addEventListener(
                 'click',
                 function (event) {
-
                     event.preventDefault();
                     event.stopPropagation();
 
@@ -2580,13 +2126,10 @@
             );
 
         document
-            .getElementById(
-                'yearNext'
-            )
+            .getElementById('yearNext')
             ?.addEventListener(
                 'click',
                 function (event) {
-
                     event.preventDefault();
                     event.stopPropagation();
 
@@ -2601,49 +2144,39 @@
             .querySelectorAll(
                 '[data-picker-year]'
             )
-            .forEach(
-                function (button) {
+            .forEach(function (button) {
+                button.addEventListener(
+                    'click',
+                    function (event) {
+                        event.preventDefault();
+                        event.stopPropagation();
 
-                    button.addEventListener(
-                        'click',
-                        function (event) {
+                        pickerYear =
+                            Number(
+                                this.dataset
+                                    .pickerYear
+                            );
 
-                            event.preventDefault();
-                            event.stopPropagation();
+                        viewDate =
+                            new Date(
+                                pickerYear,
+                                pickerMonth,
+                                1
+                            );
 
-                            pickerYear =
-                                Number(
-                                    this.dataset
-                                        .pickerYear
-                                );
+                        pickerView =
+                            'calendar';
 
-                            viewDate =
-                                new Date(
-                                    pickerYear,
-                                    pickerMonth,
-                                    1
-                                );
-
-                            pickerView =
-                                'calendar';
-
-                            renderPicker();
-                        }
-                    );
-                }
-            );
+                        renderPicker();
+                    }
+                );
+            });
     }
 
-    /* =========================================================
-       RENDER PICKER
-    ========================================================= */
-
     function renderPicker() {
-
         if (
             pickerView === 'month'
         ) {
-
             datePrev.style.visibility =
                 'hidden';
 
@@ -2651,14 +2184,12 @@
                 'hidden';
 
             renderMonthPicker();
-
             return;
         }
 
         if (
             pickerView === 'year'
         ) {
-
             datePrev.style.visibility =
                 'hidden';
 
@@ -2666,7 +2197,6 @@
                 'hidden';
 
             renderYearPicker();
-
             return;
         }
 
@@ -2679,69 +2209,40 @@
         renderCalendarView();
     }
 
-    /* =========================================================
-       SELECT DATE
-    ========================================================= */
-
     function selectDate(date) {
-
         if (!date) {
             return;
         }
 
-        /*
-         * Klik pertama:
-         * menentukan tanggal mulai.
-         */
         if (
             !tempStart ||
             tempEnd
         ) {
-
             tempStart =
                 cloneDate(date);
 
             tempEnd =
                 null;
-
-        }
-
-        /*
-         * Klik kedua:
-         * menentukan tanggal akhir.
-         */
-        else {
-
+        } else {
             if (
                 isBefore(
                     date,
                     tempStart
                 )
             ) {
-
                 tempEnd =
                     cloneDate(
                         tempStart
                     );
 
                 tempStart =
-                    cloneDate(
-                        date
-                    );
-
+                    cloneDate(date);
             } else {
-
                 tempEnd =
-                    cloneDate(
-                        date
-                    );
+                    cloneDate(date);
             }
         }
 
-        /*
-         * Pindah ke bulan
-         * tanggal yang diklik.
-         */
         viewDate =
             new Date(
                 date.getFullYear(),
@@ -2758,28 +2259,13 @@
         pickerView =
             'calendar';
 
-        /*
-         * Penting:
-         * panel TIDAK ditutup.
-         *
-         * Jadi user dapat klik tanggal
-         * kedua untuk membuat range.
-         */
         renderPicker();
         updateDateInfo();
     }
 
-    /* =========================================================
-       OPEN DATE PICKER
-    ========================================================= */
-
     function openDatePicker() {
-
         closeStatusDropdownPanel();
 
-        /*
-         * Ambil nilai yang sudah diterapkan.
-         */
         tempStart =
             parseDate(
                 dariInput.value
@@ -2819,12 +2305,7 @@
         updateDateInfo();
     }
 
-    /* =========================================================
-       CLOSE DATE PICKER
-    ========================================================= */
-
     function closeDatePicker() {
-
         datePanel.classList.add(
             'hidden'
         );
@@ -2833,30 +2314,19 @@
             'calendar';
     }
 
-    /* =========================================================
-       WARNING
-    ========================================================= */
-
-    function showWarning(
-        title,
-        text
-    ) {
-
+    function showWarning(title, text) {
         if (
-            typeof Swal !== 'undefined'
+            typeof Swal !==
+            'undefined'
         ) {
-
             Swal.fire({
                 icon: 'warning',
                 title,
                 text,
-                confirmButtonText:
-                    'Mengerti',
-                confirmButtonColor:
-                    '#2563eb',
+                confirmButtonText: 'Mengerti',
+                confirmButtonColor: '#2563eb',
                 customClass: {
-                    popup:
-                        'rounded-2xl',
+                    popup: 'rounded-2xl',
                     confirmButton:
                         'rounded-xl text-xs font-semibold px-4 py-2.5'
                 }
@@ -2868,17 +2338,11 @@
         alert(text);
     }
 
-    /* =========================================================
-       APPLY RANGE
-    ========================================================= */
-
     function applyDateRange() {
-
         if (
             !tempStart ||
             !tempEnd
         ) {
-
             showWarning(
                 'Tanggal belum lengkap',
                 'Pilih tanggal mulai dan tanggal akhir terlebih dahulu.'
@@ -2893,7 +2357,6 @@
                 tempEnd
             )
         ) {
-
             const oldStart =
                 cloneDate(
                     tempStart
@@ -2915,26 +2378,32 @@
             dateKey(tempEnd);
 
         updateInputDisplay();
-
         closeDatePicker();
     }
 
-    /* =========================================================
-       CLEAR RANGE
-    ========================================================= */
-
     function clearDateValue() {
+        tempStart =
+            null;
 
-        tempStart = null;
-        tempEnd = null;
+        tempEnd =
+            null;
 
-        dariInput.value = '';
-        sampaiInput.value = '';
+        dariInput.value =
+            '';
 
-        dateInput.value = '';
+        sampaiInput.value =
+            '';
 
-        clearDateRange.style.display =
-            'none';
+        dateInput.value =
+            '';
+
+        clearDateRange.classList.remove(
+            'flex'
+        );
+
+        clearDateRange.classList.add(
+            'hidden'
+        );
 
         viewDate =
             new Date(
@@ -2956,18 +2425,9 @@
         updateDateInfo();
     }
 
-    /* =========================================================
-       DATE INPUT CLICK
-       =========================================================
-       HANYA menggunakan CLICK.
-       Tidak menggunakan FOCUS agar tidak
-       terjadi buka -> tutup.
-    ========================================================= */
-
     dateInput?.addEventListener(
         'click',
         function (event) {
-
             event.preventDefault();
             event.stopPropagation();
 
@@ -2976,41 +2436,26 @@
                     'hidden'
                 )
             ) {
-
                 openDatePicker();
-
             } else {
-
                 closeDatePicker();
-
             }
         }
     );
 
-    /* =========================================================
-       CLEAR DATE
-    ========================================================= */
-
     clearDateRange?.addEventListener(
         'click',
         function (event) {
-
             event.preventDefault();
             event.stopPropagation();
 
             clearDateValue();
-
         }
     );
-
-    /* =========================================================
-       PREVIOUS MONTH
-    ========================================================= */
 
     datePrev?.addEventListener(
         'click',
         function (event) {
-
             event.preventDefault();
             event.stopPropagation();
 
@@ -3035,18 +2480,12 @@
                 viewDate.getMonth();
 
             renderPicker();
-
         }
     );
-
-    /* =========================================================
-       NEXT MONTH
-    ========================================================= */
 
     dateNext?.addEventListener(
         'click',
         function (event) {
-
             event.preventDefault();
             event.stopPropagation();
 
@@ -3071,52 +2510,32 @@
                 viewDate.getMonth();
 
             renderPicker();
-
         }
     );
-
-    /* =========================================================
-       APPLY BUTTON
-    ========================================================= */
 
     applyPickerButton?.addEventListener(
         'click',
         function (event) {
-
             event.preventDefault();
             event.stopPropagation();
 
             applyDateRange();
-
         }
     );
-
-    /* =========================================================
-       CLEAR BUTTON
-    ========================================================= */
 
     clearPickerButton?.addEventListener(
         'click',
         function (event) {
-
             event.preventDefault();
             event.stopPropagation();
 
             clearDateValue();
-
         }
     );
 
-    /* =========================================================
-       INITIALIZE DATE PICKER
-    ========================================================= */
-
-    updateInputDisplay();
-    updateDateInfo();
-
-    /* =========================================================
+    /* ==========================================================================
        STATUS DROPDOWN
-    ========================================================= */
+       ========================================================================== */
 
     const statusDropdownButton =
         document.getElementById(
@@ -3171,7 +2590,6 @@
         );
 
     function openStatusDropdownPanel() {
-
         closeDatePicker();
 
         statusDropdownPanel.classList.remove(
@@ -3186,7 +2604,6 @@
     }
 
     function closeStatusDropdownPanel() {
-
         statusDropdownPanel.classList.add(
             'hidden'
         );
@@ -3197,17 +2614,14 @@
     }
 
     function updateStatusSummary() {
-
         const checked =
             statusCheckboxes
                 .filter(
-                    function (checkbox) {
-                        return checkbox.checked;
-                    }
+                    checkbox =>
+                        checkbox.checked
                 )
                 .map(
-                    function (checkbox) {
-
+                    checkbox => {
                         const label =
                             checkbox.parentElement
                                 ?.querySelector(
@@ -3217,7 +2631,6 @@
                         return label
                             ? label.textContent.trim()
                             : '';
-
                     }
                 )
                 .filter(Boolean);
@@ -3226,13 +2639,14 @@
             checked.length;
 
         statusCount.textContent =
-            count + ' dipilih';
+            count +
+            ' dipilih';
 
         statusPanelCount.textContent =
-            count + ' dipilih';
+            count +
+            ' dipilih';
 
-        if (count === 0) {
-
+        if (!count) {
             statusSummary.textContent =
                 'Semua status';
 
@@ -3240,7 +2654,6 @@
         }
 
         if (count === 1) {
-
             statusSummary.textContent =
                 checked[0];
 
@@ -3253,7 +2666,10 @@
                 .join(', ') +
             (
                 count > 2
-                    ? ' +' + (count - 2)
+                    ? ' +' +
+                        (
+                            count - 2
+                        )
                     : ''
             );
     }
@@ -3261,7 +2677,6 @@
     statusDropdownButton?.addEventListener(
         'click',
         function (event) {
-
             event.preventDefault();
             event.stopPropagation();
 
@@ -3270,92 +2685,77 @@
                     'hidden'
                 )
             ) {
-
                 openStatusDropdownPanel();
-
             } else {
-
                 closeStatusDropdownPanel();
-
             }
         }
     );
 
     statusCheckboxes.forEach(
-        function (checkbox) {
-
+        checkbox => {
             checkbox.addEventListener(
                 'change',
                 updateStatusSummary
             );
-
         }
     );
 
     selectAllStatus?.addEventListener(
         'click',
         function (event) {
-
             event.preventDefault();
             event.stopPropagation();
 
             statusCheckboxes.forEach(
-                function (checkbox) {
+                checkbox => {
                     checkbox.checked = true;
                 }
             );
 
             updateStatusSummary();
-
         }
     );
 
     clearAllStatus?.addEventListener(
         'click',
         function (event) {
-
             event.preventDefault();
             event.stopPropagation();
 
             statusCheckboxes.forEach(
-                function (checkbox) {
+                checkbox => {
                     checkbox.checked = false;
                 }
             );
 
             updateStatusSummary();
-
         }
     );
 
     closeStatusDropdown?.addEventListener(
         'click',
         function (event) {
-
             event.preventDefault();
             event.stopPropagation();
 
             closeStatusDropdownPanel();
-
         }
     );
 
-    /* =========================================================
+    /* ==========================================================================
        CLICK OUTSIDE
-    ========================================================= */
+       ========================================================================== */
 
     document.addEventListener(
         'click',
         function (event) {
-
             if (
                 !event.target.closest(
                     '.archive-date-picker'
                 )
             ) {
-
                 closeDatePicker();
-
             }
 
             if (
@@ -3363,26 +2763,20 @@
                     '.archive-status-dropdown'
                 )
             ) {
-
                 closeStatusDropdownPanel();
-
             }
-
         }
     );
 
-    /* =========================================================
-       FILTER SUBMIT
-    ========================================================= */
+    /* ==========================================================================
+       FILTER VALIDATION
+       ========================================================================== */
 
     document
-        .getElementById(
-            'filterForm'
-        )
+        .getElementById('filterForm')
         ?.addEventListener(
             'submit',
             function (event) {
-
                 const start =
                     parseDate(
                         dariInput.value
@@ -3393,9 +2787,6 @@
                         sampaiInput.value
                     );
 
-                /*
-                 * Tidak menggunakan tanggal.
-                 */
                 if (
                     !start &&
                     !end
@@ -3403,14 +2794,10 @@
                     return;
                 }
 
-                /*
-                 * Hanya salah satu tanggal diisi.
-                 */
                 if (
                     !start ||
                     !end
                 ) {
-
                     event.preventDefault();
 
                     showWarning(
@@ -3421,137 +2808,104 @@
                     return;
                 }
 
-                /*
-                 * Tanggal awal > tanggal akhir.
-                 */
                 if (
                     isAfter(
                         start,
                         end
                     )
                 ) {
-
                     event.preventDefault();
 
                     showWarning(
                         'Rentang tanggal tidak valid',
                         'Tanggal mulai tidak boleh lebih besar dari tanggal akhir.'
                     );
-
                 }
             }
         );
 
-    /* =========================================================
+    /* ==========================================================================
        DELETE CONFIRMATION
-    ========================================================= */
+       ========================================================================== */
 
-    function initializeDeleteConfirmation() {
+    document
+        .querySelectorAll('.delete-btn')
+        .forEach(
+            function (button) {
+                button.addEventListener(
+                    'click',
+                    function (event) {
+                        event.preventDefault();
+                        event.stopPropagation();
 
-        document
-            .querySelectorAll(
-                '.delete-btn'
-            )
-            .forEach(
-                function (button) {
+                        const form =
+                            this.closest(
+                                '.delete-form'
+                            );
 
-                    button.addEventListener(
-                        'click',
-                        function (event) {
-
-                            event.preventDefault();
-                            event.stopPropagation();
-
-                            const form =
-                                this.closest(
-                                    '.delete-form'
-                                );
-
-                            if (!form) {
-                                return;
-                            }
-
-                            if (
-                                typeof Swal !==
-                                'undefined'
-                            ) {
-
-                                Swal.fire({
-                                    title:
-                                        'Hapus Disposisi?',
-
-                                    text:
-                                        'Data disposisi akan dipindahkan ke tempat sampah.',
-
-                                    icon:
-                                        'warning',
-
-                                    showCancelButton:
-                                        true,
-
-                                    confirmButtonColor:
-                                        '#ef4444',
-
-                                    cancelButtonColor:
-                                        '#64748b',
-
-                                    confirmButtonText:
-                                        'Ya, Hapus!',
-
-                                    cancelButtonText:
-                                        'Batal',
-
-                                    reverseButtons:
-                                        true,
-
-                                    customClass: {
-                                        popup:
-                                            'rounded-2xl',
-
-                                        confirmButton:
-                                            'rounded-xl text-xs font-semibold px-4 py-2.5',
-
-                                        cancelButton:
-                                            'rounded-xl text-xs font-semibold px-4 py-2.5'
-                                    }
-
-                                }).then(
-                                    function (result) {
-
-                                        if (
-                                            result.isConfirmed
-                                        ) {
-
-                                            form.submit();
-
-                                        }
-
-                                    }
-                                );
-
-                            } else {
-
-                                if (
-                                    confirm(
-                                        'Yakin ingin menghapus disposisi ini?'
-                                    )
-                                ) {
-
-                                    form.submit();
-
-                                }
-
-                            }
+                        if (!form) {
+                            return;
                         }
-                    );
-                }
-            );
-    }
 
+                        if (
+                            typeof Swal !==
+                            'undefined'
+                        ) {
+                            Swal.fire({
+                                title:
+                                    'Hapus Disposisi?',
+                                text:
+                                    'Data disposisi akan dipindahkan ke tempat sampah.',
+                                icon:
+                                    'warning',
+                                showCancelButton:
+                                    true,
+                                confirmButtonColor:
+                                    '#ef4444',
+                                cancelButtonColor:
+                                    '#64748b',
+                                confirmButtonText:
+                                    'Ya, Hapus!',
+                                cancelButtonText:
+                                    'Batal',
+                                reverseButtons:
+                                    true,
+                                customClass: {
+                                    popup:
+                                        'rounded-2xl',
+                                    confirmButton:
+                                        'rounded-xl text-xs font-semibold px-4 py-2.5',
+                                    cancelButton:
+                                        'rounded-xl text-xs font-semibold px-4 py-2.5'
+                                }
+                            }).then(
+                                function (result) {
+                                    if (
+                                        result.isConfirmed
+                                    ) {
+                                        form.submit();
+                                    }
+                                }
+                            );
+
+                            return;
+                        }
+
+                        if (
+                            window.confirm(
+                                'Yakin ingin menghapus disposisi ini?'
+                            )
+                        ) {
+                            form.submit();
+                        }
+                    }
+                );
+            }
+        );
+
+    updateInputDisplay();
+    updateDateInfo();
     updateStatusSummary();
-
-    initializeDeleteConfirmation();
-
 })();
 </script>
 

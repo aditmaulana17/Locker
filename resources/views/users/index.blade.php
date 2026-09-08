@@ -5,18 +5,9 @@
 @section('content')
 
 @php
-    $roleFilter = strtolower(
-        trim(
-            (string) request('role', '')
-        )
-    );
+    $roleFilter = strtolower(trim((string) request('role', '')));
 
-    /*
-     * Database menggunakan:
-     * admin
-     * pimpinan
-     * staff
-     */
+    // Database: admin, pimpinan, staff
     if ($roleFilter === 'staf') {
         $roleFilter = 'staff';
     }
@@ -25,10 +16,10 @@
 <div class="space-y-4 pb-12 sm:space-y-6">
 
     {{-- ============================================================
-       HEADER
+         HEADER
     ============================================================ --}}
-    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
 
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
         <div class="min-w-0">
             <h1 class="text-xl font-bold tracking-tight text-slate-800 sm:text-2xl">
                 Manajemen Pengguna
@@ -41,7 +32,7 @@
 
         <a
             href="{{ route('users.create') }}"
-            class="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-semibold text-white shadow-md shadow-blue-500/20 transition-all duration-200 hover:bg-blue-700 sm:w-auto sm:text-sm"
+            class="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-blue-700 sm:w-auto sm:text-sm"
         >
             <svg
                 class="h-4 w-4 sm:h-5 sm:w-5"
@@ -58,24 +49,21 @@
 
             <span>Tambah Pengguna</span>
         </a>
-
     </div>
 
-
     {{-- ============================================================
-       FILTER & PENCARIAN
+         FILTER & PENCARIAN
     ============================================================ --}}
-    <div class="rounded-xl border border-slate-200/80 bg-white p-3 shadow-sm sm:rounded-2xl sm:p-4">
 
+    <div class="rounded-2xl border border-slate-300 bg-white p-3 shadow-sm sm:p-4">
         <form
             method="GET"
             action="{{ route('users.index') }}"
-            class="flex flex-col gap-2.5 md:flex-row md:items-center sm:gap-3"
+            class="flex flex-col gap-2.5 sm:gap-3 md:flex-row md:items-center"
         >
 
             {{-- SEARCH --}}
             <div class="relative w-full flex-1">
-
                 <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
                     <svg
                         class="h-4 w-4"
@@ -102,25 +90,21 @@
                     name="search"
                     value="{{ request('search') }}"
                     placeholder="Cari nama, email, atau jabatan..."
-                    class="w-full rounded-xl border border-slate-200 bg-slate-50/50 py-2 pl-10 pr-4 text-xs text-slate-800 placeholder-slate-400 transition-all duration-150 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10 sm:py-2.5 sm:text-sm"
+                    autocomplete="off"
+                    class="h-11 w-full rounded-xl border border-slate-300 bg-slate-50 px-3.5 pl-10 text-xs text-slate-800 outline-none transition-all placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 sm:text-sm"
                 >
-
             </div>
-
 
             {{-- ROLE + BUTTON --}}
             <div class="flex w-full items-center gap-2 md:w-auto">
 
                 <div class="min-w-0 flex-1 md:w-48">
-
                     <select
                         name="role"
                         onchange="this.form.submit()"
-                        class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2 text-xs font-medium text-slate-700 transition-all focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10 sm:py-2.5 sm:text-sm"
+                        class="h-11 w-full rounded-xl border border-slate-300 bg-slate-50 px-3.5 text-xs font-medium text-slate-700 outline-none transition-all focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 sm:text-sm"
                     >
-                        <option value="">
-                            Semua Role
-                        </option>
+                        <option value="">Semua Role</option>
 
                         <option
                             value="admin"
@@ -143,83 +127,69 @@
                             Staf
                         </option>
                     </select>
-
                 </div>
-
 
                 <button
                     type="submit"
-                    class="shrink-0 rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-slate-800 sm:px-5 sm:py-2.5 sm:text-sm"
+                    class="h-11 shrink-0 rounded-xl bg-slate-900 px-4 text-xs font-semibold text-white shadow-sm transition hover:bg-slate-800 sm:px-5 sm:text-sm"
                 >
                     Cari
                 </button>
 
-
                 @if(request('search') || request('role'))
-
                     <a
                         href="{{ route('users.index') }}"
-                        class="shrink-0 rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-center text-xs font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50 sm:px-4 sm:py-2.5 sm:text-sm"
+                        class="inline-flex h-11 shrink-0 items-center justify-center rounded-xl border border-slate-300 bg-slate-100 px-3.5 text-xs font-semibold text-slate-600 shadow-sm transition hover:bg-slate-200 sm:px-4 sm:text-sm"
                     >
                         Reset
                     </a>
-
                 @endif
 
             </div>
-
         </form>
-
     </div>
 
-
     {{-- ============================================================
-       TABLE
+         TABLE
     ============================================================ --}}
-    <div class="overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm sm:rounded-2xl">
 
-        <div class="overflow-x-auto">
+    <div class="users-table-wrapper">
 
-            <table class="w-full min-w-[680px] border-collapse text-left">
+        <div class="users-table-scroll">
+
+            <table class="users-table">
 
                 <thead>
-
-                    <tr class="border-b border-slate-200/80 bg-slate-50/80 text-[10px] font-bold uppercase tracking-wider text-slate-500 sm:text-[11px]">
-
-                        <th class="px-4 py-3 sm:px-6 sm:py-3.5">
+                    <tr>
+                        <th class="user-column">
                             Pengguna
                         </th>
 
-                        <th class="px-4 py-3 sm:px-6 sm:py-3.5">
+                        <th>
                             Role
                         </th>
 
-                        <th class="px-4 py-3 sm:px-6 sm:py-3.5">
+                        <th>
                             Jabatan
                         </th>
 
-                        <th class="px-4 py-3 sm:px-6 sm:py-3.5">
+                        <th>
                             Status
                         </th>
 
-                        <th class="px-4 py-3 text-right sm:px-6 sm:py-3.5">
+                        <th class="text-center action-column">
                             Aksi
                         </th>
-
                     </tr>
-
                 </thead>
 
-
-                <tbody class="divide-y divide-slate-100 text-xs sm:text-sm">
+                <tbody>
 
                     @forelse($users as $user)
 
                         @php
                             $userRole = strtolower(
-                                trim(
-                                    (string) ($user->role ?? '')
-                                )
+                                trim((string) ($user->role ?? ''))
                             );
 
                             $userName = trim(
@@ -246,63 +216,53 @@
                             );
                         @endphp
 
+                        <tr>
 
-                        <tr class="transition-colors duration-150 hover:bg-slate-50/60">
-
-                            {{-- =================================================
-                               PENGGUNA
-                            ================================================= --}}
-                            <td class="px-4 py-3 sm:px-6 sm:py-4">
-
+                            {{-- PENGGUNA --}}
+                            <td>
                                 <div class="flex items-center gap-2.5 sm:gap-3">
 
-                                    <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-blue-200/60 bg-blue-50 text-xs font-bold text-blue-600 shadow-sm sm:h-10 sm:w-10 sm:text-sm">
+                                    <div class="user-avatar">
                                         {{ $avatarText }}
                                     </div>
 
-                                    <div class="flex min-w-0 flex-col">
-
-                                        <span class="truncate font-bold leading-snug text-slate-800">
+                                    <div class="min-w-0">
+                                        <div class="user-name">
                                             {{ $user->name ?? '-' }}
-                                        </span>
+                                        </div>
 
-                                        <span class="truncate text-[11px] font-medium text-slate-400 sm:text-xs">
+                                        <div class="user-email">
                                             {{ $user->email ?? '-' }}
-                                        </span>
-
+                                        </div>
                                     </div>
 
                                 </div>
-
                             </td>
 
-
-                            {{-- =================================================
-                               ROLE
-                            ================================================= --}}
-                            <td class="whitespace-nowrap px-4 py-3 sm:px-6 sm:py-4">
+                            {{-- ROLE --}}
+                            <td class="whitespace-nowrap">
 
                                 @if($userRole === 'admin')
 
-                                    <span class="inline-flex items-center rounded-lg border border-purple-200/60 bg-purple-50 px-2.5 py-1 text-[11px] font-semibold text-purple-700 sm:text-xs">
+                                    <span class="user-role admin">
                                         Admin
                                     </span>
 
                                 @elseif($userRole === 'pimpinan')
 
-                                    <span class="inline-flex items-center rounded-lg border border-amber-200/60 bg-amber-50 px-2.5 py-1 text-[11px] font-semibold text-amber-700 sm:text-xs">
+                                    <span class="user-role pimpinan">
                                         Pimpinan
                                     </span>
 
                                 @elseif(in_array($userRole, ['staff', 'staf'], true))
 
-                                    <span class="inline-flex items-center rounded-lg border border-blue-200/60 bg-blue-50 px-2.5 py-1 text-[11px] font-semibold text-blue-700 sm:text-xs">
+                                    <span class="user-role staff">
                                         Staf
                                     </span>
 
                                 @else
 
-                                    <span class="inline-flex items-center rounded-lg border border-slate-200/80 bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-600 sm:text-xs">
+                                    <span class="user-role default">
                                         {{ ucfirst($userRole ?: 'User') }}
                                     </span>
 
@@ -310,57 +270,42 @@
 
                             </td>
 
-
-                            {{-- =================================================
-                               JABATAN
-                            ================================================= --}}
-                            <td class="whitespace-nowrap px-4 py-3 font-medium text-slate-600 sm:px-6 sm:py-4">
+                            {{-- JABATAN --}}
+                            <td class="whitespace-nowrap user-position">
                                 {{ $user->jabatan ?? '-' }}
                             </td>
 
-
-                            {{-- =================================================
-                               STATUS
-                            ================================================= --}}
-                            <td class="whitespace-nowrap px-4 py-3 sm:px-6 sm:py-4">
+                            {{-- STATUS --}}
+                            <td class="whitespace-nowrap">
 
                                 @if($isActive)
 
-                                    <span class="inline-flex items-center gap-1.5 rounded-full border border-emerald-200/60 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700 sm:text-xs">
-
-                                        <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-
+                                    <span class="user-status active">
+                                        <span class="status-dot"></span>
                                         <span>Aktif</span>
-
                                     </span>
 
                                 @else
 
-                                    <span class="inline-flex items-center gap-1.5 rounded-full border border-rose-200/60 bg-rose-50 px-2.5 py-1 text-[11px] font-semibold text-rose-700 sm:text-xs">
-
-                                        <span class="h-1.5 w-1.5 rounded-full bg-rose-500"></span>
-
+                                    <span class="user-status inactive">
+                                        <span class="status-dot"></span>
                                         <span>Nonaktif</span>
-
                                     </span>
 
                                 @endif
 
                             </td>
 
+                            {{-- AKSI --}}
+                            <td class="whitespace-nowrap text-center">
 
-                            {{-- =================================================
-                               AKSI
-                            ================================================= --}}
-                            <td class="whitespace-nowrap px-4 py-3 text-right sm:px-6 sm:py-4">
-
-                                <div class="flex items-center justify-end gap-1">
+                                <div class="user-actions">
 
                                     {{-- EDIT --}}
                                     <a
                                         href="{{ route('users.edit', $user->id) }}"
                                         title="Edit User"
-                                        class="rounded-xl p-1.5 text-slate-400 transition-all duration-150 hover:bg-amber-50 hover:text-amber-600 sm:p-2"
+                                        class="user-action edit"
                                     >
                                         <svg
                                             class="h-4 w-4"
@@ -383,14 +328,13 @@
                                         </svg>
                                     </a>
 
-
                                     {{-- DELETE --}}
                                     @if((int) auth()->id() !== (int) $user->id)
 
                                         <form
                                             method="POST"
                                             action="{{ route('users.destroy', $user->id) }}"
-                                            class="delete-form inline-block"
+                                            class="delete-form inline"
                                         >
                                             @csrf
                                             @method('DELETE')
@@ -398,7 +342,7 @@
                                             <button
                                                 type="button"
                                                 title="Hapus User"
-                                                class="delete-btn rounded-xl p-1.5 text-slate-400 transition-all duration-150 hover:bg-rose-50 hover:text-rose-600 sm:p-2"
+                                                class="user-action delete delete-btn"
                                             >
                                                 <svg
                                                     class="h-4 w-4"
@@ -446,16 +390,13 @@
                     @empty
 
                         <tr>
-
                             <td
                                 colspan="5"
-                                class="px-4 py-10 text-center text-slate-400 sm:px-6 sm:py-12"
+                                class="user-empty"
                             >
-
                                 <div class="flex flex-col items-center justify-center gap-2">
 
-                                    <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-300">
-
+                                    <div class="user-empty-icon">
                                         <svg
                                             class="h-7 w-7"
                                             fill="none"
@@ -485,71 +426,366 @@
                                                 d="M15 19a5 5 0 014-3.87"
                                             />
                                         </svg>
-
                                     </div>
 
-                                    <p class="text-xs font-medium sm:text-sm">
+                                    <p class="text-xs font-medium text-slate-400 sm:text-sm">
                                         Tidak ada data pengguna yang ditemukan.
                                     </p>
 
                                 </div>
-
                             </td>
-
                         </tr>
 
                     @endforelse
 
                 </tbody>
-
             </table>
-
         </div>
 
-
-        {{-- ============================================================
-           PAGINATION
-        ============================================================ --}}
+        {{-- PAGINATION --}}
         @if(method_exists($users, 'hasPages') && $users->hasPages())
-
-            <div class="border-t border-slate-100 bg-slate-50/50 px-4 py-3 sm:px-6 sm:py-4">
+            <div class="users-pagination">
                 {{ $users->appends(request()->query())->links() }}
             </div>
-
         @endif
 
     </div>
 
 </div>
 
+{{-- ================================================================
+     STYLE TABLE
+================================================================ --}}
+
+@push('styles')
+<style>
+/* ==========================================================================
+   USERS TABLE
+   ========================================================================== */
+
+.users-table-wrapper {
+    overflow: hidden;
+    border: 1px solid #94a3b8;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow:
+        0 1px 3px rgba(15, 23, 42, .06),
+        0 8px 24px rgba(15, 23, 42, .04);
+}
+
+.users-table-scroll {
+    overflow-x: auto;
+}
+
+.users-table {
+    width: 100%;
+    min-width: 820px;
+    border-collapse: collapse;
+    border-spacing: 0;
+    background: #fff;
+}
+
+.users-table thead {
+    background: #f1f5f9;
+}
+
+.users-table thead th {
+    padding: 13px 16px;
+    border-right: 1px solid #cbd5e1;
+    border-bottom: 2px solid #94a3b8;
+    color: #475569;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .05em;
+    line-height: 1.4;
+    text-align: left;
+    text-transform: uppercase;
+    vertical-align: middle;
+}
+
+.users-table thead th:last-child {
+    border-right: 0;
+}
+
+.users-table tbody tr {
+    background: #fff;
+    transition: background-color .15s ease;
+}
+
+.users-table tbody tr:nth-child(even) {
+    background: #f8fafc;
+}
+
+.users-table tbody tr:hover {
+    background: #eff6ff;
+}
+
+.users-table tbody td {
+    padding: 14px 16px;
+    border-right: 1px solid #cbd5e1;
+    border-bottom: 1px solid #cbd5e1;
+    color: #475569;
+    font-size: 12px;
+    line-height: 1.5;
+    vertical-align: middle;
+}
+
+.users-table tbody td:last-child {
+    border-right: 0;
+}
+
+.users-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+/* ==========================================================================
+   COLUMN
+   ========================================================================== */
+
+.user-column {
+    min-width: 280px;
+}
+
+.action-column {
+    width: 110px;
+}
+
+/* ==========================================================================
+   USER INFO
+   ========================================================================== */
+
+.user-avatar {
+    display: flex;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #bfdbfe;
+    border-radius: 12px;
+    background: #eff6ff;
+    color: #2563eb;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.user-name {
+    overflow: hidden;
+    max-width: 280px;
+    color: #1e293b;
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1.4;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.user-email {
+    overflow: hidden;
+    max-width: 280px;
+    margin-top: 2px;
+    color: #94a3b8;
+    font-size: 10px;
+    font-weight: 500;
+    line-height: 1.4;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.user-position {
+    color: #475569 !important;
+    font-weight: 600;
+}
+
+/* ==========================================================================
+   ROLE BADGE
+   ========================================================================== */
+
+.user-role {
+    display: inline-flex;
+    align-items: center;
+    min-height: 26px;
+    border-width: 1px;
+    border-radius: 8px;
+    padding: 0 10px;
+    font-size: 10px;
+    font-weight: 800;
+}
+
+.user-role.admin {
+    border-color: #e9d5ff;
+    background: #faf5ff;
+    color: #7e22ce;
+}
+
+.user-role.pimpinan {
+    border-color: #fde68a;
+    background: #fffbeb;
+    color: #b45309;
+}
+
+.user-role.staff {
+    border-color: #bfdbfe;
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.user-role.default {
+    border-color: #cbd5e1;
+    background: #f1f5f9;
+    color: #475569;
+}
+
+/* ==========================================================================
+   STATUS
+   ========================================================================== */
+
+.user-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 27px;
+    border-width: 1px;
+    border-radius: 999px;
+    padding: 0 10px;
+    font-size: 10px;
+    font-weight: 800;
+}
+
+.user-status.active {
+    border-color: #a7f3d0;
+    background: #ecfdf5;
+    color: #047857;
+}
+
+.user-status.inactive {
+    border-color: #fecdd3;
+    background: #fff1f2;
+    color: #be123c;
+}
+
+.status-dot {
+    width: 6px;
+    height: 6px;
+    flex-shrink: 0;
+    border-radius: 999px;
+    background: currentColor;
+}
+
+/* ==========================================================================
+   ACTION
+   ========================================================================== */
+
+.user-actions {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+}
+
+.user-action {
+    display: inline-flex;
+    width: 31px;
+    height: 31px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9px;
+    color: #64748b;
+    transition:
+        background-color .15s ease,
+        color .15s ease;
+}
+
+.user-action.edit:hover {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.user-action.delete:hover {
+    background: #ffe4e6;
+    color: #e11d48;
+}
+
+/* ==========================================================================
+   EMPTY
+   ========================================================================== */
+
+.user-empty {
+    padding: 50px 16px;
+    text-align: center;
+}
+
+.user-empty-icon {
+    display: flex;
+    width: 50px;
+    height: 50px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 16px;
+    background: #f1f5f9;
+    color: #cbd5e1;
+}
+
+/* ==========================================================================
+   PAGINATION
+   ========================================================================== */
+
+.users-pagination {
+    border-top: 1px solid #cbd5e1;
+    background: #f8fafc;
+    padding: 13px 16px;
+}
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+
+@media (max-width: 767px) {
+    .users-table {
+        min-width: 800px;
+    }
+
+    .users-table thead th,
+    .users-table tbody td {
+        padding: 12px 13px;
+    }
+
+    .user-avatar {
+        width: 36px;
+        height: 36px;
+        font-size: 11px;
+    }
+}
+</style>
+@endpush
 
 {{-- ================================================================
-   SWEETALERT DELETE
+     SWEETALERT DELETE
 ================================================================ --}}
+
+@push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const deleteButtons =
-        document.querySelectorAll('.delete-btn');
+
+    const deleteButtons = document.querySelectorAll('.delete-btn');
 
     if (!deleteButtons.length) {
         return;
     }
 
     deleteButtons.forEach(function (button) {
+
         button.addEventListener('click', function () {
-            const form =
-                button.closest('.delete-form');
+
+            const form = button.closest('.delete-form');
 
             if (!form) {
                 return;
             }
 
             if (typeof Swal === 'undefined') {
-                if (
-                    confirm(
-                        'Apakah Anda yakin ingin menghapus pengguna ini?'
-                    )
-                ) {
+
+                if (confirm('Apakah Anda yakin ingin menghapus pengguna ini?')) {
                     form.submit();
                 }
 
@@ -568,17 +804,24 @@ document.addEventListener('DOMContentLoaded', function () {
                 customClass: {
                     confirmButton:
                         'rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white mx-1',
+
                     cancelButton:
                         'rounded-lg bg-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 mx-1'
                 }
             }).then(function (result) {
+
                 if (result.isConfirmed) {
                     form.submit();
                 }
+
             });
+
         });
+
     });
+
 });
 </script>
+@endpush
 
 @endsection

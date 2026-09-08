@@ -5,17 +5,12 @@
 @section('content')
 
 @php
-    /* ================================================================
-       USER & ROLE
-    ================================================================ */
     $user = auth()->user();
+
     $userRole = strtolower(trim((string) ($user->role ?? $user->jabatan ?? '')));
     $userRole = $userRole === 'staf' ? 'staff' : $userRole;
     $canManage = in_array($userRole, ['admin', 'pimpinan'], true);
 
-    /* ================================================================
-       FILTER KATEGORI
-    ================================================================ */
     $selectedKategori = collect(request('kategori_id', []))
         ->filter(fn ($id) => is_scalar($id))
         ->map(fn ($id) => (string) $id)
@@ -23,9 +18,6 @@
         ->values()
         ->all();
 
-    /* ================================================================
-       FILTER STATUS
-    ================================================================ */
     $statusOptions = [
         'draf' => 'Draf',
         'diproses' => 'Diproses',
@@ -42,9 +34,6 @@
         ->values()
         ->all();
 
-    /* ================================================================
-       STATUS BADGE
-    ================================================================ */
     $statusBadgeClasses = [
         'draf' => 'bg-slate-50 text-slate-700 border-slate-200',
         'diproses' => 'bg-amber-50 text-amber-700 border-amber-200',
@@ -53,19 +42,15 @@
         'diarsipkan' => 'bg-purple-50 text-purple-700 border-purple-200',
     ];
 
-    /* ================================================================
-       FILTER TANGGAL
-    ================================================================ */
     $dariTanggal = request('dari_tanggal');
     $sampaiTanggal = request('sampai_tanggal');
-
     $visibleDateRange = '';
 
     try {
         if ($dariTanggal && $sampaiTanggal) {
             $visibleDateRange =
-                \Illuminate\Support\Carbon::parse($dariTanggal)->format('d/m/Y')
-                . ' - ' .
+                \Illuminate\Support\Carbon::parse($dariTanggal)->format('d/m/Y') .
+                ' - ' .
                 \Illuminate\Support\Carbon::parse($sampaiTanggal)->format('d/m/Y');
         } elseif ($dariTanggal) {
             $visibleDateRange =
@@ -88,9 +73,10 @@
 
 @push('styles')
 <style>
-/* ================================================================
+/* ==========================================================================
    DATE PICKER
-================================================================ */
+   ========================================================================== */
+
 .date-range-wrapper {
     position: relative;
 }
@@ -99,21 +85,26 @@
     cursor: pointer;
 }
 
+.custom-date-picker,
+.custom-picker-panel {
+    border: 1px solid #cbd5e1;
+    background: #fff;
+    box-shadow:
+        0 24px 70px rgba(15, 23, 42, .18),
+        0 8px 25px rgba(15, 23, 42, .08);
+}
+
 .custom-date-picker {
     position: fixed;
     z-index: 999999;
     width: 720px;
     max-width: calc(100vw - 20px);
     overflow: hidden;
-    border: 1px solid #e2e8f0;
     border-radius: 18px;
-    background: #fff;
-    box-shadow:
-        0 24px 70px rgba(15, 23, 42, .18),
-        0 8px 24px rgba(15, 23, 42, .08);
 }
 
-.custom-date-picker.hidden {
+.custom-date-picker.hidden,
+.custom-picker-panel.hidden {
     display: none;
 }
 
@@ -122,9 +113,8 @@
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    border-bottom: 1px solid #e2e8f0;
     padding: 13px 15px;
-    background: #fff;
+    border-bottom: 1px solid #cbd5e1;
 }
 
 .custom-date-picker-title {
@@ -133,22 +123,26 @@
     font-weight: 800;
 }
 
-.custom-date-picker-close {
+.custom-date-picker-close,
+.custom-picker-panel-close {
     display: inline-flex;
-    width: 32px;
-    height: 32px;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
     border: 0;
-    border-radius: 9px;
     background: #f8fafc;
     color: #64748b;
-    font-size: 20px;
     cursor: pointer;
 }
 
-.custom-date-picker-close:hover {
+.custom-date-picker-close {
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    font-size: 20px;
+}
+
+.custom-date-picker-close:hover,
+.custom-picker-panel-close:hover {
     background: #f1f5f9;
     color: #ef4444;
 }
@@ -163,7 +157,7 @@
 }
 
 .custom-calendar + .custom-calendar {
-    border-left: 1px solid #e2e8f0;
+    border-left: 1px solid #cbd5e1;
 }
 
 .custom-calendar-head {
@@ -174,12 +168,20 @@
     margin-bottom: 7px;
 }
 
-.custom-calendar-nav {
-    display: inline-flex;
-    width: 34px;
-    height: 34px;
+.custom-calendar-heading {
+    display: flex;
     align-items: center;
     justify-content: center;
+    flex: 1;
+    gap: 4px;
+}
+
+.custom-calendar-nav {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
     flex: 0 0 34px;
     border: 0;
     border-radius: 9px;
@@ -195,14 +197,6 @@
     color: #2563eb;
 }
 
-.custom-calendar-heading {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex: 1;
-    gap: 4px;
-}
-
 .custom-calendar-month-button,
 .custom-calendar-year-button {
     display: inline-flex;
@@ -210,11 +204,11 @@
     justify-content: center;
     gap: 6px;
     min-height: 33px;
+    padding: 6px 10px;
     border: 1px solid transparent;
     border-radius: 9px;
     background: #f8fafc;
     color: #334155;
-    padding: 6px 10px;
     font-family: inherit;
     font-size: 12px;
     font-weight: 800;
@@ -247,10 +241,10 @@
 }
 
 .custom-calendar-weekday {
-    height: 27px;
     display: flex;
     align-items: center;
     justify-content: center;
+    height: 27px;
     color: #94a3b8;
     font-size: 10px;
     font-weight: 800;
@@ -259,9 +253,9 @@
 
 .custom-calendar-day {
     display: flex;
-    height: 36px;
     align-items: center;
     justify-content: center;
+    height: 36px;
     border: 0;
     border-radius: 8px;
     background: transparent;
@@ -319,9 +313,8 @@
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    border-top: 1px solid #e2e8f0;
     padding: 10px 14px;
-    background: #fff;
+    border-top: 1px solid #cbd5e1;
 }
 
 .custom-date-picker-selected {
@@ -339,11 +332,11 @@
 
 .custom-date-picker-button {
     height: 36px;
-    border: 1px solid #e2e8f0;
+    padding: 0 14px;
+    border: 1px solid #cbd5e1;
     border-radius: 9px;
     background: #f8fafc;
     color: #475569;
-    padding: 0 14px;
     font-family: inherit;
     font-size: 11px;
     font-weight: 700;
@@ -364,25 +357,17 @@
     background: #1d4ed8;
 }
 
-/* ================================================================
+/* ==========================================================================
    MONTH / YEAR PANEL
-================================================================ */
+   ========================================================================== */
+
 .custom-picker-panel {
     position: fixed;
     z-index: 1000000;
     width: 320px;
     max-width: calc(100vw - 20px);
-    border: 1px solid #e2e8f0;
-    border-radius: 16px;
-    background: #fff;
     padding: 14px;
-    box-shadow:
-        0 24px 60px rgba(15, 23, 42, .18),
-        0 8px 24px rgba(15, 23, 42, .08);
-}
-
-.custom-picker-panel.hidden {
-    display: none;
+    border-radius: 16px;
 }
 
 .custom-picker-panel-header {
@@ -401,44 +386,23 @@
     text-align: center;
 }
 
-.custom-picker-panel-nav {
-    display: inline-flex;
+.custom-picker-panel-nav,
+.custom-picker-panel-close {
     width: 32px;
     height: 32px;
-    align-items: center;
-    justify-content: center;
     flex: 0 0 32px;
-    border: 0;
     border-radius: 9px;
+    font-size: 19px;
+}
+
+.custom-picker-panel-nav {
     background: #f8fafc;
     color: #64748b;
-    font-size: 21px;
-    cursor: pointer;
 }
 
 .custom-picker-panel-nav:hover {
     background: #eff6ff;
     color: #2563eb;
-}
-
-.custom-picker-panel-close {
-    display: inline-flex;
-    width: 32px;
-    height: 32px;
-    align-items: center;
-    justify-content: center;
-    flex: 0 0 32px;
-    border: 0;
-    border-radius: 9px;
-    background: #f8fafc;
-    color: #64748b;
-    font-size: 19px;
-    cursor: pointer;
-}
-
-.custom-picker-panel-close:hover {
-    background: #f1f5f9;
-    color: #ef4444;
 }
 
 .custom-picker-grid {
@@ -449,11 +413,11 @@
 
 .custom-picker-option {
     min-height: 42px;
-    border: 1px solid #e2e8f0;
+    padding: 0 6px;
+    border: 1px solid #cbd5e1;
     border-radius: 10px;
     background: #fff;
     color: #475569;
-    padding: 0 6px;
     font-family: inherit;
     font-size: 11px;
     font-weight: 700;
@@ -465,7 +429,7 @@
 }
 
 .custom-picker-option:hover {
-    border-color: #bfdbfe;
+    border-color: #93c5fd;
     background: #eff6ff;
     color: #2563eb;
 }
@@ -480,9 +444,10 @@
     box-shadow: inset 0 0 0 1px #93c5fd;
 }
 
-/* ================================================================
+/* ==========================================================================
    FILTER DROPDOWN
-================================================================ */
+   ========================================================================== */
+
 .filter-row {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -500,10 +465,10 @@
     min-height: 56px;
     align-items: center;
     gap: 12px;
-    border: 1px solid #e2e8f0;
+    padding: 10px 14px;
+    border: 1px solid #cbd5e1;
     border-radius: 14px;
     background: #fff;
-    padding: 10px 14px;
     color: #334155;
     text-align: left;
     cursor: pointer;
@@ -514,7 +479,7 @@
 }
 
 .filter-dropdown-trigger:hover {
-    border-color: #cbd5e1;
+    border-color: #94a3b8;
     background: #f8fafc;
 }
 
@@ -560,27 +525,25 @@
     flex: 1;
 }
 
-.filter-dropdown-title {
+.filter-dropdown-title,
+.filter-dropdown-subtitle {
     display: block;
     overflow: hidden;
-    color: #334155;
-    font-size: 13px;
-    font-weight: 700;
-    line-height: 1.25;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
+.filter-dropdown-title {
+    color: #334155;
+    font-size: 13px;
+    font-weight: 700;
+}
+
 .filter-dropdown-subtitle {
-    display: block;
     margin-top: 3px;
-    overflow: hidden;
     color: #94a3b8;
     font-size: 10px;
     font-weight: 500;
-    line-height: 1.25;
-    text-overflow: ellipsis;
-    white-space: nowrap;
 }
 
 .filter-dropdown-count {
@@ -598,13 +561,13 @@
 }
 
 .filter-dropdown-count.category {
-    border: 1px solid #dbeafe;
+    border: 1px solid #bfdbfe;
     background: #eff6ff;
     color: #2563eb;
 }
 
 .filter-dropdown-count.status {
-    border: 1px solid #fef3c7;
+    border: 1px solid #fde68a;
     background: #fffbeb;
     color: #d97706;
 }
@@ -632,7 +595,7 @@
     z-index: 10020;
     display: none;
     overflow: hidden;
-    border: 1px solid #e2e8f0;
+    border: 1px solid #cbd5e1;
     border-radius: 14px;
     background: #fff;
     box-shadow:
@@ -649,9 +612,9 @@
     align-items: center;
     justify-content: space-between;
     gap: 10px;
-    border-bottom: 1px solid #e2e8f0;
-    background: #f8fafc;
     padding: 12px 14px;
+    border-bottom: 1px solid #cbd5e1;
+    background: #f8fafc;
 }
 
 .filter-dropdown-menu-title-wrap {
@@ -721,8 +684,8 @@
 .filter-dropdown-options {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    max-height: 280px;
     gap: 8px;
+    max-height: 280px;
     overflow-y: auto;
     padding: 12px;
 }
@@ -746,10 +709,10 @@
     min-height: 44px;
     align-items: center;
     gap: 9px;
-    border: 1px solid #e2e8f0;
+    padding: 8px 10px;
+    border: 1px solid #cbd5e1;
     border-radius: 10px;
     background: #fff;
-    padding: 8px 10px;
     cursor: pointer;
     transition:
         border-color .15s ease,
@@ -757,7 +720,7 @@
 }
 
 .filter-dropdown-option:hover {
-    border-color: #bfdbfe;
+    border-color: #93c5fd;
     background: #f8fbff;
 }
 
@@ -767,7 +730,7 @@
 }
 
 .filter-dropdown-option:has(input:checked) {
-    border-color: #bfdbfe;
+    border-color: #93c5fd;
     background: #eff6ff;
 }
 
@@ -815,9 +778,8 @@
     align-items: center;
     justify-content: space-between;
     gap: 10px;
-    border-top: 1px solid #e2e8f0;
-    background: #fff;
     padding: 10px 14px;
+    border-top: 1px solid #cbd5e1;
 }
 
 .filter-dropdown-footer-count {
@@ -831,9 +793,186 @@
     font-size: 10px;
 }
 
-/* ================================================================
+/* ==========================================================================
+   TABLE
+   ========================================================================== */
+
+.archive-table-wrapper {
+    overflow: hidden;
+    border: 1px solid #94a3b8;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow:
+        0 1px 3px rgba(15, 23, 42, .06),
+        0 8px 24px rgba(15, 23, 42, .04);
+}
+
+.archive-table-scroll {
+    overflow-x: auto;
+}
+
+.archive-table {
+    width: 100%;
+    min-width: 850px;
+    border-collapse: collapse;
+    border-spacing: 0;
+    background: #fff;
+}
+
+.archive-table thead tr {
+    background: #f1f5f9;
+}
+
+.archive-table thead th {
+    padding: 13px 16px;
+    border-right: 1px solid #cbd5e1;
+    border-bottom: 2px solid #94a3b8;
+    color: #475569;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .05em;
+    line-height: 1.4;
+    text-align: left;
+    text-transform: uppercase;
+    vertical-align: middle;
+}
+
+.archive-table thead th:last-child {
+    border-right: 0;
+    text-align: center;
+}
+
+.archive-table tbody tr {
+    background: #fff;
+}
+
+.archive-table tbody tr:nth-child(even) {
+    background: #f8fafc;
+}
+
+.archive-table tbody tr:hover {
+    background: #eff6ff;
+}
+
+.archive-table tbody td {
+    padding: 14px 16px;
+    border-right: 1px solid #cbd5e1;
+    border-bottom: 1px solid #cbd5e1;
+    color: #475569;
+    font-size: 12px;
+    line-height: 1.5;
+    vertical-align: middle;
+}
+
+.archive-table tbody td:last-child {
+    border-right: 0;
+    text-align: center;
+}
+
+.archive-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.archive-table .cell-date {
+    color: #475569;
+    font-weight: 600;
+}
+
+.archive-table .cell-sender {
+    color: #334155;
+}
+
+.archive-table .cell-subject {
+    color: #1e293b;
+    font-weight: 700;
+}
+
+.archive-table .cell-category {
+    color: #64748b;
+}
+
+.archive-table .cell-status {
+    white-space: nowrap;
+}
+
+.archive-table .sender-badge {
+    display: inline-block;
+    max-width: 220px;
+    overflow: hidden;
+    padding: 5px 9px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #f1f5f9;
+    color: #334155;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.archive-table .status-badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    border-width: 1px;
+    padding: 5px 10px;
+    font-size: 10px;
+    font-weight: 800;
+}
+
+.archive-table .action-cell {
+    width: 130px;
+}
+
+.archive-table .action-buttons {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+}
+
+.archive-table .action-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    transition:
+        background .15s ease,
+        color .15s ease;
+}
+
+.archive-table .action-button.detail,
+.archive-table .action-button.edit,
+.archive-table .action-button.delete {
+    color: #64748b;
+}
+
+.archive-table .action-button.detail:hover {
+    background: #dbeafe;
+    color: #2563eb;
+}
+
+.archive-table .action-button.edit:hover {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.archive-table .action-button.delete:hover {
+    background: #ffe4e6;
+    color: #e11d48;
+}
+
+.archive-table-empty {
+    padding: 48px 16px;
+    text-align: center;
+}
+
+/* ==========================================================================
    MOBILE
-================================================================ */
+   ========================================================================== */
+
 @media (max-width: 767px) {
     .filter-row {
         grid-template-columns: 1fr;
@@ -853,7 +992,7 @@
     }
 
     .custom-calendar + .custom-calendar {
-        border-top: 1px solid #e2e8f0;
+        border-top: 1px solid #cbd5e1;
         border-left: 0;
     }
 
@@ -917,9 +1056,9 @@
                 class="inline-flex items-center justify-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-2.5 py-2 text-xs font-semibold text-emerald-700 shadow-sm transition hover:bg-emerald-100 sm:px-3.5"
             >
                 <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 00.707.293l5.414 5.414a1 1 0 00.293.707V19a2 2 0 01-2 2z"/>
                 </svg>
-                <span>Excel</span>
+                Excel
             </a>
 
             <a
@@ -931,7 +1070,7 @@
                 <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
                 </svg>
-                <span>PDF</span>
+                PDF
             </a>
 
             @if($canManage)
@@ -942,28 +1081,25 @@
                     <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                     </svg>
-                    <span>Surat Keluar</span>
+                    Surat Keluar
                 </a>
             @endif
         </div>
     </div>
 
     {{-- FILTER CARD --}}
-    <div class="rounded-2xl border border-slate-200/80 bg-white p-3 shadow-sm sm:p-4">
+    <div class="rounded-2xl border border-slate-300 bg-white p-3 shadow-sm sm:p-4">
         <form
+            id="filterForm"
             method="GET"
             action="{{ route('surat-keluar.index') }}"
-            id="filterForm"
             class="space-y-3"
         >
-            {{-- SEARCH + DATE + FILTER --}}
             <div class="grid grid-cols-1 gap-2.5 lg:grid-cols-12">
 
                 {{-- SEARCH --}}
                 <div class="lg:col-span-5">
-                    <label for="search" class="sr-only">
-                        Pencarian
-                    </label>
+                    <label for="search" class="sr-only">Pencarian</label>
 
                     <div class="relative">
                         <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
@@ -979,7 +1115,7 @@
                             value="{{ request('search') }}"
                             placeholder="Cari perihal, nomor surat, atau instansi..."
                             autocomplete="off"
-                            class="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 pl-9 pr-3 text-xs text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 sm:text-sm"
+                            class="h-11 w-full rounded-xl border border-slate-300 bg-slate-50 pl-9 pr-3 text-xs text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 sm:text-sm"
                         >
                     </div>
                 </div>
@@ -1001,7 +1137,7 @@
                                 readonly
                                 autocomplete="off"
                                 placeholder="Pilih rentang tanggal..."
-                                class="date-range-input h-11 w-full rounded-xl border border-slate-200 bg-slate-50 pl-9 pr-10 text-xs font-medium text-slate-700 outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 sm:text-sm"
+                                class="date-range-input h-11 w-full rounded-xl border border-slate-300 bg-slate-50 pl-9 pr-10 text-xs font-medium text-slate-700 outline-none transition placeholder:text-slate-400 hover:border-slate-400 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 sm:text-sm"
                             >
 
                             <button
@@ -1017,19 +1153,8 @@
                             </button>
                         </div>
 
-                        <input
-                            type="hidden"
-                            name="dari_tanggal"
-                            id="dari_tanggal"
-                            value="{{ $dariTanggal }}"
-                        >
-
-                        <input
-                            type="hidden"
-                            name="sampai_tanggal"
-                            id="sampai_tanggal"
-                            value="{{ $sampaiTanggal }}"
-                        >
+                        <input type="hidden" name="dari_tanggal" id="dari_tanggal" value="{{ $dariTanggal }}">
+                        <input type="hidden" name="sampai_tanggal" id="sampai_tanggal" value="{{ $sampaiTanggal }}">
                     </div>
                 </div>
 
@@ -1041,7 +1166,7 @@
                             class="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-slate-900 px-3 text-xs font-semibold text-white shadow-sm transition hover:bg-slate-800 sm:text-sm"
                         >
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 00-.293.707l-6.414 6.414a1 1 0 00-.293.707L13 17v4l-4-4v-4.293a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707l-1.293.707V17l-4-4v-4.293a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
                             </svg>
                             Filter
                         </button>
@@ -1082,22 +1207,11 @@
 
                         <span class="filter-dropdown-trigger-content">
                             <span class="filter-dropdown-text">
-                                <span class="filter-dropdown-title">
-                                    Kategori Surat
-                                </span>
-
-                                <span
-                                    class="filter-dropdown-subtitle"
-                                    id="kategoriSummary"
-                                >
-                                    Semua kategori
-                                </span>
+                                <span class="filter-dropdown-title">Kategori Surat</span>
+                                <span class="filter-dropdown-subtitle" id="kategoriSummary">Semua kategori</span>
                             </span>
 
-                            <span
-                                class="filter-dropdown-count category"
-                                id="kategoriCount"
-                            >
+                            <span class="filter-dropdown-count category" id="kategoriCount">
                                 {{ count($selectedKategori) }} dipilih
                             </span>
                         </span>
@@ -1108,46 +1222,25 @@
                             stroke="currentColor"
                             viewBox="0 0 24 24"
                         >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M6 9l6 6l6-6"
-                            />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 9l6 6l6-6"/>
                         </svg>
                     </button>
 
-                    <div
-                        id="kategoriDropdownMenu"
-                        class="filter-dropdown-menu"
-                    >
+                    <div id="kategoriDropdownMenu" class="filter-dropdown-menu">
                         <div class="filter-dropdown-menu-header">
                             <div class="filter-dropdown-menu-title-wrap">
-                                <span class="filter-dropdown-menu-title">
-                                    Pilih Kategori
-                                </span>
-
-                                <span class="filter-dropdown-menu-description">
-                                    Checkbox dapat dipilih lebih dari satu
-                                </span>
+                                <span class="filter-dropdown-menu-title">Pilih Kategori</span>
+                                <span class="filter-dropdown-menu-description">Checkbox dapat dipilih lebih dari satu</span>
                             </div>
 
                             <div class="filter-dropdown-actions">
-                                <button
-                                    type="button"
-                                    id="selectAllKategori"
-                                    class="filter-dropdown-action category"
-                                >
+                                <button type="button" id="selectAllKategori" class="filter-dropdown-action category">
                                     Pilih Semua
                                 </button>
 
                                 <span class="filter-dropdown-divider">|</span>
 
-                                <button
-                                    type="button"
-                                    id="clearAllKategori"
-                                    class="filter-dropdown-action clear"
-                                >
+                                <button type="button" id="clearAllKategori" class="filter-dropdown-action clear">
                                     Batalkan
                                 </button>
                             </div>
@@ -1178,10 +1271,7 @@
                         @endif
 
                         <div class="filter-dropdown-menu-footer">
-                            <span
-                                class="filter-dropdown-footer-count"
-                                id="kategoriFooterCount"
-                            >
+                            <span id="kategoriFooterCount" class="filter-dropdown-footer-count">
                                 {{ count($selectedKategori) }} kategori dipilih
                             </span>
 
@@ -1209,22 +1299,11 @@
 
                         <span class="filter-dropdown-trigger-content">
                             <span class="filter-dropdown-text">
-                                <span class="filter-dropdown-title">
-                                    Status Surat
-                                </span>
-
-                                <span
-                                    class="filter-dropdown-subtitle"
-                                    id="statusSummary"
-                                >
-                                    Semua status
-                                </span>
+                                <span class="filter-dropdown-title">Status Surat</span>
+                                <span class="filter-dropdown-subtitle" id="statusSummary">Semua status</span>
                             </span>
 
-                            <span
-                                class="filter-dropdown-count status"
-                                id="statusCount"
-                            >
+                            <span class="filter-dropdown-count status" id="statusCount">
                                 {{ count($selectedStatus) }} dipilih
                             </span>
                         </span>
@@ -1235,46 +1314,25 @@
                             stroke="currentColor"
                             viewBox="0 0 24 24"
                         >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M6 9l6 6l6-6"
-                            />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 9l6 6l6-6"/>
                         </svg>
                     </button>
 
-                    <div
-                        id="statusDropdownMenu"
-                        class="filter-dropdown-menu"
-                    >
+                    <div id="statusDropdownMenu" class="filter-dropdown-menu">
                         <div class="filter-dropdown-menu-header">
                             <div class="filter-dropdown-menu-title-wrap">
-                                <span class="filter-dropdown-menu-title">
-                                    Pilih Status
-                                </span>
-
-                                <span class="filter-dropdown-menu-description">
-                                    Checkbox dapat dipilih lebih dari satu
-                                </span>
+                                <span class="filter-dropdown-menu-title">Pilih Status</span>
+                                <span class="filter-dropdown-menu-description">Checkbox dapat dipilih lebih dari satu</span>
                             </div>
 
                             <div class="filter-dropdown-actions">
-                                <button
-                                    type="button"
-                                    id="selectAllStatus"
-                                    class="filter-dropdown-action status"
-                                >
+                                <button type="button" id="selectAllStatus" class="filter-dropdown-action status">
                                     Pilih Semua
                                 </button>
 
                                 <span class="filter-dropdown-divider">|</span>
 
-                                <button
-                                    type="button"
-                                    id="clearAllStatus"
-                                    class="filter-dropdown-action clear"
-                                >
+                                <button type="button" id="clearAllStatus" class="filter-dropdown-action clear">
                                     Batalkan
                                 </button>
                             </div>
@@ -1291,18 +1349,13 @@
                                         @checked(in_array($value, $selectedStatus, true))
                                     >
 
-                                    <span>
-                                        {{ $label }}
-                                    </span>
+                                    <span>{{ $label }}</span>
                                 </label>
                             @endforeach
                         </div>
 
                         <div class="filter-dropdown-menu-footer">
-                            <span
-                                class="filter-dropdown-footer-count"
-                                id="statusFooterCount"
-                            >
+                            <span id="statusFooterCount" class="filter-dropdown-footer-count">
                                 {{ count($selectedStatus) }} status dipilih
                             </span>
 
@@ -1317,57 +1370,46 @@
     </div>
 
     {{-- TABLE --}}
-    <div class="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
-        <div class="overflow-x-auto">
-            <table class="w-full min-w-[850px] border-collapse whitespace-nowrap text-left text-xs sm:text-sm">
+    <div class="archive-table-wrapper">
+        <div class="archive-table-scroll">
+            <table class="archive-table">
                 <thead>
-                    <tr class="border-b border-slate-200 bg-slate-50/80 text-[10px] font-bold uppercase tracking-wider text-slate-400 sm:text-[11px]">
-                        <th class="px-4 py-3 sm:px-6 sm:py-4">
-                            Tanggal Keluar
-                        </th>
-
-                        <th class="px-4 py-3 sm:px-6 sm:py-4">
-                            Instansi Tujuan
-                        </th>
-
-                        <th class="px-4 py-3 sm:px-6 sm:py-4">
-                            Perihal
-                        </th>
-
-                        <th class="px-4 py-3 sm:px-6 sm:py-4">
-                            Kategori
-                        </th>
-
-                        <th class="px-4 py-3 sm:px-6 sm:py-4">
-                            Status
-                        </th>
-
-                        <th class="px-4 py-3 text-center sm:px-6 sm:py-4">
-                            Aksi
-                        </th>
+                    <tr>
+                        <th>Tanggal Keluar</th>
+                        <th>Instansi Tujuan</th>
+                        <th>Perihal</th>
+                        <th>Kategori</th>
+                        <th>Status</th>
+                        <th class="action-cell">Aksi</th>
                     </tr>
                 </thead>
 
-                <tbody class="divide-y divide-slate-100 text-xs">
+                <tbody>
                     @forelse($suratKeluars ?? [] as $s)
                         @php
                             $status = strtolower(trim((string) ($s->status ?? 'draf')));
                             $badgeClass = $statusBadgeClasses[$status] ?? 'bg-slate-100 text-slate-600 border-slate-200';
                             $tujuan = $s->pengirim ?? $s->asal_surat ?? '-';
+
+                            $tanggalKeluar = '-';
+
+                            if ($s->tanggal_surat) {
+                                try {
+                                    $tanggalKeluar = \Illuminate\Support\Carbon::parse($s->tanggal_surat)->format('d/m/Y');
+                                } catch (\Throwable $e) {
+                                    $tanggalKeluar = '-';
+                                }
+                            }
                         @endphp
 
-                        <tr class="transition duration-150 hover:bg-slate-50/60">
-                            <td class="px-4 py-3.5 text-slate-500 sm:px-6 sm:py-4">
-                                @if($s->tanggal_surat)
-                                    {{ \Illuminate\Support\Carbon::parse($s->tanggal_surat)->format('d/m/Y') }}
-                                @else
-                                    -
-                                @endif
+                        <tr>
+                            <td class="cell-date">
+                                {{ $tanggalKeluar }}
                             </td>
 
-                            <td class="px-4 py-3.5 text-slate-700 sm:px-6 sm:py-4">
+                            <td class="cell-sender">
                                 <span
-                                    class="inline-block max-w-[220px] truncate rounded-lg border border-slate-200/60 bg-slate-100 px-2.5 py-1 font-medium text-slate-700"
+                                    class="sender-badge"
                                     title="{{ $tujuan }}"
                                 >
                                     {{ $tujuan }}
@@ -1375,27 +1417,29 @@
                             </td>
 
                             <td
-                                class="max-w-xs truncate px-4 py-3.5 font-medium text-slate-800 sm:px-6 sm:py-4"
+                                class="cell-subject max-w-xs truncate"
                                 title="{{ $s->perihal ?? '-' }}"
                             >
                                 {{ $s->perihal ?? '-' }}
                             </td>
 
-                            <td class="px-4 py-3.5 text-slate-500 sm:px-6 sm:py-4">
+                            <td class="cell-category">
                                 {{ $s->kategori?->nama_kategori ?? '-' }}
                             </td>
 
-                            <td class="px-4 py-3.5 sm:px-6 sm:py-4">
-                                <span class="inline-flex rounded-full border px-2.5 py-1 text-[10px] font-bold {{ $badgeClass }}">
+                            <td class="cell-status">
+                                <span class="status-badge {{ $badgeClass }}">
                                     {{ $statusOptions[$status] ?? ucfirst($status) }}
                                 </span>
                             </td>
 
-                            <td class="px-4 py-3.5 text-center sm:px-6 sm:py-4">
-                                <div class="inline-flex items-center gap-1">
+                            <td class="action-cell">
+                                <div class="action-buttons">
+
+                                    {{-- DETAIL --}}
                                     <a
                                         href="{{ route('surat-keluar.show', $s) }}"
-                                        class="rounded-lg p-1.5 text-slate-400 transition hover:bg-blue-50 hover:text-blue-600"
+                                        class="action-button detail"
                                         title="Lihat Detail"
                                         aria-label="Lihat detail surat"
                                     >
@@ -1406,9 +1450,11 @@
                                     </a>
 
                                     @if($canManage)
+
+                                        {{-- EDIT --}}
                                         <a
                                             href="{{ route('surat-keluar.edit', $s) }}"
-                                            class="rounded-lg p-1.5 text-slate-400 transition hover:bg-amber-50 hover:text-amber-600"
+                                            class="action-button edit"
                                             title="Ubah Data"
                                             aria-label="Ubah data surat"
                                         >
@@ -1418,6 +1464,7 @@
                                             </svg>
                                         </a>
 
+                                        {{-- DELETE --}}
                                         <form
                                             action="{{ route('surat-keluar.destroy', $s) }}"
                                             method="POST"
@@ -1428,7 +1475,7 @@
 
                                             <button
                                                 type="button"
-                                                class="delete-btn rounded-lg p-1.5 text-slate-400 transition hover:bg-rose-50 hover:text-rose-600"
+                                                class="action-button delete delete-btn"
                                                 title="Hapus Surat"
                                                 aria-label="Hapus surat"
                                             >
@@ -1438,14 +1485,18 @@
                                                 </svg>
                                             </button>
                                         </form>
+
                                     @endif
                                 </div>
                             </td>
                         </tr>
+
                     @empty
+
                         <tr>
-                            <td colspan="6" class="py-10 text-center sm:py-12">
+                            <td colspan="6" class="archive-table-empty">
                                 <div class="flex flex-col items-center justify-center">
+
                                     <div class="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
                                         <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-1.414 0l-2.414-2.414A1 1 0 006.586 13H4"/>
@@ -1482,29 +1533,27 @@
                                             Tambah Surat Keluar
                                         </a>
                                     @endif
+
                                 </div>
                             </td>
                         </tr>
+
                     @endforelse
                 </tbody>
             </table>
         </div>
 
+        {{-- PAGINATION --}}
         @if(isset($suratKeluars) && method_exists($suratKeluars, 'hasPages') && $suratKeluars->hasPages())
-            <div class="border-t border-slate-100 px-4 py-3 sm:px-6 sm:py-4">
+            <div class="border-t border-slate-300 px-4 py-3 sm:px-6 sm:py-4">
                 {{ $suratKeluars->withQueryString()->links() }}
             </div>
         @endif
     </div>
 </div>
 
-{{-- ================================================================
-     CUSTOM DATE PICKER
-================================================================ --}}
-<div
-    id="customDatePicker"
-    class="custom-date-picker hidden"
->
+{{-- CUSTOM DATE PICKER --}}
+<div id="customDatePicker" class="custom-date-picker hidden">
     <div class="custom-date-picker-header">
         <div class="custom-date-picker-title">
             Pilih Rentang Tanggal
@@ -1520,53 +1569,32 @@
         </button>
     </div>
 
-    <div
-        id="customDateCalendars"
-        class="custom-date-calendars"
-    ></div>
+    <div id="customDateCalendars" class="custom-date-calendars"></div>
 
     <div class="custom-date-picker-footer">
-        <div
-            id="datePickerSelected"
-            class="custom-date-picker-selected"
-        >
+        <div id="datePickerSelected" class="custom-date-picker-selected">
             Pilih tanggal awal
         </div>
 
         <div class="custom-date-picker-actions">
-            <button
-                type="button"
-                id="datePickerClear"
-                class="custom-date-picker-button"
-            >
+            <button type="button" id="datePickerClear" class="custom-date-picker-button">
                 Bersihkan
             </button>
 
-            <button
-                type="button"
-                id="datePickerApply"
-                class="custom-date-picker-button apply"
-            >
+            <button type="button" id="datePickerApply" class="custom-date-picker-button apply">
                 Terapkan
             </button>
         </div>
     </div>
 </div>
 
-{{-- MONTH / YEAR PANEL --}}
-<div
-    id="customPickerPanel"
-    class="custom-picker-panel hidden"
-></div>
+<div id="customPickerPanel" class="custom-picker-panel hidden"></div>
 
 @push('scripts')
 <script>
 (function () {
     'use strict';
 
-    /* ================================================================
-       CONSTANT
-    ================================================================ */
     const MONTHS = [
         'Januari',
         'Februari',
@@ -1595,83 +1623,31 @@
     const MIN_YEAR = 2000;
     const MAX_YEAR = new Date().getFullYear() + 20;
 
-    /* ================================================================
-       ELEMENTS
-    ================================================================ */
-    const dateInput =
-        document.getElementById('date-range');
+    const dateInput = document.getElementById('date-range');
+    const dariInput = document.getElementById('dari_tanggal');
+    const sampaiInput = document.getElementById('sampai_tanggal');
+    const clearDateButton = document.getElementById('clearDateRange');
+    const datePicker = document.getElementById('customDatePicker');
+    const calendars = document.getElementById('customDateCalendars');
+    const pickerPanel = document.getElementById('customPickerPanel');
+    const closeDatePickerButton = document.getElementById('datePickerClose');
+    const clearPickerButton = document.getElementById('datePickerClear');
+    const applyPickerButton = document.getElementById('datePickerApply');
+    const selectedLabel = document.getElementById('datePickerSelected');
 
-    const dariInput =
-        document.getElementById('dari_tanggal');
+    let selectedStart = parseDate(dariInput?.value || '');
+    let selectedEnd = parseDate(sampaiInput?.value || '');
+    let tempStart = selectedStart ? cloneDate(selectedStart) : null;
+    let tempEnd = selectedEnd ? cloneDate(selectedEnd) : null;
+    let viewMonth = selectedStart
+        ? new Date(selectedStart.getFullYear(), selectedStart.getMonth(), 1)
+        : new Date();
 
-    const sampaiInput =
-        document.getElementById('sampai_tanggal');
-
-    const clearDateRangeButton =
-        document.getElementById('clearDateRange');
-
-    const datePicker =
-        document.getElementById('customDatePicker');
-
-    const calendarsContainer =
-        document.getElementById('customDateCalendars');
-
-    const datePickerClose =
-        document.getElementById('datePickerClose');
-
-    const datePickerClear =
-        document.getElementById('datePickerClear');
-
-    const datePickerApply =
-        document.getElementById('datePickerApply');
-
-    const selectedLabel =
-        document.getElementById('datePickerSelected');
-
-    const pickerPanel =
-        document.getElementById('customPickerPanel');
-
-    /* ================================================================
-       DATE STATE
-    ================================================================ */
-    let selectedStart =
-        parseDate(
-            dariInput?.value || ''
-        );
-
-    let selectedEnd =
-        parseDate(
-            sampaiInput?.value || ''
-        );
-
-    let tempStart =
-        selectedStart
-            ? cloneDate(selectedStart)
-            : null;
-
-    let tempEnd =
-        selectedEnd
-            ? cloneDate(selectedEnd)
-            : null;
-
-    let viewMonth =
-        selectedStart
-            ? new Date(
-                selectedStart.getFullYear(),
-                selectedStart.getMonth(),
-                1
-            )
-            : new Date();
-
-    viewMonth.setDate(1);
-
-    let activePanelType = null;
     let activePanelSide = 'left';
     let activePanelYear = new Date().getFullYear();
 
-    /* ================================================================
-       DATE HELPERS
-    ================================================================ */
+    viewMonth.setDate(1);
+
     function cloneDate(date) {
         return new Date(
             date.getFullYear(),
@@ -1685,30 +1661,17 @@
             return null;
         }
 
-        const match =
-            String(value).match(
-                /^(\d{4})-(\d{2})-(\d{2})$/
-            );
+        const match = String(value).match(/^(\d{4})-(\d{2})-(\d{2})$/);
 
         if (!match) {
             return null;
         }
 
-        const year =
-            Number(match[1]);
+        const year = Number(match[1]);
+        const month = Number(match[2]) - 1;
+        const day = Number(match[3]);
 
-        const month =
-            Number(match[2]) - 1;
-
-        const day =
-            Number(match[3]);
-
-        const date =
-            new Date(
-                year,
-                month,
-                day
-            );
+        const date = new Date(year, month, day);
 
         if (
             date.getFullYear() !== year ||
@@ -1759,23 +1722,6 @@
         );
     }
 
-    function isBetween(date, start, end) {
-        if (!date || !start || !end) {
-            return false;
-        }
-
-        const value =
-            toISO(date);
-
-        const from =
-            toISO(start);
-
-        const to =
-            toISO(end);
-
-        return value > from && value < to;
-    }
-
     function addMonths(date, amount) {
         return new Date(
             date.getFullYear(),
@@ -1784,15 +1730,23 @@
         );
     }
 
-    /* ================================================================
-       DATE PICKER RENDER
-    ================================================================ */
+    function isBetween(date, start, end) {
+        if (!date || !start || !end) {
+            return false;
+        }
+
+        return (
+            toISO(date) > toISO(start) &&
+            toISO(date) < toISO(end)
+        );
+    }
+
     function renderCalendars() {
-        if (!calendarsContainer) {
+        if (!calendars) {
             return;
         }
 
-        calendarsContainer.innerHTML = '';
+        calendars.innerHTML = '';
 
         const leftDate =
             new Date(
@@ -1802,256 +1756,126 @@
             );
 
         const rightDate =
-            addMonths(
-                leftDate,
-                1
-            );
+            addMonths(leftDate, 1);
 
-        calendarsContainer.appendChild(
-            createCalendar(
-                leftDate,
-                'left'
-            )
+        calendars.appendChild(
+            createCalendar(leftDate, 'left')
         );
 
-        calendarsContainer.appendChild(
-            createCalendar(
-                rightDate,
-                'right'
-            )
+        calendars.appendChild(
+            createCalendar(rightDate, 'right')
         );
 
         updateSelectedLabel();
-
-        requestAnimationFrame(
-            positionDatePicker
-        );
+        requestAnimationFrame(positionDatePicker);
     }
 
     function createCalendar(date, side) {
-        const calendar =
-            document.createElement('div');
+        const calendar = document.createElement('div');
+        calendar.className = 'custom-calendar';
 
-        calendar.className =
-            'custom-calendar';
+        const header = document.createElement('div');
+        header.className = 'custom-calendar-head';
 
-        const header =
-            document.createElement('div');
-
-        header.className =
-            'custom-calendar-head';
-
-        const previous =
-            document.createElement('button');
-
+        const previous = document.createElement('button');
         previous.type = 'button';
-        previous.className =
-            'custom-calendar-nav';
+        previous.className = 'custom-calendar-nav';
+        previous.innerHTML = '&#8249;';
+        previous.setAttribute('aria-label', 'Bulan sebelumnya');
 
-        previous.innerHTML =
-            '&#8249;';
+        const heading = document.createElement('div');
+        heading.className = 'custom-calendar-heading';
 
-        previous.setAttribute(
-            'aria-label',
-            'Bulan sebelumnya'
-        );
-
-        const heading =
-            document.createElement('div');
-
-        heading.className =
-            'custom-calendar-heading';
-
-        const monthButton =
-            document.createElement('button');
-
+        const monthButton = document.createElement('button');
         monthButton.type = 'button';
-        monthButton.className =
-            'custom-calendar-month-button';
+        monthButton.className = 'custom-calendar-month-button';
+        monthButton.textContent = MONTHS[date.getMonth()];
 
-        monthButton.textContent =
-            MONTHS[date.getMonth()];
-
-        const yearButton =
-            document.createElement('button');
-
+        const yearButton = document.createElement('button');
         yearButton.type = 'button';
-        yearButton.className =
-            'custom-calendar-year-button';
+        yearButton.className = 'custom-calendar-year-button';
+        yearButton.textContent = String(date.getFullYear());
 
-        yearButton.textContent =
-            String(date.getFullYear());
+        heading.append(monthButton, yearButton);
 
-        heading.appendChild(
-            monthButton
-        );
-
-        heading.appendChild(
-            yearButton
-        );
-
-        const next =
-            document.createElement('button');
-
+        const next = document.createElement('button');
         next.type = 'button';
-        next.className =
-            'custom-calendar-nav';
+        next.className = 'custom-calendar-nav';
+        next.innerHTML = '&#8250;';
+        next.setAttribute('aria-label', 'Bulan berikutnya');
 
-        next.innerHTML =
-            '&#8250;';
+        header.append(previous, heading, next);
 
-        next.setAttribute(
-            'aria-label',
-            'Bulan berikutnya'
-        );
+        monthButton.addEventListener('click', function (event) {
+            event.preventDefault();
+            event.stopPropagation();
 
-        header.appendChild(previous);
-        header.appendChild(heading);
-        header.appendChild(next);
+            showMonthPanel(
+                date,
+                monthButton,
+                side
+            );
+        });
 
-        monthButton.addEventListener(
-            'click',
-            function (event) {
-                event.preventDefault();
-                event.stopPropagation();
+        yearButton.addEventListener('click', function (event) {
+            event.preventDefault();
+            event.stopPropagation();
 
-                closePickerPanel();
+            showYearPanel(
+                date,
+                yearButton,
+                side
+            );
+        });
 
-                showMonthPanel(
-                    date,
-                    monthButton,
-                    side
-                );
-            }
-        );
+        previous.addEventListener('click', function (event) {
+            event.preventDefault();
+            event.stopPropagation();
 
-        yearButton.addEventListener(
-            'click',
-            function (event) {
-                event.preventDefault();
-                event.stopPropagation();
+            viewMonth = addMonths(viewMonth, -1);
+            renderCalendars();
+        });
 
-                closePickerPanel();
+        next.addEventListener('click', function (event) {
+            event.preventDefault();
+            event.stopPropagation();
 
-                showYearPanel(
-                    date,
-                    yearButton,
-                    side
-                );
-            }
-        );
-
-        previous.addEventListener(
-            'click',
-            function (event) {
-                event.preventDefault();
-                event.stopPropagation();
-
-                viewMonth =
-                    addMonths(
-                        viewMonth,
-                        -1
-                    );
-
-                renderCalendars();
-            }
-        );
-
-        next.addEventListener(
-            'click',
-            function (event) {
-                event.preventDefault();
-                event.stopPropagation();
-
-                viewMonth =
-                    addMonths(
-                        viewMonth,
-                        1
-                    );
-
-                renderCalendars();
-            }
-        );
+            viewMonth = addMonths(viewMonth, 1);
+            renderCalendars();
+        });
 
         calendar.appendChild(header);
 
-        const weekdays =
-            document.createElement('div');
+        const weekdays = document.createElement('div');
+        weekdays.className = 'custom-calendar-weekdays';
 
-        weekdays.className =
-            'custom-calendar-weekdays';
+        WEEKDAYS.forEach(function (day) {
+            const element = document.createElement('div');
 
-        WEEKDAYS.forEach(
-            function (day) {
-                const element =
-                    document.createElement('div');
+            element.className = 'custom-calendar-weekday';
+            element.textContent = day;
 
-                element.className =
-                    'custom-calendar-weekday';
+            weekdays.appendChild(element);
+        });
 
-                element.textContent =
-                    day;
+        calendar.appendChild(weekdays);
 
-                weekdays.appendChild(
-                    element
-                );
-            }
-        );
+        const days = document.createElement('div');
+        days.className = 'custom-calendar-days';
 
-        calendar.appendChild(
-            weekdays
-        );
+        const year = date.getFullYear();
+        const month = date.getMonth();
+        const firstDay = new Date(year, month, 1).getDay();
+        const mondayOffset = firstDay === 0 ? 6 : firstDay - 1;
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const daysInPreviousMonth = new Date(year, month, 0).getDate();
 
-        const days =
-            document.createElement('div');
-
-        days.className =
-            'custom-calendar-days';
-
-        const year =
-            date.getFullYear();
-
-        const month =
-            date.getMonth();
-
-        const firstDay =
-            new Date(
-                year,
-                month,
-                1
-            ).getDay();
-
-        const mondayOffset =
-            firstDay === 0
-                ? 6
-                : firstDay - 1;
-
-        const daysInMonth =
-            new Date(
-                year,
-                month + 1,
-                0
-            ).getDate();
-
-        const daysInPreviousMonth =
-            new Date(
-                year,
-                month,
-                0
-            ).getDate();
-
-        for (
-            let index = 0;
-            index < 42;
-            index++
-        ) {
-            let cellDate;
+        for (let index = 0; index < 42; index++) {
             let dayNumber;
+            let cellDate;
             let otherMonth = false;
 
-            if (
-                index < mondayOffset
-            ) {
+            if (index < mondayOffset) {
                 dayNumber =
                     daysInPreviousMonth -
                     mondayOffset +
@@ -2068,8 +1892,7 @@
                 otherMonth = true;
             } else if (
                 index >=
-                mondayOffset +
-                daysInMonth
+                mondayOffset + daysInMonth
             ) {
                 dayNumber =
                     index -
@@ -2103,80 +1926,47 @@
                 document.createElement('button');
 
             button.type = 'button';
-            button.className =
-                'custom-calendar-day';
-
-            button.textContent =
-                String(dayNumber);
+            button.className = 'custom-calendar-day';
+            button.textContent = String(dayNumber);
 
             if (otherMonth) {
-                button.classList.add(
-                    'other-month'
-                );
+                button.classList.add('other-month');
             }
 
-            if (
-                sameDate(
-                    cellDate,
-                    new Date()
-                )
-            ) {
-                button.classList.add(
-                    'today'
-                );
-            }
-
-            if (
-                isBetween(
-                    cellDate,
-                    tempStart,
-                    tempEnd
-                )
-            ) {
-                button.classList.add(
-                    'in-range'
-                );
+            if (sameDate(cellDate, new Date())) {
+                button.classList.add('today');
             }
 
             if (
                 tempStart &&
-                sameDate(
-                    cellDate,
-                    tempStart
-                )
+                tempEnd &&
+                isBetween(cellDate, tempStart, tempEnd)
             ) {
-                button.classList.add(
-                    'range-start'
-                );
+                button.classList.add('in-range');
+            }
+
+            if (
+                tempStart &&
+                sameDate(cellDate, tempStart)
+            ) {
+                button.classList.add('range-start');
             }
 
             if (
                 tempEnd &&
-                sameDate(
-                    cellDate,
-                    tempEnd
-                )
+                sameDate(cellDate, tempEnd)
             ) {
-                button.classList.add(
-                    'range-end'
-                );
+                button.classList.add('range-end');
             }
 
-            button.addEventListener(
-                'click',
-                function (event) {
-                    event.preventDefault();
-                    event.stopPropagation();
+            button.addEventListener('click', function (event) {
+                event.preventDefault();
+                event.stopPropagation();
 
-                    selectDate(
-                        cellDate
-                    );
-                }
-            );
+                selectDate(cellDate);
+            });
 
-            days.appendChild(
-                button
-            );
+            days.appendChild(button);
         }
 
         calendar.appendChild(days);
@@ -2185,30 +1975,16 @@
     }
 
     function selectDate(date) {
-        const chosen =
-            cloneDate(date);
+        const chosen = cloneDate(date);
 
-        if (
-            !tempStart ||
-            tempEnd
-        ) {
-            tempStart =
-                chosen;
-
-            tempEnd =
-                null;
-        } else if (
-            toISO(chosen) <
-            toISO(tempStart)
-        ) {
-            tempEnd =
-                cloneDate(tempStart);
-
-            tempStart =
-                chosen;
+        if (!tempStart || tempEnd) {
+            tempStart = chosen;
+            tempEnd = null;
+        } else if (toISO(chosen) < toISO(tempStart)) {
+            tempEnd = cloneDate(tempStart);
+            tempStart = chosen;
         } else {
-            tempEnd =
-                chosen;
+            tempEnd = chosen;
         }
 
         renderCalendars();
@@ -2219,10 +1995,7 @@
             return;
         }
 
-        if (
-            tempStart &&
-            tempEnd
-        ) {
+        if (tempStart && tempEnd) {
             selectedLabel.textContent =
                 formatDate(tempStart) +
                 ' - ' +
@@ -2243,9 +2016,6 @@
             'Pilih tanggal awal';
     }
 
-    /* ================================================================
-       DATE PICKER POSITION
-    ================================================================ */
     function positionDatePicker() {
         if (
             !datePicker ||
@@ -2307,9 +2077,6 @@
             top + 'px';
     }
 
-    /* ================================================================
-       SHOW / HIDE DATE PICKER
-    ================================================================ */
     function showDatePicker() {
         if (!datePicker) {
             return;
@@ -2338,17 +2105,10 @@
 
         renderCalendars();
 
-        datePicker.classList.remove(
-            'hidden'
-        );
+        datePicker.classList.remove('hidden');
+        document.body.classList.add('date-picker-lock');
 
-        document.body.classList.add(
-            'date-picker-lock'
-        );
-
-        requestAnimationFrame(
-            positionDatePicker
-        );
+        requestAnimationFrame(positionDatePicker);
     }
 
     function hideDatePicker() {
@@ -2356,45 +2116,21 @@
             return;
         }
 
-        datePicker.classList.add(
-            'hidden'
-        );
-
+        datePicker.classList.add('hidden');
         closePickerPanel();
-
-        document.body.classList.remove(
-            'date-picker-lock'
-        );
+        document.body.classList.remove('date-picker-lock');
     }
 
-    /* ================================================================
-       MONTH PANEL
-    ================================================================ */
-    function showMonthPanel(
-        calendarDate,
-        anchor,
-        side
-    ) {
+    function showMonthPanel(calendarDate, anchor, side) {
         if (!pickerPanel) {
             return;
         }
 
-        closePickerPanel();
-
-        activePanelType =
-            'month';
-
-        activePanelSide =
-            side;
-
-        activePanelYear =
-            calendarDate.getFullYear();
+        activePanelSide = side;
+        activePanelYear = calendarDate.getFullYear();
 
         pickerPanel.innerHTML = '';
-
-        pickerPanel.classList.remove(
-            'hidden'
-        );
+        pickerPanel.classList.remove('hidden');
 
         const header =
             document.createElement('div');
@@ -2406,11 +2142,8 @@
             document.createElement('button');
 
         previous.type = 'button';
-        previous.className =
-            'custom-picker-panel-nav';
-
-        previous.innerHTML =
-            '&#8249;';
+        previous.className = 'custom-picker-panel-nav';
+        previous.innerHTML = '&#8249;';
 
         const title =
             document.createElement('div');
@@ -2422,30 +2155,24 @@
             document.createElement('button');
 
         next.type = 'button';
-        next.className =
-            'custom-picker-panel-nav';
-
-        next.innerHTML =
-            '&#8250;';
+        next.className = 'custom-picker-panel-nav';
+        next.innerHTML = '&#8250;';
 
         const close =
             document.createElement('button');
 
         close.type = 'button';
-        close.className =
-            'custom-picker-panel-close';
+        close.className = 'custom-picker-panel-close';
+        close.innerHTML = '&times;';
 
-        close.innerHTML =
-            '&times;';
-
-        header.appendChild(previous);
-        header.appendChild(title);
-        header.appendChild(next);
-        header.appendChild(close);
-
-        pickerPanel.appendChild(
-            header
+        header.append(
+            previous,
+            title,
+            next,
+            close
         );
+
+        pickerPanel.appendChild(header);
 
         const grid =
             document.createElement('div');
@@ -2453,9 +2180,7 @@
         grid.className =
             'custom-picker-grid';
 
-        pickerPanel.appendChild(
-            grid
-        );
+        pickerPanel.appendChild(grid);
 
         function renderMonths() {
             title.textContent =
@@ -2464,10 +2189,7 @@
             grid.innerHTML = '';
 
             MONTHS.forEach(
-                function (
-                    monthName,
-                    monthIndex
-                ) {
+                function (monthName, monthIndex) {
                     const button =
                         document.createElement('button');
 
@@ -2502,28 +2224,17 @@
                                     1
                                 );
 
-                            if (
-                                activePanelSide ===
-                                'left'
-                            ) {
-                                viewMonth =
-                                    target;
-                            } else {
-                                viewMonth =
-                                    addMonths(
-                                        target,
-                                        -1
-                                    );
-                            }
+                            viewMonth =
+                                activePanelSide === 'left'
+                                    ? target
+                                    : addMonths(target, -1);
 
                             closePickerPanel();
                             renderCalendars();
                         }
                     );
 
-                    grid.appendChild(
-                        button
-                    );
+                    grid.appendChild(button);
                 }
             );
 
@@ -2533,45 +2244,31 @@
             );
         }
 
-        previous.addEventListener(
-            'click',
-            function (event) {
-                event.preventDefault();
-                event.stopPropagation();
+        previous.addEventListener('click', function (event) {
+            event.preventDefault();
+            event.stopPropagation();
 
-                activePanelYear--;
+            activePanelYear =
+                Math.max(
+                    MIN_YEAR,
+                    activePanelYear - 1
+                );
 
-                if (
-                    activePanelYear <
-                    MIN_YEAR
-                ) {
-                    activePanelYear =
-                        MIN_YEAR;
-                }
+            renderMonths();
+        });
 
-                renderMonths();
-            }
-        );
+        next.addEventListener('click', function (event) {
+            event.preventDefault();
+            event.stopPropagation();
 
-        next.addEventListener(
-            'click',
-            function (event) {
-                event.preventDefault();
-                event.stopPropagation();
+            activePanelYear =
+                Math.min(
+                    MAX_YEAR,
+                    activePanelYear + 1
+                );
 
-                activePanelYear++;
-
-                if (
-                    activePanelYear >
-                    MAX_YEAR
-                ) {
-                    activePanelYear =
-                        MAX_YEAR;
-                }
-
-                renderMonths();
-            }
-        );
+            renderMonths();
+        });
 
         close.addEventListener(
             'click',
@@ -2581,49 +2278,38 @@
         renderMonths();
     }
 
-    /* ================================================================
-       YEAR PANEL
-    ================================================================ */
-    function showYearPanel(
-        calendarDate,
-        anchor,
-        side
-    ) {
+    function showYearPanel(calendarDate, anchor, side) {
         if (!pickerPanel) {
             return;
         }
 
-        closePickerPanel();
-
-        activePanelType =
-            'year';
-
-        activePanelSide =
-            side;
-
-        const pageSize =
-            12;
+        activePanelSide = side;
 
         let startYear =
             Math.floor(
-                calendarDate.getFullYear() /
-                pageSize
-            ) *
-            pageSize;
+                calendarDate.getFullYear() / 12
+            ) * 12;
 
-        if (
-            startYear <
-            MIN_YEAR
-        ) {
-            startYear =
-                MIN_YEAR;
-        }
+        startYear =
+            Math.max(
+                MIN_YEAR,
+                startYear
+            );
 
-        pickerPanel.innerHTML = '';
-
-        pickerPanel.classList.remove(
-            'hidden'
+        renderYearPanel(
+            calendarDate,
+            anchor,
+            startYear
         );
+    }
+
+    function renderYearPanel(
+        calendarDate,
+        anchor,
+        startYear
+    ) {
+        pickerPanel.innerHTML = '';
+        pickerPanel.classList.remove('hidden');
 
         const header =
             document.createElement('div');
@@ -2667,14 +2353,14 @@
         close.innerHTML =
             '&times;';
 
-        header.appendChild(previous);
-        header.appendChild(title);
-        header.appendChild(next);
-        header.appendChild(close);
-
-        pickerPanel.appendChild(
-            header
+        header.append(
+            previous,
+            title,
+            next,
+            close
         );
+
+        pickerPanel.appendChild(header);
 
         const grid =
             document.createElement('div');
@@ -2682,9 +2368,7 @@
         grid.className =
             'custom-picker-grid';
 
-        pickerPanel.appendChild(
-            grid
-        );
+        pickerPanel.appendChild(grid);
 
         function renderYears() {
             title.textContent =
@@ -2696,7 +2380,7 @@
 
             for (
                 let index = 0;
-                index < pageSize;
+                index < 12;
                 index++
             ) {
                 const year =
@@ -2705,7 +2389,9 @@
                 const button =
                     document.createElement('button');
 
-                button.type = 'button';
+                button.type =
+                    'button';
+
                 button.className =
                     'custom-picker-option';
 
@@ -2743,24 +2429,18 @@
                             const month =
                                 calendarDate.getMonth();
 
-                            if (
-                                activePanelSide ===
-                                'left'
-                            ) {
-                                viewMonth =
-                                    new Date(
+                            viewMonth =
+                                activePanelSide === 'left'
+                                    ? new Date(
                                         year,
                                         month,
                                         1
-                                    );
-                            } else {
-                                viewMonth =
-                                    new Date(
+                                    )
+                                    : new Date(
                                         year,
                                         month - 1,
                                         1
                                     );
-                            }
 
                             closePickerPanel();
                             renderCalendars();
@@ -2770,9 +2450,7 @@
                     button.disabled = true;
                 }
 
-                grid.appendChild(
-                    button
-                );
+                grid.appendChild(button);
             }
 
             positionPickerPanel(
@@ -2787,16 +2465,11 @@
                 event.preventDefault();
                 event.stopPropagation();
 
-                startYear -=
-                    pageSize;
-
-                if (
-                    startYear <
-                    MIN_YEAR
-                ) {
-                    startYear =
-                        MIN_YEAR;
-                }
+                startYear =
+                    Math.max(
+                        MIN_YEAR,
+                        startYear - 12
+                    );
 
                 renderYears();
             }
@@ -2808,23 +2481,16 @@
                 event.preventDefault();
                 event.stopPropagation();
 
-                startYear +=
-                    pageSize;
-
                 const maxStart =
                     Math.floor(
-                        MAX_YEAR /
-                        pageSize
-                    ) *
-                    pageSize;
+                        MAX_YEAR / 12
+                    ) * 12;
 
-                if (
-                    startYear >
-                    maxStart
-                ) {
-                    startYear =
-                        maxStart;
-                }
+                startYear =
+                    Math.min(
+                        maxStart,
+                        startYear + 12
+                    );
 
                 renderYears();
             }
@@ -2838,23 +2504,23 @@
         renderYears();
     }
 
-    /* ================================================================
-       PANEL POSITION
-    ================================================================ */
-    function positionPickerPanel(
-        element,
-        anchor
-    ) {
-        if (!element || !anchor) {
+    function positionPickerPanel(element, anchor) {
+        if (
+            !element ||
+            !anchor
+        ) {
             return;
         }
 
         if (
-            window.innerWidth <=
-            767
+            window.innerWidth <= 767
         ) {
-            element.style.left = '50%';
-            element.style.top = '50%';
+            element.style.left =
+                '50%';
+
+            element.style.top =
+                '50%';
+
             return;
         }
 
@@ -2918,19 +2584,26 @@
         );
 
         pickerPanel.innerHTML = '';
-
-        activePanelType =
-            null;
     }
 
-    /* ================================================================
-       APPLY DATE
-    ================================================================ */
     function applyDateRange() {
         if (
             !tempStart ||
             !tempEnd
         ) {
+            if (
+                typeof window.Swal !==
+                'undefined'
+            ) {
+                window.Swal.fire({
+                    icon: 'info',
+                    title: 'Pilih rentang tanggal',
+                    text: 'Silakan pilih tanggal awal dan tanggal akhir terlebih dahulu.',
+                    confirmButtonText: 'Mengerti',
+                    confirmButtonColor: '#2563eb'
+                });
+            }
+
             return;
         }
 
@@ -2957,12 +2630,12 @@
                 formatDate(selectedEnd);
         }
 
-        if (clearDateRangeButton) {
-            clearDateRangeButton.classList.remove(
+        if (clearDateButton) {
+            clearDateButton.classList.remove(
                 'hidden'
             );
 
-            clearDateRangeButton.classList.add(
+            clearDateButton.classList.add(
                 'flex'
             );
         }
@@ -2970,9 +2643,6 @@
         hideDatePicker();
     }
 
-    /* ================================================================
-       CLEAR DATE
-    ================================================================ */
     function clearDateRange() {
         selectedStart = null;
         selectedEnd = null;
@@ -2991,12 +2661,12 @@
             dateInput.value = '';
         }
 
-        if (clearDateRangeButton) {
-            clearDateRangeButton.classList.remove(
+        if (clearDateButton) {
+            clearDateButton.classList.remove(
                 'flex'
             );
 
-            clearDateRangeButton.classList.add(
+            clearDateButton.classList.add(
                 'hidden'
             );
         }
@@ -3009,9 +2679,6 @@
         hideDatePicker();
     }
 
-    /* ================================================================
-       DATE EVENTS
-    ================================================================ */
     if (
         dateInput &&
         datePicker
@@ -3047,7 +2714,7 @@
             }
         );
 
-        datePickerClose?.addEventListener(
+        closeDatePickerButton?.addEventListener(
             'click',
             function (event) {
                 event.preventDefault();
@@ -3057,7 +2724,7 @@
             }
         );
 
-        datePickerClear?.addEventListener(
+        clearPickerButton?.addEventListener(
             'click',
             function (event) {
                 event.preventDefault();
@@ -3067,7 +2734,7 @@
             }
         );
 
-        datePickerApply?.addEventListener(
+        applyPickerButton?.addEventListener(
             'click',
             function (event) {
                 event.preventDefault();
@@ -3077,7 +2744,7 @@
             }
         );
 
-        clearDateRangeButton?.addEventListener(
+        clearDateButton?.addEventListener(
             'click',
             function (event) {
                 event.preventDefault();
@@ -3124,8 +2791,8 @@
                 }
 
                 if (
-                    clearDateRangeButton &&
-                    clearDateRangeButton.contains(
+                    clearDateButton &&
+                    clearDateButton.contains(
                         event.target
                     )
                 ) {
@@ -3137,9 +2804,6 @@
         );
     }
 
-    /* ================================================================
-       DATE RESIZE / SCROLL
-    ================================================================ */
     window.addEventListener(
         'resize',
         function () {
@@ -3170,7 +2834,8 @@
                 datePicker &&
                 !datePicker.classList.contains(
                     'hidden'
-                )
+                ) &&
+                window.innerWidth > 767
             ) {
                 positionDatePicker();
             }
@@ -3181,6 +2846,7 @@
     /* ================================================================
        FILTER DROPDOWN
     ================================================================ */
+
     const kategoriDropdown =
         document.getElementById(
             'kategoriDropdown'
@@ -3246,9 +2912,7 @@
             return;
         }
 
-        dropdown.classList.remove(
-            'open'
-        );
+        dropdown.classList.remove('open');
 
         const button =
             dropdown.querySelector(
@@ -3264,13 +2928,8 @@
     }
 
     function closeAllDropdowns() {
-        closeDropdown(
-            kategoriDropdown
-        );
-
-        closeDropdown(
-            statusDropdown
-        );
+        closeDropdown(kategoriDropdown);
+        closeDropdown(statusDropdown);
     }
 
     function openDropdown(dropdown) {
@@ -3296,9 +2955,7 @@
             );
         }
 
-        dropdown.classList.add(
-            'open'
-        );
+        dropdown.classList.add('open');
 
         const button =
             dropdown.querySelector(
@@ -3313,9 +2970,7 @@
         }
     }
 
-    function getCheckedLabels(
-        selector
-    ) {
+    function getCheckedLabels(selector) {
         return Array.from(
             document.querySelectorAll(
                 selector + ':checked'
@@ -3334,8 +2989,7 @@
                         );
 
                     return (
-                        span?.textContent
-                            .trim() ||
+                        span?.textContent.trim() ||
                         ''
                     );
                 }
@@ -3354,8 +3008,7 @@
 
         if (kategoriCount) {
             kategoriCount.textContent =
-                count +
-                ' dipilih';
+                count + ' dipilih';
         }
 
         if (kategoriFooterCount) {
@@ -3397,8 +3050,7 @@
 
         if (statusCount) {
             statusCount.textContent =
-                count +
-                ' dipilih';
+                count + ' dipilih';
         }
 
         if (statusFooterCount) {
@@ -3492,7 +3144,9 @@
     );
 
     document
-        .getElementById('selectAllKategori')
+        .getElementById(
+            'selectAllKategori'
+        )
         ?.addEventListener(
             'click',
             function (event) {
@@ -3511,7 +3165,9 @@
         );
 
     document
-        .getElementById('clearAllKategori')
+        .getElementById(
+            'clearAllKategori'
+        )
         ?.addEventListener(
             'click',
             function (event) {
@@ -3530,7 +3186,9 @@
         );
 
     document
-        .getElementById('selectAllStatus')
+        .getElementById(
+            'selectAllStatus'
+        )
         ?.addEventListener(
             'click',
             function (event) {
@@ -3549,7 +3207,9 @@
         );
 
     document
-        .getElementById('clearAllStatus')
+        .getElementById(
+            'clearAllStatus'
+        )
         ?.addEventListener(
             'click',
             function (event) {
@@ -3616,6 +3276,7 @@
     /* ================================================================
        DELETE CONFIRMATION
     ================================================================ */
+
     document
         .querySelectorAll('.delete-btn')
         .forEach(
@@ -3672,7 +3333,11 @@
                                     }
                                 }
                             );
-                        } else if (
+
+                            return;
+                        }
+
+                        if (
                             window.confirm(
                                 'Yakin ingin menghapus surat keluar ini?'
                             )
@@ -3685,31 +3350,81 @@
         );
 
     /* ================================================================
-       INITIAL DATE DISPLAY
+       FILTER DATE VALIDATION
     ================================================================ */
+
+    const filterForm =
+        document.getElementById(
+            'filterForm'
+        );
+
+    filterForm?.addEventListener(
+        'submit',
+        function (event) {
+            const start =
+                dariInput?.value || '';
+
+            const end =
+                sampaiInput?.value || '';
+
+            if (
+                start &&
+                end &&
+                start > end
+            ) {
+                event.preventDefault();
+
+                if (
+                    typeof window.Swal !==
+                    'undefined'
+                ) {
+                    window.Swal.fire({
+                        icon:
+                            'warning',
+                        title:
+                            'Rentang tanggal tidak valid',
+                        text:
+                            'Tanggal mulai tidak boleh lebih besar dari tanggal akhir.',
+                        confirmButtonText:
+                            'Mengerti',
+                        confirmButtonColor:
+                            '#2563eb'
+                    });
+                } else {
+                    window.alert(
+                        'Tanggal mulai tidak boleh lebih besar dari tanggal akhir.'
+                    );
+                }
+            }
+        }
+    );
+
+    /* ================================================================
+       INITIALIZE
+    ================================================================ */
+
     if (
         selectedStart &&
         selectedEnd &&
         dateInput &&
-        clearDateRangeButton
+        clearDateButton
     ) {
         dateInput.value =
             formatDate(selectedStart) +
             ' - ' +
             formatDate(selectedEnd);
 
-        clearDateRangeButton.classList.remove(
+        clearDateButton.classList.remove(
             'hidden'
         );
 
-        clearDateRangeButton.classList.add(
+        clearDateButton.classList.add(
             'flex'
         );
     }
 })();
 </script>
 
-{{-- SWEETALERT --}}
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 @endpush
 
