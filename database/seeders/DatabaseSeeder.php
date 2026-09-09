@@ -22,7 +22,7 @@ class DatabaseSeeder extends Seeder
 
         User::updateOrCreate(
             [
-                'email' => 'admin@arsipsurat.test',
+                'email' => 'admin@locker.com',
             ],
             [
                 'name' => 'Administrator',
@@ -41,7 +41,7 @@ class DatabaseSeeder extends Seeder
 
         User::updateOrCreate(
             [
-                'email' => 'pimpinan@arsipsurat.test',
+                'email' => 'pimpinan@locker.com',
             ],
             [
                 'name' => 'Kepala Instansi',
@@ -60,7 +60,7 @@ class DatabaseSeeder extends Seeder
 
         User::updateOrCreate(
             [
-                'email' => 'staff@arsipsurat.test',
+                'email' => 'staff@locker.com',
             ],
             [
                 'name' => 'Staff Arsip',
