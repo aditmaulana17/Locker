@@ -2,13 +2,21 @@
 
 namespace App\Http\Requests;
 
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class SuratMasukRequest extends FormRequest
 {
     /**
-     * Menentukan apakah user boleh melakukan request.
+     * Menentukan apakah request boleh diproses.
+     *
+     * Hanya admin dan pimpinan yang dapat:
+     * - membuat surat masuk
+     * - mengedit surat masuk
+     *
+     * Staff hanya dapat melihat surat yang
+     * didisposisikan kepadanya.
      */
     public function authorize(): bool
     {
@@ -18,30 +26,30 @@ class SuratMasukRequest extends FormRequest
             return false;
         }
 
-        $role = strtolower(
-            trim(
-                (string) (
-                    $user->role
-                    ?? $user->jabatan
-                    ?? ''
-                )
-            )
-        );
-
         /*
-         * Normalisasi legacy:
-         * staf -> staff
+         * Gunakan helper User::normalizeRole()
+         * agar role "staf" otomatis dianggap "staff".
          */
-        if ($role === 'staf') {
-            $role = 'staff';
+        if (method_exists(User::class, 'normalizeRole')) {
+            $role = User::normalizeRole(
+                $user->role ?? $user->jabatan ?? ''
+            );
+        } else {
+            $role = strtolower(
+                trim(
+                    (string) (
+                        $user->role
+                        ?? $user->jabatan
+                        ?? ''
+                    )
+                )
+            );
+
+            if ($role === 'staf') {
+                $role = 'staff';
+            }
         }
 
-        /*
-         * Hanya admin dan pimpinan yang dapat
-         * membuat/mengubah surat masuk.
-         *
-         * Staff hanya melihat.
-         */
         return in_array(
             $role,
             [
@@ -53,7 +61,7 @@ class SuratMasukRequest extends FormRequest
     }
 
     /**
-     * Rules validasi.
+     * Rules validasi request.
      */
     public function rules(): array
     {
@@ -64,14 +72,15 @@ class SuratMasukRequest extends FormRequest
             ? $suratMasuk->id
             : $suratMasuk;
 
-        $isCreate = $this->isMethod('post');
-
         return [
 
             /*
              * =====================================================
              * NOMOR AGENDA
              * =====================================================
+             *
+             * Saat edit, nomor agenda milik surat yang sama
+             * tidak dianggap duplikat.
              */
             'nomor_agenda' => [
                 'nullable',
@@ -107,7 +116,7 @@ class SuratMasukRequest extends FormRequest
 
             /*
              * =====================================================
-             * TANGGAL
+             * TANGGAL SURAT
              * =====================================================
              */
             'tanggal_surat' => [
@@ -115,6 +124,11 @@ class SuratMasukRequest extends FormRequest
                 'date',
             ],
 
+            /*
+             * =====================================================
+             * TANGGAL DITERIMA
+             * =====================================================
+             */
             'tanggal_terima' => [
                 'required',
                 'date',
@@ -156,37 +170,44 @@ class SuratMasukRequest extends FormRequest
 
             /*
              * =====================================================
-             * FILE LAMPIRAN
+             * LAMPIRAN FILE
              * =====================================================
              *
-             * Bisa:
-             * - PDF
-             * - JPG
-             * - JPEG
-             * - PNG
-             * - WEBP
+             * Format yang diizinkan:
+             *
+             * PDF
+             * JPG
+             * JPEG
+             * PNG
+             * WEBP
              *
              * Maksimal 10 MB.
              *
-             * Pada EDIT nullable karena file lama
-             * tetap dipertahankan jika tidak ada file baru.
+             * Nullable karena pada EDIT user boleh
+             * mempertahankan file lama.
              */
             'lampiran_file' => [
                 'nullable',
                 'file',
-                'mimes:pdf,jpg,jpeg,png,webp',
                 'max:10240',
+                'mimes:pdf,jpg,jpeg,png,webp',
+                'extensions:pdf,jpg,jpeg,png,webp',
             ],
 
             /*
              * =====================================================
-             * HASIL KAMERA
+             * HASIL SCAN KAMERA
              * =====================================================
+             *
+             * Berupa Data URI Base64.
+             *
+             * Contoh:
+             * data:image/jpeg;base64,...
+             * data:image/png;base64,...
              */
             'captured_image' => [
                 'nullable',
                 'string',
-                'regex:/^data:image\/(png|jpeg|jpg|webp);base64,/i',
             ],
 
             /*
@@ -219,22 +240,41 @@ class SuratMasukRequest extends FormRequest
     }
 
     /**
-     * Validasi tambahan.
-     *
-     * Pada CREATE harus ada minimal salah satu:
-     * - lampiran_file
-     * - captured_image
-     *
-     * Pada EDIT tidak wajib upload karena file lama
-     * tetap dipertahankan.
+     * Validasi tambahan setelah rules utama.
      */
     public function withValidator($validator): void
     {
         $validator->after(function ($validator) {
-            if (!$this->isMethod('post')) {
-                return;
+
+            /*
+             * =====================================================
+             * CEK CAPTURED IMAGE
+             * =====================================================
+             */
+            if ($this->filled('captured_image')) {
+
+                $capturedImage = trim(
+                    (string) $this->input('captured_image')
+                );
+
+                if (
+                    !preg_match(
+                        '/^data:image\/(jpeg|jpg|png|webp);base64,/i',
+                        $capturedImage
+                    )
+                ) {
+                    $validator->errors()->add(
+                        'captured_image',
+                        'Format hasil scan kamera tidak valid. Gunakan JPG, JPEG, PNG, atau WEBP.'
+                    );
+                }
             }
 
+            /*
+             * =====================================================
+             * CEK FILE UPLOAD
+             * =====================================================
+             */
             $hasFile =
                 $this->hasFile('lampiran_file') &&
                 $this->file('lampiran_file') &&
@@ -243,20 +283,185 @@ class SuratMasukRequest extends FormRequest
             $hasCamera =
                 $this->filled('captured_image');
 
-            if (!$hasFile && !$hasCamera) {
-                $validator->errors()->add(
-                    'lampiran_file',
-                    'Berkas digital wajib diupload atau discan menggunakan kamera.'
-                );
-            }
-
+            /*
+             * Jangan izinkan upload file dan kamera
+             * digunakan secara bersamaan.
+             */
             if ($hasFile && $hasCamera) {
                 $validator->errors()->add(
                     'lampiran_file',
                     'Pilih salah satu saja: upload file atau scan menggunakan kamera.'
                 );
             }
+
+            /*
+             * =====================================================
+             * CREATE
+             * =====================================================
+             *
+             * Pada CREATE wajib ada dokumen digital:
+             * - file upload
+             * ATAU
+             * - hasil scan kamera
+             *
+             * Pada EDIT tidak wajib karena file lama
+             * tetap digunakan.
+             */
+            if ($this->isMethod('POST')) {
+
+                if (!$hasFile && !$hasCamera) {
+                    $validator->errors()->add(
+                        'lampiran_file',
+                        'Berkas digital wajib diupload atau discan menggunakan kamera.'
+                    );
+                }
+            }
+
+            /*
+             * =====================================================
+             * CEK ERROR UPLOAD PHP
+             * =====================================================
+             *
+             * Ini penting karena file JPG/PNG kadang gagal
+             * sebelum masuk ke proses validasi Laravel.
+             */
+            if ($this->hasFile('lampiran_file')) {
+
+                $file = $this->file('lampiran_file');
+
+                if ($file) {
+
+                    $errorCode = $file->getError();
+
+                    if (
+                        $errorCode !== UPLOAD_ERR_OK
+                    ) {
+                        $message = match ($errorCode) {
+
+                            UPLOAD_ERR_INI_SIZE,
+                            UPLOAD_ERR_FORM_SIZE =>
+                                'Ukuran file terlalu besar. Maksimal 10 MB.',
+
+                            UPLOAD_ERR_PARTIAL =>
+                                'File hanya terupload sebagian. Silakan coba lagi.',
+
+                            UPLOAD_ERR_NO_FILE =>
+                                'Tidak ada file yang dipilih.',
+
+                            UPLOAD_ERR_NO_TMP_DIR =>
+                                'Folder temporary upload PHP tidak tersedia.',
+
+                            UPLOAD_ERR_CANT_WRITE =>
+                                'Server gagal menulis file upload.',
+
+                            UPLOAD_ERR_EXTENSION =>
+                                'Upload file dihentikan oleh konfigurasi PHP.',
+
+                            default =>
+                                'File gagal diupload. Silakan coba lagi.',
+                        };
+
+                        $validator->errors()->add(
+                            'lampiran_file',
+                            $message
+                        );
+                    }
+                }
+            }
         });
+    }
+
+    /**
+     * Membersihkan input sebelum validasi.
+     */
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'nomor_agenda' => $this->cleanInput(
+                'nomor_agenda'
+            ),
+
+            'nomor_surat' => $this->cleanInput(
+                'nomor_surat'
+            ),
+
+            'pengirim' => $this->cleanInput(
+                'pengirim'
+            ),
+
+            'perihal' => $this->cleanInput(
+                'perihal'
+            ),
+
+            'ringkasan' => $this->cleanInput(
+                'ringkasan'
+            ),
+
+            'status' => $this->cleanStatus(),
+
+            'lokasi_arsip_fisik' => $this->cleanInput(
+                'lokasi_arsip_fisik'
+            ),
+
+            'captured_image' => $this->cleanCapturedImage(),
+        ]);
+    }
+
+    /**
+     * Membersihkan input string biasa.
+     */
+    private function cleanInput(string $key): ?string
+    {
+        if (!$this->filled($key)) {
+            return null;
+        }
+
+        $value = trim(
+            (string) $this->input($key)
+        );
+
+        return $value !== ''
+            ? $value
+            : null;
+    }
+
+    /**
+     * Membersihkan status.
+     */
+    private function cleanStatus(): string
+    {
+        $status = strtolower(
+            trim(
+                (string) $this->input(
+                    'status',
+                    'baru'
+                )
+            )
+        );
+
+        return $status !== ''
+            ? $status
+            : 'baru';
+    }
+
+    /**
+     * Membersihkan data hasil kamera.
+     */
+    private function cleanCapturedImage(): ?string
+    {
+        if (!$this->filled('captured_image')) {
+            return null;
+        }
+
+        $value = trim(
+            (string) $this->input(
+                'captured_image'
+            )
+        );
+
+        return $value !== ''
+            ? $value
+            : null;
     }
 
     /**
@@ -268,6 +473,9 @@ class SuratMasukRequest extends FormRequest
 
             'nomor_agenda.unique' =>
                 'Nomor agenda ini sudah digunakan oleh surat lain.',
+
+            'nomor_agenda.max' =>
+                ':attribute maksimal 50 karakter.',
 
             'nomor_surat.required' =>
                 ':attribute wajib diisi.',
@@ -332,11 +540,11 @@ class SuratMasukRequest extends FormRequest
             'lampiran_file.mimes' =>
                 ':attribute harus berformat PDF, JPG, JPEG, PNG, atau WEBP.',
 
+            'lampiran_file.extensions' =>
+                ':attribute memiliki ekstensi yang tidak didukung. Gunakan PDF, JPG, JPEG, PNG, atau WEBP.',
+
             'lampiran_file.max' =>
                 ':attribute maksimal berukuran 10 MB.',
-
-            'captured_image.regex' =>
-                ':attribute bukan hasil gambar kamera yang valid.',
 
             'captured_image.string' =>
                 ':attribute tidak valid.',
@@ -356,11 +564,12 @@ class SuratMasukRequest extends FormRequest
     }
 
     /**
-     * Nama atribut untuk pesan validasi.
+     * Nama field agar pesan validasi lebih mudah dibaca.
      */
     public function attributes(): array
     {
         return [
+
             'nomor_agenda' =>
                 'Nomor Agenda',
 
@@ -368,7 +577,7 @@ class SuratMasukRequest extends FormRequest
                 'Nomor Surat',
 
             'pengirim' =>
-                'Pengirim',
+                'Instansi Pengirim',
 
             'tanggal_surat' =>
                 'Tanggal Surat',
@@ -386,7 +595,7 @@ class SuratMasukRequest extends FormRequest
                 'Ringkasan',
 
             'lampiran_file' =>
-                'Berkas Lampiran',
+                'Berkas Digital',
 
             'captured_image' =>
                 'Hasil Scan Kamera',
@@ -397,95 +606,5 @@ class SuratMasukRequest extends FormRequest
             'lokasi_arsip_fisik' =>
                 'Lokasi Arsip Fisik',
         ];
-    }
-
-    /**
-     * Membersihkan data sebelum validasi.
-     */
-    protected function prepareForValidation(): void
-    {
-        $this->merge([
-            'nomor_agenda' =>
-                $this->cleanInput('nomor_agenda'),
-
-            'nomor_surat' =>
-                $this->cleanInput('nomor_surat'),
-
-            'pengirim' =>
-                $this->cleanInput('pengirim'),
-
-            'perihal' =>
-                $this->cleanInput('perihal'),
-
-            'ringkasan' =>
-                $this->cleanInput('ringkasan'),
-
-            'status' =>
-                $this->cleanStatus(),
-
-            'lokasi_arsip_fisik' =>
-                $this->cleanInput('lokasi_arsip_fisik'),
-
-            /*
-             * Jangan mengubah file upload.
-             */
-            'captured_image' =>
-                $this->cleanCapturedImage(),
-        ]);
-    }
-
-    /**
-     * Membersihkan input string.
-     */
-    private function cleanInput(string $key): ?string
-    {
-        if (!$this->filled($key)) {
-            return null;
-        }
-
-        $value = trim(
-            (string) $this->input($key)
-        );
-
-        return $value !== ''
-            ? $value
-            : null;
-    }
-
-    /**
-     * Membersihkan status.
-     */
-    private function cleanStatus(): string
-    {
-        $status = strtolower(
-            trim(
-                (string) $this->input(
-                    'status',
-                    'baru'
-                )
-            )
-        );
-
-        return $status !== ''
-            ? $status
-            : 'baru';
-    }
-
-    /**
-     * Membersihkan hasil kamera.
-     */
-    private function cleanCapturedImage(): ?string
-    {
-        if (!$this->filled('captured_image')) {
-            return null;
-        }
-
-        $value = trim(
-            (string) $this->input('captured_image')
-        );
-
-        return $value !== ''
-            ? $value
-            : null;
     }
 }
