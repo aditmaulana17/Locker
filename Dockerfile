@@ -1,3 +1,4 @@
+
 # =========================================================
 # STAGE 1
 # BUILD FRONTEND
@@ -27,9 +28,7 @@ RUN npm ci
 # ---------------------------------------------------------
 
 COPY resources ./resources
-
 COPY public ./public
-
 COPY vite.config.* ./
 
 
@@ -42,7 +41,6 @@ ARG VITE_APP_NAME=Locker
 ENV VITE_APP_NAME=${VITE_APP_NAME}
 
 RUN npm run build
-
 
 
 # =========================================================
@@ -98,7 +96,6 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 COPY composer.json composer.lock ./
 
-
 RUN composer install \
     --no-dev \
     --no-interaction \
@@ -112,6 +109,16 @@ RUN composer install \
 # ---------------------------------------------------------
 
 COPY . .
+
+
+# ---------------------------------------------------------
+# PHP configuration
+# ---------------------------------------------------------
+# Memuat konfigurasi upload dari php.ini project
+# ke konfigurasi PHP-FPM di dalam container.
+# ---------------------------------------------------------
+
+COPY php.ini /usr/local/etc/php/conf.d/uploads.ini
 
 
 # ---------------------------------------------------------
@@ -161,13 +168,15 @@ COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+# ---------------------------------------------------------
+# PHP-FPM
+# ---------------------------------------------------------
 
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
 EXPOSE 9000
 
 CMD ["php-fpm"]
-
 
 
 # =========================================================
@@ -202,7 +211,10 @@ COPY docker/nginx/default.conf \
      /etc/nginx/conf.d/default.conf
 
 
-EXPOSE 80
+# ---------------------------------------------------------
+# Nginx
+# ---------------------------------------------------------
 
+EXPOSE 80
 
 CMD ["nginx", "-g", "daemon off;"]
