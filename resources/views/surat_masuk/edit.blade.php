@@ -7,12 +7,16 @@
 @php
     /*
     |--------------------------------------------------------------------------
-    | Format tanggal untuk input type="date"
+    | FORMAT TANGGAL
     |--------------------------------------------------------------------------
     */
+
     $tanggalSuratValue = old('tanggal_surat');
 
-    if ($tanggalSuratValue === null && !empty($suratMasuk->tanggal_surat)) {
+    if (
+        $tanggalSuratValue === null &&
+        !empty($suratMasuk->tanggal_surat)
+    ) {
         try {
             $tanggalSuratValue = \Illuminate\Support\Carbon::parse(
                 $suratMasuk->tanggal_surat
@@ -28,7 +32,10 @@
 
     $tanggalTerimaValue = old('tanggal_terima');
 
-    if ($tanggalTerimaValue === null && !empty($suratMasuk->tanggal_terima)) {
+    if (
+        $tanggalTerimaValue === null &&
+        !empty($suratMasuk->tanggal_terima)
+    ) {
         try {
             $tanggalTerimaValue = \Illuminate\Support\Carbon::parse(
                 $suratMasuk->tanggal_terima
@@ -42,9 +49,13 @@
         }
     }
 
-    $currentStatus = old(
-        'status',
-        $suratMasuk->status ?: 'baru'
+    $currentStatus = strtolower(
+        trim(
+            (string) old(
+                'status',
+                $suratMasuk->status ?: 'baru'
+            )
+        )
     );
 
     $currentKategori = old(
@@ -52,6 +63,7 @@
         $suratMasuk->kategori_surat_id
     );
 @endphp
+
 
 <div class="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-6">
 
@@ -70,17 +82,23 @@
             </p>
         </div>
 
-        <a href="{{ route('surat-masuk.index') }}"
-           class="inline-flex items-center justify-center w-full sm:w-auto px-4 py-2.5 text-sm font-semibold text-slate-700 bg-white border-2 border-slate-300 rounded-xl hover:bg-slate-50 hover:border-slate-400 transition">
-
-            <svg class="w-4 h-4 mr-2"
-                 fill="none"
-                 stroke="currentColor"
-                 viewBox="0 0 24 24">
-                <path stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+        <a
+            href="{{ route('surat-masuk.index') }}"
+            class="inline-flex items-center justify-center w-full sm:w-auto px-4 py-2.5 text-sm font-semibold text-slate-700 bg-white border-2 border-slate-300 rounded-xl hover:bg-slate-50 hover:border-slate-400 transition"
+        >
+            <svg
+                class="w-4 h-4 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+            >
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                />
             </svg>
 
             Kembali
@@ -98,28 +116,33 @@
 
             <div class="flex items-start gap-3">
 
-                <svg class="w-5 h-5 mt-0.5 text-rose-600 shrink-0"
-                     fill="none"
-                     stroke="currentColor"
-                     viewBox="0 0 24 24">
-                    <path stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M12 9v4m0 4h.01M10.29 3.86l-8.82 15A2 2 0 003.2 21.86h17.6a2 2 0 001.73-3l-8.82-15a2 2 0 00-3.42 0z"/>
+                <svg
+                    class="w-5 h-5 mt-0.5 text-rose-600 shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M12 9v4m0 4h.01M10.29 3.86l-8.82 15A2 2 0 003.2 21.86h17.6a2 2 0 001.73-3l-8.82-15a2 2 0 00-3.42 0z"
+                    />
                 </svg>
 
-                <div>
+                <div class="min-w-0">
 
                     <p class="font-bold text-sm text-rose-700">
                         Data belum dapat diperbarui.
                     </p>
 
                     <ul class="mt-1 text-xs text-rose-600 space-y-0.5">
-
                         @foreach ($errors->all() as $error)
-                            <li>• {{ $error }}</li>
+                            <li>
+                                • {{ $error }}
+                            </li>
                         @endforeach
-
                     </ul>
 
                 </div>
@@ -134,19 +157,22 @@
     {{-- =========================================================
          FORM
     ========================================================== --}}
-    <form method="POST"
-          action="{{ route('surat-masuk.update', $suratMasuk->id) }}"
-          enctype="multipart/form-data"
-          id="form-surat">
+    <form
+        method="POST"
+        action="{{ route('surat-masuk.update', $suratMasuk->id) }}"
+        enctype="multipart/form-data"
+        id="form-surat"
+    >
 
         @csrf
         @method('PUT')
 
-
         {{-- Nomor agenda --}}
-        <input type="hidden"
-               name="nomor_agenda"
-               value="{{ old('nomor_agenda', $suratMasuk->nomor_agenda) }}">
+        <input
+            type="hidden"
+            name="nomor_agenda"
+            value="{{ old('nomor_agenda', $suratMasuk->nomor_agenda) }}"
+        >
 
 
         <div class="bg-white border-2 border-slate-300 rounded-2xl shadow-sm overflow-hidden">
@@ -163,14 +189,19 @@
 
                         <div class="flex items-center justify-center w-9 h-9 mr-3 bg-blue-600 border-2 border-blue-600 rounded-lg text-white shrink-0">
 
-                            <svg class="w-4 h-4"
-                                 fill="none"
-                                 stroke="currentColor"
-                                 viewBox="0 0 24 24">
-                                <path stroke-linecap="round"
-                                      stroke-linejoin="round"
-                                      stroke-width="2"
-                                      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a3 3 0 003 3h0a3 3 0 003-3M9 5a3 3 0 013-3h0a3 3 0 013 3m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                            <svg
+                                class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                                aria-hidden="true"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a3 3 0 003 3h0a3 3 0 003-3M9 5a3 3 0 013-3h0a3 3 0 013 3m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+                                />
                             </svg>
 
                         </div>
@@ -234,20 +265,24 @@
                         {{-- Nomor Surat --}}
                         <div class="form-group">
 
-                            <label for="nomor_surat"
-                                   class="form-label">
+                            <label
+                                for="nomor_surat"
+                                class="form-label"
+                            >
                                 Nomor Surat
                                 <span class="text-rose-500">*</span>
                             </label>
 
-                            <input type="text"
-                                   id="nomor_surat"
-                                   name="nomor_surat"
-                                   value="{{ old('nomor_surat', $suratMasuk->nomor_surat) }}"
-                                   required
-                                   autocomplete="off"
-                                   placeholder="Contoh: 005/B/I/2026"
-                                   class="form-control-custom @error('nomor_surat') form-error @enderror">
+                            <input
+                                type="text"
+                                id="nomor_surat"
+                                name="nomor_surat"
+                                value="{{ old('nomor_surat', $suratMasuk->nomor_surat) }}"
+                                required
+                                autocomplete="off"
+                                placeholder="Contoh: 005/B/I/2026"
+                                class="form-control-custom @error('nomor_surat') form-error @enderror"
+                            >
 
                             @error('nomor_surat')
                                 <p class="form-error-text">
@@ -261,22 +296,24 @@
                         {{-- Pengirim --}}
                         <div class="form-group">
 
-                            <label for="pengirim"
-                                   class="form-label">
-
+                            <label
+                                for="pengirim"
+                                class="form-label"
+                            >
                                 Instansi Pengirim
                                 <span class="text-rose-500">*</span>
-
                             </label>
 
-                            <input type="text"
-                                   id="pengirim"
-                                   name="pengirim"
-                                   value="{{ old('pengirim', $suratMasuk->pengirim) }}"
-                                   required
-                                   autocomplete="organization"
-                                   placeholder="Masukkan nama instansi pengirim..."
-                                   class="form-control-custom @error('pengirim') form-error @enderror">
+                            <input
+                                type="text"
+                                id="pengirim"
+                                name="pengirim"
+                                value="{{ old('pengirim', $suratMasuk->pengirim) }}"
+                                required
+                                autocomplete="organization"
+                                placeholder="Masukkan nama instansi pengirim..."
+                                class="form-control-custom @error('pengirim') form-error @enderror"
+                            >
 
                             @error('pengirim')
                                 <p class="form-error-text">
@@ -290,20 +327,22 @@
                         {{-- Tanggal Surat --}}
                         <div class="form-group">
 
-                            <label for="tanggal_surat"
-                                   class="form-label">
-
+                            <label
+                                for="tanggal_surat"
+                                class="form-label"
+                            >
                                 Tanggal Surat
                                 <span class="text-rose-500">*</span>
-
                             </label>
 
-                            <input type="date"
-                                   id="tanggal_surat"
-                                   name="tanggal_surat"
-                                   value="{{ $tanggalSuratValue }}"
-                                   required
-                                   class="form-control-custom @error('tanggal_surat') form-error @enderror">
+                            <input
+                                type="date"
+                                id="tanggal_surat"
+                                name="tanggal_surat"
+                                value="{{ $tanggalSuratValue }}"
+                                required
+                                class="form-control-custom @error('tanggal_surat') form-error @enderror"
+                            >
 
                             @error('tanggal_surat')
                                 <p class="form-error-text">
@@ -317,20 +356,22 @@
                         {{-- Tanggal Diterima --}}
                         <div class="form-group">
 
-                            <label for="tanggal_terima"
-                                   class="form-label">
-
+                            <label
+                                for="tanggal_terima"
+                                class="form-label"
+                            >
                                 Tanggal Diterima
                                 <span class="text-rose-500">*</span>
-
                             </label>
 
-                            <input type="date"
-                                   id="tanggal_terima"
-                                   name="tanggal_terima"
-                                   value="{{ $tanggalTerimaValue }}"
-                                   required
-                                   class="form-control-custom @error('tanggal_terima') form-error @enderror">
+                            <input
+                                type="date"
+                                id="tanggal_terima"
+                                name="tanggal_terima"
+                                value="{{ $tanggalTerimaValue }}"
+                                required
+                                class="form-control-custom @error('tanggal_terima') form-error @enderror"
+                            >
 
                             @error('tanggal_terima')
                                 <p class="form-error-text">
@@ -344,52 +385,61 @@
                         {{-- Kategori --}}
                         <div class="form-group">
 
-                            <label for="kategori_surat_id"
-                                   class="form-label">
-
+                            <label
+                                for="kategori_surat_id"
+                                class="form-label"
+                            >
                                 Kategori Surat
                                 <span class="text-rose-500">*</span>
-
                             </label>
 
                             <div class="relative">
 
-                                <select id="kategori_surat_id"
-                                        name="kategori_surat_id"
-                                        required
-                                        class="form-control-custom appearance-none pr-10 @error('kategori_surat_id') form-error @enderror">
+                                <select
+                                    id="kategori_surat_id"
+                                    name="kategori_surat_id"
+                                    required
+                                    class="form-control-custom appearance-none pr-10 @error('kategori_surat_id') form-error @enderror"
+                                >
 
-                                    <option value=""
-                                            disabled
-                                            {{ $currentKategori ? '' : 'selected' }}>
+                                    <option
+                                        value=""
+                                        disabled
+                                        {{ $currentKategori ? '' : 'selected' }}
+                                    >
                                         Pilih kategori surat
                                     </option>
 
                                     @foreach($kategoris as $kategori)
 
-                                        <option value="{{ $kategori->id }}"
-                                            {{ (string) $currentKategori === (string) $kategori->id ? 'selected' : '' }}>
-
+                                        <option
+                                            value="{{ $kategori->id }}"
+                                            {{ (string) $currentKategori === (string) $kategori->id ? 'selected' : '' }}
+                                        >
                                             {{ $kategori->nama_kategori }}
 
                                             @if(!empty($kategori->sifat))
                                                 ({{ ucfirst($kategori->sifat) }})
                                             @endif
-
                                         </option>
 
                                     @endforeach
 
                                 </select>
 
-                                <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none"
-                                     fill="none"
-                                     stroke="currentColor"
-                                     viewBox="0 0 24 24">
-                                    <path stroke-linecap="round"
-                                          stroke-linejoin="round"
-                                          stroke-width="2"
-                                          d="M19 9l-7 7-7-7"/>
+                                <svg
+                                    class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                    aria-hidden="true"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M19 9l-7 7-7-7"
+                                    />
                                 </svg>
 
                             </div>
@@ -406,56 +456,73 @@
                         {{-- Status --}}
                         <div class="form-group">
 
-                            <label for="status"
-                                   class="form-label">
-
+                            <label
+                                for="status"
+                                class="form-label"
+                            >
                                 Status Surat
                                 <span class="text-rose-500">*</span>
-
                             </label>
 
                             <div class="relative">
 
-                                <select id="status"
-                                        name="status"
-                                        required
-                                        class="form-control-custom appearance-none pr-10 @error('status') form-error @enderror">
+                                <select
+                                    id="status"
+                                    name="status"
+                                    required
+                                    class="form-control-custom appearance-none pr-10 @error('status') form-error @enderror"
+                                >
 
-                                    <option value="baru"
-                                        {{ $currentStatus === 'baru' ? 'selected' : '' }}>
+                                    <option
+                                        value="baru"
+                                        {{ $currentStatus === 'baru' ? 'selected' : '' }}
+                                    >
                                         Baru
                                     </option>
 
-                                    <option value="diproses"
-                                        {{ $currentStatus === 'diproses' ? 'selected' : '' }}>
+                                    <option
+                                        value="diproses"
+                                        {{ $currentStatus === 'diproses' ? 'selected' : '' }}
+                                    >
                                         Diproses
                                     </option>
 
-                                    <option value="didisposisikan"
-                                        {{ $currentStatus === 'didisposisikan' ? 'selected' : '' }}>
+                                    <option
+                                        value="didisposisikan"
+                                        {{ $currentStatus === 'didisposisikan' ? 'selected' : '' }}
+                                    >
                                         Didisposisikan
                                     </option>
 
-                                    <option value="selesai"
-                                        {{ $currentStatus === 'selesai' ? 'selected' : '' }}>
+                                    <option
+                                        value="selesai"
+                                        {{ $currentStatus === 'selesai' ? 'selected' : '' }}
+                                    >
                                         Selesai
                                     </option>
 
-                                    <option value="diarsipkan"
-                                        {{ $currentStatus === 'diarsipkan' ? 'selected' : '' }}>
+                                    <option
+                                        value="diarsipkan"
+                                        {{ $currentStatus === 'diarsipkan' ? 'selected' : '' }}
+                                    >
                                         Diarsipkan
                                     </option>
 
                                 </select>
 
-                                <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none"
-                                     fill="none"
-                                     stroke="currentColor"
-                                     viewBox="0 0 24 24">
-                                    <path stroke-linecap="round"
-                                          stroke-linejoin="round"
-                                          stroke-width="2"
-                                          d="M19 9l-7 7-7-7"/>
+                                <svg
+                                    class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                    aria-hidden="true"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M19 9l-7 7-7-7"
+                                    />
                                 </svg>
 
                             </div>
@@ -472,20 +539,22 @@
                         {{-- Perihal --}}
                         <div class="md:col-span-2 form-group">
 
-                            <label for="perihal"
-                                   class="form-label">
-
+                            <label
+                                for="perihal"
+                                class="form-label"
+                            >
                                 Perihal / Isi Ringkas
                                 <span class="text-rose-500">*</span>
-
                             </label>
 
-                            <textarea id="perihal"
-                                      name="perihal"
-                                      rows="3"
-                                      required
-                                      placeholder="Tuliskan perihal atau isi ringkas surat secara jelas..."
-                                      class="form-control-custom form-textarea @error('perihal') form-error @enderror">{{ old('perihal', $suratMasuk->perihal) }}</textarea>
+                            <textarea
+                                id="perihal"
+                                name="perihal"
+                                rows="3"
+                                required
+                                placeholder="Tuliskan perihal atau isi ringkas surat secara jelas..."
+                                class="form-control-custom form-textarea @error('perihal') form-error @enderror"
+                            >{{ old('perihal', $suratMasuk->perihal) }}</textarea>
 
                             @error('perihal')
                                 <p class="form-error-text">
@@ -537,22 +606,17 @@
                                 <div>
 
                                     <h3 class="archive-card-title">
-
                                         Berkas Digital
-                                        <span class="text-rose-500">*</span>
-
                                     </h3>
 
                                     <p class="archive-card-description">
-
                                         File lama tetap digunakan jika tidak diganti.
-
                                     </p>
 
                                 </div>
 
-                                <span class="archive-card-badge required">
-                                    Wajib
+                                <span class="archive-card-badge">
+                                    Opsional
                                 </span>
 
                             </div>
@@ -567,16 +631,19 @@
 
                                     <div class="current-file-icon">
 
-                                        <svg class="w-4 h-4"
-                                             fill="none"
-                                             stroke="currentColor"
-                                             viewBox="0 0 24 24">
-
-                                            <path stroke-linecap="round"
-                                                  stroke-linejoin="round"
-                                                  stroke-width="2"
-                                                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l4.414 4.414A1 1 0 0118 8.414V19a2 2 0 01-2 2z"/>
-
+                                        <svg
+                                            class="w-4 h-4"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                            aria-hidden="true"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l4.414 4.414A1 1 0 0118 8.414V19a2 2 0 01-2 2z"
+                                            />
                                         </svg>
 
                                     </div>
@@ -595,12 +662,13 @@
                                     </div>
 
 
-                                    <a href="{{ route('surat-masuk.preview-lampiran', $suratMasuk->id) }}"
-                                       target="_blank"
-                                       class="inline-flex items-center justify-center px-2.5 py-1.5 text-xs font-semibold text-blue-700 bg-blue-50 border-2 border-blue-200 rounded-lg hover:bg-blue-100 transition">
-
+                                    <a
+                                        href="{{ route('surat-masuk.preview-lampiran', $suratMasuk->id) }}"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        class="inline-flex items-center justify-center px-2.5 py-1.5 text-xs font-semibold text-blue-700 bg-blue-50 border-2 border-blue-200 rounded-lg hover:bg-blue-100 transition"
+                                    >
                                         Lihat
-
                                     </a>
 
                                 </div>
@@ -609,31 +677,34 @@
 
                                 <div class="current-file">
 
-                                    <div class="current-file-icon text-amber-600 bg-amber-50 border-amber-200">
+                                    <div class="current-file-icon current-file-warning">
 
-                                        <svg class="w-4 h-4"
-                                             fill="none"
-                                             stroke="currentColor"
-                                             viewBox="0 0 24 24">
-
-                                            <path stroke-linecap="round"
-                                                  stroke-linejoin="round"
-                                                  stroke-width="2"
-                                                  d="M12 9v4m0 4h.01M10.29 3.86l-8.82 15A2 2 0 003.2 21.86h17.6a2 2 0 001.73-3l-8.82-15a2 2 0 00-3.42 0z"/>
-
+                                        <svg
+                                            class="w-4 h-4"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                            aria-hidden="true"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M12 9v4m0 4h.01M10.29 3.86l-8.82 15A2 2 0 003.2 21.86h17.6a2 2 0 001.73-3l-8.82-15a2 2 0 00-3.42 0z"
+                                            />
                                         </svg>
 
                                     </div>
 
 
-                                    <div>
+                                    <div class="min-w-0">
 
                                         <p class="text-xs font-bold text-amber-700">
                                             Belum ada dokumen
                                         </p>
 
                                         <p class="mt-0.5 text-xs text-amber-600">
-                                            Silakan upload file atau gunakan kamera.
+                                            Pilih file baru atau gunakan kamera.
                                         </p>
 
                                     </div>
@@ -648,86 +719,97 @@
                             ================================================== --}}
                             <div class="mode-selector">
 
-                                <button type="button"
-                                        id="btn-upload"
-                                        class="mode-button mode-button-active">
-
-                                    <svg class="w-4 h-4"
-                                         fill="none"
-                                         stroke="currentColor"
-                                         viewBox="0 0 24 24">
-
-                                        <path stroke-linecap="round"
-                                              stroke-linejoin="round"
-                                              stroke-width="2"
-                                              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M12 12V4m0 0L8 8m4-4l4 4"/>
-
+                                <button
+                                    type="button"
+                                    id="btn-upload"
+                                    class="mode-button mode-button-active"
+                                >
+                                    <svg
+                                        class="w-4 h-4"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                        aria-hidden="true"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M12 12V4m0 0L8 8m4-4l4 4"
+                                        />
                                     </svg>
 
                                     Upload File
-
                                 </button>
 
 
-                                <button type="button"
-                                        id="btn-camera"
-                                        class="mode-button">
-
-                                    <svg class="w-4 h-4"
-                                         fill="none"
-                                         stroke="currentColor"
-                                         viewBox="0 0 24 24">
-
-                                        <path stroke-linecap="round"
-                                              stroke-linejoin="round"
-                                              stroke-width="2"
-                                              d="M3 8h2l2-3h10l2 3h2a2 2 0 012 2v9a2 2 0 01-2 2H3a2 2 0 01-2-2v-9a2 2 0 012-2zm9 3a3 3 0 100 6 3 3 0 000-6z"/>
-
+                                <button
+                                    type="button"
+                                    id="btn-camera"
+                                    class="mode-button"
+                                >
+                                    <svg
+                                        class="w-4 h-4"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                        aria-hidden="true"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M3 8h2l2-3h10l2 3h2a2 2 0 012 2v9a2 2 0 01-2 2H3a2 2 0 01-2-2v-9a2 2 0 012-2zm9 3a3 3 0 100 6 3 3 0 000-6z"
+                                        />
                                     </svg>
 
                                     Scan Kamera
-
                                 </button>
 
                             </div>
 
 
                             {{-- =================================================
-                                 MODE UPLOAD
+                                 UPLOAD PANEL
                             ================================================== --}}
-                            <div id="mode-upload">
+                            <div id="upload-panel">
 
-                                <label for="lampiran_file"
-                                       id="upload-box-label"
-                                       class="upload-box @error('lampiran_file') upload-box-error @enderror">
+                                <label
+                                    for="lampiran_file"
+                                    id="upload-box"
+                                    class="upload-box @error('lampiran_file') upload-box-error @enderror"
+                                >
 
                                     <div class="upload-icon">
 
-                                        <svg class="w-6 h-6"
-                                             fill="none"
-                                             stroke="currentColor"
-                                             viewBox="0 0 24 24">
-
-                                            <path stroke-linecap="round"
-                                                  stroke-linejoin="round"
-                                                  stroke-width="2"
-                                                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
-
+                                        <svg
+                                            class="w-6 h-6"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                            aria-hidden="true"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                                            />
                                         </svg>
 
                                     </div>
 
 
-                                    <span id="file-label-text"
-                                          class="text-sm font-bold text-slate-700 text-center">
-
+                                    <span
+                                        id="file-label-text"
+                                        class="text-sm font-bold text-slate-700 text-center"
+                                    >
                                         Pilih file baru
-
                                     </span>
 
 
-                                    <span class="mt-1 text-xs text-slate-400 text-center">
-                                        PDF, JPG, JPEG, PNG, WEBP
+                                    <span class="mt-1 text-xs text-slate-500 text-center">
+                                        PDF, JPG, JPEG, PNG
                                     </span>
 
 
@@ -736,31 +818,40 @@
                                     </span>
 
 
-                                    <input type="file"
-                                           name="lampiran_file"
-                                           id="lampiran_file"
-                                           accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp"
-                                           class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                                    <input
+                                        type="file"
+                                        name="lampiran_file"
+                                        id="lampiran_file"
+                                        accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+                                        class="sr-only"
+                                    >
+
                                 </label>
 
 
-                                <div id="selected-file"
-                                     class="hidden mt-2 px-3 py-2.5 rounded-lg border-2 border-emerald-200 bg-emerald-50">
+                                {{-- File terpilih --}}
+                                <div
+                                    id="selected-file"
+                                    class="hidden mt-2 px-3 py-2.5 rounded-lg border-2 border-emerald-200 bg-emerald-50"
+                                >
 
                                     <div class="flex items-center gap-2">
 
                                         <div class="flex items-center justify-center w-7 h-7 rounded-md bg-emerald-100 border border-emerald-200 text-emerald-600 shrink-0">
 
-                                            <svg class="w-4 h-4"
-                                                 fill="none"
-                                                 stroke="currentColor"
-                                                 viewBox="0 0 24 24">
-
-                                                <path stroke-linecap="round"
-                                                      stroke-linejoin="round"
-                                                      stroke-width="2"
-                                                      d="M5 13l4 4L19 7"/>
-
+                                            <svg
+                                                class="w-4 h-4"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                                aria-hidden="true"
+                                            >
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    d="M5 13l4 4L19 7"
+                                                />
                                             </svg>
 
                                         </div>
@@ -772,33 +863,46 @@
                                                 File baru dipilih
                                             </p>
 
-                                            <p id="selected-file-name"
-                                               class="text-xs text-emerald-600 truncate">
-                                            </p>
+                                            <p
+                                                id="selected-file-name"
+                                                class="text-xs text-emerald-600 truncate"
+                                            ></p>
 
                                         </div>
 
 
-                                        <button type="button"
-                                                id="clear-file-btn"
-                                                class="inline-flex items-center justify-center w-7 h-7 rounded-md border-2 border-emerald-200 bg-white text-emerald-600 hover:bg-emerald-100 transition"
-                                                title="Batalkan file baru">
-
-                                            <svg class="w-3.5 h-3.5"
-                                                 fill="none"
-                                                 stroke="currentColor"
-                                                 viewBox="0 0 24 24">
-
-                                                <path stroke-linecap="round"
-                                                      stroke-linejoin="round"
-                                                      stroke-width="2"
-                                                      d="M6 18L18 6M6 6l12 12"/>
-
+                                        <button
+                                            type="button"
+                                            id="clear-file-btn"
+                                            class="inline-flex items-center justify-center w-7 h-7 rounded-md border-2 border-emerald-200 bg-white text-emerald-600 hover:bg-emerald-100 transition"
+                                            title="Batalkan file baru"
+                                        >
+                                            <svg
+                                                class="w-3.5 h-3.5"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                                aria-hidden="true"
+                                            >
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    d="M6 18L18 6M6 6l12 12"
+                                                />
                                             </svg>
-
                                         </button>
 
                                     </div>
+
+                                </div>
+
+
+                                <div class="mt-2 px-3 py-2 bg-slate-50 border-2 border-slate-200 rounded-lg">
+
+                                    <p class="text-xs leading-relaxed text-slate-500">
+                                        Tidak memilih file baru berarti dokumen lama tetap dipertahankan.
+                                    </p>
 
                                 </div>
 
@@ -806,33 +910,40 @@
 
 
                             {{-- =================================================
-                                 MODE KAMERA
+                                 CAMERA PANEL
                             ================================================== --}}
-                            <div id="mode-camera"
-                                 class="hidden">
+                            <div
+                                id="camera-panel"
+                                class="hidden"
+                            >
 
-                                <div id="camera-container"
-                                     class="camera-container">
+                                <div
+                                    id="camera-container"
+                                    class="camera-container"
+                                >
 
-                                    <video id="video"
-                                           autoplay
-                                           muted
-                                           playsinline
-                                           class="w-full h-full object-cover">
-                                    </video>
-
-
-                                    <img id="image-preview"
-                                         src=""
-                                         alt="Preview hasil scan"
-                                         class="hidden absolute inset-0 w-full h-full object-contain bg-slate-950">
+                                    <video
+                                        id="video"
+                                        autoplay
+                                        muted
+                                        playsinline
+                                        class="w-full h-full object-cover"
+                                    ></video>
 
 
-                                    <div id="camera-placeholder"
-                                         class="camera-placeholder">
+                                    <img
+                                        id="image-preview"
+                                        src=""
+                                        alt="Preview hasil scan"
+                                        class="hidden absolute inset-0 w-full h-full object-contain bg-slate-950"
+                                    >
 
+
+                                    <div
+                                        id="camera-placeholder"
+                                        class="camera-placeholder"
+                                    >
                                         Kamera belum aktif
-
                                     </div>
 
                                 </div>
@@ -840,66 +951,65 @@
 
                                 <div class="mt-2 flex flex-wrap justify-center gap-2">
 
-                                    <button type="button"
-                                            id="start-cam-btn"
-                                            class="camera-button camera-start">
-
-                                        <svg class="w-4 h-4"
-                                             fill="none"
-                                             stroke="currentColor"
-                                             viewBox="0 0 24 24">
-
-                                            <path stroke-linecap="round"
-                                                  stroke-linejoin="round"
-                                                  stroke-width="2"
-                                                  d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-
-                                        </svg>
-
+                                    <button
+                                        type="button"
+                                        id="start-cam-btn"
+                                        class="camera-button camera-start"
+                                    >
                                         Nyalakan Kamera
-
                                     </button>
 
 
-                                    <button type="button"
-                                            id="capture-btn"
-                                            class="hidden camera-button camera-capture">
-
+                                    <button
+                                        type="button"
+                                        id="capture-btn"
+                                        class="hidden camera-button camera-capture"
+                                    >
                                         Ambil Foto
-
                                     </button>
 
 
-                                    <button type="button"
-                                            id="retake-btn"
-                                            class="hidden camera-button camera-retake">
-
+                                    <button
+                                        type="button"
+                                        id="retake-btn"
+                                        class="hidden camera-button camera-retake"
+                                    >
                                         Foto Ulang
-
                                     </button>
 
 
-                                    <button type="button"
-                                            id="stop-cam-btn"
-                                            class="hidden camera-button camera-stop">
-
+                                    <button
+                                        type="button"
+                                        id="stop-cam-btn"
+                                        class="hidden camera-button camera-stop"
+                                    >
                                         Tutup Kamera
-
                                     </button>
 
                                 </div>
 
 
-                                <input type="hidden"
-                                       name="captured_image"
-                                       id="captured_image"
-                                       value="{{ old('captured_image') }}">
+                                <input
+                                    type="hidden"
+                                    name="captured_image"
+                                    id="captured_image"
+                                    value="{{ old('captured_image') }}"
+                                >
 
 
-                                <div id="snapshot-preview"
-                                     class="{{ old('captured_image') ? '' : 'hidden' }} mt-2 text-center text-xs font-bold text-emerald-600">
-
+                                <div
+                                    id="snapshot-preview"
+                                    class="{{ old('captured_image') ? '' : 'hidden' }} mt-2 text-center text-xs font-bold text-emerald-600"
+                                >
                                     ✓ Hasil scan berhasil diambil.
+                                </div>
+
+
+                                <div class="mt-2 px-3 py-2 bg-slate-50 border-2 border-slate-200 rounded-lg">
+
+                                    <p class="text-xs leading-relaxed text-slate-500">
+                                        Mengambil foto baru akan mengganti file lampiran lama.
+                                    </p>
 
                                 </div>
 
@@ -927,7 +1037,7 @@
 
 
                         {{-- =================================================
-                             LOKASI FISIK
+                             LOKASI ARSIP FISIK
                         ================================================== --}}
                         <div class="archive-card">
 
@@ -956,16 +1066,19 @@
 
                                 <div class="location-icon">
 
-                                    <svg class="w-5 h-5"
-                                         fill="none"
-                                         stroke="currentColor"
-                                         viewBox="0 0 24 24">
-
-                                        <path stroke-linecap="round"
-                                              stroke-linejoin="round"
-                                              stroke-width="2"
-                                              d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
-
+                                    <svg
+                                        class="w-5 h-5"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                        aria-hidden="true"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                                        />
                                     </svg>
 
                                 </div>
@@ -976,36 +1089,35 @@
                                 </h4>
 
 
-                                <p class="mt-1 text-xs leading-relaxed text-slate-400">
-
+                                <p class="mt-1 text-xs leading-relaxed text-slate-400 text-center">
                                     Masukkan posisi rak, lemari, box, atau map tempat arsip disimpan.
-
                                 </p>
 
 
                                 <div class="w-full mt-4">
 
-                                    <label for="lokasi_arsip_fisik"
-                                           class="form-label">
-
+                                    <label
+                                        for="lokasi_arsip_fisik"
+                                        class="form-label"
+                                    >
                                         Detail Posisi Lemari / Box
-
                                     </label>
 
 
-                                    <input type="text"
-                                           id="lokasi_arsip_fisik"
-                                           name="lokasi_arsip_fisik"
-                                           value="{{ old('lokasi_arsip_fisik', $suratMasuk->lokasi_arsip_fisik) }}"
-                                           placeholder="Contoh: Rak A-3 Box 12"
-                                           class="form-control-custom @error('lokasi_arsip_fisik') form-error @enderror">
+                                    <input
+                                        type="text"
+                                        id="lokasi_arsip_fisik"
+                                        name="lokasi_arsip_fisik"
+                                        value="{{ old('lokasi_arsip_fisik', $suratMasuk->lokasi_arsip_fisik) }}"
+                                        placeholder="Contoh: Rak A-3 Box 12"
+                                        class="form-control-custom @error('lokasi_arsip_fisik') form-error @enderror"
+                                    >
+
 
                                     @error('lokasi_arsip_fisik')
-
                                         <p class="form-error-text">
                                             {{ $message }}
                                         </p>
-
                                     @enderror
 
                                 </div>
@@ -1047,34 +1159,37 @@
             ================================================== --}}
             <div class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2 px-4 sm:px-5 py-3 bg-slate-50 border-t-2 border-slate-300">
 
-                <a href="{{ route('surat-masuk.index') }}"
-                   class="action-button action-button-secondary">
-
+                <a
+                    href="{{ route('surat-masuk.index') }}"
+                    class="action-button action-button-secondary"
+                >
                     Batal
-
                 </a>
 
 
-                <button type="submit"
-                        id="submit-btn"
-                        class="action-button action-button-primary">
-
-                    <svg class="w-4 h-4 mr-2"
-                         fill="none"
-                         stroke="currentColor"
-                         viewBox="0 0 24 24">
-
-                        <path stroke-linecap="round"
-                              stroke-linejoin="round"
-                              stroke-width="2"
-                              d="M5 13l4 4L19 7"/>
-
+                <button
+                    type="submit"
+                    id="submit-btn"
+                    class="action-button action-button-primary"
+                >
+                    <svg
+                        class="w-4 h-4 mr-2"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M5 13l4 4L19 7"
+                        />
                     </svg>
 
                     <span id="submit-text">
                         Perbarui Surat Masuk
                     </span>
-
                 </button>
 
             </div>
@@ -1145,7 +1260,10 @@
         font-size: 0.875rem;
         line-height: 1.25rem;
         outline: none;
-        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        transition:
+            border-color 0.15s ease,
+            box-shadow 0.15s ease,
+            background-color 0.15s ease;
     }
 
     .form-control-custom:hover {
@@ -1187,6 +1305,11 @@
         border: 2px solid #cbd5e1;
         border-radius: 14px;
         background: #ffffff;
+        transition: border-color 0.15s ease;
+    }
+
+    .archive-card:hover {
+        border-color: #94a3b8;
     }
 
     .archive-card-header {
@@ -1253,6 +1376,12 @@
         border-radius: 8px;
         background: #eff6ff;
         color: #2563eb;
+    }
+
+    .current-file-warning {
+        border-color: #fde68a;
+        background: #fffbeb;
+        color: #d97706;
     }
 
     .mode-selector {
@@ -1337,11 +1466,18 @@
     .camera-container {
         position: relative;
         width: 100%;
-        min-height: 250px;
+        aspect-ratio: 4 / 3;
         overflow: hidden;
+        background: #020617;
         border: 2px solid #334155;
         border-radius: 12px;
-        background: #020617;
+    }
+
+    .camera-container video {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
     }
 
     .camera-placeholder {
@@ -1498,20 +1634,37 @@
 ============================================================= --}}
 @push('scripts')
 <script>
-    let cameraStream = null;
-    let imageCapture = null;
+document.addEventListener('DOMContentLoaded', function () {
 
-    const formSurat =
+    /*
+    |--------------------------------------------------------------------------
+    | ELEMENT
+    |--------------------------------------------------------------------------
+    */
+
+    const form =
         document.getElementById('form-surat');
 
-    const lampiranFile =
+    const fileInput =
         document.getElementById('lampiran_file');
 
-    const capturedImage =
+    const capturedInput =
         document.getElementById('captured_image');
 
+    const uploadPanel =
+        document.getElementById('upload-panel');
+
+    const cameraPanel =
+        document.getElementById('camera-panel');
+
+    const btnUpload =
+        document.getElementById('btn-upload');
+
+    const btnCamera =
+        document.getElementById('btn-camera');
+
     const uploadBox =
-        document.getElementById('upload-box-label');
+        document.getElementById('upload-box');
 
     const fileLabelText =
         document.getElementById('file-label-text');
@@ -1522,20 +1675,8 @@
     const selectedFileName =
         document.getElementById('selected-file-name');
 
-    const clearFileBtn =
+    const clearFileButton =
         document.getElementById('clear-file-btn');
-
-    const modeUpload =
-        document.getElementById('mode-upload');
-
-    const modeCamera =
-        document.getElementById('mode-camera');
-
-    const btnUpload =
-        document.getElementById('btn-upload');
-
-    const btnCamera =
-        document.getElementById('btn-camera');
 
     const video =
         document.getElementById('video');
@@ -1546,173 +1687,43 @@
     const cameraPlaceholder =
         document.getElementById('camera-placeholder');
 
-    const startCamBtn =
+    const startCamButton =
         document.getElementById('start-cam-btn');
 
-    const captureBtn =
+    const captureButton =
         document.getElementById('capture-btn');
 
-    const retakeBtn =
+    const retakeButton =
         document.getElementById('retake-btn');
 
-    const stopCamBtn =
+    const stopCamButton =
         document.getElementById('stop-cam-btn');
 
     const snapshotPreview =
         document.getElementById('snapshot-preview');
 
-    const submitBtn =
+    const submitButton =
         document.getElementById('submit-btn');
 
     const submitText =
         document.getElementById('submit-text');
 
 
-    /*
-     * ============================================================
-     * SWITCH MODE
-     * ============================================================
-     */
-    function switchMode(mode) {
+    const MAX_FILE_SIZE =
+        15 * 1024 * 1024;
 
-        if (mode === 'camera') {
 
-            modeUpload.classList.add('hidden');
-            modeCamera.classList.remove('hidden');
-
-            btnUpload.classList.remove(
-                'mode-button-active'
-            );
-
-            btnCamera.classList.add(
-                'mode-button-active'
-            );
-
-            /*
-             * File baru dibatalkan saat memilih kamera.
-             */
-            clearUploadFile();
-
-            return;
-        }
-
-        /*
-         * Upload mode.
-         */
-        stopCamera();
-
-        modeCamera.classList.add('hidden');
-        modeUpload.classList.remove('hidden');
-
-        btnCamera.classList.remove(
-            'mode-button-active'
-        );
-
-        btnUpload.classList.add(
-            'mode-button-active'
-        );
-
-        /*
-         * Hasil kamera dibatalkan saat memilih upload.
-         */
-        clearCapturedImage();
-    }
+    let mediaStream = null;
+    let imageCapture = null;
+    let isSubmitting = false;
 
 
     /*
-     * ============================================================
-     * FILE DIPILIH
-     * ============================================================
-     *
-     * Tidak melakukan pengecekan file.type di browser.
-     *
-     * Laravel Request yang menangani:
-     * PDF/JPG/JPEG/PNG/WEBP.
-     */
-    function handleFileChange() {
+    |--------------------------------------------------------------------------
+    | RESET FILE
+    |--------------------------------------------------------------------------
+    */
 
-        if (
-            !lampiranFile ||
-            !lampiranFile.files ||
-            !lampiranFile.files.length
-        ) {
-            resetFileDisplay();
-            return;
-        }
-
-        const file =
-            lampiranFile.files[0];
-
-        /*
-         * Batas sisi browser.
-         *
-         * Validasi utama tetap di Laravel.
-         */
-        const maxSize =
-            15 * 1024 * 1024;
-
-        if (file.size > maxSize) {
-
-            alert(
-                'Ukuran file terlalu besar. Maksimal 15 MB.'
-            );
-
-            lampiranFile.value = '';
-
-            resetFileDisplay();
-
-            return;
-        }
-
-        /*
-         * Jika file baru dipilih,
-         * hasil kamera dibersihkan.
-         */
-        clearCapturedImage();
-
-        /*
-         * Tampilkan nama file.
-         */
-        if (fileLabelText) {
-
-            fileLabelText.textContent =
-                'File baru berhasil dipilih';
-
-            fileLabelText.classList.remove(
-                'text-slate-700'
-            );
-
-            fileLabelText.classList.add(
-                'text-blue-600'
-            );
-        }
-
-        if (selectedFile) {
-            selectedFile.classList.remove(
-                'hidden'
-            );
-        }
-
-        if (selectedFileName) {
-            selectedFileName.textContent =
-                file.name;
-        }
-
-        if (uploadBox) {
-            uploadBox.classList.remove(
-                'upload-box-error'
-            );
-        }
-
-        stopCamera();
-    }
-
-
-    /*
-     * ============================================================
-     * RESET FILE DISPLAY
-     * ============================================================
-     */
     function resetFileDisplay() {
 
         if (fileLabelText) {
@@ -1721,7 +1732,8 @@
                 'Pilih file baru';
 
             fileLabelText.classList.remove(
-                'text-blue-600'
+                'text-blue-600',
+                'text-rose-600'
             );
 
             fileLabelText.classList.add(
@@ -1738,23 +1750,22 @@
 
         if (selectedFileName) {
 
-            selectedFileName.textContent = '';
-
+            selectedFileName.textContent =
+                '';
         }
     }
 
 
     /*
-     * ============================================================
-     * CLEAR UPLOAD
-     * ============================================================
-     */
+    |--------------------------------------------------------------------------
+    | CLEAR FILE
+    |--------------------------------------------------------------------------
+    */
+
     function clearUploadFile() {
 
-        if (lampiranFile) {
-
-            lampiranFile.value = '';
-
+        if (fileInput) {
+            fileInput.value = '';
         }
 
         resetFileDisplay();
@@ -1762,16 +1773,15 @@
 
 
     /*
-     * ============================================================
-     * CLEAR CAMERA
-     * ============================================================
-     */
+    |--------------------------------------------------------------------------
+    | CLEAR CAMERA
+    |--------------------------------------------------------------------------
+    */
+
     function clearCapturedImage() {
 
-        if (capturedImage) {
-
-            capturedImage.value = '';
-
+        if (capturedInput) {
+            capturedInput.value = '';
         }
 
         if (imagePreview) {
@@ -1807,10 +1817,289 @@
 
 
     /*
-     * ============================================================
-     * START CAMERA
-     * ============================================================
-     */
+    |--------------------------------------------------------------------------
+    | STOP CAMERA
+    |--------------------------------------------------------------------------
+    */
+
+    function stopCamera() {
+
+        if (mediaStream) {
+
+            mediaStream
+                .getTracks()
+                .forEach(function (track) {
+
+                    try {
+                        track.stop();
+                    } catch (error) {
+                        console.warn(error);
+                    }
+
+                });
+
+            mediaStream = null;
+        }
+
+        imageCapture = null;
+
+        if (video) {
+            video.srcObject = null;
+        }
+
+        if (startCamButton) {
+            startCamButton.classList.remove(
+                'hidden'
+            );
+        }
+
+        if (captureButton) {
+            captureButton.classList.add(
+                'hidden'
+            );
+        }
+
+        if (retakeButton) {
+            retakeButton.classList.add(
+                'hidden'
+            );
+        }
+
+        if (stopCamButton) {
+            stopCamButton.classList.add(
+                'hidden'
+            );
+        }
+
+        if (
+            cameraPlaceholder &&
+            capturedInput &&
+            !capturedInput.value
+        ) {
+            cameraPlaceholder.classList.remove(
+                'hidden'
+            );
+        }
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | SWITCH MODE
+    |--------------------------------------------------------------------------
+    */
+
+    function switchMode(mode) {
+
+        stopCamera();
+
+        if (mode === 'camera') {
+
+            btnUpload.classList.remove(
+                'mode-button-active'
+            );
+
+            btnCamera.classList.add(
+                'mode-button-active'
+            );
+
+            uploadPanel.classList.add(
+                'hidden'
+            );
+
+            cameraPanel.classList.remove(
+                'hidden'
+            );
+
+            /*
+             * File upload dibersihkan ketika
+             * user memilih mode kamera.
+             */
+            clearUploadFile();
+
+            return;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | UPLOAD MODE
+        |--------------------------------------------------------------------------
+        */
+
+        btnCamera.classList.remove(
+            'mode-button-active'
+        );
+
+        btnUpload.classList.add(
+            'mode-button-active'
+        );
+
+        cameraPanel.classList.add(
+            'hidden'
+        );
+
+        uploadPanel.classList.remove(
+            'hidden'
+        );
+
+        /*
+         * Hasil kamera dibersihkan.
+         */
+        clearCapturedImage();
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | FILE CHANGE
+    |--------------------------------------------------------------------------
+    |
+    | Tidak ada pengecekan file.type.
+    |
+    | JPG/JPEG dibiarkan sebagai file asli.
+    |
+    */
+
+    if (fileInput) {
+
+        fileInput.addEventListener(
+            'change',
+            function () {
+
+                if (
+                    !this.files ||
+                    this.files.length === 0
+                ) {
+                    resetFileDisplay();
+                    return;
+                }
+
+                const file =
+                    this.files[0];
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | BATAS UKURAN
+                |--------------------------------------------------------------------------
+                */
+
+                if (
+                    file.size >
+                    MAX_FILE_SIZE
+                ) {
+
+                    this.value = '';
+
+                    resetFileDisplay();
+
+                    if (fileLabelText) {
+
+                        fileLabelText.textContent =
+                            'Ukuran file melebihi 15 MB';
+
+                        fileLabelText.classList.remove(
+                            'text-slate-700',
+                            'text-blue-600'
+                        );
+
+                        fileLabelText.classList.add(
+                            'text-rose-600'
+                        );
+
+                    }
+
+                    return;
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | FILE DIPILIH
+                |--------------------------------------------------------------------------
+                */
+
+                clearCapturedImage();
+
+                if (fileLabelText) {
+
+                    fileLabelText.textContent =
+                        'File baru dipilih';
+
+                    fileLabelText.classList.remove(
+                        'text-slate-700',
+                        'text-rose-600'
+                    );
+
+                    fileLabelText.classList.add(
+                        'text-blue-600'
+                    );
+                }
+
+
+                if (selectedFile) {
+
+                    selectedFile.classList.remove(
+                        'hidden'
+                    );
+
+                }
+
+
+                if (selectedFileName) {
+
+                    selectedFileName.textContent =
+                        file.name;
+
+                }
+
+
+                if (uploadBox) {
+
+                    uploadBox.classList.remove(
+                        'upload-box-error'
+                    );
+
+                }
+
+
+                stopCamera();
+            }
+        );
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | CLEAR FILE BUTTON
+    |--------------------------------------------------------------------------
+    */
+
+    if (clearFileButton) {
+
+        clearFileButton.addEventListener(
+            'click',
+            function (event) {
+
+                event.preventDefault();
+
+                event.stopPropagation();
+
+                clearUploadFile();
+
+            }
+        );
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | START CAMERA
+    |--------------------------------------------------------------------------
+    */
+
     async function startCamera() {
 
         if (
@@ -1819,11 +2108,12 @@
         ) {
 
             alert(
-                'Browser tidak mendukung akses kamera. Gunakan Chrome atau Edge terbaru.'
+                'Browser tidak mendukung akses kamera.'
             );
 
             return;
         }
+
 
         try {
 
@@ -1831,76 +2121,73 @@
 
             clearCapturedImage();
 
-            /*
-             * File upload tidak boleh ikut terkirim.
-             */
             clearUploadFile();
 
-            cameraPlaceholder.classList.add(
-                'hidden'
-            );
 
-            imagePreview.classList.add(
-                'hidden'
-            );
-
-            video.classList.remove(
-                'hidden'
-            );
-
-
-            cameraStream =
+            mediaStream =
                 await navigator.mediaDevices.getUserMedia({
                     video: {
                         facingMode: {
                             ideal: 'environment'
                         },
+
                         width: {
-                            ideal: 1920
+                            ideal: 1280
                         },
+
                         height: {
-                            ideal: 1080
+                            ideal: 720
                         }
                     },
+
                     audio: false
                 });
 
 
             video.srcObject =
-                cameraStream;
+                mediaStream;
 
             await video.play();
 
 
+            /*
+            |--------------------------------------------------------------------------
+            | IMAGE CAPTURE
+            |--------------------------------------------------------------------------
+            */
+
+            const track =
+                mediaStream.getVideoTracks()[0];
+
             if (
-                'ImageCapture' in window
+                track &&
+                typeof ImageCapture !==
+                'undefined'
             ) {
 
-                const track =
-                    cameraStream.getVideoTracks()[0];
+                imageCapture =
+                    new ImageCapture(track);
 
-                if (track) {
-
-                    imageCapture =
-                        new ImageCapture(track);
-
-                }
             }
 
 
-            startCamBtn.classList.add(
+            cameraPlaceholder.classList.add(
                 'hidden'
             );
 
-            captureBtn.classList.remove(
+            startCamButton.classList.add(
                 'hidden'
             );
 
-            retakeBtn.classList.add(
+            captureButton.classList.remove(
                 'hidden'
             );
 
-            stopCamBtn.classList.remove(
+            stopCamButton.classList.remove(
+                'hidden'
+            );
+
+            retakeButton.classList.add(
                 'hidden'
             );
 
@@ -1913,10 +2200,6 @@
 
             stopCamera();
 
-            cameraPlaceholder.classList.remove(
-                'hidden'
-            );
-
             alert(
                 'Kamera tidak dapat diakses. Pastikan izin kamera telah diberikan.'
             );
@@ -1925,13 +2208,144 @@
 
 
     /*
-     * ============================================================
-     * TAKE SNAPSHOT
-     * ============================================================
-     */
+    |--------------------------------------------------------------------------
+    | PROCESS CAMERA BLOB
+    |--------------------------------------------------------------------------
+    */
+
+    async function processCameraBlob(blob) {
+
+        if (!blob) {
+
+            throw new Error(
+                'Hasil kamera kosong.'
+            );
+        }
+
+
+        if (
+            blob.size >
+            MAX_FILE_SIZE
+        ) {
+
+            throw new Error(
+                'Ukuran hasil kamera melebihi 15 MB.'
+            );
+        }
+
+
+        const reader =
+            new FileReader();
+
+
+        const dataUrl =
+            await new Promise(
+                function (resolve, reject) {
+
+                    reader.onload =
+                        function () {
+                            resolve(
+                                reader.result
+                            );
+                        };
+
+                    reader.onerror =
+                        function () {
+                            reject(
+                                new Error(
+                                    'Gagal membaca hasil kamera.'
+                                )
+                            );
+                        };
+
+                    reader.readAsDataURL(
+                        blob
+                    );
+                }
+            );
+
+
+        if (
+            typeof dataUrl !== 'string' ||
+            !dataUrl.startsWith(
+                'data:image/'
+            )
+        ) {
+
+            throw new Error(
+                'Data hasil kamera tidak valid.'
+            );
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | SIMPAN HASIL KAMERA
+        |--------------------------------------------------------------------------
+        */
+
+        capturedInput.value =
+            dataUrl;
+
+
+        clearUploadFile();
+
+
+        imagePreview.src =
+            dataUrl;
+
+        imagePreview.classList.remove(
+            'hidden'
+        );
+
+        video.classList.add(
+            'hidden'
+        );
+
+        cameraPlaceholder.classList.add(
+            'hidden'
+        );
+
+        snapshotPreview.classList.remove(
+            'hidden'
+        );
+
+        startCamButton.classList.add(
+            'hidden'
+        );
+
+        captureButton.classList.add(
+            'hidden'
+        );
+
+        retakeButton.classList.remove(
+            'hidden'
+        );
+
+        stopCamButton.classList.add(
+            'hidden'
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | STREAM SUDAH TIDAK DIPERLUKAN
+        |--------------------------------------------------------------------------
+        */
+
+        stopCamera();
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | TAKE SNAPSHOT
+    |--------------------------------------------------------------------------
+    */
+
     async function takeSnapshot() {
 
-        if (!cameraStream) {
+        if (!mediaStream) {
 
             alert(
                 'Kamera belum aktif.'
@@ -1943,105 +2357,105 @@
 
         try {
 
-            let blob = null;
+            const track =
+                mediaStream.getVideoTracks()[0];
+
+
+            if (!track) {
+
+                throw new Error(
+                    'Track kamera tidak tersedia.'
+                );
+            }
 
 
             /*
-             * ImageCapture digunakan jika tersedia.
-             */
+            |--------------------------------------------------------------------------
+            | IMAGE CAPTURE
+            |--------------------------------------------------------------------------
+            */
+
             if (
                 imageCapture &&
                 typeof imageCapture.takePhoto ===
                 'function'
             ) {
 
-                blob =
+                const blob =
                     await imageCapture.takePhoto();
 
-            }
-
-
-            if (!blob) {
-
-                throw new Error(
-                    'Browser tidak mendukung pengambilan foto kamera.'
+                await processCameraBlob(
+                    blob
                 );
 
+                return;
             }
 
 
-            const reader =
-                new FileReader();
+            /*
+            |--------------------------------------------------------------------------
+            | FALLBACK CANVAS
+            |--------------------------------------------------------------------------
+            */
+
+            const canvas =
+                document.createElement(
+                    'canvas'
+                );
+
+            canvas.width =
+                video.videoWidth || 1280;
+
+            canvas.height =
+                video.videoHeight || 720;
 
 
-            reader.onloadend =
-                function () {
-
-                    const result =
-                        reader.result;
+            const context =
+                canvas.getContext('2d');
 
 
-                    if (
-                        !result ||
-                        typeof result !== 'string'
-                    ) {
+            if (!context) {
 
-                        alert(
-                            'Hasil scan kamera tidak valid.'
+                throw new Error(
+                    'Canvas kamera tidak tersedia.'
+                );
+            }
+
+
+            context.drawImage(
+                video,
+                0,
+                0,
+                canvas.width,
+                canvas.height
+            );
+
+
+            canvas.toBlob(
+                async function (blob) {
+
+                    try {
+
+                        await processCameraBlob(
+                            blob
                         );
 
-                        return;
+                    } catch (error) {
+
+                        console.error(
+                            error
+                        );
+
+                        alert(
+                            error.message ||
+                            'Gagal memproses hasil kamera.'
+                        );
                     }
 
-
-                    capturedImage.value =
-                        result;
-
-
-                    imagePreview.src =
-                        result;
-
-                    imagePreview.classList.remove(
-                        'hidden'
-                    );
-
-                    video.classList.add(
-                        'hidden'
-                    );
-
-                    cameraPlaceholder.classList.add(
-                        'hidden'
-                    );
-
-                    snapshotPreview.classList.remove(
-                        'hidden'
-                    );
-
-
-                    /*
-                     * Pastikan file upload kosong.
-                     */
-                    clearUploadFile();
-
-
-                    captureBtn.classList.add(
-                        'hidden'
-                    );
-
-                    retakeBtn.classList.remove(
-                        'hidden'
-                    );
-
-                    stopCamBtn.classList.remove(
-                        'hidden'
-                    );
-
-                    stopCamera(false);
-
-                };
-
-
-            reader.readAsDataURL(blob);
+                },
+                'image/jpeg',
+                0.9
+            );
 
         } catch (error) {
 
@@ -2051,7 +2465,7 @@
             );
 
             alert(
-                error?.message ||
+                error.message ||
                 'Gagal mengambil foto dari kamera.'
             );
         }
@@ -2059,318 +2473,198 @@
 
 
     /*
-     * ============================================================
-     * RETAKE
-     * ============================================================
-     */
+    |--------------------------------------------------------------------------
+    | RETAKE
+    |--------------------------------------------------------------------------
+    */
+
     function retakeSnapshot() {
 
         clearCapturedImage();
 
         startCamera();
-
     }
 
 
     /*
-     * ============================================================
-     * STOP CAMERA
-     * ============================================================
-     */
-    function stopCamera(
-        resetButtons = true
-    ) {
+    |--------------------------------------------------------------------------
+    | BUTTON EVENTS
+    |--------------------------------------------------------------------------
+    */
 
-        if (cameraStream) {
-
-            cameraStream
-                .getTracks()
-                .forEach(
-                    track => {
-
-                        try {
-
-                            track.stop();
-
-                        } catch (error) {
-
-                            console.warn(
-                                error
-                            );
-
-                        }
-
-                    }
-                );
-
-            cameraStream = null;
+    btnUpload.addEventListener(
+        'click',
+        function () {
+            switchMode('upload');
         }
+    );
 
-        imageCapture = null;
 
-
-        if (video) {
-
-            video.srcObject = null;
-
+    btnCamera.addEventListener(
+        'click',
+        function () {
+            switchMode('camera');
         }
+    );
 
 
-        if (resetButtons) {
+    startCamButton.addEventListener(
+        'click',
+        startCamera
+    );
 
-            if (startCamBtn) {
 
-                startCamBtn.classList.remove(
-                    'hidden'
-                );
+    captureButton.addEventListener(
+        'click',
+        takeSnapshot
+    );
 
-            }
 
-            if (captureBtn) {
+    retakeButton.addEventListener(
+        'click',
+        retakeSnapshot
+    );
 
-                captureBtn.classList.add(
-                    'hidden'
-                );
 
-            }
-
-            if (retakeBtn) {
-
-                retakeBtn.classList.add(
-                    'hidden'
-                );
-
-            }
-
-            if (stopCamBtn) {
-
-                stopCamBtn.classList.add(
-                    'hidden'
-                );
-
-            }
-
-            if (
-                cameraPlaceholder &&
-                !capturedImage.value
-            ) {
-
-                cameraPlaceholder.classList.remove(
-                    'hidden'
-                );
-
-            }
-        }
-    }
+    stopCamButton.addEventListener(
+        'click',
+        stopCamera
+    );
 
 
     /*
-     * ============================================================
-     * EVENT FILE
-     * ============================================================
-     */
-    if (lampiranFile) {
+    |--------------------------------------------------------------------------
+    | SUBMIT
+    |--------------------------------------------------------------------------
+    */
 
-        lampiranFile.addEventListener(
-            'change',
-            handleFileChange
-        );
+    form.addEventListener(
+        'submit',
+        function (event) {
 
-    }
-
-
-    /*
-     * ============================================================
-     * EVENT BUTTON
-     * ============================================================
-     */
-    if (btnUpload) {
-
-        btnUpload.addEventListener(
-            'click',
-            function () {
-
-                switchMode(
-                    'upload'
-                );
-
-            }
-        );
-
-    }
-
-
-    if (btnCamera) {
-
-        btnCamera.addEventListener(
-            'click',
-            function () {
-
-                switchMode(
-                    'camera'
-                );
-
-            }
-        );
-
-    }
-
-
-    if (startCamBtn) {
-
-        startCamBtn.addEventListener(
-            'click',
-            startCamera
-        );
-
-    }
-
-
-    if (captureBtn) {
-
-        captureBtn.addEventListener(
-            'click',
-            takeSnapshot
-        );
-
-    }
-
-
-    if (retakeBtn) {
-
-        retakeBtn.addEventListener(
-            'click',
-            retakeSnapshot
-        );
-
-    }
-
-
-    if (stopCamBtn) {
-
-        stopCamBtn.addEventListener(
-            'click',
-            function () {
-
-                stopCamera();
-
-            }
-        );
-
-    }
-
-
-    if (clearFileBtn) {
-
-        clearFileBtn.addEventListener(
-            'click',
-            function (event) {
+            if (isSubmitting) {
 
                 event.preventDefault();
-                event.stopPropagation();
 
-                clearUploadFile();
-
+                return;
             }
-        );
-
-    }
 
 
-    /*
-     * ============================================================
-     * FORM SUBMIT
-     * ============================================================
-     */
-    if (formSurat) {
-
-        formSurat.addEventListener(
-            'submit',
-            function (event) {
-
-                const hasFile =
-                    lampiranFile &&
-                    lampiranFile.files &&
-                    lampiranFile.files.length > 0;
-
-                const hasCamera =
-                    capturedImage &&
-                    capturedImage.value.trim() !== '';
+            const hasFile =
+                fileInput &&
+                fileInput.files &&
+                fileInput.files.length > 0;
 
 
-                /*
-                 * Tidak boleh upload dan kamera bersamaan.
-                 */
-                if (
-                    hasFile &&
-                    hasCamera
-                ) {
-
-                    event.preventDefault();
-
-                    alert(
-                        'Pilih salah satu saja: upload file atau scan kamera.'
-                    );
-
-                    return;
-                }
+            const hasCamera =
+                capturedInput &&
+                capturedInput.value.trim() !== '';
 
 
-                /*
-                 * Pada EDIT:
-                 *
-                 * file baru boleh kosong karena
-                 * controller akan mempertahankan file lama.
-                 */
-                stopCamera();
+            /*
+            |--------------------------------------------------------------------------
+            | FILE + CAMERA TIDAK BOLEH BERSAMAAN
+            |--------------------------------------------------------------------------
+            */
 
+            if (
+                hasFile &&
+                hasCamera
+            ) {
 
-                /*
-                 * Cegah double submit.
-                 */
-                if (submitBtn) {
+                event.preventDefault();
 
-                    submitBtn.disabled =
-                        true;
+                alert(
+                    'Gunakan salah satu metode saja: Upload File atau Scan Kamera.'
+                );
 
-                }
-
-
-                if (submitText) {
-
-                    submitText.textContent =
-                        'Menyimpan...';
-
-                }
-
+                return;
             }
-        );
-
-    }
 
 
-    /*
-     * ============================================================
-     * INITIAL STATE
-     * ============================================================
-     */
-    document.addEventListener(
-        'DOMContentLoaded',
-        function () {
+            /*
+            |--------------------------------------------------------------------------
+            | EDIT BOLEH TANPA FILE BARU
+            |--------------------------------------------------------------------------
+            |
+            | Controller akan mempertahankan file lama.
+            |
+            */
 
-            switchMode(
-                'upload'
-            );
+            isSubmitting =
+                true;
 
+
+            submitButton.disabled =
+                true;
+
+
+            submitText.textContent =
+                'Menyimpan...';
+
+
+            stopCamera();
         }
     );
 
 
     /*
-     * ============================================================
-     * BEFORE UNLOAD
-     * ============================================================
-     */
+    |--------------------------------------------------------------------------
+    | STATE AWAL
+    |--------------------------------------------------------------------------
+    */
+
+    switchMode(
+        'upload'
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | RESTORE CAMERA SETELAH VALIDATION ERROR
+    |--------------------------------------------------------------------------
+    */
+
+    @if(old('captured_image'))
+
+        switchMode('camera');
+
+        imagePreview.src =
+            @json(old('captured_image'));
+
+        imagePreview.classList.remove(
+            'hidden'
+        );
+
+        video.classList.add(
+            'hidden'
+        );
+
+        cameraPlaceholder.classList.add(
+            'hidden'
+        );
+
+        snapshotPreview.classList.remove(
+            'hidden'
+        );
+
+        startCamButton.classList.add(
+            'hidden'
+        );
+
+        retakeButton.classList.remove(
+            'hidden'
+        );
+
+    @endif
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | STOP CAMERA SAAT PAGE DITINGGALKAN
+    |--------------------------------------------------------------------------
+    */
+
     window.addEventListener(
         'beforeunload',
         function () {
@@ -2380,28 +2674,7 @@
         }
     );
 
-
-    /*
-     * Expose functions untuk kompatibilitas
-     * jika ada script/layout lama yang memanggilnya.
-     */
-    window.switchMode =
-        switchMode;
-
-    window.startCamera =
-        startCamera;
-
-    window.takeSnapshot =
-        takeSnapshot;
-
-    window.retakeSnapshot =
-        retakeSnapshot;
-
-    window.stopCamera =
-        stopCamera;
-
-    window.updateFileName =
-        handleFileChange;
+});
 </script>
 @endpush
 
