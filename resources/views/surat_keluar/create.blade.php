@@ -1,4 +1,3 @@
-```blade
 @extends('layouts.app')
 
 @section('title', 'Catat Surat Keluar')
@@ -836,4 +835,3 @@ document.addEventListener('DOMContentLoaded', function () {
 @endpush
 
 @endsection
-```
