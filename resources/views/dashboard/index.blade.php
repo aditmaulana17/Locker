@@ -31,7 +31,7 @@
     $isPimpinan = $role === 'pimpinan';
 
     $roleLabel = match ($role) {
-        'admin' => 'Administrator',
+        'admin' => 'Admin',
         'pimpinan' => 'Pimpinan',
         'staf' => 'Staf',
         default => 'Pengguna',
