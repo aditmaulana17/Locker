@@ -5,14 +5,25 @@
 @section('content')
 
 @php
+    /*
+    |--------------------------------------------------------------------------
+    | USER & ROLE
+    |--------------------------------------------------------------------------
+    */
+
     $user = auth()->user();
 
     $role = strtolower(
         trim(
-            (string) ($user->role ?? $user->jabatan ?? '')
+            (string) (
+                $user->role
+                ?? $user->jabatan
+                ?? ''
+            )
         )
     );
 
+    // Normalisasi role staff/staf
     $role = $role === 'staff' ? 'staf' : $role;
 
     $isStaf = $role === 'staf';
@@ -28,11 +39,13 @@
 
     $today = now()->translatedFormat('l, d F Y');
 
+
     /*
     |--------------------------------------------------------------------------
-    | Status Surat
+    | STATUS SURAT
     |--------------------------------------------------------------------------
     */
+
     $statusConfig = [
         'baru' => [
             'label' => 'Baru',
@@ -71,11 +84,13 @@
         ],
     ];
 
+
     /*
     |--------------------------------------------------------------------------
-    | Status Disposisi
+    | STATUS DISPOSISI
     |--------------------------------------------------------------------------
     */
+
     $disposisiConfig = [
         'menunggu' => [
             'label' => 'Menunggu',
@@ -103,11 +118,12 @@
 
 <div class="dashboard-page space-y-6 sm:space-y-7 lg:space-y-8">
 
-    {{-- =========================================================
+    {{-- =====================================================================
         HERO
-    ========================================================== --}}
+    ====================================================================== --}}
     <section class="hero-dashboard relative overflow-hidden rounded-[28px] bg-slate-950 shadow-2xl">
 
+        {{-- Background Decoration --}}
         <div class="pointer-events-none absolute inset-0 overflow-hidden">
 
             <div class="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-blue-600/30 blur-3xl"></div>
@@ -128,6 +144,7 @@
                 {{-- HERO CONTENT --}}
                 <div class="min-w-0">
 
+                    {{-- Status & Role --}}
                     <div class="mb-4 flex flex-wrap items-center gap-2">
 
                         <span class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-blue-100 backdrop-blur-md sm:text-xs">
@@ -146,12 +163,15 @@
 
 
                         <span class="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[10px] font-semibold text-slate-300 sm:text-xs">
+
                             {{ $roleLabel }}
+
                         </span>
 
                     </div>
 
 
+                    {{-- Greeting --}}
                     <h1 class="max-w-3xl text-2xl font-extrabold leading-tight tracking-tight text-white sm:text-3xl lg:text-4xl">
 
                         Selamat Datang,
@@ -163,6 +183,7 @@
                     </h1>
 
 
+                    {{-- Description --}}
                     <p class="mt-3 max-w-2xl text-xs leading-relaxed text-slate-300 sm:text-sm">
 
                         @if($isStaf)
@@ -178,6 +199,7 @@
                     </p>
 
 
+                    {{-- Date --}}
                     <div class="mt-5 flex items-center gap-2 text-[11px] font-medium text-slate-400 sm:text-xs">
 
                         <svg
@@ -213,6 +235,7 @@
 
                     @if(!$isStaf)
 
+                        {{-- Tambah Surat Masuk --}}
                         <a
                             href="{{ route('surat-masuk.create') }}"
                             class="dashboard-action group"
@@ -267,6 +290,7 @@
                         </a>
 
 
+                        {{-- Tambah Surat Keluar --}}
                         <a
                             href="{{ route('surat-keluar.create') }}"
                             class="dashboard-action group"
@@ -328,6 +352,7 @@
 
                     @else
 
+                        {{-- Disposisi Staff --}}
                         <a
                             href="{{ route('disposisi.index') }}"
                             class="dashboard-action group"
@@ -399,17 +424,19 @@
     </section>
 
 
-    {{-- =========================================================
+    {{-- =====================================================================
         ADMIN / PIMPINAN
-        SCORECARD SAJA - TANPA JUDUL "IKHTISAR ARSIP"
-    ========================================================== --}}
+        SCORECARD
+    ====================================================================== --}}
     @if(!$isStaf)
 
         <section>
 
             <div class="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
 
-                {{-- SURAT MASUK --}}
+                {{-- =========================================================
+                    SURAT MASUK
+                ========================================================== --}}
                 <a
                     href="{{ route('surat-masuk.index') }}"
                     class="stat-card stat-card-blue group"
@@ -484,7 +511,9 @@
                 </a>
 
 
-                {{-- SURAT KELUAR --}}
+                {{-- =========================================================
+                    SURAT KELUAR
+                ========================================================== --}}
                 <a
                     href="{{ route('surat-keluar.index') }}"
                     class="stat-card stat-card-emerald group"
@@ -557,7 +586,9 @@
                 </a>
 
 
-                {{-- BELUM DIPROSES --}}
+                {{-- =========================================================
+                    BELUM DIPROSES
+                ========================================================== --}}
                 <a
                     href="{{ route('surat-masuk.index', ['status' => ['baru']]) }}"
                     class="stat-card stat-card-amber group"
@@ -629,7 +660,9 @@
                 </a>
 
 
-                {{-- SELESAI --}}
+                {{-- =========================================================
+                    SELESAI
+                ========================================================== --}}
                 <a
                     href="{{ route('surat-masuk.index', ['status' => ['selesai']]) }}"
                     class="stat-card stat-card-teal group"
@@ -706,91 +739,78 @@
         </section>
 
 
-        {{-- =====================================================
-            ANALYTICS
-        ====================================================== --}}
-        <section class="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_280px]">
+        {{-- =================================================================
+            GRAFIK AKTIVITAS SURAT
+        ================================================================== --}}
+        <section class="dashboard-panel overflow-hidden">
 
-            <div class="dashboard-panel overflow-hidden">
+            {{-- Chart Header --}}
+            <div class="border-b border-slate-100 px-4 py-4 sm:px-6 sm:py-5">
 
-                <div class="border-b border-slate-100 px-4 py-4 sm:px-6 sm:py-5">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
-                    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
 
-                        <div>
+                        <div class="flex items-center gap-2">
 
-                            <div class="flex items-center gap-2">
+                            <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
 
-                                <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                                <svg
+                                    class="h-4 w-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="1.8"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M4 19V5M4 19h16"
+                                    />
 
-                                    <svg
-                                        class="h-4 w-4"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        stroke-width="1.8"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            d="M4 19V5M4 19h16"
-                                        />
-
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            d="M7 15l4-4 3 2 5-6"
-                                        />
-                                    </svg>
-
-                                </span>
-
-
-                                <h2 class="text-sm font-extrabold text-slate-800 sm:text-base">
-                                    Aktivitas Surat
-                                </h2>
-
-                            </div>
-
-
-                            <p class="mt-1 pl-10 text-[10px] text-slate-400 sm:text-xs">
-                                Perbandingan surat masuk dan surat keluar selama 12 bulan terakhir.
-                            </p>
-
-                        </div>
-
-
-                        <div class="flex items-center gap-4 pl-10 sm:pl-0">
-
-                            <span class="flex items-center gap-2 text-[10px] font-semibold text-slate-500 sm:text-xs">
-
-                                <span class="h-2.5 w-2.5 rounded-full bg-blue-600"></span>
-
-                                Masuk
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M7 15l4-4 3 2 5-6"
+                                    />
+                                </svg>
 
                             </span>
 
 
-                            <span class="flex items-center gap-2 text-[10px] font-semibold text-slate-500 sm:text-xs">
-
-                                <span class="h-2.5 w-2.5 rounded-full bg-emerald-500"></span>
-
-                                Keluar
-
-                            </span>
+                            <h2 class="text-sm font-extrabold text-slate-800 sm:text-base">
+                                Aktivitas Surat
+                            </h2>
 
                         </div>
+
+
+                        <p class="mt-1 pl-10 text-[10px] text-slate-400 sm:text-xs">
+                            Perbandingan surat masuk dan surat keluar selama 12 bulan terakhir.
+                        </p>
 
                     </div>
 
-                </div>
+
+                    {{-- Chart Legend --}}
+                    <div class="flex items-center gap-4 pl-10 sm:pl-0">
+
+                        <span class="flex items-center gap-2 text-[10px] font-semibold text-slate-500 sm:text-xs">
+
+                            <span class="h-2.5 w-2.5 rounded-full bg-blue-600"></span>
+
+                            Masuk
+
+                        </span>
 
 
-                <div class="p-4 sm:p-6">
+                        <span class="flex items-center gap-2 text-[10px] font-semibold text-slate-500 sm:text-xs">
 
-                    <div class="relative h-64 w-full sm:h-72 lg:h-80">
+                            <span class="h-2.5 w-2.5 rounded-full bg-emerald-500"></span>
 
-                        <canvas id="suratChart"></canvas>
+                            Keluar
+
+                        </span>
 
                     </div>
 
@@ -799,110 +819,12 @@
             </div>
 
 
-            <div class="grid grid-cols-2 gap-3 xl:grid-cols-1">
+            {{-- Chart --}}
+            <div class="p-4 sm:p-6">
 
-                {{-- TOTAL ARSIP --}}
-                <div class="dashboard-mini-card">
+                <div class="relative h-64 w-full sm:h-72 lg:h-80">
 
-                    <div class="flex items-center justify-between">
-
-                        <div>
-
-                            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                                Total Arsip
-                            </span>
-
-                            <div class="mt-2 text-2xl font-extrabold tracking-tight text-slate-800">
-
-                                {{ ($totalSuratMasuk ?? 0) + ($totalSuratKeluar ?? 0) }}
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-600">
-
-                            <svg
-                                class="h-5 w-5"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="1.8"
-                                viewBox="0 0 24 24"
-                            >
-                                <rect
-                                    x="4"
-                                    y="4"
-                                    width="16"
-                                    height="16"
-                                    rx="2"
-                                />
-
-                                <path
-                                    stroke-linecap="round"
-                                    d="M8 9h8M8 13h8M8 17h4"
-                                />
-                            </svg>
-
-                        </div>
-
-                    </div>
-
-
-                    <p class="mt-2 text-[10px] text-slate-400">
-                        Akumulasi surat masuk & keluar
-                    </p>
-
-                </div>
-
-
-                {{-- PERLU PERHATIAN --}}
-                <div class="dashboard-mini-card">
-
-                    <div class="flex items-center justify-between">
-
-                        <div>
-
-                            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                                Perlu Perhatian
-                            </span>
-
-                            <div class="mt-2 text-2xl font-extrabold tracking-tight text-amber-600">
-                                {{ $suratPending ?? 0 }}
-                            </div>
-
-                        </div>
-
-
-                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
-
-                            <svg
-                                class="h-5 w-5"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="1.8"
-                                viewBox="0 0 24 24"
-                            >
-                                <circle
-                                    cx="12"
-                                    cy="12"
-                                    r="8.5"
-                                />
-
-                                <path
-                                    stroke-linecap="round"
-                                    d="M12 7.5v5l3 2"
-                                />
-                            </svg>
-
-                        </div>
-
-                    </div>
-
-
-                    <p class="mt-2 text-[10px] text-slate-400">
-                        Surat berstatus baru
-                    </p>
+                    <canvas id="suratChart"></canvas>
 
                 </div>
 
@@ -911,11 +833,12 @@
         </section>
 
 
-        {{-- =====================================================
+        {{-- =================================================================
             SURAT MASUK TERBARU
-        ====================================================== --}}
+        ================================================================== --}}
         <section class="dashboard-panel overflow-hidden">
 
+            {{-- Header --}}
             <div class="flex flex-col gap-4 border-b border-slate-100 px-4 py-4 sm:px-6 sm:py-5 lg:flex-row lg:items-center lg:justify-between">
 
                 <div>
@@ -961,7 +884,9 @@
             </div>
 
 
-            {{-- DESKTOP TABLE --}}
+            {{-- =============================================================
+                DESKTOP TABLE
+            ============================================================= --}}
             <div class="hidden overflow-x-auto md:block">
 
                 <table class="w-full text-left">
@@ -1020,6 +945,7 @@
 
                             <tr class="group transition hover:bg-slate-50/70">
 
+                                {{-- Nomor Agenda --}}
                                 <td class="table-cell">
 
                                     <span class="inline-flex items-center rounded-lg bg-blue-50 px-2.5 py-1.5 font-mono text-[10px] font-bold text-blue-700">
@@ -1031,6 +957,7 @@
                                 </td>
 
 
+                                {{-- Perihal --}}
                                 <td class="table-cell">
 
                                     <div class="max-w-[260px]">
@@ -1046,6 +973,7 @@
                                 </td>
 
 
+                                {{-- Pengirim --}}
                                 <td class="table-cell">
 
                                     <div class="flex items-center gap-2">
@@ -1068,6 +996,7 @@
                                 </td>
 
 
+                                {{-- Kategori --}}
                                 <td class="table-cell">
 
                                     <span class="text-xs text-slate-600">
@@ -1079,6 +1008,7 @@
                                 </td>
 
 
+                                {{-- Status --}}
                                 <td class="table-cell">
 
                                     <span class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-bold {{ $currentStatusConfig['class'] }}">
@@ -1092,6 +1022,7 @@
                                 </td>
 
 
+                                {{-- Action --}}
                                 <td class="table-cell text-right">
 
                                     <a
@@ -1182,7 +1113,9 @@
             </div>
 
 
-            {{-- MOBILE LIST --}}
+            {{-- =============================================================
+                MOBILE LIST
+            ============================================================= --}}
             <div class="divide-y divide-slate-100 md:hidden">
 
                 @forelse($suratMasukTerbaru ?? [] as $sm)
@@ -1310,18 +1243,21 @@
         </section>
 
 
-    {{-- =========================================================
+    {{-- =====================================================================
         STAFF DASHBOARD
-        DISPOSISI HANYA MUNCUL DI SINI
-    ========================================================== --}}
+    ====================================================================== --}}
     @else
 
-        {{-- STAFF SCORECARD --}}
+        {{-- ================================================================
+            STAFF SCORECARD
+        ================================================================= --}}
         <section>
 
             <div class="grid grid-cols-2 gap-3 sm:gap-4">
 
-                {{-- MENUNGGU --}}
+                {{-- =========================================================
+                    DISPOSISI MENUNGGU
+                ========================================================== --}}
                 <a
                     href="{{ route('disposisi.index', ['status' => ['menunggu']]) }}"
                     class="stat-card stat-card-amber group"
@@ -1393,7 +1329,9 @@
                 </a>
 
 
-                {{-- SELESAI --}}
+                {{-- =========================================================
+                    DISPOSISI SELESAI
+                ========================================================== --}}
                 <a
                     href="{{ route('disposisi.index', ['status' => ['selesai']]) }}"
                     class="stat-card stat-card-teal group"
@@ -1470,9 +1408,12 @@
         </section>
 
 
-        {{-- STAFF TASK LIST --}}
+        {{-- ================================================================
+            STAFF TASK LIST
+        ================================================================= --}}
         <section class="dashboard-panel overflow-hidden">
 
+            {{-- Header --}}
             <div class="border-b border-slate-100 px-4 py-4 sm:px-6 sm:py-5">
 
                 <div class="flex items-center gap-3">
@@ -1520,6 +1461,7 @@
             </div>
 
 
+            {{-- Task Content --}}
             <div class="p-4 sm:p-6">
 
                 <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
@@ -1547,6 +1489,7 @@
                             class="task-card group {{ $currentDisposisiConfig['border'] }}"
                         >
 
+                            {{-- Task Header --}}
                             <div class="flex items-start gap-3">
 
                                 <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl {{ $currentDisposisiConfig['icon'] }}">
@@ -1595,6 +1538,7 @@
                             </div>
 
 
+                            {{-- Task Information --}}
                             <div class="mt-4 space-y-2.5">
 
                                 {{-- DARI --}}
@@ -1737,6 +1681,7 @@
                             </div>
 
 
+                            {{-- Detail --}}
                             <div class="mt-4 flex items-center justify-between border-t border-slate-100 pt-3">
 
                                 <span class="text-[10px] font-medium text-slate-400">
@@ -1790,7 +1735,10 @@
 
 
                                 <p class="mt-1 max-w-sm text-center text-[10px] leading-relaxed text-slate-400">
-                                    Saat ada disposisi baru yang diberikan kepada Anda, tugas tersebut akan tampil di halaman ini.
+
+                                    Saat ada disposisi baru yang diberikan kepada Anda,
+                                    tugas tersebut akan tampil di halaman ini.
+
                                 </p>
 
                             </div>
@@ -1804,6 +1752,7 @@
             </div>
 
 
+            {{-- Footer --}}
             <div class="border-t border-slate-100 bg-slate-50/50 p-4 sm:p-5">
 
                 <a
@@ -1838,10 +1787,14 @@
 </div>
 
 
-{{-- =============================================================
+{{-- ========================================================================
     DASHBOARD STYLE
-============================================================= --}}
+============================================================================ --}}
 <style>
+
+    /* =====================================================================
+       PAGE
+    ====================================================================== */
 
     .dashboard-page {
         animation: dashboardFade .45s ease-out;
@@ -1863,9 +1816,9 @@
     }
 
 
-    /* =========================================================
+    /* =====================================================================
        HERO
-    ========================================================== */
+    ====================================================================== */
 
     .hero-dashboard {
         isolation: isolate;
@@ -1875,18 +1828,21 @@
     .dashboard-action {
 
         display: flex;
+
         align-items: center;
+
         gap: .75rem;
 
         min-width: 230px;
 
         border-radius: 1rem;
 
-        background: rgba(255,255,255,.96);
+        background: rgba(255, 255, 255, .96);
 
         padding: .7rem .8rem;
 
-        box-shadow: 0 10px 30px rgba(0,0,0,.12);
+        box-shadow:
+            0 10px 30px rgba(0, 0, 0, .12);
 
         transition:
             transform .2s ease,
@@ -1900,7 +1856,8 @@
 
         transform: translateY(-2px);
 
-        box-shadow: 0 15px 35px rgba(0,0,0,.18);
+        box-shadow:
+            0 15px 35px rgba(0, 0, 0, .18);
 
     }
 
@@ -1910,11 +1867,13 @@
         display: flex;
 
         height: 2.5rem;
+
         width: 2.5rem;
 
         flex-shrink: 0;
 
         align-items: center;
+
         justify-content: center;
 
         border-radius: .8rem;
@@ -1922,9 +1881,9 @@
     }
 
 
-    /* =========================================================
+    /* =====================================================================
        SCORECARD
-    ========================================================== */
+    ====================================================================== */
 
     .stat-card {
 
@@ -1934,16 +1893,16 @@
 
         overflow: hidden;
 
-        border: 1px solid rgba(226,232,240,.9);
+        border: 1px solid rgba(226, 232, 240, .9);
 
         border-radius: 1.25rem;
 
-        background: #fff;
+        background: #ffffff;
 
         padding: 1rem;
 
         box-shadow:
-            0 4px 18px rgba(15,23,42,.045);
+            0 4px 18px rgba(15, 23, 42, .045);
 
         transition:
             transform .2s ease,
@@ -1957,23 +1916,25 @@
 
         transform: translateY(-4px);
 
-        border-color: rgba(148,163,184,.35);
+        border-color: rgba(148, 163, 184, .35);
 
         box-shadow:
-            0 18px 40px rgba(15,23,42,.10);
+            0 18px 40px rgba(15, 23, 42, .10);
 
     }
 
 
-    /* Penanda warna kiri */
+    /* Color Marker */
 
     .stat-color-bar {
 
         position: absolute;
 
-        left: 0;
         top: 0;
+
         bottom: 0;
+
+        left: 0;
 
         width: 4px;
 
@@ -2023,11 +1984,13 @@
         display: flex;
 
         height: 2.75rem;
+
         width: 2.75rem;
 
         flex-shrink: 0;
 
         align-items: center;
+
         justify-content: center;
 
         border-radius: .9rem;
@@ -2042,13 +2005,13 @@
 
 
     .stat-card:hover .stat-icon {
-
         transform: scale(1.07);
-
     }
 
 
-    /* BLUE */
+    /* =====================================================================
+       BLUE
+    ====================================================================== */
 
     .stat-icon-blue {
 
@@ -2066,15 +2029,17 @@
 
         background: #2563eb;
 
-        color: #fff;
+        color: #ffffff;
 
         box-shadow:
-            0 8px 20px rgba(37,99,235,.25);
+            0 8px 20px rgba(37, 99, 235, .25);
 
     }
 
 
-    /* EMERALD */
+    /* =====================================================================
+       EMERALD
+    ====================================================================== */
 
     .stat-icon-emerald {
 
@@ -2092,15 +2057,17 @@
 
         background: #059669;
 
-        color: #fff;
+        color: #ffffff;
 
         box-shadow:
-            0 8px 20px rgba(5,150,105,.25);
+            0 8px 20px rgba(5, 150, 105, .25);
 
     }
 
 
-    /* AMBER */
+    /* =====================================================================
+       AMBER
+    ====================================================================== */
 
     .stat-icon-amber {
 
@@ -2118,15 +2085,17 @@
 
         background: #f59e0b;
 
-        color: #fff;
+        color: #ffffff;
 
         box-shadow:
-            0 8px 20px rgba(245,158,11,.25);
+            0 8px 20px rgba(245, 158, 11, .25);
 
     }
 
 
-    /* TEAL */
+    /* =====================================================================
+       TEAL
+    ====================================================================== */
 
     .stat-icon-teal {
 
@@ -2144,13 +2113,17 @@
 
         background: #0d9488;
 
-        color: #fff;
+        color: #ffffff;
 
         box-shadow:
-            0 8px 20px rgba(13,148,136,.25);
+            0 8px 20px rgba(13, 148, 136, .25);
 
     }
 
+
+    /* =====================================================================
+       SCORECARD FOOTER
+    ====================================================================== */
 
     .stat-pill {
 
@@ -2177,69 +2150,38 @@
 
         opacity: .7;
 
-        transition: transform .2s ease;
+        transition:
+            transform .2s ease;
 
     }
 
 
     .stat-card:hover .stat-arrow {
-
         transform: translateX(4px);
-
     }
 
 
-    /* =========================================================
+    /* =====================================================================
        PANEL
-    ========================================================== */
+    ====================================================================== */
 
     .dashboard-panel {
 
-        border: 1px solid rgba(226,232,240,.85);
+        border: 1px solid rgba(226, 232, 240, .85);
 
         border-radius: 1.25rem;
 
-        background: #fff;
+        background: #ffffff;
 
         box-shadow:
-            0 4px 18px rgba(15,23,42,.04);
+            0 4px 18px rgba(15, 23, 42, .04);
 
     }
 
 
-    .dashboard-mini-card {
-
-        border: 1px solid rgba(226,232,240,.85);
-
-        border-radius: 1.1rem;
-
-        background: #fff;
-
-        padding: 1rem;
-
-        box-shadow:
-            0 4px 18px rgba(15,23,42,.04);
-
-        transition:
-            transform .2s ease,
-            box-shadow .2s ease;
-
-    }
-
-
-    .dashboard-mini-card:hover {
-
-        transform: translateY(-2px);
-
-        box-shadow:
-            0 12px 28px rgba(15,23,42,.07);
-
-    }
-
-
-    /* =========================================================
+    /* =====================================================================
        SECTION
-    ========================================================== */
+    ====================================================================== */
 
     .section-eyebrow {
 
@@ -2258,9 +2200,9 @@
     }
 
 
-    /* =========================================================
+    /* =====================================================================
        TABLE
-    ========================================================== */
+    ====================================================================== */
 
     .table-heading {
 
@@ -2290,9 +2232,9 @@
     }
 
 
-    /* =========================================================
+    /* =====================================================================
        STAFF TASK
-    ========================================================== */
+    ====================================================================== */
 
     .task-card {
 
@@ -2300,18 +2242,18 @@
 
         display: block;
 
-        border: 1px solid rgba(226,232,240,.9);
+        border: 1px solid rgba(226, 232, 240, .9);
 
         border-left-width: 4px;
 
         border-radius: 1rem;
 
-        background: #fff;
+        background: #ffffff;
 
         padding: 1rem;
 
         box-shadow:
-            0 3px 15px rgba(15,23,42,.035);
+            0 3px 15px rgba(15, 23, 42, .035);
 
         transition:
             transform .2s ease,
@@ -2328,14 +2270,14 @@
         background: #fcfdff;
 
         box-shadow:
-            0 14px 30px rgba(15,23,42,.08);
+            0 14px 30px rgba(15, 23, 42, .08);
 
     }
 
 
-    /* =========================================================
+    /* =====================================================================
        EMPTY STATE
-    ========================================================== */
+    ====================================================================== */
 
     .empty-state {
 
@@ -2353,16 +2295,16 @@
 
         border-radius: 1rem;
 
-        background: rgba(248,250,252,.65);
+        background: rgba(248, 250, 252, .65);
 
         padding: 2rem;
 
     }
 
 
-    /* =========================================================
+    /* =====================================================================
        RESPONSIVE
-    ========================================================== */
+    ====================================================================== */
 
     @media (min-width: 640px) {
 
@@ -2426,9 +2368,9 @@
     }
 
 
-    /* =========================================================
+    /* =====================================================================
        REDUCED MOTION
-    ========================================================== */
+    ====================================================================== */
 
     @media (prefers-reduced-motion: reduce) {
 
@@ -2437,8 +2379,7 @@
         .dashboard-action,
         .task-card,
         .stat-icon,
-        .stat-arrow,
-        .dashboard-mini-card {
+        .stat-arrow {
 
             animation: none !important;
 
@@ -2451,9 +2392,9 @@
 </style>
 
 
-{{-- =============================================================
-    CHART
-============================================================= --}}
+{{-- ========================================================================
+    CHART JS
+============================================================================ --}}
 @if(!$isStaf)
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -2476,12 +2417,24 @@
             }
 
 
+            /*
+            |--------------------------------------------------------------------------
+            | DATA
+            |--------------------------------------------------------------------------
+            */
+
             const chartLabels = @json($chartLabels ?? []);
 
             const dataMasuk = @json($chartDataMasuk ?? []);
 
             const dataKeluar = @json($chartDataKeluar ?? []);
 
+
+            /*
+            |--------------------------------------------------------------------------
+            | GRADIENT SURAT MASUK
+            |--------------------------------------------------------------------------
+            */
 
             const gradientMasuk = ctx.createLinearGradient(
                 0,
@@ -2492,14 +2445,20 @@
 
             gradientMasuk.addColorStop(
                 0,
-                'rgba(37,99,235,.18)'
+                'rgba(37, 99, 235, .18)'
             );
 
             gradientMasuk.addColorStop(
                 1,
-                'rgba(37,99,235,0)'
+                'rgba(37, 99, 235, 0)'
             );
 
+
+            /*
+            |--------------------------------------------------------------------------
+            | GRADIENT SURAT KELUAR
+            |--------------------------------------------------------------------------
+            */
 
             const gradientKeluar = ctx.createLinearGradient(
                 0,
@@ -2510,16 +2469,35 @@
 
             gradientKeluar.addColorStop(
                 0,
-                'rgba(16,185,129,.18)'
+                'rgba(16, 185, 129, .18)'
             );
 
             gradientKeluar.addColorStop(
                 1,
-                'rgba(16,185,129,0)'
+                'rgba(16, 185, 129, 0)'
             );
 
 
-            new Chart(ctx, {
+            /*
+            |--------------------------------------------------------------------------
+            | HAPUS CHART LAMA
+            |--------------------------------------------------------------------------
+            */
+
+            if (window.suratChartInstance) {
+
+                window.suratChartInstance.destroy();
+
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | CHART
+            |--------------------------------------------------------------------------
+            */
+
+            window.suratChartInstance = new Chart(ctx, {
 
                 type: 'line',
 
@@ -2552,7 +2530,7 @@
 
                             pointBorderColor: '#ffffff',
 
-                            pointBorderWidth: 2
+                            pointBorderWidth: 2,
                         },
 
 
@@ -2579,7 +2557,7 @@
 
                             pointBorderColor: '#ffffff',
 
-                            pointBorderWidth: 2
+                            pointBorderWidth: 2,
                         }
 
                     ]
@@ -2598,7 +2576,7 @@
 
                         intersect: false,
 
-                        mode: 'index'
+                        mode: 'index',
 
                     },
 
@@ -2607,7 +2585,7 @@
 
                         duration: 900,
 
-                        easing: 'easeOutQuart'
+                        easing: 'easeOutQuart',
 
                     },
 
@@ -2615,7 +2593,9 @@
                     plugins: {
 
                         legend: {
-                            display: false
+
+                            display: false,
+
                         },
 
 
@@ -2632,19 +2612,24 @@
                             borderWidth: 1,
 
                             titleFont: {
+
                                 size: 11,
-                                weight: 'bold'
+
+                                weight: 'bold',
+
                             },
 
                             bodyFont: {
-                                size: 11
+
+                                size: 11,
+
                             },
 
                             padding: 11,
 
                             cornerRadius: 10,
 
-                            displayColors: true
+                            displayColors: true,
 
                         }
 
@@ -2656,11 +2641,15 @@
                         x: {
 
                             grid: {
-                                display: false
+
+                                display: false,
+
                             },
 
                             border: {
-                                display: false
+
+                                display: false,
+
                             },
 
                             ticks: {
@@ -2668,14 +2657,16 @@
                                 color: '#94a3b8',
 
                                 font: {
-                                    size: 10
+
+                                    size: 10,
+
                                 },
 
                                 maxRotation: 0,
 
                                 autoSkip: true,
 
-                                maxTicksLimit: 12
+                                maxTicksLimit: 12,
 
                             }
 
@@ -2687,7 +2678,9 @@
                             beginAtZero: true,
 
                             border: {
-                                display: false
+
+                                display: false,
+
                             },
 
                             ticks: {
@@ -2699,13 +2692,17 @@
                                 color: '#94a3b8',
 
                                 font: {
-                                    size: 10
+
+                                    size: 10,
+
                                 }
 
                             },
 
                             grid: {
-                                color: '#f1f5f9'
+
+                                color: '#f1f5f9',
+
                             }
 
                         }
