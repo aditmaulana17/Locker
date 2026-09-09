@@ -108,12 +108,11 @@
         <input
             type="hidden"
             name="nomor_agenda"
-            value="{{ old('nomor_agenda', $nomorAgenda) }}"
+            value="{{ $nomorAgenda }}"
         >
 
 
         <div class="bg-white border-2 border-slate-300 rounded-2xl shadow-sm overflow-hidden">
-
 
             {{-- =================================================
                  NOMOR AGENDA
@@ -150,9 +149,7 @@
                             </span>
 
                             <strong class="inline-flex items-center w-fit px-2.5 py-1 bg-white border-2 border-blue-200 rounded-lg text-xs font-bold font-mono text-blue-700">
-
                                 {{ $nomorAgenda }}
-
                             </strong>
 
                         </div>
@@ -172,7 +169,6 @@
                  MAIN CONTENT
             ================================================== --}}
             <div class="p-4 sm:p-5">
-
 
                 {{-- =================================================
                      INFORMASI UTAMA
@@ -197,7 +193,6 @@
 
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-3">
-
 
                         {{-- Nomor Surat --}}
                         <div class="form-group">
@@ -347,7 +342,7 @@
                                         Pilih kategori surat
                                     </option>
 
-                                    @foreach($kategoris as $kategori)
+                                    @foreach ($kategoris as $kategori)
 
                                         <option
                                             value="{{ $kategori->id }}"
@@ -355,7 +350,7 @@
                                         >
                                             {{ $kategori->nama_kategori }}
 
-                                            @if(!empty($kategori->sifat))
+                                            @if (!empty($kategori->sifat))
                                                 ({{ ucfirst($kategori->sifat) }})
                                             @endif
                                         </option>
@@ -530,7 +525,6 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3 items-stretch">
 
-
                         {{-- =================================================
                              BERKAS DIGITAL
                         ================================================== --}}
@@ -642,7 +636,6 @@
 
                                     </div>
 
-
                                     <span
                                         id="file-label-text"
                                         class="text-sm font-bold text-slate-700 text-center"
@@ -650,16 +643,13 @@
                                         Klik untuk memilih file
                                     </span>
 
-
                                     <span class="mt-1 text-xs text-slate-500 text-center">
                                         PDF, JPG, JPEG, PNG
                                     </span>
 
-
                                     <span class="mt-0.5 text-[11px] font-medium text-slate-400 text-center">
                                         Maksimal 15 MB
                                     </span>
-
 
                                     <input
                                         type="file"
@@ -672,7 +662,7 @@
                                 </label>
 
 
-                                {{-- File selected --}}
+                                {{-- Selected file --}}
                                 <div
                                     id="selected-file"
                                     class="hidden mt-2 px-3 py-2.5 rounded-lg border-2 border-emerald-200 bg-emerald-50"
@@ -699,7 +689,6 @@
 
                                         </div>
 
-
                                         <div class="min-w-0 flex-1">
 
                                             <p class="text-xs font-bold text-emerald-700">
@@ -712,7 +701,6 @@
                                             ></p>
 
                                         </div>
-
 
                                         <button
                                             type="button"
@@ -761,7 +749,6 @@
                                         autoplay
                                         muted
                                         playsinline
-                                        class="w-full h-full object-cover"
                                     ></video>
 
 
@@ -769,7 +756,7 @@
                                         id="image-preview"
                                         src=""
                                         alt="Preview hasil scan"
-                                        class="hidden absolute inset-0 w-full h-full object-contain bg-slate-950"
+                                        hidden
                                     >
 
 
@@ -777,12 +764,47 @@
                                         id="camera-placeholder"
                                         class="camera-placeholder"
                                     >
-                                        Kamera belum aktif
+                                        <div class="text-center px-4">
+
+                                            <svg
+                                                class="w-8 h-8 mx-auto mb-2 opacity-90"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                                aria-hidden="true"
+                                            >
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="1.8"
+                                                    d="M3 7a2 2 0 012-2h3l1.5-2h5L16 5h3a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"
+                                                />
+
+                                                <circle
+                                                    cx="12"
+                                                    cy="12"
+                                                    r="3.5"
+                                                />
+                                            </svg>
+
+                                            <span id="camera-placeholder-text">
+                                                Kamera belum aktif
+                                            </span>
+
+                                        </div>
                                     </div>
+
+
+                                    <div
+                                        id="camera-error"
+                                        class="camera-error hidden"
+                                        role="alert"
+                                    ></div>
 
                                 </div>
 
 
+                                {{-- Camera controls --}}
                                 <div class="flex flex-wrap justify-center gap-1.5 mt-2">
 
                                     <button
@@ -951,19 +973,14 @@
                                 <div class="w-full mt-2 px-3 py-2 bg-slate-50 border-2 border-slate-200 rounded-lg">
 
                                     <p class="text-xs leading-relaxed text-slate-500">
-
                                         Contoh:
-
                                         <span class="font-semibold text-slate-700">
                                             Rak A-3 Box 12
                                         </span>
-
                                         atau
-
                                         <span class="font-semibold text-slate-700">
                                             Lemari B-2 Map 07
                                         </span>.
-
                                     </p>
 
                                 </div>
@@ -1274,22 +1291,67 @@
     }
 
     .camera-container video {
+        position: absolute;
+        inset: 0;
         display: block;
         width: 100%;
         height: 100%;
         object-fit: cover;
+        background: #020617;
+    }
+
+    .camera-container video.is-hidden {
+        display: none !important;
+    }
+
+    .camera-container img {
+        position: absolute;
+        inset: 0;
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        background: #020617;
+    }
+
+    .camera-container img[hidden] {
+        display: none !important;
     }
 
     .camera-placeholder {
         position: absolute;
         inset: 0;
+        z-index: 5;
         display: flex;
         align-items: center;
         justify-content: center;
         color: #fff;
         font-size: .68rem;
         font-weight: 500;
-        background: rgba(2, 6, 23, .35);
+        text-align: center;
+        background: rgba(2, 6, 23, .42);
+        pointer-events: none;
+    }
+
+    .camera-placeholder.is-hidden {
+        display: none !important;
+    }
+
+    .camera-error {
+        position: absolute;
+        left: .75rem;
+        right: .75rem;
+        bottom: .75rem;
+        z-index: 10;
+        padding: .65rem .75rem;
+        color: #ffe4e6;
+        background: rgba(127, 29, 29, .88);
+        border: 1px solid rgba(254, 202, 202, .5);
+        border-radius: .5rem;
+        font-size: .68rem;
+        line-height: 1rem;
+        font-weight: 600;
+        text-align: center;
     }
 
     .camera-button {
@@ -1417,50 +1479,32 @@ document.addEventListener('DOMContentLoaded', function () {
     |--------------------------------------------------------------------------
     */
 
-    const form =
-        document.getElementById('form-surat');
+    const form = document.getElementById('form-surat');
 
-    const fileInput =
-        document.getElementById('lampiran_file');
+    const fileInput = document.getElementById('lampiran_file');
+    const capturedInput = document.getElementById('captured_image');
 
-    const capturedInput =
-        document.getElementById('captured_image');
+    const btnUpload = document.getElementById('btn-upload');
+    const btnCamera = document.getElementById('btn-camera');
 
-    const btnUpload =
-        document.getElementById('btn-upload');
+    const uploadPanel = document.getElementById('upload-panel');
+    const cameraPanel = document.getElementById('camera-panel');
 
-    const btnCamera =
-        document.getElementById('btn-camera');
+    const uploadBox = document.getElementById('upload-box');
+    const fileLabelText = document.getElementById('file-label-text');
 
-    const uploadPanel =
-        document.getElementById('upload-panel');
+    const selectedFile = document.getElementById('selected-file');
+    const selectedFileName = document.getElementById('selected-file-name');
+    const clearFileButton = document.getElementById('clear-file-btn');
 
-    const cameraPanel =
-        document.getElementById('camera-panel');
-
-    const uploadBox =
-        document.getElementById('upload-box');
-
-    const fileLabelText =
-        document.getElementById('file-label-text');
-
-    const selectedFile =
-        document.getElementById('selected-file');
-
-    const selectedFileName =
-        document.getElementById('selected-file-name');
-
-    const clearFileButton =
-        document.getElementById('clear-file-btn');
-
-    const video =
-        document.getElementById('video');
-
-    const imagePreview =
-        document.getElementById('image-preview');
+    const video = document.getElementById('video');
+    const imagePreview = document.getElementById('image-preview');
 
     const cameraPlaceholder =
         document.getElementById('camera-placeholder');
+
+    const cameraError =
+        document.getElementById('camera-error');
 
     const startCamButton =
         document.getElementById('start-cam-btn');
@@ -1484,12 +1528,80 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('submit-text');
 
 
-    const MAX_FILE_SIZE =
-        15 * 1024 * 1024;
+    /*
+    |--------------------------------------------------------------------------
+    | KONSTANTA
+    |--------------------------------------------------------------------------
+    */
 
+    const MAX_FILE_SIZE = 15 * 1024 * 1024;
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | STATE
+    |--------------------------------------------------------------------------
+    */
 
     let videoStream = null;
     let isSubmitting = false;
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | UTILITY
+    |--------------------------------------------------------------------------
+    */
+
+    function setHidden(element, hidden) {
+
+        if (!element) {
+            return;
+        }
+
+        if (hidden) {
+            element.classList.add('hidden');
+        } else {
+            element.classList.remove('hidden');
+        }
+    }
+
+
+    function showCameraPlaceholder(show, text = 'Kamera belum aktif') {
+
+        if (!cameraPlaceholder) {
+            return;
+        }
+
+        const textElement =
+            document.getElementById('camera-placeholder-text');
+
+        if (textElement) {
+            textElement.textContent = text;
+        }
+
+        if (show) {
+            cameraPlaceholder.classList.remove('is-hidden');
+        } else {
+            cameraPlaceholder.classList.add('is-hidden');
+        }
+    }
+
+
+    function showCameraError(message = '') {
+
+        if (!cameraError) {
+            return;
+        }
+
+        cameraError.textContent = message;
+
+        if (message) {
+            cameraError.classList.remove('hidden');
+        } else {
+            cameraError.classList.add('hidden');
+        }
+    }
 
 
     /*
@@ -1520,23 +1632,18 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         if (selectedFile) {
-
-            selectedFile.classList.add(
-                'hidden'
-            );
+            selectedFile.classList.add('hidden');
         }
 
         if (selectedFileName) {
-
-            selectedFileName.textContent =
-                '';
+            selectedFileName.textContent = '';
         }
     }
 
 
     /*
     |--------------------------------------------------------------------------
-    | CAMERA RESET
+    | CLEAR CAPTURED IMAGE
     |--------------------------------------------------------------------------
     */
 
@@ -1547,19 +1654,169 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         if (imagePreview) {
-
-            imagePreview.src = '';
-
-            imagePreview.classList.add(
-                'hidden'
-            );
+            imagePreview.removeAttribute('src');
+            imagePreview.hidden = true;
         }
 
         if (snapshotPreview) {
+            snapshotPreview.classList.add('hidden');
+        }
+    }
 
-            snapshotPreview.classList.add(
-                'hidden'
-            );
+
+    /*
+    |--------------------------------------------------------------------------
+    | RESET CAMERA VIEW
+    |--------------------------------------------------------------------------
+    */
+
+    function resetCameraView() {
+
+        if (video) {
+            video.classList.remove('is-hidden');
+            video.srcObject = null;
+        }
+
+        if (imagePreview) {
+            imagePreview.hidden = true;
+            imagePreview.removeAttribute('src');
+        }
+
+        showCameraPlaceholder(true);
+
+        showCameraError('');
+
+        if (snapshotPreview) {
+            snapshotPreview.classList.add('hidden');
+        }
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | STOP STREAM SAJA
+    |--------------------------------------------------------------------------
+    |
+    | Penting:
+    | fungsi ini hanya menghentikan stream.
+    | Tidak mengubah UI kamera.
+    |
+    */
+
+    function stopCameraStream() {
+
+        if (!videoStream) {
+            return;
+        }
+
+        videoStream
+            .getTracks()
+            .forEach(function (track) {
+
+                try {
+                    track.stop();
+                } catch (error) {
+                    console.warn(
+                        'Gagal menghentikan track kamera:',
+                        error
+                    );
+                }
+            });
+
+        videoStream = null;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | STOP CAMERA
+    |--------------------------------------------------------------------------
+    */
+
+    function stopCamera() {
+
+        stopCameraStream();
+
+        if (video) {
+            video.pause();
+            video.srcObject = null;
+            video.classList.remove('is-hidden');
+        }
+
+        showCameraPlaceholder(true);
+        showCameraError('');
+
+        if (startCamButton) {
+            startCamButton.classList.remove('hidden');
+        }
+
+        if (captureButton) {
+            captureButton.classList.add('hidden');
+        }
+
+        if (stopCamButton) {
+            stopCamButton.classList.add('hidden');
+        }
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | CAMERA READY UI
+    |--------------------------------------------------------------------------
+    */
+
+    function setCameraActiveUI() {
+
+        showCameraPlaceholder(false);
+        showCameraError('');
+
+        if (startCamButton) {
+            startCamButton.classList.add('hidden');
+        }
+
+        if (captureButton) {
+            captureButton.classList.remove('hidden');
+        }
+
+        if (retakeButton) {
+            retakeButton.classList.add('hidden');
+        }
+
+        if (stopCamButton) {
+            stopCamButton.classList.remove('hidden');
+        }
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | CAMERA CAPTURED UI
+    |--------------------------------------------------------------------------
+    */
+
+    function setCameraCapturedUI() {
+
+        showCameraPlaceholder(false);
+
+        if (startCamButton) {
+            startCamButton.classList.add('hidden');
+        }
+
+        if (captureButton) {
+            captureButton.classList.add('hidden');
+        }
+
+        if (retakeButton) {
+            retakeButton.classList.remove('hidden');
+        }
+
+        if (stopCamButton) {
+            stopCamButton.classList.remove('hidden');
+        }
+
+        if (snapshotPreview) {
+            snapshotPreview.classList.remove('hidden');
         }
     }
 
@@ -1572,7 +1829,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function switchMode(mode) {
 
-        stopCamera();
+        stopCameraStream();
+
+        showCameraError('');
 
         if (mode === 'upload') {
 
@@ -1594,9 +1853,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
             clearCapturedImage();
 
+            resetCameraView();
+
+            stopCamera();
+
             return;
         }
 
+
+        /*
+        |----------------------------------------------------------------------
+        | CAMERA MODE
+        |----------------------------------------------------------------------
+        */
 
         btnCamera.classList.add(
             'mode-button-active'
@@ -1614,15 +1883,31 @@ document.addEventListener('DOMContentLoaded', function () {
             'hidden'
         );
 
+
         /*
-        |--------------------------------------------------------------------------
-        | HANYA SATU SUMBER FILE
-        |--------------------------------------------------------------------------
+        | Hanya satu sumber file.
         */
 
         resetFileDisplay();
+
+        resetCameraView();
+
+        stopCamera();
+
+        /*
+        | Pastikan hasil kamera lama tidak ikut terkirim
+        | ketika membuka kamera baru.
+        */
+
+        clearCapturedImage();
     }
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | MODE BUTTON
+    |--------------------------------------------------------------------------
+    */
 
     btnUpload.addEventListener(
         'click',
@@ -1644,10 +1929,6 @@ document.addEventListener('DOMContentLoaded', function () {
     |--------------------------------------------------------------------------
     | FILE INPUT
     |--------------------------------------------------------------------------
-    |
-    | Tidak ada pengecekan MIME di browser.
-    | JPG/JPEG dibiarkan sebagai file asli.
-    |
     */
 
     fileInput.addEventListener(
@@ -1668,15 +1949,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
             /*
-            |--------------------------------------------------------------------------
+            |----------------------------------------------------------------------
             | UKURAN
-            |--------------------------------------------------------------------------
+            |----------------------------------------------------------------------
             */
 
-            if (
-                file.size >
-                MAX_FILE_SIZE
-            ) {
+            if (file.size > MAX_FILE_SIZE) {
 
                 this.value = '';
 
@@ -1699,10 +1977,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
             /*
-            |--------------------------------------------------------------------------
+            |----------------------------------------------------------------------
             | FILE DIPILIH
-            |--------------------------------------------------------------------------
+            |----------------------------------------------------------------------
             */
+
+            capturedInput.value = '';
 
             clearCapturedImage();
 
@@ -1748,11 +2028,9 @@ document.addEventListener('DOMContentLoaded', function () {
         function (event) {
 
             event.preventDefault();
-
             event.stopPropagation();
 
             resetFileDisplay();
-
         }
     );
 
@@ -1765,12 +2043,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     async function startCamera() {
 
+        showCameraError('');
+
         if (
             !navigator.mediaDevices ||
             !navigator.mediaDevices.getUserMedia
         ) {
 
-            alert(
+            showCameraError(
                 'Browser tidak mendukung akses kamera.'
             );
 
@@ -1780,10 +2060,29 @@ document.addEventListener('DOMContentLoaded', function () {
 
         try {
 
-            stopCamera();
+            /*
+            | Bersihkan stream sebelumnya.
+            */
+
+            stopCameraStream();
+
+
+            /*
+            | Bersihkan hasil sebelumnya.
+            */
 
             clearCapturedImage();
 
+
+            if (video) {
+                video.classList.remove('is-hidden');
+                video.srcObject = null;
+            }
+
+
+            /*
+            | Request camera.
+            */
 
             videoStream =
                 await navigator.mediaDevices.getUserMedia({
@@ -1805,31 +2104,42 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
 
 
+            /*
+            | Hubungkan stream ke video.
+            */
+
             video.srcObject =
                 videoStream;
+
+
+            /*
+            | Tunggu metadata video.
+            */
+
+            await new Promise(function (resolve) {
+
+                if (
+                    video.readyState >= 2
+                ) {
+                    resolve();
+                    return;
+                }
+
+                video.onloadedmetadata =
+                    function () {
+                        resolve();
+                    };
+            });
+
 
             await video.play();
 
 
-            cameraPlaceholder.classList.add(
-                'hidden'
-            );
+            /*
+            | Kamera benar-benar aktif.
+            */
 
-            startCamButton.classList.add(
-                'hidden'
-            );
-
-            captureButton.classList.remove(
-                'hidden'
-            );
-
-            stopCamButton.classList.remove(
-                'hidden'
-            );
-
-            retakeButton.classList.add(
-                'hidden'
-            );
+            setCameraActiveUI();
 
         } catch (error) {
 
@@ -1838,84 +2148,196 @@ document.addEventListener('DOMContentLoaded', function () {
                 error
             );
 
-            stopCamera();
+            stopCameraStream();
 
-            alert(
-                'Gagal mengakses kamera. Pastikan izin kamera diberikan pada browser.'
+            if (video) {
+                video.srcObject = null;
+            }
+
+            showCameraPlaceholder(
+                true,
+                'Kamera belum aktif'
             );
+
+
+            let message =
+                'Gagal mengakses kamera.';
+
+            if (
+                error &&
+                error.name === 'NotAllowedError'
+            ) {
+                message =
+                    'Izin kamera ditolak. Izinkan akses kamera pada browser lalu coba lagi.';
+            } else if (
+                error &&
+                error.name === 'NotFoundError'
+            ) {
+                message =
+                    'Kamera tidak ditemukan pada perangkat.';
+            } else if (
+                error &&
+                error.name === 'NotReadableError'
+            ) {
+                message =
+                    'Kamera sedang digunakan aplikasi lain.';
+            } else if (
+                error &&
+                error.name === 'OverconstrainedError'
+            ) {
+                message =
+                    'Kamera tidak mendukung konfigurasi yang diminta.';
+            } else if (
+                error &&
+                error.message
+            ) {
+                message =
+                    error.message;
+            }
+
+            showCameraError(message);
+
+
+            if (startCamButton) {
+                startCamButton.classList.remove('hidden');
+            }
+
+            if (captureButton) {
+                captureButton.classList.add('hidden');
+            }
+
+            if (stopCamButton) {
+                stopCamButton.classList.add('hidden');
+            }
         }
     }
 
 
     /*
     |--------------------------------------------------------------------------
-    | STOP CAMERA
+    | PROCESS CAMERA BLOB
     |--------------------------------------------------------------------------
     */
 
-    function stopCamera() {
+    async function processCameraBlob(blob) {
 
-        if (videoStream) {
-
-            videoStream
-                .getTracks()
-                .forEach(
-                    function (track) {
-
-                        try {
-                            track.stop();
-                        } catch (error) {
-                            console.warn(error);
-                        }
-
-                    }
-                );
-
-            videoStream = null;
+        if (!blob) {
+            throw new Error(
+                'Hasil kamera kosong.'
+            );
         }
 
+
+        if (blob.size > MAX_FILE_SIZE) {
+            throw new Error(
+                'Ukuran hasil kamera melebihi 15 MB.'
+            );
+        }
+
+
+        const reader =
+            new FileReader();
+
+
+        const dataUrl =
+            await new Promise(
+                function (resolve, reject) {
+
+                    reader.onload =
+                        function () {
+                            resolve(
+                                reader.result
+                            );
+                        };
+
+                    reader.onerror =
+                        function () {
+
+                            reject(
+                                new Error(
+                                    'Gagal membaca hasil kamera.'
+                                )
+                            );
+                        };
+
+                    reader.readAsDataURL(blob);
+                }
+            );
+
+
+        if (
+            typeof dataUrl !== 'string' ||
+            !dataUrl.startsWith('data:image/')
+        ) {
+            throw new Error(
+                'Data hasil kamera tidak valid.'
+            );
+        }
+
+
+        /*
+        |----------------------------------------------------------------------
+        | SIMPAN DATA KAMERA
+        |----------------------------------------------------------------------
+        */
+
+        capturedInput.value =
+            dataUrl;
+
+
+        /*
+        | File upload harus kosong.
+        */
+
+        if (fileInput) {
+            fileInput.value = '';
+        }
+
+        resetFileDisplay();
+
+
+        /*
+        | Tampilkan hasil foto.
+        */
+
+        if (imagePreview) {
+
+            imagePreview.src =
+                dataUrl;
+
+            imagePreview.hidden =
+                false;
+        }
+
+
+        /*
+        | Sembunyikan video.
+        */
 
         if (video) {
-            video.srcObject = null;
+            video.pause();
+            video.classList.add('is-hidden');
         }
 
 
-        if (cameraPlaceholder) {
+        /*
+        | Stop hardware camera tanpa mereset preview.
+        */
 
-            cameraPlaceholder.classList.remove(
-                'hidden'
-            );
-        }
-
-
-        if (startCamButton) {
-
-            startCamButton.classList.remove(
-                'hidden'
-            );
-        }
+        stopCameraStream();
 
 
-        if (captureButton) {
+        /*
+        | Tampilkan UI hasil.
+        */
 
-            captureButton.classList.add(
-                'hidden'
-            );
-        }
-
-
-        if (stopCamButton) {
-
-            stopCamButton.classList.add(
-                'hidden'
-            );
-        }
+        setCameraCapturedUI();
     }
 
 
     /*
     |--------------------------------------------------------------------------
-    | AMBIL FOTO
+    | TAKE SNAPSHOT
     |--------------------------------------------------------------------------
     */
 
@@ -1923,8 +2345,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (!videoStream) {
 
-            alert(
-                'Kamera belum aktif.'
+            showCameraError(
+                'Kamera belum aktif. Klik "Nyalakan Kamera" terlebih dahulu.'
             );
 
             return;
@@ -1946,46 +2368,64 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
             /*
-            |--------------------------------------------------------------------------
+            |----------------------------------------------------------------------
             | IMAGE CAPTURE
-            |--------------------------------------------------------------------------
+            |----------------------------------------------------------------------
             */
 
             if (
-                typeof ImageCapture !==
-                'undefined'
+                typeof ImageCapture !== 'undefined'
             ) {
 
-                const imageCapture =
-                    new ImageCapture(track);
+                try {
 
-                const blob =
-                    await imageCapture.takePhoto();
+                    const imageCapture =
+                        new ImageCapture(track);
 
-                await processCameraBlob(
-                    blob
-                );
+                    const blob =
+                        await imageCapture.takePhoto();
 
-                return;
+                    await processCameraBlob(
+                        blob
+                    );
+
+                    return;
+
+                } catch (imageCaptureError) {
+
+                    console.warn(
+                        'ImageCapture gagal, menggunakan canvas:',
+                        imageCaptureError
+                    );
+                }
             }
 
 
             /*
-            |--------------------------------------------------------------------------
+            |----------------------------------------------------------------------
             | FALLBACK CANVAS
-            |--------------------------------------------------------------------------
+            |----------------------------------------------------------------------
             */
 
-            const canvas =
-                document.createElement(
-                    'canvas'
+            if (
+                !video.videoWidth ||
+                !video.videoHeight
+            ) {
+                throw new Error(
+                    'Video kamera belum siap. Silakan tunggu sebentar lalu coba lagi.'
                 );
+            }
+
+
+            const canvas =
+                document.createElement('canvas');
+
 
             canvas.width =
-                video.videoWidth || 1280;
+                video.videoWidth;
 
             canvas.height =
-                video.videoHeight || 720;
+                video.videoHeight;
 
 
             const context =
@@ -2009,30 +2449,34 @@ document.addEventListener('DOMContentLoaded', function () {
             );
 
 
-            canvas.toBlob(
-                async function (blob) {
+            const blob =
+                await new Promise(
+                    function (resolve, reject) {
 
-                    try {
+                        canvas.toBlob(
+                            function (result) {
 
-                        await processCameraBlob(
-                            blob
-                        );
+                                if (!result) {
+                                    reject(
+                                        new Error(
+                                            'Gagal membuat gambar dari kamera.'
+                                        )
+                                    );
 
-                    } catch (error) {
+                                    return;
+                                }
 
-                        console.error(
-                            error
-                        );
-
-                        alert(
-                            error.message ||
-                            'Gagal memproses hasil kamera.'
+                                resolve(result);
+                            },
+                            'image/jpeg',
+                            0.90
                         );
                     }
+                );
 
-                },
-                'image/jpeg',
-                0.9
+
+            await processCameraBlob(
+                blob
             );
 
         } catch (error) {
@@ -2042,7 +2486,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 error
             );
 
-            alert(
+            showCameraError(
                 error.message ||
                 'Gagal mengambil foto dari kamera.'
             );
@@ -2052,126 +2496,30 @@ document.addEventListener('DOMContentLoaded', function () {
 
     /*
     |--------------------------------------------------------------------------
-    | PROSES BLOB KAMERA
+    | RETAKE PHOTO
     |--------------------------------------------------------------------------
     */
 
-    async function processCameraBlob(blob) {
+    async function retakePhoto() {
 
-        if (!blob) {
+        clearCapturedImage();
 
-            throw new Error(
-                'Hasil kamera kosong.'
-            );
+        if (video) {
+            video.classList.remove('is-hidden');
         }
 
+        showCameraPlaceholder(
+            true,
+            'Menyiapkan kamera...'
+        );
 
-        if (
-            blob.size >
-            MAX_FILE_SIZE
-        ) {
-
-            throw new Error(
-                'Ukuran hasil kamera melebihi 15 MB.'
-            );
+        if (retakeButton) {
+            retakeButton.classList.add('hidden');
         }
 
+        showCameraError('');
 
-        const reader =
-            new FileReader();
-
-
-        const dataUrl =
-            await new Promise(
-                function (resolve, reject) {
-
-                    reader.onload =
-                        function () {
-                            resolve(
-                                reader.result
-                            );
-                        };
-
-
-                    reader.onerror =
-                        function () {
-
-                            reject(
-                                new Error(
-                                    'Gagal membaca hasil kamera.'
-                                )
-                            );
-                        };
-
-
-                    reader.readAsDataURL(
-                        blob
-                    );
-                }
-            );
-
-
-        if (
-            typeof dataUrl !== 'string' ||
-            !dataUrl.startsWith(
-                'data:image/'
-            )
-        ) {
-
-            throw new Error(
-                'Data hasil kamera tidak valid.'
-            );
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | SIMPAN HASIL KAMERA
-        |--------------------------------------------------------------------------
-        */
-
-        capturedInput.value =
-            dataUrl;
-
-
-        if (fileInput) {
-
-            fileInput.value =
-                '';
-        }
-
-
-        resetFileDisplay();
-
-
-        imagePreview.src =
-            dataUrl;
-
-        imagePreview.classList.remove(
-            'hidden'
-        );
-
-
-        video.classList.add(
-            'hidden'
-        );
-
-
-        snapshotPreview.classList.remove(
-            'hidden'
-        );
-
-
-        stopCamera();
-
-
-        startCamButton.classList.add(
-            'hidden'
-        );
-
-        retakeButton.classList.remove(
-            'hidden'
-        );
+        await startCamera();
     }
 
 
@@ -2195,26 +2543,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
     retakeButton.addEventListener(
         'click',
-        function () {
-
-            clearCapturedImage();
-
-            video.classList.remove(
-                'hidden'
-            );
-
-            retakeButton.classList.add(
-                'hidden'
-            );
-
-            startCamera();
-        }
+        retakePhoto
     );
 
 
     stopCamButton.addEventListener(
         'click',
-        stopCamera
+        function () {
+
+            clearCapturedImage();
+
+            stopCamera();
+
+        }
     );
 
 
@@ -2248,9 +2589,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
             /*
-            |--------------------------------------------------------------------------
+            |----------------------------------------------------------------------
             | WAJIB FILE ATAU KAMERA
-            |--------------------------------------------------------------------------
+            |----------------------------------------------------------------------
             */
 
             if (
@@ -2277,9 +2618,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
             /*
-            |--------------------------------------------------------------------------
+            |----------------------------------------------------------------------
             | TIDAK BOLEH KEDUANYA
-            |--------------------------------------------------------------------------
+            |----------------------------------------------------------------------
             */
 
             if (
@@ -2298,9 +2639,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
             /*
-            |--------------------------------------------------------------------------
+            |----------------------------------------------------------------------
             | SUBMIT
-            |--------------------------------------------------------------------------
+            |----------------------------------------------------------------------
             */
 
             isSubmitting =
@@ -2315,7 +2656,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 'Menyimpan...';
 
 
-            stopCamera();
+            /*
+            | Stop hardware camera.
+            | Tidak menghapus captured_image.
+            */
+
+            stopCameraStream();
         }
     );
 
@@ -2326,20 +2672,20 @@ document.addEventListener('DOMContentLoaded', function () {
     |--------------------------------------------------------------------------
     */
 
-    switchMode(
-        'upload'
-    );
+    switchMode('upload');
 
 
     /*
     |--------------------------------------------------------------------------
-    | STOP KAMERA SAAT MENINGGALKAN HALAMAN
+    | CLEANUP
     |--------------------------------------------------------------------------
     */
 
     window.addEventListener(
         'beforeunload',
-        stopCamera
+        function () {
+            stopCameraStream();
+        }
     );
 
 });
