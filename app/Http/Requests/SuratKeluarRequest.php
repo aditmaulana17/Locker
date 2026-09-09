@@ -20,10 +20,7 @@ class SuratKeluarRequest extends FormRequest
             return false;
         }
 
-        $role = method_exists(
-            $user,
-            'normalizedRole'
-        )
+        $role = method_exists($user, 'normalizedRole')
             ? $user->normalizedRole()
             : User::normalizeRole(
                 (string) (
@@ -56,6 +53,12 @@ class SuratKeluarRequest extends FormRequest
             : $suratKeluar;
 
         return [
+
+            /*
+            |--------------------------------------------------------------------------
+            | NOMOR SURAT
+            |--------------------------------------------------------------------------
+            */
             'nomor_surat' => [
                 'nullable',
                 'string',
@@ -66,35 +69,65 @@ class SuratKeluarRequest extends FormRequest
                 )->ignore($suratKeluarId),
             ],
 
+            /*
+            |--------------------------------------------------------------------------
+            | TANGGAL SURAT
+            |--------------------------------------------------------------------------
+            */
             'tanggal_surat' => [
                 'required',
                 'date',
             ],
 
+            /*
+            |--------------------------------------------------------------------------
+            | TANGGAL KELUAR
+            |--------------------------------------------------------------------------
+            */
             'tanggal_keluar' => [
                 'required',
                 'date',
                 'after_or_equal:tanggal_surat',
             ],
 
+            /*
+            |--------------------------------------------------------------------------
+            | PENGIRIM / INSTANSI TUJUAN
+            |--------------------------------------------------------------------------
+            */
             'pengirim' => [
                 'required',
                 'string',
                 'max:150',
             ],
 
+            /*
+            |--------------------------------------------------------------------------
+            | KATEGORI
+            |--------------------------------------------------------------------------
+            */
             'kategori_surat_id' => [
                 'required',
                 'integer',
                 'exists:kategori_surats,id',
             ],
 
+            /*
+            |--------------------------------------------------------------------------
+            | PERIHAL
+            |--------------------------------------------------------------------------
+            */
             'perihal' => [
                 'required',
                 'string',
                 'max:255',
             ],
 
+            /*
+            |--------------------------------------------------------------------------
+            | RINGKASAN
+            |--------------------------------------------------------------------------
+            */
             'ringkasan' => [
                 'nullable',
                 'string',
@@ -103,19 +136,23 @@ class SuratKeluarRequest extends FormRequest
 
             /*
             |--------------------------------------------------------------------------
-            | FILE
+            | LAMPIRAN FILE
             |--------------------------------------------------------------------------
             |
-            | Maksimal 15MB.
-            | File boleh kosong karena edit bisa mempertahankan file lama
-            | dan create juga mendukung hasil kamera.
+            | Format yang diperbolehkan:
+            | PDF
+            | JPG
+            | JPEG
+            | PNG
+            |
+            | Maksimal 15 MB.
             |
             */
             'lampiran_file' => [
                 'nullable',
                 'file',
                 'max:15360',
-                'mimes:pdf,jpg,jpeg,png,webp',
+                'mimetypes:application/pdf,image/jpeg,image/jpg,image/pjpeg,image/png',
             ],
 
             /*
@@ -212,12 +249,14 @@ class SuratKeluarRequest extends FormRequest
     ): void {
         $validator->after(
             function (Validator $validator) {
+
                 $hasFile = $this->hasFile(
                     'lampiran_file'
                 );
 
-                $fileIsValid = $hasFile
-                    && $this->file('lampiran_file')?->isValid();
+                $file = $this->file(
+                    'lampiran_file'
+                );
 
                 $capturedImage = trim(
                     (string) $this->input(
@@ -233,9 +272,10 @@ class SuratKeluarRequest extends FormRequest
                 | FILE DAN KAMERA TIDAK BOLEH BERSAMAAN
                 |--------------------------------------------------------------------------
                 */
-
                 if (
-                    $fileIsValid
+                    $hasFile
+                    && $file
+                    && $file->isValid()
                     && $hasCamera
                 ) {
                     $validator->errors()->add(
@@ -247,56 +287,8 @@ class SuratKeluarRequest extends FormRequest
                         'captured_image',
                         'Gunakan salah satu metode: upload file atau kamera.'
                     );
-                }
 
-                /*
-                |--------------------------------------------------------------------------
-                | CEK ERROR UPLOAD
-                |--------------------------------------------------------------------------
-                */
-
-                if (
-                    $hasFile
-                    && !$fileIsValid
-                ) {
-                    $file = $this->file(
-                        'lampiran_file'
-                    );
-
-                    if ($file) {
-                        $message = match (
-                            $file->getError()
-                        ) {
-                            UPLOAD_ERR_INI_SIZE =>
-                                'Ukuran file melebihi batas upload server.',
-
-                            UPLOAD_ERR_FORM_SIZE =>
-                                'Ukuran file melebihi batas form.',
-
-                            UPLOAD_ERR_PARTIAL =>
-                                'File hanya terupload sebagian.',
-
-                            UPLOAD_ERR_NO_FILE =>
-                                'Tidak ada file yang dipilih.',
-
-                            UPLOAD_ERR_NO_TMP_DIR =>
-                                'Folder temporary upload tidak tersedia.',
-
-                            UPLOAD_ERR_CANT_WRITE =>
-                                'Server gagal menulis file upload.',
-
-                            UPLOAD_ERR_EXTENSION =>
-                                'Upload dihentikan oleh ekstensi PHP.',
-
-                            default =>
-                                'File lampiran tidak valid.',
-                        };
-
-                        $validator->errors()->add(
-                            'lampiran_file',
-                            $message
-                        );
-                    }
+                    return;
                 }
 
                 /*
@@ -304,11 +296,17 @@ class SuratKeluarRequest extends FormRequest
                 | VALIDASI HASIL KAMERA
                 |--------------------------------------------------------------------------
                 */
-
                 if ($hasCamera) {
+
+                    /*
+                    | Data URI yang valid:
+                    | data:image/jpeg;base64,...
+                    | data:image/jpg;base64,...
+                    | data:image/png;base64,...
+                    */
                     if (
                         !preg_match(
-                            '/^data:image\/(jpeg|jpg|png|webp);base64,/i',
+                            '/^data:image\/(jpeg|jpg|png);base64,/i',
                             $capturedImage
                         )
                     ) {
@@ -316,36 +314,114 @@ class SuratKeluarRequest extends FormRequest
                             'captured_image',
                             'Format hasil kamera tidak valid.'
                         );
-                    } else {
-                        [
-                            ,
-                            $base64
-                        ] = explode(
-                            ',',
-                            $capturedImage,
-                            2
-                        );
 
-                        $decoded = base64_decode(
-                            $base64,
-                            true
-                        );
-
-                        if ($decoded === false) {
-                            $validator->errors()->add(
-                                'captured_image',
-                                'Data hasil kamera tidak valid.'
-                            );
-                        } elseif (
-                            strlen($decoded)
-                            > 15 * 1024 * 1024
-                        ) {
-                            $validator->errors()->add(
-                                'captured_image',
-                                'Ukuran hasil kamera maksimal 15MB.'
-                            );
-                        }
+                        return;
                     }
+
+                    [
+                        ,
+                        $base64
+                    ] = explode(
+                        ',',
+                        $capturedImage,
+                        2
+                    );
+
+                    $decoded = base64_decode(
+                        $base64,
+                        true
+                    );
+
+                    if ($decoded === false) {
+                        $validator->errors()->add(
+                            'captured_image',
+                            'Data hasil kamera tidak valid.'
+                        );
+
+                        return;
+                    }
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | BATAS UKURAN KAMERA
+                    |--------------------------------------------------------------------------
+                    */
+                    if (
+                        strlen($decoded)
+                        > 15 * 1024 * 1024
+                    ) {
+                        $validator->errors()->add(
+                            'captured_image',
+                            'Ukuran hasil kamera maksimal 15MB.'
+                        );
+
+                        return;
+                    }
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | PASTIKAN BENAR-BENAR GAMBAR
+                    |--------------------------------------------------------------------------
+                    */
+                    if (
+                        @getimagesizefromstring(
+                            $decoded
+                        ) === false
+                    ) {
+                        $validator->errors()->add(
+                            'captured_image',
+                            'Data hasil kamera bukan gambar yang valid.'
+                        );
+                    }
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | ERROR UPLOAD PHP
+                |--------------------------------------------------------------------------
+                |
+                | Hanya tambahkan pesan spesifik bila PHP memang
+                | mengembalikan error upload.
+                |
+                */
+                if (
+                    $hasFile
+                    && $file
+                    && !$file->isValid()
+                ) {
+                    $errorCode = $file->getError();
+
+                    $message = match ($errorCode) {
+
+                        UPLOAD_ERR_INI_SIZE =>
+                            'Ukuran file melebihi batas upload PHP.',
+
+                        UPLOAD_ERR_FORM_SIZE =>
+                            'Ukuran file melebihi batas upload form.',
+
+                        UPLOAD_ERR_PARTIAL =>
+                            'File hanya terupload sebagian.',
+
+                        UPLOAD_ERR_NO_FILE =>
+                            'Tidak ada file yang dipilih.',
+
+                        UPLOAD_ERR_NO_TMP_DIR =>
+                            'Folder temporary upload PHP tidak tersedia.',
+
+                        UPLOAD_ERR_CANT_WRITE =>
+                            'PHP gagal menulis file upload.',
+
+                        UPLOAD_ERR_EXTENSION =>
+                            'Upload dihentikan oleh ekstensi PHP.',
+
+                        default =>
+                            'File gagal diupload oleh PHP.',
+                    };
+
+                    $validator->errors()->add(
+                        'lampiran_file',
+                        $message
+                    );
                 }
             }
         );
@@ -357,6 +433,7 @@ class SuratKeluarRequest extends FormRequest
     public function messages(): array
     {
         return [
+
             'nomor_surat.string' =>
                 'Nomor surat harus berupa teks.',
 
@@ -417,8 +494,8 @@ class SuratKeluarRequest extends FormRequest
             'lampiran_file.file' =>
                 'Lampiran harus berupa file yang valid.',
 
-            'lampiran_file.mimes' =>
-                'Lampiran harus berformat PDF, JPG, JPEG, PNG, atau WEBP.',
+            'lampiran_file.mimetypes' =>
+                'Lampiran hanya boleh berupa PDF, JPG, JPEG, atau PNG.',
 
             'lampiran_file.max' =>
                 'Ukuran file lampiran maksimal 15MB.',
