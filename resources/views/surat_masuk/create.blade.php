@@ -75,7 +75,7 @@
             <div class="flex flex-col sm:flex-row
                         sm:items-center sm:justify-between gap-3">
 
-                <div class="flex items-center">
+                <div class="flex items-center min-w-0">
 
                     <div class="flex items-center justify-center
                                 w-9 h-9 mr-3
@@ -89,6 +89,7 @@
                              fill="none"
                              stroke="currentColor"
                              viewBox="0 0 24 24">
+
                             <path stroke-linecap="round"
                                   stroke-linejoin="round"
                                   stroke-width="2"
@@ -97,7 +98,7 @@
                     </div>
 
                     <div class="flex flex-col sm:flex-row
-                                sm:items-center gap-1.5">
+                                sm:items-center gap-1.5 min-w-0">
 
                         <span class="text-sm font-medium text-blue-900">
                             Nomor Agenda Sistem:
@@ -129,31 +130,25 @@
 
 
             {{-- =================================================
-                 SECTION 1
+                 SECTION 1 : INFORMASI UTAMA
             ================================================== --}}
             <section>
 
-                <div class="flex items-center gap-3
-                            pb-3 mb-5
-                            border-b-2 border-slate-200">
-
-                    <div class="w-2 h-6 bg-blue-600 rounded-full shrink-0"></div>
+                <div class="section-heading">
+                    <div class="section-marker bg-blue-600"></div>
 
                     <div>
-                        <h2 class="text-sm font-bold
-                                   uppercase tracking-wide
-                                   text-slate-700">
+                        <h2 class="section-title">
                             Informasi Utama Surat
                         </h2>
 
-                        <p class="mt-0.5 text-xs text-slate-400">
+                        <p class="section-description">
                             Lengkapi identitas dan informasi utama surat masuk.
                         </p>
                     </div>
                 </div>
 
 
-                {{-- FORM GRID --}}
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-5">
 
 
@@ -180,7 +175,7 @@
                     </div>
 
 
-                    {{-- Pengirim --}}
+                    {{-- Instansi Pengirim --}}
                     <div class="form-group">
 
                         <label class="form-label">
@@ -363,84 +358,62 @@
 
 
             {{-- =================================================
-                 SECTION 2
+                 SECTION 2 : DOKUMEN & ARSIP FISIK
             ================================================== --}}
             <section class="mt-8">
 
-                <div class="flex items-center gap-3
-                            pb-3 mb-5
-                            border-b-2 border-slate-200">
-
-                    <div class="w-2 h-6 bg-indigo-600 rounded-full shrink-0"></div>
+                <div class="section-heading">
+                    <div class="section-marker bg-indigo-600"></div>
 
                     <div>
-                        <h2 class="text-sm font-bold
-                                   uppercase tracking-wide
-                                   text-slate-700">
+                        <h2 class="section-title">
                             Lampiran Dokumen & Arsip Fisik
                         </h2>
 
-                        <p class="mt-0.5 text-xs text-slate-400">
+                        <p class="section-description">
                             Tambahkan dokumen digital dan lokasi penyimpanan arsip fisik.
                         </p>
                     </div>
                 </div>
 
 
-                {{-- TWO COLUMN --}}
+                {{-- =================================================
+                     TWO COLUMN CARD
+                ================================================== --}}
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5 items-stretch">
 
 
                     {{-- =================================================
-                         BERKAS DIGITAL
+                         CARD BERKAS DIGITAL
                     ================================================== --}}
-                    <div class="flex flex-col
-                                p-5
-                                bg-slate-50
-                                border-2 border-slate-300
-                                rounded-2xl">
+                    <div class="archive-card">
 
-                        <div class="flex items-center
-                                    justify-between gap-3 mb-4">
+                        {{-- Card Header --}}
+                        <div class="archive-card-header">
 
                             <div>
-                                <h3 class="text-sm font-bold text-slate-700">
+                                <h3 class="archive-card-title">
                                     Berkas Digital
                                 </h3>
 
-                                <p class="mt-0.5 text-xs text-slate-400">
+                                <p class="archive-card-description">
                                     Upload dokumen atau gunakan kamera.
                                 </p>
                             </div>
 
-                            <span class="px-2.5 py-1
-                                         text-[11px] font-semibold
-                                         text-slate-600
-                                         bg-white
-                                         border-2 border-slate-300
-                                         rounded-lg">
+                            <span class="archive-card-badge">
                                 Opsional
                             </span>
                         </div>
 
 
-                        {{-- TAB MODE --}}
-                        <div class="flex w-fit p-1 mb-4
-                                    bg-slate-200
-                                    border-2 border-slate-300
-                                    rounded-xl">
+                        {{-- Mode Selector --}}
+                        <div class="mode-selector">
 
                             <button type="button"
                                     onclick="switchMode('upload')"
                                     id="btn-upload"
-                                    class="px-4 py-2
-                                           rounded-lg
-                                           bg-white
-                                           text-blue-600
-                                           border border-slate-200
-                                           shadow-sm
-                                           text-xs font-semibold
-                                           transition">
+                                    class="mode-button mode-button-active">
 
                                 Upload File
                             </button>
@@ -448,49 +421,20 @@
                             <button type="button"
                                     onclick="switchMode('camera')"
                                     id="btn-camera"
-                                    class="px-4 py-2
-                                           rounded-lg
-                                           text-slate-600
-                                           text-xs font-semibold
-                                           transition">
+                                    class="mode-button">
 
                                 Scan Kamera
                             </button>
                         </div>
 
 
-                        {{-- =================================================
-                             MODE UPLOAD
-                        ================================================== --}}
+                        {{-- Upload Mode --}}
                         <div id="mode-upload" class="flex-1">
 
                             <label id="upload-box-label"
-                                   class="relative flex flex-col
-                                          items-center justify-center
-                                          h-full min-h-[190px]
-                                          p-6
-                                          text-center
-                                          bg-white
-                                          border-2 border-dashed
-                                          border-slate-400
-                                          rounded-xl
-                                          cursor-pointer
-                                          hover:bg-slate-50
-                                          hover:border-slate-500
-                                          transition
-                                          group
-                                          @error('lampiran_file')
-                                              !border-rose-500 !bg-rose-50/30
-                                          @enderror">
+                                   class="upload-box @error('lampiran_file') upload-box-error @enderror">
 
-                                <div class="flex items-center justify-center
-                                            w-12 h-12 mb-3
-                                            bg-blue-50
-                                            border-2 border-blue-100
-                                            rounded-full
-                                            text-blue-600
-                                            group-hover:scale-105
-                                            transition-transform">
+                                <div class="upload-icon">
 
                                     <svg class="w-6 h-6"
                                          fill="none"
@@ -502,10 +446,12 @@
                                               stroke-width="2"
                                               d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
                                     </svg>
+
                                 </div>
 
                                 <span id="file-label-text"
                                       class="text-sm font-bold text-slate-700">
+
                                     Klik untuk memilih file
                                 </span>
 
@@ -517,71 +463,43 @@
                                        name="lampiran_file"
                                        id="lampiran_file"
                                        accept=".pdf,.jpg,.jpeg,.png"
-                                       class="absolute inset-0
-                                              w-full h-full
-                                              opacity-0 cursor-pointer"
+                                       class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                                        onchange="updateFileName(this)">
                             </label>
                         </div>
 
 
-                        {{-- =================================================
-                             MODE CAMERA
-                        ================================================== --}}
+                        {{-- Camera Mode --}}
                         <div id="mode-camera"
                              class="hidden flex-1">
 
                             <div id="camera-container"
-                                 class="relative w-full
-                                        aspect-[4/3]
-                                        bg-slate-950
-                                        border-2 border-slate-400
-                                        rounded-xl
-                                        overflow-hidden">
+                                 class="camera-container">
 
-                                {{-- VIDEO CAMERA --}}
                                 <video id="video"
                                        autoplay
                                        playsinline
                                        class="w-full h-full object-cover">
                                 </video>
 
-                                {{-- PREVIEW FOTO --}}
                                 <img id="image-preview"
-                                     class="hidden
-                                            absolute inset-0
-                                            w-full h-full
-                                            object-contain
-                                            bg-slate-950"
+                                     class="hidden absolute inset-0 w-full h-full object-contain bg-slate-950"
                                      alt="Preview Scan">
 
                                 <div id="camera-placeholder"
-                                     class="absolute inset-0
-                                            flex items-center
-                                            justify-center
-                                            text-xs font-medium
-                                            text-white
-                                            bg-slate-950/40">
+                                     class="camera-placeholder">
+
                                     Kamera belum aktif
                                 </div>
                             </div>
 
 
-                            {{-- CAMERA BUTTONS --}}
-                            <div class="flex flex-wrap
-                                        justify-center gap-2 mt-4">
+                            <div class="flex flex-wrap justify-center gap-2 mt-4">
 
                                 <button type="button"
                                         id="start-cam-btn"
                                         onclick="startCamera()"
-                                        class="px-4 py-2.5
-                                               text-xs font-bold
-                                               text-white
-                                               bg-blue-600
-                                               border-2 border-blue-600
-                                               rounded-xl
-                                               hover:bg-blue-700
-                                               transition">
+                                        class="camera-button bg-blue-600 hover:bg-blue-700 border-blue-600">
 
                                     Nyalakan Kamera
                                 </button>
@@ -589,15 +507,7 @@
                                 <button type="button"
                                         id="capture-btn"
                                         onclick="takeSnapshot()"
-                                        class="hidden
-                                               px-4 py-2.5
-                                               text-xs font-bold
-                                               text-white
-                                               bg-emerald-600
-                                               border-2 border-emerald-600
-                                               rounded-xl
-                                               hover:bg-emerald-700
-                                               transition">
+                                        class="hidden camera-button bg-emerald-600 hover:bg-emerald-700 border-emerald-600">
 
                                     Ambil Foto
                                 </button>
@@ -605,15 +515,7 @@
                                 <button type="button"
                                         id="retake-btn"
                                         onclick="retakeSnapshot()"
-                                        class="hidden
-                                               px-4 py-2.5
-                                               text-xs font-bold
-                                               text-white
-                                               bg-amber-500
-                                               border-2 border-amber-500
-                                               rounded-xl
-                                               hover:bg-amber-600
-                                               transition">
+                                        class="hidden camera-button bg-amber-500 hover:bg-amber-600 border-amber-500">
 
                                     Foto Ulang
                                 </button>
@@ -621,18 +523,11 @@
                                 <button type="button"
                                         id="stop-cam-btn"
                                         onclick="stopCamera()"
-                                        class="hidden
-                                               px-4 py-2.5
-                                               text-xs font-bold
-                                               text-white
-                                               bg-rose-600
-                                               border-2 border-rose-600
-                                               rounded-xl
-                                               hover:bg-rose-700
-                                               transition">
+                                        class="hidden camera-button bg-rose-600 hover:bg-rose-700 border-rose-600">
 
                                     Tutup Kamera
                                 </button>
+
                             </div>
 
 
@@ -644,10 +539,8 @@
 
                             <div id="snapshot-preview"
                                  class="{{ old('captured_image') ? '' : 'hidden' }}
-                                        mt-3
-                                        text-center
-                                        text-xs
-                                        font-semibold
+                                        mt-3 text-center
+                                        text-xs font-semibold
                                         text-emerald-600">
 
                                 ✓ Hasil scan berhasil diambil!
@@ -655,17 +548,17 @@
                         </div>
 
 
-                        {{-- ERROR --}}
+                        {{-- Errors --}}
                         <div class="mt-3 space-y-1">
 
                             @error('lampiran_file')
-                                <p class="text-xs font-medium text-rose-600">
+                                <p class="form-error-text">
                                     {{ $message }}
                                 </p>
                             @enderror
 
                             @error('captured_image')
-                                <p class="text-xs font-medium text-rose-600">
+                                <p class="form-error-text">
                                     {{ $message }}
                                 </p>
                             @enderror
@@ -675,108 +568,102 @@
 
 
                     {{-- =================================================
-                         ARSIP FISIK
+                         CARD LOKASI ARSIP FISIK
                     ================================================== --}}
-                    <div class="flex flex-col
-                                p-5
-                                bg-slate-50
-                                border-2 border-slate-300
-                                rounded-2xl">
+                    <div class="archive-card">
 
-                        <div class="flex items-center
-                                    justify-between gap-3 mb-4">
+                        {{-- Header dibuat sama seperti Berkas Digital --}}
+                        <div class="archive-card-header">
 
                             <div>
-                                <h3 class="text-sm font-bold text-slate-700">
+                                <h3 class="archive-card-title">
                                     Lokasi Arsip Fisik
                                 </h3>
 
-                                <p class="mt-0.5 text-xs text-slate-400">
+                                <p class="archive-card-description">
                                     Catat posisi berkas asli di ruang penyimpanan.
                                 </p>
                             </div>
 
-                            <div class="flex items-center justify-center
-                                        w-9 h-9
-                                        bg-white
-                                        border-2 border-slate-300
-                                        rounded-lg
-                                        text-slate-500">
-
-                                <svg class="w-4 h-4"
-                                     fill="none"
-                                     stroke="currentColor"
-                                     viewBox="0 0 24 24">
-
-                                    <path stroke-linecap="round"
-                                          stroke-linejoin="round"
-                                          stroke-width="2"
-                                          d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
-                                </svg>
-                            </div>
+                            <span class="archive-card-badge">
+                                Opsional
+                            </span>
                         </div>
 
 
-                        {{-- PHYSICAL LOCATION --}}
-                        <div class="flex-1
-                                    p-5
-                                    bg-white
-                                    border-2 border-slate-300
-                                    rounded-xl">
+                        {{-- Area Lokasi dibuat setara dengan area upload --}}
+                        <div class="flex-1 flex flex-col">
 
-                            <label class="flex items-center gap-2
-                                          mb-3
-                                          text-xs font-bold
-                                          text-slate-700">
+                            <div class="location-box">
 
-                                <svg class="w-4 h-4 text-slate-500"
-                                     fill="none"
-                                     stroke="currentColor"
-                                     viewBox="0 0 24 24">
+                                <div class="location-icon">
 
-                                    <path stroke-linecap="round"
-                                          stroke-linejoin="round"
-                                          stroke-width="2"
-                                          d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
-                                </svg>
+                                    <svg class="w-6 h-6"
+                                         fill="none"
+                                         stroke="currentColor"
+                                         viewBox="0 0 24 24">
 
-                                Detail Posisi Lemari / Box
-                            </label>
+                                        <path stroke-linecap="round"
+                                              stroke-linejoin="round"
+                                              stroke-width="2"
+                                              d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                                    </svg>
+
+                                </div>
 
 
-                            <input type="text"
-                                   name="lokasi_arsip_fisik"
-                                   value="{{ old('lokasi_arsip_fisik') }}"
-                                   placeholder="Contoh: Rak A-3 Box 12"
-                                   class="form-control-custom @error('lokasi_arsip_fisik') form-error @enderror">
+                                <h4 class="text-sm font-bold text-slate-700">
+                                    Lokasi Penyimpanan
+                                </h4>
 
-
-                            @error('lokasi_arsip_fisik')
-                                <p class="form-error-text">
-                                    {{ $message }}
+                                <p class="mt-1 max-w-sm text-xs leading-relaxed text-slate-400">
+                                    Masukkan posisi lemari, rak, box,
+                                    atau map tempat arsip fisik disimpan.
                                 </p>
-                            @enderror
 
 
-                            <div class="mt-4
-                                        p-3
-                                        bg-slate-50
-                                        border-2 border-slate-200
-                                        rounded-lg">
+                                <div class="w-full max-w-md mt-5">
 
-                                <p class="text-xs leading-relaxed text-slate-500">
-                                    Gunakan format lokasi yang mudah ditemukan kembali,
-                                    misalnya
-                                    <span class="font-semibold text-slate-700">
-                                        Rak A-3 Box 12
-                                    </span>
-                                    atau
-                                    <span class="font-semibold text-slate-700">
-                                        Lemari B-2 Map 07
-                                    </span>.
-                                </p>
+                                    <label class="form-label text-left">
+                                        Detail Posisi Lemari / Box
+                                    </label>
+
+                                    <input type="text"
+                                           name="lokasi_arsip_fisik"
+                                           value="{{ old('lokasi_arsip_fisik') }}"
+                                           placeholder="Contoh: Rak A-3 Box 12"
+                                           class="form-control-custom text-center @error('lokasi_arsip_fisik') form-error @enderror">
+
+                                    @error('lokasi_arsip_fisik')
+                                        <p class="form-error-text text-left">
+                                            {{ $message }}
+                                        </p>
+                                    @enderror
+                                </div>
+
+
+                                <div class="w-full max-w-md mt-4 p-3
+                                            bg-slate-50
+                                            border-2 border-slate-200
+                                            rounded-xl">
+
+                                    <p class="text-xs leading-relaxed text-slate-500">
+
+                                        Contoh:
+                                        <span class="font-semibold text-slate-700">
+                                            Rak A-3 Box 12
+                                        </span>
+                                        atau
+                                        <span class="font-semibold text-slate-700">
+                                            Lemari B-2 Map 07
+                                        </span>.
+
+                                    </p>
+                                </div>
+
                             </div>
                         </div>
+
                     </div>
 
                 </div>
@@ -785,12 +672,10 @@
 
 
         {{-- =================================================
-             FOOTER BUTTON
+             FOOTER
         ================================================== --}}
-        <div class="flex flex-col-reverse
-                    sm:flex-row
-                    sm:items-center
-                    sm:justify-end
+        <div class="flex flex-col-reverse sm:flex-row
+                    sm:items-center sm:justify-end
                     gap-3
                     px-5 sm:px-6
                     py-4
@@ -798,18 +683,7 @@
                     border-t-2 border-slate-300">
 
             <a href="{{ route('surat-masuk.index') }}"
-               class="inline-flex items-center
-                      justify-center
-                      w-full sm:w-auto
-                      px-5 py-2.5
-                      text-sm font-semibold
-                      text-slate-700
-                      bg-white
-                      border-2 border-slate-300
-                      rounded-xl
-                      hover:bg-slate-100
-                      hover:border-slate-400
-                      transition">
+               class="action-button action-button-secondary">
 
                 Batal
             </a>
@@ -817,21 +691,7 @@
 
             <button type="submit"
                     id="submit-btn"
-                    class="inline-flex items-center
-                           justify-center
-                           w-full sm:w-auto
-                           px-5 py-2.5
-                           text-sm font-semibold
-                           text-white
-                           bg-blue-600
-                           border-2 border-blue-600
-                           rounded-xl
-                           hover:bg-blue-700
-                           hover:border-blue-700
-                           shadow-md shadow-blue-600/20
-                           transition
-                           disabled:opacity-50
-                           disabled:cursor-not-allowed">
+                    class="action-button action-button-primary">
 
                 <svg class="w-4 h-4 mr-2"
                      fill="none"
@@ -842,6 +702,7 @@
                           stroke-linejoin="round"
                           stroke-width="2"
                           d="M5 13l4 4L19 7"/>
+
                 </svg>
 
                 Simpan Surat Masuk
@@ -859,6 +720,47 @@ CUSTOM STYLE
 ============================================================== --}}
 
 <style>
+
+    /* =========================
+       SECTION
+    ========================== */
+
+    .section-heading {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding-bottom: 0.75rem;
+        margin-bottom: 1.25rem;
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+    .section-marker {
+        width: 0.5rem;
+        height: 1.5rem;
+        border-radius: 9999px;
+        flex-shrink: 0;
+    }
+
+    .section-title {
+        font-size: 0.875rem;
+        font-weight: 700;
+        line-height: 1.25rem;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: #334155;
+    }
+
+    .section-description {
+        margin-top: 0.125rem;
+        color: #94a3b8;
+        font-size: 0.75rem;
+        line-height: 1rem;
+    }
+
+
+    /* =========================
+       FORM
+    ========================== */
 
     .form-group {
         width: 100%;
@@ -903,9 +805,7 @@ CUSTOM STYLE
     .form-control-custom:focus {
         border-color: #2563eb;
         background: #ffffff;
-
-        box-shadow:
-            0 0 0 3px rgba(37, 99, 235, 0.12);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
     }
 
     .form-control-custom::placeholder {
@@ -933,15 +833,339 @@ CUSTOM STYLE
         font-weight: 500;
     }
 
-    #camera-container video {
-        display: block;
+
+    /* =========================
+       ARCHIVE CARD
+    ========================== */
+
+    .archive-card {
+        display: flex;
+        flex-direction: column;
+
+        min-height: 355px;
+
+        padding: 1.25rem;
+
+        background: #f8fafc;
+
+        border: 2px solid #94a3b8;
+        border-radius: 1rem;
+
+        transition:
+            border-color 0.15s ease,
+            box-shadow 0.15s ease;
     }
 
-    #camera-container img {
-        z-index: 2;
+    .archive-card:hover {
+        border-color: #64748b;
+    }
+
+
+    .archive-card-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 0.75rem;
+
+        margin-bottom: 1rem;
+    }
+
+    .archive-card-title {
+        color: #334155;
+        font-size: 0.875rem;
+        line-height: 1.25rem;
+        font-weight: 700;
+    }
+
+    .archive-card-description {
+        margin-top: 0.125rem;
+        color: #94a3b8;
+        font-size: 0.75rem;
+        line-height: 1rem;
+    }
+
+    .archive-card-badge {
+        flex-shrink: 0;
+
+        padding: 0.35rem 0.65rem;
+
+        background: #ffffff;
+
+        border: 2px solid #cbd5e1;
+        border-radius: 0.5rem;
+
+        color: #475569;
+
+        font-size: 0.6875rem;
+        line-height: 1rem;
+        font-weight: 600;
+    }
+
+
+    /* =========================
+       MODE BUTTON
+    ========================== */
+
+    .mode-selector {
+        display: inline-flex;
+        width: fit-content;
+
+        padding: 0.25rem;
+        margin-bottom: 1rem;
+
+        background: #e2e8f0;
+
+        border: 2px solid #94a3b8;
+        border-radius: 0.75rem;
+    }
+
+    .mode-button {
+        padding: 0.5rem 1rem;
+
+        border-radius: 0.5rem;
+
+        color: #475569;
+
+        font-size: 0.75rem;
+        line-height: 1rem;
+        font-weight: 600;
+
+        transition: all 0.15s ease;
+    }
+
+    .mode-button-active {
+        background: #ffffff;
+        color: #2563eb;
+
+        border: 1px solid #cbd5e1;
+
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+    }
+
+
+    /* =========================
+       UPLOAD BOX
+    ========================== */
+
+    .upload-box {
+        position: relative;
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        width: 100%;
+        min-height: 245px;
+
+        padding: 1.5rem;
+
+        text-align: center;
+
+        background: #ffffff;
+
+        border: 2px dashed #64748b;
+        border-radius: 0.75rem;
+
+        cursor: pointer;
+
+        transition:
+            background-color 0.15s ease,
+            border-color 0.15s ease;
+    }
+
+    .upload-box:hover {
+        background: #f8fafc;
+        border-color: #475569;
+    }
+
+    .upload-box-error {
+        border-color: #f43f5e !important;
+        background: #fff1f2 !important;
+    }
+
+    .upload-icon,
+    .location-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        width: 3rem;
+        height: 3rem;
+
+        margin-bottom: 0.75rem;
+
+        background: #eff6ff;
+
+        border: 2px solid #dbeafe;
+        border-radius: 9999px;
+
+        color: #2563eb;
+    }
+
+
+    /* =========================
+       LOCATION BOX
+    ========================== */
+
+    .location-box {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        min-height: 245px;
+
+        padding: 1.5rem;
+
+        text-align: center;
+
+        background: #ffffff;
+
+        border: 2px dashed #64748b;
+        border-radius: 0.75rem;
+
+        transition:
+            background-color 0.15s ease,
+            border-color 0.15s ease;
+    }
+
+    .location-box:hover {
+        background: #f8fafc;
+        border-color: #475569;
+    }
+
+    .location-icon {
+        margin-bottom: 0.75rem;
+
+        background: #eef2ff;
+
+        border-color: #e0e7ff;
+
+        color: #4f46e5;
+    }
+
+
+    /* =========================
+       CAMERA
+    ========================== */
+
+    .camera-container {
+        position: relative;
+
+        width: 100%;
+        aspect-ratio: 4 / 3;
+
+        overflow: hidden;
+
+        background: #020617;
+
+        border: 2px solid #64748b;
+        border-radius: 0.75rem;
+    }
+
+    .camera-placeholder {
+        position: absolute;
+        inset: 0;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        color: #ffffff;
+
+        font-size: 0.75rem;
+        font-weight: 500;
+
+        background: rgba(2, 6, 23, 0.35);
+    }
+
+    .camera-button {
+        padding: 0.625rem 1rem;
+
+        color: #ffffff;
+
+        border-width: 2px;
+        border-radius: 0.75rem;
+
+        font-size: 0.75rem;
+        line-height: 1rem;
+        font-weight: 700;
+
+        transition: background-color 0.15s ease;
+    }
+
+
+    /* =========================
+       ACTION BUTTON
+    ========================== */
+
+    .action-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        width: 100%;
+
+        padding: 0.625rem 1.25rem;
+
+        border-width: 2px;
+        border-radius: 0.75rem;
+
+        font-size: 0.875rem;
+        font-weight: 600;
+
+        transition: all 0.15s ease;
+    }
+
+    .action-button-secondary {
+        background: #ffffff;
+        color: #334155;
+
+        border-color: #cbd5e1;
+    }
+
+    .action-button-secondary:hover {
+        background: #f1f5f9;
+        border-color: #94a3b8;
+    }
+
+    .action-button-primary {
+        background: #2563eb;
+        color: #ffffff;
+
+        border-color: #2563eb;
+
+        box-shadow: 0 6px 14px rgba(37, 99, 235, 0.20);
+    }
+
+    .action-button-primary:hover {
+        background: #1d4ed8;
+        border-color: #1d4ed8;
+    }
+
+
+    /* =========================
+       RESPONSIVE
+    ========================== */
+
+    @media (min-width: 640px) {
+
+        .action-button {
+            width: auto;
+        }
     }
 
     @media (max-width: 640px) {
+
+        .archive-card {
+            min-height: auto;
+        }
+
+        .upload-box,
+        .location-box {
+            min-height: 220px;
+        }
 
         .form-control-custom {
             min-height: 43px;
@@ -975,8 +1199,8 @@ JAVASCRIPT
         const uploadMode = document.getElementById('mode-upload');
         const cameraMode = document.getElementById('mode-camera');
 
-        const uploadBtn = document.getElementById('btn-upload');
-        const cameraBtn = document.getElementById('btn-camera');
+        const uploadButton = document.getElementById('btn-upload');
+        const cameraButton = document.getElementById('btn-camera');
 
 
         if (mode === 'upload') {
@@ -984,19 +1208,19 @@ JAVASCRIPT
             uploadMode.classList.remove('hidden');
             cameraMode.classList.add('hidden');
 
-            uploadBtn.classList.add(
+            uploadButton.classList.add(
                 'bg-white',
                 'text-blue-600',
                 'shadow-sm'
             );
 
-            cameraBtn.classList.remove(
+            cameraButton.classList.remove(
                 'bg-white',
                 'text-blue-600',
                 'shadow-sm'
             );
 
-            cameraBtn.classList.add('text-slate-600');
+            cameraButton.classList.add('text-slate-600');
 
             return;
         }
@@ -1005,21 +1229,25 @@ JAVASCRIPT
         uploadMode.classList.add('hidden');
         cameraMode.classList.remove('hidden');
 
-        cameraBtn.classList.add(
+        cameraButton.classList.add(
             'bg-white',
             'text-blue-600',
             'shadow-sm'
         );
 
-        cameraBtn.classList.remove('text-slate-600');
+        cameraButton.classList.remove(
+            'text-slate-600'
+        );
 
-        uploadBtn.classList.remove(
+        uploadButton.classList.remove(
             'bg-white',
             'text-blue-600',
             'shadow-sm'
         );
 
-        uploadBtn.classList.add('text-slate-600');
+        uploadButton.classList.add(
+            'text-slate-600'
+        );
     }
 
 
@@ -1070,22 +1298,14 @@ JAVASCRIPT
             document.getElementById('video');
 
         const placeholder =
-            document.getElementById('camera-placeholder');
+            document.getElementById(
+                'camera-placeholder'
+            );
 
         const imagePreview =
-            document.getElementById('image-preview');
-
-        const startButton =
-            document.getElementById('start-cam-btn');
-
-        const captureButton =
-            document.getElementById('capture-btn');
-
-        const stopButton =
-            document.getElementById('stop-cam-btn');
-
-        const retakeButton =
-            document.getElementById('retake-btn');
+            document.getElementById(
+                'image-preview'
+            );
 
 
         if (
@@ -1135,20 +1355,29 @@ JAVASCRIPT
                 videoStream;
 
 
-            startButton.classList.add('hidden');
+            document
+                .getElementById('start-cam-btn')
+                .classList.add('hidden');
 
-            captureButton.classList.remove('hidden');
+            document
+                .getElementById('capture-btn')
+                .classList.remove('hidden');
 
-            stopButton.classList.remove('hidden');
+            document
+                .getElementById('stop-cam-btn')
+                .classList.remove('hidden');
 
-            retakeButton.classList.add('hidden');
-
+            document
+                .getElementById('retake-btn')
+                .classList.add('hidden');
 
         } catch (error) {
 
             console.error(error);
 
-            placeholder.classList.remove('hidden');
+            placeholder.classList.remove(
+                'hidden'
+            );
 
             alert(
                 'Gagal mengakses kamera. ' +
@@ -1182,10 +1411,14 @@ JAVASCRIPT
 
 
         const capturedImage =
-            document.getElementById('captured_image');
+            document.getElementById(
+                'captured_image'
+            );
 
         const placeholder =
-            document.getElementById('camera-placeholder');
+            document.getElementById(
+                'camera-placeholder'
+            );
 
 
         if (
@@ -1194,30 +1427,44 @@ JAVASCRIPT
             capturedImage.value === ''
         ) {
 
-            placeholder.classList.remove('hidden');
+            placeholder.classList.remove(
+                'hidden'
+            );
         }
 
 
         const startButton =
-            document.getElementById('start-cam-btn');
+            document.getElementById(
+                'start-cam-btn'
+            );
 
         const captureButton =
-            document.getElementById('capture-btn');
+            document.getElementById(
+                'capture-btn'
+            );
 
         const stopButton =
-            document.getElementById('stop-cam-btn');
+            document.getElementById(
+                'stop-cam-btn'
+            );
 
 
         if (startButton) {
-            startButton.classList.remove('hidden');
+            startButton.classList.remove(
+                'hidden'
+            );
         }
 
         if (captureButton) {
-            captureButton.classList.add('hidden');
+            captureButton.classList.add(
+                'hidden'
+            );
         }
 
         if (stopButton) {
-            stopButton.classList.add('hidden');
+            stopButton.classList.add(
+                'hidden'
+            );
         }
     }
 
@@ -1225,7 +1472,6 @@ JAVASCRIPT
     /* =========================================================
        TAKE PHOTO
        Tidak menggunakan canvas.
-       Menggunakan ImageCapture jika browser mendukung.
     ========================================================== */
     async function takeSnapshot() {
 
@@ -1233,13 +1479,19 @@ JAVASCRIPT
             document.getElementById('video');
 
         const imagePreview =
-            document.getElementById('image-preview');
+            document.getElementById(
+                'image-preview'
+            );
 
         const capturedImage =
-            document.getElementById('captured_image');
+            document.getElementById(
+                'captured_image'
+            );
 
         const container =
-            document.getElementById('camera-container');
+            document.getElementById(
+                'camera-container'
+            );
 
 
         if (!video.srcObject) {
@@ -1255,7 +1507,8 @@ JAVASCRIPT
         try {
 
             const track =
-                video.srcObject.getVideoTracks()[0];
+                video.srcObject
+                    .getVideoTracks()[0];
 
 
             if (
@@ -1264,6 +1517,7 @@ JAVASCRIPT
 
                 const imageCapture =
                     new ImageCapture(track);
+
 
                 const blob =
                     await imageCapture.takePhoto();
@@ -1289,9 +1543,14 @@ JAVASCRIPT
                         'hidden'
                     );
 
+
                     document
-                        .getElementById('snapshot-preview')
-                        .classList.remove('hidden');
+                        .getElementById(
+                            'snapshot-preview'
+                        )
+                        .classList.remove(
+                            'hidden'
+                        );
 
 
                     container.classList.remove(
@@ -1307,13 +1566,21 @@ JAVASCRIPT
 
 
                     document
-                        .getElementById('start-cam-btn')
-                        .classList.add('hidden');
+                        .getElementById(
+                            'start-cam-btn'
+                        )
+                        .classList.add(
+                            'hidden'
+                        );
 
 
                     document
-                        .getElementById('retake-btn')
-                        .classList.remove('hidden');
+                        .getElementById(
+                            'retake-btn'
+                        )
+                        .classList.remove(
+                            'hidden'
+                        );
                 };
 
 
@@ -1323,19 +1590,10 @@ JAVASCRIPT
             }
 
 
-            /*
-             * Fallback untuk browser yang tidak mendukung
-             * ImageCapture.
-             *
-             * Preview tetap menggunakan stream kamera.
-             * Data gambar tidak dibuat melalui canvas.
-             */
-
             alert(
-                'Browser tidak mendukung pengambilan foto langsung dari kamera. ' +
+                'Browser ini tidak mendukung pengambilan foto langsung. ' +
                 'Silakan gunakan Upload File.'
             );
-
 
         } catch (error) {
 
@@ -1349,24 +1607,34 @@ JAVASCRIPT
 
 
     /* =========================================================
-       RETAKE
+       RETAKE PHOTO
     ========================================================== */
     function retakeSnapshot() {
 
         const capturedImage =
-            document.getElementById('captured_image');
+            document.getElementById(
+                'captured_image'
+            );
 
         const imagePreview =
-            document.getElementById('image-preview');
+            document.getElementById(
+                'image-preview'
+            );
 
         const video =
-            document.getElementById('video');
+            document.getElementById(
+                'video'
+            );
 
         const container =
-            document.getElementById('camera-container');
+            document.getElementById(
+                'camera-container'
+            );
 
         const snapshotPreview =
-            document.getElementById('snapshot-preview');
+            document.getElementById(
+                'snapshot-preview'
+            );
 
 
         capturedImage.value = '';
@@ -1385,6 +1653,7 @@ JAVASCRIPT
             'hidden'
         );
 
+
         container.classList.remove(
             'border-emerald-500'
         );
@@ -1402,7 +1671,9 @@ JAVASCRIPT
        SUBMIT
     ========================================================== */
     const formSurat =
-        document.getElementById('form-surat');
+        document.getElementById(
+            'form-surat'
+        );
 
 
     if (formSurat) {
