@@ -7,10 +7,6 @@
 @php
     $oldRole = old('role', '');
 
-    /*
-     * Normalisasi alias lama:
-     * staf -> staff
-     */
     if ($oldRole === 'staf') {
         $oldRole = 'staff';
     }
@@ -18,47 +14,40 @@
     $oldStatus = old('status', 'aktif');
 @endphp
 
-<div class="mx-auto max-w-4xl space-y-4 pb-12 sm:space-y-6">
+<div class="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-6">
 
-    {{-- ============================================================
-       HEADER
-    ============================================================ --}}
-    <div class="flex flex-col gap-3 rounded-xl border border-slate-200/80 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:rounded-2xl sm:p-6">
+    {{-- Header --}}
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
 
         <div class="min-w-0">
 
             <div class="flex items-center gap-2">
 
-                <span class="h-2.5 w-2.5 shrink-0 animate-pulse rounded-full bg-blue-600"></span>
+                <span class="w-2.5 h-2.5 shrink-0 rounded-full bg-blue-600"></span>
 
-                <h1 class="truncate text-xl font-bold tracking-tight text-slate-800 sm:text-2xl">
+                <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-800">
                     Tambah Pengguna Baru
                 </h1>
 
             </div>
 
-            <p class="mt-1 text-xs leading-relaxed text-slate-500 sm:text-sm">
+            <p class="mt-0.5 text-sm text-slate-500">
                 Buat akun pengguna baru dan tentukan hak akses serta status akun.
             </p>
 
         </div>
 
-        <a
-            href="{{ route('users.index') }}"
-            class="inline-flex w-full shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-200 sm:w-auto"
-        >
-            <svg
-                class="mr-1.5 h-4 w-4 text-slate-500"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.8"
-                viewBox="0 0 24 24"
-            >
-                <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M15 19l-7-7 7-7"
-                />
+        <a href="{{ route('users.index') }}"
+           class="inline-flex items-center justify-center w-full sm:w-auto px-4 py-2 text-sm font-semibold text-slate-700 bg-white border-2 border-slate-300 rounded-xl hover:bg-slate-50 hover:border-slate-400 transition">
+
+            <svg class="w-4 h-4 mr-2"
+                 fill="none"
+                 stroke="currentColor"
+                 stroke-width="1.8"
+                 viewBox="0 0 24 24">
+                <path stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M15 19l-7-7 7-7"/>
             </svg>
 
             Kembali ke Daftar
@@ -67,81 +56,75 @@
     </div>
 
 
-    {{-- ============================================================
-       FORM
-    ============================================================ --}}
-    <div class="overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm sm:rounded-2xl">
+    {{-- Main Card --}}
+    <div class="bg-white border-2 border-slate-300 rounded-2xl shadow-sm overflow-hidden">
 
-        <form
-            method="POST"
-            action="{{ route('users.store') }}"
-        >
+        <form method="POST"
+              action="{{ route('users.store') }}"
+              id="form-user">
+
             @csrf
 
-            <div class="space-y-6 p-4 sm:p-8">
+            <div class="p-4 sm:p-5">
 
-                {{-- ==================================================
-                   INFORMASI PERSONAL
-                ================================================== --}}
+                {{-- =====================================================
+                     INFORMASI PERSONAL
+                ====================================================== --}}
                 <section>
 
-                    <div class="mb-4 flex items-center gap-2">
+                    <div class="section-heading">
 
-                        <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-                            <svg
-                                class="h-4 w-4"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="1.8"
-                                viewBox="0 0 24 24"
-                            >
-                                <circle
-                                    cx="12"
-                                    cy="8"
-                                    r="3.5"
-                                />
+                        <div class="section-icon blue">
+                            <svg class="w-4 h-4"
+                                 fill="none"
+                                 stroke="currentColor"
+                                 stroke-width="1.8"
+                                 viewBox="0 0 24 24">
+                                <circle cx="12"
+                                        cy="8"
+                                        r="3.5"/>
 
-                                <path
-                                    stroke-linecap="round"
-                                    d="M5 20a7 7 0 0114 0"
-                                />
+                                <path stroke-linecap="round"
+                                      d="M5 20a7 7 0 0114 0"/>
                             </svg>
                         </div>
 
-                        <h3 class="text-xs font-bold uppercase tracking-wider text-blue-600">
-                            Informasi Personal
-                        </h3>
+                        <div>
+                            <h2 class="section-title">
+                                Informasi Personal
+                            </h2>
+
+                            <p class="section-description">
+                                Lengkapi identitas pengguna yang akan dibuat.
+                            </p>
+                        </div>
 
                     </div>
 
 
-                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-3">
 
-                        {{-- NAMA --}}
-                        <div class="sm:col-span-2">
+                        {{-- Nama Lengkap --}}
+                        <div class="form-group md:col-span-2">
 
-                            <label
-                                for="name"
-                                class="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-600"
-                            >
+                            <label for="name"
+                                   class="form-label">
                                 Nama Lengkap
                                 <span class="text-rose-500">*</span>
                             </label>
 
-                            <input
-                                type="text"
-                                name="name"
-                                id="name"
-                                value="{{ old('name') }}"
-                                required
-                                autofocus
-                                autocomplete="name"
-                                placeholder="Contoh: Budi Santoso, S.Kom"
-                                class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2 text-xs text-slate-700 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 sm:py-2.5 sm:text-sm @error('name') border-rose-500 bg-rose-50/30 @enderror"
-                            >
+                            <input type="text"
+                                   name="name"
+                                   id="name"
+                                   value="{{ old('name') }}"
+                                   required
+                                   autofocus
+                                   autocomplete="name"
+                                   placeholder="Contoh: Budi Santoso, S.Kom"
+                                   class="form-control-custom @error('name') form-error @enderror">
 
                             @error('name')
-                                <p class="mt-1.5 text-xs font-medium text-rose-500">
+                                <p class="form-error-text">
                                     {{ $message }}
                                 </p>
                             @enderror
@@ -149,30 +132,26 @@
                         </div>
 
 
-                        {{-- EMAIL --}}
-                        <div>
+                        {{-- Email --}}
+                        <div class="form-group">
 
-                            <label
-                                for="email"
-                                class="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-600"
-                            >
+                            <label for="email"
+                                   class="form-label">
                                 Alamat Email
                                 <span class="text-rose-500">*</span>
                             </label>
 
-                            <input
-                                type="email"
-                                name="email"
-                                id="email"
-                                value="{{ old('email') }}"
-                                required
-                                autocomplete="email"
-                                placeholder="budi@domain.com"
-                                class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2 text-xs text-slate-700 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 sm:py-2.5 sm:text-sm @error('email') border-rose-500 bg-rose-50/30 @enderror"
-                            >
+                            <input type="email"
+                                   name="email"
+                                   id="email"
+                                   value="{{ old('email') }}"
+                                   required
+                                   autocomplete="email"
+                                   placeholder="budi@domain.com"
+                                   class="form-control-custom @error('email') form-error @enderror">
 
                             @error('email')
-                                <p class="mt-1.5 text-xs font-medium text-rose-500">
+                                <p class="form-error-text">
                                     {{ $message }}
                                 </p>
                             @enderror
@@ -180,29 +159,25 @@
                         </div>
 
 
-                        {{-- JABATAN --}}
-                        <div>
+                        {{-- Jabatan --}}
+                        <div class="form-group">
 
-                            <label
-                                for="jabatan"
-                                class="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-600"
-                            >
+                            <label for="jabatan"
+                                   class="form-label">
                                 Jabatan / Posisi
                                 <span class="text-rose-500">*</span>
                             </label>
 
-                            <input
-                                type="text"
-                                name="jabatan"
-                                id="jabatan"
-                                value="{{ old('jabatan') }}"
-                                required
-                                placeholder="Contoh: Staf Agenda / Kepala Bagian"
-                                class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2 text-xs text-slate-700 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 sm:py-2.5 sm:text-sm @error('jabatan') border-rose-500 bg-rose-50/30 @enderror"
-                            >
+                            <input type="text"
+                                   name="jabatan"
+                                   id="jabatan"
+                                   value="{{ old('jabatan') }}"
+                                   required
+                                   placeholder="Contoh: Staf Agenda / Kepala Bagian"
+                                   class="form-control-custom @error('jabatan') form-error @enderror">
 
                             @error('jabatan')
-                                <p class="mt-1.5 text-xs font-medium text-rose-500">
+                                <p class="form-error-text">
                                     {{ $message }}
                                 </p>
                             @enderror
@@ -214,93 +189,91 @@
                 </section>
 
 
-                <hr class="border-slate-100">
+                {{-- Divider --}}
+                <div class="section-divider"></div>
 
 
-                {{-- ==================================================
-                   HAK AKSES & KEAMANAN
-                ================================================== --}}
+                {{-- =====================================================
+                     HAK AKSES & KEAMANAN
+                ====================================================== --}}
                 <section>
 
-                    <div class="mb-4 flex items-center gap-2">
+                    <div class="section-heading">
 
-                        <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-                            <svg
-                                class="h-4 w-4"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="1.8"
-                                viewBox="0 0 24 24"
-                            >
-                                <rect
-                                    x="4"
-                                    y="10"
-                                    width="16"
-                                    height="10"
-                                    rx="2"
-                                />
+                        <div class="section-icon blue">
+                            <svg class="w-4 h-4"
+                                 fill="none"
+                                 stroke="currentColor"
+                                 stroke-width="1.8"
+                                 viewBox="0 0 24 24">
 
-                                <path
-                                    stroke-linecap="round"
-                                    d="M8 10V7a4 4 0 018 0v3"
-                                />
+                                <rect x="4"
+                                      y="10"
+                                      width="16"
+                                      height="10"
+                                      rx="2"/>
+
+                                <path stroke-linecap="round"
+                                      d="M8 10V7a4 4 0 018 0v3"/>
+
                             </svg>
                         </div>
 
-                        <h3 class="text-xs font-bold uppercase tracking-wider text-blue-600">
-                            Hak Akses & Keamanan Akun
-                        </h3>
+                        <div>
+                            <h2 class="section-title">
+                                Hak Akses & Keamanan Akun
+                            </h2>
+
+                            <p class="section-description">
+                                Tentukan role, status, dan password akun pengguna.
+                            </p>
+                        </div>
 
                     </div>
 
 
-                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
+                    {{-- Role & Status --}}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-3">
 
-                        {{-- ROLE --}}
-                        <div>
+                        {{-- Role --}}
+                        <div class="form-group">
 
-                            <label
-                                for="role"
-                                class="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-600"
-                            >
+                            <label for="role"
+                                   class="form-label">
                                 Role / Hak Akses
                                 <span class="text-rose-500">*</span>
                             </label>
 
-                            <select
-                                name="role"
-                                id="role"
-                                required
-                                class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2 text-xs font-medium text-slate-700 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 sm:py-2.5 sm:text-sm"
-                            >
-                                <option value="" disabled {{ $oldRole === '' ? 'selected' : '' }}>
+                            <select name="role"
+                                    id="role"
+                                    required
+                                    class="form-control-custom @error('role') form-error @enderror">
+
+                                <option value=""
+                                        disabled
+                                        {{ $oldRole === '' ? 'selected' : '' }}>
                                     Pilih hak akses
                                 </option>
 
-                                <option
-                                    value="admin"
-                                    {{ $oldRole === 'admin' ? 'selected' : '' }}
-                                >
+                                <option value="admin"
+                                    {{ $oldRole === 'admin' ? 'selected' : '' }}>
                                     Admin (Akses Penuh)
                                 </option>
 
-                                <option
-                                    value="pimpinan"
-                                    {{ $oldRole === 'pimpinan' ? 'selected' : '' }}
-                                >
+                                <option value="pimpinan"
+                                    {{ $oldRole === 'pimpinan' ? 'selected' : '' }}>
                                     Pimpinan (Akses Eksekutif)
                                 </option>
 
-                                <option
-                                    value="staff"
-                                    {{ $oldRole === 'staff' ? 'selected' : '' }}
-                                >
+                                <option value="staff"
+                                    {{ $oldRole === 'staff' ? 'selected' : '' }}>
                                     Staf (Akses Operator)
                                 </option>
+
                             </select>
 
                             @error('role')
-                                <p class="mt-1.5 text-xs font-medium text-rose-500">
+                                <p class="form-error-text">
                                     {{ $message }}
                                 </p>
                             @enderror
@@ -308,40 +281,34 @@
                         </div>
 
 
-                        {{-- STATUS --}}
-                        <div>
+                        {{-- Status --}}
+                        <div class="form-group">
 
-                            <label
-                                for="status"
-                                class="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-600"
-                            >
+                            <label for="status"
+                                   class="form-label">
                                 Status Akun
                                 <span class="text-rose-500">*</span>
                             </label>
 
-                            <select
-                                name="status"
-                                id="status"
-                                required
-                                class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2 text-xs font-medium text-slate-700 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 sm:py-2.5 sm:text-sm"
-                            >
-                                <option
-                                    value="aktif"
-                                    {{ $oldStatus === 'aktif' ? 'selected' : '' }}
-                                >
+                            <select name="status"
+                                    id="status"
+                                    required
+                                    class="form-control-custom @error('status') form-error @enderror">
+
+                                <option value="aktif"
+                                    {{ $oldStatus === 'aktif' ? 'selected' : '' }}>
                                     Aktif (Dapat Login)
                                 </option>
 
-                                <option
-                                    value="nonaktif"
-                                    {{ $oldStatus === 'nonaktif' ? 'selected' : '' }}
-                                >
+                                <option value="nonaktif"
+                                    {{ $oldStatus === 'nonaktif' ? 'selected' : '' }}>
                                     Nonaktif (Diblokir)
                                 </option>
+
                             </select>
 
                             @error('status')
-                                <p class="mt-1.5 text-xs font-medium text-rose-500">
+                                <p class="form-error-text">
                                     {{ $message }}
                                 </p>
                             @enderror
@@ -351,93 +318,77 @@
                     </div>
 
 
-                    {{-- PASSWORD --}}
-                    <div class="mt-4 sm:mt-5">
+                    {{-- Password --}}
+                    <div class="form-group mt-3">
 
-                        <label
-                            for="password"
-                            class="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-600"
-                        >
+                        <label for="password"
+                               class="form-label">
                             Password
                             <span class="text-rose-500">*</span>
                         </label>
 
                         <div class="relative">
 
-                            <input
-                                type="password"
-                                name="password"
-                                id="password"
-                                required
-                                autocomplete="new-password"
-                                placeholder="Minimal 6 karakter"
-                                class="w-full rounded-xl border border-slate-200 bg-slate-50/50 py-2 pl-3.5 pr-11 text-xs text-slate-700 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 sm:py-2.5 sm:text-sm @error('password') border-rose-500 bg-rose-50/30 @enderror"
-                            >
+                            <input type="password"
+                                   name="password"
+                                   id="password"
+                                   required
+                                   autocomplete="new-password"
+                                   placeholder="Minimal 6 karakter"
+                                   class="form-control-custom pr-11 @error('password') form-error @enderror">
 
-                            <button
-                                type="button"
-                                id="togglePassword"
-                                aria-label="Tampilkan atau sembunyikan password"
-                                class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 transition hover:text-slate-600 focus:outline-none"
-                            >
+                            <button type="button"
+                                    id="togglePassword"
+                                    aria-label="Tampilkan atau sembunyikan password"
+                                    class="password-toggle">
 
-                                <svg
-                                    id="eyeOpen"
-                                    class="h-5 w-5"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    stroke-width="1.8"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        d="M2.5 12s3.5-6 9.5-6s9.5 6 9.5 6s-3.5 6-9.5 6s-9.5-6-9.5-6z"
-                                    />
+                                <svg id="eyeOpen"
+                                     class="w-5 h-5"
+                                     fill="none"
+                                     stroke="currentColor"
+                                     stroke-width="1.8"
+                                     viewBox="0 0 24 24">
 
-                                    <circle
-                                        cx="12"
-                                        cy="12"
-                                        r="3"
-                                    />
+                                    <path stroke-linecap="round"
+                                          stroke-linejoin="round"
+                                          d="M2.5 12s3.5-6 9.5-6s9.5 6 9.5 6s-3.5 6-9.5 6s-9.5-6-9.5-6z"/>
+
+                                    <circle cx="12"
+                                            cy="12"
+                                            r="3"/>
+
                                 </svg>
 
-                                <svg
-                                    id="eyeClosed"
-                                    class="hidden h-5 w-5"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    stroke-width="1.8"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        d="M3 3l18 18"
-                                    />
+                                <svg id="eyeClosed"
+                                     class="hidden w-5 h-5"
+                                     fill="none"
+                                     stroke="currentColor"
+                                     stroke-width="1.8"
+                                     viewBox="0 0 24 24">
 
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        d="M6.5 6.5C4 8.3 2.5 12 2.5 12s3.5 6 9.5 6c1.9 0 3.5-.42 4.8-1.05"
-                                    />
+                                    <path stroke-linecap="round"
+                                          d="M3 3l18 18"/>
 
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        d="M10 5.2A9.7 9.7 0 0112 5c6 0 9.5 7 9.5 7s-1.1 2.1-3.2 3.8"
-                                    />
+                                    <path stroke-linecap="round"
+                                          stroke-linejoin="round"
+                                          d="M6.5 6.5C4 8.3 2.5 12 2.5 12s3.5 6 9.5 6c1.9 0 3.5-.42 4.8-1.05"/>
+
+                                    <path stroke-linecap="round"
+                                          stroke-linejoin="round"
+                                          d="M10 5.2A9.7 9.7 0 0112 5c6 0 9.5 7 9.5 7s-1.1 2.1-3.2 3.8"/>
+
                                 </svg>
 
                             </button>
 
                         </div>
 
-                        <p class="mt-1.5 text-[10px] leading-relaxed text-slate-400 sm:text-[11px]">
+                        <p class="form-help">
                             Gunakan kombinasi huruf, angka, dan karakter khusus untuk keamanan yang lebih baik.
                         </p>
 
                         @error('password')
-                            <p class="mt-1.5 text-xs font-medium text-rose-500">
+                            <p class="form-error-text">
                                 {{ $message }}
                             </p>
                         @enderror
@@ -445,75 +396,61 @@
                     </div>
 
 
-                    {{-- KONFIRMASI PASSWORD --}}
-                    <div class="mt-4 sm:mt-5">
+                    {{-- Konfirmasi Password --}}
+                    <div class="form-group mt-3">
 
-                        <label
-                            for="password_confirmation"
-                            class="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-600"
-                        >
+                        <label for="password_confirmation"
+                               class="form-label">
                             Konfirmasi Password
                             <span class="text-rose-500">*</span>
                         </label>
 
                         <div class="relative">
 
-                            <input
-                                type="password"
-                                name="password_confirmation"
-                                id="password_confirmation"
-                                required
-                                autocomplete="new-password"
-                                placeholder="Ulangi password"
-                                class="w-full rounded-xl border border-slate-200 bg-slate-50/50 py-2 pl-3.5 pr-11 text-xs text-slate-700 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 sm:py-2.5 sm:text-sm @error('password_confirmation') border-rose-500 bg-rose-50/30 @enderror"
-                            >
+                            <input type="password"
+                                   name="password_confirmation"
+                                   id="password_confirmation"
+                                   required
+                                   autocomplete="new-password"
+                                   placeholder="Ulangi password"
+                                   class="form-control-custom pr-11 @error('password_confirmation') form-error @enderror">
 
-                            <button
-                                type="button"
-                                id="togglePasswordConfirmation"
-                                aria-label="Tampilkan atau sembunyikan konfirmasi password"
-                                class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 transition hover:text-slate-600 focus:outline-none"
-                            >
+                            <button type="button"
+                                    id="togglePasswordConfirmation"
+                                    aria-label="Tampilkan atau sembunyikan konfirmasi password"
+                                    class="password-toggle">
 
-                                <svg
-                                    id="eyeConfirmationOpen"
-                                    class="h-5 w-5"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    stroke-width="1.8"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        d="M2.5 12s3.5-6 9.5-6s9.5 6 9.5 6s-3.5 6-9.5 6s-9.5-6-9.5-6z"
-                                    />
+                                <svg id="eyeConfirmationOpen"
+                                     class="w-5 h-5"
+                                     fill="none"
+                                     stroke="currentColor"
+                                     stroke-width="1.8"
+                                     viewBox="0 0 24 24">
 
-                                    <circle
-                                        cx="12"
-                                        cy="12"
-                                        r="3"
-                                    />
+                                    <path stroke-linecap="round"
+                                          stroke-linejoin="round"
+                                          d="M2.5 12s3.5-6 9.5-6s9.5 6 9.5 6s-3.5 6-9.5 6s-9.5-6-9.5-6z"/>
+
+                                    <circle cx="12"
+                                            cy="12"
+                                            r="3"/>
+
                                 </svg>
 
-                                <svg
-                                    id="eyeConfirmationClosed"
-                                    class="hidden h-5 w-5"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    stroke-width="1.8"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        d="M3 3l18 18"
-                                    />
+                                <svg id="eyeConfirmationClosed"
+                                     class="hidden w-5 h-5"
+                                     fill="none"
+                                     stroke="currentColor"
+                                     stroke-width="1.8"
+                                     viewBox="0 0 24 24">
 
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        d="M6.5 6.5C4 8.3 2.5 12 2.5 12s3.5 6 9.5 6c1.9 0 3.5-.42 4.8-1.05"
-                                    />
+                                    <path stroke-linecap="round"
+                                          d="M3 3l18 18"/>
+
+                                    <path stroke-linecap="round"
+                                          stroke-linejoin="round"
+                                          d="M6.5 6.5C4 8.3 2.5 12 2.5 12s3.5 6 9.5 6c1.9 0 3.5-.42 4.8-1.05"/>
+
                                 </svg>
 
                             </button>
@@ -521,7 +458,7 @@
                         </div>
 
                         @error('password_confirmation')
-                            <p class="mt-1.5 text-xs font-medium text-rose-500">
+                            <p class="form-error-text">
                                 {{ $message }}
                             </p>
                         @enderror
@@ -533,37 +470,30 @@
             </div>
 
 
-            {{-- ====================================================
-               FOOTER ACTION
-            ==================================================== --}}
-            <div class="flex flex-col-reverse items-center justify-end gap-2.5 border-t border-slate-100 bg-slate-50 px-4 py-3.5 sm:flex-row sm:px-8 sm:py-4">
+            {{-- Footer --}}
+            <div class="flex flex-col-reverse sm:flex-row items-center justify-end gap-2 px-4 sm:px-5 py-2.5 bg-slate-50 border-t-2 border-slate-300">
 
-                <a
-                    href="{{ route('users.index') }}"
-                    class="w-full rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-center text-xs font-semibold text-slate-600 shadow-sm transition hover:bg-slate-100 hover:text-slate-800 sm:w-auto"
-                >
+                <a href="{{ route('users.index') }}"
+                   class="action-button action-button-secondary">
                     Batal
                 </a>
 
-                <button
-                    type="submit"
-                    class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-xs font-semibold text-white shadow-md shadow-blue-600/30 transition hover:bg-blue-700 sm:w-auto"
-                >
-                    <svg
-                        class="h-4 w-4"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                        viewBox="0 0 24 24"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M5 12.5l4 4L19 7"
-                        />
+                <button type="submit"
+                        id="submit-btn"
+                        class="action-button action-button-primary">
+
+                    <svg class="w-4 h-4 mr-2"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="1.8"
+                         viewBox="0 0 24 24">
+                        <path stroke-linecap="round"
+                              stroke-linejoin="round"
+                              d="M5 12.5l4 4L19 7"/>
                     </svg>
 
                     Simpan Pengguna
+
                 </button>
 
             </div>
@@ -574,44 +504,226 @@
 
 </div>
 
-@endsection
 
+{{-- =============================================================
+CSS
+============================================================= --}}
+<style>
+    .section-heading {
+        display: flex;
+        align-items: center;
+        gap: .6rem;
+        padding-bottom: .45rem;
+        margin-bottom: .75rem;
+        border-bottom: 2px solid #cbd5e1;
+    }
 
-@push('scripts')
+    .section-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 2rem;
+        height: 2rem;
+        flex-shrink: 0;
+        border-radius: .6rem;
+        border: 2px solid #dbeafe;
+        background: #eff6ff;
+        color: #2563eb;
+    }
 
-<script>
-document.addEventListener('DOMContentLoaded', function () {
+    .section-title {
+        color: #334155;
+        font-size: .82rem;
+        line-height: 1rem;
+        font-weight: 700;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+    }
 
-    function setupPasswordToggle(
-        buttonId,
-        inputId,
-        openIconId,
-        closedIconId
-    ) {
-        const button =
-            document.getElementById(buttonId);
+    .section-description {
+        margin-top: .05rem;
+        color: #94a3b8;
+        font-size: .68rem;
+        line-height: .9rem;
+    }
 
-        const input =
-            document.getElementById(inputId);
+    .section-divider {
+        height: 2px;
+        margin: 1.25rem 0;
+        background: #e2e8f0;
+    }
 
-        const openIcon =
-            document.getElementById(openIconId);
+    .form-group {
+        width: 100%;
+    }
 
-        const closedIcon =
-            document.getElementById(closedIconId);
+    .form-label {
+        display: block;
+        margin-bottom: .3rem;
+        color: #334155;
+        font-size: .68rem;
+        line-height: .9rem;
+        font-weight: 700;
+        letter-spacing: .03em;
+        text-transform: uppercase;
+    }
 
-        if (
-            !button ||
-            !input ||
-            !openIcon ||
-            !closedIcon
-        ) {
-            return;
+    .form-control-custom {
+        width: 100%;
+        min-height: 40px;
+        padding: .48rem .7rem;
+        background: #fff;
+        color: #334155;
+        border: 2px solid #94a3b8;
+        border-radius: .6rem;
+        outline: none;
+        font-size: .8rem;
+        line-height: 1.25;
+        transition:
+            border-color .15s ease,
+            background-color .15s ease,
+            box-shadow .15s ease;
+    }
+
+    .form-control-custom:hover {
+        border-color: #64748b;
+    }
+
+    .form-control-custom:focus {
+        border-color: #2563eb;
+        background: #fff;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, .08);
+    }
+
+    .form-control-custom::placeholder {
+        color: #94a3b8;
+    }
+
+    .form-error {
+        border-color: #f43f5e !important;
+        background: #fff1f2 !important;
+    }
+
+    .form-error-text {
+        margin-top: .2rem;
+        color: #e11d48;
+        font-size: .68rem;
+        line-height: .9rem;
+        font-weight: 500;
+    }
+
+    .form-help {
+        margin-top: .25rem;
+        color: #94a3b8;
+        font-size: .66rem;
+        line-height: .9rem;
+        font-weight: 500;
+    }
+
+    .password-toggle {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        align-items: center;
+        padding-right: .75rem;
+        color: #94a3b8;
+        transition: color .15s ease;
+    }
+
+    .password-toggle:hover {
+        color: #475569;
+    }
+
+    .password-toggle:focus {
+        outline: none;
+    }
+
+    .action-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        padding: .5rem .9rem;
+        border-width: 2px;
+        border-radius: .6rem;
+        font-size: .76rem;
+        font-weight: 700;
+        transition: all .15s ease;
+    }
+
+    .action-button-secondary {
+        color: #334155;
+        background: #fff;
+        border-color: #cbd5e1;
+    }
+
+    .action-button-secondary:hover {
+        background: #f1f5f9;
+        border-color: #94a3b8;
+    }
+
+    .action-button-primary {
+        color: #fff;
+        background: #2563eb;
+        border-color: #2563eb;
+        box-shadow: 0 4px 10px rgba(37, 99, 235, .15);
+    }
+
+    .action-button-primary:hover {
+        background: #1d4ed8;
+        border-color: #1d4ed8;
+    }
+
+    .action-button:disabled {
+        opacity: .65;
+        cursor: not-allowed;
+    }
+
+    @media (min-width: 640px) {
+        .action-button {
+            width: auto;
         }
+    }
+</style>
 
-        button.addEventListener(
-            'click',
-            function () {
+
+{{-- =============================================================
+JAVASCRIPT
+============================================================= --}}
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+        function setupPasswordToggle(
+            buttonId,
+            inputId,
+            openIconId,
+            closedIconId
+        ) {
+            const button =
+                document.getElementById(buttonId);
+
+            const input =
+                document.getElementById(inputId);
+
+            const openIcon =
+                document.getElementById(openIconId);
+
+            const closedIcon =
+                document.getElementById(closedIconId);
+
+            if (
+                !button ||
+                !input ||
+                !openIcon ||
+                !closedIcon
+            ) {
+                return;
+            }
+
+            button.addEventListener('click', function () {
 
                 const isPassword =
                     input.type === 'password';
@@ -630,25 +742,69 @@ document.addEventListener('DOMContentLoaded', function () {
                     'hidden',
                     !isPassword
                 );
-            }
+            });
+        }
+
+
+        setupPasswordToggle(
+            'togglePassword',
+            'password',
+            'eyeOpen',
+            'eyeClosed'
         );
-    }
 
-    setupPasswordToggle(
-        'togglePassword',
-        'password',
-        'eyeOpen',
-        'eyeClosed'
-    );
 
-    setupPasswordToggle(
-        'togglePasswordConfirmation',
-        'password_confirmation',
-        'eyeConfirmationOpen',
-        'eyeConfirmationClosed'
-    );
+        setupPasswordToggle(
+            'togglePasswordConfirmation',
+            'password_confirmation',
+            'eyeConfirmationOpen',
+            'eyeConfirmationClosed'
+        );
 
-});
+
+        const formUser =
+            document.getElementById('form-user');
+
+        if (formUser) {
+            formUser.addEventListener('submit', function () {
+
+                const submitButton =
+                    document.getElementById('submit-btn');
+
+                if (!submitButton) {
+                    return;
+                }
+
+                submitButton.disabled = true;
+
+                submitButton.innerHTML = `
+                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                         xmlns="http://www.w3.org/2000/svg"
+                         fill="none"
+                         viewBox="0 0 24 24">
+
+                        <circle class="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                stroke-width="4">
+                        </circle>
+
+                        <path class="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                        </path>
+
+                    </svg>
+
+                    Menyimpan...
+                `;
+            });
+        }
+
+    });
 </script>
-
 @endpush
+
+@endsection

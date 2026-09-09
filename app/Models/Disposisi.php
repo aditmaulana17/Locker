@@ -19,7 +19,7 @@ class Disposisi extends Model
     protected $table = 'disposisis';
 
     /**
-     * Kolom yang boleh diisi secara mass assignment.
+     * Kolom yang boleh diisi melalui mass assignment.
      */
     protected $fillable = [
         'surat_masuk_id',
@@ -30,6 +30,7 @@ class Disposisi extends Model
         'catatan',
         'batas_waktu',
         'status',
+        'sifat',
     ];
 
     /**
@@ -43,7 +44,7 @@ class Disposisi extends Model
     }
 
     /**
-     * Relasi ke surat masuk.
+     * Relasi ke Surat Masuk.
      */
     public function suratMasuk(): BelongsTo
     {
@@ -83,9 +84,9 @@ class Disposisi extends Model
         array $filters = []
     ): Builder {
         /*
-         * =====================================================
+         * =========================================================
          * SEARCH
-         * =====================================================
+         * =========================================================
          */
         $search = isset($filters['search'])
             ? trim((string) $filters['search'])
@@ -95,10 +96,9 @@ class Disposisi extends Model
             $keyword = "%{$search}%";
 
             $query->where(
-                function (Builder $q) use ($keyword) {
-
+                function (Builder $q) use ($keyword): void {
                     /*
-                     * Field pada tabel disposisis.
+                     * Field disposisi.
                      */
                     $q->where(
                         'instruksi',
@@ -114,16 +114,32 @@ class Disposisi extends Model
                         'catatan',
                         'like',
                         $keyword
-                    )
+                    );
 
                     /*
-                     * Field pada SuratMasuk.
+                     * Field sifat jika tersedia.
                      */
-                    ->orWhereHas(
+                    if (
+                        Schema::hasColumn(
+                            'disposisis',
+                            'sifat'
+                        )
+                    ) {
+                        $q->orWhere(
+                            'sifat',
+                            'like',
+                            $keyword
+                        );
+                    }
+
+                    /*
+                     * Search Surat Masuk.
+                     */
+                    $q->orWhereHas(
                         'suratMasuk',
                         function (
                             Builder $surat
-                        ) use ($keyword) {
+                        ) use ($keyword): void {
                             $surat
                                 ->where(
                                     'nomor_surat',
@@ -146,32 +162,31 @@ class Disposisi extends Model
                                     $keyword
                                 );
                         }
-                    )
+                    );
 
                     /*
-                     * Field user penerima.
+                     * Search user penerima.
                      */
-                    ->orWhereHas(
+                    $q->orWhereHas(
                         'kepada',
                         function (
                             Builder $user
-                        ) use ($keyword) {
-                            $user
-                                ->where(
-                                    'name',
-                                    'like',
-                                    $keyword
-                                )
-                                ->orWhere(
-                                    'nama',
-                                    'like',
-                                    $keyword
-                                )
-                                ->orWhere(
-                                    'jabatan',
-                                    'like',
-                                    $keyword
-                                );
+                        ) use ($keyword): void {
+                            $user->where(
+                                'name',
+                                'like',
+                                $keyword
+                            )
+                            ->orWhere(
+                                'email',
+                                'like',
+                                $keyword
+                            )
+                            ->orWhere(
+                                'jabatan',
+                                'like',
+                                $keyword
+                            );
                         }
                     );
                 }
@@ -179,9 +194,9 @@ class Disposisi extends Model
         }
 
         /*
-         * =====================================================
+         * =========================================================
          * STATUS
-         * =====================================================
+         * =========================================================
          */
         $allowedStatuses = [
             'menunggu',
@@ -189,24 +204,39 @@ class Disposisi extends Model
             'selesai',
         ];
 
+        $rawStatuses =
+            $filters['status'] ?? [];
+
+        if (
+            is_scalar($rawStatuses) &&
+            trim((string) $rawStatuses) !== ''
+        ) {
+            $rawStatuses = [
+                $rawStatuses,
+            ];
+        }
+
         $statuses = collect(
-            $filters['status'] ?? []
+            $rawStatuses
         )
             ->flatten()
             ->filter(
-                fn ($status) => is_scalar($status)
+                fn ($status) =>
+                    is_scalar($status)
             )
             ->map(
-                fn ($status) => strtolower(
-                    trim((string) $status)
-                )
+                fn ($status) =>
+                    strtolower(
+                        trim((string) $status)
+                    )
             )
             ->filter(
-                fn ($status) => in_array(
-                    $status,
-                    $allowedStatuses,
-                    true
-                )
+                fn ($status) =>
+                    in_array(
+                        $status,
+                        $allowedStatuses,
+                        true
+                    )
             )
             ->unique()
             ->values()
@@ -220,12 +250,9 @@ class Disposisi extends Model
         }
 
         /*
-         * =====================================================
+         * =========================================================
          * FILTER TANGGAL
-         * =====================================================
-         *
-         * Gunakan tanggal_disposisi jika kolom tersedia.
-         * Jika tidak, gunakan created_at.
+         * =========================================================
          */
         $dateColumn =
             self::getFilterDateColumn();
@@ -258,7 +285,7 @@ class Disposisi extends Model
 
         /*
          * Jika tanggal awal lebih besar,
-         * tukarkan secara otomatis.
+         * tukarkan otomatis.
          */
         if (
             $validDariTanggal &&
@@ -267,7 +294,7 @@ class Disposisi extends Model
         ) {
             [
                 $dariTanggal,
-                $sampaiTanggal
+                $sampaiTanggal,
             ] = [
                 $sampaiTanggal,
                 $dariTanggal,
@@ -294,8 +321,10 @@ class Disposisi extends Model
     }
 
     /**
-     * Menentukan kolom tanggal yang digunakan
-     * untuk filter tanggal disposisi.
+     * Menentukan kolom tanggal untuk filter.
+     *
+     * Menggunakan tanggal_disposisi jika tersedia.
+     * Jika tidak tersedia, menggunakan created_at.
      */
     public static function getFilterDateColumn(): string
     {
@@ -308,19 +337,24 @@ class Disposisi extends Model
     }
 
     /**
-     * Scope untuk disposisi yang belum selesai.
+     * Scope disposisi yang belum selesai.
      */
     public function scopeBelumSelesai(
         Builder $query
     ): Builder {
-        return $query->whereRaw(
-            'LOWER(TRIM(status)) != ?',
-            ['selesai']
+        return $query->where(
+            function (Builder $q): void {
+                $q->whereNull('status')
+                    ->orWhereRaw(
+                        'LOWER(TRIM(status)) != ?',
+                        ['selesai']
+                    );
+            }
         );
     }
 
     /**
-     * Scope untuk disposisi selesai.
+     * Scope disposisi yang selesai.
      */
     public function scopeSelesai(
         Builder $query
@@ -364,7 +398,10 @@ class Disposisi extends Model
         Builder $query,
         ?string $status
     ): Builder {
-        if (!$status) {
+        if (
+            $status === null ||
+            trim($status) === ''
+        ) {
             return $query;
         }
 
@@ -385,9 +422,9 @@ class Disposisi extends Model
             return $query;
         }
 
-        return $query->where(
-            'status',
-            $status
+        return $query->whereRaw(
+            'LOWER(TRIM(status)) = ?',
+            [$status]
         );
     }
 
@@ -423,6 +460,30 @@ class Disposisi extends Model
     }
 
     /**
+     * Mengecek apakah status menunggu.
+     */
+    public function isMenunggu(): bool
+    {
+        return strtolower(
+            trim(
+                (string) $this->status
+            )
+        ) === 'menunggu';
+    }
+
+    /**
+     * Mengecek apakah status sedang diproses.
+     */
+    public function isDiproses(): bool
+    {
+        return strtolower(
+            trim(
+                (string) $this->status
+            )
+        ) === 'diproses';
+    }
+
+    /**
      * Mengecek apakah memiliki batas waktu.
      */
     public function memilikiBatasWaktu(): bool
@@ -444,6 +505,80 @@ class Disposisi extends Model
     }
 
     /**
+     * Mengecek apakah batas waktu masih aktif.
+     */
+    public function batasWaktuAktif(): bool
+    {
+        return $this->memilikiBatasWaktu()
+            && !$this->isSelesai();
+    }
+
+    /**
+     * Mengambil status yang sudah dinormalisasi.
+     */
+    public function getStatusNormalizedAttribute(): string
+    {
+        return strtolower(
+            trim(
+                (string) $this->status
+            )
+        );
+    }
+
+    /**
+     * Mengambil instruksi utama.
+     *
+     * Field instruksi menjadi prioritas.
+     * isi_disposisi digunakan sebagai fallback
+     * untuk data lama.
+     */
+    public function getInstruksiUtamaAttribute(): string
+    {
+        $instruksi =
+            trim(
+                (string) (
+                    $this->instruksi
+                    ?? ''
+                )
+            );
+
+        if ($instruksi !== '') {
+            return $instruksi;
+        }
+
+        return trim(
+            (string) (
+                $this->isi_disposisi
+                ?? ''
+            )
+        );
+    }
+
+    /**
+     * Mengambil label status.
+     */
+    public function getStatusLabelAttribute(): string
+    {
+        return match (
+            $this->status_normalized
+        ) {
+            'menunggu' =>
+                'Menunggu',
+
+            'diproses' =>
+                'Diproses',
+
+            'selesai' =>
+                'Selesai',
+
+            default =>
+                ucfirst(
+                    $this->status_normalized
+                ),
+        };
+    }
+
+    /**
      * Validasi tanggal YYYY-MM-DD.
      */
     private static function validDate(
@@ -458,6 +593,10 @@ class Disposisi extends Model
                 (string) $value
             );
 
+        /*
+         * Format harus:
+         * 2026-09-09
+         */
         if (!preg_match(
             '/^\d{4}-\d{2}-\d{2}$/',
             $value
@@ -468,7 +607,7 @@ class Disposisi extends Model
         [
             $year,
             $month,
-            $day
+            $day,
         ] = array_map(
             'intval',
             explode(
