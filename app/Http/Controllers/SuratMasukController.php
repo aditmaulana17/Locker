@@ -24,6 +24,12 @@ use Throwable;
 
 class SuratMasukController extends Controller
 {
+    /*
+    |--------------------------------------------------------------------------
+    | CONFIGURATION
+    |--------------------------------------------------------------------------
+    */
+
     /**
      * Status surat masuk yang valid.
      */
@@ -36,7 +42,7 @@ class SuratMasukController extends Controller
     ];
 
     /**
-     * Extension file yang didukung.
+     * Extension file yang diperbolehkan.
      */
     private const ALLOWED_FILE_EXTENSIONS = [
         'pdf',
@@ -46,27 +52,25 @@ class SuratMasukController extends Controller
     ];
 
     /**
-     * Ukuran maksimum file input:
+     * Batas maksimum file upload.
+     *
      * 10 MB.
      */
     private const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
     /**
-     * Ukuran maksimum gambar setelah compression.
+     * Target maksimum hasil compression gambar.
      *
-     * Target dibuat sedikit di bawah 10 MB
-     * agar aman ketika disimpan ke storage.
+     * Dibuat 9 MB agar masih memiliki margin
+     * terhadap batas maksimum 10 MB.
      */
     private const MAX_COMPRESSED_IMAGE_SIZE = 9 * 1024 * 1024;
 
     /**
-     * Maksimum dimensi gambar.
-     *
-     * Scan dokumen dari HP biasanya memiliki
-     * resolusi sangat besar. Resize dilakukan
-     * sebelum disimpan agar ukuran lebih efisien.
+     * Dimensi maksimum gambar.
      */
     private const MAX_IMAGE_WIDTH = 2500;
+
     private const MAX_IMAGE_HEIGHT = 2500;
 
     /**
@@ -95,21 +99,28 @@ class SuratMasukController extends Controller
 
         $rawKategoriIds = $request->input(
             'kategori_surat_id',
-            $request->input('kategori_id', [])
+            $request->input(
+                'kategori_id',
+                []
+            )
         );
 
         if (
             is_scalar($rawKategoriIds)
             && trim((string) $rawKategoriIds) !== ''
         ) {
-            $rawKategoriIds = [$rawKategoriIds];
+            $rawKategoriIds = [
+                $rawKategoriIds,
+            ];
         }
 
         if (!is_array($rawKategoriIds)) {
             $rawKategoriIds = [];
         }
 
-        $kategoriIds = collect($rawKategoriIds)
+        $kategoriIds = collect(
+            $rawKategoriIds
+        )
             ->flatten()
             ->filter(
                 fn ($id) =>
@@ -117,7 +128,10 @@ class SuratMasukController extends Controller
                     && is_numeric($id)
                     && (int) $id > 0
             )
-            ->map(fn ($id) => (int) $id)
+            ->map(
+                fn ($id) =>
+                    (int) $id
+            )
             ->unique()
             ->values()
             ->all();
@@ -128,17 +142,31 @@ class SuratMasukController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $rawStatuses = $request->input('status', []);
+        $rawStatuses = $request->input(
+            'status',
+            []
+        );
 
         if (!is_array($rawStatuses)) {
-            $rawStatuses = [$rawStatuses];
+            $rawStatuses = [
+                $rawStatuses,
+            ];
         }
 
-        $statuses = collect($rawStatuses)
-            ->filter(fn ($status) => is_scalar($status))
+        $statuses = collect(
+            $rawStatuses
+        )
+            ->filter(
+                fn ($status) =>
+                    is_scalar($status)
+            )
             ->map(
                 fn ($status) =>
-                    strtolower(trim((string) $status))
+                    strtolower(
+                        trim(
+                            (string) $status
+                        )
+                    )
             )
             ->filter(
                 fn ($status) =>
@@ -158,10 +186,11 @@ class SuratMasukController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $query = SuratMasuk::query()->with([
-            'kategori',
-            'penerima',
-        ]);
+        $query = SuratMasuk::query()
+            ->with([
+                'kategori',
+                'penerima',
+            ]);
 
         /*
         |--------------------------------------------------------------------------
@@ -170,60 +199,68 @@ class SuratMasukController extends Controller
         */
 
         $search = trim(
-            (string) $request->input('search', '')
+            (string) $request->input(
+                'search',
+                ''
+            )
         );
 
         if ($search !== '') {
-            $keyword = "%{$search}%";
+            $keyword =
+                '%' . $search . '%';
 
-            $query->where(function (Builder $q) use ($keyword): void {
-                $q->where(
-                    'nomor_agenda',
-                    'like',
-                    $keyword
-                )
-                    ->orWhere(
-                        'nomor_surat',
+            $query->where(
+                function (Builder $q) use ($keyword): void {
+                    $q->where(
+                        'nomor_agenda',
                         'like',
                         $keyword
                     )
-                    ->orWhere(
-                        'pengirim',
-                        'like',
-                        $keyword
-                    )
-                    ->orWhere(
-                        'perihal',
-                        'like',
-                        $keyword
-                    )
-                    ->orWhere(
-                        'ringkasan',
-                        'like',
-                        $keyword
-                    )
-                    ->orWhereHas(
-                        'kategori',
-                        function (Builder $kategori) use ($keyword): void {
-                            $kategori
-                                ->where(
-                                    'nama_kategori',
-                                    'like',
-                                    $keyword
-                                )
-                                ->orWhere(
-                                    'kode',
-                                    'like',
-                                    $keyword
-                                )
-                                ->orWhere(
-                                    'sifat',
-                                    'like',
-                                    $keyword
-                                );
-                        }
-                    );
-            });
+                        ->orWhere(
+                            'nomor_surat',
+                            'like',
+                            $keyword
+                        )
+                        ->orWhere(
+                            'pengirim',
+                            'like',
+                            $keyword
+                        )
+                        ->orWhere(
+                            'perihal',
+                            'like',
+                            $keyword
+                        )
+                        ->orWhere(
+                            'ringkasan',
+                            'like',
+                            $keyword
+                        )
+                        ->orWhereHas(
+                            'kategori',
+                            function (
+                                Builder $kategori
+                            ) use ($keyword): void {
+                                $kategori
+                                    ->where(
+                                        'nama_kategori',
+                                        'like',
+                                        $keyword
+                                    )
+                                    ->orWhere(
+                                        'kode',
+                                        'like',
+                                        $keyword
+                                    )
+                                    ->orWhere(
+                                        'sifat',
+                                        'like',
+                                        $keyword
+                                    );
+                            }
+                        );
+                }
+            );
         }
 
         /*
@@ -272,13 +309,15 @@ class SuratMasukController extends Controller
             )
         );
 
-        $validDariTanggal = $this->isValidDate(
-            $dariTanggal
-        );
+        $validDariTanggal =
+            $this->isValidDate(
+                $dariTanggal
+            );
 
-        $validSampaiTanggal = $this->isValidDate(
-            $sampaiTanggal
-        );
+        $validSampaiTanggal =
+            $this->isValidDate(
+                $sampaiTanggal
+            );
 
         if (
             $validDariTanggal
@@ -312,8 +351,11 @@ class SuratMasukController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | FILTER KHUSUS STAFF
+        | FILTER STAFF
         |--------------------------------------------------------------------------
+        |
+        | isStaff() berasal dari Controller parent.
+        |
         */
 
         if ($this->isStaff()) {
@@ -329,7 +371,9 @@ class SuratMasukController extends Controller
             } else {
                 $query->whereHas(
                     'disposisi',
-                    function (Builder $disposisi): void {
+                    function (
+                        Builder $disposisi
+                    ): void {
                         $disposisi->where(
                             'kepada_user_id',
                             (int) Auth::id()
@@ -346,8 +390,12 @@ class SuratMasukController extends Controller
         */
 
         $suratMasuks = $query
-            ->orderByDesc('tanggal_terima')
-            ->orderByDesc('id')
+            ->orderByDesc(
+                'tanggal_terima'
+            )
+            ->orderByDesc(
+                'id'
+            )
             ->paginate(10)
             ->withQueryString();
 
@@ -358,7 +406,9 @@ class SuratMasukController extends Controller
         */
 
         $kategoris = KategoriSurat::query()
-            ->orderBy('nama_kategori')
+            ->orderBy(
+                'nama_kategori'
+            )
             ->get();
 
         return view(
@@ -378,16 +428,21 @@ class SuratMasukController extends Controller
 
     /**
      * Form tambah surat masuk.
+     *
+     * ensureCanManageSurat() berasal dari Controller parent.
      */
     public function create()
     {
         $this->ensureCanManageSurat();
 
         $kategoris = KategoriSurat::query()
-            ->orderBy('nama_kategori')
+            ->orderBy(
+                'nama_kategori'
+            )
             ->get();
 
-        $nomorAgenda = SuratMasuk::generateNomorAgenda();
+        $nomorAgenda =
+            SuratMasuk::generateNomorAgenda();
 
         return view(
             'surat_masuk.create',
@@ -407,13 +462,16 @@ class SuratMasukController extends Controller
     /**
      * Menyimpan surat masuk baru.
      */
-    public function store(SuratMasukRequest $request)
-    {
+    public function store(
+        SuratMasukRequest $request
+    ) {
         $this->ensureCanManageSurat();
 
-        $data = $request->validated();
+        $data =
+            $request->validated();
 
-        $diskName = $this->getStorageDisk();
+        $diskName =
+            $this->getStorageDisk();
 
         $uploadedPath = null;
 
@@ -426,12 +484,13 @@ class SuratMasukController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            $nomorInput = trim(
-                (string) $request->input(
-                    'nomor_agenda',
-                    ''
-                )
-            );
+            $nomorInput =
+                trim(
+                    (string) $request->input(
+                        'nomor_agenda',
+                        ''
+                    )
+                );
 
             if (
                 $nomorInput === ''
@@ -462,31 +521,35 @@ class SuratMasukController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            $status = strtolower(
-                trim(
-                    (string) (
-                        $data['status']
-                        ?? 'baru'
+            $status =
+                strtolower(
+                    trim(
+                        (string) (
+                            $data['status']
+                            ?? 'baru'
+                        )
                     )
-                )
-            );
+                );
 
-            $data['status'] = in_array(
-                $status,
-                self::STATUS_OPTIONS,
-                true
-            )
-                ? $status
-                : 'baru';
+            $data['status'] =
+                in_array(
+                    $status,
+                    self::STATUS_OPTIONS,
+                    true
+                )
+                    ? $status
+                    : 'baru';
 
             /*
             |--------------------------------------------------------------------------
-            | UPLOAD HASIL KAMERA
+            | CAMERA
             |--------------------------------------------------------------------------
             */
 
             if (
-                $request->filled('captured_image')
+                $request->filled(
+                    'captured_image'
+                )
             ) {
                 $uploadedPath =
                     $this->uploadBase64Image(
@@ -502,16 +565,20 @@ class SuratMasukController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | UPLOAD FILE
+            | FILE UPLOAD
             |--------------------------------------------------------------------------
             */
 
             elseif (
-                $request->hasFile('lampiran_file')
+                $request->hasFile(
+                    'lampiran_file'
+                )
             ) {
                 $uploadedPath =
                     $this->storeUploadedFile(
-                        $request->file('lampiran_file'),
+                        $request->file(
+                            'lampiran_file'
+                        ),
                         $diskName
                     );
 
@@ -519,19 +586,26 @@ class SuratMasukController extends Controller
                     $uploadedPath;
             }
 
+            /*
+            |--------------------------------------------------------------------------
+            | CLEAN FIELD
+            |--------------------------------------------------------------------------
+            */
+
             unset(
                 $data['captured_image']
             );
 
             /*
             |--------------------------------------------------------------------------
-            | SIMPAN DATABASE
+            | DATABASE
             |--------------------------------------------------------------------------
             */
 
-            $surat = SuratMasuk::create(
-                $data
-            );
+            $surat =
+                SuratMasuk::create(
+                    $data
+                );
 
             /*
             |--------------------------------------------------------------------------
@@ -552,7 +626,9 @@ class SuratMasukController extends Controller
             DB::commit();
 
             return redirect()
-                ->route('surat-masuk.index')
+                ->route(
+                    'surat-masuk.index'
+                )
                 ->with(
                     'success',
                     'Surat masuk berhasil dicatat dengan nomor agenda ' .
@@ -571,10 +647,17 @@ class SuratMasukController extends Controller
             Log::error(
                 'Gagal menyimpan Surat Masuk.',
                 [
-                    'message' => $e->getMessage(),
-                    'user_id' => Auth::id(),
-                    'disk' => $diskName,
-                    'trace' => $e->getTraceAsString(),
+                    'message' =>
+                        $e->getMessage(),
+
+                    'user_id' =>
+                        Auth::id(),
+
+                    'disk' =>
+                        $diskName,
+
+                    'trace' =>
+                        $e->getTraceAsString(),
                 ]
             );
 
@@ -597,8 +680,9 @@ class SuratMasukController extends Controller
     /**
      * Menampilkan detail surat masuk.
      */
-    public function show(SuratMasuk $suratMasuk)
-    {
+    public function show(
+        SuratMasuk $suratMasuk
+    ) {
         $this->ensureCanView(
             $suratMasuk
         );
@@ -610,35 +694,39 @@ class SuratMasukController extends Controller
             'disposisi.kepada',
         ]);
 
-        $daftarStaf = User::query()
-            ->where(
-                'id',
-                '!=',
-                Auth::id()
-            )
-            ->where(
-                'is_active',
-                true
-            )
-            ->where(
-                function ($query): void {
-                    $query
-                        ->whereRaw(
-                            'LOWER(TRIM(role)) = ?',
-                            ['staff']
-                        )
-                        ->orWhereRaw(
-                            'LOWER(TRIM(role)) = ?',
-                            ['staf']
-                        );
-                }
-            )
-            ->orderBy('name')
-            ->get();
+        $daftarStaf =
+            User::query()
+                ->where(
+                    'id',
+                    '!=',
+                    Auth::id()
+                )
+                ->where(
+                    'is_active',
+                    true
+                )
+                ->where(
+                    function ($query): void {
+                        $query
+                            ->whereRaw(
+                                'LOWER(TRIM(role)) = ?',
+                                ['staff']
+                            )
+                            ->orWhereRaw(
+                                'LOWER(TRIM(role)) = ?',
+                                ['staf']
+                            );
+                    }
+                )
+                ->orderBy(
+                    'name'
+                )
+                ->get();
 
-        $fileUrl = $this->getFileUrl(
-            $suratMasuk->lampiran_file
-        );
+        $fileUrl =
+            $this->getFileUrl(
+                $suratMasuk->lampiran_file
+            );
 
         return view(
             'surat_masuk.show',
@@ -657,7 +745,7 @@ class SuratMasukController extends Controller
     */
 
     /**
-     * Endpoint disposisi legacy.
+     * Menyimpan disposisi surat masuk.
      */
     public function storeDisposisi(
         Request $request,
@@ -665,69 +753,76 @@ class SuratMasukController extends Controller
     ) {
         $this->ensureCanManageSurat();
 
-        $validated = $request->validate(
-            [
-                'tujuan_user_id' => [
-                    'required',
-                    'integer',
-                    Rule::exists(
-                        'users',
-                        'id'
-                    )->where(
-                        function ($query): void {
-                            $query
-                                ->where(
-                                    'is_active',
-                                    true
-                                )
-                                ->where(
-                                    function ($q): void {
-                                        $q
-                                            ->whereRaw(
-                                                'LOWER(TRIM(role)) = ?',
-                                                ['staff']
-                                            )
-                                            ->orWhereRaw(
-                                                'LOWER(TRIM(role)) = ?',
-                                                ['staf']
-                                            );
-                                    }
-                                );
-                        }
-                    ),
+        $validated =
+            $request->validate(
+                [
+                    'tujuan_user_id' => [
+                        'required',
+                        'integer',
+                        Rule::exists(
+                            'users',
+                            'id'
+                        )->where(
+                            function (
+                                $query
+                            ): void {
+                                $query
+                                    ->where(
+                                        'is_active',
+                                        true
+                                    )
+                                    ->where(
+                                        function (
+                                            $q
+                                        ): void {
+                                            $q
+                                                ->whereRaw(
+                                                    'LOWER(TRIM(role)) = ?',
+                                                    ['staff']
+                                                )
+                                                ->orWhereRaw(
+                                                    'LOWER(TRIM(role)) = ?',
+                                                    ['staf']
+                                                );
+                                        }
+                                    );
+                            }
+                        ),
+                    ],
+
+                    'instruksi' => [
+                        'required',
+                        'string',
+                        'max:5000',
+                    ],
+
+                    'batas_waktu' => [
+                        'nullable',
+                        'date',
+                    ],
                 ],
+                [
+                    'tujuan_user_id.required' =>
+                        'Staf tujuan wajib dipilih.',
 
-                'instruksi' => [
-                    'required',
-                    'string',
-                    'max:5000',
-                ],
+                    'tujuan_user_id.exists' =>
+                        'Staf tujuan tidak valid atau tidak aktif.',
 
-                'batas_waktu' => [
-                    'nullable',
-                    'date',
-                ],
-            ],
-            [
-                'tujuan_user_id.required' =>
-                    'Staf tujuan wajib dipilih.',
+                    'instruksi.required' =>
+                        'Instruksi disposisi wajib diisi.',
 
-                'tujuan_user_id.exists' =>
-                    'Staf tujuan tidak valid atau tidak aktif.',
+                    'instruksi.max' =>
+                        'Instruksi disposisi maksimal 5.000 karakter.',
 
-                'instruksi.required' =>
-                    'Instruksi disposisi wajib diisi.',
-
-                'instruksi.max' =>
-                    'Instruksi disposisi maksimal 5.000 karakter.',
-
-                'batas_waktu.date' =>
-                    'Batas waktu disposisi tidak valid.',
-            ]
-        );
+                    'batas_waktu.date' =>
+                        'Batas waktu disposisi tidak valid.',
+                ]
+            );
 
         $tujuanUserId =
-            (int) $validated['tujuan_user_id'];
+            (int) $validated[
+                'tujuan_user_id'
+            ];
 
         if (
             $tujuanUserId ===
@@ -746,9 +841,12 @@ class SuratMasukController extends Controller
         DB::beginTransaction();
 
         try {
-            $instruksi = trim(
-                (string) $validated['instruksi']
-            );
+            $instruksi =
+                trim(
+                    (string) $validated[
+                        'instruksi'
+                    ]
+                );
 
             $disposisiData = [
                 'surat_masuk_id' =>
@@ -767,8 +865,16 @@ class SuratMasukController extends Controller
                     'menunggu',
 
                 'batas_waktu' =>
-                    $validated['batas_waktu'] ?? null,
+                    $validated[
+                        'batas_waktu'
+                    ] ?? null,
             ];
+
+            /*
+            |--------------------------------------------------------------------------
+            | KOMPATIBILITAS KOLOM
+            |--------------------------------------------------------------------------
+            */
 
             if (
                 Schema::hasColumn(
@@ -776,8 +882,9 @@ class SuratMasukController extends Controller
                     'isi_disposisi'
                 )
             ) {
-                $disposisiData['isi_disposisi'] =
-                    $instruksi;
+                $disposisiData[
+                    'isi_disposisi'
+                ] = $instruksi;
             }
 
             if (
@@ -786,9 +893,16 @@ class SuratMasukController extends Controller
                     'sifat'
                 )
             ) {
-                $disposisiData['sifat'] =
-                    'biasa';
+                $disposisiData[
+                    'sifat'
+                ] = 'biasa';
             }
+
+            /*
+            |--------------------------------------------------------------------------
+            | CREATE DISPOSISI
+            |--------------------------------------------------------------------------
+            */
 
             $suratMasuk
                 ->disposisi()
@@ -796,12 +910,24 @@ class SuratMasukController extends Controller
                     $disposisiData
                 );
 
+            /*
+            |--------------------------------------------------------------------------
+            | UPDATE STATUS
+            |--------------------------------------------------------------------------
+            */
+
             $suratMasuk->update(
                 [
                     'status' =>
                         'didisposisikan',
                 ]
             );
+
+            /*
+            |--------------------------------------------------------------------------
+            | LOG
+            |--------------------------------------------------------------------------
+            */
 
             $this->logActivity(
                 'disposisi',
@@ -852,13 +978,17 @@ class SuratMasukController extends Controller
     /**
      * Form edit surat masuk.
      */
-    public function edit(SuratMasuk $suratMasuk)
-    {
+    public function edit(
+        SuratMasuk $suratMasuk
+    ) {
         $this->ensureCanManageSurat();
 
-        $kategoris = KategoriSurat::query()
-            ->orderBy('nama_kategori')
-            ->get();
+        $kategoris =
+            KategoriSurat::query()
+                ->orderBy(
+                    'nama_kategori'
+                )
+                ->get();
 
         return view(
             'surat_masuk.edit',
@@ -876,9 +1006,10 @@ class SuratMasukController extends Controller
     */
 
     /**
-     * Update surat masuk.
+     * Memperbarui surat masuk.
      *
-     * File lama dipertahankan jika tidak ada file baru.
+     * File lama dipertahankan jika tidak
+     * ada file baru.
      */
     public function update(
         SuratMasukRequest $request,
@@ -886,7 +1017,8 @@ class SuratMasukController extends Controller
     ) {
         $this->ensureCanManageSurat();
 
-        $data = $request->validated();
+        $data =
+            $request->validated();
 
         $diskName =
             $this->getStorageDisk();
@@ -911,11 +1043,14 @@ class SuratMasukController extends Controller
                     $data
                 )
             ) {
-                $status = strtolower(
-                    trim(
-                        (string) $data['status']
-                    )
-                );
+                $status =
+                    strtolower(
+                        trim(
+                            (string) $data[
+                                'status'
+                            ]
+                        )
+                    );
 
                 if (
                     in_array(
@@ -931,7 +1066,7 @@ class SuratMasukController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | UPLOAD KAMERA
+            | CAMERA
             |--------------------------------------------------------------------------
             */
 
@@ -954,7 +1089,7 @@ class SuratMasukController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | UPLOAD FILE BARU
+            | FILE BARU
             |--------------------------------------------------------------------------
             */
 
@@ -993,7 +1128,7 @@ class SuratMasukController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | UPDATE DATABASE
+            | UPDATE
             |--------------------------------------------------------------------------
             */
 
@@ -1003,7 +1138,7 @@ class SuratMasukController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | ACTIVITY LOG
+            | ACTIVITY
             |--------------------------------------------------------------------------
             */
 
@@ -1018,7 +1153,7 @@ class SuratMasukController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | HAPUS FILE LAMA
+            | DELETE FILE LAMA
             |--------------------------------------------------------------------------
             */
 
@@ -1147,7 +1282,7 @@ class SuratMasukController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | LABEL
+    | CETAK LABEL
     |--------------------------------------------------------------------------
     */
 
@@ -1175,7 +1310,7 @@ class SuratMasukController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | PREVIEW
+    | PREVIEW LAMPIRAN
     |--------------------------------------------------------------------------
     */
 
@@ -1199,6 +1334,12 @@ class SuratMasukController extends Controller
             );
         }
 
+        /*
+        |--------------------------------------------------------------------------
+        | EXTERNAL URL
+        |--------------------------------------------------------------------------
+        */
+
         if (
             filter_var(
                 $file,
@@ -1215,7 +1356,9 @@ class SuratMasukController extends Controller
 
         try {
             $disk =
-                $this->storage();
+                Storage::disk(
+                    $diskName
+                );
 
             if (!$disk->exists($file)) {
                 abort(
@@ -1223,6 +1366,12 @@ class SuratMasukController extends Controller
                     'File lampiran tidak ditemukan di storage.'
                 );
             }
+
+            /*
+            |--------------------------------------------------------------------------
+            | SUPABASE
+            |--------------------------------------------------------------------------
+            */
 
             if (
                 $diskName === 'supabase'
@@ -1249,6 +1398,12 @@ class SuratMasukController extends Controller
                 );
             }
 
+            /*
+            |--------------------------------------------------------------------------
+            | LOCAL
+            |--------------------------------------------------------------------------
+            */
+
             if (
                 method_exists(
                     $disk,
@@ -1261,7 +1416,9 @@ class SuratMasukController extends Controller
             }
 
             $content =
-                $disk->get($file);
+                $disk->get(
+                    $file
+                );
 
             return response(
                 $content,
@@ -1309,7 +1466,7 @@ class SuratMasukController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | DOWNLOAD
+    | DOWNLOAD LAMPIRAN
     |--------------------------------------------------------------------------
     */
 
@@ -1349,7 +1506,9 @@ class SuratMasukController extends Controller
 
         try {
             $disk =
-                $this->storage();
+                Storage::disk(
+                    $diskName
+                );
 
             if (!$disk->exists($file)) {
                 abort(
@@ -1357,6 +1516,12 @@ class SuratMasukController extends Controller
                     'File lampiran tidak ditemukan di storage.'
                 );
             }
+
+            /*
+            |--------------------------------------------------------------------------
+            | SUPABASE
+            |--------------------------------------------------------------------------
+            */
 
             if (
                 $diskName === 'supabase'
@@ -1383,6 +1548,12 @@ class SuratMasukController extends Controller
                 );
             }
 
+            /*
+            |--------------------------------------------------------------------------
+            | LOCAL
+            |--------------------------------------------------------------------------
+            */
+
             if (
                 method_exists(
                     $disk,
@@ -1396,7 +1567,9 @@ class SuratMasukController extends Controller
             }
 
             $content =
-                $disk->get($file);
+                $disk->get(
+                    $file
+                );
 
             return response(
                 $content,
@@ -1475,13 +1648,20 @@ class SuratMasukController extends Controller
     |--------------------------------------------------------------------------
     | ACCESS CONTROL
     |--------------------------------------------------------------------------
+    |
+    | ensureAuthenticated()
+    | ensureCanManageSurat()
+    | isStaff()
+    |
+    | semuanya diwarisi dari Controller parent.
+    |
     */
 
     /**
-     * Memastikan user boleh melihat surat masuk.
+     * Memastikan user boleh melihat surat tertentu.
      *
      * Admin dan pimpinan dapat melihat semua surat.
-     * Staff hanya dapat melihat surat yang memiliki
+     * Staff hanya dapat melihat surat yang mempunyai
      * disposisi kepada dirinya.
      */
     private function ensureCanView(
@@ -1489,21 +1669,42 @@ class SuratMasukController extends Controller
     ): void {
         $this->ensureAuthenticated();
 
-        $user = Auth::user();
+        $user =
+            Auth::user();
 
-        $role = strtolower(
-            trim(
-                (string) (
-                    $user->role
-                    ?? $user->jabatan
-                    ?? ''
-                )
-            )
-        );
-
-        if ($role === 'staff') {
-            $role = 'staf';
+        if (!$user) {
+            abort(
+                401,
+                'Anda harus login terlebih dahulu.'
+            );
         }
+
+        /*
+        |--------------------------------------------------------------------------
+        | ROLE
+        |--------------------------------------------------------------------------
+        */
+
+        $role =
+            strtolower(
+                trim(
+                    (string) (
+                        $user->role
+                        ?? $user->jabatan
+                        ?? ''
+                    )
+                )
+            );
+
+        if ($role === 'staf') {
+            $role = 'staff';
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | ADMIN / PIMPINAN
+        |--------------------------------------------------------------------------
+        */
 
         if (
             in_array(
@@ -1518,7 +1719,13 @@ class SuratMasukController extends Controller
             return;
         }
 
-        if ($role === 'staf') {
+        /*
+        |--------------------------------------------------------------------------
+        | STAFF
+        |--------------------------------------------------------------------------
+        */
+
+        if ($role === 'staff') {
             $hasDisposisi =
                 $suratMasuk
                     ->disposisi()
@@ -1532,6 +1739,12 @@ class SuratMasukController extends Controller
                 return;
             }
         }
+
+        /*
+        |--------------------------------------------------------------------------
+        | DENY
+        |--------------------------------------------------------------------------
+        */
 
         abort(
             403,
@@ -1550,14 +1763,15 @@ class SuratMasukController extends Controller
      */
     private function getStorageDisk(): string
     {
-        $disk = strtolower(
-            trim(
-                (string) config(
-                    'filesystems.default',
-                    'public'
+        $disk =
+            strtolower(
+                trim(
+                    (string) config(
+                        'filesystems.default',
+                        'public'
+                    )
                 )
-            )
-        );
+            );
 
         return $disk === 'supabase'
             ? 'supabase'
@@ -1565,7 +1779,7 @@ class SuratMasukController extends Controller
     }
 
     /**
-     * Mendapatkan adapter filesystem.
+     * Mendapatkan filesystem adapter.
      */
     private function storage(): FilesystemAdapter
     {
@@ -1581,13 +1795,15 @@ class SuratMasukController extends Controller
     */
 
     /**
-     * Mengubah kode error upload PHP
-     * menjadi pesan yang mudah dipahami.
+     * Mengubah error PHP upload menjadi
+     * pesan berbahasa Indonesia.
      */
     private function getUploadErrorMessage(
         UploadedFile $file
     ): string {
-        return match ($file->getError()) {
+        return match (
+            $file->getError()
+        ) {
             UPLOAD_ERR_INI_SIZE =>
                 'Ukuran file melebihi batas upload server.',
 
@@ -1617,21 +1833,16 @@ class SuratMasukController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | UPLOAD FILE
+    | STORE UPLOADED FILE
     |--------------------------------------------------------------------------
     */
 
     /**
      * Menyimpan file upload.
      *
-     * PDF:
-     * - Disimpan apa adanya.
+     * PDF tidak diubah.
      *
-     * JPG/JPEG/PNG:
-     * - Dibaca menggunakan GD.
-     * - Resize jika terlalu besar.
-     * - Dikonversi menjadi JPG.
-     * - Dikompres sebelum dikirim ke storage.
+     * JPG/JPEG/PNG diproses menggunakan GD.
      */
     private function storeUploadedFile(
         ?UploadedFile $file,
@@ -1651,6 +1862,12 @@ class SuratMasukController extends Controller
             );
         }
 
+        /*
+        |--------------------------------------------------------------------------
+        | SIZE
+        |--------------------------------------------------------------------------
+        */
+
         $fileSize =
             $file->getSize();
 
@@ -1663,11 +1880,18 @@ class SuratMasukController extends Controller
             );
         }
 
-        $extension = strtolower(
-            trim(
-                (string) $file->getClientOriginalExtension()
-            )
-        );
+        /*
+        |--------------------------------------------------------------------------
+        | EXTENSION
+        |--------------------------------------------------------------------------
+        */
+
+        $extension =
+            strtolower(
+                trim(
+                    (string) $file->getClientOriginalExtension()
+                )
+            );
 
         if ($extension === 'jpeg') {
             $extension = 'jpg';
@@ -1693,10 +1917,22 @@ class SuratMasukController extends Controller
         */
 
         if ($extension === 'pdf') {
-            return $this->storeBinaryFile(
+            $contents =
                 file_get_contents(
                     $file->getRealPath()
-                ),
+                );
+
+            if (
+                $contents === false
+                || $contents === ''
+            ) {
+                throw new RuntimeException(
+                    'Gagal membaca file PDF.'
+                );
+            }
+
+            return $this->storeBinaryFile(
+                $contents,
                 'pdf',
                 'application/pdf',
                 'surat-masuk',
@@ -1706,7 +1942,7 @@ class SuratMasukController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | GAMBAR
+        | IMAGE
         |--------------------------------------------------------------------------
         */
 
@@ -1733,15 +1969,12 @@ class SuratMasukController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | CAMERA / BASE64
+    | CAMERA BASE64
     |--------------------------------------------------------------------------
     */
 
     /**
      * Menyimpan hasil scan kamera.
-     *
-     * Gambar akan langsung melalui proses
-     * compression sebelum dikirim ke storage.
      */
     private function uploadBase64Image(
         string $base64String,
@@ -1755,6 +1988,12 @@ class SuratMasukController extends Controller
                 'Data gambar kamera kosong.'
             );
         }
+
+        /*
+        |--------------------------------------------------------------------------
+        | VALIDASI HEADER BASE64
+        |--------------------------------------------------------------------------
+        */
 
         if (
             !preg_match(
@@ -1785,6 +2024,12 @@ class SuratMasukController extends Controller
                 $commaPosition + 1
             );
 
+        /*
+        |--------------------------------------------------------------------------
+        | DECODE
+        |--------------------------------------------------------------------------
+        */
+
         $decodedData =
             base64_decode(
                 $encoded,
@@ -1796,14 +2041,13 @@ class SuratMasukController extends Controller
             || $decodedData === ''
         ) {
             throw new RuntimeException(
-                'Gagal memproses gambar kamera. ' .
-                'Data Base64 tidak valid.'
+                'Gagal memproses gambar kamera. Data Base64 tidak valid.'
             );
         }
 
         /*
         |--------------------------------------------------------------------------
-        | VALIDASI GAMBAR
+        | VALIDATE IMAGE
         |--------------------------------------------------------------------------
         */
 
@@ -1814,7 +2058,7 @@ class SuratMasukController extends Controller
 
         if ($imageInfo === false) {
             throw new RuntimeException(
-                'Data kamera bukan merupakan gambar yang valid.'
+                'Data kamera bukan gambar yang valid.'
             );
         }
 
@@ -1826,9 +2070,7 @@ class SuratMasukController extends Controller
                 )
             );
 
-        if (
-            $actualMime === 'image/jpg'
-        ) {
+        if ($actualMime === 'image/jpg') {
             $actualMime =
                 'image/jpeg';
         }
@@ -1868,31 +2110,39 @@ class SuratMasukController extends Controller
     */
 
     /**
-     * Kompres gambar menggunakan GD.
+     * Compression gambar menggunakan GD.
      *
-     * Proses:
-     *
-     * 1. Validasi gambar.
-     * 2. Buat resource GD.
-     * 3. Resize jika melebihi batas.
-     * 4. Konversi ke JPG.
-     * 5. Kompres kualitas 82 → 72 → 62 → 52
-     *    jika ukuran masih terlalu besar.
-     * 6. Simpan hasil ke storage.
+     * Hasil akhir dikonversi menjadi JPG.
      */
     private function storeCompressedImage(
         string $contents,
         string $diskName,
         string $prefix
     ): string {
+        /*
+        |--------------------------------------------------------------------------
+        | CHECK GD
+        |--------------------------------------------------------------------------
+        */
+
         if (
-            !function_exists('imagecreatefromstring')
-            || !function_exists('imagejpeg')
+            !function_exists(
+                'imagecreatefromstring'
+            )
+            || !function_exists(
+                'imagejpeg'
+            )
         ) {
             throw new RuntimeException(
                 'PHP GD belum tersedia. Aktifkan ekstensi GD pada server.'
             );
         }
+
+        /*
+        |--------------------------------------------------------------------------
+        | IMAGE INFO
+        |--------------------------------------------------------------------------
+        */
 
         $imageInfo =
             @getimagesizefromstring(
@@ -1913,9 +2163,7 @@ class SuratMasukController extends Controller
                 )
             );
 
-        if (
-            $mime === 'image/jpg'
-        ) {
+        if ($mime === 'image/jpg') {
             $mime =
                 'image/jpeg';
         }
@@ -1934,6 +2182,12 @@ class SuratMasukController extends Controller
                 'Format gambar tidak didukung.'
             );
         }
+
+        /*
+        |--------------------------------------------------------------------------
+        | LOAD SOURCE
+        |--------------------------------------------------------------------------
+        */
 
         $source =
             @imagecreatefromstring(
@@ -1956,7 +2210,9 @@ class SuratMasukController extends Controller
             $sourceWidth <= 0
             || $sourceHeight <= 0
         ) {
-            imagedestroy($source);
+            imagedestroy(
+                $source
+            );
 
             throw new RuntimeException(
                 'Dimensi gambar tidak valid.'
@@ -1965,13 +2221,17 @@ class SuratMasukController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | HITUNG UKURAN BARU
+        | SCALE
         |--------------------------------------------------------------------------
         */
 
         $scale = min(
-            self::MAX_IMAGE_WIDTH / $sourceWidth,
-            self::MAX_IMAGE_HEIGHT / $sourceHeight,
+            self::MAX_IMAGE_WIDTH /
+                $sourceWidth,
+
+            self::MAX_IMAGE_HEIGHT /
+                $sourceHeight,
+
             1
         );
 
@@ -1993,7 +2253,7 @@ class SuratMasukController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | BUAT CANVAS
+        | CREATE CANVAS
         |--------------------------------------------------------------------------
         */
 
@@ -2004,7 +2264,9 @@ class SuratMasukController extends Controller
             );
 
         if ($canvas === false) {
-            imagedestroy($source);
+            imagedestroy(
+                $source
+            );
 
             throw new RuntimeException(
                 'Gagal membuat canvas gambar.'
@@ -2013,13 +2275,11 @@ class SuratMasukController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | BACKGROUND PUTIH
+        | WHITE BACKGROUND
         |--------------------------------------------------------------------------
         |
-        | PNG dapat memiliki transparency.
-        | Karena hasil akhir menjadi JPG,
-        | background dibuat putih agar dokumen
-        | tidak menjadi hitam.
+        | Untuk PNG transparan, background dibuat putih
+        | karena hasil akhir dikonversi menjadi JPEG.
         |
         */
 
@@ -2040,7 +2300,7 @@ class SuratMasukController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | RESIZE
+        | RESAMPLE
         |--------------------------------------------------------------------------
         */
 
@@ -2063,7 +2323,7 @@ class SuratMasukController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | COMPRESSION
+        | COMPRESSION LOOP
         |--------------------------------------------------------------------------
         */
 
@@ -2074,9 +2334,12 @@ class SuratMasukController extends Controller
             52,
         ];
 
-        $compressedData = null;
+        $compressedData =
+            null;
 
-        foreach ($qualities as $quality) {
+        foreach (
+            $qualities as $quality
+        ) {
             ob_start();
 
             $success =
@@ -2094,7 +2357,9 @@ class SuratMasukController extends Controller
                 || $output === false
                 || $output === ''
             ) {
-                imagedestroy($canvas);
+                imagedestroy(
+                    $canvas
+                );
 
                 throw new RuntimeException(
                     'Gagal melakukan compression gambar.'
@@ -2105,7 +2370,9 @@ class SuratMasukController extends Controller
                 $output;
 
             if (
-                strlen($compressedData)
+                strlen(
+                    $compressedData
+                )
                 <= self::MAX_COMPRESSED_IMAGE_SIZE
             ) {
                 break;
@@ -2114,20 +2381,19 @@ class SuratMasukController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | JIKA MASIH TERLALU BESAR
+        | RESIZE KEDUA
         |--------------------------------------------------------------------------
-        |
-        | Gambar sangat besar dapat membutuhkan
-        | resize kedua agar benar-benar aman.
-        |
         */
 
         if (
             $compressedData === null
-            || strlen($compressedData)
+            || strlen(
+                $compressedData
+            )
             > self::MAX_COMPRESSED_IMAGE_SIZE
         ) {
-            $ratio = 0.75;
+            $ratio =
+                0.75;
 
             $smallerWidth =
                 max(
@@ -2152,7 +2418,9 @@ class SuratMasukController extends Controller
                 );
 
             if ($smallerCanvas === false) {
-                imagedestroy($canvas);
+                imagedestroy(
+                    $canvas
+                );
 
                 throw new RuntimeException(
                     'Gagal melakukan resize lanjutan gambar.'
@@ -2193,11 +2461,12 @@ class SuratMasukController extends Controller
 
             ob_start();
 
-            imagejpeg(
-                $smallerCanvas,
-                null,
-                50
-            );
+            $success =
+                imagejpeg(
+                    $smallerCanvas,
+                    null,
+                    50
+                );
 
             $compressedData =
                 ob_get_clean();
@@ -2205,18 +2474,19 @@ class SuratMasukController extends Controller
             imagedestroy(
                 $smallerCanvas
             );
+
+            if (
+                !$success
+                || $compressedData === false
+                || $compressedData === ''
+            ) {
+                throw new RuntimeException(
+                    'Gagal melakukan compression lanjutan gambar.'
+                );
+            }
         } else {
             imagedestroy(
                 $canvas
-            );
-        }
-
-        if (
-            $compressedData === false
-            || $compressedData === ''
-        ) {
-            throw new RuntimeException(
-                'Hasil compression gambar kosong.'
             );
         }
 
@@ -2227,7 +2497,18 @@ class SuratMasukController extends Controller
         */
 
         if (
-            strlen($compressedData)
+            $compressedData === false
+            || $compressedData === ''
+        ) {
+            throw new RuntimeException(
+                'Hasil compression gambar kosong.'
+            );
+        }
+
+        if (
+            strlen(
+                $compressedData
+            )
             > self::MAX_FILE_SIZE
         ) {
             throw new RuntimeException(
@@ -2237,7 +2518,7 @@ class SuratMasukController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | STORAGE
+        | STORE
         |--------------------------------------------------------------------------
         */
 
@@ -2272,6 +2553,12 @@ class SuratMasukController extends Controller
             );
         }
 
+        /*
+        |--------------------------------------------------------------------------
+        | FILE NAME
+        |--------------------------------------------------------------------------
+        */
+
         $safePrefix =
             Str::slug(
                 $prefix,
@@ -2279,19 +2566,37 @@ class SuratMasukController extends Controller
             );
 
         $fileName =
-            $safePrefix . '_' .
-            now()->format('Ymd_His') . '_' .
+            $safePrefix .
+            '_' .
+            now()->format(
+                'Ymd_His'
+            ) .
+            '_' .
             Str::lower(
                 Str::random(12)
             ) .
             '.' .
             $extension;
 
+        /*
+        |--------------------------------------------------------------------------
+        | DIRECTORY
+        |--------------------------------------------------------------------------
+        */
+
         $directory =
             'lampiran/surat_masuk';
 
         $path =
-            $directory . '/' . $fileName;
+            $directory .
+            '/' .
+            $fileName;
+
+        /*
+        |--------------------------------------------------------------------------
+        | OPTIONS
+        |--------------------------------------------------------------------------
+        */
 
         $options = [
             'ContentType' =>
@@ -2301,9 +2606,16 @@ class SuratMasukController extends Controller
         if (
             $diskName === 'supabase'
         ) {
-            $options['visibility'] =
-                'private';
+            $options[
+                'visibility'
+            ] = 'private';
         }
+
+        /*
+        |--------------------------------------------------------------------------
+        | SAVE
+        |--------------------------------------------------------------------------
+        */
 
         try {
             $disk =
@@ -2373,6 +2685,12 @@ class SuratMasukController extends Controller
             return null;
         }
 
+        /*
+        |--------------------------------------------------------------------------
+        | EXTERNAL URL
+        |--------------------------------------------------------------------------
+        */
+
         if (
             filter_var(
                 $file,
@@ -2387,11 +2705,19 @@ class SuratMasukController extends Controller
 
         try {
             $disk =
-                $this->storage();
+                Storage::disk(
+                    $diskName
+                );
 
             if (!$disk->exists($file)) {
                 return null;
             }
+
+            /*
+            |--------------------------------------------------------------------------
+            | SUPABASE
+            |--------------------------------------------------------------------------
+            */
 
             if (
                 $diskName === 'supabase'
@@ -2410,6 +2736,12 @@ class SuratMasukController extends Controller
                     now()->addMinutes(30)
                 );
             }
+
+            /*
+            |--------------------------------------------------------------------------
+            | LOCAL
+            |--------------------------------------------------------------------------
+            */
 
             if (
                 method_exists(
@@ -2474,8 +2806,14 @@ class SuratMasukController extends Controller
                     $diskName
                 );
 
-            if ($disk->exists($file)) {
-                $disk->delete($file);
+            if (
+                $disk->exists(
+                    $file
+                )
+            ) {
+                $disk->delete(
+                    $file
+                );
             }
         } catch (Throwable $e) {
             Log::warning(
@@ -2501,7 +2839,7 @@ class SuratMasukController extends Controller
     */
 
     /**
-     * Mendapatkan MIME berdasarkan extension.
+     * Mendapatkan MIME type dari extension.
      */
     private function getMimeTypeFromPath(
         string $file
@@ -2514,7 +2852,9 @@ class SuratMasukController extends Controller
                 )
             );
 
-        return match ($extension) {
+        return match (
+            $extension
+        ) {
             'pdf' =>
                 'application/pdf',
 
@@ -2532,12 +2872,12 @@ class SuratMasukController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | VALIDASI TANGGAL
+    | DATE VALIDATION
     |--------------------------------------------------------------------------
     */
 
     /**
-     * Validasi tanggal YYYY-MM-DD.
+     * Validasi tanggal format YYYY-MM-DD.
      */
     private function isValidDate(
         ?string $date
