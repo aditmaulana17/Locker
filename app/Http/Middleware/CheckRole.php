@@ -11,46 +11,144 @@ class CheckRole
 {
     /**
      * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next, string ...$roles): Response
-    {
+    public function handle(
+        Request $request,
+        Closure $next,
+        string ...$roles
+    ): Response {
         $user = $request->user();
 
-        // 1. Cek autentikasi pengguna
-        if (! $user) {
+        /*
+        |--------------------------------------------------------------------------
+        | AUTENTIKASI
+        |--------------------------------------------------------------------------
+        */
+
+        if (!$user) {
             return redirect()->route('login');
         }
 
-        // 2. Cek status keaktifan akun (Mendukung kolom 'status' atau 'is_active')
-        $isInactive = (isset($user->status) && strtolower($user->status) === 'nonaktif') || 
-                      (isset($user->is_active) && ! $user->is_active);
+        /*
+        |--------------------------------------------------------------------------
+        | STATUS AKUN
+        |--------------------------------------------------------------------------
+        |
+        | Mendukung:
+        | - status = nonaktif
+        | - is_active = false
+        |
+        */
+
+        $status =
+            strtolower(
+                trim(
+                    (string) (
+                        $user->status
+                        ?? ''
+                    )
+                )
+            );
+
+        $isInactive =
+            $status === 'nonaktif'
+            || (
+                isset($user->is_active)
+                && !$user->is_active
+            );
 
         if ($isInactive) {
+
             Auth::logout();
-            
+
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
-            return redirect()->route('login')->with('error', 'Akun Anda telah dinonaktifkan. Silakan hubungi Administrator.');
+            return redirect()
+                ->route('login')
+                ->with(
+                    'error',
+                    'Akun Anda telah dinonaktifkan. Silakan hubungi Administrator.'
+                );
         }
 
-        // 3. Normalisasi Role (Menangani variasi penulisan 'staf' & 'staff')
-        $normalizeRole = fn ($r) => strtolower($r) === 'staff' ? 'staf' : strtolower($r);
+        /*
+        |--------------------------------------------------------------------------
+        | NORMALISASI ROLE
+        |--------------------------------------------------------------------------
+        |
+        | Standar internal:
+        | - admin
+        | - pimpinan
+        | - staff
+        |
+        | "staf" dianggap alias "staff".
+        |
+        */
 
-        $userRole = $normalizeRole($user->role ?? '');
+        $normalizeRole = static function ($role): string {
+            $role = strtolower(
+                trim(
+                    (string) $role
+                )
+            );
 
-        // 4. Admin selalu memiliki akses penuh ke seluruh rute (Bypass)
+            return match ($role) {
+                'staf' => 'staff',
+                'staff' => 'staff',
+                'pimpinan' => 'pimpinan',
+                'admin' => 'admin',
+                default => $role,
+            };
+        };
+
+        $userRole = $normalizeRole(
+            $user->role
+            ?? $user->jabatan
+            ?? ''
+        );
+
+        /*
+        |--------------------------------------------------------------------------
+        | ADMIN BYPASS
+        |--------------------------------------------------------------------------
+        |
+        | Admin memiliki akses penuh.
+        |
+        */
+
         if ($userRole === 'admin') {
             return $next($request);
         }
 
-        // 5. Cek kesesuaian role dengan parameter yang diizinkan
-        $allowedRoles = array_map($normalizeRole, $roles);
+        /*
+        |--------------------------------------------------------------------------
+        | ROLE YANG DIIZINKAN
+        |--------------------------------------------------------------------------
+        */
 
-        if (! in_array($userRole, $allowedRoles, true)) {
-            abort(403, 'Anda tidak memiliki hak akses ke halaman ini.');
+        $allowedRoles = array_map(
+            $normalizeRole,
+            $roles
+        );
+
+        /*
+        |--------------------------------------------------------------------------
+        | AUTHORIZATION
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            !in_array(
+                $userRole,
+                $allowedRoles,
+                true
+            )
+        ) {
+            abort(
+                403,
+                'Anda tidak memiliki hak akses ke halaman ini.'
+            );
         }
 
         return $next($request);

@@ -3,81 +3,58 @@
 @section('title', 'Catat Surat Keluar')
 
 @section('content')
-<div class="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-6">
-
-    {{-- Header --}}
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
-        <div>
-            <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-800">
+<div class="mx-auto w-full max-w-5xl px-4 pb-6 sm:px-6 lg:px-8">
+    {{-- HEADER --}}
+    <div class="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div class="min-w-0">
+            <h1 class="text-xl font-bold tracking-tight text-slate-800 sm:text-2xl">
                 Catat Surat Keluar
             </h1>
-
             <p class="mt-0.5 text-sm text-slate-500">
-                Isi formulir di bawah ini untuk menambahkan data arsip surat keluar baru.
+                Isi formulir untuk menambahkan arsip surat keluar baru.
             </p>
         </div>
 
         <a
             href="{{ route('surat-keluar.index') }}"
-            class="inline-flex items-center justify-center w-full sm:w-auto px-4 py-2 text-sm font-semibold text-slate-700 bg-white border-2 border-slate-300 rounded-xl hover:bg-slate-50 hover:border-slate-400 transition"
+            class="inline-flex w-full items-center justify-center rounded-xl border-2 border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50 sm:w-auto"
         >
-            <svg
-                class="w-4 h-4 mr-2"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-            >
-                <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                />
+            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-
             Kembali
         </a>
     </div>
 
-    {{-- Form --}}
+    {{-- FORM --}}
     <form
         id="form-surat"
         method="POST"
         action="{{ route('surat-keluar.store') }}"
         enctype="multipart/form-data"
+        novalidate
     >
         @csrf
 
-        <div class="bg-white border-2 border-slate-300 rounded-2xl shadow-sm overflow-hidden">
-
-            {{-- Main Content --}}
+        <div class="overflow-hidden rounded-2xl border-2 border-slate-300 bg-white shadow-sm">
+            {{-- MAIN CONTENT --}}
             <div class="p-4 sm:p-5">
-
-                {{-- Informasi Utama --}}
+                {{-- INFORMASI UTAMA --}}
                 <section>
                     <div class="section-heading">
                         <div class="section-marker bg-blue-600"></div>
-
                         <div>
-                            <h2 class="section-title">
-                                Informasi Utama Surat
-                            </h2>
-
-                            <p class="section-description">
-                                Lengkapi identitas dan informasi utama surat keluar.
-                            </p>
+                            <h2 class="section-title">Informasi Utama Surat</h2>
+                            <p class="section-description">Lengkapi identitas dan informasi utama surat keluar.</p>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-3">
-
-                        {{-- Nomor Surat --}}
+                    <div class="grid grid-cols-1 gap-x-4 gap-y-3 md:grid-cols-2">
+                        {{-- NOMOR SURAT --}}
                         <div class="form-group">
                             <label for="nomor_surat" class="form-label">
-                                Nomor Surat
+                                Nomor Surat <span class="text-rose-500">*</span>
                             </label>
-
                             <input
                                 type="text"
                                 id="nomor_surat"
@@ -85,327 +62,256 @@
                                 value="{{ old('nomor_surat') }}"
                                 placeholder="Contoh: 005/SK/I/2026"
                                 autocomplete="off"
+                                maxlength="255"
+                                required
                                 class="form-control-custom @error('nomor_surat') form-error @enderror"
                             >
-
                             @error('nomor_surat')
-                                <p class="form-error-text">
-                                    {{ $message }}
-                                </p>
+                                <p class="form-error-text">{{ $message }}</p>
                             @enderror
                         </div>
 
-                        {{-- Instansi Tujuan --}}
+                        {{-- TUJUAN SURAT --}}
                         <div class="form-group">
                             <label for="pengirim" class="form-label">
-                                Instansi Tujuan
-                                <span class="text-rose-500">*</span>
+                                Tujuan Surat <span class="text-rose-500">*</span>
                             </label>
-
                             <input
                                 type="text"
                                 id="pengirim"
                                 name="pengirim"
                                 value="{{ old('pengirim') }}"
                                 placeholder="Contoh: PT Maju Takgentar"
-                                autocomplete="off"
+                                autocomplete="organization"
+                                maxlength="255"
                                 required
                                 class="form-control-custom @error('pengirim') form-error @enderror"
                             >
-
+                            <p class="form-hint">
+                                Gunakan field ini untuk mencatat instansi, lembaga, atau pihak tujuan surat.
+                            </p>
                             @error('pengirim')
-                                <p class="form-error-text">
-                                    {{ $message }}
-                                </p>
+                                <p class="form-error-text">{{ $message }}</p>
                             @enderror
                         </div>
 
-                        {{-- Tanggal Surat --}}
+                        {{-- TANGGAL SURAT --}}
                         <div class="form-group">
                             <label for="tanggal_surat" class="form-label">
-                                Tanggal Surat
-                                <span class="text-rose-500">*</span>
+                                Tanggal Surat <span class="text-rose-500">*</span>
                             </label>
-
                             <input
                                 type="date"
                                 id="tanggal_surat"
                                 name="tanggal_surat"
-                                value="{{ old('tanggal_surat', date('Y-m-d')) }}"
+                                value="{{ old('tanggal_surat', now()->format('Y-m-d')) }}"
                                 required
                                 class="form-control-custom @error('tanggal_surat') form-error @enderror"
                             >
-
                             @error('tanggal_surat')
-                                <p class="form-error-text">
-                                    {{ $message }}
-                                </p>
+                                <p class="form-error-text">{{ $message }}</p>
                             @enderror
                         </div>
 
-                        {{-- Tanggal Dikirim --}}
+                        {{-- TANGGAL KELUAR --}}
                         <div class="form-group">
                             <label for="tanggal_keluar" class="form-label">
-                                Tanggal Dikirim
-                                <span class="text-rose-500">*</span>
+                                Tanggal Keluar <span class="text-rose-500">*</span>
                             </label>
-
                             <input
                                 type="date"
                                 id="tanggal_keluar"
                                 name="tanggal_keluar"
-                                value="{{ old('tanggal_keluar', date('Y-m-d')) }}"
+                                value="{{ old('tanggal_keluar', now()->format('Y-m-d')) }}"
                                 required
                                 class="form-control-custom @error('tanggal_keluar') form-error @enderror"
                             >
-
+                            <p class="form-hint">Tanggal surat keluar atau tanggal surat dikirim.</p>
                             @error('tanggal_keluar')
-                                <p class="form-error-text">
-                                    {{ $message }}
-                                </p>
+                                <p class="form-error-text">{{ $message }}</p>
                             @enderror
                         </div>
 
-                        {{-- Kategori Surat --}}
+                        {{-- KATEGORI --}}
                         <div class="form-group">
                             <label for="kategori_surat_id" class="form-label">
-                                Kategori Surat
-                                <span class="text-rose-500">*</span>
+                                Kategori Surat <span class="text-rose-500">*</span>
                             </label>
-
                             <select
                                 id="kategori_surat_id"
                                 name="kategori_surat_id"
                                 required
                                 class="form-control-custom @error('kategori_surat_id') form-error @enderror"
                             >
-                                <option
-                                    value=""
-                                    disabled
-                                    {{ old('kategori_surat_id') ? '' : 'selected' }}
-                                >
+                                <option value="" disabled @selected(!old('kategori_surat_id'))>
                                     Pilih kategori surat
                                 </option>
-
-                                @foreach ($kategoris as $k)
+                                @foreach ($kategoris ?? [] as $kategori)
                                     <option
-                                        value="{{ $k->id }}"
-                                        {{ old('kategori_surat_id') == $k->id ? 'selected' : '' }}
+                                        value="{{ $kategori->id }}"
+                                        @selected((string) old('kategori_surat_id') === (string) $kategori->id)
                                     >
-                                        {{ $k->nama_kategori }}
-
-                                        @if (isset($k->sifat) && $k->sifat)
-                                            ({{ ucfirst($k->sifat) }})
+                                        {{ $kategori->nama_kategori }}
+                                        @if (!empty($kategori->sifat))
+                                            ({{ ucfirst($kategori->sifat) }})
                                         @endif
                                     </option>
                                 @endforeach
                             </select>
-
+                            @if (!isset($kategoris) || $kategoris->isEmpty())
+                                <p class="form-hint text-amber-600">Belum ada kategori surat yang tersedia.</p>
+                            @endif
                             @error('kategori_surat_id')
-                                <p class="form-error-text">
-                                    {{ $message }}
-                                </p>
+                                <p class="form-error-text">{{ $message }}</p>
                             @enderror
                         </div>
 
-                        {{-- Status Surat --}}
+                        {{-- STATUS --}}
                         <div class="form-group">
                             <label for="status" class="form-label">
-                                Status Surat
-                                <span class="text-rose-500">*</span>
+                                Status Surat <span class="text-rose-500">*</span>
                             </label>
-
                             <select
                                 id="status"
                                 name="status"
                                 required
                                 class="form-control-custom @error('status') form-error @enderror"
                             >
-                                <option
-                                    value="draft"
-                                    {{ old('status', 'draft') === 'draft' ? 'selected' : '' }}
-                                >
-                                    Draft
-                                </option>
-
-                                <option
-                                    value="diproses"
-                                    {{ old('status') === 'diproses' ? 'selected' : '' }}
-                                >
-                                    Diproses
-                                </option>
-
-                                <option
-                                    value="disetujui"
-                                    {{ old('status') === 'disetujui' ? 'selected' : '' }}
-                                >
-                                    Disetujui
-                                </option>
-
-                                <option
-                                    value="dikirim"
-                                    {{ old('status') === 'dikirim' ? 'selected' : '' }}
-                                >
-                                    Dikirim
-                                </option>
-
-                                <option
-                                    value="diarsipkan"
-                                    {{ old('status') === 'diarsipkan' ? 'selected' : '' }}
-                                >
-                                    Diarsipkan
-                                </option>
+                                <option value="draft" @selected(old('status', 'draft') === 'draft')>Draft</option>
+                                <option value="diproses" @selected(old('status') === 'diproses')>Diproses</option>
+                                <option value="disetujui" @selected(old('status') === 'disetujui')>Disetujui</option>
+                                <option value="dikirim" @selected(old('status') === 'dikirim')>Dikirim</option>
+                                <option value="diarsipkan" @selected(old('status') === 'diarsipkan')>Diarsipkan</option>
                             </select>
-
                             @error('status')
-                                <p class="form-error-text">
-                                    {{ $message }}
-                                </p>
+                                <p class="form-error-text">{{ $message }}</p>
                             @enderror
                         </div>
 
-                        {{-- Perihal --}}
-                        <div class="md:col-span-2 form-group">
+                        {{-- PERIHAL --}}
+                        <div class="form-group md:col-span-2">
                             <label for="perihal" class="form-label">
-                                Perihal / Isi Ringkas
-                                <span class="text-rose-500">*</span>
+                                Perihal <span class="text-rose-500">*</span>
                             </label>
-
                             <textarea
                                 id="perihal"
                                 name="perihal"
-                                rows="2"
+                                rows="3"
+                                maxlength="1000"
                                 required
-                                placeholder="Tuliskan perihal atau isi ringkas surat secara jelas..."
+                                placeholder="Tuliskan perihal surat secara jelas..."
                                 class="form-control-custom form-textarea @error('perihal') form-error @enderror"
                             >{{ old('perihal') }}</textarea>
-
                             @error('perihal')
-                                <p class="form-error-text">
-                                    {{ $message }}
-                                </p>
+                                <p class="form-error-text">{{ $message }}</p>
                             @enderror
                         </div>
 
+                        {{-- RINGKASAN --}}
+                        <div class="form-group md:col-span-2">
+                            <label for="ringkasan" class="form-label">Ringkasan</label>
+                            <textarea
+                                id="ringkasan"
+                                name="ringkasan"
+                                rows="3"
+                                maxlength="2000"
+                                placeholder="Tulis ringkasan isi surat secara singkat (opsional)..."
+                                class="form-control-custom form-textarea @error('ringkasan') form-error @enderror"
+                            >{{ old('ringkasan') }}</textarea>
+                            <p class="form-hint">
+                                Ringkasan bersifat opsional dan membantu pencarian atau identifikasi isi surat.
+                            </p>
+                            @error('ringkasan')
+                                <p class="form-error-text">{{ $message }}</p>
+                            @enderror
+                        </div>
                     </div>
                 </section>
 
-                {{-- Lampiran --}}
+                {{-- LAMPIRAN --}}
                 <section class="mt-5">
                     <div class="section-heading">
                         <div class="section-marker bg-indigo-600"></div>
-
                         <div>
-                            <h2 class="section-title">
-                                Lampiran Berkas Digital
-                            </h2>
-
+                            <h2 class="section-title">Lampiran Berkas Digital</h2>
                             <p class="section-description">
-                                Upload dokumen surat yang akan disimpan sebagai arsip digital.
+                                Upload dokumen surat untuk disimpan sebagai arsip digital.
                             </p>
                         </div>
                     </div>
 
                     <div class="archive-card">
-
                         <div class="archive-card-header">
                             <div>
-                                <h3 class="archive-card-title">
-                                    Dokumen Surat
-                                </h3>
-
-                                <p class="archive-card-description">
-                                    Pilih file surat yang ingin diarsipkan.
-                                </p>
+                                <h3 class="archive-card-title">Dokumen Surat</h3>
+                                <p class="archive-card-description">File dapat berupa PDF, JPG, JPEG, atau PNG.</p>
                             </div>
-
-                            <span class="archive-card-badge">
-                                Opsional
-                            </span>
+                            <span class="archive-card-badge">Opsional</span>
                         </div>
 
-                        {{-- Upload File --}}
+                        {{-- UPLOAD FILE --}}
                         <div id="upload-section">
                             <label
                                 for="lampiran_file"
                                 class="upload-box @error('lampiran_file') upload-box-error @enderror"
                             >
                                 <div class="upload-icon">
-                                    <svg
-                                        class="w-5 h-5"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                        aria-hidden="true"
-                                    >
+                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                         <path
                                             stroke-linecap="round"
                                             stroke-linejoin="round"
                                             stroke-width="2"
-                                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 0115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
                                         />
                                     </svg>
                                 </div>
-
-                                <span
-                                    id="file-label-text"
-                                    class="text-sm font-bold text-slate-700"
-                                >
+                                <span id="file-label-text" class="text-sm font-bold text-slate-700">
                                     Klik untuk memilih file
                                 </span>
-
                                 <span class="mt-0.5 text-xs text-slate-400">
-                                    PDF, JPG, JPEG, PNG · Maks. 15MB
+                                    PDF, JPG, JPEG, PNG · Maks. 10 MB
                                 </span>
-
                                 <input
                                     type="file"
                                     id="lampiran_file"
                                     name="lampiran_file"
                                     accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
-                                    class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                    class="absolute inset-0 h-full w-full cursor-pointer opacity-0"
                                 >
                             </label>
 
                             @error('lampiran_file')
-                                <p class="form-error-text mt-1.5">
-                                    {{ $message }}
-                                </p>
+                                <p class="form-error-text mt-1.5">{{ $message }}</p>
                             @enderror
 
-                            <p
-                                id="file-info"
-                                class="hidden mt-1.5 text-xs text-slate-500"
-                            ></p>
-                        </div>
+                            <p id="file-info" class="mt-1.5 hidden text-xs text-slate-500"></p>
 
+                            <p class="mt-1.5 text-[11px] leading-relaxed text-slate-400">
+                                File disimpan sebagai lampiran surat keluar. Tidak tersedia fitur scan atau kamera pada surat keluar.
+                            </p>
+                        </div>
                     </div>
                 </section>
 
-                {{-- Validation Error --}}
+                {{-- VALIDATION SUMMARY --}}
                 @if ($errors->any())
-                    <div class="mt-4 p-3 bg-rose-50 border-2 border-rose-200 text-rose-700 rounded-lg text-xs">
-                        <strong class="font-bold">
-                            Terjadi Kesalahan Validasi:
-                        </strong>
-
-                        <ul class="mt-1 space-y-0.5 list-disc list-inside">
+                    <div
+                        class="mt-4 rounded-lg border-2 border-rose-200 bg-rose-50 p-3 text-xs text-rose-700"
+                        role="alert"
+                    >
+                        <strong class="font-bold">Terdapat kesalahan pada formulir:</strong>
+                        <ul class="mt-1 list-inside list-disc space-y-0.5">
                             @foreach ($errors->all() as $error)
                                 <li>{{ $error }}</li>
                             @endforeach
                         </ul>
                     </div>
                 @endif
-
             </div>
 
-            {{-- Footer --}}
-            <div class="flex flex-col-reverse sm:flex-row items-center justify-end gap-2 px-4 sm:px-5 py-2.5 bg-slate-50 border-t-2 border-slate-300">
-
-                <a
-                    href="{{ route('surat-keluar.index') }}"
-                    class="action-button action-button-secondary"
-                >
+            {{-- FOOTER --}}
+            <div class="flex flex-col-reverse items-center justify-end gap-2 border-t-2 border-slate-300 bg-slate-50 px-4 py-2.5 sm:flex-row sm:px-5">
+                <a href="{{ route('surat-keluar.index') }}" class="action-button action-button-secondary">
                     Batal
                 </a>
 
@@ -414,424 +320,381 @@
                     id="submit-btn"
                     class="action-button action-button-primary"
                 >
-                    <svg
-                        class="w-4 h-4 mr-2"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        aria-hidden="true"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M5 13l4 4L19 7"
-                        />
+                    <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                     </svg>
-
                     Simpan Surat Keluar
                 </button>
-
             </div>
         </div>
     </form>
 </div>
 
 <style>
-    /* =====================================================
-       SECTION
-    ===================================================== */
-
-    .section-heading {
-        display: flex;
-        align-items: center;
-        gap: .6rem;
-        padding-bottom: .45rem;
-        margin-bottom: .75rem;
-        border-bottom: 2px solid #cbd5e1;
-    }
-
-    .section-marker {
-        width: .35rem;
-        height: 1.2rem;
-        flex-shrink: 0;
-        border-radius: 9999px;
-    }
-
-    .section-title {
-        color: #334155;
-        font-size: .82rem;
-        line-height: 1rem;
-        font-weight: 700;
-        letter-spacing: .04em;
-        text-transform: uppercase;
-    }
-
-    .section-description {
-        margin-top: .05rem;
-        color: #94a3b8;
-        font-size: .68rem;
-        line-height: .9rem;
-    }
-
-
-    /* =====================================================
-       FORM
-    ===================================================== */
-
-    .form-group {
-        width: 100%;
-    }
-
-    .form-label {
-        display: block;
-        margin-bottom: .3rem;
-        color: #334155;
-        font-size: .68rem;
-        line-height: .9rem;
-        font-weight: 700;
-        letter-spacing: .03em;
-        text-transform: uppercase;
-    }
-
-    .form-control-custom {
-        width: 100%;
-        min-height: 40px;
-        padding: .48rem .7rem;
-        background: #fff;
-        color: #334155;
-        border: 2px solid #94a3b8;
-        border-radius: .6rem;
-        outline: none;
-        font-size: .8rem;
-        line-height: 1.25;
-        transition:
-            border-color .15s ease,
-            background-color .15s ease,
-            box-shadow .15s ease;
-    }
-
-    .form-control-custom:hover {
-        border-color: #64748b;
-    }
-
-    .form-control-custom:focus {
-        border-color: #2563eb;
-        background: #fff;
-        box-shadow: 0 0 0 3px rgba(37, 99, 235, .08);
-    }
-
-    .form-control-custom::placeholder {
-        color: #94a3b8;
-    }
-
-    select.form-control-custom {
-        cursor: pointer;
-    }
-
-    .form-textarea {
-        min-height: 82px;
-        resize: vertical;
-    }
-
-    .form-error {
-        border-color: #f43f5e !important;
-        background: #fff1f2 !important;
-    }
-
-    .form-error-text {
-        margin-top: .2rem;
-        color: #e11d48;
-        font-size: .68rem;
-        line-height: .9rem;
-        font-weight: 500;
-    }
-
-
-    /* =====================================================
-       ARCHIVE / UPLOAD
-    ===================================================== */
-
-    .archive-card {
-        display: flex;
-        flex-direction: column;
-        min-height: 205px;
-        padding: .8rem;
-        background: #f8fafc;
-        border: 2px solid #94a3b8;
-        border-radius: .8rem;
-    }
-
-    .archive-card-header {
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        gap: .6rem;
-        margin-bottom: .55rem;
-    }
-
-    .archive-card-title {
-        color: #334155;
-        font-size: .8rem;
-        line-height: 1rem;
-        font-weight: 700;
-    }
-
-    .archive-card-description {
-        margin-top: .05rem;
-        color: #94a3b8;
-        font-size: .66rem;
-        line-height: .9rem;
-    }
-
-    .archive-card-badge {
-        flex-shrink: 0;
-        padding: .22rem .45rem;
-        background: #fff;
-        border: 2px solid #cbd5e1;
-        border-radius: .4rem;
-        color: #475569;
-        font-size: .6rem;
-        line-height: .8rem;
-        font-weight: 700;
-    }
-
-    .upload-box {
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        width: 100%;
-        min-height: 145px;
-        padding: .9rem;
-        text-align: center;
-        background: #fff;
-        border: 2px dashed #64748b;
-        border-radius: .6rem;
-        cursor: pointer;
-        transition:
-            background-color .15s ease,
-            border-color .15s ease;
-    }
-
-    .upload-box:hover {
-        background: #f8fafc;
-        border-color: #475569;
-    }
-
-    .upload-box-error {
-        border-color: #f43f5e !important;
-        background: #fff1f2 !important;
-    }
-
-    .upload-icon {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 2.35rem;
-        height: 2.35rem;
-        margin-bottom: .45rem;
-        border: 2px solid #dbeafe;
-        border-radius: 9999px;
-        background: #eff6ff;
-        color: #2563eb;
-    }
-
-
-    /* =====================================================
-       BUTTON
-    ===================================================== */
-
-    .action-button {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 100%;
-        padding: .5rem .9rem;
-        border-width: 2px;
-        border-radius: .6rem;
-        font-size: .76rem;
-        font-weight: 700;
-        transition: all .15s ease;
-    }
-
-    .action-button-secondary {
-        background: #fff;
-        color: #334155;
-        border-color: #cbd5e1;
-    }
-
-    .action-button-secondary:hover {
-        background: #f1f5f9;
-        border-color: #94a3b8;
-    }
-
-    .action-button-primary {
-        background: #2563eb;
-        color: #fff;
-        border-color: #2563eb;
-        box-shadow: 0 4px 10px rgba(37, 99, 235, .15);
-    }
-
-    .action-button-primary:hover {
-        background: #1d4ed8;
-        border-color: #1d4ed8;
-    }
-
-
-    /* =====================================================
-       RESPONSIVE
-    ===================================================== */
-
-    @media (min-width: 640px) {
-        .action-button {
-            width: auto;
-        }
-    }
-
-    @media (max-width: 640px) {
-        .archive-card {
-            min-height: auto;
-        }
-
-        .upload-box {
-            min-height: 155px;
-        }
-
-        .form-control-custom {
-            min-height: 40px;
-        }
-    }
+.section-heading {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    padding-bottom: .45rem;
+    margin-bottom: .75rem;
+    border-bottom: 2px solid #cbd5e1;
+}
+.section-marker {
+    width: .35rem;
+    height: 1.2rem;
+    flex-shrink: 0;
+    border-radius: 9999px;
+}
+.section-title {
+    color: #334155;
+    font-size: .82rem;
+    line-height: 1rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+.section-description {
+    margin-top: .05rem;
+    color: #94a3b8;
+    font-size: .68rem;
+    line-height: .9rem;
+}
+.form-group { width: 100%; }
+.form-label {
+    display: block;
+    margin-bottom: .3rem;
+    color: #334155;
+    font-size: .68rem;
+    line-height: .9rem;
+    font-weight: 700;
+    letter-spacing: .03em;
+    text-transform: uppercase;
+}
+.form-hint {
+    margin-top: .25rem;
+    color: #94a3b8;
+    font-size: .65rem;
+    line-height: 1rem;
+}
+.form-control-custom {
+    width: 100%;
+    min-height: 40px;
+    padding: .48rem .7rem;
+    background: #fff;
+    color: #334155;
+    border: 2px solid #94a3b8;
+    border-radius: .6rem;
+    outline: none;
+    font-size: .8rem;
+    line-height: 1.25;
+    transition: border-color .15s ease, background-color .15s ease, box-shadow .15s ease;
+}
+.form-control-custom:hover { border-color: #64748b; }
+.form-control-custom:focus {
+    border-color: #2563eb;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, .08);
+}
+.form-control-custom::placeholder { color: #94a3b8; }
+select.form-control-custom { cursor: pointer; }
+.form-textarea {
+    min-height: 82px;
+    resize: vertical;
+}
+.form-error {
+    border-color: #f43f5e !important;
+    background: #fff1f2 !important;
+}
+.form-error-text {
+    margin-top: .2rem;
+    color: #e11d48;
+    font-size: .68rem;
+    line-height: .9rem;
+    font-weight: 500;
+}
+.archive-card {
+    display: flex;
+    flex-direction: column;
+    min-height: 205px;
+    padding: .8rem;
+    background: #f8fafc;
+    border: 2px solid #94a3b8;
+    border-radius: .8rem;
+}
+.archive-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: .6rem;
+    margin-bottom: .55rem;
+}
+.archive-card-title {
+    color: #334155;
+    font-size: .8rem;
+    line-height: 1rem;
+    font-weight: 700;
+}
+.archive-card-description {
+    margin-top: .05rem;
+    color: #94a3b8;
+    font-size: .66rem;
+    line-height: .9rem;
+}
+.archive-card-badge {
+    flex-shrink: 0;
+    padding: .22rem .45rem;
+    background: #fff;
+    border: 2px solid #cbd5e1;
+    border-radius: .4rem;
+    color: #475569;
+    font-size: .6rem;
+    line-height: .8rem;
+    font-weight: 700;
+}
+.upload-box {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 145px;
+    padding: .9rem;
+    text-align: center;
+    background: #fff;
+    border: 2px dashed #64748b;
+    border-radius: .6rem;
+    cursor: pointer;
+    transition: background-color .15s ease, border-color .15s ease;
+}
+.upload-box:hover {
+    background: #f8fafc;
+    border-color: #475569;
+}
+.upload-box:focus-within {
+    border-color: #2563eb;
+    background: #eff6ff;
+}
+.upload-box-error {
+    border-color: #f43f5e !important;
+    background: #fff1f2 !important;
+}
+.upload-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.35rem;
+    height: 2.35rem;
+    margin-bottom: .45rem;
+    border: 2px solid #dbeafe;
+    border-radius: 9999px;
+    background: #eff6ff;
+    color: #2563eb;
+}
+.action-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: .5rem .9rem;
+    border-width: 2px;
+    border-radius: .6rem;
+    font-size: .76rem;
+    font-weight: 700;
+    transition: all .15s ease;
+}
+.action-button-secondary {
+    background: #fff;
+    color: #334155;
+    border-color: #cbd5e1;
+}
+.action-button-secondary:hover {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+}
+.action-button-primary {
+    background: #2563eb;
+    color: #fff;
+    border-color: #2563eb;
+    box-shadow: 0 4px 10px rgba(37, 99, 235, .15);
+}
+.action-button-primary:hover {
+    background: #1d4ed8;
+    border-color: #1d4ed8;
+}
+.action-button-primary:disabled {
+    cursor: not-allowed;
+    opacity: .7;
+}
+@media (min-width: 640px) {
+    .action-button { width: auto; }
+}
+@media (max-width: 640px) {
+    .archive-card { min-height: auto; }
+    .upload-box { min-height: 155px; }
+    .form-control-custom { min-height: 40px; }
+}
 </style>
 
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    'use strict';
+
     const form = document.getElementById('form-surat');
     const fileInput = document.getElementById('lampiran_file');
     const fileLabelText = document.getElementById('file-label-text');
     const fileInfo = document.getElementById('file-info');
     const submitButton = document.getElementById('submit-btn');
+    const tanggalSurat = document.getElementById('tanggal_surat');
+    const tanggalKeluar = document.getElementById('tanggal_keluar');
 
-    const MAX_FILE_SIZE = 15 * 1024 * 1024;
-
+    const MAX_FILE_SIZE = 10 * 1024 * 1024;
+    const ALLOWED_EXTENSIONS = ['pdf', 'jpg', 'jpeg', 'png'];
     let isSubmitting = false;
 
+    function resetFileInput() {
+        if (fileInput) fileInput.value = '';
 
-    /* =====================================================
-       FILE UPLOAD
-    ===================================================== */
+        if (fileLabelText) {
+            fileLabelText.textContent = 'Klik untuk memilih file';
+            fileLabelText.classList.remove('text-blue-600', 'text-rose-600');
+            fileLabelText.classList.add('text-slate-700');
+        }
 
-    fileInput.addEventListener('change', function () {
+        if (fileInfo) {
+            fileInfo.textContent = '';
+            fileInfo.classList.add('hidden');
+        }
+    }
+
+    function formatFileSize(bytes) {
+        if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+        return (bytes / 1024 / 1024).toFixed(2) + ' MB';
+    }
+
+    fileInput?.addEventListener('change', function () {
         if (!fileInput.files || fileInput.files.length === 0) {
             resetFileInput();
             return;
         }
 
         const file = fileInput.files[0];
+        const extension = file.name.split('.').pop()?.toLowerCase() || '';
 
-        // Validasi ukuran file
-        if (file.size > MAX_FILE_SIZE) {
-            fileInput.value = '';
+        if (!ALLOWED_EXTENSIONS.includes(extension)) {
+            resetFileInput();
 
-            fileLabelText.textContent = 'Ukuran file melebihi 15 MB';
+            if (fileLabelText) {
+                fileLabelText.textContent = 'Format file tidak didukung';
+                fileLabelText.classList.remove('text-slate-700', 'text-blue-600');
+                fileLabelText.classList.add('text-rose-600');
+            }
 
-            fileLabelText.classList.remove(
-                'text-slate-700',
-                'text-blue-600'
-            );
-
-            fileLabelText.classList.add('text-rose-600');
-
-            fileInfo.textContent =
-                'Silakan pilih file yang ukurannya tidak lebih dari 15 MB.';
-
-            fileInfo.classList.remove('hidden');
+            if (fileInfo) {
+                fileInfo.textContent = 'Gunakan PDF, JPG, JPEG, atau PNG.';
+                fileInfo.classList.remove('hidden');
+            }
 
             return;
         }
 
-        // File valid
-        fileLabelText.textContent = `Terpilih: ${file.name}`;
+        if (file.size > MAX_FILE_SIZE) {
+            resetFileInput();
 
-        fileLabelText.classList.remove(
-            'text-slate-700',
-            'text-rose-600'
-        );
+            if (fileLabelText) {
+                fileLabelText.textContent = 'Ukuran file melebihi 10 MB';
+                fileLabelText.classList.remove('text-slate-700', 'text-blue-600');
+                fileLabelText.classList.add('text-rose-600');
+            }
 
-        fileLabelText.classList.add('text-blue-600');
+            if (fileInfo) {
+                fileInfo.textContent = 'Silakan pilih file yang ukurannya tidak lebih dari 10 MB.';
+                fileInfo.classList.remove('hidden');
+            }
 
-        const sizeInMb = (file.size / 1024 / 1024).toFixed(2);
+            return;
+        }
 
-        fileInfo.textContent = `Ukuran: ${sizeInMb} MB`;
-        fileInfo.classList.remove('hidden');
+        if (fileLabelText) {
+            fileLabelText.textContent = `Terpilih: ${file.name}`;
+            fileLabelText.classList.remove('text-slate-700', 'text-rose-600');
+            fileLabelText.classList.add('text-blue-600');
+        }
+
+        if (fileInfo) {
+            fileInfo.textContent = `Ukuran: ${formatFileSize(file.size)}`;
+            fileInfo.classList.remove('hidden');
+        }
     });
 
-
-    /* =====================================================
-       RESET FILE
-    ===================================================== */
-
-    function resetFileInput() {
-        fileInput.value = '';
-
-        fileLabelText.textContent = 'Klik untuk memilih file';
-
-        fileLabelText.classList.remove(
-            'text-blue-600',
-            'text-rose-600'
-        );
-
-        fileLabelText.classList.add('text-slate-700');
-
-        fileInfo.textContent = '';
-        fileInfo.classList.add('hidden');
-    }
-
-
-    /* =====================================================
-       FORM SUBMIT
-    ===================================================== */
-
-    form.addEventListener('submit', function (event) {
+    form?.addEventListener('submit', function (event) {
         if (isSubmitting) {
             event.preventDefault();
             return;
         }
 
+        const suratDate = tanggalSurat?.value || '';
+        const keluarDate = tanggalKeluar?.value || '';
+
+        if (suratDate && keluarDate && keluarDate < suratDate) {
+            event.preventDefault();
+
+            if (typeof window.Swal !== 'undefined') {
+                window.Swal.fire({
+                    icon: 'warning',
+                    title: 'Tanggal tidak valid',
+                    text: 'Tanggal keluar tidak boleh lebih awal dari tanggal surat.',
+                    confirmButtonText: 'Mengerti',
+                    confirmButtonColor: '#2563eb'
+                });
+            } else {
+                window.alert('Tanggal keluar tidak boleh lebih awal dari tanggal surat.');
+            }
+
+            return;
+        }
+
+        if (fileInput && fileInput.files && fileInput.files.length > 0) {
+            const file = fileInput.files[0];
+
+            if (file.size > MAX_FILE_SIZE) {
+                event.preventDefault();
+
+                if (typeof window.Swal !== 'undefined') {
+                    window.Swal.fire({
+                        icon: 'warning',
+                        title: 'File terlalu besar',
+                        text: 'Ukuran lampiran maksimal 10 MB.',
+                        confirmButtonText: 'Mengerti',
+                        confirmButtonColor: '#2563eb'
+                    });
+                } else {
+                    window.alert('Ukuran lampiran maksimal 10 MB.');
+                }
+
+                return;
+            }
+        }
+
         isSubmitting = true;
-        submitButton.disabled = true;
 
-        submitButton.innerHTML = `
-            <svg
-                class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-            >
-                <circle
-                    class="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    stroke-width="4"
-                ></circle>
-
-                <path
-                    class="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-            </svg>
-
-            Menyimpan...
-        `;
+        if (submitButton) {
+            submitButton.disabled = true;
+            submitButton.innerHTML = `
+                <svg class="mr-2 h-4 w-4 animate-spin text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Menyimpan...
+            `;
+        }
     });
 });
 </script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 @endpush
 
 @endsection

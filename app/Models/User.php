@@ -12,9 +12,12 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    /**
-     * Konstanta role aplikasi.
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | ROLE
+    |--------------------------------------------------------------------------
+    */
+
     public const ROLE_ADMIN = 'admin';
 
     public const ROLE_PIMPINAN = 'pimpinan';
@@ -22,7 +25,7 @@ class User extends Authenticatable
     public const ROLE_STAFF = 'staff';
 
     /**
-     * Daftar role resmi.
+     * Role resmi aplikasi.
      */
     public const ROLES = [
         self::ROLE_ADMIN,
@@ -30,9 +33,12 @@ class User extends Authenticatable
         self::ROLE_STAFF,
     ];
 
-    /**
-     * Kolom yang boleh diisi.
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | FILLABLE
+    |--------------------------------------------------------------------------
+    */
+
     protected $fillable = [
         'name',
         'email',
@@ -42,17 +48,23 @@ class User extends Authenticatable
         'is_active',
     ];
 
-    /**
-     * Kolom yang disembunyikan.
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | HIDDEN
+    |--------------------------------------------------------------------------
+    */
+
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * Casting.
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | CASTS
+    |--------------------------------------------------------------------------
+    */
+
     protected function casts(): array
     {
         return [
@@ -62,8 +74,14 @@ class User extends Authenticatable
         ];
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | ROLE NORMALIZATION
+    |--------------------------------------------------------------------------
+    */
+
     /**
-     * Normalisasi role.
+     * Menormalisasi role menjadi standar aplikasi.
      *
      * staf -> staff
      */
@@ -76,13 +94,17 @@ class User extends Authenticatable
             )
         );
 
-        return $role === 'staf'
-            ? self::ROLE_STAFF
-            : $role;
+        return match ($role) {
+            'staf' => self::ROLE_STAFF,
+            'staff' => self::ROLE_STAFF,
+            'pimpinan' => self::ROLE_PIMPINAN,
+            'admin' => self::ROLE_ADMIN,
+            default => $role,
+        };
     }
 
     /**
-     * Role yang sudah dinormalisasi.
+     * Role user yang sudah dinormalisasi.
      */
     public function normalizedRole(): string
     {
@@ -91,8 +113,14 @@ class User extends Authenticatable
         );
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | ROLE CHECK
+    |--------------------------------------------------------------------------
+    */
+
     /**
-     * Mengecek admin.
+     * Mengecek apakah user adalah Admin.
      */
     public function isAdmin(): bool
     {
@@ -101,7 +129,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Mengecek pimpinan.
+     * Mengecek apakah user adalah Pimpinan.
      */
     public function isPimpinan(): bool
     {
@@ -110,7 +138,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Mengecek staff.
+     * Mengecek apakah user adalah Staff.
      */
     public function isStaff(): bool
     {
@@ -119,12 +147,18 @@ class User extends Authenticatable
     }
 
     /**
-     * Alias staff dalam bahasa Indonesia.
+     * Alias Staff dalam Bahasa Indonesia.
      */
     public function isStaf(): bool
     {
         return $this->isStaff();
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | ACCOUNT STATUS
+    |--------------------------------------------------------------------------
+    */
 
     /**
      * Mengecek akun aktif.
@@ -142,8 +176,14 @@ class User extends Authenticatable
         return !$this->isActive();
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | PERMISSION HELPERS
+    |--------------------------------------------------------------------------
+    */
+
     /**
-     * Admin dapat mengelola master data.
+     * Hanya Admin yang dapat mengelola master data.
      */
     public function canManageMasterData(): bool
     {
@@ -151,7 +191,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Admin dan pimpinan dapat mengelola surat.
+     * Admin dan Pimpinan dapat mengelola surat.
      */
     public function canManageSurat(): bool
     {
@@ -160,7 +200,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Admin dan pimpinan dapat mengelola disposisi.
+     * Admin dan Pimpinan dapat mengelola disposisi.
      */
     public function canManageDisposisi(): bool
     {
@@ -168,8 +208,14 @@ class User extends Authenticatable
             || $this->isPimpinan();
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | RELATIONSHIPS
+    |--------------------------------------------------------------------------
+    */
+
     /**
-     * Relasi disposisi yang diterima.
+     * Disposisi yang diterima user.
      */
     public function disposisiMasuk(): HasMany
     {
@@ -180,7 +226,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Relasi disposisi yang dibuat.
+     * Disposisi yang dibuat user.
      */
     public function disposisiKeluar(): HasMany
     {
@@ -191,7 +237,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Relasi surat masuk yang dicatat.
+     * Surat masuk yang dicatat user.
      */
     public function suratMasuk(): HasMany
     {
@@ -202,7 +248,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Relasi surat keluar yang dibuat.
+     * Surat keluar yang dibuat user.
      */
     public function suratKeluar(): HasMany
     {
@@ -213,7 +259,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Relasi surat keluar yang ditandatangani.
+     * Surat keluar yang ditandatangani user.
      */
     public function suratKeluarDitandatangani(): HasMany
     {
@@ -223,8 +269,14 @@ class User extends Authenticatable
         );
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | QUERY SCOPES
+    |--------------------------------------------------------------------------
+    */
+
     /**
-     * Scope user aktif.
+     * User aktif.
      */
     public function scopeAktif(
         Builder $query
@@ -236,7 +288,10 @@ class User extends Authenticatable
     }
 
     /**
-     * Scope staff.
+     * User Staff.
+     *
+     * Mendukung data lama:
+     * staff / staf.
      */
     public function scopeStaff(
         Builder $query
@@ -244,14 +299,14 @@ class User extends Authenticatable
         return $query->whereRaw(
             'LOWER(TRIM(role)) IN (?, ?)',
             [
-                'staff',
+                self::ROLE_STAFF,
                 'staf',
             ]
         );
     }
 
     /**
-     * Scope admin.
+     * User Admin.
      */
     public function scopeAdmin(
         Builder $query
@@ -259,13 +314,13 @@ class User extends Authenticatable
         return $query->whereRaw(
             'LOWER(TRIM(role)) = ?',
             [
-                'admin',
+                self::ROLE_ADMIN,
             ]
         );
     }
 
     /**
-     * Scope pimpinan.
+     * User Pimpinan.
      */
     public function scopePimpinan(
         Builder $query
@@ -273,41 +328,46 @@ class User extends Authenticatable
         return $query->whereRaw(
             'LOWER(TRIM(role)) = ?',
             [
-                'pimpinan',
+                self::ROLE_PIMPINAN,
             ]
         );
     }
 
     /**
-     * Scope berdasarkan role.
+     * Filter berdasarkan role.
      */
     public function scopeRole(
         Builder $query,
         ?string $role
     ): Builder {
         if (
-            $role === null ||
-            trim($role) === ''
+            $role === null
+            || trim($role) === ''
         ) {
             return $query;
         }
 
-        $role =
-            self::normalizeRole($role);
+        $role = self::normalizeRole(
+            $role
+        );
 
-        if (!in_array(
-            $role,
-            self::ROLES,
-            true
-        )) {
+        if (
+            !in_array(
+                $role,
+                self::ROLES,
+                true
+            )
+        ) {
             return $query;
         }
 
-        if ($role === self::ROLE_STAFF) {
+        if (
+            $role === self::ROLE_STAFF
+        ) {
             return $query->whereRaw(
                 'LOWER(TRIM(role)) IN (?, ?)',
                 [
-                    'staff',
+                    self::ROLE_STAFF,
                     'staf',
                 ]
             );
@@ -320,28 +380,27 @@ class User extends Authenticatable
     }
 
     /**
-     * Scope pencarian user.
+     * Pencarian user.
      */
     public function scopeSearch(
         Builder $query,
         ?string $search
     ): Builder {
-        $search =
-            trim(
-                (string) $search
-            );
+        $search = trim(
+            (string) $search
+        );
 
         if ($search === '') {
             return $query;
         }
 
-        $keyword =
-            "%{$search}%";
+        $keyword = "%{$search}%";
 
         return $query->where(
             function (
                 Builder $q
             ) use ($keyword): void {
+
                 $q->where(
                     'name',
                     'like',
@@ -361,14 +420,21 @@ class User extends Authenticatable
         );
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | LABEL
+    |--------------------------------------------------------------------------
+    */
+
     /**
-     * Label role.
+     * Label role untuk tampilan.
      */
     public function getRoleLabelAttribute(): string
     {
         return match (
             $this->normalizedRole()
         ) {
+
             self::ROLE_ADMIN =>
                 'Admin',
 
@@ -386,7 +452,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Label status.
+     * Label status akun.
      */
     public function getStatusLabelAttribute(): string
     {

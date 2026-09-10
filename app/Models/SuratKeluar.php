@@ -12,14 +12,20 @@ class SuratKeluar extends Model
 {
     use HasFactory, SoftDeletes;
 
-    /**
-     * Nama tabel.
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | TABLE
+    |--------------------------------------------------------------------------
+    */
+
     protected $table = 'surat_keluars';
 
-    /**
-     * Kolom yang dapat diisi melalui mass assignment.
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | FILLABLE
+    |--------------------------------------------------------------------------
+    */
+
     protected $fillable = [
         'nomor_surat',
         'tanggal_surat',
@@ -34,9 +40,12 @@ class SuratKeluar extends Model
         'ditandatangani_oleh',
     ];
 
-    /**
-     * Casting atribut.
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | CASTS
+    |--------------------------------------------------------------------------
+    */
+
     protected function casts(): array
     {
         return [
@@ -44,6 +53,12 @@ class SuratKeluar extends Model
             'tanggal_keluar' => 'date',
         ];
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | RELATIONSHIPS
+    |--------------------------------------------------------------------------
+    */
 
     /**
      * Relasi ke kategori surat.
@@ -78,11 +93,19 @@ class SuratKeluar extends Model
         );
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | NOMOR SURAT
+    |--------------------------------------------------------------------------
+    */
+
     /**
      * Generate nomor surat otomatis.
      *
      * Format:
      * 001/KODE/I/2026
+     *
+     * Nomor urut dihitung berdasarkan tahun berjalan.
      */
     public static function generateNomorSurat(
         string $kodeKategori
@@ -106,22 +129,23 @@ class SuratKeluar extends Model
         $bulan = $romawi[now()->month];
 
         $urutan = self::withTrashed()
-            ->whereYear(
-                'created_at',
-                $tahun
-            )
+            ->whereYear('created_at', $tahun)
             ->count() + 1;
 
         return sprintf(
             '%03d/%s/%s/%d',
             $urutan,
-            strtoupper(
-                trim($kodeKategori)
-            ),
+            strtoupper(trim($kodeKategori)),
             $bulan,
             $tahun
         );
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | FILTER
+    |--------------------------------------------------------------------------
+    */
 
     /**
      * Scope filter surat keluar.
@@ -130,33 +154,28 @@ class SuratKeluar extends Model
      * - pencarian
      * - kategori
      * - status
-     * - pengirim
-     * - tanggal
+     * - pengirim / tujuan
+     * - tanggal keluar
      */
     public function scopeFilter(
         Builder $query,
         array $filters = []
     ): Builder {
         /*
-         * =========================================================
-         * SEARCH
-         * =========================================================
-         */
+        |--------------------------------------------------------------------------
+        | SEARCH
+        |--------------------------------------------------------------------------
+        */
+
         $search = isset($filters['search'])
-            ? trim(
-                (string) $filters['search']
-            )
+            ? trim((string) $filters['search'])
             : '';
 
         if ($search !== '') {
-            $keyword =
-                "%{$search}%";
+            $keyword = "%{$search}%";
 
             $query->where(
-                function (
-                    Builder $q
-                ) use ($keyword): void {
-
+                function (Builder $q) use ($keyword): void {
                     $q->where(
                         'nomor_surat',
                         'like',
@@ -179,9 +198,7 @@ class SuratKeluar extends Model
                     )
                     ->orWhereHas(
                         'kategori',
-                        function (
-                            Builder $kategori
-                        ) use ($keyword): void {
+                        function (Builder $kategori) use ($keyword): void {
                             $kategori
                                 ->where(
                                     'nama_kategori',
@@ -199,39 +216,79 @@ class SuratKeluar extends Model
                                     $keyword
                                 );
                         }
+                    )
+                    ->orWhereHas(
+                        'pembuat',
+                        function (Builder $user) use ($keyword): void {
+                            $user
+                                ->where(
+                                    'name',
+                                    'like',
+                                    $keyword
+                                )
+                                ->orWhere(
+                                    'email',
+                                    'like',
+                                    $keyword
+                                )
+                                ->orWhere(
+                                    'jabatan',
+                                    'like',
+                                    $keyword
+                                );
+                        }
+                    )
+                    ->orWhereHas(
+                        'penandatangan',
+                        function (Builder $user) use ($keyword): void {
+                            $user
+                                ->where(
+                                    'name',
+                                    'like',
+                                    $keyword
+                                )
+                                ->orWhere(
+                                    'email',
+                                    'like',
+                                    $keyword
+                                )
+                                ->orWhere(
+                                    'jabatan',
+                                    'like',
+                                    $keyword
+                                );
+                        }
                     );
                 }
             );
         }
 
         /*
-         * =========================================================
-         * KATEGORI
-         * =========================================================
-         *
-         * Mendukung:
-         * kategori_surat_id
-         * kategori_id sebagai parameter legacy.
-         */
+        |--------------------------------------------------------------------------
+        | FILTER KATEGORI
+        |--------------------------------------------------------------------------
+        |
+        | Mendukung:
+        | - kategori_surat_id
+        | - kategori_id
+        |
+        */
+
         $rawKategoriIds =
             $filters['kategori_surat_id']
             ?? $filters['kategori_id']
             ?? [];
 
         if (
-            is_scalar($rawKategoriIds) &&
-            trim(
-                (string) $rawKategoriIds
-            ) !== ''
+            is_scalar($rawKategoriIds)
+            && trim((string) $rawKategoriIds) !== ''
         ) {
             $rawKategoriIds = [
                 $rawKategoriIds,
             ];
         }
 
-        $kategoriIds = collect(
-            $rawKategoriIds
-        )
+        $kategoriIds = collect($rawKategoriIds)
             ->flatten()
             ->filter(
                 fn ($id) =>
@@ -240,8 +297,7 @@ class SuratKeluar extends Model
                     && (int) $id > 0
             )
             ->map(
-                fn ($id) =>
-                    (int) $id
+                fn ($id) => (int) $id
             )
             ->unique()
             ->values()
@@ -255,13 +311,13 @@ class SuratKeluar extends Model
         }
 
         /*
-         * =========================================================
-         * STATUS
-         * =========================================================
-         */
+        |--------------------------------------------------------------------------
+        | FILTER STATUS
+        |--------------------------------------------------------------------------
+        */
+
         $allowedStatuses = [
             'draft',
-            'draf',
             'diproses',
             'disetujui',
             'dikirim',
@@ -269,22 +325,19 @@ class SuratKeluar extends Model
         ];
 
         $rawStatuses =
-            $filters['status'] ?? [];
+            $filters['status']
+            ?? [];
 
         if (
-            is_scalar($rawStatuses) &&
-            trim(
-                (string) $rawStatuses
-            ) !== ''
+            is_scalar($rawStatuses)
+            && trim((string) $rawStatuses) !== ''
         ) {
             $rawStatuses = [
                 $rawStatuses,
             ];
         }
 
-        $statuses = collect(
-            $rawStatuses
-        )
+        $statuses = collect($rawStatuses)
             ->flatten()
             ->filter(
                 fn ($status) =>
@@ -306,13 +359,7 @@ class SuratKeluar extends Model
                 fn ($status) =>
                     in_array(
                         $status,
-                        [
-                            'draft',
-                            'diproses',
-                            'disetujui',
-                            'dikirim',
-                            'diarsipkan',
-                        ],
+                        $allowedStatuses,
                         true
                     )
             )
@@ -328,16 +375,14 @@ class SuratKeluar extends Model
         }
 
         /*
-         * =========================================================
-         * PENGIRIM
-         * =========================================================
-         */
-        $pengirim =
-            isset($filters['pengirim'])
-                ? trim(
-                    (string) $filters['pengirim']
-                )
-                : '';
+        |--------------------------------------------------------------------------
+        | FILTER TUJUAN / PENGIRIM
+        |--------------------------------------------------------------------------
+        */
+
+        $pengirim = isset($filters['pengirim'])
+            ? trim((string) $filters['pengirim'])
+            : '';
 
         if ($pengirim !== '') {
             $query->where(
@@ -348,48 +393,49 @@ class SuratKeluar extends Model
         }
 
         /*
-         * =========================================================
-         * FILTER TANGGAL
-         * =========================================================
-         */
+        |--------------------------------------------------------------------------
+        | FILTER TANGGAL KELUAR
+        |--------------------------------------------------------------------------
+        |
+        | Karena index Surat Keluar menggunakan tanggal_keluar,
+        | filter juga harus menggunakan kolom ini.
+        |
+        */
+
         $dariTanggal =
-            $filters['dari_tanggal'] ?? null;
+            $filters['dari_tanggal']
+            ?? null;
 
         $sampaiTanggal =
-            $filters['sampai_tanggal'] ?? null;
+            $filters['sampai_tanggal']
+            ?? null;
 
         $dariTanggal =
             is_scalar($dariTanggal)
-                ? trim(
-                    (string) $dariTanggal
-                )
+                ? trim((string) $dariTanggal)
                 : '';
 
         $sampaiTanggal =
             is_scalar($sampaiTanggal)
-                ? trim(
-                    (string) $sampaiTanggal
-                )
+                ? trim((string) $sampaiTanggal)
                 : '';
 
         $validDariTanggal =
-            self::validDate(
-                $dariTanggal
-            );
+            self::validDate($dariTanggal);
 
         $validSampaiTanggal =
-            self::validDate(
-                $sampaiTanggal
-            );
+            self::validDate($sampaiTanggal);
 
         /*
-         * Jika tanggal awal lebih besar,
-         * tukarkan otomatis.
-         */
+        |--------------------------------------------------------------------------
+        | NORMALISASI RENTANG
+        |--------------------------------------------------------------------------
+        */
+
         if (
-            $validDariTanggal &&
-            $validSampaiTanggal &&
-            $dariTanggal > $sampaiTanggal
+            $validDariTanggal
+            && $validSampaiTanggal
+            && $dariTanggal > $sampaiTanggal
         ) {
             [
                 $dariTanggal,
@@ -400,17 +446,29 @@ class SuratKeluar extends Model
             ];
         }
 
+        /*
+        |--------------------------------------------------------------------------
+        | TANGGAL MULAI
+        |--------------------------------------------------------------------------
+        */
+
         if ($validDariTanggal) {
             $query->whereDate(
-                'tanggal_surat',
+                'tanggal_keluar',
                 '>=',
                 $dariTanggal
             );
         }
 
+        /*
+        |--------------------------------------------------------------------------
+        | TANGGAL AKHIR
+        |--------------------------------------------------------------------------
+        */
+
         if ($validSampaiTanggal) {
             $query->whereDate(
-                'tanggal_surat',
+                'tanggal_keluar',
                 '<=',
                 $sampaiTanggal
             );
@@ -418,6 +476,12 @@ class SuratKeluar extends Model
 
         return $query;
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | STATUS
+    |--------------------------------------------------------------------------
+    */
 
     /**
      * Scope berdasarkan status.
@@ -427,32 +491,35 @@ class SuratKeluar extends Model
         ?string $status
     ): Builder {
         if (
-            $status === null ||
-            trim($status) === ''
+            $status === null
+            || trim($status) === ''
         ) {
             return $query;
         }
 
-        $status =
-            strtolower(
-                trim($status)
-            );
+        $status = strtolower(
+            trim($status)
+        );
 
         if ($status === 'draf') {
             $status = 'draft';
         }
 
-        if (!in_array(
-            $status,
-            [
-                'draft',
-                'diproses',
-                'disetujui',
-                'dikirim',
-                'diarsipkan',
-            ],
-            true
-        )) {
+        $allowedStatuses = [
+            'draft',
+            'diproses',
+            'disetujui',
+            'dikirim',
+            'diarsipkan',
+        ];
+
+        if (
+            !in_array(
+                $status,
+                $allowedStatuses,
+                true
+            )
+        ) {
             return $query;
         }
 
@@ -461,6 +528,12 @@ class SuratKeluar extends Model
             [$status]
         );
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | STATUS SCOPES
+    |--------------------------------------------------------------------------
+    */
 
     /**
      * Scope surat yang masih aktif.
@@ -493,87 +566,53 @@ class SuratKeluar extends Model
         );
     }
 
-    /**
-     * Mengecek apakah surat berstatus draft.
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | STATUS CHECK
+    |--------------------------------------------------------------------------
+    */
+
     public function isDraft(): bool
     {
-        $status =
-            strtolower(
-                trim(
-                    (string) $this->status
-                )
-            );
-
-        return in_array(
-            $status,
-            [
-                'draft',
-                'draf',
-            ],
-            true
-        );
+        return $this->status_normalized === 'draft';
     }
 
-    /**
-     * Mengecek apakah surat sedang diproses.
-     */
     public function isDiproses(): bool
     {
-        return strtolower(
-            trim(
-                (string) $this->status
-            )
-        ) === 'diproses';
+        return $this->status_normalized === 'diproses';
     }
 
-    /**
-     * Mengecek apakah surat sudah disetujui.
-     */
     public function isDisetujui(): bool
     {
-        return strtolower(
-            trim(
-                (string) $this->status
-            )
-        ) === 'disetujui';
+        return $this->status_normalized === 'disetujui';
     }
 
-    /**
-     * Mengecek apakah surat sudah dikirim.
-     */
     public function isDikirim(): bool
     {
-        return strtolower(
-            trim(
-                (string) $this->status
-            )
-        ) === 'dikirim';
+        return $this->status_normalized === 'dikirim';
     }
 
-    /**
-     * Mengecek apakah surat sudah diarsipkan.
-     */
     public function isDiarsipkan(): bool
     {
-        return strtolower(
-            trim(
-                (string) $this->status
-            )
-        ) === 'diarsipkan';
+        return $this->status_normalized === 'diarsipkan';
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | STATUS ATTRIBUTE
+    |--------------------------------------------------------------------------
+    */
 
     /**
      * Mengambil status yang telah dinormalisasi.
      */
     public function getStatusNormalizedAttribute(): string
     {
-        $status =
-            strtolower(
-                trim(
-                    (string) $this->status
-                )
-            );
+        $status = strtolower(
+            trim(
+                (string) $this->status
+            )
+        );
 
         return $status === 'draf'
             ? 'draft'
@@ -581,7 +620,7 @@ class SuratKeluar extends Model
     }
 
     /**
-     * Mengambil label status untuk tampilan.
+     * Label status.
      */
     public function getStatusLabelAttribute(): string
     {
@@ -605,25 +644,61 @@ class SuratKeluar extends Model
 
             default =>
                 ucfirst(
-                    $this->status_normalized
+                    str_replace(
+                        '_',
+                        ' ',
+                        $this->status_normalized
+                    )
                 ),
         };
     }
+
+    /**
+     * Class badge status.
+     */
+    public function getStatusClassAttribute(): string
+    {
+        return match (
+            $this->status_normalized
+        ) {
+            'draft' =>
+                'bg-slate-100 text-slate-700',
+
+            'diproses' =>
+                'bg-amber-100 text-amber-700',
+
+            'disetujui' =>
+                'bg-blue-100 text-blue-700',
+
+            'dikirim' =>
+                'bg-emerald-100 text-emerald-700',
+
+            'diarsipkan' =>
+                'bg-purple-100 text-purple-700',
+
+            default =>
+                'bg-slate-100 text-slate-700',
+        };
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | LAMPIRAN
+    |--------------------------------------------------------------------------
+    */
 
     /**
      * Mengecek apakah memiliki lampiran.
      */
     public function hasLampiran(): bool
     {
-        return !empty(
-            trim(
-                (string) $this->lampiran_file
-            )
-        );
+        return trim(
+            (string) $this->lampiran_file
+        ) !== '';
     }
 
     /**
-     * Alias bahasa Indonesia untuk hasLampiran().
+     * Alias Bahasa Indonesia.
      */
     public function memilikiLampiran(): bool
     {
@@ -631,7 +706,7 @@ class SuratKeluar extends Model
     }
 
     /**
-     * Mengambil nama file lampiran.
+     * Nama file lampiran.
      */
     public function getNamaLampiranAttribute(): ?string
     {
@@ -644,8 +719,16 @@ class SuratKeluar extends Model
         );
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | EDIT
+    |--------------------------------------------------------------------------
+    */
+
     /**
-     * Mengecek apakah surat dapat diedit.
+     * Mengecek apakah surat secara status masih dapat diedit.
+     *
+     * Helper ini tidak otomatis membatasi controller.
      */
     public function isEditable(): bool
     {
@@ -659,6 +742,12 @@ class SuratKeluar extends Model
         );
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | VALIDASI TANGGAL
+    |--------------------------------------------------------------------------
+    */
+
     /**
      * Validasi tanggal YYYY-MM-DD.
      */
@@ -669,15 +758,16 @@ class SuratKeluar extends Model
             return false;
         }
 
-        $value =
-            trim(
-                (string) $value
-            );
+        $value = trim(
+            (string) $value
+        );
 
-        if (!preg_match(
-            '/^\d{4}-\d{2}-\d{2}$/',
-            $value
-        )) {
+        if (
+            !preg_match(
+                '/^\d{4}-\d{2}-\d{2}$/',
+                $value
+            )
+        ) {
             return false;
         }
 

@@ -3,200 +3,349 @@
 @section('title', 'Detail Surat Keluar')
 
 @section('content')
-<div class="max-w-7xl mx-auto space-y-6 px-4 sm:px-6 lg:px-8 py-6">
+@php
+    $status = strtolower(trim((string) ($suratKeluar->status ?? 'draft')));
+    if ($status === 'draf') {
+        $status = 'draft';
+    }
 
-    {{-- Alert Success --}}
-    @if(session('success'))
-        <div class="flex items-center justify-between p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl shadow-sm">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0">
-                    <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    $statusLabels = [
+        'draft' => 'Draft',
+        'diproses' => 'Diproses',
+        'disetujui' => 'Disetujui',
+        'dikirim' => 'Dikirim',
+        'diarsipkan' => 'Diarsipkan',
+    ];
+
+    $statusBadgeClasses = [
+        'draft' => 'bg-slate-100 text-slate-700 border-slate-300',
+        'diproses' => 'bg-amber-100 text-amber-800 border-amber-300',
+        'disetujui' => 'bg-blue-100 text-blue-800 border-blue-300',
+        'dikirim' => 'bg-emerald-100 text-emerald-800 border-emerald-300',
+        'diarsipkan' => 'bg-purple-100 text-purple-800 border-purple-300',
+    ];
+
+    $statusLabel = $statusLabels[$status] ?? ucfirst($status);
+    $statusBadgeClass = $statusBadgeClasses[$status] ?? 'bg-slate-100 text-slate-700 border-slate-300';
+
+    $tanggalSurat = '-';
+    $tanggalKeluar = '-';
+
+    try {
+        if ($suratKeluar->tanggal_surat) {
+            $tanggalSurat = \Illuminate\Support\Carbon::parse($suratKeluar->tanggal_surat)->format('d/m/Y');
+        }
+    } catch (\Throwable $e) {
+        $tanggalSurat = '-';
+    }
+
+    try {
+        if ($suratKeluar->tanggal_keluar) {
+            $tanggalKeluar = \Illuminate\Support\Carbon::parse($suratKeluar->tanggal_keluar)->format('d/m/Y');
+        }
+    } catch (\Throwable $e) {
+        $tanggalKeluar = '-';
+    }
+
+    $tujuanSurat = trim((string) ($suratKeluar->pengirim ?? ''));
+    $tujuanSurat = $tujuanSurat !== '' ? $tujuanSurat : '-';
+
+    $nomorSurat = trim((string) ($suratKeluar->nomor_surat ?? ''));
+    $nomorSurat = $nomorSurat !== '' ? $nomorSurat : '-';
+
+    $perihal = trim((string) ($suratKeluar->perihal ?? ''));
+    $perihal = $perihal !== '' ? $perihal : 'Tanpa Perihal';
+
+    $ringkasan = trim((string) ($suratKeluar->ringkasan ?? ''));
+    $kategoriNama = $suratKeluar->kategori?->nama_kategori ?? '-';
+    $pembuatNama = $suratKeluar->pembuat?->name ?? '-';
+    $penandatanganNama = $suratKeluar->penandatangan?->name ?? '-';
+
+    $lampiranPath = $suratKeluar->lampiran_file ?? null;
+    $lampiranUrl = null;
+
+    if (!empty($lampiranPath)) {
+        if (filter_var($lampiranPath, FILTER_VALIDATE_URL)) {
+            $lampiranUrl = $lampiranPath;
+        } elseif (\Illuminate\Support\Facades\Route::has('surat-keluar.preview-lampiran')) {
+            $lampiranUrl = route('surat-keluar.preview-lampiran', $suratKeluar);
+        }
+    }
+
+    $lampiranExtension = !empty($lampiranPath)
+        ? strtolower(pathinfo($lampiranPath, PATHINFO_EXTENSION))
+        : '';
+
+    $lampiranNama = !empty($lampiranPath) ? basename($lampiranPath) : null;
+@endphp
+
+<div class="mx-auto w-full max-w-7xl space-y-4 px-4 py-5 sm:space-y-5 sm:px-6 lg:px-8">
+    {{-- SUCCESS --}}
+    @if (session('success'))
+        <div id="success-alert" class="flex items-center justify-between gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-800 shadow-sm" role="alert">
+            <div class="flex min-w-0 items-center gap-3">
+                <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-emerald-100">
+                    <svg class="h-5 w-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
                 </div>
-                <span class="text-xs sm:text-sm font-medium">{{ session('success') }}</span>
+                <span class="text-xs font-medium sm:text-sm">{{ session('success') }}</span>
             </div>
-            <button onclick="this.closest('div').remove()" class="text-emerald-400 hover:text-emerald-700 p-1 rounded-lg hover:bg-emerald-100/50 transition">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            <button
+                type="button"
+                onclick="document.getElementById('success-alert')?.remove()"
+                class="shrink-0 rounded-lg p-1 text-emerald-400 transition hover:bg-emerald-100/50 hover:text-emerald-700"
+                aria-label="Tutup pemberitahuan"
+            >
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
             </button>
         </div>
     @endif
 
-    {{-- Alert Error --}}
-    @if(session('error'))
-        <div class="flex items-center justify-between p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl shadow-sm">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-xl bg-rose-100 flex items-center justify-center shrink-0">
-                    <svg class="w-5 h-5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    {{-- ERROR --}}
+    @if (session('error'))
+        <div id="error-alert" class="flex items-center justify-between gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-rose-800 shadow-sm" role="alert">
+            <div class="flex min-w-0 items-center gap-3">
+                <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-rose-100">
+                    <svg class="h-5 w-5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
                 </div>
-                <span class="text-xs sm:text-sm font-medium">{{ session('error') }}</span>
+                <span class="text-xs font-medium sm:text-sm">{{ session('error') }}</span>
             </div>
-            <button onclick="this.closest('div').remove()" class="text-rose-400 hover:text-rose-700 p-1 rounded-lg hover:bg-rose-100/50 transition">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            <button
+                type="button"
+                onclick="document.getElementById('error-alert')?.remove()"
+                class="shrink-0 rounded-lg p-1 text-rose-400 transition hover:bg-rose-100/50 hover:text-rose-700"
+                aria-label="Tutup pemberitahuan"
+            >
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
             </button>
         </div>
     @endif
 
-    {{-- Header Page & Actions --}}
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 via-slate-800 to-emerald-950 p-6 sm:p-7 rounded-3xl border border-slate-800 shadow-md text-white">
-        <div class="flex items-center gap-4">
-            <a href="{{ route('surat-keluar.index') }}" class="w-10 h-10 rounded-2xl bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all duration-200 shrink-0 backdrop-blur-sm" title="Kembali">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+    {{-- HEADER --}}
+    <div class="flex flex-col justify-between gap-4 rounded-3xl border border-slate-800 bg-gradient-to-r from-slate-900 via-slate-800 to-emerald-950 p-5 text-white shadow-md sm:flex-row sm:items-center sm:p-6">
+        <div class="flex min-w-0 items-center gap-3 sm:gap-4">
+            <a
+                href="{{ route('surat-keluar.index') }}"
+                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-white backdrop-blur-sm transition hover:bg-white/20"
+                title="Kembali"
+                aria-label="Kembali ke surat keluar"
+            >
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
             </a>
-            <div>
-                <h1 class="text-lg sm:text-xl font-bold tracking-tight">Detail Surat Keluar</h1>
-                <p class="text-xs text-slate-300 mt-0.5">Informasi lengkap dan arsip dokumen surat keluar.</p>
+            <div class="min-w-0">
+                <h1 class="text-lg font-bold tracking-tight sm:text-xl">Detail Surat Keluar</h1>
+                <p class="mt-0.5 text-xs text-slate-300 sm:text-sm">
+                    Informasi lengkap dan arsip dokumen surat keluar.
+                </p>
             </div>
         </div>
 
-        <div class="flex items-center gap-2">
-            @if(Route::has('surat-keluar.edit'))
-                <a href="{{ route('surat-keluar.edit', $suratKeluar) }}" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-semibold bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 rounded-2xl transition border border-amber-500/30 backdrop-blur-sm shadow-sm">
-                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                    <span>Edit Arsip</span>
+        {{-- ACTION --}}
+        <div class="flex w-full items-center gap-2 sm:w-auto">
+            @if (\Illuminate\Support\Facades\Route::has('surat-keluar.edit'))
+                <a
+                    href="{{ route('surat-keluar.edit', $suratKeluar) }}"
+                    class="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-amber-500/30 bg-amber-500/20 px-4 py-2.5 text-xs font-semibold text-amber-300 shadow-sm backdrop-blur-sm transition hover:bg-amber-500/30 sm:w-auto"
+                >
+                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    Edit Arsip
                 </a>
             @endif
         </div>
     </div>
 
-    {{-- Card Main Content --}}
-    <div class="bg-gradient-to-b from-white via-slate-50/50 to-slate-100/60 rounded-3xl shadow-md border border-slate-200 p-6 sm:p-8 space-y-6">
-        
-        {{-- Top Title & Status Section --}}
-        <div class="flex flex-col sm:flex-row sm:items-start justify-between pb-6 border-b-2 border-slate-200 gap-4">
-            <div class="space-y-2">
+    {{-- MAIN CARD --}}
+    <div class="space-y-5 rounded-3xl border border-slate-200 bg-gradient-to-b from-white via-slate-50/50 to-slate-100/60 p-5 shadow-md sm:p-7">
+        {{-- TITLE + STATUS --}}
+        <div class="flex flex-col justify-between gap-4 border-b-2 border-slate-200 pb-5 sm:flex-row sm:items-start">
+            <div class="min-w-0 space-y-2">
                 <div class="flex items-center gap-2">
-                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50"></span>
-                    <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-700">Arsip Surat Keluar</span>
+                    <span class="h-2.5 w-2.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50"></span>
+                    <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-700">
+                        Arsip Surat Keluar
+                    </span>
                 </div>
-                <h2 class="text-xl sm:text-2xl font-black text-slate-900 leading-snug tracking-tight break-words">
-                    {{ $suratKeluar->perihal ?? 'Tanpa Perihal' }}
+
+                <h2 class="break-words text-xl font-black leading-snug tracking-tight text-slate-900 sm:text-2xl">
+                    {{ $perihal }}
                 </h2>
-                <div class="flex flex-wrap items-center gap-2.5 pt-1">
-                    <span class="inline-flex items-center px-3 py-1 rounded-xl text-xs font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-2xs">
-                        #{{ $suratKeluar->no_agenda ?? $suratKeluar->nomor_agenda ?? $suratKeluar->id }}
+
+                <div class="flex flex-wrap items-center gap-2 pt-1">
+                    <span class="inline-flex items-center rounded-xl border border-emerald-300 bg-emerald-100 px-3 py-1 font-mono text-xs font-bold text-emerald-800">
+                        #{{ $suratKeluar->id }}
                     </span>
                     <span class="text-slate-400">&bull;</span>
-                    <span class="text-xs text-slate-600">No. Surat: <strong class="text-slate-900 font-semibold break-all">{{ $suratKeluar->nomor_surat ?? '-' }}</strong></span>
+                    <span class="break-all text-xs text-slate-600">
+                        No. Surat:
+                        <strong class="font-semibold text-slate-900">{{ $nomorSurat }}</strong>
+                    </span>
                 </div>
             </div>
 
-            @php
-                $status = strtolower($suratKeluar->status ?? 'terkirim');
-                $badgeClass = match($status) {
-                    'konsep'    => 'bg-slate-200 text-slate-800 border-slate-300',
-                    'diproses'  => 'bg-amber-100 text-amber-800 border-amber-300',
-                    'disetujui' => 'bg-blue-100 text-blue-800 border-blue-300',
-                    'dikirim', 'terkirim' => 'bg-emerald-100 text-emerald-800 border-emerald-300',
-                    default     => 'bg-slate-200 text-slate-800 border-slate-300'
-                };
-            @endphp
-            <div class="self-start sm:self-auto shrink-0">
-                <span class="inline-flex items-center px-4 py-2 rounded-2xl text-xs font-bold border-2 shadow-xs {{ $badgeClass }}">
-                    {{ ucfirst($status) }}
+            {{-- STATUS --}}
+            <div class="shrink-0">
+                <span class="inline-flex items-center rounded-2xl border-2 px-4 py-2 text-xs font-bold shadow-sm {{ $statusBadgeClass }}">
+                    {{ $statusLabel }}
                 </span>
             </div>
         </div>
 
-        {{-- Metadata Grid Details (Dibuat lebih tebal/berisi dengan padding & border lebih jelas) --}}
-        <dl class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="space-y-2 p-5 rounded-2xl bg-white border-2 border-slate-200 shadow-sm">
-                <dt class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Pengirim / Tujuan</dt>
-                <dd class="text-sm font-bold text-slate-900 break-words">
-                    {{ $suratKeluar->pengirim ?? '-' }}
-                </dd>
-            </div>
-            
-            <div class="space-y-2 p-5 rounded-2xl bg-white border-2 border-slate-200 shadow-sm">
-                <dt class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Kategori Surat</dt>
-                <dd class="text-sm font-bold text-slate-900 break-words">
-                    {{ $suratKeluar->kategori->nama_kategori ?? $suratKeluar->kategori ?? '-' }}
-                </dd>
+        {{-- METADATA --}}
+        <dl class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div class="rounded-2xl border-2 border-slate-200 bg-white p-4 shadow-sm">
+                <dt class="mb-2 text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Tujuan Surat</dt>
+                <dd class="break-words text-sm font-bold text-slate-900">{{ $tujuanSurat }}</dd>
             </div>
 
-            <div class="space-y-2 p-5 rounded-2xl bg-white border-2 border-slate-200 shadow-sm">
-                <dt class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Tanggal Surat</dt>
-                <dd class="text-sm font-bold text-slate-900">
-                    {{ $suratKeluar->tanggal_surat ? \Carbon\Carbon::parse($suratKeluar->tanggal_surat)->format('d-m-Y') : '-' }}
-                </dd>
+            <div class="rounded-2xl border-2 border-slate-200 bg-white p-4 shadow-sm">
+                <dt class="mb-2 text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Kategori Surat</dt>
+                <dd class="break-words text-sm font-bold text-slate-900">{{ $kategoriNama }}</dd>
             </div>
 
-            <div class="space-y-2 p-5 rounded-2xl bg-white border-2 border-slate-200 shadow-sm">
-                <dt class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Tanggal Dikirim</dt>
-                <dd class="text-sm font-bold text-slate-900">
-                    {{ $suratKeluar->tanggal_keluar ? \Carbon\Carbon::parse($suratKeluar->tanggal_keluar)->format('d-m-Y') : '-' }}
-                </dd>
+            <div class="rounded-2xl border-2 border-slate-200 bg-white p-4 shadow-sm">
+                <dt class="mb-2 text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Tanggal Surat</dt>
+                <dd class="text-sm font-bold text-slate-900">{{ $tanggalSurat }}</dd>
             </div>
 
-            <div class="sm:col-span-2 space-y-2 p-5 rounded-2xl bg-white border-2 border-slate-200 shadow-sm">
-                <dt class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Dibuat Oleh</dt>
-                <dd class="text-sm font-bold text-slate-900 truncate">
-                    {{ $suratKeluar->pembuat->name ?? '-' }}
-                </dd>
+            <div class="rounded-2xl border-2 border-slate-200 bg-white p-4 shadow-sm">
+                <dt class="mb-2 text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Tanggal Keluar</dt>
+                <dd class="text-sm font-bold text-slate-900">{{ $tanggalKeluar }}</dd>
+            </div>
+
+            <div class="rounded-2xl border-2 border-slate-200 bg-white p-4 shadow-sm sm:col-span-2">
+                <dt class="mb-2 text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Dibuat Oleh</dt>
+                <dd class="break-words text-sm font-bold text-slate-900">{{ $pembuatNama }}</dd>
+            </div>
+
+            <div class="rounded-2xl border-2 border-slate-200 bg-white p-4 shadow-sm sm:col-span-2">
+                <dt class="mb-2 text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Ditandatangani Oleh</dt>
+                <dd class="break-words text-sm font-bold text-slate-900">{{ $penandatanganNama }}</dd>
             </div>
         </dl>
 
-        {{-- Content / Ringkasan --}}
-        @if(!empty($suratKeluar->perihal) || !empty($suratKeluar->ringkasan) || !empty($suratKeluar->isi_surat))
-            <div class="pt-2">
-                <div class="p-5 rounded-2xl bg-white border-2 border-slate-200 space-y-2 shadow-sm">
-                    <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 block">Perihal / Isi Ringkas Surat</span>
-                    <div class="text-sm text-slate-800 leading-relaxed whitespace-pre-line break-words font-medium">
-                        {{ $suratKeluar->perihal ?? ($suratKeluar->ringkasan ?? $suratKeluar->isi_surat) }}
+        {{-- PERIHAL --}}
+        <div class="border-t-2 border-slate-200 pt-4">
+            <div class="space-y-2 rounded-2xl border-2 border-slate-200 bg-white p-5 shadow-sm">
+                <span class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Perihal Surat</span>
+                <div class="whitespace-pre-line break-words text-sm font-medium leading-relaxed text-slate-800">
+                    {{ $perihal }}
+                </div>
+            </div>
+        </div>
+
+        {{-- RINGKASAN --}}
+        @if ($ringkasan !== '')
+            <div>
+                <div class="space-y-2 rounded-2xl border-2 border-slate-200 bg-white p-5 shadow-sm">
+                    <span class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500">
+                        Ringkasan Isi Surat
+                    </span>
+                    <div class="whitespace-pre-line break-words text-sm font-medium leading-relaxed text-slate-700">
+                        {{ $ringkasan }}
                     </div>
                 </div>
             </div>
         @endif
 
-        {{-- Lampiran Berkas Digital Section --}}
-        <div class="pt-4 border-t-2 border-slate-200 space-y-4">
-            <div class="flex items-center justify-between">
-                <span class="text-xs font-bold uppercase tracking-wider text-slate-600">Berkas Lampiran Digital</span>
+        {{-- LAMPIRAN --}}
+        <div class="space-y-4 border-t-2 border-slate-200 pt-5">
+            <div class="flex items-center justify-between gap-3">
+                <div>
+                    <span class="block text-xs font-bold uppercase tracking-wider text-slate-600">
+                        Berkas Lampiran Digital
+                    </span>
+                    @if ($lampiranNama)
+                        <span class="mt-1 block break-all text-[11px] text-slate-400">
+                            {{ $lampiranNama }}
+                        </span>
+                    @endif
+                </div>
             </div>
-            
-            @php
-                $rawPath = $suratKeluar->lampiran_file ?? $suratKeluar->file_surat ?? null;
-                $resolvedUrl = $fileUrl ?? (Route::has('surat-keluar.preview-lampiran') ? route('surat-keluar.preview-lampiran', $suratKeluar) : null);
-                $extension = $rawPath ? strtolower(pathinfo($rawPath, PATHINFO_EXTENSION)) : '';
-            @endphp
 
-            @if(!empty($rawPath) && !empty($resolvedUrl))
-                <div class="space-y-4">
-                    {{-- Action Buttons --}}
-                    <div class="flex flex-wrap items-center gap-2.5">
-                        <a href="{{ $resolvedUrl }}" target="_blank" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 transition shadow-sm shadow-emerald-600/20">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                            <span>Buka / Layar Penuh</span>
-                        </a>
-                        <a href="{{ $resolvedUrl }}" download class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-semibold bg-white text-slate-700 hover:bg-slate-100 transition border-2 border-slate-200 shadow-2xs">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                            <span>Unduh Berkas</span>
-                        </a>
-                    </div>
+            @if (!empty($lampiranPath) && !empty($lampiranUrl))
+                {{-- ACTION --}}
+                <div class="flex flex-wrap items-center gap-2.5">
+                    <a
+                        href="{{ $lampiranUrl }}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm shadow-emerald-600/20 transition hover:bg-emerald-700"
+                    >
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                        Buka Lampiran
+                    </a>
 
-                    {{-- Document Viewer Box --}}
-                    <div class="bg-slate-900/10 p-3 rounded-2xl border-2 border-slate-300 overflow-hidden backdrop-blur-sm">
-                        @if(in_array($extension, ['jpg', 'jpeg', 'png', 'webp', 'gif']))
-                            <div class="text-center py-2">
-                                <img src="{{ $resolvedUrl }}" alt="Lampiran Surat Keluar" class="max-h-[550px] mx-auto rounded-xl border border-white shadow-md object-contain">
-                            </div>
-                        @elseif($extension === 'pdf')
-                            <iframe src="{{ $resolvedUrl }}" class="w-full h-[550px] border-0 rounded-xl bg-white shadow-sm" title="Pratinjau PDF"></iframe>
-                        @else
-                            <div class="text-center py-10 bg-white rounded-xl border border-slate-200">
-                                <svg class="w-12 h-12 text-slate-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                <p class="text-xs text-slate-700 font-medium">Pratinjau langsung tidak tersedia untuk format file <code class="bg-slate-100 px-1.5 py-0.5 rounded text-slate-900 font-bold">.{{ $extension ?: 'dokumen' }}</code>.</p>
-                                <p class="text-[11px] text-slate-500 mt-1">Silakan gunakan tombol "Buka" atau "Unduh" di atas untuk melihat isi berkas.</p>
-                            </div>
-                        @endif
-                    </div>
+                    <a
+                        href="{{ $lampiranUrl }}"
+                        download
+                        class="inline-flex items-center justify-center gap-2 rounded-2xl border-2 border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-100"
+                    >
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        Unduh Berkas
+                    </a>
+                </div>
+
+                {{-- VIEWER --}}
+                <div class="overflow-hidden rounded-2xl border-2 border-slate-300 bg-slate-900/10 p-3">
+                    @if (in_array($lampiranExtension, ['jpg', 'jpeg', 'png'], true))
+                        <div class="py-2 text-center">
+                            <img
+                                src="{{ $lampiranUrl }}"
+                                alt="Lampiran Surat Keluar"
+                                class="mx-auto max-h-[600px] rounded-xl border border-white object-contain shadow-md"
+                                loading="lazy"
+                            >
+                        </div>
+                    @elseif ($lampiranExtension === 'pdf')
+                        <iframe
+                            src="{{ $lampiranUrl }}"
+                            class="h-[600px] w-full rounded-xl border-0 bg-white shadow-sm"
+                            title="Pratinjau PDF Surat Keluar"
+                            loading="lazy"
+                        ></iframe>
+                    @else
+                        <div class="rounded-xl border border-slate-200 bg-white py-12 text-center">
+                            <svg class="mx-auto mb-3 h-12 w-12 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <p class="text-xs font-medium text-slate-700">
+                                Pratinjau langsung tidak tersedia untuk format
+                                <code class="rounded bg-slate-100 px-1.5 py-0.5 font-bold text-slate-900">
+                                    .{{ $lampiranExtension ?: 'dokumen' }}
+                                </code>
+                            </p>
+                            <p class="mt-1 text-[11px] text-slate-500">
+                                Gunakan tombol buka atau unduh untuk melihat berkas.
+                            </p>
+                        </div>
+                    @endif
                 </div>
             @else
-                <div class="w-full flex items-center justify-center gap-3 p-6 rounded-2xl bg-white text-slate-500 border-2 border-slate-200 shadow-sm">
-                    <svg class="w-5 h-5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
-                    <span class="text-xs font-medium">Tidak ada berkas digital yang dilampirkan pada arsip surat ini.</span>
+                <div class="flex w-full items-center justify-center gap-3 rounded-2xl border-2 border-slate-200 bg-white p-6 text-slate-500 shadow-sm">
+                    <svg class="h-5 w-5 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                    </svg>
+                    <span class="text-xs font-medium">
+                        Tidak ada berkas digital yang dilampirkan pada surat ini.
+                    </span>
                 </div>
             @endif
         </div>
-
     </div>
 </div>
 @endsection

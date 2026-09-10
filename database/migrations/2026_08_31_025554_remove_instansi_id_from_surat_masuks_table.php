@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Menghapus instansi_id dan memastikan pengirim tersedia.
      */
     public function up(): void
     {
@@ -17,27 +17,27 @@ return new class extends Migration
 
         /*
         |--------------------------------------------------------------------------
-        | Remove instansi_id
+        | Hapus instansi_id
         |--------------------------------------------------------------------------
-        |
-        | Kolom instansi_id sudah tidak digunakan oleh struktur aplikasi.
-        | Pemeriksaan dilakukan terlebih dahulu agar migration aman
-        | apabila kolom tersebut sudah tidak ada.
-        |
         */
+
         if (Schema::hasColumn('surat_masuks', 'instansi_id')) {
-            $foreignKeys = Schema::getForeignKeys('surat_masuks');
+            if (Schema::hasTable('instansis')) {
+                $foreignKeys = Schema::getForeignKeys('surat_masuks');
 
-            foreach ($foreignKeys as $foreignKey) {
-                if (
-                    isset($foreignKey['name']) &&
-                    $foreignKey['name'] === 'surat_masuks_instansi_id_foreign'
-                ) {
-                    Schema::table('surat_masuks', function (Blueprint $table) {
-                        $table->dropForeign('surat_masuks_instansi_id_foreign');
-                    });
+                foreach ($foreignKeys as $foreignKey) {
+                    if (
+                        isset($foreignKey['name']) &&
+                        $foreignKey['name'] === 'surat_masuks_instansi_id_foreign'
+                    ) {
+                        Schema::table('surat_masuks', function (Blueprint $table) {
+                            $table->dropForeign(
+                                'surat_masuks_instansi_id_foreign'
+                            );
+                        });
 
-                    break;
+                        break;
+                    }
                 }
             }
 
@@ -48,18 +48,20 @@ return new class extends Migration
 
         /*
         |--------------------------------------------------------------------------
-        | Add pengirim
+        | Tambahkan pengirim
         |--------------------------------------------------------------------------
         */
+
         if (! Schema::hasColumn('surat_masuks', 'pengirim')) {
             Schema::table('surat_masuks', function (Blueprint $table) {
-                $table->string('pengirim')->after('nomor_surat');
+                $table->string('pengirim')
+                    ->after('nomor_surat');
             });
         }
     }
 
     /**
-     * Reverse the migrations.
+     * Mengembalikan perubahan migration.
      */
     public function down(): void
     {
@@ -69,9 +71,10 @@ return new class extends Migration
 
         /*
         |--------------------------------------------------------------------------
-        | Remove pengirim
+        | Hapus pengirim
         |--------------------------------------------------------------------------
         */
+
         if (Schema::hasColumn('surat_masuks', 'pengirim')) {
             Schema::table('surat_masuks', function (Blueprint $table) {
                 $table->dropColumn('pengirim');
@@ -80,12 +83,16 @@ return new class extends Migration
 
         /*
         |--------------------------------------------------------------------------
-        | Restore instansi_id
+        | Kembalikan instansi_id
         |--------------------------------------------------------------------------
         */
+
         if (! Schema::hasColumn('surat_masuks', 'instansi_id')) {
             Schema::table('surat_masuks', function (Blueprint $table) {
-                $table->unsignedBigInteger('instansi_id')->nullable();
+                $table->foreignId('instansi_id')
+                    ->nullable()
+                    ->constrained('instansis')
+                    ->nullOnDelete();
             });
         }
     }

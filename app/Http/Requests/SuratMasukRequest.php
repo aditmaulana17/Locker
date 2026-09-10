@@ -11,6 +11,18 @@ use Illuminate\Validation\Rule;
 class SuratMasukRequest extends FormRequest
 {
     /**
+     * Maksimal ukuran file upload: 10 MB.
+     *
+     * Rule Laravel max menggunakan satuan KB.
+     */
+    private const MAX_FILE_SIZE_KB = 10240;
+
+    /**
+     * Maksimal ukuran hasil scan kamera: 10 MB.
+     */
+    private const MAX_CAMERA_SIZE = 10 * 1024 * 1024;
+
+    /**
      * Hanya admin dan pimpinan yang dapat
      * membuat dan mengubah surat masuk.
      */
@@ -157,20 +169,23 @@ class SuratMasukRequest extends FormRequest
             | EDIT:
             | File boleh kosong sehingga file lama tetap digunakan.
             |
-            | Maksimal file 15 MB.
+            | Maksimal file asli: 10 MB.
             |
             */
             'lampiran_file' => [
                 'nullable',
                 'file',
-                'max:15360',
+                'max:' . self::MAX_FILE_SIZE_KB,
                 'mimes:pdf,jpg,jpeg,png',
             ],
 
             /*
             |--------------------------------------------------------------------------
-            | HASIL KAMERA
+            | HASIL SCAN KAMERA
             |--------------------------------------------------------------------------
+            |
+            | Berisi Data URI Base64 dari kamera.
+            |
             */
             'captured_image' => [
                 'nullable',
@@ -218,9 +233,8 @@ class SuratMasukRequest extends FormRequest
         | DEBUG UPLOAD
         |--------------------------------------------------------------------------
         |
-        | Jangan menggunakan getMimeType() di sini.
-        | getMimeType() mencoba membaca temporary file dan pada kondisi
-        | upload invalid dapat menimbulkan exception tambahan.
+        | Membantu mengetahui apakah file benar-benar diterima
+        | oleh PHP sebelum masuk proses validasi Laravel.
         |
         */
         try {
@@ -228,16 +242,11 @@ class SuratMasukRequest extends FormRequest
                 'SURAT MASUK REQUEST DEBUG',
                 [
                     'method' => $this->method(),
-
                     'real_method' => $_SERVER['REQUEST_METHOD'] ?? null,
-
                     'content_type' => $_SERVER['CONTENT_TYPE'] ?? null,
-
                     'content_length' => $_SERVER['CONTENT_LENGTH'] ?? null,
 
-                    'has_file' => $this->hasFile(
-                        'lampiran_file'
-                    ),
+                    'has_file' => $this->hasFile('lampiran_file'),
 
                     'file_exists' => $file !== null,
 
@@ -276,8 +285,8 @@ class SuratMasukRequest extends FormRequest
                     'tmp_exists' => $file
                         ? (
                             $file->getRealPath()
-                            ? file_exists($file->getRealPath())
-                            : false
+                                ? file_exists($file->getRealPath())
+                                : false
                         )
                         : null,
 
@@ -303,25 +312,15 @@ class SuratMasukRequest extends FormRequest
         |--------------------------------------------------------------------------
         */
         $this->merge([
-            'nomor_agenda' => $this->cleanInput(
-                'nomor_agenda'
-            ),
+            'nomor_agenda' => $this->cleanInput('nomor_agenda'),
 
-            'nomor_surat' => $this->cleanInput(
-                'nomor_surat'
-            ),
+            'nomor_surat' => $this->cleanInput('nomor_surat'),
 
-            'pengirim' => $this->cleanInput(
-                'pengirim'
-            ),
+            'pengirim' => $this->cleanInput('pengirim'),
 
-            'perihal' => $this->cleanInput(
-                'perihal'
-            ),
+            'perihal' => $this->cleanInput('perihal'),
 
-            'ringkasan' => $this->cleanInput(
-                'ringkasan'
-            ),
+            'ringkasan' => $this->cleanInput('ringkasan'),
 
             'status' => $this->cleanStatus(),
 
@@ -334,28 +333,23 @@ class SuratMasukRequest extends FormRequest
     }
 
     /**
-     * Validasi tambahan.
+     * Validasi tambahan setelah rules utama selesai.
      */
-    protected function withValidator(Validator $validator): void
-    {
+    protected function withValidator(
+        Validator $validator
+    ): void {
         $validator->after(
             function (Validator $validator): void {
-                $hasFile = $this->hasFile(
-                    'lampiran_file'
-                );
+                $hasFile = $this->hasFile('lampiran_file');
 
-                $file = $this->file(
-                    'lampiran_file'
-                );
+                $file = $this->file('lampiran_file');
 
                 $hasValidFile =
                     $hasFile
                     && $file !== null
                     && $file->isValid();
 
-                $hasCamera = $this->filled(
-                    'captured_image'
-                );
+                $hasCamera = $this->filled('captured_image');
 
                 /*
                 |--------------------------------------------------------------------------
@@ -405,10 +399,10 @@ class SuratMasukRequest extends FormRequest
                             'tmp_exists' => $file
                                 ? (
                                     $file->getRealPath()
-                                    ? file_exists(
-                                        $file->getRealPath()
-                                    )
-                                    : false
+                                        ? file_exists(
+                                            $file->getRealPath()
+                                        )
+                                        : false
                                 )
                                 : null,
 
@@ -506,7 +500,8 @@ class SuratMasukRequest extends FormRequest
                 | CREATE
                 |--------------------------------------------------------------------------
                 |
-                | POST = create.
+                | Saat membuat surat baru, lampiran digital wajib
+                | berasal dari upload file atau scan kamera.
                 |
                 */
                 if ($this->isMethod('POST')) {
@@ -538,9 +533,7 @@ class SuratMasukRequest extends FormRequest
                 |--------------------------------------------------------------------------
                 */
                 $captured = trim(
-                    (string) $this->input(
-                        'captured_image'
-                    )
+                    (string) $this->input('captured_image')
                 );
 
                 if (
@@ -577,7 +570,27 @@ class SuratMasukRequest extends FormRequest
                     return;
                 }
 
+                $header = $parts[0];
                 $encoded = $parts[1];
+
+                /*
+                |--------------------------------------------------------------------------
+                | VALIDASI HEADER DATA URI
+                |--------------------------------------------------------------------------
+                */
+                if (
+                    !preg_match(
+                        '/^data:image\/(jpeg|jpg|png);base64$/i',
+                        $header
+                    )
+                ) {
+                    $validator->errors()->add(
+                        'captured_image',
+                        'Header hasil scan kamera tidak valid.'
+                    );
+
+                    return;
+                }
 
                 /*
                 |--------------------------------------------------------------------------
@@ -603,16 +616,16 @@ class SuratMasukRequest extends FormRequest
 
                 /*
                 |--------------------------------------------------------------------------
-                | BATAS UKURAN
+                | BATAS UKURAN SCAN KAMERA
                 |--------------------------------------------------------------------------
                 */
                 if (
                     strlen($decoded)
-                    > 15 * 1024 * 1024
+                    > self::MAX_CAMERA_SIZE
                 ) {
                     $validator->errors()->add(
                         'captured_image',
-                        'Ukuran hasil kamera maksimal 15 MB.'
+                        'Ukuran hasil kamera maksimal 10 MB.'
                     );
 
                     return;
@@ -713,18 +726,12 @@ class SuratMasukRequest extends FormRequest
      */
     private function cleanCapturedImage(): ?string
     {
-        if (
-            !$this->filled(
-                'captured_image'
-            )
-        ) {
+        if (!$this->filled('captured_image')) {
             return null;
         }
 
         $value = trim(
-            (string) $this->input(
-                'captured_image'
-            )
+            (string) $this->input('captured_image')
         );
 
         return $value !== ''
@@ -808,7 +815,7 @@ class SuratMasukRequest extends FormRequest
                 ':attribute harus berformat PDF, JPG, JPEG, atau PNG.',
 
             'lampiran_file.max' =>
-                ':attribute maksimal berukuran 15 MB.',
+                ':attribute maksimal berukuran 10 MB.',
 
             'captured_image.string' =>
                 ':attribute tidak valid.',

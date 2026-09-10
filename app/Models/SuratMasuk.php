@@ -48,6 +48,12 @@ class SuratMasuk extends Model
     }
 
     /**
+     * =========================================================
+     * RELATIONSHIPS
+     * =========================================================
+     */
+
+    /**
      * Relasi ke kategori surat.
      */
     public function kategori(): BelongsTo
@@ -81,10 +87,18 @@ class SuratMasuk extends Model
     }
 
     /**
+     * =========================================================
+     * NOMOR AGENDA
+     * =========================================================
+     */
+
+    /**
      * Generate nomor agenda otomatis.
      *
      * Format:
      * AG/0001/09/2026
+     *
+     * Nomor urut dimulai kembali setiap bulan.
      */
     public static function generateNomorAgenda(): string
     {
@@ -92,14 +106,8 @@ class SuratMasuk extends Model
         $tahun = now()->format('Y');
 
         $records = self::withTrashed()
-            ->whereYear(
-                'created_at',
-                $tahun
-            )
-            ->whereMonth(
-                'created_at',
-                $bulan
-            )
+            ->whereYear('created_at', $tahun)
+            ->whereMonth('created_at', $bulan)
             ->pluck('nomor_agenda');
 
         $maxUrutan = 0;
@@ -128,6 +136,12 @@ class SuratMasuk extends Model
     }
 
     /**
+     * =========================================================
+     * FILTER
+     * =========================================================
+     */
+
+    /**
      * Scope filter surat masuk.
      *
      * Mendukung:
@@ -140,26 +154,21 @@ class SuratMasuk extends Model
         Builder $query,
         array $filters = []
     ): Builder {
-        /*
-         * =========================================================
+        /**
+         * =====================================================
          * SEARCH
-         * =========================================================
+         * =====================================================
          */
+
         $search = isset($filters['search'])
-            ? trim(
-                (string) $filters['search']
-            )
+            ? trim((string) $filters['search'])
             : '';
 
         if ($search !== '') {
-            $keyword =
-                "%{$search}%";
+            $keyword = "%{$search}%";
 
             $query->where(
-                function (
-                    Builder $q
-                ) use ($keyword): void {
-
+                function (Builder $q) use ($keyword): void {
                     $q->where(
                         'perihal',
                         'like',
@@ -187,9 +196,7 @@ class SuratMasuk extends Model
                     )
                     ->orWhereHas(
                         'kategori',
-                        function (
-                            Builder $kategori
-                        ) use ($keyword): void {
+                        function (Builder $kategori) use ($keyword): void {
                             $kategori
                                 ->where(
                                     'nama_kategori',
@@ -210,9 +217,7 @@ class SuratMasuk extends Model
                     )
                     ->orWhereHas(
                         'penerima',
-                        function (
-                            Builder $user
-                        ) use ($keyword): void {
+                        function (Builder $user) use ($keyword): void {
                             $user
                                 ->where(
                                     'name',
@@ -235,15 +240,16 @@ class SuratMasuk extends Model
             );
         }
 
-        /*
-         * =========================================================
+        /**
+         * =====================================================
          * FILTER KATEGORI
-         * =========================================================
+         * =====================================================
          *
          * Mendukung:
-         * kategori_surat_id
-         * kategori_id sebagai parameter lama.
+         * - kategori_surat_id
+         * - kategori_id sebagai parameter lama
          */
+
         $rawKategoriIds =
             $filters['kategori_surat_id']
             ?? $filters['kategori_id']
@@ -251,18 +257,14 @@ class SuratMasuk extends Model
 
         if (
             is_scalar($rawKategoriIds) &&
-            trim(
-                (string) $rawKategoriIds
-            ) !== ''
+            trim((string) $rawKategoriIds) !== ''
         ) {
             $rawKategoriIds = [
                 $rawKategoriIds,
             ];
         }
 
-        $kategoriIds = collect(
-            $rawKategoriIds
-        )
+        $kategoriIds = collect($rawKategoriIds)
             ->flatten()
             ->filter(
                 fn ($id) =>
@@ -271,8 +273,7 @@ class SuratMasuk extends Model
                     && (int) $id > 0
             )
             ->map(
-                fn ($id) =>
-                    (int) $id
+                fn ($id) => (int) $id
             )
             ->unique()
             ->values()
@@ -285,11 +286,12 @@ class SuratMasuk extends Model
             );
         }
 
-        /*
-         * =========================================================
+        /**
+         * =====================================================
          * FILTER STATUS
-         * =========================================================
+         * =====================================================
          */
+
         $allowedStatuses = [
             'baru',
             'diproses',
@@ -298,23 +300,18 @@ class SuratMasuk extends Model
             'diarsipkan',
         ];
 
-        $rawStatuses =
-            $filters['status'] ?? [];
+        $rawStatuses = $filters['status'] ?? [];
 
         if (
             is_scalar($rawStatuses) &&
-            trim(
-                (string) $rawStatuses
-            ) !== ''
+            trim((string) $rawStatuses) !== ''
         ) {
             $rawStatuses = [
                 $rawStatuses,
             ];
         }
 
-        $statuses = collect(
-            $rawStatuses
-        )
+        $statuses = collect($rawStatuses)
             ->flatten()
             ->filter(
                 fn ($status) =>
@@ -345,42 +342,35 @@ class SuratMasuk extends Model
             );
         }
 
-        /*
-         * =========================================================
+        /**
+         * =====================================================
          * FILTER TANGGAL
-         * =========================================================
+         * =====================================================
          */
+
         $dariTanggal =
             $filters['dari_tanggal'] ?? null;
 
         $sampaiTanggal =
             $filters['sampai_tanggal'] ?? null;
 
-        $dariTanggal =
-            is_scalar($dariTanggal)
-                ? trim(
-                    (string) $dariTanggal
-                )
-                : '';
+        $dariTanggal = is_scalar($dariTanggal)
+            ? trim((string) $dariTanggal)
+            : '';
 
-        $sampaiTanggal =
-            is_scalar($sampaiTanggal)
-                ? trim(
-                    (string) $sampaiTanggal
-                )
-                : '';
+        $sampaiTanggal = is_scalar($sampaiTanggal)
+            ? trim((string) $sampaiTanggal)
+            : '';
 
-        $validDariTanggal =
-            self::validDate(
-                $dariTanggal
-            );
+        $validDariTanggal = self::validDate(
+            $dariTanggal
+        );
 
-        $validSampaiTanggal =
-            self::validDate(
-                $sampaiTanggal
-            );
+        $validSampaiTanggal = self::validDate(
+            $sampaiTanggal
+        );
 
-        /*
+        /**
          * Jika tanggal awal lebih besar,
          * otomatis ditukar.
          */
@@ -418,6 +408,12 @@ class SuratMasuk extends Model
     }
 
     /**
+     * =========================================================
+     * STAFF
+     * =========================================================
+     */
+
+    /**
      * Scope surat masuk untuk staff tertentu.
      *
      * Staff hanya melihat surat yang memiliki
@@ -429,9 +425,7 @@ class SuratMasuk extends Model
     ): Builder {
         return $query->whereHas(
             'disposisi',
-            function (
-                Builder $disposisi
-            ) use ($userId): void {
+            function (Builder $disposisi) use ($userId): void {
                 $disposisi->where(
                     'kepada_user_id',
                     $userId
@@ -439,6 +433,12 @@ class SuratMasuk extends Model
             }
         );
     }
+
+    /**
+     * =========================================================
+     * STATUS
+     * =========================================================
+     */
 
     /**
      * Scope berdasarkan status.
@@ -454,20 +454,21 @@ class SuratMasuk extends Model
             return $query;
         }
 
-        $status =
-            strtolower(
-                trim($status)
-            );
+        $status = strtolower(
+            trim($status)
+        );
+
+        $allowedStatuses = [
+            'baru',
+            'diproses',
+            'didisposisikan',
+            'selesai',
+            'diarsipkan',
+        ];
 
         if (!in_array(
             $status,
-            [
-                'baru',
-                'diproses',
-                'didisposisikan',
-                'selesai',
-                'diarsipkan',
-            ],
+            $allowedStatuses,
             true
         )) {
             return $query;
@@ -478,6 +479,12 @@ class SuratMasuk extends Model
             [$status]
         );
     }
+
+    /**
+     * =========================================================
+     * KATEGORI
+     * =========================================================
+     */
 
     /**
      * Scope berdasarkan kategori.
@@ -498,6 +505,12 @@ class SuratMasuk extends Model
             $kategoriId
         );
     }
+
+    /**
+     * =========================================================
+     * URUTAN DATA
+     * =========================================================
+     */
 
     /**
      * Scope surat terbaru.
@@ -542,41 +555,36 @@ class SuratMasuk extends Model
     }
 
     /**
+     * =========================================================
+     * STATUS ATTRIBUTE
+     * =========================================================
+     */
+
+    /**
      * Label status untuk tampilan.
      */
     public function getStatusLabelAttribute(): string
     {
-        $status =
-            strtolower(
-                trim(
-                    (string) $this->status
-                )
-            );
+        $status = strtolower(
+            trim(
+                (string) $this->status
+            )
+        );
 
         return match ($status) {
-            'baru' =>
-                'Baru',
+            'baru' => 'Baru',
+            'diproses' => 'Diproses',
+            'didisposisikan' => 'Didisposisikan',
+            'selesai' => 'Selesai',
+            'diarsipkan' => 'Diarsipkan',
 
-            'diproses' =>
-                'Diproses',
-
-            'didisposisikan' =>
-                'Didisposisikan',
-
-            'selesai' =>
-                'Selesai',
-
-            'diarsipkan' =>
-                'Diarsipkan',
-
-            default =>
-                ucfirst(
-                    str_replace(
-                        '_',
-                        ' ',
-                        $status
-                    )
-                ),
+            default => ucfirst(
+                str_replace(
+                    '_',
+                    ' ',
+                    $status
+                )
+            ),
         };
     }
 
@@ -625,6 +633,12 @@ class SuratMasuk extends Model
     }
 
     /**
+     * =========================================================
+     * LAMPIRAN
+     * =========================================================
+     */
+
+    /**
      * Mengecek apakah surat memiliki lampiran.
      */
     public function hasLampiran(): bool
@@ -659,6 +673,12 @@ class SuratMasuk extends Model
     }
 
     /**
+     * =========================================================
+     * DISPOSISI
+     * =========================================================
+     */
+
+    /**
      * Mengecek apakah surat memiliki disposisi.
      */
     public function hasDisposisi(): bool
@@ -673,6 +693,12 @@ class SuratMasuk extends Model
     {
         return $this->hasDisposisi();
     }
+
+    /**
+     * =========================================================
+     * STATUS CHECK
+     * =========================================================
+     */
 
     /**
      * Mengecek apakah surat sudah selesai.
@@ -714,6 +740,12 @@ class SuratMasuk extends Model
     }
 
     /**
+     * =========================================================
+     * VALIDASI TANGGAL
+     * =========================================================
+     */
+
+    /**
      * Validasi tanggal YYYY-MM-DD.
      */
     private static function validDate(
@@ -723,10 +755,9 @@ class SuratMasuk extends Model
             return false;
         }
 
-        $value =
-            trim(
-                (string) $value
-            );
+        $value = trim(
+            (string) $value
+        );
 
         if (!preg_match(
             '/^\d{4}-\d{2}-\d{2}$/',

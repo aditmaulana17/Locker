@@ -27,7 +27,7 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Administrator',
                 'password' => Hash::make('password'),
-                'role' => 'admin',
+                'role' => User::ROLE_ADMIN,
                 'jabatan' => 'Kepala IT / Admin Sistem',
                 'is_active' => true,
             ]
@@ -46,7 +46,7 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Kepala Instansi',
                 'password' => Hash::make('password'),
-                'role' => 'pimpinan',
+                'role' => User::ROLE_PIMPINAN,
                 'jabatan' => 'Kepala Dinas / Direktur',
                 'is_active' => true,
             ]
@@ -65,7 +65,7 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Staff Arsip',
                 'password' => Hash::make('password'),
-                'role' => 'staff',
+                'role' => User::ROLE_STAFF,
                 'jabatan' => 'Staff Administrasi & Agenda',
                 'is_active' => true,
             ]
