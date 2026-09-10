@@ -17,9 +17,15 @@
 
     if ($tanggalSurat === null && $suratMasuk->tanggal_surat) {
         try {
-            $tanggalSurat = Carbon::parse($suratMasuk->tanggal_surat)->format('Y-m-d');
+            $tanggalSurat = Carbon::parse(
+                $suratMasuk->tanggal_surat
+            )->format('Y-m-d');
         } catch (\Throwable $e) {
-            $tanggalSurat = substr((string) $suratMasuk->tanggal_surat, 0, 10);
+            $tanggalSurat = substr(
+                (string) $suratMasuk->tanggal_surat,
+                0,
+                10
+            );
         }
     }
 
@@ -33,9 +39,15 @@
 
     if ($tanggalTerima === null && $suratMasuk->tanggal_terima) {
         try {
-            $tanggalTerima = Carbon::parse($suratMasuk->tanggal_terima)->format('Y-m-d');
+            $tanggalTerima = Carbon::parse(
+                $suratMasuk->tanggal_terima
+            )->format('Y-m-d');
         } catch (\Throwable $e) {
-            $tanggalTerima = substr((string) $suratMasuk->tanggal_terima, 0, 10);
+            $tanggalTerima = substr(
+                (string) $suratMasuk->tanggal_terima,
+                0,
+                10
+            );
         }
     }
 
@@ -75,9 +87,9 @@
 @endphp
 
 
-{{-- ================================================================ --}}
-{{-- HEADER --}}
-{{-- ================================================================ --}}
+{{-- ==========================================================================
+    HEADER
+============================================================================= --}}
 
 <div class="mb-6">
 
@@ -150,9 +162,9 @@
 </div>
 
 
-{{-- ================================================================ --}}
-{{-- VALIDATION ERROR --}}
-{{-- ================================================================ --}}
+{{-- ==========================================================================
+    VALIDATION ERROR
+============================================================================= --}}
 
 @if($errors->any())
 
@@ -206,9 +218,9 @@
 @endif
 
 
-{{-- ================================================================ --}}
-{{-- FORM --}}
-{{-- ================================================================ --}}
+{{-- ==========================================================================
+    FORM
+============================================================================= --}}
 
 <form
     id="form-surat"
@@ -228,16 +240,16 @@
     >
 
 
-    {{-- ============================================================ --}}
-    {{-- MAIN CARD --}}
-    {{-- ============================================================ --}}
+    {{-- =========================================================================
+        MAIN CARD
+    ========================================================================= --}}
 
     <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
 
 
-        {{-- ======================================================== --}}
-        {{-- AGENDA BAR --}}
-        {{-- ======================================================== --}}
+        {{-- =====================================================================
+            AGENDA BAR
+        ====================================================================== --}}
 
         <div class="border-b border-slate-200 bg-slate-50 px-4 py-4 sm:px-6">
 
@@ -286,16 +298,16 @@
         </div>
 
 
-        {{-- ======================================================== --}}
-        {{-- FORM BODY --}}
-        {{-- ======================================================== --}}
+        {{-- =====================================================================
+            FORM BODY
+        ====================================================================== --}}
 
         <div class="space-y-8 p-4 sm:p-6 lg:p-8">
 
 
-            {{-- ==================================================== --}}
-            {{-- INFORMASI UTAMA --}}
-            {{-- ==================================================== --}}
+            {{-- =================================================================
+                INFORMASI UTAMA
+            ================================================================== --}}
 
             <section>
 
@@ -486,7 +498,6 @@
                                     @if(!empty($kategori->sifat))
                                         ({{ ucfirst($kategori->sifat) }})
                                     @endif
-
                                 </option>
 
                             @endforeach
@@ -608,9 +619,9 @@
             </section>
 
 
-            {{-- ==================================================== --}}
-            {{-- LAMPIRAN --}}
-            {{-- ==================================================== --}}
+            {{-- =================================================================
+                LAMPIRAN
+            ================================================================== --}}
 
             <section class="border-t border-slate-200 pt-8">
 
@@ -636,9 +647,9 @@
                 <div class="grid grid-cols-1 gap-6 xl:grid-cols-2">
 
 
-                    {{-- ================================================= --}}
-                    {{-- DOKUMEN DIGITAL --}}
-                    {{-- ================================================= --}}
+                    {{-- =================================================================
+                        DOKUMEN DIGITAL
+                    ================================================================== --}}
 
                     <div class="rounded-2xl border border-slate-200 bg-slate-50/60 p-4 sm:p-5">
 
@@ -700,9 +711,7 @@
                         </div>
 
 
-                        {{-- ================================================= --}}
                         {{-- MODE BUTTON --}}
-                        {{-- ================================================= --}}
 
                         <div class="mb-4 grid grid-cols-2 gap-2">
 
@@ -725,7 +734,7 @@
                                             stroke-linecap="round"
                                             stroke-linejoin="round"
                                             stroke-width="2"
-                                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 0115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 0115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l3 3m-3-3v12"
                                         />
                                     </svg>
 
@@ -788,9 +797,7 @@
                         </div>
 
 
-                        {{-- ================================================= --}}
                         {{-- FILE LAMA --}}
-                        {{-- ================================================= --}}
 
                         <div class="mb-4 rounded-xl border border-slate-200 bg-white p-3">
 
@@ -863,9 +870,7 @@
                         </div>
 
 
-                        {{-- ================================================= --}}
                         {{-- UPLOAD PANEL --}}
-                        {{-- ================================================= --}}
 
                         <div id="upload-panel">
 
@@ -887,7 +892,7 @@
                                             stroke-linecap="round"
                                             stroke-linejoin="round"
                                             stroke-width="2"
-                                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 0115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 0115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l3 3m-3-3v12"
                                         />
                                     </svg>
 
@@ -995,9 +1000,7 @@
                         </div>
 
 
-                        {{-- ================================================= --}}
                         {{-- SCAN PANEL --}}
-                        {{-- ================================================= --}}
 
                         <div
                             id="scan-panel"
@@ -1086,8 +1089,6 @@
                                         role="alert"
                                     ></div>
 
-
-                                    {{-- CAMERA FRAME --}}
 
                                     <div class="pointer-events-none absolute inset-8 rounded-xl border-2 border-dashed border-white/40 sm:inset-12"></div>
 
@@ -1240,7 +1241,7 @@
                                 Jika tidak memilih file baru dan tidak melakukan scan,
                                 dokumen lama akan tetap dipertahankan.
 
-                                PDF tidak dikompres, sedangkan gambar akan
+                                PDF tidak dikompres, sedangkan JPG, JPEG, dan PNG
                                 dikompres otomatis sebelum upload.
 
                             </p>
@@ -1272,9 +1273,9 @@
                     </div>
 
 
-                    {{-- ================================================= --}}
-                    {{-- ARSIP FISIK --}}
-                    {{-- ================================================= --}}
+                    {{-- =================================================================
+                        ARSIP FISIK
+                    ================================================================== --}}
 
                     <div class="rounded-2xl border border-slate-200 bg-slate-50/60 p-4 sm:p-5">
 
@@ -1387,9 +1388,9 @@
         </div>
 
 
-        {{-- ======================================================== --}}
-        {{-- FOOTER --}}
-        {{-- ======================================================== --}}
+        {{-- =====================================================================
+            FOOTER
+        ====================================================================== --}}
 
         <div class="flex flex-col-reverse gap-3 border-t border-slate-200 bg-slate-50 px-4 py-4 sm:flex-row sm:items-center sm:justify-end sm:px-6">
 
@@ -1434,14 +1435,21 @@
 </form>
 
 
-{{-- ================================================================ --}}
-{{-- JAVASCRIPT --}}
-{{-- ================================================================ --}}
+{{-- ==========================================================================
+    JAVASCRIPT
+============================================================================= --}}
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
 
     'use strict';
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | ELEMENT
+    |--------------------------------------------------------------------------
+    */
 
     const form = document.getElementById('form-surat');
 
@@ -1477,6 +1485,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const submitBtn = document.getElementById('submit-btn');
     const submitText = document.getElementById('submit-text');
 
+
     if (!form || !fileInput || !capturedInput) {
         return;
     }
@@ -1484,16 +1493,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /*
     |--------------------------------------------------------------------------
-    | CONFIG
+    | CONFIGURATION
     |--------------------------------------------------------------------------
     */
 
     const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
-    // Target hasil gambar.
     const TARGET_IMAGE_SIZE = 2.5 * 1024 * 1024;
 
-    // Batas absolut hasil kompresi.
     const MAX_COMPRESSED_IMAGE_SIZE = 5 * 1024 * 1024;
 
     const MAX_IMAGE_DIMENSION = 2200;
@@ -1501,19 +1508,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const MIN_IMAGE_DIMENSION = 1200;
 
     const JPEG_QUALITIES = [
-        0.82,
+        0.84,
+        0.80,
         0.76,
-        0.70,
+        0.72,
+        0.68,
         0.64,
-        0.58,
+        0.60,
+        0.56,
         0.52,
-        0.46,
+        0.48,
+        0.44,
         0.40,
-        0.34
+        0.36,
+        0.32
     ];
 
+
     let cameraStream = null;
+
     let previewObjectUrl = null;
+
+    let isSubmitting = false;
 
 
     /*
@@ -1542,7 +1558,10 @@ document.addEventListener('DOMContentLoaded', () => {
     |--------------------------------------------------------------------------
     */
 
-    function getReductionPercent(originalSize, compressedSize) {
+    function getReductionPercent(
+        originalSize,
+        compressedSize
+    ) {
 
         if (!originalSize || originalSize <= 0) {
             return 0;
@@ -1570,6 +1589,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         cameraError.textContent = message;
+
         cameraError.classList.remove('hidden');
     }
 
@@ -1581,6 +1601,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         cameraError.textContent = '';
+
         cameraError.classList.add('hidden');
     }
 
@@ -1624,9 +1645,11 @@ document.addEventListener('DOMContentLoaded', () => {
         );
 
         uploadPanel?.classList.remove('hidden');
+
         scanPanel?.classList.add('hidden');
 
         stopCamera();
+
         clearCameraError();
     }
 
@@ -1670,9 +1693,11 @@ document.addEventListener('DOMContentLoaded', () => {
         );
 
         uploadPanel?.classList.add('hidden');
+
         scanPanel?.classList.remove('hidden');
 
         clearFileSelection();
+
         clearCameraError();
     }
 
@@ -1694,196 +1719,284 @@ document.addEventListener('DOMContentLoaded', () => {
     |--------------------------------------------------------------------------
     */
 
-    fileInput.addEventListener('change', async () => {
+    fileInput.addEventListener(
+        'change',
+        async () => {
 
-        clearCameraError();
+            clearCameraError();
 
-        const file = fileInput.files?.[0];
+            const file = fileInput.files?.[0];
 
-        if (!file) {
-            return;
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | CHECK SIZE
-        |--------------------------------------------------------------------------
-        */
-
-        if (file.size > MAX_FILE_SIZE) {
-
-            clearFileSelection();
-
-            alert(
-                'Ukuran file terlalu besar.\n\n' +
-                'Maksimal ukuran file adalah 10 MB.'
-            );
-
-            return;
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | PDF
-        |--------------------------------------------------------------------------
-        */
-
-        if (file.type === 'application/pdf') {
-
-            capturedInput.value = '';
-
-            clearScanResult();
-
-            showSelectedFile(
-                file,
-                'PDF disimpan tanpa kompresi'
-            );
-
-            return;
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | IMAGE
-        |--------------------------------------------------------------------------
-        */
-
-        const supportedImages = [
-            'image/jpeg',
-            'image/jpg',
-            'image/png'
-        ];
-
-        if (!supportedImages.includes(file.type)) {
-
-            clearFileSelection();
-
-            alert(
-                'Format file tidak didukung.\n\n' +
-                'Gunakan PDF, JPG, JPEG, atau PNG.'
-            );
-
-            return;
-        }
-
-
-        try {
-
-            const originalSize = file.size;
-
-            const compressedFile =
-                await compressImageFile(file);
-
-
-            let finalFile = compressedFile;
-
-            /*
-            |----------------------------------------------------------------------
-            | Jika hasil kompresi justru lebih besar,
-            | gunakan file asli.
-            |----------------------------------------------------------------------
-            */
-
-            if (compressedFile.size >= originalSize) {
-                finalFile = file;
+            if (!file) {
+                return;
             }
 
 
             /*
             |----------------------------------------------------------------------
-            | Pastikan tetap di bawah batas maksimal.
+            | CHECK EXTENSION
             |----------------------------------------------------------------------
             */
 
-            if (finalFile.size > MAX_FILE_SIZE) {
+            const fileName =
+                String(file.name || '');
+
+            const extension =
+                fileName
+                    .split('.')
+                    .pop()
+                    ?.toLowerCase();
+
+
+            const allowedExtensions = [
+                'pdf',
+                'jpg',
+                'jpeg',
+                'png'
+            ];
+
+
+            if (
+                !extension ||
+                !allowedExtensions.includes(extension)
+            ) {
 
                 clearFileSelection();
 
                 alert(
-                    'Gambar masih terlalu besar setelah dikompres.\n\n' +
-                    'Silakan gunakan gambar dengan resolusi lebih rendah.'
+                    'Format file tidak didukung.\n\n' +
+                    'Gunakan PDF, JPG, JPEG, atau PNG.'
                 );
 
                 return;
             }
 
 
-            const dataTransfer = new DataTransfer();
+            /*
+            |----------------------------------------------------------------------
+            | CHECK ORIGINAL SIZE
+            |----------------------------------------------------------------------
+            */
 
-            dataTransfer.items.add(finalFile);
+            if (file.size > MAX_FILE_SIZE) {
 
-            fileInput.files = dataTransfer.files;
+                clearFileSelection();
+
+                alert(
+                    'Ukuran file terlalu besar.\n\n' +
+                    'Maksimal ukuran file adalah 10 MB.'
+                );
+
+                return;
+            }
 
 
             /*
             |----------------------------------------------------------------------
-            | Upload baru membatalkan scan.
+            | PDF
             |----------------------------------------------------------------------
             */
 
-            capturedInput.value = '';
-            clearScanResult();
+            if (
+                extension === 'pdf' ||
+                file.type === 'application/pdf'
+            ) {
 
+                capturedInput.value = '';
 
-            const reduction = getReductionPercent(
-                originalSize,
-                finalFile.size
-            );
+                clearScanResult();
 
+                showSelectedFile(
+                    file,
+                    'PDF disimpan tanpa kompresi'
+                );
 
-            let note;
-
-            if (finalFile === file) {
-
-                note =
-                    `Tidak dikompres • ${formatFileSize(finalFile.size)}`;
-
-            } else {
-
-                note =
-                    `Dikompres ${reduction}% • ${formatFileSize(finalFile.size)}`;
+                return;
             }
 
 
-            showSelectedFile(
-                finalFile,
-                note
-            );
+            /*
+            |----------------------------------------------------------------------
+            | IMAGE
+            |----------------------------------------------------------------------
+            */
 
-        } catch (error) {
+            const isImage =
+                extension === 'jpg' ||
+                extension === 'jpeg' ||
+                extension === 'png';
 
-            console.error(
-                'Compression upload gagal:',
-                error
-            );
 
-            clearFileSelection();
+            if (!isImage) {
 
-            alert(
-                error?.message ||
-                'Gagal memproses gambar.'
-            );
+                clearFileSelection();
+
+                alert(
+                    'Format file tidak didukung.\n\n' +
+                    'Gunakan PDF, JPG, JPEG, atau PNG.'
+                );
+
+                return;
+            }
+
+
+            try {
+
+                const originalSize = file.size;
+
+
+                /*
+                |------------------------------------------------------------------
+                | COMPRESS
+                |------------------------------------------------------------------
+                */
+
+                const compressedFile =
+                    await compressImageFile(
+                        file
+                    );
+
+
+                let finalFile =
+                    compressedFile;
+
+
+                /*
+                |------------------------------------------------------------------
+                | Jangan gunakan hasil kompresi
+                | jika justru lebih besar.
+                |------------------------------------------------------------------
+                */
+
+                if (
+                    compressedFile.size >=
+                    originalSize
+                ) {
+
+                    finalFile = file;
+                }
+
+
+                /*
+                |------------------------------------------------------------------
+                | FINAL SIZE
+                |------------------------------------------------------------------
+                */
+
+                if (
+                    finalFile.size >
+                    MAX_FILE_SIZE
+                ) {
+
+                    clearFileSelection();
+
+                    alert(
+                        'Gambar masih terlalu besar setelah dikompres.\n\n' +
+                        'Silakan pilih gambar dengan resolusi lebih rendah.'
+                    );
+
+                    return;
+                }
+
+
+                /*
+                |------------------------------------------------------------------
+                | MASUKKAN FILE HASIL KE INPUT
+                |------------------------------------------------------------------
+                */
+
+                const dataTransfer =
+                    new DataTransfer();
+
+                dataTransfer.items.add(
+                    finalFile
+                );
+
+                fileInput.files =
+                    dataTransfer.files;
+
+
+                /*
+                |------------------------------------------------------------------
+                | Upload membatalkan scan
+                |------------------------------------------------------------------
+                */
+
+                capturedInput.value = '';
+
+                clearScanResult();
+
+
+                /*
+                |------------------------------------------------------------------
+                | INFO
+                |------------------------------------------------------------------
+                */
+
+                const reduction =
+                    getReductionPercent(
+                        originalSize,
+                        finalFile.size
+                    );
+
+
+                let note;
+
+
+                if (finalFile === file) {
+
+                    note =
+                        `Tidak dikompres • ${formatFileSize(finalFile.size)}`;
+
+                } else {
+
+                    note =
+                        `Dikompres ${reduction}% • ${formatFileSize(finalFile.size)}`;
+                }
+
+
+                showSelectedFile(
+                    finalFile,
+                    note
+                );
+
+            } catch (error) {
+
+                console.error(
+                    'Compression upload gagal:',
+                    error
+                );
+
+                clearFileSelection();
+
+                alert(
+                    error?.message ||
+                    'Gagal memproses gambar.'
+                );
+            }
         }
-    });
+    );
 
 
     /*
     |--------------------------------------------------------------------------
-    | SHOW FILE
+    | SHOW SELECTED FILE
     |--------------------------------------------------------------------------
     */
 
-    function showSelectedFile(file, note = '') {
+    function showSelectedFile(
+        file,
+        note = ''
+    ) {
 
         if (!selectedFile) {
             return;
         }
 
         if (selectedFileName) {
-            selectedFileName.textContent = file.name;
+
+            selectedFileName.textContent =
+                file.name;
         }
 
         if (selectedFileSize) {
@@ -1892,7 +2005,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 `${formatFileSize(file.size)}${note ? ` • ${note}` : ''}`;
         }
 
-        selectedFile.classList.remove('hidden');
+        selectedFile.classList.remove(
+            'hidden'
+        );
 
         uploadBox?.classList.add(
             'border-emerald-400',
@@ -1913,7 +2028,9 @@ document.addEventListener('DOMContentLoaded', () => {
             fileInput.value = '';
         }
 
-        selectedFile?.classList.add('hidden');
+        selectedFile?.classList.add(
+            'hidden'
+        );
 
         if (selectedFileName) {
             selectedFileName.textContent = '';
@@ -1944,45 +2061,60 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function loadImageFromFile(file) {
 
-        return new Promise((resolve, reject) => {
+        return new Promise(
+            (resolve, reject) => {
 
-            const objectUrl = URL.createObjectURL(file);
+                const objectUrl =
+                    URL.createObjectURL(file);
 
-            const image = new Image();
+                const image =
+                    new Image();
 
-            image.onload = () => {
 
-                URL.revokeObjectURL(objectUrl);
+                image.onload = () => {
 
-                resolve(image);
-            };
+                    URL.revokeObjectURL(
+                        objectUrl
+                    );
 
-            image.onerror = () => {
+                    resolve(image);
+                };
 
-                URL.revokeObjectURL(objectUrl);
 
-                reject(
-                    new Error(
-                        'Gambar tidak dapat dibaca oleh browser.'
-                    )
-                );
-            };
+                image.onerror = () => {
 
-            image.src = objectUrl;
-        });
+                    URL.revokeObjectURL(
+                        objectUrl
+                    );
+
+                    reject(
+                        new Error(
+                            'Gambar tidak dapat dibaca oleh browser.'
+                        )
+                    );
+                };
+
+
+                image.src =
+                    objectUrl;
+            }
+        );
     }
 
 
     /*
     |--------------------------------------------------------------------------
-    | COMPRESS IMAGE
+    | COMPRESS IMAGE FILE
     |--------------------------------------------------------------------------
     */
 
     async function compressImageFile(file) {
 
         const image =
-            await loadImageFromFile(file);
+            await loadImageFromFile(
+                file
+            );
+
 
         return compressImageElement(
             image,
@@ -1993,7 +2125,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /*
     |--------------------------------------------------------------------------
-    | CALCULATE DIMENSION
+    | CALCULATE DIMENSIONS
     |--------------------------------------------------------------------------
     */
 
@@ -2003,22 +2135,113 @@ document.addEventListener('DOMContentLoaded', () => {
         maxDimension
     ) {
 
-        const scale = Math.min(
-            maxDimension / width,
-            maxDimension / height,
-            1
-        );
+        if (
+            width <= maxDimension &&
+            height <= maxDimension
+        ) {
+
+            return {
+                width,
+                height
+            };
+        }
+
+
+        const scale =
+            Math.min(
+                maxDimension / width,
+                maxDimension / height
+            );
+
 
         return {
             width: Math.max(
                 1,
-                Math.round(width * scale)
+                Math.round(
+                    width * scale
+                )
             ),
+
             height: Math.max(
                 1,
-                Math.round(height * scale)
+                Math.round(
+                    height * scale
+                )
             )
         };
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | BUILD DIMENSION LIST
+    |--------------------------------------------------------------------------
+    */
+
+    function buildDimensionList(
+        sourceWidth,
+        sourceHeight
+    ) {
+
+        const maxDimensions = [
+            2200,
+            2000,
+            1800,
+            1600,
+            1400,
+            1200
+        ];
+
+
+        const list = [];
+
+
+        for (
+            const maxDimension
+            of maxDimensions
+        ) {
+
+            const dimensions =
+                calculateDimensions(
+                    sourceWidth,
+                    sourceHeight,
+                    maxDimension
+                );
+
+
+            if (
+                dimensions.width < MIN_IMAGE_DIMENSION &&
+                dimensions.height < MIN_IMAGE_DIMENSION
+            ) {
+
+                continue;
+            }
+
+
+            list.push(
+                dimensions
+            );
+        }
+
+
+        list.unshift(
+            calculateDimensions(
+                sourceWidth,
+                sourceHeight,
+                MAX_IMAGE_DIMENSION
+            )
+        );
+
+
+        return list.filter(
+            (item, index, array) =>
+                index ===
+                array.findIndex(
+                    value =>
+                        value.width === item.width &&
+                        value.height === item.height
+                )
+        );
     }
 
 
@@ -2028,182 +2251,112 @@ document.addEventListener('DOMContentLoaded', () => {
     |--------------------------------------------------------------------------
     */
 
-    function compressImageElement(
+    async function compressImageElement(
         image,
         originalName
     ) {
 
-        return new Promise((resolve, reject) => {
-
-            const sourceWidth =
-                image.naturalWidth || image.width;
-
-            const sourceHeight =
-                image.naturalHeight || image.height;
+        const sourceWidth =
+            image.naturalWidth ||
+            image.width;
 
 
-            if (
-                sourceWidth <= 0 ||
-                sourceHeight <= 0
+        const sourceHeight =
+            image.naturalHeight ||
+            image.height;
+
+
+        if (
+            sourceWidth <= 0 ||
+            sourceHeight <= 0
+        ) {
+
+            throw new Error(
+                'Dimensi gambar tidak valid.'
+            );
+        }
+
+
+        const dimensionsList =
+            buildDimensionList(
+                sourceWidth,
+                sourceHeight
+            );
+
+
+        let smallestResult =
+            null;
+
+
+        /*
+        |----------------------------------------------------------------------
+        | Prioritas 1:
+        | Cari hasil <= 2.5 MB
+        |----------------------------------------------------------------------
+        */
+
+        for (
+            const dimensions
+            of dimensionsList
+        ) {
+
+            for (
+                const quality
+                of JPEG_QUALITIES
             ) {
 
-                reject(
-                    new Error(
-                        'Dimensi gambar tidak valid.'
-                    )
-                );
-
-                return;
-            }
-
-
-            let dimensions =
-                calculateDimensions(
-                    sourceWidth,
-                    sourceHeight,
-                    MAX_IMAGE_DIMENSION
-                );
-
-
-            async function runCompression() {
-
-                /*
-                |----------------------------------------------------------------------
-                | Coba beberapa ukuran.
-                |----------------------------------------------------------------------
-                */
-
-                const dimensionsList = [];
-
-                const maxDimensionSteps = [
-                    2200,
-                    2000,
-                    1800,
-                    1600,
-                    1400,
-                    1200
-                ];
-
-
-                for (const maxDimension of maxDimensionSteps) {
-
-                    const result =
-                        calculateDimensions(
-                            sourceWidth,
-                            sourceHeight,
-                            maxDimension
-                        );
-
-                    if (
-                        result.width < MIN_IMAGE_DIMENSION &&
-                        result.height < MIN_IMAGE_DIMENSION
-                    ) {
-                        continue;
-                    }
-
-                    dimensionsList.push(result);
-                }
-
-
-                /*
-                |----------------------------------------------------------------------
-                | Pastikan ukuran awal ikut dicoba.
-                |----------------------------------------------------------------------
-                */
-
-                dimensionsList.unshift(dimensions);
-
-
-                /*
-                |----------------------------------------------------------------------
-                | Hapus duplikasi.
-                |----------------------------------------------------------------------
-                */
-
-                const uniqueDimensions =
-                    dimensionsList.filter(
-                        (item, index, array) =>
-                            index === array.findIndex(
-                                value =>
-                                    value.width === item.width &&
-                                    value.height === item.height
-                            )
+                const result =
+                    await compressCanvasAtDimensions(
+                        image,
+                        dimensions.width,
+                        dimensions.height,
+                        originalName,
+                        quality
                     );
 
 
-                for (const size of uniqueDimensions) {
+                if (
+                    !smallestResult ||
+                    result.size < smallestResult.size
+                ) {
 
-                    const result =
-                        await compressCanvasAtDimensions(
-                            image,
-                            size.width,
-                            size.height,
-                            originalName
-                        );
-
-
-                    if (
-                        result.size <=
-                        TARGET_IMAGE_SIZE
-                    ) {
-
-                        return result;
-                    }
+                    smallestResult =
+                        result;
                 }
 
 
-                /*
-                |----------------------------------------------------------------------
-                | Jika target 2.5 MB belum tercapai,
-                | gunakan hasil terkecil yang masih <= 5 MB.
-                |----------------------------------------------------------------------
-                */
+                if (
+                    result.size <=
+                    TARGET_IMAGE_SIZE
+                ) {
 
-                let smallestResult = null;
-
-
-                for (const size of uniqueDimensions) {
-
-                    const result =
-                        await compressCanvasAtDimensions(
-                            image,
-                            size.width,
-                            size.height,
-                            originalName
-                        );
-
-
-                    if (
-                        result.size <=
-                        MAX_COMPRESSED_IMAGE_SIZE
-                    ) {
-
-                        if (
-                            !smallestResult ||
-                            result.size < smallestResult.size
-                        ) {
-
-                            smallestResult = result;
-                        }
-                    }
+                    return result;
                 }
-
-
-                if (smallestResult) {
-                    return smallestResult;
-                }
-
-
-                throw new Error(
-                    'Gambar masih terlalu besar setelah dikompres. Silakan gunakan gambar dengan resolusi lebih rendah.'
-                );
             }
+        }
 
 
-            runCompression()
-                .then(resolve)
-                .catch(reject);
-        });
+        /*
+        |----------------------------------------------------------------------
+        | Prioritas 2:
+        | Jika 2.5 MB tidak tercapai,
+        | gunakan hasil terkecil <= 5 MB.
+        |----------------------------------------------------------------------
+        */
+
+        if (
+            smallestResult &&
+            smallestResult.size <=
+            MAX_COMPRESSED_IMAGE_SIZE
+        ) {
+
+            return smallestResult;
+        }
+
+
+        throw new Error(
+            'Gambar masih terlalu besar setelah dikompres. Silakan gunakan gambar dengan resolusi lebih rendah.'
+        );
     }
 
 
@@ -2217,111 +2370,80 @@ document.addEventListener('DOMContentLoaded', () => {
         image,
         width,
         height,
-        originalName
+        originalName,
+        quality
     ) {
 
-        return new Promise((resolve, reject) => {
+        return new Promise(
+            (resolve, reject) => {
 
-            const canvas =
-                document.createElement('canvas');
-
-            canvas.width = width;
-            canvas.height = height;
-
-
-            const context =
-                canvas.getContext(
-                    '2d',
-                    {
-                        alpha: false
-                    }
-                );
+                const canvas =
+                    document.createElement(
+                        'canvas'
+                    );
 
 
-            if (!context) {
+                canvas.width =
+                    width;
 
-                reject(
-                    new Error(
-                        'Browser tidak mendukung pemrosesan gambar.'
-                    )
-                );
-
-                return;
-            }
+                canvas.height =
+                    height;
 
 
-            /*
-            |----------------------------------------------------------------------
-            | Background putih
-            |----------------------------------------------------------------------
-            */
-
-            context.fillStyle = '#ffffff';
-
-            context.fillRect(
-                0,
-                0,
-                width,
-                height
-            );
+                const context =
+                    canvas.getContext(
+                        '2d',
+                        {
+                            alpha: false
+                        }
+                    );
 
 
-            context.imageSmoothingEnabled = true;
-            context.imageSmoothingQuality = 'high';
+                if (!context) {
 
-
-            context.drawImage(
-                image,
-                0,
-                0,
-                width,
-                height
-            );
-
-
-            let qualityIndex = 0;
-
-
-            function attempt() {
-
-                if (
-                    qualityIndex >=
-                    JPEG_QUALITIES.length
-                ) {
-
-                    canvas.toBlob(
-                        blob => {
-
-                            if (!blob) {
-
-                                reject(
-                                    new Error(
-                                        'Browser gagal membuat file hasil kompresi.'
-                                    )
-                                );
-
-                                return;
-                            }
-
-
-                            resolve(
-                                createCompressedFile(
-                                    blob,
-                                    originalName
-                                )
-                            );
-
-                        },
-                        'image/jpeg',
-                        0.30
+                    reject(
+                        new Error(
+                            'Browser tidak mendukung pemrosesan gambar.'
+                        )
                     );
 
                     return;
                 }
 
 
-                const quality =
-                    JPEG_QUALITIES[qualityIndex];
+                /*
+                |------------------------------------------------------------------
+                | Background putih
+                |------------------------------------------------------------------
+                */
+
+                context.fillStyle =
+                    '#ffffff';
+
+
+                context.fillRect(
+                    0,
+                    0,
+                    width,
+                    height
+                );
+
+
+                context.imageSmoothingEnabled =
+                    true;
+
+
+                context.imageSmoothingQuality =
+                    'high';
+
+
+                context.drawImage(
+                    image,
+                    0,
+                    0,
+                    width,
+                    height
+                );
 
 
                 canvas.toBlob(
@@ -2339,41 +2461,24 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
 
 
-                        if (
-                            blob.size <=
-                            TARGET_IMAGE_SIZE
-                        ) {
-
-                            resolve(
-                                createCompressedFile(
-                                    blob,
-                                    originalName
-                                )
-                            );
-
-                            return;
-                        }
-
-
-                        qualityIndex++;
-
-                        attempt();
-
+                        resolve(
+                            createCompressedFile(
+                                blob,
+                                originalName
+                            )
+                        );
                     },
                     'image/jpeg',
                     quality
                 );
             }
-
-
-            attempt();
-        });
+        );
     }
 
 
     /*
     |--------------------------------------------------------------------------
-    | CREATE FILE
+    | CREATE COMPRESSED FILE
     |--------------------------------------------------------------------------
     */
 
@@ -2383,9 +2488,17 @@ document.addEventListener('DOMContentLoaded', () => {
     ) {
 
         const baseName =
-            originalName
-                .replace(/\.[^/.]+$/, '')
-                .replace(/[^a-zA-Z0-9_-]/g, '_');
+            String(
+                originalName || 'lampiran'
+            )
+                .replace(
+                    /\.[^/.]+$/,
+                    ''
+                )
+                .replace(
+                    /[^a-zA-Z0-9_-]/g,
+                    '_'
+                );
 
 
         return new File(
@@ -2468,10 +2581,16 @@ document.addEventListener('DOMContentLoaded', () => {
             );
 
 
-            startCameraBtn.disabled = true;
-            captureBtn.disabled = false;
-            stopCameraBtn.disabled = false;
+            startCameraBtn.disabled =
+                true;
 
+
+            captureBtn.disabled =
+                false;
+
+
+            stopCameraBtn.disabled =
+                false;
 
         } catch (error) {
 
@@ -2490,7 +2609,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /*
     |--------------------------------------------------------------------------
-    | CAPTURE
+    | CAPTURE CAMERA
     |--------------------------------------------------------------------------
     */
 
@@ -2519,6 +2638,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const width =
                     cameraVideo.videoWidth;
 
+
                 const height =
                     cameraVideo.videoHeight;
 
@@ -2539,6 +2659,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 canvas.width =
                     dimensions.width;
+
 
                 canvas.height =
                     dimensions.height;
@@ -2561,8 +2682,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
 
+                /*
+                |------------------------------------------------------------------
+                | Background putih
+                |------------------------------------------------------------------
+                */
+
                 context.fillStyle =
                     '#ffffff';
+
 
                 context.fillRect(
                     0,
@@ -2574,6 +2702,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 context.imageSmoothingEnabled =
                     true;
+
 
                 context.imageSmoothingQuality =
                     'high';
@@ -2589,24 +2718,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
                 /*
-                |----------------------------------------------------------------------
+                |------------------------------------------------------------------
+                | Buat Image dari canvas
+                |------------------------------------------------------------------
+                */
+
+                const image =
+                    await canvasToImage(
+                        canvas
+                    );
+
+
+                /*
+                |------------------------------------------------------------------
                 | COMPRESS
-                |----------------------------------------------------------------------
+                |------------------------------------------------------------------
                 */
 
                 const compressedFile =
-                    await compressCanvasAtDimensions(
-                        canvas,
-                        canvas.width,
-                        canvas.height,
+                    await compressImageElement(
+                        image,
                         'scan_dokumen.jpg'
                     );
 
 
                 /*
-                |----------------------------------------------------------------------
+                |------------------------------------------------------------------
                 | DATA URL
-                |----------------------------------------------------------------------
+                |------------------------------------------------------------------
                 */
 
                 capturedInput.value =
@@ -2616,9 +2755,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
                 /*
-                |----------------------------------------------------------------------
+                |------------------------------------------------------------------
                 | PREVIEW
-                |----------------------------------------------------------------------
+                |------------------------------------------------------------------
                 */
 
                 if (previewObjectUrl) {
@@ -2650,23 +2789,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (scanCompressionInfo) {
 
                     scanCompressionInfo.textContent =
-                        `Hasil scan: ${formatFileSize(compressedFile.size)} • sudah dikompres sebelum dikirim ke server`;
+                        `Hasil scan: ${formatFileSize(compressedFile.size)} • JPEG terkompresi`;
                 }
 
 
                 /*
-                |----------------------------------------------------------------------
-                | Scan menggantikan upload.
-                |----------------------------------------------------------------------
+                |------------------------------------------------------------------
+                | Scan menggantikan upload
+                |------------------------------------------------------------------
                 */
 
                 clearFileSelection();
 
 
                 /*
-                |----------------------------------------------------------------------
-                | Stop camera.
-                |----------------------------------------------------------------------
+                |------------------------------------------------------------------
+                | Matikan kamera
+                |------------------------------------------------------------------
                 */
 
                 stopCameraTracksOnly();
@@ -2677,15 +2816,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
 
-                captureBtn.disabled = true;
-                stopCameraBtn.disabled = true;
-                startCameraBtn.disabled = false;
+                captureBtn.disabled =
+                    true;
+
+
+                stopCameraBtn.disabled =
+                    true;
+
+
+                startCameraBtn.disabled =
+                    false;
 
 
                 cameraPlaceholder?.classList.remove(
                     'hidden'
                 );
-
 
             } catch (error) {
 
@@ -2702,6 +2847,46 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | CANVAS TO IMAGE
+    |--------------------------------------------------------------------------
+    */
+
+    function canvasToImage(canvas) {
+
+        return new Promise(
+            (resolve, reject) => {
+
+                const image =
+                    new Image();
+
+
+                image.onload = () => {
+                    resolve(image);
+                };
+
+
+                image.onerror = () => {
+
+                    reject(
+                        new Error(
+                            'Gagal membaca hasil scan.'
+                        )
+                    );
+                };
+
+
+                image.src =
+                    canvas.toDataURL(
+                        'image/jpeg',
+                        0.95
+                    );
+            }
+        );
+    }
 
 
     /*
@@ -2739,12 +2924,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
         if (scanPreviewImage) {
-            scanPreviewImage.src = '';
+
+            scanPreviewImage.src =
+                '';
         }
 
 
         if (scanCompressionInfo) {
-            scanCompressionInfo.textContent = '';
+
+            scanCompressionInfo.textContent =
+                '';
         }
 
 
@@ -2754,7 +2943,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 previewObjectUrl
             );
 
-            previewObjectUrl = null;
+            previewObjectUrl =
+                null;
         }
     }
 
@@ -2818,7 +3008,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
         if (cameraVideo) {
-            cameraVideo.srcObject = null;
+
+            cameraVideo.srcObject =
+                null;
         }
 
 
@@ -2828,24 +3020,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
         if (captureBtn) {
-            captureBtn.disabled = true;
+
+            captureBtn.disabled =
+                true;
         }
 
 
         if (stopCameraBtn) {
-            stopCameraBtn.disabled = true;
+
+            stopCameraBtn.disabled =
+                true;
         }
 
 
         if (startCameraBtn) {
-            startCameraBtn.disabled = false;
+
+            startCameraBtn.disabled =
+                false;
         }
     }
 
 
     /*
     |--------------------------------------------------------------------------
-    | STOP CAMERA TRACK
+    | STOP CAMERA TRACKS
     |--------------------------------------------------------------------------
     */
 
@@ -2858,12 +3056,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         cameraStream
             .getTracks()
-            .forEach(track => {
-                track.stop();
-            });
+            .forEach(
+                track => {
+                    track.stop();
+                }
+            );
 
 
-        cameraStream = null;
+        cameraStream =
+            null;
     }
 
 
@@ -2876,6 +3077,14 @@ document.addEventListener('DOMContentLoaded', () => {
     form.addEventListener(
         'submit',
         event => {
+
+            if (isSubmitting) {
+
+                event.preventDefault();
+
+                return;
+            }
+
 
             /*
             |----------------------------------------------------------------------
@@ -2902,6 +3111,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
             /*
             |----------------------------------------------------------------------
+            | PASTIKAN FILE TIDAK MELEBIHI BATAS
+            |----------------------------------------------------------------------
+            */
+
+            const selected =
+                fileInput.files?.[0];
+
+
+            if (
+                selected &&
+                selected.size > MAX_FILE_SIZE
+            ) {
+
+                event.preventDefault();
+
+
+                alert(
+                    'Ukuran file melebihi 10 MB.'
+                );
+
+                return;
+            }
+
+
+            /*
+            |----------------------------------------------------------------------
             | STOP CAMERA
             |----------------------------------------------------------------------
             */
@@ -2911,13 +3146,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
             /*
             |----------------------------------------------------------------------
-            | LOCK BUTTON
+            | LOCK SUBMIT
             |----------------------------------------------------------------------
             */
 
+            isSubmitting =
+                true;
+
+
             if (submitBtn) {
 
-                submitBtn.disabled = true;
+                submitBtn.disabled =
+                    true;
 
                 submitBtn.classList.add(
                     'opacity-70',
@@ -2954,7 +3194,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     previewObjectUrl
                 );
 
-                previewObjectUrl = null;
+                previewObjectUrl =
+                    null;
             }
         }
     );
