@@ -41,14 +41,6 @@ class SuratKeluarController extends Controller
         'png',
     ];
 
-    private const ALLOWED_MIME_TYPES = [
-        'application/pdf',
-        'image/jpeg',
-        'image/png',
-        'image/x-png',
-        'image/pjpeg',
-    ];
-
     private const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
     /*
@@ -1025,7 +1017,7 @@ class SuratKeluarController extends Controller
      * Tidak menggunakan GD.
      * Tidak menggunakan file_get_contents().
      *
-     * Validasi file berdasarkan signature/header:
+     * Validasi berdasarkan signature/header:
      * - PDF
      * - JPG/JPEG
      * - PNG
@@ -1105,11 +1097,7 @@ class SuratKeluarController extends Controller
         if (
             !in_array(
                 $extension,
-                [
-                    'pdf',
-                    'jpg',
-                    'png',
-                ],
+                self::ALLOWED_FILE_EXTENSIONS,
                 true
             )
         ) {
@@ -1142,8 +1130,8 @@ class SuratKeluarController extends Controller
         |--------------------------------------------------------------------------
         |
         | Hanya membaca 16 byte pertama.
-        | Tidak memakai GD.
-        | Tidak memakai file_get_contents().
+        | Tidak menggunakan GD.
+        | Tidak menggunakan file_get_contents().
         |
         */
 
@@ -1353,14 +1341,23 @@ class SuratKeluarController extends Controller
                 'Gagal menyimpan file surat keluar.',
                 [
                     'message' => $e->getMessage(),
+
                     'path' =>
                         $directory .
                         '/' .
                         $fileName,
-                    'extension' => $extension,
-                    'mime' => $mimeType,
-                    'size' => $fileSize,
-                    'disk' => $this->getStorageDisk(),
+
+                    'extension' =>
+                        $extension,
+
+                    'mime' =>
+                        $mimeType,
+
+                    'size' =>
+                        $fileSize,
+
+                    'disk' =>
+                        $this->getStorageDisk(),
                 ]
             );
 

@@ -22,6 +22,7 @@ class SuratKeluarRequest extends FormRequest
         'jpg',
         'jpeg',
         'png',
+        'zip',
     ];
 
     private const ALLOWED_STATUSES = [
@@ -157,10 +158,11 @@ class SuratKeluarRequest extends FormRequest
             | LAMPIRAN
             |--------------------------------------------------------------------------
             |
-            | Jangan menggunakan mimetypes di sini.
+            | PDF / JPG / JPEG / PNG / ZIP
+            | Maksimal 10 MB.
             |
-            | Laravel "mimes" memeriksa tipe berdasarkan isi/signature
-            | yang didukung Laravel, bukan sekadar MIME browser.
+            | Tidak menggunakan mimetypes karena MIME browser/server
+            | dapat berbeda walaupun file sebenarnya valid.
             |
             */
 
@@ -168,14 +170,12 @@ class SuratKeluarRequest extends FormRequest
                 'nullable',
                 'file',
                 'max:' . self::MAX_FILE_SIZE_KB,
-                'mimes:pdf,jpg,jpeg,png',
+                'mimes:pdf,jpg,jpeg,png,zip',
             ],
 
             'status' => [
                 'nullable',
-                Rule::in(
-                    self::ALLOWED_STATUSES
-                ),
+                Rule::in(self::ALLOWED_STATUSES),
             ],
 
             'ditandatangani_oleh' => [
@@ -251,9 +251,7 @@ class SuratKeluarRequest extends FormRequest
                 $file = $this->file('lampiran_file');
 
                 /*
-                |--------------------------------------------------------------------------
-                | EDIT TANPA MENGGANTI FILE
-                |--------------------------------------------------------------------------
+                | Edit tanpa mengganti file
                 */
 
                 if (!$file) {
@@ -261,9 +259,7 @@ class SuratKeluarRequest extends FormRequest
                 }
 
                 /*
-                |--------------------------------------------------------------------------
-                | CEK UPLOAD PHP
-                |--------------------------------------------------------------------------
+                | Cek upload PHP
                 */
 
                 if (!$file->isValid()) {
@@ -278,16 +274,14 @@ class SuratKeluarRequest extends FormRequest
                 }
 
                 /*
-                |--------------------------------------------------------------------------
-                | CEK UKURAN
-                |--------------------------------------------------------------------------
+                | Cek ukuran
                 */
 
                 $fileSize = $file->getSize();
 
                 if (
-                    $fileSize === false
-                    || $fileSize <= 0
+                    $fileSize === false ||
+                    $fileSize <= 0
                 ) {
                     $validator->errors()->add(
                         'lampiran_file',
@@ -310,15 +304,12 @@ class SuratKeluarRequest extends FormRequest
                 }
 
                 /*
-                |--------------------------------------------------------------------------
-                | CEK EXTENSION
-                |--------------------------------------------------------------------------
+                | Cek extension asli
                 */
 
                 $extension = strtolower(
                     trim(
-                        (string)
-                        $file->getClientOriginalExtension()
+                        (string) $file->getClientOriginalExtension()
                     )
                 );
 
@@ -332,10 +323,8 @@ class SuratKeluarRequest extends FormRequest
                     $validator->errors()->add(
                         'lampiran_file',
                         'Format file tidak didukung. ' .
-                        'Gunakan PDF, JPG, JPEG, atau PNG.'
+                        'Gunakan PDF, JPG, JPEG, PNG, atau ZIP.'
                     );
-
-                    return;
                 }
             }
         );
@@ -371,8 +360,8 @@ class SuratKeluarRequest extends FormRequest
         mixed $value
     ): ?int {
         if (
-            $value === null
-            || $value === ''
+            $value === null ||
+            $value === ''
         ) {
             return null;
         }
@@ -525,7 +514,7 @@ class SuratKeluarRequest extends FormRequest
                 'Lampiran harus berupa file yang valid.',
 
             'lampiran_file.mimes' =>
-                'Lampiran hanya boleh berupa PDF, JPG, JPEG, atau PNG.',
+                'Lampiran hanya boleh berupa PDF, JPG, JPEG, PNG, atau ZIP.',
 
             'lampiran_file.max' =>
                 'Ukuran file lampiran maksimal 10 MB.',
