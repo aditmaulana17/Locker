@@ -45,6 +45,7 @@ class SuratKeluarController extends Controller
         'application/pdf',
         'image/jpeg',
         'image/png',
+        'image/x-png',
     ];
 
     private const MAX_FILE_SIZE = 10 * 1024 * 1024;
@@ -55,11 +56,6 @@ class SuratKeluarController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    /**
-     * Mengambil role user yang sedang login.
-     *
-     * staf -> staff
-     */
     private function userRole(): string
     {
         $user = Auth::user();
@@ -82,7 +78,7 @@ class SuratKeluarController extends Controller
     }
 
     /**
-     * Nama method sengaja dibuat berbeda dari Controller::ensureAuthenticated()
+     * Nama method dibuat berbeda dari Controller::ensureAuthenticated()
      * agar tidak bentrok dengan method parent.
      */
     private function ensureUserAuthenticated(): void
@@ -95,15 +91,7 @@ class SuratKeluarController extends Controller
     }
 
     /**
-     * Memastikan user boleh mengelola surat keluar.
-     *
-     * Admin dan Pimpinan:
-     * - tambah
-     * - edit
-     * - hapus
-     *
-     * Staff:
-     * - tidak boleh mengelola
+     * Admin dan Pimpinan boleh mengelola surat keluar.
      */
     private function authorizeManageSurat(): void
     {
@@ -129,11 +117,6 @@ class SuratKeluarController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    /**
-     * Normalisasi status.
-     *
-     * draf -> draft
-     */
     private function normalizeStatus(?string $status): string
     {
         $status = strtolower(
@@ -147,9 +130,6 @@ class SuratKeluarController extends Controller
             : $status;
     }
 
-    /**
-     * Mengambil status yang valid.
-     */
     private function getValidStatus(?string $status): string
     {
         $status = $this->normalizeStatus($status);
@@ -169,9 +149,6 @@ class SuratKeluarController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    /**
-     * Menampilkan daftar surat keluar.
-     */
     public function index(Request $request)
     {
         $this->ensureUserAuthenticated();
@@ -433,9 +410,6 @@ class SuratKeluarController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    /**
-     * Form tambah surat keluar.
-     */
     public function create()
     {
         $this->authorizeManageSurat();
@@ -471,9 +445,6 @@ class SuratKeluarController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    /**
-     * Menyimpan surat keluar baru.
-     */
     public function store(
         SuratKeluarRequest $request
     ) {
@@ -535,12 +506,6 @@ class SuratKeluarController extends Controller
                     'Surat keluar berhasil ditambahkan.'
                 );
         } catch (Throwable $e) {
-            /*
-            |--------------------------------------------------------------------------
-            | HAPUS FILE JIKA DATABASE GAGAL
-            |--------------------------------------------------------------------------
-            */
-
             if ($storedAttachment) {
                 $this->deleteAttachment(
                     $storedAttachment
@@ -577,9 +542,6 @@ class SuratKeluarController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    /**
-     * Menampilkan detail surat keluar.
-     */
     public function show(
         SuratKeluar $suratKeluar
     ) {
@@ -605,9 +567,6 @@ class SuratKeluarController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    /**
-     * Form edit surat keluar.
-     */
     public function edit(
         SuratKeluar $suratKeluar
     ) {
@@ -645,9 +604,6 @@ class SuratKeluarController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    /**
-     * Memperbarui surat keluar.
-     */
     public function update(
         SuratKeluarRequest $request,
         SuratKeluar $suratKeluar
@@ -663,6 +619,7 @@ class SuratKeluarController extends Controller
         }
 
         $oldAttachment = $suratKeluar->lampiran_file;
+
         $newAttachment = null;
 
         try {
@@ -679,9 +636,6 @@ class SuratKeluarController extends Controller
 
                 $data['lampiran_file'] = $newAttachment;
             } else {
-                /*
-                 * Jangan menghapus attachment lama.
-                 */
                 unset(
                     $data['lampiran_file']
                 );
@@ -734,12 +688,6 @@ class SuratKeluarController extends Controller
                     'Surat keluar berhasil diperbarui.'
                 );
         } catch (Throwable $e) {
-            /*
-            |--------------------------------------------------------------------------
-            | HAPUS FILE BARU JIKA UPDATE GAGAL
-            |--------------------------------------------------------------------------
-            */
-
             if (
                 $newAttachment
                 && $newAttachment !== $oldAttachment
@@ -775,9 +723,6 @@ class SuratKeluarController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    /**
-     * Menghapus surat keluar.
-     */
     public function destroy(
         SuratKeluar $suratKeluar
     ) {
@@ -790,9 +735,6 @@ class SuratKeluarController extends Controller
         try {
             $suratKeluar->delete();
 
-            /*
-             * File attachment ikut dihapus.
-             */
             if ($attachment) {
                 $this->deleteAttachment(
                     $attachment
@@ -838,9 +780,6 @@ class SuratKeluarController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    /**
-     * Preview lampiran surat keluar.
-     */
     public function previewLampiran(
         SuratKeluar $suratKeluar
     ) {
@@ -968,9 +907,6 @@ class SuratKeluarController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    /**
-     * Halaman cetak surat keluar.
-     */
     public function cetak(
         SuratKeluar $suratKeluar
     ) {
@@ -996,9 +932,6 @@ class SuratKeluarController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    /**
-     * Halaman label surat keluar.
-     */
     public function label(
         SuratKeluar $suratKeluar
     ) {
@@ -1022,9 +955,6 @@ class SuratKeluarController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    /**
-     * Menambahkan activity log surat keluar.
-     */
     public function storeLog(
         Request $request,
         SuratKeluar $suratKeluar
@@ -1051,9 +981,6 @@ class SuratKeluarController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    /**
-     * Mendapatkan disk storage aktif.
-     */
     private function getStorageDisk(): string
     {
         $disk = strtolower(
@@ -1070,9 +997,6 @@ class SuratKeluarController extends Controller
             : 'public';
     }
 
-    /**
-     * Mendapatkan filesystem adapter.
-     */
     private function storage(): FilesystemAdapter
     {
         return Storage::disk(
@@ -1089,13 +1013,7 @@ class SuratKeluarController extends Controller
     /**
      * Menyimpan file upload langsung ke storage.
      *
-     * Tidak menggunakan:
-     * - GD
-     * - imagecreatefromstring()
-     * - imagejpeg()
-     * - file_get_contents()
-     *
-     * sehingga tidak membuat bitmap besar di RAM PHP.
+     * Tidak menggunakan GD atau file_get_contents().
      */
     private function storeUploadedFile(
         ?UploadedFile $file
@@ -1181,9 +1099,15 @@ class SuratKeluarController extends Controller
         */
 
         $mimeType = strtolower(
-            (string) $file->getMimeType()
+            trim(
+                (string) $file->getMimeType()
+            )
         );
 
+        /*
+         * Beberapa server dapat mendeteksi PNG sebagai image/x-png.
+         * MIME tersebut tetap kita izinkan.
+         */
         if (
             !in_array(
                 $mimeType,
@@ -1193,13 +1117,28 @@ class SuratKeluarController extends Controller
         ) {
             throw new RuntimeException(
                 'Tipe file tidak didukung. ' .
-                'Gunakan PDF, JPG, JPEG, atau PNG.'
+                'MIME terdeteksi: ' .
+                ($mimeType ?: 'tidak diketahui') .
+                '. Gunakan PDF, JPG, JPEG, atau PNG.'
             );
         }
 
         /*
         |--------------------------------------------------------------------------
-        | PASTIKAN EXTENSION DAN MIME SESUAI
+        | NORMALISASI MIME PNG
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            $extension === 'png'
+            && $mimeType === 'image/x-png'
+        ) {
+            $mimeType = 'image/png';
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | VALIDASI EXTENSION + MIME
         |--------------------------------------------------------------------------
         */
 
@@ -1264,9 +1203,6 @@ class SuratKeluarController extends Controller
             'ContentType' => $mimeType,
         ];
 
-        /*
-         * Bucket Supabase bersifat private.
-         */
         if (
             $this->getStorageDisk() === 'supabase'
         ) {
@@ -1277,17 +1213,6 @@ class SuratKeluarController extends Controller
         |--------------------------------------------------------------------------
         | SIMPAN FILE
         |--------------------------------------------------------------------------
-        |
-        | putFileAs() menggunakan UploadedFile secara langsung.
-        |
-        | Ini penting agar PHP tidak melakukan:
-        |
-        | file_get_contents()
-        | imagecreatefromstring()
-        | imagejpeg()
-        |
-        | sehingga tidak terjadi penggunaan RAM besar seperti sebelumnya.
-        |
         */
 
         try {
@@ -1312,7 +1237,7 @@ class SuratKeluarController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | PASTIKAN FILE BENAR-BENAR ADA
+            | CEK FILE
             |--------------------------------------------------------------------------
             */
 
@@ -1343,7 +1268,8 @@ class SuratKeluarController extends Controller
             throw new RuntimeException(
                 'Gagal menyimpan file ke storage: ' .
                 $e->getMessage(),
-                previous: $e
+                0,
+                $e
             );
         }
     }
@@ -1354,9 +1280,6 @@ class SuratKeluarController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    /**
-     * Menghapus attachment dari storage.
-     */
     private function deleteAttachment(
         ?string $path
     ): void {
@@ -1412,10 +1335,6 @@ class SuratKeluarController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    /**
-     * Mengubah kode error upload PHP
-     * menjadi pesan yang mudah dimengerti.
-     */
     private function getUploadErrorMessage(
         int $error
     ): string {
@@ -1453,9 +1372,6 @@ class SuratKeluarController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    /**
-     * Mendapatkan MIME type berdasarkan extension.
-     */
     private function getMimeTypeFromPath(
         string $path
     ): string {
@@ -1488,9 +1404,6 @@ class SuratKeluarController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    /**
-     * Memvalidasi tanggal format YYYY-MM-DD.
-     */
     private function isValidDate(
         ?string $date
     ): bool {
@@ -1537,9 +1450,6 @@ class SuratKeluarController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    /**
-     * Mencatat activity log dengan aman.
-     */
     private function logActivity(
         string $action,
         string $module,
