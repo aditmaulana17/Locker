@@ -78,10 +78,6 @@ class SuratKeluarController extends Controller
         return $role;
     }
 
-    /**
-     * Nama method dibuat berbeda dari Controller::ensureAuthenticated()
-     * agar tidak bentrok dengan method parent.
-     */
     private function ensureUserAuthenticated(): void
     {
         abort_unless(
@@ -91,9 +87,6 @@ class SuratKeluarController extends Controller
         );
     }
 
-    /**
-     * Admin dan Pimpinan boleh mengelola surat keluar.
-     */
     private function authorizeManageSurat(): void
     {
         $this->ensureUserAuthenticated();
@@ -1032,10 +1025,9 @@ class SuratKeluarController extends Controller
      * Tidak menggunakan GD.
      * Tidak menggunakan file_get_contents().
      *
-     * Mendukung:
+     * Validasi file berdasarkan signature/header:
      * - PDF
-     * - JPG
-     * - JPEG
+     * - JPG/JPEG
      * - PNG
      *
      * Maksimal 10 MB.
@@ -1043,6 +1035,12 @@ class SuratKeluarController extends Controller
     private function storeUploadedFile(
         ?UploadedFile $file
     ): string {
+        /*
+        |--------------------------------------------------------------------------
+        | CEK FILE
+        |--------------------------------------------------------------------------
+        */
+
         if (!$file) {
             throw new RuntimeException(
                 'File lampiran tidak ditemukan.'
@@ -1072,8 +1070,8 @@ class SuratKeluarController extends Controller
         $fileSize = $file->getSize();
 
         if (
-            $fileSize === false
-            || $fileSize <= 0
+            $fileSize === false ||
+            $fileSize <= 0
         ) {
             throw new RuntimeException(
                 'Ukuran file tidak dapat dibaca.'
@@ -1107,7 +1105,11 @@ class SuratKeluarController extends Controller
         if (
             !in_array(
                 $extension,
-                self::ALLOWED_FILE_EXTENSIONS,
+                [
+                    'pdf',
+                    'jpg',
+                    'png',
+                ],
                 true
             )
         ) {
@@ -1119,85 +1121,140 @@ class SuratKeluarController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | MIME TYPE
+        | FILE TEMPORARY
         |--------------------------------------------------------------------------
         */
 
-        $mimeType = strtolower(
-            trim(
-                (string) $file->getMimeType()
-            )
+        $realPath = $file->getRealPath();
+
+        if (
+            !$realPath ||
+            !is_readable($realPath)
+        ) {
+            throw new RuntimeException(
+                'File upload tidak dapat dibaca oleh server.'
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | BACA SIGNATURE
+        |--------------------------------------------------------------------------
+        |
+        | Hanya membaca 16 byte pertama.
+        | Tidak memakai GD.
+        | Tidak memakai file_get_contents().
+        |
+        */
+
+        $handle = fopen(
+            $realPath,
+            'rb'
+        );
+
+        if ($handle === false) {
+            throw new RuntimeException(
+                'File upload tidak dapat dibuka oleh server.'
+            );
+        }
+
+        $header = fread(
+            $handle,
+            16
+        );
+
+        fclose($handle);
+
+        if (
+            $header === false ||
+            $header === ''
+        ) {
+            throw new RuntimeException(
+                'File upload kosong atau tidak dapat dibaca.'
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | DETEKSI SIGNATURE
+        |--------------------------------------------------------------------------
+        */
+
+        $isPng = str_starts_with(
+            $header,
+            "\x89PNG\r\n\x1a\n"
+        );
+
+        $isJpeg = str_starts_with(
+            $header,
+            "\xFF\xD8\xFF"
+        );
+
+        $isPdf = str_starts_with(
+            $header,
+            '%PDF'
         );
 
         /*
         |--------------------------------------------------------------------------
-        | NORMALISASI MIME
-        |--------------------------------------------------------------------------
-        */
-
-        if ($mimeType === 'image/x-png') {
-            $mimeType = 'image/png';
-        }
-
-        if ($mimeType === 'image/pjpeg') {
-            $mimeType = 'image/jpeg';
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | VALIDASI MIME
+        | VALIDASI EXTENSION + SIGNATURE
         |--------------------------------------------------------------------------
         */
 
         if (
-            !in_array(
-                $mimeType,
-                [
-                    'application/pdf',
-                    'image/jpeg',
-                    'image/png',
-                ],
-                true
-            )
+            $extension === 'png' &&
+            !$isPng
         ) {
             throw new RuntimeException(
-                'Tipe file tidak didukung. ' .
-                'MIME terdeteksi: ' .
-                ($mimeType ?: 'tidak diketahui') .
-                '. Gunakan PDF, JPG, JPEG, atau PNG.'
+                'File PNG tidak valid. ' .
+                'Pastikan file benar-benar berformat PNG.'
+            );
+        }
+
+        if (
+            $extension === 'jpg' &&
+            !$isJpeg
+        ) {
+            throw new RuntimeException(
+                'File JPG/JPEG tidak valid. ' .
+                'Pastikan file benar-benar berformat JPG/JPEG.'
+            );
+        }
+
+        if (
+            $extension === 'pdf' &&
+            !$isPdf
+        ) {
+            throw new RuntimeException(
+                'File PDF tidak valid. ' .
+                'Pastikan file benar-benar berformat PDF.'
             );
         }
 
         /*
         |--------------------------------------------------------------------------
-        | VALIDASI EXTENSION + MIME
+        | TENTUKAN MIME DARI SIGNATURE
         |--------------------------------------------------------------------------
         */
 
-        if (
-            $extension === 'pdf'
-            && $mimeType !== 'application/pdf'
-        ) {
-            throw new RuntimeException(
-                'File PDF tidak valid.'
-            );
-        }
+        $mimeType = match (true) {
+            $isPng =>
+                'image/png',
 
-        if (
-            $extension === 'jpg'
-            && $mimeType !== 'image/jpeg'
-        ) {
-            throw new RuntimeException(
-                'File JPG/JPEG tidak valid.'
-            );
-        }
+            $isJpeg =>
+                'image/jpeg',
 
-        if (
-            $extension === 'png'
-            && $mimeType !== 'image/png'
-        ) {
+            $isPdf =>
+                'application/pdf',
+
+            default =>
+                null,
+        };
+
+        if ($mimeType === null) {
             throw new RuntimeException(
-                'File PNG tidak valid.'
+                'Isi file tidak dikenali sebagai ' .
+                'PDF, JPG/JPEG, atau PNG.'
             );
         }
 
@@ -1212,7 +1269,7 @@ class SuratKeluarController extends Controller
             now()->format('Ymd_His') .
             '_' .
             Str::lower(
-                Str::random(16)
+                Str::random(20)
             ) .
             '.' .
             $extension;
@@ -1223,7 +1280,8 @@ class SuratKeluarController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $directory = 'lampiran/surat_keluar';
+        $directory =
+            'lampiran/surat_keluar';
 
         /*
         |--------------------------------------------------------------------------
@@ -1234,6 +1292,12 @@ class SuratKeluarController extends Controller
         $options = [
             'ContentType' => $mimeType,
         ];
+
+        /*
+        |--------------------------------------------------------------------------
+        | SUPABASE
+        |--------------------------------------------------------------------------
+        */
 
         if (
             $this->getStorageDisk() === 'supabase'
@@ -1258,9 +1322,9 @@ class SuratKeluarController extends Controller
             );
 
             if (
-                $savedPath === false
-                || $savedPath === null
-                || $savedPath === ''
+                $savedPath === false ||
+                $savedPath === null ||
+                $savedPath === ''
             ) {
                 throw new RuntimeException(
                     'File gagal disimpan ke storage.'
@@ -1269,7 +1333,7 @@ class SuratKeluarController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | CEK FILE
+            | VERIFIKASI FILE
             |--------------------------------------------------------------------------
             */
 
@@ -1319,8 +1383,8 @@ class SuratKeluarController extends Controller
         ?string $path
     ): void {
         if (
-            !$path
-            || trim($path) === ''
+            !$path ||
+            trim($path) === ''
         ) {
             return;
         }
@@ -1403,7 +1467,7 @@ class SuratKeluarController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | MIME TYPE
+    | MIME TYPE DARI PATH
     |--------------------------------------------------------------------------
     */
 
@@ -1450,7 +1514,7 @@ class SuratKeluarController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | REGEX YYYY-MM-DD
+        | FORMAT YYYY-MM-DD
         |--------------------------------------------------------------------------
         */
 
@@ -1496,8 +1560,8 @@ class SuratKeluarController extends Controller
             if (
                 class_exists(
                     ActivityLog::class
-                )
-                && method_exists(
+                ) &&
+                method_exists(
                     ActivityLog::class,
                     'catat'
                 )
