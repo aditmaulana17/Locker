@@ -17,7 +17,7 @@ class SuratKeluarRequest extends FormRequest
     */
 
     /**
-     * Maksimal ukuran file:
+     * Maksimal ukuran file.
      *
      * 10240 KB = 10 MB.
      */
@@ -36,12 +36,15 @@ class SuratKeluarRequest extends FormRequest
     /**
      * MIME type yang diperbolehkan.
      *
-     * Digunakan untuk pemeriksaan tambahan.
+     * Tidak digunakan sebagai satu-satunya dasar validasi
+     * karena deteksi MIME dapat berbeda pada server.
      */
     private const ALLOWED_FILE_MIMES = [
         'application/pdf',
         'image/jpeg',
         'image/png',
+        'image/x-png',
+        'image/pjpeg',
     ];
 
     /**
@@ -82,19 +85,9 @@ class SuratKeluarRequest extends FormRequest
         |--------------------------------------------------------------------------
         */
 
-        if (
-            method_exists(
-                $user,
-                'normalizedRole'
-            )
-        ) {
+        if (method_exists($user, 'normalizedRole')) {
             $role = $user->normalizedRole();
-        } elseif (
-            method_exists(
-                User::class,
-                'normalizeRole'
-            )
-        ) {
+        } elseif (method_exists(User::class, 'normalizeRole')) {
             $role = User::normalizeRole(
                 (string) (
                     $user->role
@@ -112,12 +105,6 @@ class SuratKeluarRequest extends FormRequest
                     )
                 )
             );
-
-            /*
-            |--------------------------------------------------------------------------
-            | NORMALISASI STAF
-            |--------------------------------------------------------------------------
-            */
 
             if ($role === 'staf') {
                 $role = 'staff';
@@ -156,7 +143,7 @@ class SuratKeluarRequest extends FormRequest
         | ROUTE MODEL
         |--------------------------------------------------------------------------
         |
-        | Mendukung route model binding:
+        | Mendukung:
         |
         | /surat-keluar/{suratKeluar}
         |
@@ -231,13 +218,8 @@ class SuratKeluarRequest extends FormRequest
 
             /*
             |--------------------------------------------------------------------------
-            | TUJUAN / PENGIRIM SURAT
+            | PENGIRIM / TUJUAN SURAT
             |--------------------------------------------------------------------------
-            |
-            | Sesuai dengan nama kolom database:
-            |
-            | pengirim
-            |
             */
 
             'pengirim' => [
@@ -250,11 +232,6 @@ class SuratKeluarRequest extends FormRequest
             |--------------------------------------------------------------------------
             | KATEGORI
             |--------------------------------------------------------------------------
-            |
-            | Sesuai dengan database:
-            |
-            | kategori_surat_id
-            |
             */
 
             'kategori_surat_id' => [
@@ -292,16 +269,15 @@ class SuratKeluarRequest extends FormRequest
             | LAMPIRAN
             |--------------------------------------------------------------------------
             |
-            | File:
-            |
             | PDF
             | JPG
             | JPEG
             | PNG
             |
-            | Maksimal:
+            | Maksimal 10 MB.
             |
-            | 10 MB
+            | nullable penting untuk EDIT karena user boleh
+            | memperbarui surat tanpa mengganti lampiran.
             |
             */
 
@@ -353,222 +329,117 @@ class SuratKeluarRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
-        /*
-        |--------------------------------------------------------------------------
-        | NOMOR SURAT
-        |--------------------------------------------------------------------------
-        */
-
-        $nomorSurat =
-            $this->input(
-                'nomor_surat'
-            );
-
-        /*
-        |--------------------------------------------------------------------------
-        | TANGGAL SURAT
-        |--------------------------------------------------------------------------
-        */
-
-        $tanggalSurat =
-            $this->input(
-                'tanggal_surat'
-            );
-
-        /*
-        |--------------------------------------------------------------------------
-        | TANGGAL KELUAR
-        |--------------------------------------------------------------------------
-        */
-
-        $tanggalKeluar =
-            $this->input(
-                'tanggal_keluar'
-            );
-
-        /*
-        |--------------------------------------------------------------------------
-        | PENGIRIM
-        |--------------------------------------------------------------------------
-        */
-
-        $pengirim =
-            $this->input(
-                'pengirim'
-            );
-
-        /*
-        |--------------------------------------------------------------------------
-        | KATEGORI
-        |--------------------------------------------------------------------------
-        */
-
-        $kategoriId =
-            $this->input(
-                'kategori_surat_id'
-            );
-
-        /*
-        |--------------------------------------------------------------------------
-        | PERIHAL
-        |--------------------------------------------------------------------------
-        */
-
-        $perihal =
-            $this->input(
-                'perihal'
-            );
-
-        /*
-        |--------------------------------------------------------------------------
-        | RINGKASAN
-        |--------------------------------------------------------------------------
-        */
-
-        $ringkasan =
-            $this->input(
-                'ringkasan'
-            );
-
-        /*
-        |--------------------------------------------------------------------------
-        | STATUS
-        |--------------------------------------------------------------------------
-        */
-
-        $status =
-            $this->input(
-                'status'
-            );
-
-        /*
-        |--------------------------------------------------------------------------
-        | PENANDATANGAN
-        |--------------------------------------------------------------------------
-        */
-
-        $penandatangan =
-            $this->input(
-                'ditandatangani_oleh'
-            );
-
-        /*
-        |--------------------------------------------------------------------------
-        | MERGE DATA
-        |--------------------------------------------------------------------------
-        */
-
         $this->merge([
 
             /*
-            |----------------------------------------------------------------------
+            |--------------------------------------------------------------------------
             | NOMOR SURAT
-            |----------------------------------------------------------------------
+            |--------------------------------------------------------------------------
             */
 
             'nomor_surat' =>
                 $this->nullableString(
-                    $nomorSurat
+                    $this->input('nomor_surat')
                 ),
 
             /*
-            |----------------------------------------------------------------------
+            |--------------------------------------------------------------------------
             | TANGGAL SURAT
-            |----------------------------------------------------------------------
+            |--------------------------------------------------------------------------
             */
 
             'tanggal_surat' =>
                 $this->nullableString(
-                    $tanggalSurat
+                    $this->input('tanggal_surat')
                 ),
 
             /*
-            |----------------------------------------------------------------------
+            |--------------------------------------------------------------------------
             | TANGGAL KELUAR
-            |----------------------------------------------------------------------
+            |--------------------------------------------------------------------------
             */
 
             'tanggal_keluar' =>
                 $this->nullableString(
-                    $tanggalKeluar
+                    $this->input('tanggal_keluar')
                 ),
 
             /*
-            |----------------------------------------------------------------------
+            |--------------------------------------------------------------------------
             | PENGIRIM
-            |----------------------------------------------------------------------
+            |--------------------------------------------------------------------------
             */
 
             'pengirim' =>
                 $this->nullableString(
-                    $pengirim
+                    $this->input('pengirim')
                 ),
 
             /*
-            |----------------------------------------------------------------------
+            |--------------------------------------------------------------------------
             | KATEGORI
-            |----------------------------------------------------------------------
+            |--------------------------------------------------------------------------
             */
 
             'kategori_surat_id' =>
                 $this->nullableInteger(
-                    $kategoriId
+                    $this->input('kategori_surat_id')
                 ),
 
             /*
-            |----------------------------------------------------------------------
+            |--------------------------------------------------------------------------
             | PERIHAL
-            |----------------------------------------------------------------------
+            |--------------------------------------------------------------------------
             */
 
             'perihal' =>
                 $this->nullableString(
-                    $perihal
+                    $this->input('perihal')
                 ),
 
             /*
-            |----------------------------------------------------------------------
+            |--------------------------------------------------------------------------
             | RINGKASAN
-            |----------------------------------------------------------------------
+            |--------------------------------------------------------------------------
             */
 
             'ringkasan' =>
                 $this->nullableString(
-                    $ringkasan
+                    $this->input('ringkasan')
                 ),
 
             /*
-            |----------------------------------------------------------------------
+            |--------------------------------------------------------------------------
             | STATUS
-            |----------------------------------------------------------------------
+            |--------------------------------------------------------------------------
             */
 
             'status' =>
                 $this->normalizeStatus(
-                    $status
+                    $this->input('status')
                 ),
 
             /*
-            |----------------------------------------------------------------------
+            |--------------------------------------------------------------------------
             | PENANDATANGAN
-            |----------------------------------------------------------------------
+            |--------------------------------------------------------------------------
             */
 
             'ditandatangani_oleh' =>
                 $this->nullableInteger(
-                    $penandatangan
+                    $this->input('ditandatangani_oleh')
                 ),
         ]);
     }
 
     /*
     |--------------------------------------------------------------------------
-    | VALIDATOR
+    | VALIDATOR TAMBAHAN
     |--------------------------------------------------------------------------
     */
 
     /**
-     * Pemeriksaan tambahan setelah rules utama.
+     * Pemeriksaan tambahan setelah validasi utama.
      */
     protected function withValidator(
         Validator $validator
@@ -577,24 +448,16 @@ class SuratKeluarRequest extends FormRequest
             function (
                 Validator $validator
             ): void {
-
-                /*
-                |--------------------------------------------------------------------------
-                | FILE
-                |--------------------------------------------------------------------------
-                */
-
-                $file =
-                    $this->file(
-                        'lampiran_file'
-                    );
+                $file = $this->file(
+                    'lampiran_file'
+                );
 
                 /*
                 |--------------------------------------------------------------------------
                 | TIDAK ADA FILE
                 |--------------------------------------------------------------------------
                 |
-                | Pada edit, file memang boleh kosong.
+                | Normal pada halaman EDIT.
                 |
                 */
 
@@ -604,13 +467,85 @@ class SuratKeluarRequest extends FormRequest
 
                 /*
                 |--------------------------------------------------------------------------
-                | DEBUG LOG
+                | CEK STATUS UPLOAD PHP
                 |--------------------------------------------------------------------------
                 */
 
+                if (!$file->isValid()) {
+                    $validator->errors()->add(
+                        'lampiran_file',
+                        $this->getUploadErrorMessage(
+                            $file->getError()
+                        )
+                    );
+
+                    return;
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | CEK UKURAN
+                |--------------------------------------------------------------------------
+                */
+
+                $fileSize = $file->getSize();
+
                 if (
-                    config('app.debug')
+                    $fileSize !== false
+                    && $fileSize > (
+                        self::MAX_FILE_SIZE_KB * 1024
+                    )
                 ) {
+                    $validator->errors()->add(
+                        'lampiran_file',
+                        'Ukuran file lampiran maksimal 10 MB.'
+                    );
+
+                    return;
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | EXTENSION
+                |--------------------------------------------------------------------------
+                */
+
+                $extension = strtolower(
+                    trim(
+                        (string) $file->getClientOriginalExtension()
+                    )
+                );
+
+                if (
+                    !in_array(
+                        $extension,
+                        self::ALLOWED_FILE_EXTENSIONS,
+                        true
+                    )
+                ) {
+                    $validator->errors()->add(
+                        'lampiran_file',
+                        'Format file tidak didukung. ' .
+                        'Gunakan PDF, JPG, JPEG, atau PNG.'
+                    );
+
+                    return;
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | LOG DEBUG
+                |--------------------------------------------------------------------------
+                |
+                | Hanya aktif jika APP_DEBUG=true.
+                |
+                | Tidak ada penolakan berdasarkan MIME di sini.
+                | Ini penting agar PNG yang terdeteksi server
+                | sebagai image/x-png tidak ditolak.
+                |
+                */
+
+                if (config('app.debug')) {
                     Log::info(
                         'SURAT KELUAR - UPLOAD',
                         [
@@ -637,115 +572,6 @@ class SuratKeluarRequest extends FormRequest
                         ]
                     );
                 }
-
-                /*
-                |--------------------------------------------------------------------------
-                | ERROR UPLOAD PHP
-                |--------------------------------------------------------------------------
-                */
-
-                if (
-                    !$file->isValid()
-                ) {
-                    $validator->errors()->add(
-                        'lampiran_file',
-                        $this->getUploadErrorMessage(
-                            $file->getError()
-                        )
-                    );
-
-                    return;
-                }
-
-                /*
-                |--------------------------------------------------------------------------
-                | UKURAN FILE
-                |--------------------------------------------------------------------------
-                */
-
-                $fileSize =
-                    $file->getSize();
-
-                if (
-                    $fileSize !== false
-                    && $fileSize > (
-                        self::MAX_FILE_SIZE_KB * 1024
-                    )
-                ) {
-                    $validator->errors()->add(
-                        'lampiran_file',
-                        'Ukuran file lampiran maksimal 10 MB.'
-                    );
-
-                    return;
-                }
-
-                /*
-                |--------------------------------------------------------------------------
-                | EXTENSION
-                |--------------------------------------------------------------------------
-                */
-
-                $extension =
-                    strtolower(
-                        trim(
-                            (string)
-                            $file->getClientOriginalExtension()
-                        )
-                    );
-
-                if (
-                    !in_array(
-                        $extension,
-                        self::ALLOWED_FILE_EXTENSIONS,
-                        true
-                    )
-                ) {
-                    $validator->errors()->add(
-                        'lampiran_file',
-                        'Format file tidak didukung. ' .
-                        'Gunakan PDF, JPG, JPEG, atau PNG.'
-                    );
-
-                    return;
-                }
-
-                /*
-                |--------------------------------------------------------------------------
-                | MIME
-                |--------------------------------------------------------------------------
-                |
-                | getMimeType() dapat berbeda pada beberapa server,
-                | sehingga pemeriksaan ini tidak dibuat terlalu ketat.
-                |
-                | Validasi utama tetap menggunakan mimes.
-                |
-                */
-
-                $mime =
-                    strtolower(
-                        trim(
-                            (string)
-                            $file->getMimeType()
-                        )
-                    );
-
-                if (
-                    $mime !== ''
-                    && !in_array(
-                        $mime,
-                        self::ALLOWED_FILE_MIMES,
-                        true
-                    )
-                ) {
-                    /*
-                    |------------------------------------------------------------------
-                    | Beberapa server dapat mengembalikan MIME yang sedikit berbeda.
-                    | Jangan langsung menolak jika extension valid.
-                    | Controller akan melakukan pemeriksaan gambar/PDF kembali.
-                    |------------------------------------------------------------------
-                    */
-                }
             }
         );
     }
@@ -762,9 +588,7 @@ class SuratKeluarRequest extends FormRequest
     private function nullableString(
         mixed $value
     ): ?string {
-        if (
-            !is_scalar($value)
-        ) {
+        if (!is_scalar($value)) {
             return null;
         }
 
@@ -790,9 +614,7 @@ class SuratKeluarRequest extends FormRequest
             return null;
         }
 
-        if (
-            !is_numeric($value)
-        ) {
+        if (!is_numeric($value)) {
             return null;
         }
 
@@ -811,9 +633,7 @@ class SuratKeluarRequest extends FormRequest
     private function normalizeStatus(
         mixed $status
     ): string {
-        if (
-            !is_scalar($status)
-        ) {
+        if (!is_scalar($status)) {
             return 'draft';
         }
 
@@ -890,12 +710,6 @@ class SuratKeluarRequest extends FormRequest
     {
         return [
 
-            /*
-            |----------------------------------------------------------------------
-            | NOMOR SURAT
-            |----------------------------------------------------------------------
-            */
-
             'nomor_surat.string' =>
                 'Nomor surat harus berupa teks.',
 
@@ -905,23 +719,11 @@ class SuratKeluarRequest extends FormRequest
             'nomor_surat.unique' =>
                 'Nomor surat tersebut sudah digunakan.',
 
-            /*
-            |----------------------------------------------------------------------
-            | TANGGAL SURAT
-            |----------------------------------------------------------------------
-            */
-
             'tanggal_surat.required' =>
                 'Tanggal surat wajib diisi.',
 
             'tanggal_surat.date' =>
                 'Tanggal surat harus berupa tanggal yang valid.',
-
-            /*
-            |----------------------------------------------------------------------
-            | TANGGAL KELUAR
-            |----------------------------------------------------------------------
-            */
 
             'tanggal_keluar.required' =>
                 'Tanggal keluar wajib diisi.',
@@ -932,12 +734,6 @@ class SuratKeluarRequest extends FormRequest
             'tanggal_keluar.after_or_equal' =>
                 'Tanggal keluar tidak boleh sebelum tanggal surat.',
 
-            /*
-            |----------------------------------------------------------------------
-            | PENGIRIM
-            |----------------------------------------------------------------------
-            */
-
             'pengirim.required' =>
                 'Tujuan surat wajib diisi.',
 
@@ -946,12 +742,6 @@ class SuratKeluarRequest extends FormRequest
 
             'pengirim.max' =>
                 'Tujuan surat maksimal 150 karakter.',
-
-            /*
-            |----------------------------------------------------------------------
-            | KATEGORI
-            |----------------------------------------------------------------------
-            */
 
             'kategori_surat_id.required' =>
                 'Kategori surat wajib dipilih.',
@@ -962,12 +752,6 @@ class SuratKeluarRequest extends FormRequest
             'kategori_surat_id.exists' =>
                 'Kategori surat yang dipilih tidak tersedia.',
 
-            /*
-            |----------------------------------------------------------------------
-            | PERIHAL
-            |----------------------------------------------------------------------
-            */
-
             'perihal.required' =>
                 'Perihal surat wajib diisi.',
 
@@ -977,23 +761,11 @@ class SuratKeluarRequest extends FormRequest
             'perihal.max' =>
                 'Perihal surat maksimal 255 karakter.',
 
-            /*
-            |----------------------------------------------------------------------
-            | RINGKASAN
-            |----------------------------------------------------------------------
-            */
-
             'ringkasan.string' =>
                 'Ringkasan harus berupa teks.',
 
             'ringkasan.max' =>
                 'Ringkasan maksimal 5000 karakter.',
-
-            /*
-            |----------------------------------------------------------------------
-            | LAMPIRAN
-            |----------------------------------------------------------------------
-            */
 
             'lampiran_file.file' =>
                 'Lampiran harus berupa file yang valid.',
@@ -1004,20 +776,8 @@ class SuratKeluarRequest extends FormRequest
             'lampiran_file.max' =>
                 'Ukuran file lampiran maksimal 10 MB.',
 
-            /*
-            |----------------------------------------------------------------------
-            | STATUS
-            |----------------------------------------------------------------------
-            */
-
             'status.in' =>
                 'Status surat yang dipilih tidak valid.',
-
-            /*
-            |----------------------------------------------------------------------
-            | PENANDATANGAN
-            |----------------------------------------------------------------------
-            */
 
             'ditandatangani_oleh.integer' =>
                 'Data penandatangan tidak valid.',
@@ -1034,8 +794,7 @@ class SuratKeluarRequest extends FormRequest
     */
 
     /**
-     * Nama field yang ditampilkan
-     * pada pesan validasi.
+     * Nama field pada pesan validasi.
      */
     public function attributes(): array
     {

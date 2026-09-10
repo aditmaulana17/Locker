@@ -46,6 +46,7 @@ class SuratKeluarController extends Controller
         'image/jpeg',
         'image/png',
         'image/x-png',
+        'image/pjpeg',
     ];
 
     private const MAX_FILE_SIZE = 10 * 1024 * 1024;
@@ -864,21 +865,36 @@ class SuratKeluarController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | FALLBACK
+            | FALLBACK STREAM
             |--------------------------------------------------------------------------
             */
 
-            $content = $disk->get($path);
+            $stream = $disk->readStream($path);
 
-            return response(
-                $content,
+            if ($stream === false) {
+                throw new RuntimeException(
+                    'File lampiran tidak dapat dibaca dari storage.'
+                );
+            }
+
+            return response()->stream(
+                function () use ($stream): void {
+                    fpassthru($stream);
+
+                    if (is_resource($stream)) {
+                        fclose($stream);
+                    }
+                },
                 200,
                 [
-                    'Content-Type' => $this->getMimeTypeFromPath(
-                        $path
-                    ),
-                    'Content-Disposition' => 'inline',
-                    'Cache-Control' => 'private, max-age=300',
+                    'Content-Type' =>
+                        $this->getMimeTypeFromPath($path),
+
+                    'Content-Disposition' =>
+                        'inline',
+
+                    'Cache-Control' =>
+                        'private, max-age=300',
                 ]
             );
         } catch (Throwable $e) {
@@ -1013,7 +1029,16 @@ class SuratKeluarController extends Controller
     /**
      * Menyimpan file upload langsung ke storage.
      *
-     * Tidak menggunakan GD atau file_get_contents().
+     * Tidak menggunakan GD.
+     * Tidak menggunakan file_get_contents().
+     *
+     * Mendukung:
+     * - PDF
+     * - JPG
+     * - JPEG
+     * - PNG
+     *
+     * Maksimal 10 MB.
      */
     private function storeUploadedFile(
         ?UploadedFile $file
@@ -1105,13 +1130,33 @@ class SuratKeluarController extends Controller
         );
 
         /*
-         * Beberapa server dapat mendeteksi PNG sebagai image/x-png.
-         * MIME tersebut tetap kita izinkan.
-         */
+        |--------------------------------------------------------------------------
+        | NORMALISASI MIME
+        |--------------------------------------------------------------------------
+        */
+
+        if ($mimeType === 'image/x-png') {
+            $mimeType = 'image/png';
+        }
+
+        if ($mimeType === 'image/pjpeg') {
+            $mimeType = 'image/jpeg';
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | VALIDASI MIME
+        |--------------------------------------------------------------------------
+        */
+
         if (
             !in_array(
                 $mimeType,
-                self::ALLOWED_MIME_TYPES,
+                [
+                    'application/pdf',
+                    'image/jpeg',
+                    'image/png',
+                ],
                 true
             )
         ) {
@@ -1121,19 +1166,6 @@ class SuratKeluarController extends Controller
                 ($mimeType ?: 'tidak diketahui') .
                 '. Gunakan PDF, JPG, JPEG, atau PNG.'
             );
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | NORMALISASI MIME PNG
-        |--------------------------------------------------------------------------
-        */
-
-        if (
-            $extension === 'png'
-            && $mimeType === 'image/x-png'
-        ) {
-            $mimeType = 'image/png';
         }
 
         /*
@@ -1257,7 +1289,10 @@ class SuratKeluarController extends Controller
                 'Gagal menyimpan file surat keluar.',
                 [
                     'message' => $e->getMessage(),
-                    'path' => $directory . '/' . $fileName,
+                    'path' =>
+                        $directory .
+                        '/' .
+                        $fileName,
                     'extension' => $extension,
                     'mime' => $mimeType,
                     'size' => $fileSize,
@@ -1414,9 +1449,11 @@ class SuratKeluarController extends Controller
         $date = trim($date);
 
         /*
-         * Regex yang benar:
-         * YYYY-MM-DD
-         */
+        |--------------------------------------------------------------------------
+        | REGEX YYYY-MM-DD
+        |--------------------------------------------------------------------------
+        */
+
         if (
             !preg_match(
                 '/^\d{4}-\d{2}-\d{2}$/',
@@ -1473,9 +1510,12 @@ class SuratKeluarController extends Controller
             }
         } catch (Throwable $e) {
             /*
-             * Activity log tidak boleh
-             * menggagalkan proses surat.
-             */
+            |--------------------------------------------------------------------------
+            | Activity log tidak boleh menggagalkan
+            | proses surat.
+            |--------------------------------------------------------------------------
+            */
+
             Log::warning(
                 'Gagal mencatat Activity Log surat keluar.',
                 [
