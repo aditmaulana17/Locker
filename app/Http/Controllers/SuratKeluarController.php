@@ -26,9 +26,6 @@ class SuratKeluarController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    /**
-     * Status surat keluar yang diperbolehkan.
-     */
     private const STATUS_OPTIONS = [
         'draft',
         'diproses',
@@ -37,9 +34,6 @@ class SuratKeluarController extends Controller
         'diarsipkan',
     ];
 
-    /**
-     * Extension file yang diperbolehkan.
-     */
     private const ALLOWED_FILE_EXTENSIONS = [
         'pdf',
         'jpg',
@@ -47,52 +41,23 @@ class SuratKeluarController extends Controller
         'png',
     ];
 
-    /**
-     * Maksimal ukuran file upload.
-     */
+    private const ALLOWED_MIME_TYPES = [
+        'application/pdf',
+        'image/jpeg',
+        'image/png',
+    ];
+
     private const MAX_FILE_SIZE = 10 * 1024 * 1024;
-
-    /**
-     * Target maksimal ukuran gambar hasil compression.
-     */
-    private const MAX_COMPRESSED_IMAGE_SIZE = 9 * 1024 * 1024;
-
-    /**
-     * Maksimal dimensi gambar hasil resize.
-     */
-    private const MAX_IMAGE_WIDTH = 2500;
-    private const MAX_IMAGE_HEIGHT = 2500;
-
-    /**
-     * Kualitas JPEG awal.
-     */
-    private const JPEG_QUALITY = 82;
-
-    /**
-     * Memory limit yang dicoba untuk proses gambar.
-     *
-     * Nilai ini hanya berlaku untuk proses PHP request tersebut.
-     */
-    private const IMAGE_MEMORY_LIMIT = '512M';
-
-    /**
-     * Batas pixel gambar sumber.
-     *
-     * 40 megapixel masih cukup besar untuk foto dari HP,
-     * tetapi mencegah gambar ekstrem menyebabkan server kehabisan RAM.
-     */
-    private const MAX_SOURCE_PIXELS = 40_000_000;
 
     /*
     |--------------------------------------------------------------------------
-    | ROLE
+    | AUTH / ROLE
     |--------------------------------------------------------------------------
     */
 
     /**
      * Mengambil role user yang sedang login.
      *
-     * Normalisasi:
      * staf -> staff
      */
     private function userRole(): string
@@ -105,9 +70,7 @@ class SuratKeluarController extends Controller
 
         $role = strtolower(
             trim(
-                (string) (
-                    $user->role ?? ''
-                )
+                (string) ($user->role ?? '')
             )
         );
 
@@ -119,11 +82,32 @@ class SuratKeluarController extends Controller
     }
 
     /**
-     * Memastikan user memiliki hak pengelolaan surat keluar.
+     * Nama method sengaja dibuat berbeda dari Controller::ensureAuthenticated()
+     * agar tidak bentrok dengan method parent.
+     */
+    private function ensureUserAuthenticated(): void
+    {
+        abort_unless(
+            Auth::check(),
+            401,
+            'Anda harus login terlebih dahulu.'
+        );
+    }
+
+    /**
+     * Memastikan user boleh mengelola surat keluar.
+     *
+     * Admin dan Pimpinan:
+     * - tambah
+     * - edit
+     * - hapus
+     *
+     * Staff:
+     * - tidak boleh mengelola
      */
     private function authorizeManageSurat(): void
     {
-        $this->ensureAuthenticated();
+        $this->ensureUserAuthenticated();
 
         abort_unless(
             in_array(
@@ -146,7 +130,7 @@ class SuratKeluarController extends Controller
     */
 
     /**
-     * Menormalisasi status.
+     * Normalisasi status.
      *
      * draf -> draft
      */
@@ -190,7 +174,7 @@ class SuratKeluarController extends Controller
      */
     public function index(Request $request)
     {
-        $this->ensureAuthenticated();
+        $this->ensureUserAuthenticated();
 
         $query = SuratKeluar::query()
             ->with([
@@ -223,7 +207,7 @@ class SuratKeluarController extends Controller
                         $keyword
                     )
                         ->orWhere(
-                            'pengirim',
+                            'tujuan_surat',
                             'like',
                             $keyword
                         )
@@ -365,15 +349,13 @@ class SuratKeluarController extends Controller
             )
         );
 
-        $validDariTanggal =
-            $this->isValidDate(
-                $dariTanggal
-            );
+        $validDariTanggal = $this->isValidDate(
+            $dariTanggal
+        );
 
-        $validSampaiTanggal =
-            $this->isValidDate(
-                $sampaiTanggal
-            );
+        $validSampaiTanggal = $this->isValidDate(
+            $sampaiTanggal
+        );
 
         if (
             $validDariTanggal
@@ -492,8 +474,9 @@ class SuratKeluarController extends Controller
     /**
      * Menyimpan surat keluar baru.
      */
-    public function store(SuratKeluarRequest $request)
-    {
+    public function store(
+        SuratKeluarRequest $request
+    ) {
         $this->authorizeManageSurat();
 
         $data = $request->validated();
@@ -507,6 +490,12 @@ class SuratKeluarController extends Controller
         $storedAttachment = null;
 
         try {
+            /*
+            |--------------------------------------------------------------------------
+            | UPLOAD LAMPIRAN
+            |--------------------------------------------------------------------------
+            */
+
             if ($request->hasFile('lampiran_file')) {
                 $storedAttachment = $this->storeUploadedFile(
                     $request->file('lampiran_file')
@@ -515,7 +504,21 @@ class SuratKeluarController extends Controller
                 $data['lampiran_file'] = $storedAttachment;
             }
 
-            $suratKeluar = SuratKeluar::create($data);
+            /*
+            |--------------------------------------------------------------------------
+            | SIMPAN DATABASE
+            |--------------------------------------------------------------------------
+            */
+
+            $suratKeluar = SuratKeluar::create(
+                $data
+            );
+
+            /*
+            |--------------------------------------------------------------------------
+            | ACTIVITY LOG
+            |--------------------------------------------------------------------------
+            */
 
             $this->logActivity(
                 'create',
@@ -524,12 +527,20 @@ class SuratKeluarController extends Controller
             );
 
             return redirect()
-                ->route('surat-keluar.index')
+                ->route(
+                    'surat-keluar.index'
+                )
                 ->with(
                     'success',
                     'Surat keluar berhasil ditambahkan.'
                 );
         } catch (Throwable $e) {
+            /*
+            |--------------------------------------------------------------------------
+            | HAPUS FILE JIKA DATABASE GAGAL
+            |--------------------------------------------------------------------------
+            */
+
             if ($storedAttachment) {
                 $this->deleteAttachment(
                     $storedAttachment
@@ -539,14 +550,14 @@ class SuratKeluarController extends Controller
             Log::error(
                 'Gagal menyimpan surat keluar.',
                 [
-                    'message' =>
-                        $e->getMessage(),
-
-                    'user_id' =>
-                        Auth::id(),
-
-                    'disk' =>
-                        $this->getStorageDisk(),
+                    'message' => $e->getMessage(),
+                    'user_id' => Auth::id(),
+                    'disk' => $this->getStorageDisk(),
+                    'file' => $request->hasFile('lampiran_file')
+                        ? $request
+                            ->file('lampiran_file')
+                            ->getClientOriginalName()
+                        : null,
                 ]
             );
 
@@ -572,7 +583,7 @@ class SuratKeluarController extends Controller
     public function show(
         SuratKeluar $suratKeluar
     ) {
-        $this->ensureAuthenticated();
+        $this->ensureUserAuthenticated();
 
         $suratKeluar->load([
             'kategori',
@@ -655,6 +666,12 @@ class SuratKeluarController extends Controller
         $newAttachment = null;
 
         try {
+            /*
+            |--------------------------------------------------------------------------
+            | UPLOAD FILE BARU
+            |--------------------------------------------------------------------------
+            */
+
             if ($request->hasFile('lampiran_file')) {
                 $newAttachment = $this->storeUploadedFile(
                     $request->file('lampiran_file')
@@ -662,12 +679,29 @@ class SuratKeluarController extends Controller
 
                 $data['lampiran_file'] = $newAttachment;
             } else {
+                /*
+                 * Jangan menghapus attachment lama.
+                 */
                 unset(
                     $data['lampiran_file']
                 );
             }
 
-            $suratKeluar->update($data);
+            /*
+            |--------------------------------------------------------------------------
+            | UPDATE DATABASE
+            |--------------------------------------------------------------------------
+            */
+
+            $suratKeluar->update(
+                $data
+            );
+
+            /*
+            |--------------------------------------------------------------------------
+            | HAPUS FILE LAMA
+            |--------------------------------------------------------------------------
+            */
 
             if (
                 $newAttachment
@@ -679,6 +713,12 @@ class SuratKeluarController extends Controller
                 );
             }
 
+            /*
+            |--------------------------------------------------------------------------
+            | ACTIVITY LOG
+            |--------------------------------------------------------------------------
+            */
+
             $this->logActivity(
                 'update',
                 'surat_keluar',
@@ -686,12 +726,20 @@ class SuratKeluarController extends Controller
             );
 
             return redirect()
-                ->route('surat-keluar.index')
+                ->route(
+                    'surat-keluar.index'
+                )
                 ->with(
                     'success',
                     'Surat keluar berhasil diperbarui.'
                 );
         } catch (Throwable $e) {
+            /*
+            |--------------------------------------------------------------------------
+            | HAPUS FILE BARU JIKA UPDATE GAGAL
+            |--------------------------------------------------------------------------
+            */
+
             if (
                 $newAttachment
                 && $newAttachment !== $oldAttachment
@@ -704,14 +752,10 @@ class SuratKeluarController extends Controller
             Log::error(
                 'Gagal memperbarui surat keluar.',
                 [
-                    'surat_keluar_id' =>
-                        $suratKeluar->id,
-
-                    'message' =>
-                        $e->getMessage(),
-
-                    'user_id' =>
-                        Auth::id(),
+                    'surat_keluar_id' => $suratKeluar->id,
+                    'message' => $e->getMessage(),
+                    'user_id' => Auth::id(),
+                    'disk' => $this->getStorageDisk(),
                 ]
             );
 
@@ -741,8 +785,19 @@ class SuratKeluarController extends Controller
 
         $id = $suratKeluar->id;
 
+        $attachment = $suratKeluar->lampiran_file;
+
         try {
             $suratKeluar->delete();
+
+            /*
+             * File attachment ikut dihapus.
+             */
+            if ($attachment) {
+                $this->deleteAttachment(
+                    $attachment
+                );
+            }
 
             $this->logActivity(
                 'delete',
@@ -751,7 +806,9 @@ class SuratKeluarController extends Controller
             );
 
             return redirect()
-                ->route('surat-keluar.index')
+                ->route(
+                    'surat-keluar.index'
+                )
                 ->with(
                     'success',
                     'Surat keluar berhasil dipindahkan ke sampah.'
@@ -760,14 +817,9 @@ class SuratKeluarController extends Controller
             Log::error(
                 'Gagal menghapus surat keluar.',
                 [
-                    'surat_keluar_id' =>
-                        $id,
-
-                    'message' =>
-                        $e->getMessage(),
-
-                    'user_id' =>
-                        Auth::id(),
+                    'surat_keluar_id' => $id,
+                    'message' => $e->getMessage(),
+                    'user_id' => Auth::id(),
                 ]
             );
 
@@ -792,7 +844,7 @@ class SuratKeluarController extends Controller
     public function previewLampiran(
         SuratKeluar $suratKeluar
     ) {
-        $this->ensureAuthenticated();
+        $this->ensureUserAuthenticated();
 
         $path = $suratKeluar->lampiran_file;
 
@@ -825,6 +877,12 @@ class SuratKeluarController extends Controller
         try {
             $disk = $this->storage();
 
+            /*
+            |--------------------------------------------------------------------------
+            | CEK FILE
+            |--------------------------------------------------------------------------
+            */
+
             if (!$disk->exists($path)) {
                 abort(
                     404,
@@ -834,7 +892,7 @@ class SuratKeluarController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | SUPABASE TEMPORARY URL
+            | SUPABASE PRIVATE URL
             |--------------------------------------------------------------------------
             */
 
@@ -858,11 +916,8 @@ class SuratKeluarController extends Controller
                     Log::warning(
                         'Gagal membuat temporary URL surat keluar.',
                         [
-                            'path' =>
-                                $path,
-
-                            'message' =>
-                                $e->getMessage(),
+                            'path' => $path,
+                            'message' => $e->getMessage(),
                         ]
                     );
                 }
@@ -880,33 +935,21 @@ class SuratKeluarController extends Controller
                 $content,
                 200,
                 [
-                    'Content-Type' =>
-                        $this->getMimeTypeFromPath(
-                            $path
-                        ),
-
-                    'Content-Disposition' =>
-                        'inline',
-
-                    'Cache-Control' =>
-                        'private, max-age=300',
+                    'Content-Type' => $this->getMimeTypeFromPath(
+                        $path
+                    ),
+                    'Content-Disposition' => 'inline',
+                    'Cache-Control' => 'private, max-age=300',
                 ]
             );
         } catch (Throwable $e) {
             Log::error(
                 'Gagal preview lampiran surat keluar.',
                 [
-                    'path' =>
-                        $path,
-
-                    'message' =>
-                        $e->getMessage(),
-
-                    'disk' =>
-                        $diskName,
-
-                    'surat_keluar_id' =>
-                        $suratKeluar->id,
+                    'path' => $path,
+                    'message' => $e->getMessage(),
+                    'disk' => $diskName,
+                    'surat_keluar_id' => $suratKeluar->id,
                 ]
             );
 
@@ -931,7 +974,7 @@ class SuratKeluarController extends Controller
     public function cetak(
         SuratKeluar $suratKeluar
     ) {
-        $this->ensureAuthenticated();
+        $this->ensureUserAuthenticated();
 
         $suratKeluar->load([
             'kategori',
@@ -959,7 +1002,7 @@ class SuratKeluarController extends Controller
     public function label(
         SuratKeluar $suratKeluar
     ) {
-        $this->ensureAuthenticated();
+        $this->ensureUserAuthenticated();
 
         $suratKeluar->load(
             'kategori'
@@ -1044,15 +1087,15 @@ class SuratKeluarController extends Controller
     */
 
     /**
-     * Menyimpan file upload.
+     * Menyimpan file upload langsung ke storage.
      *
-     * PDF:
-     * - disimpan apa adanya.
+     * Tidak menggunakan:
+     * - GD
+     * - imagecreatefromstring()
+     * - imagejpeg()
+     * - file_get_contents()
      *
-     * JPG/JPEG/PNG:
-     * - resize
-     * - convert ke JPG
-     * - compression
+     * sehingga tidak membuat bitmap besar di RAM PHP.
      */
     private function storeUploadedFile(
         ?UploadedFile $file
@@ -1062,6 +1105,12 @@ class SuratKeluarController extends Controller
                 'File lampiran tidak ditemukan.'
             );
         }
+
+        /*
+        |--------------------------------------------------------------------------
+        | CEK UPLOAD PHP
+        |--------------------------------------------------------------------------
+        */
 
         if (!$file->isValid()) {
             throw new RuntimeException(
@@ -1073,15 +1122,23 @@ class SuratKeluarController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | UKURAN INPUT
+        | CEK UKURAN
         |--------------------------------------------------------------------------
         */
 
         $fileSize = $file->getSize();
 
         if (
-            $fileSize !== false
-            && $fileSize > self::MAX_FILE_SIZE
+            $fileSize === false
+            || $fileSize <= 0
+        ) {
+            throw new RuntimeException(
+                'Ukuran file tidak dapat dibaca.'
+            );
+        }
+
+        if (
+            $fileSize > self::MAX_FILE_SIZE
         ) {
             throw new RuntimeException(
                 'Ukuran file lampiran maksimal 10 MB.'
@@ -1119,551 +1176,167 @@ class SuratKeluarController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | PDF
+        | MIME TYPE
         |--------------------------------------------------------------------------
         */
 
-        if ($extension === 'pdf') {
-            $contents = file_get_contents(
-                $file->getRealPath()
-            );
-
-            if (
-                $contents === false
-                || $contents === ''
-            ) {
-                throw new RuntimeException(
-                    'Gagal membaca file PDF.'
-                );
-            }
-
-            return $this->storeBinaryFile(
-                $contents,
-                'pdf',
-                'application/pdf',
-                'surat-keluar'
-            );
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | IMAGE
-        |--------------------------------------------------------------------------
-        */
-
-        $contents = file_get_contents(
-            $file->getRealPath()
+        $mimeType = strtolower(
+            (string) $file->getMimeType()
         );
-
-        if (
-            $contents === false
-            || $contents === ''
-        ) {
-            throw new RuntimeException(
-                'Gagal membaca file gambar.'
-            );
-        }
-
-        return $this->storeCompressedImage(
-            $contents
-        );
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | COMPRESS IMAGE
-    |--------------------------------------------------------------------------
-    */
-
-    /**
-     * Compress gambar menggunakan GD.
-     *
-     * Hasil akhir selalu JPG.
-     */
-    private function storeCompressedImage(
-        string $contents
-    ): string {
-        if (
-            !function_exists(
-                'imagecreatefromstring'
-            )
-            || !function_exists(
-                'imagejpeg'
-            )
-        ) {
-            throw new RuntimeException(
-                'PHP GD belum tersedia. Aktifkan ekstensi GD pada server.'
-            );
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | NAIKKAN MEMORY LIMIT UNTUK REQUEST INI
-        |--------------------------------------------------------------------------
-        |
-        | Ini penting karena GD membutuhkan RAM jauh lebih besar daripada
-        | ukuran file JPG/PNG aslinya.
-        |
-        */
-
-        $currentLimit = ini_get('memory_limit');
-
-        @ini_set(
-            'memory_limit',
-            self::IMAGE_MEMORY_LIMIT
-        );
-
-        /*
-        |--------------------------------------------------------------------------
-        | IMAGE INFO
-        |--------------------------------------------------------------------------
-        */
-
-        $imageInfo = @getimagesizefromstring(
-            $contents
-        );
-
-        if ($imageInfo === false) {
-            throw new RuntimeException(
-                'File bukan gambar yang valid.'
-            );
-        }
-
-        $mime = strtolower(
-            (string) (
-                $imageInfo['mime'] ?? ''
-            )
-        );
-
-        if ($mime === 'image/jpg') {
-            $mime = 'image/jpeg';
-        }
 
         if (
             !in_array(
-                $mime,
-                [
-                    'image/jpeg',
-                    'image/png',
-                ],
+                $mimeType,
+                self::ALLOWED_MIME_TYPES,
                 true
             )
         ) {
             throw new RuntimeException(
-                'Format gambar tidak didukung.'
-            );
-        }
-
-        $sourceWidth = (int) (
-            $imageInfo[0] ?? 0
-        );
-
-        $sourceHeight = (int) (
-            $imageInfo[1] ?? 0
-        );
-
-        if (
-            $sourceWidth <= 0
-            || $sourceHeight <= 0
-        ) {
-            throw new RuntimeException(
-                'Dimensi gambar tidak valid.'
+                'Tipe file tidak didukung. ' .
+                'Gunakan PDF, JPG, JPEG, atau PNG.'
             );
         }
 
         /*
         |--------------------------------------------------------------------------
-        | CEK PIXEL SUMBER
-        |--------------------------------------------------------------------------
-        */
-
-        $sourcePixels = $sourceWidth * $sourceHeight;
-
-        if (
-            $sourcePixels > self::MAX_SOURCE_PIXELS
-        ) {
-            throw new RuntimeException(
-                'Resolusi gambar terlalu besar. ' .
-                'Maksimal sekitar 40 megapixel.'
-            );
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | CEK MEMORY
-        |--------------------------------------------------------------------------
-        |
-        | GD membutuhkan beberapa kali ukuran pixel ketika decode gambar.
-        |
-        */
-
-        $memoryLimitBytes =
-            $this->parseMemoryLimit(
-                ini_get('memory_limit')
-            );
-
-        $currentUsage =
-            memory_get_usage(true);
-
-        /*
-         * Estimasi konservatif:
-         *
-         * sekitar 6 byte/pixel untuk image buffer GD
-         * ditambah overhead dan buffer PHP.
-         */
-        $estimatedSourceMemory =
-            $sourcePixels * 6;
-
-        $estimatedRequired =
-            $currentUsage
-            + $estimatedSourceMemory
-            + (32 * 1024 * 1024);
-
-        if (
-            $memoryLimitBytes > 0
-            && $estimatedRequired > $memoryLimitBytes
-        ) {
-            throw new RuntimeException(
-                'Gambar terlalu besar untuk diproses server. ' .
-                'Silakan gunakan gambar dengan resolusi lebih kecil.'
-            );
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | LOAD IMAGE
-        |--------------------------------------------------------------------------
-        */
-
-        $source = @imagecreatefromstring(
-            $contents
-        );
-
-        if ($source === false) {
-            throw new RuntimeException(
-                'Gagal membaca gambar menggunakan GD.'
-            );
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | RESIZE
-        |--------------------------------------------------------------------------
-        */
-
-        $scale = min(
-            self::MAX_IMAGE_WIDTH / $sourceWidth,
-            self::MAX_IMAGE_HEIGHT / $sourceHeight,
-            1
-        );
-
-        $newWidth = max(
-            1,
-            (int) round(
-                $sourceWidth * $scale
-            )
-        );
-
-        $newHeight = max(
-            1,
-            (int) round(
-                $sourceHeight * $scale
-            )
-        );
-
-        /*
-        |--------------------------------------------------------------------------
-        | CANVAS
-        |--------------------------------------------------------------------------
-        */
-
-        $canvas = @imagecreatetruecolor(
-            $newWidth,
-            $newHeight
-        );
-
-        if ($canvas === false) {
-            imagedestroy(
-                $source
-            );
-
-            throw new RuntimeException(
-                'Gagal membuat canvas gambar.'
-            );
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | WHITE BACKGROUND
-        |--------------------------------------------------------------------------
-        |
-        | Dibutuhkan untuk PNG transparan karena hasil akhir JPG.
-        |
-        */
-
-        $white = imagecolorallocate(
-            $canvas,
-            255,
-            255,
-            255
-        );
-
-        imagefill(
-            $canvas,
-            0,
-            0,
-            $white
-        );
-
-        /*
-        |--------------------------------------------------------------------------
-        | RESAMPLE
-        |--------------------------------------------------------------------------
-        */
-
-        $copied = @imagecopyresampled(
-            $canvas,
-            $source,
-            0,
-            0,
-            0,
-            0,
-            $newWidth,
-            $newHeight,
-            $sourceWidth,
-            $sourceHeight
-        );
-
-        /*
-        |--------------------------------------------------------------------------
-        | SOURCE TIDAK DIPERLUKAN LAGI
-        |--------------------------------------------------------------------------
-        */
-
-        imagedestroy(
-            $source
-        );
-
-        unset($source);
-
-        if (!$copied) {
-            imagedestroy(
-                $canvas
-            );
-
-            throw new RuntimeException(
-                'Gagal melakukan resize gambar.'
-            );
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | QUALITY LOOP
-        |--------------------------------------------------------------------------
-        */
-
-        $qualities = [
-            self::JPEG_QUALITY,
-            72,
-            62,
-            52,
-            45,
-        ];
-
-        $compressedData = null;
-
-        foreach ($qualities as $quality) {
-            ob_start();
-
-            $success = @imagejpeg(
-                $canvas,
-                null,
-                $quality
-            );
-
-            $output = ob_get_clean();
-
-            if (
-                !$success
-                || $output === false
-                || $output === ''
-            ) {
-                imagedestroy(
-                    $canvas
-                );
-
-                throw new RuntimeException(
-                    'Gagal melakukan compression gambar.'
-                );
-            }
-
-            $compressedData = $output;
-
-            if (
-                strlen(
-                    $compressedData
-                ) <= self::MAX_COMPRESSED_IMAGE_SIZE
-            ) {
-                break;
-            }
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | HAPUS CANVAS UTAMA
-        |--------------------------------------------------------------------------
-        */
-
-        imagedestroy(
-            $canvas
-        );
-
-        unset($canvas);
-
-        /*
-        |--------------------------------------------------------------------------
-        | FINAL CHECK
+        | PASTIKAN EXTENSION DAN MIME SESUAI
         |--------------------------------------------------------------------------
         */
 
         if (
-            $compressedData === null
-            || $compressedData === false
-            || $compressedData === ''
+            $extension === 'pdf'
+            && $mimeType !== 'application/pdf'
         ) {
             throw new RuntimeException(
-                'Hasil compression gambar kosong.'
+                'File PDF tidak valid.'
             );
         }
 
         if (
-            strlen(
-                $compressedData
-            ) > self::MAX_FILE_SIZE
+            $extension === 'jpg'
+            && $mimeType !== 'image/jpeg'
         ) {
             throw new RuntimeException(
-                'Gambar masih melebihi batas 10 MB setelah compression.'
+                'File JPG/JPEG tidak valid.'
+            );
+        }
+
+        if (
+            $extension === 'png'
+            && $mimeType !== 'image/png'
+        ) {
+            throw new RuntimeException(
+                'File PNG tidak valid.'
             );
         }
 
         /*
         |--------------------------------------------------------------------------
-        | STORAGE
+        | NAMA FILE
         |--------------------------------------------------------------------------
         */
-
-        return $this->storeBinaryFile(
-            $compressedData,
-            'jpg',
-            'image/jpeg',
-            'surat-keluar'
-        );
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | STORE BINARY
-    |--------------------------------------------------------------------------
-    */
-
-    /**
-     * Menyimpan binary data ke storage.
-     */
-    private function storeBinaryFile(
-        string $contents,
-        string $extension,
-        string $mimeType,
-        string $prefix
-    ): string {
-        if ($contents === '') {
-            throw new RuntimeException(
-                'Data file kosong.'
-            );
-        }
-
-        $safePrefix = Str::slug(
-            $prefix,
-            '-'
-        );
 
         $fileName =
-            $safePrefix .
-            '_' .
-            now()->format(
-                'Ymd_His'
-            ) .
+            'surat-keluar_' .
+            now()->format('Ymd_His') .
             '_' .
             Str::lower(
-                Str::random(12)
+                Str::random(16)
             ) .
             '.' .
             $extension;
 
-        $directory =
-            'lampiran/surat_keluar';
+        /*
+        |--------------------------------------------------------------------------
+        | DIRECTORY
+        |--------------------------------------------------------------------------
+        */
 
-        $path =
-            $directory .
-            '/' .
-            $fileName;
+        $directory = 'lampiran/surat_keluar';
 
         /*
         |--------------------------------------------------------------------------
         | STORAGE OPTIONS
         |--------------------------------------------------------------------------
-        |
-        | ContentType wajib dibuat eksplisit karena Supabase Storage
-        | dapat menolak MIME type yang tidak sesuai.
-        |
         */
 
         $options = [
             'ContentType' => $mimeType,
         ];
 
+        /*
+         * Bucket Supabase bersifat private.
+         */
         if (
             $this->getStorageDisk() === 'supabase'
         ) {
             $options['visibility'] = 'private';
         }
 
+        /*
+        |--------------------------------------------------------------------------
+        | SIMPAN FILE
+        |--------------------------------------------------------------------------
+        |
+        | putFileAs() menggunakan UploadedFile secara langsung.
+        |
+        | Ini penting agar PHP tidak melakukan:
+        |
+        | file_get_contents()
+        | imagecreatefromstring()
+        | imagejpeg()
+        |
+        | sehingga tidak terjadi penggunaan RAM besar seperti sebelumnya.
+        |
+        */
+
         try {
             $disk = $this->storage();
 
-            $saved = $disk->put(
-                $path,
-                $contents,
+            $savedPath = $disk->putFileAs(
+                $directory,
+                $file,
+                $fileName,
                 $options
             );
 
-            if (!$saved) {
+            if (
+                $savedPath === false
+                || $savedPath === null
+                || $savedPath === ''
+            ) {
                 throw new RuntimeException(
                     'File gagal disimpan ke storage.'
                 );
             }
 
-            return $path;
+            /*
+            |--------------------------------------------------------------------------
+            | PASTIKAN FILE BENAR-BENAR ADA
+            |--------------------------------------------------------------------------
+            */
+
+            if (
+                !$disk->exists(
+                    $savedPath
+                )
+            ) {
+                throw new RuntimeException(
+                    'File berhasil diproses tetapi tidak ditemukan di storage.'
+                );
+            }
+
+            return $savedPath;
         } catch (Throwable $e) {
             Log::error(
-                'Gagal menyimpan binary surat keluar.',
+                'Gagal menyimpan file surat keluar.',
                 [
-                    'message' =>
-                        $e->getMessage(),
-
-                    'path' =>
-                        $path,
-
-                    'extension' =>
-                        $extension,
-
-                    'mime' =>
-                        $mimeType,
-
-                    'size' =>
-                        strlen($contents),
-
-                    'disk' =>
-                        $this->getStorageDisk(),
+                    'message' => $e->getMessage(),
+                    'path' => $directory . '/' . $fileName,
+                    'extension' => $extension,
+                    'mime' => $mimeType,
+                    'size' => $fileSize,
+                    'disk' => $this->getStorageDisk(),
                 ]
             );
 
@@ -1696,7 +1369,7 @@ class SuratKeluarController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Jangan hapus URL eksternal.
+        | JANGAN HAPUS URL EXTERNAL
         |--------------------------------------------------------------------------
         */
 
@@ -1712,21 +1385,22 @@ class SuratKeluarController extends Controller
         try {
             $disk = $this->storage();
 
-            if ($disk->exists($path)) {
-                $disk->delete($path);
+            if (
+                $disk->exists(
+                    $path
+                )
+            ) {
+                $disk->delete(
+                    $path
+                );
             }
         } catch (Throwable $e) {
             Log::warning(
                 'Gagal menghapus lampiran surat keluar.',
                 [
-                    'path' =>
-                        $path,
-
-                    'message' =>
-                        $e->getMessage(),
-
-                    'disk' =>
-                        $this->getStorageDisk(),
+                    'path' => $path,
+                    'message' => $e->getMessage(),
+                    'disk' => $this->getStorageDisk(),
                 ]
             );
         }
@@ -1810,72 +1484,6 @@ class SuratKeluarController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | MEMORY HELPER
-    |--------------------------------------------------------------------------
-    */
-
-    /**
-     * Mengubah memory_limit PHP menjadi byte.
-     */
-    private function parseMemoryLimit(
-        mixed $value
-    ): int {
-        if (
-            $value === false
-            || $value === null
-            || $value === ''
-        ) {
-            return 0;
-        }
-
-        $value = trim(
-            strtolower(
-                (string) $value
-            )
-        );
-
-        if ($value === '-1') {
-            return 0;
-        }
-
-        if (!preg_match(
-            '/^([0-9]+(?:\.[0-9]+)?)\s*(b|kb|mb|gb|tb)?$/i',
-            $value,
-            $matches
-        )) {
-            return 0;
-        }
-
-        $number = (float) $matches[1];
-
-        $unit = strtolower(
-            $matches[2] ?? 'b'
-        );
-
-        $multiplier = match ($unit) {
-            'tb' =>
-                1024 ** 4,
-
-            'gb' =>
-                1024 ** 3,
-
-            'mb' =>
-                1024 ** 2,
-
-            'kb' =>
-                1024,
-
-            default =>
-                1,
-        };
-
-        return (int) round(
-            $number * $multiplier
-        );
-    }
-
-    /*
-    |--------------------------------------------------------------------------
     | VALIDASI TANGGAL
     |--------------------------------------------------------------------------
     */
@@ -1892,6 +1500,10 @@ class SuratKeluarController extends Controller
 
         $date = trim($date);
 
+        /*
+         * Regex yang benar:
+         * YYYY-MM-DD
+         */
         if (
             !preg_match(
                 '/^\d{4}-\d{2}-\d{2}$/',
@@ -1950,17 +1562,16 @@ class SuratKeluarController extends Controller
                 );
             }
         } catch (Throwable $e) {
+            /*
+             * Activity log tidak boleh
+             * menggagalkan proses surat.
+             */
             Log::warning(
                 'Gagal mencatat Activity Log surat keluar.',
                 [
-                    'message' =>
-                        $e->getMessage(),
-
-                    'action' =>
-                        $action,
-
-                    'module' =>
-                        $module,
+                    'message' => $e->getMessage(),
+                    'action' => $action,
+                    'module' => $module,
                 ]
             );
         }
