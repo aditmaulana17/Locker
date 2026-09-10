@@ -102,10 +102,9 @@ class SuratKeluar extends Model
     /**
      * Generate nomor surat otomatis.
      *
-     * Format:
-     * 001/KODE/I/2026
+     * Contoh:
      *
-     * Nomor urut dihitung berdasarkan tahun berjalan.
+     * 001/ABC/IX/2026
      */
     public static function generateNomorSurat(
         string $kodeKategori
@@ -132,10 +131,16 @@ class SuratKeluar extends Model
             ->whereYear('created_at', $tahun)
             ->count() + 1;
 
+        $kodeKategori = trim($kodeKategori);
+
+        if ($kodeKategori === '') {
+            $kodeKategori = 'SURAT';
+        }
+
         return sprintf(
             '%03d/%s/%s/%d',
             $urutan,
-            strtoupper(trim($kodeKategori)),
+            strtoupper($kodeKategori),
             $bulan,
             $tahun
         );
@@ -151,10 +156,11 @@ class SuratKeluar extends Model
      * Scope filter surat keluar.
      *
      * Mendukung:
-     * - pencarian
+     *
+     * - search
      * - kategori
      * - status
-     * - pengirim / tujuan
+     * - pengirim
      * - tanggal keluar
      */
     public function scopeFilter(
@@ -172,7 +178,7 @@ class SuratKeluar extends Model
             : '';
 
         if ($search !== '') {
-            $keyword = "%{$search}%";
+            $keyword = '%' . $search . '%';
 
             $query->where(
                 function (Builder $q) use ($keyword): void {
@@ -198,7 +204,9 @@ class SuratKeluar extends Model
                     )
                     ->orWhereHas(
                         'kategori',
-                        function (Builder $kategori) use ($keyword): void {
+                        function (
+                            Builder $kategori
+                        ) use ($keyword): void {
                             $kategori
                                 ->where(
                                     'nama_kategori',
@@ -219,7 +227,9 @@ class SuratKeluar extends Model
                     )
                     ->orWhereHas(
                         'pembuat',
-                        function (Builder $user) use ($keyword): void {
+                        function (
+                            Builder $user
+                        ) use ($keyword): void {
                             $user
                                 ->where(
                                     'name',
@@ -240,7 +250,9 @@ class SuratKeluar extends Model
                     )
                     ->orWhereHas(
                         'penandatangan',
-                        function (Builder $user) use ($keyword): void {
+                        function (
+                            Builder $user
+                        ) use ($keyword): void {
                             $user
                                 ->where(
                                     'name',
@@ -267,11 +279,6 @@ class SuratKeluar extends Model
         |--------------------------------------------------------------------------
         | FILTER KATEGORI
         |--------------------------------------------------------------------------
-        |
-        | Mendukung:
-        | - kategori_surat_id
-        | - kategori_id
-        |
         */
 
         $rawKategoriIds =
@@ -288,7 +295,9 @@ class SuratKeluar extends Model
             ];
         }
 
-        $kategoriIds = collect($rawKategoriIds)
+        $kategoriIds = collect(
+            $rawKategoriIds
+        )
             ->flatten()
             ->filter(
                 fn ($id) =>
@@ -297,7 +306,8 @@ class SuratKeluar extends Model
                     && (int) $id > 0
             )
             ->map(
-                fn ($id) => (int) $id
+                fn ($id) =>
+                    (int) $id
             )
             ->unique()
             ->values()
@@ -337,7 +347,9 @@ class SuratKeluar extends Model
             ];
         }
 
-        $statuses = collect($rawStatuses)
+        $statuses = collect(
+            $rawStatuses
+        )
             ->flatten()
             ->filter(
                 fn ($status) =>
@@ -376,19 +388,23 @@ class SuratKeluar extends Model
 
         /*
         |--------------------------------------------------------------------------
-        | FILTER TUJUAN / PENGIRIM
+        | FILTER PENGIRIM
         |--------------------------------------------------------------------------
         */
 
-        $pengirim = isset($filters['pengirim'])
-            ? trim((string) $filters['pengirim'])
+        $pengirim = isset(
+            $filters['pengirim']
+        )
+            ? trim(
+                (string) $filters['pengirim']
+            )
             : '';
 
         if ($pengirim !== '') {
             $query->where(
                 'pengirim',
                 'like',
-                "%{$pengirim}%"
+                '%' . $pengirim . '%'
             );
         }
 
@@ -396,10 +412,6 @@ class SuratKeluar extends Model
         |--------------------------------------------------------------------------
         | FILTER TANGGAL KELUAR
         |--------------------------------------------------------------------------
-        |
-        | Karena index Surat Keluar menggunakan tanggal_keluar,
-        | filter juga harus menggunakan kolom ini.
-        |
         */
 
         $dariTanggal =
@@ -421,14 +433,18 @@ class SuratKeluar extends Model
                 : '';
 
         $validDariTanggal =
-            self::validDate($dariTanggal);
+            self::validDate(
+                $dariTanggal
+            );
 
         $validSampaiTanggal =
-            self::validDate($sampaiTanggal);
+            self::validDate(
+                $sampaiTanggal
+            );
 
         /*
         |--------------------------------------------------------------------------
-        | NORMALISASI RENTANG
+        | NORMALISASI RENTANG TANGGAL
         |--------------------------------------------------------------------------
         */
 
@@ -523,9 +539,9 @@ class SuratKeluar extends Model
             return $query;
         }
 
-        return $query->whereRaw(
-            'LOWER(TRIM(status)) = ?',
-            [$status]
+        return $query->where(
+            'status',
+            $status
         );
     }
 
@@ -536,7 +552,7 @@ class SuratKeluar extends Model
     */
 
     /**
-     * Scope surat yang masih aktif.
+     * Surat yang masih aktif.
      */
     public function scopeAktif(
         Builder $query
@@ -552,7 +568,7 @@ class SuratKeluar extends Model
     }
 
     /**
-     * Scope surat yang sudah dikirim.
+     * Surat yang sudah dikirim.
      */
     public function scopeSudahDikirim(
         Builder $query
@@ -604,7 +620,7 @@ class SuratKeluar extends Model
     */
 
     /**
-     * Mengambil status yang telah dinormalisasi.
+     * Status yang sudah dinormalisasi.
      */
     public function getStatusNormalizedAttribute(): string
     {
@@ -614,9 +630,11 @@ class SuratKeluar extends Model
             )
         );
 
-        return $status === 'draf'
-            ? 'draft'
-            : $status;
+        if ($status === 'draf') {
+            return 'draft';
+        }
+
+        return $status;
     }
 
     /**
@@ -654,7 +672,7 @@ class SuratKeluar extends Model
     }
 
     /**
-     * Class badge status.
+     * Class Tailwind badge status.
      */
     public function getStatusClassAttribute(): string
     {
@@ -688,7 +706,7 @@ class SuratKeluar extends Model
     */
 
     /**
-     * Mengecek apakah memiliki lampiran.
+     * Mengecek apakah surat mempunyai lampiran.
      */
     public function hasLampiran(): bool
     {
@@ -726,9 +744,8 @@ class SuratKeluar extends Model
     */
 
     /**
-     * Mengecek apakah surat secara status masih dapat diedit.
-     *
-     * Helper ini tidak otomatis membatasi controller.
+     * Mengecek apakah surat masih dapat diedit
+     * berdasarkan status.
      */
     public function isEditable(): bool
     {
@@ -749,7 +766,9 @@ class SuratKeluar extends Model
     */
 
     /**
-     * Validasi tanggal YYYY-MM-DD.
+     * Validasi tanggal dengan format:
+     *
+     * YYYY-MM-DD
      */
     private static function validDate(
         mixed $value
@@ -758,9 +777,19 @@ class SuratKeluar extends Model
             return false;
         }
 
+        if (!is_scalar($value)) {
+            return false;
+        }
+
         $value = trim(
             (string) $value
         );
+
+        /*
+        |--------------------------------------------------------------------------
+        | REGEX YANG BENAR
+        |--------------------------------------------------------------------------
+        */
 
         if (
             !preg_match(
