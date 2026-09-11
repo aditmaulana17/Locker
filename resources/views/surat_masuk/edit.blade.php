@@ -1698,37 +1698,6 @@
 
                             </div>
 
-
-                            {{-- RINGKASAN --}}
-
-                            <div class="field field-full">
-
-                                <label
-                                    for="ringkasan"
-                                    class="field-label"
-                                >
-                                    Ringkasan
-                                    <span class="font-normal text-slate-400">
-                                        (opsional)
-                                    </span>
-                                </label>
-
-                                <textarea
-                                    id="ringkasan"
-                                    name="ringkasan"
-                                    rows="3"
-                                    placeholder="Ringkasan isi surat..."
-                                    class="control @error('ringkasan') border-red-500 @enderror"
-                                >{{ old('ringkasan', $suratMasuk->ringkasan) }}</textarea>
-
-                                @error('ringkasan')
-                                    <p class="field-error">
-                                        {{ $message }}
-                                    </p>
-                                @enderror
-
-                            </div>
-
                         </div>
 
                     </div>

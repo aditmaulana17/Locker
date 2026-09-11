@@ -450,39 +450,6 @@
 
                             </div>
 
-
-                            {{-- RINGKASAN --}}
-
-                            <div class="p-3 md:col-span-2">
-
-                                <label
-                                    for="ringkasan"
-                                    class="mb-1.5 block text-[11px] font-bold text-slate-700"
-                                >
-                                    Ringkasan
-                                    <span class="font-normal text-slate-400">
-                                        (Opsional)
-                                    </span>
-                                </label>
-
-                                <textarea
-                                    id="ringkasan"
-                                    name="ringkasan"
-                                    rows="2"
-                                    placeholder="Tuliskan ringkasan isi surat jika diperlukan..."
-                                    class="{{ $inputClass }} resize-y"
-                                >{{ old('ringkasan') }}</textarea>
-
-                                @if($formErrors->has('ringkasan'))
-
-                                    <p class="mt-1 text-[10px] font-medium text-rose-600">
-                                        {{ $formErrors->first('ringkasan') }}
-                                    </p>
-
-                                @endif
-
-                            </div>
-
                         </div>
 
                     </div>
