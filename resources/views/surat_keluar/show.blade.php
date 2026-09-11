@@ -22,19 +22,19 @@
     }
 
     $statusLabels = [
-        'draft'       => 'Draft',
-        'diproses'    => 'Diproses',
-        'disetujui'   => 'Disetujui',
-        'dikirim'     => 'Dikirim',
-        'diarsipkan'  => 'Diarsipkan',
+        'draft'      => 'Draft',
+        'diproses'   => 'Diproses',
+        'disetujui'  => 'Disetujui',
+        'dikirim'    => 'Dikirim',
+        'diarsipkan' => 'Diarsipkan',
     ];
 
     $statusClasses = [
-        'draft'       => 'status-draft',
-        'diproses'    => 'status-processing',
-        'disetujui'   => 'status-approved',
-        'dikirim'     => 'status-sent',
-        'diarsipkan'  => 'status-archived',
+        'draft'      => 'status-draft',
+        'diproses'   => 'status-processing',
+        'disetujui'  => 'status-approved',
+        'dikirim'    => 'status-sent',
+        'diarsipkan' => 'status-archived',
     ];
 
     $statusLabel = $statusLabels[$status] ?? ucfirst($status);
@@ -262,6 +262,10 @@
 
     .alert-error .detail-alert-close {
         color: #f87171;
+    }
+
+    .detail-alert-close:hover {
+        background: rgba(15, 23, 42, .05);
     }
 
 
@@ -549,41 +553,72 @@
     ========================================================== */
 
     .meta-table {
+        width: 100%;
         overflow: hidden;
         border: 2px solid #475569;
-        border-radius: 8px;
+        border-radius: 9px;
         background: #ffffff;
     }
 
     .meta-grid {
         display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-columns:
+            repeat(4, minmax(0, 1fr));
+        width: 100%;
     }
 
     .meta-item {
         min-width: 0;
-        min-height: 62px;
-        padding: 10px;
+        min-height: 66px;
+        padding: 10px 12px;
+        background: #ffffff;
         border-right: 2px solid #94a3b8;
         border-bottom: 2px solid #94a3b8;
-        background: #ffffff;
     }
 
-    .meta-item:nth-child(4n) {
+    /*
+     * BARIS PERTAMA
+     * Tujuan | Kategori | Tanggal Surat | Tanggal Keluar
+     */
+
+    .meta-item:nth-child(1),
+    .meta-item:nth-child(2),
+    .meta-item:nth-child(3) {
+        border-right: 2px solid #94a3b8;
+    }
+
+    .meta-item:nth-child(4) {
         border-right: 0;
     }
 
-    .meta-item:nth-last-child(-n + 4) {
+    /*
+     * DIBUAT OLEH
+     * Mengambil dua kolom pertama.
+     */
+
+    .meta-created {
+        grid-column: 1 / 3;
+        border-right: 2px solid #94a3b8;
         border-bottom: 0;
+        background: #f8fafc;
     }
 
-    .meta-item-wide {
-        grid-column: span 2;
+    /*
+     * Sel penyeimbang.
+     * Hanya sebagai ruang kosong agar struktur bawah
+     * tetap mengikuti grid.
+     */
+
+    .meta-spacer {
+        grid-column: 3 / 5;
+        border-right: 0;
+        border-bottom: 0;
+        background: #ffffff;
     }
 
     .meta-label {
         display: block;
-        margin-bottom: 4px;
+        margin-bottom: 5px;
         font-size: 8px;
         line-height: 1.3;
         font-weight: 800;
@@ -858,32 +893,58 @@
 
 
     /* =========================================================
-       RESPONSIVE
+       RESPONSIVE TABLET
     ========================================================== */
 
     @media (max-width: 950px) {
 
         .meta-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
+            grid-template-columns:
+                repeat(2, minmax(0, 1fr));
         }
 
-        .meta-item:nth-child(4n) {
+        .meta-item {
             border-right: 2px solid #94a3b8;
-        }
-
-        .meta-item:nth-child(2n) {
-            border-right: 0;
-        }
-
-        .meta-item:nth-last-child(-n + 4) {
             border-bottom: 2px solid #94a3b8;
         }
 
-        .meta-item:nth-last-child(-n + 2) {
+        /*
+         * Kolom kanan setiap baris
+         */
+
+        .meta-item:nth-child(2),
+        .meta-item:nth-child(4) {
+            border-right: 0;
+        }
+
+        /*
+         * Dibuat Oleh full width
+         */
+
+        .meta-created {
+            grid-column: 1 / -1;
+            border-right: 0;
             border-bottom: 0;
+        }
+
+        .meta-spacer {
+            display: none;
+        }
+
+        /*
+         * Baris terakhir sebelum Dibuat Oleh
+         */
+
+        .meta-item:nth-child(3),
+        .meta-item:nth-child(4) {
+            border-bottom: 2px solid #94a3b8;
         }
     }
 
+
+    /* =========================================================
+       RESPONSIVE MOBILE
+    ========================================================== */
 
     @media (max-width: 700px) {
 
@@ -928,25 +989,35 @@
             font-size: 8px;
         }
 
+        /*
+         * Semua metadata menjadi satu kolom
+         */
+
         .meta-grid {
             grid-template-columns: 1fr;
         }
 
         .meta-item,
-        .meta-item:nth-child(2n),
-        .meta-item:nth-child(4n),
-        .meta-item:nth-last-child(-n + 2),
-        .meta-item:nth-last-child(-n + 4) {
+        .meta-item:nth-child(1),
+        .meta-item:nth-child(2),
+        .meta-item:nth-child(3),
+        .meta-item:nth-child(4),
+        .meta-created {
+            grid-column: auto;
             border-right: 0;
             border-bottom: 2px solid #94a3b8;
         }
 
-        .meta-item:last-child {
-            border-bottom: 0;
+        .meta-created {
+            background: #f8fafc;
         }
 
-        .meta-item-wide {
-            grid-column: auto;
+        .meta-spacer {
+            display: none;
+        }
+
+        .meta-item:last-of-type {
+            border-bottom: 0;
         }
 
         .attachment-actions {
@@ -963,6 +1034,10 @@
     }
 
 
+    /* =========================================================
+       RESPONSIVE SMALL PHONE
+    ========================================================== */
+
     @media (max-width: 400px) {
 
         .letter-title {
@@ -971,6 +1046,14 @@
 
         .letter-number {
             font-size: 8px;
+        }
+
+        .meta-item {
+            padding: 9px 10px;
+        }
+
+        .meta-value {
+            font-size: 9px;
         }
     }
 </style>
@@ -993,6 +1076,7 @@
             <div class="detail-alert-inner">
 
                 <div class="detail-alert-icon">
+
                     <svg
                         class="w-4 h-4"
                         fill="none"
@@ -1006,6 +1090,7 @@
                             d="M5 13l4 4L19 7"
                         />
                     </svg>
+
                 </div>
 
                 <p class="detail-alert-text">
@@ -1055,6 +1140,7 @@
             <div class="detail-alert-inner">
 
                 <div class="detail-alert-icon">
+
                     <svg
                         class="w-4 h-4"
                         fill="none"
@@ -1068,6 +1154,7 @@
                             d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                         />
                     </svg>
+
                 </div>
 
                 <p class="detail-alert-text">
@@ -1116,6 +1203,7 @@
                 title="Kembali"
                 aria-label="Kembali ke surat keluar"
             >
+
                 <svg
                     class="w-4 h-4"
                     fill="none"
@@ -1129,6 +1217,7 @@
                         d="M10 19l-7-7m0 0l7-7m-7 7h18"
                     />
                 </svg>
+
             </a>
 
 
@@ -1136,7 +1225,9 @@
 
                 <div class="detail-breadcrumb">
 
-                    <a href="{{ route('surat-keluar.index') }}">
+                    <a
+                        href="{{ route('surat-keluar.index') }}"
+                    >
                         Surat Keluar
                     </a>
 
@@ -1180,7 +1271,7 @@
                         stroke-linecap="round"
                         stroke-linejoin="round"
                         stroke-width="2"
-                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h5m5.5-1.5a2.121 2.121 0 003 0l5.5-5.5a2.121 2.121 0 00-3-3L15 10.5V13h-2.5z"
                     />
                 </svg>
 
@@ -1198,6 +1289,7 @@
     ========================================================== --}}
 
     <div class="main-card">
+
 
         {{-- =====================================================
              HEADER SURAT
@@ -1231,6 +1323,7 @@
 
                     <span class="letter-number">
                         Nomor Surat:
+
                         <strong>
                             {{ $nomorSurat }}
                         </strong>
@@ -1256,7 +1349,7 @@
 
 
             {{-- =================================================
-                 INFORMASI META
+                 INFORMASI UTAMA
             ================================================== --}}
 
             <div class="meta-table">
@@ -1318,7 +1411,9 @@
                                 />
                             </svg>
 
-                            {{ $tanggalSurat }}
+                            <span>
+                                {{ $tanggalSurat }}
+                            </span>
 
                         </p>
 
@@ -1345,11 +1440,13 @@
                                     stroke-linecap="round"
                                     stroke-linejoin="round"
                                     stroke-width="2"
-                                    d="M8 2v4M16 2v4M3 10h18M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z"
+                                    d="M8 2v4M16 2v4M3 10h18M5 5h14a2 2 0 012 2v12a2 2 0 01-2-2V7a2 2 0 012-2z"
                                 />
                             </svg>
 
-                            {{ $tanggalKeluar }}
+                            <span>
+                                {{ $tanggalKeluar }}
+                            </span>
 
                         </p>
 
@@ -1358,7 +1455,7 @@
 
                     {{-- DIBUAT OLEH --}}
 
-                    <div class="meta-item meta-item-wide">
+                    <div class="meta-item meta-created">
 
                         <span class="meta-label">
                             Dibuat Oleh
@@ -1369,6 +1466,14 @@
                         </p>
 
                     </div>
+
+
+                    {{-- SPACER --}}
+
+                    <div
+                        class="meta-item meta-spacer"
+                        aria-hidden="true"
+                    ></div>
 
                 </div>
 
@@ -1569,7 +1674,9 @@
                             </div>
 
 
-                        @elseif($lampiranExtension === 'pdf')
+                        @elseif(
+                            $lampiranExtension === 'pdf'
+                        )
 
                             <iframe
                                 src="{{ $lampiranUrl }}"
@@ -1593,7 +1700,7 @@
                                         stroke-linecap="round"
                                         stroke-linejoin="round"
                                         stroke-width="2"
-                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 011.414.414l5.414 5.414A2 2 0 0118 8.414V19a2 2 0 01-2 2z"
+                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                                     />
                                 </svg>
 
@@ -1602,6 +1709,7 @@
                                 </p>
 
                                 <p class="viewer-empty-text">
+
                                     Format:
 
                                     <code>
@@ -1611,6 +1719,7 @@
                                     tidak mendukung preview langsung.
 
                                     Gunakan tombol buka atau unduh.
+
                                 </p>
 
                             </div>
