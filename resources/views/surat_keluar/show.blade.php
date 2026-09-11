@@ -38,7 +38,6 @@
     ];
 
     $statusLabel = $statusLabels[$status] ?? ucfirst($status);
-
     $statusClass = $statusClasses[$status] ?? 'status-draft';
 
 
@@ -132,12 +131,15 @@
                 FILTER_VALIDATE_URL
             )
         ) {
+
             $lampiranUrl = $lampiranPath;
+
         } elseif (
             \Illuminate\Support\Facades\Route::has(
                 'surat-keluar.preview-lampiran'
             )
         ) {
+
             $lampiranUrl = route(
                 'surat-keluar.preview-lampiran',
                 $suratKeluar
@@ -393,7 +395,7 @@
 
 
     /* =========================================================
-       LETTER HEADING
+       HEADER SURAT
     ========================================================== */
 
     .letter-heading {
@@ -562,8 +564,7 @@
 
     .meta-grid {
         display: grid;
-        grid-template-columns:
-            repeat(4, minmax(0, 1fr));
+        grid-template-columns: repeat(4, minmax(0, 1fr));
         width: 100%;
     }
 
@@ -576,45 +577,37 @@
         border-bottom: 2px solid #94a3b8;
     }
 
-    /*
-     * BARIS PERTAMA
-     * Tujuan | Kategori | Tanggal Surat | Tanggal Keluar
-     */
+    /* -----------------------------------------
+       BARIS PERTAMA
+       4 kolom sama besar
+    ------------------------------------------ */
 
-    .meta-item:nth-child(1),
-    .meta-item:nth-child(2),
-    .meta-item:nth-child(3) {
-        border-right: 2px solid #94a3b8;
+    .meta-item:last-child {
+        border-right: 0;
     }
 
     .meta-item:nth-child(4) {
         border-right: 0;
     }
 
-    /*
-     * DIBUAT OLEH
-     * Mengambil dua kolom pertama.
-     */
+
+    /* -----------------------------------------
+       DIBUAT OLEH
+       Full width agar tidak ada ruang kosong
+    ------------------------------------------ */
 
     .meta-created {
-        grid-column: 1 / 3;
-        border-right: 2px solid #94a3b8;
+        grid-column: 1 / -1;
+        border-right: 0;
         border-bottom: 0;
+        min-height: 58px;
         background: #f8fafc;
     }
 
-    /*
-     * Sel penyeimbang.
-     * Hanya sebagai ruang kosong agar struktur bawah
-     * tetap mengikuti grid.
-     */
 
-    .meta-spacer {
-        grid-column: 3 / 5;
-        border-right: 0;
-        border-bottom: 0;
-        background: #ffffff;
-    }
+    /* -----------------------------------------
+       LABEL
+    ------------------------------------------ */
 
     .meta-label {
         display: block;
@@ -627,6 +620,11 @@
         color: #64748b;
     }
 
+
+    /* -----------------------------------------
+       VALUE
+    ------------------------------------------ */
+
     .meta-value {
         margin: 0;
         font-size: 10px;
@@ -635,6 +633,11 @@
         color: #1e293b;
         overflow-wrap: anywhere;
     }
+
+
+    /* -----------------------------------------
+       TANGGAL
+    ------------------------------------------ */
 
     .meta-date {
         display: flex;
@@ -893,14 +896,13 @@
 
 
     /* =========================================================
-       RESPONSIVE TABLET
+       TABLET
     ========================================================== */
 
     @media (max-width: 950px) {
 
         .meta-grid {
-            grid-template-columns:
-                repeat(2, minmax(0, 1fr));
+            grid-template-columns: repeat(2, minmax(0, 1fr));
         }
 
         .meta-item {
@@ -908,42 +910,26 @@
             border-bottom: 2px solid #94a3b8;
         }
 
-        /*
-         * Kolom kanan setiap baris
-         */
+        /* Kolom kanan */
 
         .meta-item:nth-child(2),
         .meta-item:nth-child(4) {
             border-right: 0;
         }
 
-        /*
-         * Dibuat Oleh full width
-         */
+        /* Dibuat Oleh full width */
 
         .meta-created {
             grid-column: 1 / -1;
             border-right: 0;
             border-bottom: 0;
-        }
-
-        .meta-spacer {
-            display: none;
-        }
-
-        /*
-         * Baris terakhir sebelum Dibuat Oleh
-         */
-
-        .meta-item:nth-child(3),
-        .meta-item:nth-child(4) {
-            border-bottom: 2px solid #94a3b8;
+            background: #f8fafc;
         }
     }
 
 
     /* =========================================================
-       RESPONSIVE MOBILE
+       MOBILE
     ========================================================== */
 
     @media (max-width: 700px) {
@@ -989,10 +975,6 @@
             font-size: 8px;
         }
 
-        /*
-         * Semua metadata menjadi satu kolom
-         */
-
         .meta-grid {
             grid-template-columns: 1fr;
         }
@@ -1012,11 +994,7 @@
             background: #f8fafc;
         }
 
-        .meta-spacer {
-            display: none;
-        }
-
-        .meta-item:last-of-type {
+        .meta-item:last-child {
             border-bottom: 0;
         }
 
@@ -1035,7 +1013,7 @@
 
 
     /* =========================================================
-       RESPONSIVE SMALL PHONE
+       SMALL PHONE
     ========================================================== */
 
     @media (max-width: 400px) {
@@ -1076,7 +1054,6 @@
             <div class="detail-alert-inner">
 
                 <div class="detail-alert-icon">
-
                     <svg
                         class="w-4 h-4"
                         fill="none"
@@ -1090,7 +1067,6 @@
                             d="M5 13l4 4L19 7"
                         />
                     </svg>
-
                 </div>
 
                 <p class="detail-alert-text">
@@ -1140,7 +1116,6 @@
             <div class="detail-alert-inner">
 
                 <div class="detail-alert-icon">
-
                     <svg
                         class="w-4 h-4"
                         fill="none"
@@ -1154,7 +1129,6 @@
                             d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                         />
                     </svg>
-
                 </div>
 
                 <p class="detail-alert-text">
@@ -1225,9 +1199,7 @@
 
                 <div class="detail-breadcrumb">
 
-                    <a
-                        href="{{ route('surat-keluar.index') }}"
-                    >
+                    <a href="{{ route('surat-keluar.index') }}">
                         Surat Keluar
                     </a>
 
@@ -1349,7 +1321,7 @@
 
 
             {{-- =================================================
-                 INFORMASI UTAMA
+                 INFORMASI META
             ================================================== --}}
 
             <div class="meta-table">
@@ -1357,7 +1329,9 @@
                 <div class="meta-grid">
 
 
-                    {{-- TUJUAN SURAT --}}
+                    {{-- =================================================
+                         TUJUAN SURAT
+                    ================================================== --}}
 
                     <div class="meta-item">
 
@@ -1372,7 +1346,9 @@
                     </div>
 
 
-                    {{-- KATEGORI --}}
+                    {{-- =================================================
+                         KATEGORI SURAT
+                    ================================================== --}}
 
                     <div class="meta-item">
 
@@ -1387,7 +1363,9 @@
                     </div>
 
 
-                    {{-- TANGGAL SURAT --}}
+                    {{-- =================================================
+                         TANGGAL SURAT
+                    ================================================== --}}
 
                     <div class="meta-item">
 
@@ -1420,7 +1398,9 @@
                     </div>
 
 
-                    {{-- TANGGAL KELUAR --}}
+                    {{-- =================================================
+                         TANGGAL KELUAR
+                    ================================================== --}}
 
                     <div class="meta-item">
 
@@ -1440,7 +1420,7 @@
                                     stroke-linecap="round"
                                     stroke-linejoin="round"
                                     stroke-width="2"
-                                    d="M8 2v4M16 2v4M3 10h18M5 5h14a2 2 0 012 2v12a2 2 0 01-2-2V7a2 2 0 012-2z"
+                                    d="M8 2v4M16 2v4M3 10h18M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z"
                                 />
                             </svg>
 
@@ -1453,7 +1433,9 @@
                     </div>
 
 
-                    {{-- DIBUAT OLEH --}}
+                    {{-- =================================================
+                         DIBUAT OLEH
+                    ================================================== --}}
 
                     <div class="meta-item meta-created">
 
@@ -1466,14 +1448,6 @@
                         </p>
 
                     </div>
-
-
-                    {{-- SPACER --}}
-
-                    <div
-                        class="meta-item meta-spacer"
-                        aria-hidden="true"
-                    ></div>
 
                 </div>
 
@@ -1584,10 +1558,7 @@
                     !empty($lampiranUrl)
                 )
 
-
-                    {{-- =================================================
-                         BUTTON
-                    ================================================== --}}
+                    {{-- BUTTON --}}
 
                     <div class="attachment-actions">
 
@@ -1644,9 +1615,7 @@
                     </div>
 
 
-                    {{-- =================================================
-                         VIEWER
-                    ================================================== --}}
+                    {{-- VIEWER --}}
 
                     <div class="viewer">
 
@@ -1709,7 +1678,6 @@
                                 </p>
 
                                 <p class="viewer-empty-text">
-
                                     Format:
 
                                     <code>
@@ -1719,7 +1687,6 @@
                                     tidak mendukung preview langsung.
 
                                     Gunakan tombol buka atau unduh.
-
                                 </p>
 
                             </div>
@@ -1727,7 +1694,6 @@
                         @endif
 
                     </div>
-
 
                 @else
 
