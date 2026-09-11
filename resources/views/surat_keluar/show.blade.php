@@ -7,7 +7,7 @@
 @php
     /*
     |--------------------------------------------------------------------------
-    | DATA SURAT
+    | STATUS
     |--------------------------------------------------------------------------
     */
 
@@ -22,28 +22,24 @@
     }
 
     $statusLabels = [
-        'draft' => 'Draft',
-        'diproses' => 'Diproses',
-        'disetujui' => 'Disetujui',
-        'dikirim' => 'Dikirim',
-        'diarsipkan' => 'Diarsipkan',
+        'draft'       => 'Draft',
+        'diproses'    => 'Diproses',
+        'disetujui'   => 'Disetujui',
+        'dikirim'     => 'Dikirim',
+        'diarsipkan'  => 'Diarsipkan',
     ];
 
     $statusClasses = [
-        'draft' => 'status-draft',
-        'diproses' => 'status-processing',
-        'disetujui' => 'status-approved',
-        'dikirim' => 'status-sent',
-        'diarsipkan' => 'status-archived',
+        'draft'       => 'status-draft',
+        'diproses'    => 'status-processing',
+        'disetujui'   => 'status-approved',
+        'dikirim'     => 'status-sent',
+        'diarsipkan'  => 'status-archived',
     ];
 
-    $statusLabel =
-        $statusLabels[$status]
-        ?? ucfirst($status);
+    $statusLabel = $statusLabels[$status] ?? ucfirst($status);
 
-    $statusClass =
-        $statusClasses[$status]
-        ?? 'status-draft';
+    $statusClass = $statusClasses[$status] ?? 'status-draft';
 
 
     /*
@@ -57,10 +53,9 @@
 
     try {
         if ($suratKeluar->tanggal_surat) {
-            $tanggalSurat =
-                \Illuminate\Support\Carbon::parse(
-                    $suratKeluar->tanggal_surat
-                )->format('d/m/Y');
+            $tanggalSurat = \Illuminate\Support\Carbon::parse(
+                $suratKeluar->tanggal_surat
+            )->format('d/m/Y');
         }
     } catch (\Throwable $e) {
         $tanggalSurat = '-';
@@ -68,10 +63,9 @@
 
     try {
         if ($suratKeluar->tanggal_keluar) {
-            $tanggalKeluar =
-                \Illuminate\Support\Carbon::parse(
-                    $suratKeluar->tanggal_keluar
-                )->format('d/m/Y');
+            $tanggalKeluar = \Illuminate\Support\Carbon::parse(
+                $suratKeluar->tanggal_keluar
+            )->format('d/m/Y');
         }
     } catch (\Throwable $e) {
         $tanggalKeluar = '-';
@@ -80,74 +74,43 @@
 
     /*
     |--------------------------------------------------------------------------
-    | INFORMASI
+    | INFORMASI SURAT
     |--------------------------------------------------------------------------
     */
 
-    $tujuanSurat =
-        trim(
-            (string) (
-                $suratKeluar->pengirim
-                ?? ''
-            )
-        );
+    $tujuanSurat = trim(
+        (string) ($suratKeluar->pengirim ?? '')
+    );
 
-    $tujuanSurat =
-        $tujuanSurat !== ''
-        ? $tujuanSurat
-        : '-';
+    if ($tujuanSurat === '') {
+        $tujuanSurat = '-';
+    }
 
+    $nomorSurat = trim(
+        (string) ($suratKeluar->nomor_surat ?? '')
+    );
 
-    $nomorSurat =
-        trim(
-            (string) (
-                $suratKeluar->nomor_surat
-                ?? ''
-            )
-        );
+    if ($nomorSurat === '') {
+        $nomorSurat = '-';
+    }
 
-    $nomorSurat =
-        $nomorSurat !== ''
-        ? $nomorSurat
-        : '-';
+    $perihal = trim(
+        (string) ($suratKeluar->perihal ?? '')
+    );
 
+    if ($perihal === '') {
+        $perihal = 'Tanpa Perihal';
+    }
 
-    $perihal =
-        trim(
-            (string) (
-                $suratKeluar->perihal
-                ?? ''
-            )
-        );
-
-    $perihal =
-        $perihal !== ''
-        ? $perihal
-        : 'Tanpa Perihal';
-
-
-    $ringkasan =
-        trim(
-            (string) (
-                $suratKeluar->ringkasan
-                ?? ''
-            )
-        );
-
+    $ringkasan = trim(
+        (string) ($suratKeluar->ringkasan ?? '')
+    );
 
     $kategoriNama =
-        $suratKeluar->kategori?->nama_kategori
-        ?? '-';
-
+        $suratKeluar->kategori?->nama_kategori ?? '-';
 
     $pembuatNama =
-        $suratKeluar->pembuat?->name
-        ?? '-';
-
-
-    $penandatanganNama =
-        $suratKeluar->penandatangan?->name
-        ?? '-';
+        $suratKeluar->pembuat?->name ?? '-';
 
 
     /*
@@ -157,8 +120,7 @@
     */
 
     $lampiranPath =
-        $suratKeluar->lampiran_file
-        ?? null;
+        $suratKeluar->lampiran_file ?? null;
 
     $lampiranUrl = null;
 
@@ -170,40 +132,33 @@
                 FILTER_VALIDATE_URL
             )
         ) {
-
-            $lampiranUrl =
-                $lampiranPath;
-
+            $lampiranUrl = $lampiranPath;
         } elseif (
             \Illuminate\Support\Facades\Route::has(
                 'surat-keluar.preview-lampiran'
             )
         ) {
-
-            $lampiranUrl =
-                route(
-                    'surat-keluar.preview-lampiran',
-                    $suratKeluar
-                );
+            $lampiranUrl = route(
+                'surat-keluar.preview-lampiran',
+                $suratKeluar
+            );
         }
     }
 
-
     $lampiranExtension =
         !empty($lampiranPath)
-        ? strtolower(
-            pathinfo(
-                $lampiranPath,
-                PATHINFO_EXTENSION
+            ? strtolower(
+                pathinfo(
+                    $lampiranPath,
+                    PATHINFO_EXTENSION
+                )
             )
-        )
-        : '';
-
+            : '';
 
     $lampiranNama =
         !empty($lampiranPath)
-        ? basename($lampiranPath)
-        : null;
+            ? basename($lampiranPath)
+            : null;
 @endphp
 
 
@@ -323,16 +278,14 @@
         padding: 13px 15px;
         border: 2px solid #334155;
         border-radius: 11px;
-        background:
-            linear-gradient(
-                135deg,
-                #0f172a,
-                #1e293b,
-                #064e3b
-            );
+        background: linear-gradient(
+            135deg,
+            #0f172a,
+            #1e293b,
+            #064e3b
+        );
         color: #ffffff;
-        box-shadow:
-            0 4px 10px rgba(15, 23, 42, .10);
+        box-shadow: 0 4px 10px rgba(15, 23, 42, .10);
     }
 
     .detail-header-left {
@@ -428,16 +381,15 @@
 
     .main-card {
         overflow: hidden;
-        border: 2px solid #64748b;
+        border: 2px solid #475569;
         border-radius: 11px;
         background: #ffffff;
-        box-shadow:
-            0 4px 10px rgba(15, 23, 42, .06);
+        box-shadow: 0 4px 10px rgba(15, 23, 42, .06);
     }
 
 
     /* =========================================================
-       HERO / TITLE
+       LETTER HEADING
     ========================================================== */
 
     .letter-heading {
@@ -446,13 +398,12 @@
         justify-content: space-between;
         gap: 14px;
         padding: 15px;
-        border-bottom: 2px solid #94a3b8;
-        background:
-            linear-gradient(
-                to right,
-                #f8fafc,
-                #ffffff
-            );
+        border-bottom: 2px solid #64748b;
+        background: linear-gradient(
+            to right,
+            #f8fafc,
+            #ffffff
+        );
     }
 
     .letter-heading-content {
@@ -507,7 +458,7 @@
         align-items: center;
         min-height: 24px;
         padding: 0 8px;
-        border: 1px solid #a7f3d0;
+        border: 1px solid #6ee7b7;
         border-radius: 6px;
         background: #ecfdf5;
         color: #047857;
@@ -535,7 +486,7 @@
 
 
     /* =========================================================
-       STATUS BADGE
+       STATUS
     ========================================================== */
 
     .status-badge {
@@ -599,7 +550,7 @@
 
     .meta-table {
         overflow: hidden;
-        border: 2px solid #64748b;
+        border: 2px solid #475569;
         border-radius: 8px;
         background: #ffffff;
     }
@@ -611,6 +562,7 @@
 
     .meta-item {
         min-width: 0;
+        min-height: 62px;
         padding: 10px;
         border-right: 2px solid #94a3b8;
         border-bottom: 2px solid #94a3b8;
@@ -637,7 +589,7 @@
         font-weight: 800;
         text-transform: uppercase;
         letter-spacing: .06em;
-        color: #94a3b8;
+        color: #64748b;
     }
 
     .meta-value {
@@ -649,6 +601,19 @@
         overflow-wrap: anywhere;
     }
 
+    .meta-date {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .meta-date-icon {
+        width: 13px;
+        height: 13px;
+        flex: 0 0 13px;
+        color: #475569;
+    }
+
 
     /* =========================================================
        SECTION
@@ -657,7 +622,7 @@
     .detail-section {
         margin-top: 14px;
         padding-top: 14px;
-        border-top: 2px solid #94a3b8;
+        border-top: 2px solid #64748b;
     }
 
     .section-heading {
@@ -686,12 +651,12 @@
 
 
     /* =========================================================
-       TEXT CONTENT
+       CONTENT
     ========================================================== */
 
     .content-box {
         padding: 10px 11px;
-        border: 2px solid #cbd5e1;
+        border: 2px solid #94a3b8;
         border-radius: 8px;
         background: #f8fafc;
     }
@@ -707,7 +672,7 @@
     }
 
     .summary-box {
-        border-color: #cbd5e1;
+        border-color: #94a3b8;
         background: #ffffff;
     }
 
@@ -738,7 +703,7 @@
         margin: 3px 0 0;
         font-size: 8px;
         line-height: 1.4;
-        color: #94a3b8;
+        color: #64748b;
         overflow-wrap: anywhere;
     }
 
@@ -747,10 +712,10 @@
         align-items: center;
         min-height: 23px;
         padding: 0 7px;
-        border: 1px solid #cbd5e1;
+        border: 1px solid #94a3b8;
         border-radius: 6px;
         background: #f8fafc;
-        color: #64748b;
+        color: #475569;
         font-size: 8px;
         font-weight: 800;
         text-transform: uppercase;
@@ -789,13 +754,13 @@
     }
 
     .attachment-btn-secondary {
-        border: 2px solid #cbd5e1;
+        border: 2px solid #94a3b8;
         background: #ffffff;
         color: #475569;
     }
 
     .attachment-btn-secondary:hover {
-        border-color: #94a3b8;
+        border-color: #64748b;
         background: #f8fafc;
     }
 
@@ -806,7 +771,7 @@
 
     .viewer {
         overflow: hidden;
-        border: 2px solid #64748b;
+        border: 2px solid #475569;
         border-radius: 8px;
         background: #0f172a;
         padding: 7px;
@@ -878,7 +843,7 @@
         align-items: center;
         gap: 8px;
         padding: 11px;
-        border: 2px dashed #cbd5e1;
+        border: 2px dashed #94a3b8;
         border-radius: 8px;
         background: #f8fafc;
         color: #64748b;
@@ -897,6 +862,7 @@
     ========================================================== */
 
     @media (max-width: 950px) {
+
         .meta-grid {
             grid-template-columns: repeat(2, minmax(0, 1fr));
         }
@@ -920,6 +886,7 @@
 
 
     @media (max-width: 700px) {
+
         .surat-keluar-detail-page {
             padding: 8px 10px 20px;
         }
@@ -948,6 +915,7 @@
 
 
     @media (max-width: 560px) {
+
         .detail-header-left {
             align-items: flex-start;
         }
@@ -996,6 +964,7 @@
 
 
     @media (max-width: 400px) {
+
         .letter-title {
             font-size: 16px;
         }
@@ -1012,6 +981,7 @@
     {{-- =========================================================
          SUCCESS
     ========================================================== --}}
+
     @if(session('success'))
 
         <div
@@ -1023,7 +993,6 @@
             <div class="detail-alert-inner">
 
                 <div class="detail-alert-icon">
-
                     <svg
                         class="w-4 h-4"
                         fill="none"
@@ -1037,7 +1006,6 @@
                             d="M5 13l4 4L19 7"
                         />
                     </svg>
-
                 </div>
 
                 <p class="detail-alert-text">
@@ -1075,6 +1043,7 @@
     {{-- =========================================================
          ERROR
     ========================================================== --}}
+
     @if(session('error'))
 
         <div
@@ -1086,7 +1055,6 @@
             <div class="detail-alert-inner">
 
                 <div class="detail-alert-icon">
-
                     <svg
                         class="w-4 h-4"
                         fill="none"
@@ -1100,7 +1068,6 @@
                             d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                         />
                     </svg>
-
                 </div>
 
                 <p class="detail-alert-text">
@@ -1138,6 +1105,7 @@
     {{-- =========================================================
          HEADER
     ========================================================== --}}
+
     <div class="detail-header">
 
         <div class="detail-header-left">
@@ -1148,7 +1116,6 @@
                 title="Kembali"
                 aria-label="Kembali ke surat keluar"
             >
-
                 <svg
                     class="w-4 h-4"
                     fill="none"
@@ -1162,7 +1129,6 @@
                         d="M10 19l-7-7m0 0l7-7m-7 7h18"
                     />
                 </svg>
-
             </a>
 
 
@@ -1230,12 +1196,13 @@
     {{-- =========================================================
          MAIN CARD
     ========================================================== --}}
+
     <div class="main-card">
 
-
         {{-- =====================================================
-             LETTER HEADING
+             HEADER SURAT
         ====================================================== --}}
+
         <div class="letter-heading">
 
             <div class="letter-heading-content">
@@ -1284,15 +1251,20 @@
         {{-- =====================================================
              BODY
         ====================================================== --}}
+
         <div class="main-body">
 
 
             {{-- =================================================
-                 METADATA
+                 INFORMASI META
             ================================================== --}}
+
             <div class="meta-table">
 
                 <div class="meta-grid">
+
+
+                    {{-- TUJUAN SURAT --}}
 
                     <div class="meta-item">
 
@@ -1307,6 +1279,8 @@
                     </div>
 
 
+                    {{-- KATEGORI --}}
+
                     <div class="meta-item">
 
                         <span class="meta-label">
@@ -1320,18 +1294,38 @@
                     </div>
 
 
+                    {{-- TANGGAL SURAT --}}
+
                     <div class="meta-item">
 
                         <span class="meta-label">
                             Tanggal Surat
                         </span>
 
-                        <p class="meta-value">
+                        <p class="meta-value meta-date">
+
+                            <svg
+                                class="meta-date-icon"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M8 2v4M16 2v4M3 10h18M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z"
+                                />
+                            </svg>
+
                             {{ $tanggalSurat }}
+
                         </p>
 
                     </div>
 
+
+                    {{-- TANGGAL KELUAR --}}
 
                     <div class="meta-item">
 
@@ -1339,12 +1333,30 @@
                             Tanggal Keluar
                         </span>
 
-                        <p class="meta-value">
+                        <p class="meta-value meta-date">
+
+                            <svg
+                                class="meta-date-icon"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M8 2v4M16 2v4M3 10h18M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z"
+                                />
+                            </svg>
+
                             {{ $tanggalKeluar }}
+
                         </p>
 
                     </div>
 
+
+                    {{-- DIBUAT OLEH --}}
 
                     <div class="meta-item meta-item-wide">
 
@@ -1358,19 +1370,6 @@
 
                     </div>
 
-
-                    <div class="meta-item meta-item-wide">
-
-                        <span class="meta-label">
-                            Ditandatangani Oleh
-                        </span>
-
-                        <p class="meta-value">
-                            {{ $penandatanganNama }}
-                        </p>
-
-                    </div>
-
                 </div>
 
             </div>
@@ -1379,6 +1378,7 @@
             {{-- =================================================
                  PERIHAL
             ================================================== --}}
+
             <section class="detail-section">
 
                 <div class="section-heading">
@@ -1406,6 +1406,7 @@
             {{-- =================================================
                  RINGKASAN
             ================================================== --}}
+
             @if($ringkasan !== '')
 
                 <section class="detail-section">
@@ -1440,6 +1441,7 @@
             {{-- =================================================
                  LAMPIRAN
             ================================================== --}}
+
             <section class="detail-section">
 
                 <div class="attachment-header">
@@ -1477,9 +1479,11 @@
                     !empty($lampiranUrl)
                 )
 
+
                     {{-- =================================================
-                         ACTION
+                         BUTTON
                     ================================================== --}}
+
                     <div class="attachment-actions">
 
                         <a
@@ -1538,6 +1542,7 @@
                     {{-- =================================================
                          VIEWER
                     ================================================== --}}
+
                     <div class="viewer">
 
                         @if(
@@ -1588,7 +1593,7 @@
                                         stroke-linecap="round"
                                         stroke-linejoin="round"
                                         stroke-width="2"
-                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 011.414.414l5.414 5.414A2 2 0 0118 8.414V19a2 2 0 01-2 2z"
                                     />
                                 </svg>
 
@@ -1597,7 +1602,6 @@
                                 </p>
 
                                 <p class="viewer-empty-text">
-
                                     Format:
 
                                     <code>
@@ -1607,7 +1611,6 @@
                                     tidak mendukung preview langsung.
 
                                     Gunakan tombol buka atau unduh.
-
                                 </p>
 
                             </div>
