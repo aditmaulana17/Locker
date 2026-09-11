@@ -114,15 +114,23 @@
 
     $isImage = in_array(
         $lampiranExtension,
-        ['jpg', 'jpeg', 'png', 'webp', 'gif'],
+        [
+            'jpg',
+            'jpeg',
+            'png',
+            'webp',
+            'gif'
+        ],
         true
     );
 
-    $isPdf = $lampiranExtension === 'pdf';
+    $isPdf =
+        $lampiranExtension === 'pdf';
 
-    $lampiranNama = !empty($lampiranPath)
-        ? basename($lampiranPath)
-        : null;
+    $lampiranNama =
+        !empty($lampiranPath)
+            ? basename($lampiranPath)
+            : null;
 
 
     /*
@@ -149,7 +157,10 @@
 
     $canManage = in_array(
         $userRole,
-        ['admin', 'pimpinan'],
+        [
+            'admin',
+            'pimpinan'
+        ],
         true
     );
 
@@ -167,7 +178,7 @@
 
 <style>
     /* =========================================================
-       PAGE
+       ROOT / PAGE
     ========================================================== */
 
     .sm-detail-page {
@@ -196,8 +207,17 @@
         gap: 12px;
         margin-bottom: 12px;
         padding: 10px 12px;
-        border: 1px solid;
         border-radius: 12px;
+    }
+
+    .sm-alert-success {
+        background: #f0fdf4;
+        color: #166534;
+    }
+
+    .sm-alert-error {
+        background: #fff1f2;
+        color: #991b1b;
     }
 
     .sm-alert-inner {
@@ -215,6 +235,16 @@
         justify-content: center;
         flex: 0 0 30px;
         border-radius: 9px;
+    }
+
+    .sm-alert-success .sm-alert-icon {
+        background: #dcfce7;
+        color: #16a34a;
+    }
+
+    .sm-alert-error .sm-alert-icon {
+        background: #ffe4e6;
+        color: #dc2626;
     }
 
     .sm-alert-text {
@@ -237,30 +267,8 @@
         cursor: pointer;
     }
 
-    .sm-alert-success {
-        border-color: #bbf7d0;
-        background: #f0fdf4;
-        color: #166534;
-    }
-
-    .sm-alert-success .sm-alert-icon {
-        background: #dcfce7;
-        color: #16a34a;
-    }
-
     .sm-alert-success .sm-alert-close {
         color: #4ade80;
-    }
-
-    .sm-alert-error {
-        border-color: #fecdd3;
-        background: #fff1f2;
-        color: #991b1b;
-    }
-
-    .sm-alert-error .sm-alert-icon {
-        background: #ffe4e6;
-        color: #dc2626;
     }
 
     .sm-alert-error .sm-alert-close {
@@ -273,45 +281,60 @@
 
 
     /* =========================================================
-       TOP HEADER
+       HEADER
     ========================================================== */
 
     .sm-header {
+        position: relative;
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 16px;
         margin-bottom: 14px;
-        padding: 14px 16px;
-        border: 1px solid #dbe3ef;
-        border-radius: 16px;
-        background: linear-gradient(
-            135deg,
-            #0f172a,
-            #1e293b 58%,
-            #312e81
-        );
+        padding: 16px 18px;
+        overflow: hidden;
+        border-radius: 18px;
+        background:
+            linear-gradient(
+                135deg,
+                #0f172a 0%,
+                #1e293b 55%,
+                #312e81 100%
+            );
         color: #fff;
         box-shadow:
-            0 8px 25px rgba(15, 23, 42, .10);
+            0 14px 34px rgba(15, 23, 42, .12);
+    }
+
+    .sm-header::after {
+        content: "";
+        position: absolute;
+        width: 180px;
+        height: 180px;
+        right: -70px;
+        top: -100px;
+        border-radius: 999px;
+        background: rgba(99, 102, 241, .18);
+        pointer-events: none;
     }
 
     .sm-header-left {
+        position: relative;
+        z-index: 1;
         display: flex;
         align-items: center;
-        gap: 11px;
+        gap: 12px;
         min-width: 0;
     }
 
     .sm-back {
-        width: 38px;
-        height: 38px;
+        width: 40px;
+        height: 40px;
         display: flex;
         align-items: center;
         justify-content: center;
-        flex: 0 0 38px;
-        border: 1px solid rgba(255, 255, 255, .14);
-        border-radius: 10px;
+        flex: 0 0 40px;
+        border-radius: 11px;
         background: rgba(255, 255, 255, .08);
         color: #fff;
         text-decoration: none;
@@ -319,8 +342,8 @@
     }
 
     .sm-back:hover {
-        background: rgba(255, 255, 255, .15);
-        transform: translateX(-1px);
+        background: rgba(255, 255, 255, .16);
+        transform: translateX(-2px);
     }
 
     .sm-header-content {
@@ -362,6 +385,8 @@
     }
 
     .sm-header-actions {
+        position: relative;
+        z-index: 1;
         display: flex;
         align-items: center;
         justify-content: flex-end;
@@ -375,7 +400,7 @@
         justify-content: center;
         gap: 6px;
         min-height: 34px;
-        padding: 0 10px;
+        padding: 0 11px;
         border-radius: 9px;
         font-size: 9px;
         font-weight: 800;
@@ -385,27 +410,24 @@
     }
 
     .sm-header-btn-edit {
-        border: 1px solid rgba(245, 158, 11, .28);
-        background: rgba(245, 158, 11, .12);
+        background: rgba(245, 158, 11, .13);
         color: #fde68a;
     }
 
     .sm-header-btn-edit:hover {
-        background: rgba(245, 158, 11, .22);
+        background: rgba(245, 158, 11, .23);
     }
 
     .sm-header-btn-print {
-        border: 1px solid rgba(16, 185, 129, .28);
         background: rgba(16, 185, 129, .11);
         color: #a7f3d0;
     }
 
     .sm-header-btn-print:hover {
-        background: rgba(16, 185, 129, .20);
+        background: rgba(16, 185, 129, .21);
     }
 
     .sm-header-btn-label {
-        border: 1px solid rgba(96, 165, 250, .28);
         background: rgba(96, 165, 250, .10);
         color: #bfdbfe;
     }
@@ -416,13 +438,13 @@
 
 
     /* =========================================================
-       LAYOUT
+       MAIN LAYOUT
     ========================================================== */
 
     .sm-layout {
         display: grid;
         grid-template-columns:
-            minmax(0, 1.75fr)
+            minmax(0, 1.7fr)
             minmax(300px, .85fr);
         gap: 14px;
         align-items: start;
@@ -430,38 +452,56 @@
 
 
     /* =========================================================
-       MAIN CARD
+       GENERAL CARD
     ========================================================== */
 
-    .sm-main-card {
-        overflow: hidden;
-        border: 1px solid #dbe3ef;
-        border-radius: 16px;
+    .sm-card {
+        border-radius: 17px;
         background: #fff;
         box-shadow:
-            0 8px 24px rgba(15, 23, 42, .06);
+            0 8px 28px rgba(15, 23, 42, .055);
     }
 
 
     /* =========================================================
-       LETTER HEAD
+       LETTER CARD
     ========================================================== */
 
+    .sm-letter-card {
+        overflow: hidden;
+    }
+
     .sm-letter-head {
+        position: relative;
         display: flex;
         align-items: flex-start;
         justify-content: space-between;
         gap: 14px;
-        padding: 16px;
+        padding: 18px;
         background:
             linear-gradient(
-                to bottom,
-                #ffffff,
-                #f8fafc
+                135deg,
+                #ffffff 0%,
+                #f8fafc 58%,
+                #f5f3ff 100%
             );
     }
 
+    .sm-letter-head::after {
+        content: "";
+        position: absolute;
+        width: 120px;
+        height: 120px;
+        right: -55px;
+        top: -60px;
+        border-radius: 999px;
+        background: #eef2ff;
+        pointer-events: none;
+    }
+
     .sm-letter-info {
+        position: relative;
+        z-index: 1;
         min-width: 0;
         flex: 1;
     }
@@ -470,7 +510,7 @@
         display: flex;
         align-items: center;
         gap: 6px;
-        margin-bottom: 5px;
+        margin-bottom: 6px;
     }
 
     .sm-eyebrow-dot {
@@ -479,7 +519,7 @@
         border-radius: 999px;
         background: #4f46e5;
         box-shadow:
-            0 0 0 3px #e0e7ff;
+            0 0 0 4px #e0e7ff;
     }
 
     .sm-eyebrow-text {
@@ -493,10 +533,11 @@
 
     .sm-letter-title {
         margin: 0;
-        font-size: 18px;
+        max-width: 760px;
+        font-size: 19px;
         line-height: 1.4;
         font-weight: 850;
-        letter-spacing: -.02em;
+        letter-spacing: -.025em;
         color: #0f172a;
         overflow-wrap: anywhere;
     }
@@ -506,16 +547,15 @@
         align-items: center;
         flex-wrap: wrap;
         gap: 7px;
-        margin-top: 7px;
+        margin-top: 8px;
     }
 
     .sm-agenda {
         display: inline-flex;
         align-items: center;
-        min-height: 23px;
-        padding: 0 8px;
-        border: 1px solid #c7d2fe;
-        border-radius: 7px;
+        min-height: 24px;
+        padding: 0 9px;
+        border-radius: 8px;
         background: #eef2ff;
         color: #4338ca;
         font-family:
@@ -531,7 +571,7 @@
 
     .sm-number {
         font-size: 9px;
-        line-height: 1.4;
+        line-height: 1.45;
         color: #64748b;
         overflow-wrap: anywhere;
     }
@@ -541,13 +581,14 @@
     }
 
     .sm-status {
+        position: relative;
+        z-index: 2;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        min-height: 28px;
-        padding: 0 10px;
+        min-height: 29px;
+        padding: 0 11px;
         flex: 0 0 auto;
-        border: 1px solid;
         border-radius: 999px;
         font-size: 9px;
         font-weight: 800;
@@ -555,87 +596,74 @@
     }
 
     .sm-status-baru {
-        border-color: #bfdbfe;
         background: #eff6ff;
         color: #1d4ed8;
     }
 
     .sm-status-diproses {
-        border-color: #fde68a;
         background: #fffbeb;
         color: #b45309;
     }
 
     .sm-status-disposisi {
-        border-color: #ddd6fe;
         background: #f5f3ff;
         color: #6d28d9;
     }
 
     .sm-status-selesai {
-        border-color: #bbf7d0;
         background: #f0fdf4;
         color: #15803d;
     }
 
     .sm-status-arsip {
-        border-color: #e2e8f0;
-        background: #f8fafc;
+        background: #f1f5f9;
         color: #475569;
     }
 
 
     /* =========================================================
-       MAIN BODY
+       CARD BODY
     ========================================================== */
 
-    .sm-main-body {
-        padding: 14px 16px 16px;
+    .sm-card-body {
+        padding: 15px 17px 18px;
     }
 
 
     /* =========================================================
-       INFORMATION GRID
+       INFORMATION
     ========================================================== */
 
     .sm-info-grid {
         display: grid;
         grid-template-columns:
             repeat(2, minmax(0, 1fr));
-        overflow: hidden;
-        border: 1px solid #e2e8f0;
-        border-radius: 12px;
-        background: #fff;
+        gap: 8px;
     }
 
     .sm-info-item {
         min-width: 0;
-        min-height: 67px;
-        padding: 10px 11px;
-        background: #fff;
-        transition: background .15s ease;
-    }
-
-    .sm-info-item:nth-child(odd) {
-        border-right: 1px solid #e2e8f0;
-    }
-
-    .sm-info-item:nth-child(-n + 4) {
-        border-bottom: 1px solid #e2e8f0;
+        padding: 11px 12px;
+        border-radius: 11px;
+        background: #f8fafc;
+        transition:
+            background .16s ease,
+            transform .16s ease;
     }
 
     .sm-info-item:hover {
-        background: #fafbff;
+        background: #f1f5f9;
+        transform: translateY(-1px);
     }
 
     .sm-info-label {
         display: block;
         margin-bottom: 4px;
-        font-size: 8px;
-        line-height: 1.25;
+        font-size: 7.5px;
+        line-height: 1.3;
         font-weight: 800;
         text-transform: uppercase;
-        letter-spacing: .06em;
+        letter-spacing: .07em;
         color: #94a3b8;
     }
 
@@ -658,37 +686,39 @@
         width: 13px;
         height: 13px;
         flex: 0 0 13px;
-        color: #64748b;
+        color: #6366f1;
     }
 
 
     /* =========================================================
-       CONTENT SECTIONS
+       SECTION
     ========================================================== */
 
     .sm-section {
-        margin-top: 14px;
-        padding-top: 14px;
-        border-top: 1px solid #e2e8f0;
+        margin-top: 17px;
     }
 
     .sm-section-head {
         display: flex;
         align-items: center;
-        gap: 7px;
+        gap: 8px;
         margin-bottom: 7px;
     }
 
     .sm-section-icon {
-        width: 25px;
-        height: 25px;
+        width: 27px;
+        height: 27px;
         display: flex;
         align-items: center;
         justify-content: center;
-        flex: 0 0 25px;
-        border-radius: 7px;
+        flex: 0 0 27px;
+        border-radius: 8px;
         background: #eef2ff;
         color: #4f46e5;
+    }
+
+    .sm-section-text {
+        min-width: 0;
     }
 
     .sm-section-title {
@@ -706,24 +736,28 @@
         color: #94a3b8;
     }
 
-    .sm-text-box {
-        padding: 11px 12px;
-        border: 1px solid #e2e8f0;
+
+    /* =========================================================
+       CONTENT BOX
+    ========================================================== */
+
+    .sm-content-box {
+        padding: 12px 13px;
         border-radius: 11px;
         background: #f8fafc;
     }
 
-    .sm-text-content {
+    .sm-content-box-white {
+        background: #fff;
+    }
+
+    .sm-content-text {
         margin: 0;
         font-size: 10px;
-        line-height: 1.65;
+        line-height: 1.7;
         color: #475569;
         white-space: pre-line;
         overflow-wrap: anywhere;
-    }
-
-    .sm-summary-box {
-        background: #fff;
     }
 
 
@@ -731,7 +765,13 @@
        ATTACHMENT
     ========================================================== */
 
-    .sm-attachment-top {
+    .sm-attachment {
+        margin-top: 18px;
+        padding-top: 17px;
+        border-top: 1px solid #eef2f7;
+    }
+
+    .sm-attachment-head {
         display: flex;
         align-items: flex-start;
         justify-content: space-between;
@@ -751,6 +791,7 @@
     .sm-attachment-description {
         margin: 3px 0 0;
         font-size: 8px;
+        line-height: 1.45;
         color: #94a3b8;
     }
 
@@ -759,11 +800,17 @@
         align-items: center;
         justify-content: center;
         min-height: 22px;
-        padding: 0 7px;
-        border: 1px solid #e2e8f0;
+        padding: 0 8px;
         border-radius: 7px;
-        background: #f8fafc;
+        background: #f1f5f9;
         color: #64748b;
+        font-family:
+            ui-monospace,
+            SFMono-Regular,
+            Menlo,
+            Monaco,
+            Consolas,
+            monospace;
         font-size: 8px;
         font-weight: 800;
         text-transform: uppercase;
@@ -775,8 +822,7 @@
         justify-content: space-between;
         gap: 10px;
         margin-bottom: 8px;
-        padding: 8px 9px;
-        border: 1px solid #e2e8f0;
+        padding: 9px;
         border-radius: 10px;
         background: #f8fafc;
     }
@@ -784,18 +830,18 @@
     .sm-file-info {
         display: flex;
         align-items: center;
-        gap: 7px;
+        gap: 8px;
         min-width: 0;
     }
 
     .sm-file-icon {
-        width: 29px;
-        height: 29px;
+        width: 31px;
+        height: 31px;
         display: flex;
         align-items: center;
         justify-content: center;
-        flex: 0 0 29px;
-        border-radius: 8px;
+        flex: 0 0 31px;
+        border-radius: 9px;
         background: #eef2ff;
         color: #4f46e5;
     }
@@ -847,7 +893,6 @@
     }
 
     .sm-file-btn-download {
-        border: 1px solid #dbe3ef;
         background: #fff;
         color: #475569;
     }
@@ -856,11 +901,15 @@
         background: #f1f5f9;
     }
 
+
+    /* =========================================================
+       VIEWER
+    ========================================================== */
+
     .sm-viewer {
         overflow: hidden;
         padding: 5px;
-        border: 1px solid #dbe3ef;
-        border-radius: 11px;
+        border-radius: 12px;
         background: #0f172a;
     }
 
@@ -869,7 +918,7 @@
         align-items: center;
         justify-content: center;
         min-height: 240px;
-        border-radius: 7px;
+        border-radius: 8px;
         background: #111827;
     }
 
@@ -886,7 +935,7 @@
         height: 620px;
         display: block;
         border: 0;
-        border-radius: 7px;
+        border-radius: 8px;
         background: #fff;
     }
 
@@ -896,8 +945,8 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        padding: 25px;
-        border-radius: 7px;
+        padding: 28px;
+        border-radius: 8px;
         background: #fff;
         text-align: center;
     }
@@ -921,17 +970,16 @@
         display: flex;
         align-items: center;
         gap: 8px;
-        padding: 10px 11px;
-        border: 1px dashed #dbe3ef;
+        padding: 11px 12px;
         border-radius: 10px;
         background: #f8fafc;
+        color: #94a3b8;
     }
 
     .sm-no-file p {
         margin: 0;
         font-size: 8.5px;
         line-height: 1.5;
-        color: #94a3b8;
     }
 
 
@@ -941,11 +989,6 @@
 
     .sm-disposition {
         overflow: hidden;
-        border: 1px solid #dbe3ef;
-        border-radius: 16px;
-        background: #fff;
-        box-shadow:
-            0 8px 24px rgba(15,23,42,.06);
     }
 
     .sm-disposition-head {
@@ -953,13 +996,13 @@
         align-items: center;
         justify-content: space-between;
         gap: 8px;
-        padding: 12px 13px;
-        background: linear-gradient(
-            to right,
-            #faf8ff,
-            #fff
-        );
-        border-bottom: 1px solid #eeeaf9;
+        padding: 14px 14px 12px;
+        background:
+            linear-gradient(
+                135deg,
+                #faf8ff,
+                #ffffff
+            );
     }
 
     .sm-disposition-heading {
@@ -969,14 +1012,14 @@
         min-width: 0;
     }
 
-    .sm-disposition-heading-icon {
-        width: 30px;
-        height: 30px;
+    .sm-disposition-icon {
+        width: 32px;
+        height: 32px;
         display: flex;
         align-items: center;
         justify-content: center;
-        flex: 0 0 30px;
-        border-radius: 9px;
+        flex: 0 0 32px;
+        border-radius: 10px;
         background: #f5f3ff;
         color: #7c3aed;
     }
@@ -999,8 +1042,8 @@
         align-items: center;
         justify-content: center;
         gap: 4px;
-        min-height: 28px;
-        padding: 0 8px;
+        min-height: 29px;
+        padding: 0 9px;
         border-radius: 8px;
         background: #7c3aed;
         color: #fff;
@@ -1016,7 +1059,7 @@
     }
 
     .sm-disposition-body {
-        padding: 12px 13px;
+        padding: 4px 14px 14px;
     }
 
     .sm-timeline {
@@ -1026,7 +1069,7 @@
     .sm-timeline-item {
         position: relative;
         padding-left: 22px;
-        padding-bottom: 15px;
+        padding-bottom: 16px;
     }
 
     .sm-timeline-item:last-child {
@@ -1039,7 +1082,7 @@
         bottom: 0;
         left: 5px;
         width: 1px;
-        background: #e9d5ff;
+        background: #ede9fe;
     }
 
     .sm-timeline-item:last-child .sm-timeline-line {
@@ -1052,9 +1095,10 @@
         left: 0;
         width: 11px;
         height: 11px;
-        border: 3px solid #f3e8ff;
         border-radius: 999px;
         background: #7c3aed;
+        box-shadow:
+            0 0 0 4px #f5f3ff;
     }
 
     .sm-disp-top {
@@ -1076,7 +1120,7 @@
     }
 
     .sm-disp-from {
-        color: #1e293b;
+        color: #334155;
         overflow-wrap: anywhere;
     }
 
@@ -1089,44 +1133,38 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        min-height: 20px;
-        padding: 0 6px;
+        min-height: 21px;
+        padding: 0 7px;
         flex: 0 0 auto;
-        border: 1px solid;
-        border-radius: 6px;
+        border-radius: 7px;
         font-size: 7px;
         font-weight: 800;
         white-space: nowrap;
     }
 
     .sm-disp-menunggu {
-        border-color: #ddd6fe;
         background: #f5f3ff;
         color: #6d28d9;
     }
 
     .sm-disp-diproses {
-        border-color: #fde68a;
         background: #fffbeb;
         color: #b45309;
     }
 
     .sm-disp-selesai {
-        border-color: #bbf7d0;
         background: #f0fdf4;
         color: #15803d;
     }
 
     .sm-disp-ditolak {
-        border-color: #fecdd3;
         background: #fff1f2;
         color: #be123c;
     }
 
     .sm-disp-content {
         margin-top: 6px;
-        padding: 8px 9px;
-        border: 1px solid #e2e8f0;
+        padding: 9px 10px;
         border-radius: 9px;
         background: #f8fafc;
     }
@@ -1134,7 +1172,7 @@
     .sm-disp-text {
         margin: 0;
         font-size: 8.5px;
-        line-height: 1.55;
+        line-height: 1.6;
         color: #64748b;
         white-space: pre-line;
         overflow-wrap: anywhere;
@@ -1162,18 +1200,18 @@
     }
 
     .sm-empty {
-        padding: 25px 8px 18px;
+        padding: 28px 8px 22px;
         text-align: center;
     }
 
     .sm-empty-icon {
-        width: 42px;
-        height: 42px;
+        width: 44px;
+        height: 44px;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0 auto 8px;
-        border-radius: 12px;
+        margin: 0 auto 9px;
+        border-radius: 13px;
         background: #f8fafc;
         color: #94a3b8;
     }
@@ -1193,8 +1231,7 @@
 
     .sm-system-footer {
         margin-top: 9px;
-        padding-top: 8px;
-        border-top: 1px solid #eef2f7;
+        padding-top: 9px;
         text-align: center;
     }
 
@@ -1216,14 +1253,6 @@
         .sm-layout {
             grid-template-columns: 1fr;
         }
-
-        .sm-disposition {
-            order: 2;
-        }
-
-        .sm-pdf {
-            height: 560px;
-        }
     }
 
 
@@ -1236,13 +1265,14 @@
         .sm-header {
             align-items: flex-start;
             flex-direction: column;
+            padding: 14px;
         }
 
         .sm-header-actions {
             width: 100%;
             justify-content: flex-start;
             padding-top: 8px;
-            border-top: 1px solid rgba(255,255,255,.09);
+            border-top: 1px solid rgba(255,255,255,.08);
         }
 
         .sm-header-btn {
@@ -1257,22 +1287,12 @@
             align-self: flex-start;
         }
 
-        .sm-main-body {
-            padding: 11px;
+        .sm-card-body {
+            padding: 12px;
         }
 
         .sm-info-grid {
             grid-template-columns: 1fr;
-        }
-
-        .sm-info-item,
-        .sm-info-item:nth-child(odd) {
-            border-right: 0;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        .sm-info-item:last-child {
-            border-bottom: 0;
         }
 
         .sm-file-bar {
@@ -1334,7 +1354,7 @@
 <div class="sm-detail-page">
 
     {{-- =========================================================
-         ALERT
+         ALERT SUCCESS
     ========================================================== --}}
 
     @if(session('success'))
@@ -1365,7 +1385,6 @@
                 <p class="sm-alert-text">
                     {{ session('success') }}
                 </p>
-
             </div>
 
             <button
@@ -1393,6 +1412,10 @@
 
     @endif
 
+
+    {{-- =========================================================
+         ALERT ERROR
+    ========================================================== --}}
 
     @if(session('error'))
 
@@ -1422,7 +1445,6 @@
                 <p class="sm-alert-text">
                     {{ session('error') }}
                 </p>
-
             </div>
 
             <button
@@ -1490,7 +1512,7 @@
 
                     <span>/</span>
 
-                    <span>Detail</span>
+                    <span>Detail Arsip</span>
 
                 </div>
 
@@ -1499,7 +1521,7 @@
                 </h1>
 
                 <p class="sm-header-subtitle">
-                    Informasi surat, lampiran digital, dan riwayat disposisi.
+                    Informasi surat, dokumen digital, dan riwayat disposisi.
                 </p>
 
             </div>
@@ -1558,7 +1580,7 @@
                             stroke-linecap="round"
                             stroke-linejoin="round"
                             stroke-width="2"
-                            d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4h4m2 8h6a2 2 0 002-2v-4H8v4a2 2 0 002 2z"
+                            d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4h4m2 5h6a2 2 0 002-2v-3H8v3a2 2 0 002 2z"
                         />
                     </svg>
 
@@ -1603,19 +1625,19 @@
 
 
     {{-- =========================================================
-         CONTENT LAYOUT
+         MAIN LAYOUT
     ========================================================== --}}
 
     <div class="sm-layout">
 
 
         {{-- =====================================================
-             MAIN
+             MAIN CONTENT
         ====================================================== --}}
 
         <main>
 
-            <div class="sm-main-card">
+            <div class="sm-card sm-letter-card">
 
                 {{-- =================================================
                      LETTER HEADER
@@ -1667,14 +1689,14 @@
 
 
                 {{-- =================================================
-                     MAIN BODY
+                     BODY
                 ================================================== --}}
 
-                <div class="sm-main-body">
+                <div class="sm-card-body">
 
 
                     {{-- =================================================
-                         INFORMASI SURAT
+                         INFORMASI UTAMA
                     ================================================== --}}
 
                     <div class="sm-info-grid">
@@ -1727,7 +1749,9 @@
                                     />
                                 </svg>
 
-                                {{ $tanggalSurat }}
+                                <span>
+                                    {{ $tanggalSurat }}
+                                </span>
 
                             </p>
 
@@ -1756,7 +1780,9 @@
                                     />
                                 </svg>
 
-                                {{ $tanggalTerima }}
+                                <span>
+                                    {{ $tanggalTerima }}
+                                </span>
 
                             </p>
 
@@ -1817,14 +1843,14 @@
 
                             </div>
 
-                            <div>
+                            <div class="sm-section-text">
 
                                 <p class="sm-section-title">
                                     Perihal Surat
                                 </p>
 
                                 <p class="sm-section-subtitle">
-                                    Isi perihal atau pokok surat.
+                                    Pokok atau tujuan utama surat.
                                 </p>
 
                             </div>
@@ -1832,9 +1858,9 @@
                         </div>
 
 
-                        <div class="sm-text-box">
+                        <div class="sm-content-box">
 
-                            <p class="sm-text-content">
+                            <p class="sm-content-text">
                                 {{ $suratMasuk->perihal ?? 'Tanpa Perihal' }}
                             </p>
 
@@ -1857,6 +1883,7 @@
                                     class="sm-section-icon"
                                     style="background:#f5f3ff;color:#7c3aed;"
                                 >
+
                                     <svg
                                         class="w-3.5 h-3.5"
                                         fill="none"
@@ -1870,16 +1897,17 @@
                                             d="M4 5h16M4 9h16M4 13h10M4 17h8"
                                         />
                                     </svg>
+
                                 </div>
 
-                                <div>
+                                <div class="sm-section-text">
 
                                     <p class="sm-section-title">
                                         Ringkasan Surat
                                     </p>
 
                                     <p class="sm-section-subtitle">
-                                        Ringkasan isi dokumen.
+                                        Ringkasan singkat isi dokumen.
                                     </p>
 
                                 </div>
@@ -1887,9 +1915,9 @@
                             </div>
 
 
-                            <div class="sm-text-box sm-summary-box">
+                            <div class="sm-content-box sm-content-box-white">
 
-                                <p class="sm-text-content">
+                                <p class="sm-content-text">
                                     {{ $suratMasuk->ringkasan }}
                                 </p>
 
@@ -1904,9 +1932,9 @@
                          LAMPIRAN
                     ================================================== --}}
 
-                    <section class="sm-section">
+                    <section class="sm-attachment">
 
-                        <div class="sm-attachment-top">
+                        <div class="sm-attachment-head">
 
                             <div class="min-w-0">
 
@@ -1915,7 +1943,7 @@
                                 </h3>
 
                                 <p class="sm-attachment-description">
-                                    Dokumen yang tersimpan pada arsip surat.
+                                    Dokumen yang tersimpan pada arsip surat ini.
                                 </p>
 
                             </div>
@@ -1936,6 +1964,8 @@
                             !empty($lampiranPath) &&
                             !empty($lampiranUrl)
                         )
+
+                            {{-- FILE INFO --}}
 
                             <div class="sm-file-bar">
 
@@ -2028,6 +2058,8 @@
                             </div>
 
 
+                            {{-- VIEWER --}}
+
                             <div class="sm-viewer">
 
                                 @if($isImage)
@@ -2106,7 +2138,7 @@
                                         stroke-linecap="round"
                                         stroke-linejoin="round"
                                         stroke-width="1.5"
-                                        d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"
+                                        d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636"
                                     />
                                 </svg>
 
@@ -2133,13 +2165,13 @@
 
         <aside>
 
-            <div class="sm-disposition">
+            <div class="sm-card sm-disposition">
 
                 <div class="sm-disposition-head">
 
                     <div class="sm-disposition-heading">
 
-                        <div class="sm-disposition-heading-icon">
+                        <div class="sm-disposition-icon">
 
                             <svg
                                 class="w-4 h-4"
