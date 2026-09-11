@@ -124,8 +124,7 @@
         true
     );
 
-    $isPdf =
-        $lampiranExtension === 'pdf';
+    $isPdf = $lampiranExtension === 'pdf';
 
     $lampiranNama =
         !empty($lampiranPath)
@@ -178,14 +177,14 @@
 
 <style>
     /* =========================================================
-       ROOT / PAGE
+       PAGE
     ========================================================== */
 
     .sm-detail-page {
         width: 100%;
         max-width: 1180px;
         margin: 0 auto;
-        padding: 12px 16px 32px;
+        padding: 14px 16px 34px;
         color: #334155;
     }
 
@@ -205,8 +204,8 @@
         align-items: center;
         justify-content: space-between;
         gap: 12px;
-        margin-bottom: 12px;
-        padding: 10px 12px;
+        margin-bottom: 13px;
+        padding: 11px 13px;
         border-radius: 12px;
     }
 
@@ -223,17 +222,17 @@
     .sm-alert-inner {
         display: flex;
         align-items: center;
-        gap: 9px;
+        gap: 10px;
         min-width: 0;
     }
 
     .sm-alert-icon {
-        width: 30px;
-        height: 30px;
+        width: 32px;
+        height: 32px;
         display: flex;
         align-items: center;
         justify-content: center;
-        flex: 0 0 30px;
+        flex: 0 0 32px;
         border-radius: 9px;
     }
 
@@ -249,18 +248,18 @@
 
     .sm-alert-text {
         margin: 0;
-        font-size: 10px;
-        line-height: 1.45;
+        font-size: 11px;
+        line-height: 1.5;
         font-weight: 700;
     }
 
     .sm-alert-close {
-        width: 27px;
-        height: 27px;
+        width: 28px;
+        height: 28px;
         display: flex;
         align-items: center;
         justify-content: center;
-        flex: 0 0 27px;
+        flex: 0 0 28px;
         border: 0;
         border-radius: 7px;
         background: transparent;
@@ -289,9 +288,9 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 16px;
-        margin-bottom: 14px;
-        padding: 16px 18px;
+        gap: 18px;
+        margin-bottom: 15px;
+        padding: 17px 19px;
         overflow: hidden;
         border-radius: 18px;
         background:
@@ -309,8 +308,8 @@
     .sm-header::after {
         content: "";
         position: absolute;
-        width: 180px;
-        height: 180px;
+        width: 185px;
+        height: 185px;
         right: -70px;
         top: -100px;
         border-radius: 999px;
@@ -328,12 +327,12 @@
     }
 
     .sm-back {
-        width: 40px;
-        height: 40px;
+        width: 41px;
+        height: 41px;
         display: flex;
         align-items: center;
         justify-content: center;
-        flex: 0 0 40px;
+        flex: 0 0 41px;
         border-radius: 11px;
         background: rgba(255, 255, 255, .08);
         color: #fff;
@@ -354,9 +353,9 @@
         display: flex;
         align-items: center;
         flex-wrap: wrap;
-        gap: 5px;
-        margin-bottom: 2px;
-        font-size: 8px;
+        gap: 6px;
+        margin-bottom: 3px;
+        font-size: 9px;
         color: #94a3b8;
     }
 
@@ -371,16 +370,16 @@
 
     .sm-header-title {
         margin: 0;
-        font-size: 18px;
+        font-size: 20px;
         line-height: 1.25;
         font-weight: 800;
         letter-spacing: -.025em;
     }
 
     .sm-header-subtitle {
-        margin: 3px 0 0;
-        font-size: 9px;
-        line-height: 1.45;
+        margin: 4px 0 0;
+        font-size: 10px;
+        line-height: 1.5;
         color: #cbd5e1;
     }
 
@@ -391,7 +390,7 @@
         align-items: center;
         justify-content: flex-end;
         flex-wrap: wrap;
-        gap: 6px;
+        gap: 7px;
     }
 
     .sm-header-btn {
@@ -399,10 +398,10 @@
         align-items: center;
         justify-content: center;
         gap: 6px;
-        min-height: 34px;
-        padding: 0 11px;
+        min-height: 35px;
+        padding: 0 12px;
         border-radius: 9px;
-        font-size: 9px;
+        font-size: 10px;
         font-weight: 800;
         text-decoration: none;
         white-space: nowrap;
@@ -444,9 +443,9 @@
     .sm-layout {
         display: grid;
         grid-template-columns:
-            minmax(0, 1.7fr)
-            minmax(300px, .85fr);
-        gap: 14px;
+            minmax(0, 1.72fr)
+            minmax(300px, .86fr);
+        gap: 15px;
         align-items: start;
     }
 
@@ -476,8 +475,8 @@
         display: flex;
         align-items: flex-start;
         justify-content: space-between;
-        gap: 14px;
-        padding: 18px;
+        gap: 15px;
+        padding: 19px;
         background:
             linear-gradient(
                 135deg,
@@ -490,8 +489,8 @@
     .sm-letter-head::after {
         content: "";
         position: absolute;
-        width: 120px;
-        height: 120px;
+        width: 125px;
+        height: 125px;
         right: -55px;
         top: -60px;
         border-radius: 999px;
@@ -509,13 +508,13 @@
     .sm-eyebrow {
         display: flex;
         align-items: center;
-        gap: 6px;
-        margin-bottom: 6px;
+        gap: 7px;
+        margin-bottom: 7px;
     }
 
     .sm-eyebrow-dot {
-        width: 7px;
-        height: 7px;
+        width: 8px;
+        height: 8px;
         border-radius: 999px;
         background: #4f46e5;
         box-shadow:
@@ -523,7 +522,7 @@
     }
 
     .sm-eyebrow-text {
-        font-size: 8px;
+        font-size: 9px;
         line-height: 1.3;
         font-weight: 800;
         text-transform: uppercase;
@@ -533,8 +532,8 @@
 
     .sm-letter-title {
         margin: 0;
-        max-width: 760px;
-        font-size: 19px;
+        max-width: 780px;
+        font-size: 21px;
         line-height: 1.4;
         font-weight: 850;
         letter-spacing: -.025em;
@@ -546,15 +545,15 @@
         display: flex;
         align-items: center;
         flex-wrap: wrap;
-        gap: 7px;
-        margin-top: 8px;
+        gap: 8px;
+        margin-top: 9px;
     }
 
     .sm-agenda {
         display: inline-flex;
         align-items: center;
-        min-height: 24px;
-        padding: 0 9px;
+        min-height: 26px;
+        padding: 0 10px;
         border-radius: 8px;
         background: #eef2ff;
         color: #4338ca;
@@ -565,13 +564,13 @@
             Monaco,
             Consolas,
             monospace;
-        font-size: 8px;
+        font-size: 9px;
         font-weight: 800;
     }
 
     .sm-number {
-        font-size: 9px;
-        line-height: 1.45;
+        font-size: 10px;
+        line-height: 1.5;
         color: #64748b;
         overflow-wrap: anywhere;
     }
@@ -586,11 +585,11 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        min-height: 29px;
-        padding: 0 11px;
+        min-height: 31px;
+        padding: 0 12px;
         flex: 0 0 auto;
         border-radius: 999px;
-        font-size: 9px;
+        font-size: 10px;
         font-weight: 800;
         white-space: nowrap;
     }
@@ -626,7 +625,7 @@
     ========================================================== */
 
     .sm-card-body {
-        padding: 15px 17px 18px;
+        padding: 17px 18px 20px;
     }
 
 
@@ -638,13 +637,13 @@
         display: grid;
         grid-template-columns:
             repeat(2, minmax(0, 1fr));
-        gap: 8px;
+        gap: 9px;
     }
 
     .sm-info-item {
         min-width: 0;
-        padding: 11px 12px;
-        border-radius: 11px;
+        padding: 13px 14px;
+        border-radius: 12px;
         background: #f8fafc;
         transition:
             background .16s ease,
@@ -658,8 +657,8 @@
 
     .sm-info-label {
         display: block;
-        margin-bottom: 4px;
-        font-size: 7.5px;
+        margin-bottom: 5px;
+        font-size: 9px;
         line-height: 1.3;
         font-weight: 800;
         text-transform: uppercase;
@@ -669,8 +668,8 @@
 
     .sm-info-value {
         margin: 0;
-        font-size: 10px;
-        line-height: 1.5;
+        font-size: 12px;
+        line-height: 1.55;
         font-weight: 750;
         color: #1e293b;
         overflow-wrap: anywhere;
@@ -679,13 +678,13 @@
     .sm-info-date {
         display: flex;
         align-items: center;
-        gap: 5px;
+        gap: 6px;
     }
 
     .sm-date-icon {
-        width: 13px;
-        height: 13px;
-        flex: 0 0 13px;
+        width: 14px;
+        height: 14px;
+        flex: 0 0 14px;
         color: #6366f1;
     }
 
@@ -695,23 +694,23 @@
     ========================================================== */
 
     .sm-section {
-        margin-top: 17px;
+        margin-top: 18px;
     }
 
     .sm-section-head {
         display: flex;
         align-items: center;
-        gap: 8px;
-        margin-bottom: 7px;
+        gap: 9px;
+        margin-bottom: 8px;
     }
 
     .sm-section-icon {
-        width: 27px;
-        height: 27px;
+        width: 29px;
+        height: 29px;
         display: flex;
         align-items: center;
         justify-content: center;
-        flex: 0 0 27px;
+        flex: 0 0 29px;
         border-radius: 8px;
         background: #eef2ff;
         color: #4f46e5;
@@ -723,7 +722,7 @@
 
     .sm-section-title {
         margin: 0;
-        font-size: 10px;
+        font-size: 11px;
         font-weight: 800;
         text-transform: uppercase;
         letter-spacing: .05em;
@@ -732,7 +731,7 @@
 
     .sm-section-subtitle {
         margin: 2px 0 0;
-        font-size: 8px;
+        font-size: 9px;
         color: #94a3b8;
     }
 
@@ -742,7 +741,7 @@
     ========================================================== */
 
     .sm-content-box {
-        padding: 12px 13px;
+        padding: 13px 14px;
         border-radius: 11px;
         background: #f8fafc;
     }
@@ -753,8 +752,8 @@
 
     .sm-content-text {
         margin: 0;
-        font-size: 10px;
-        line-height: 1.7;
+        font-size: 12px;
+        line-height: 1.75;
         color: #475569;
         white-space: pre-line;
         overflow-wrap: anywhere;
@@ -766,8 +765,8 @@
     ========================================================== */
 
     .sm-attachment {
-        margin-top: 18px;
-        padding-top: 17px;
+        margin-top: 19px;
+        padding-top: 18px;
         border-top: 1px solid #eef2f7;
     }
 
@@ -775,13 +774,13 @@
         display: flex;
         align-items: flex-start;
         justify-content: space-between;
-        gap: 10px;
-        margin-bottom: 8px;
+        gap: 11px;
+        margin-bottom: 9px;
     }
 
     .sm-attachment-title {
         margin: 0;
-        font-size: 10px;
+        font-size: 11px;
         font-weight: 800;
         text-transform: uppercase;
         letter-spacing: .05em;
@@ -790,7 +789,7 @@
 
     .sm-attachment-description {
         margin: 3px 0 0;
-        font-size: 8px;
+        font-size: 9px;
         line-height: 1.45;
         color: #94a3b8;
     }
@@ -799,8 +798,8 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        min-height: 22px;
-        padding: 0 8px;
+        min-height: 24px;
+        padding: 0 9px;
         border-radius: 7px;
         background: #f1f5f9;
         color: #64748b;
@@ -811,7 +810,7 @@
             Monaco,
             Consolas,
             monospace;
-        font-size: 8px;
+        font-size: 9px;
         font-weight: 800;
         text-transform: uppercase;
     }
@@ -820,9 +819,9 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 10px;
-        margin-bottom: 8px;
-        padding: 9px;
+        gap: 11px;
+        margin-bottom: 9px;
+        padding: 10px;
         border-radius: 10px;
         background: #f8fafc;
     }
@@ -830,17 +829,17 @@
     .sm-file-info {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 9px;
         min-width: 0;
     }
 
     .sm-file-icon {
-        width: 31px;
-        height: 31px;
+        width: 33px;
+        height: 33px;
         display: flex;
         align-items: center;
         justify-content: center;
-        flex: 0 0 31px;
+        flex: 0 0 33px;
         border-radius: 9px;
         background: #eef2ff;
         color: #4f46e5;
@@ -851,21 +850,21 @@
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
-        font-size: 8.5px;
+        font-size: 10px;
         font-weight: 750;
         color: #334155;
     }
 
     .sm-file-state {
         margin: 2px 0 0;
-        font-size: 7.5px;
+        font-size: 9px;
         color: #94a3b8;
     }
 
     .sm-file-actions {
         display: flex;
         align-items: center;
-        gap: 5px;
+        gap: 6px;
     }
 
     .sm-file-btn {
@@ -873,10 +872,10 @@
         align-items: center;
         justify-content: center;
         gap: 5px;
-        min-height: 29px;
-        padding: 0 9px;
+        min-height: 31px;
+        padding: 0 10px;
         border-radius: 8px;
-        font-size: 8px;
+        font-size: 9px;
         font-weight: 800;
         text-decoration: none;
         white-space: nowrap;
@@ -952,24 +951,24 @@
     }
 
     .sm-viewer-empty-title {
-        margin: 7px 0 0;
-        font-size: 10px;
+        margin: 8px 0 0;
+        font-size: 11px;
         font-weight: 800;
         color: #334155;
     }
 
     .sm-viewer-empty-text {
-        max-width: 400px;
-        margin: 4px auto 0;
-        font-size: 8px;
-        line-height: 1.5;
+        max-width: 430px;
+        margin: 5px auto 0;
+        font-size: 9px;
+        line-height: 1.6;
         color: #94a3b8;
     }
 
     .sm-no-file {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 9px;
         padding: 11px 12px;
         border-radius: 10px;
         background: #f8fafc;
@@ -978,8 +977,8 @@
 
     .sm-no-file p {
         margin: 0;
-        font-size: 8.5px;
-        line-height: 1.5;
+        font-size: 9px;
+        line-height: 1.55;
     }
 
 
@@ -995,8 +994,8 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 8px;
-        padding: 14px 14px 12px;
+        gap: 9px;
+        padding: 15px 15px 13px;
         background:
             linear-gradient(
                 135deg,
@@ -1008,17 +1007,17 @@
     .sm-disposition-heading {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 9px;
         min-width: 0;
     }
 
     .sm-disposition-icon {
-        width: 32px;
-        height: 32px;
+        width: 34px;
+        height: 34px;
         display: flex;
         align-items: center;
         justify-content: center;
-        flex: 0 0 32px;
+        flex: 0 0 34px;
         border-radius: 10px;
         background: #f5f3ff;
         color: #7c3aed;
@@ -1026,14 +1025,14 @@
 
     .sm-disposition-title {
         margin: 0;
-        font-size: 11px;
+        font-size: 12px;
         font-weight: 800;
         color: #1e293b;
     }
 
     .sm-disposition-subtitle {
         margin: 2px 0 0;
-        font-size: 8px;
+        font-size: 9px;
         color: #94a3b8;
     }
 
@@ -1041,13 +1040,13 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        gap: 4px;
-        min-height: 29px;
-        padding: 0 9px;
+        gap: 5px;
+        min-height: 30px;
+        padding: 0 10px;
         border-radius: 8px;
         background: #7c3aed;
         color: #fff;
-        font-size: 8px;
+        font-size: 9px;
         font-weight: 800;
         text-decoration: none;
         white-space: nowrap;
@@ -1059,7 +1058,7 @@
     }
 
     .sm-disposition-body {
-        padding: 4px 14px 14px;
+        padding: 5px 15px 15px;
     }
 
     .sm-timeline {
@@ -1068,8 +1067,8 @@
 
     .sm-timeline-item {
         position: relative;
-        padding-left: 22px;
-        padding-bottom: 16px;
+        padding-left: 23px;
+        padding-bottom: 17px;
     }
 
     .sm-timeline-item:last-child {
@@ -1105,17 +1104,17 @@
         display: flex;
         align-items: flex-start;
         justify-content: space-between;
-        gap: 7px;
+        gap: 8px;
     }
 
     .sm-disp-route {
         display: flex;
         align-items: center;
         flex-wrap: wrap;
-        gap: 4px;
+        gap: 5px;
         min-width: 0;
-        font-size: 8.5px;
-        line-height: 1.4;
+        font-size: 10px;
+        line-height: 1.5;
         font-weight: 800;
     }
 
@@ -1133,11 +1132,11 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        min-height: 21px;
-        padding: 0 7px;
+        min-height: 22px;
+        padding: 0 8px;
         flex: 0 0 auto;
         border-radius: 7px;
-        font-size: 7px;
+        font-size: 8px;
         font-weight: 800;
         white-space: nowrap;
     }
@@ -1163,16 +1162,16 @@
     }
 
     .sm-disp-content {
-        margin-top: 6px;
-        padding: 9px 10px;
+        margin-top: 7px;
+        padding: 10px 11px;
         border-radius: 9px;
         background: #f8fafc;
     }
 
     .sm-disp-text {
         margin: 0;
-        font-size: 8.5px;
-        line-height: 1.6;
+        font-size: 10px;
+        line-height: 1.65;
         color: #64748b;
         white-space: pre-line;
         overflow-wrap: anywhere;
@@ -1183,34 +1182,34 @@
         align-items: center;
         justify-content: space-between;
         flex-wrap: wrap;
-        gap: 5px 8px;
-        margin-top: 5px;
+        gap: 6px 9px;
+        margin-top: 6px;
     }
 
     .sm-disp-date {
-        font-size: 7.5px;
+        font-size: 9px;
         font-weight: 700;
         color: #94a3b8;
     }
 
     .sm-disp-deadline {
-        font-size: 7.5px;
+        font-size: 9px;
         font-weight: 700;
         color: #d97706;
     }
 
     .sm-empty {
-        padding: 28px 8px 22px;
+        padding: 30px 8px 23px;
         text-align: center;
     }
 
     .sm-empty-icon {
-        width: 44px;
-        height: 44px;
+        width: 46px;
+        height: 46px;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0 auto 9px;
+        margin: 0 auto 10px;
         border-radius: 13px;
         background: #f8fafc;
         color: #94a3b8;
@@ -1218,25 +1217,25 @@
 
     .sm-empty-title {
         margin: 0;
-        font-size: 9px;
+        font-size: 10px;
         font-weight: 800;
         color: #475569;
     }
 
     .sm-empty-text {
-        margin: 3px 0 0;
-        font-size: 8px;
+        margin: 4px 0 0;
+        font-size: 9px;
         color: #94a3b8;
     }
 
     .sm-system-footer {
-        margin-top: 9px;
-        padding-top: 9px;
+        margin-top: 10px;
+        padding-top: 10px;
         text-align: center;
     }
 
     .sm-system-footer span {
-        font-size: 7px;
+        font-size: 8px;
         font-weight: 800;
         text-transform: uppercase;
         letter-spacing: .08em;
@@ -1245,7 +1244,7 @@
 
 
     /* =========================================================
-       RESPONSIVE
+       RESPONSIVE TABLET
     ========================================================== */
 
     @media (max-width: 980px) {
@@ -1256,22 +1255,26 @@
     }
 
 
+    /* =========================================================
+       RESPONSIVE MOBILE
+    ========================================================== */
+
     @media (max-width: 700px) {
 
         .sm-detail-page {
-            padding: 8px 10px 22px;
+            padding: 9px 10px 24px;
         }
 
         .sm-header {
             align-items: flex-start;
             flex-direction: column;
-            padding: 14px;
+            padding: 15px;
         }
 
         .sm-header-actions {
             width: 100%;
             justify-content: flex-start;
-            padding-top: 8px;
+            padding-top: 9px;
             border-top: 1px solid rgba(255,255,255,.08);
         }
 
@@ -1281,6 +1284,7 @@
 
         .sm-letter-head {
             flex-direction: column;
+            padding: 16px;
         }
 
         .sm-status {
@@ -1288,11 +1292,15 @@
         }
 
         .sm-card-body {
-            padding: 12px;
+            padding: 13px;
         }
 
         .sm-info-grid {
             grid-template-columns: 1fr;
+        }
+
+        .sm-info-item {
+            padding: 12px;
         }
 
         .sm-file-bar {
@@ -1314,18 +1322,42 @@
     }
 
 
+    /* =========================================================
+       SMALL MOBILE
+    ========================================================== */
+
     @media (max-width: 470px) {
 
         .sm-header-title {
-            font-size: 16px;
+            font-size: 18px;
         }
 
         .sm-header-subtitle {
-            font-size: 8px;
+            font-size: 9px;
         }
 
         .sm-letter-title {
-            font-size: 16px;
+            font-size: 18px;
+        }
+
+        .sm-eyebrow-text {
+            font-size: 8px;
+        }
+
+        .sm-number {
+            font-size: 9px;
+        }
+
+        .sm-info-label {
+            font-size: 8px;
+        }
+
+        .sm-info-value {
+            font-size: 11px;
+        }
+
+        .sm-content-text {
+            font-size: 11px;
         }
 
         .sm-header-actions {
@@ -1342,6 +1374,14 @@
 
         .sm-disp-status {
             align-self: flex-start;
+        }
+
+        .sm-disp-route {
+            font-size: 9px;
+        }
+
+        .sm-disp-text {
+            font-size: 9px;
         }
 
         .sm-pdf {
@@ -1639,6 +1679,7 @@
 
             <div class="sm-card sm-letter-card">
 
+
                 {{-- =================================================
                      LETTER HEADER
                 ================================================== --}}
@@ -1696,7 +1737,7 @@
 
 
                     {{-- =================================================
-                         INFORMASI UTAMA
+                         INFORMASI SURAT
                     ================================================== --}}
 
                     <div class="sm-info-grid">
@@ -1828,7 +1869,7 @@
                             <div class="sm-section-icon">
 
                                 <svg
-                                    class="w-3.5 h-3.5"
+                                    class="w-4 h-4"
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
@@ -1885,7 +1926,7 @@
                                 >
 
                                     <svg
-                                        class="w-3.5 h-3.5"
+                                        class="w-4 h-4"
                                         fill="none"
                                         stroke="currentColor"
                                         viewBox="0 0 24 24"
@@ -1965,8 +2006,6 @@
                             !empty($lampiranUrl)
                         )
 
-                            {{-- FILE INFO --}}
-
                             <div class="sm-file-bar">
 
                                 <div class="sm-file-info">
@@ -1974,7 +2013,7 @@
                                     <div class="sm-file-icon">
 
                                         <svg
-                                            class="w-3.5 h-3.5"
+                                            class="w-4 h-4"
                                             fill="none"
                                             stroke="currentColor"
                                             viewBox="0 0 24 24"
@@ -2014,7 +2053,7 @@
                                         class="sm-file-btn sm-file-btn-open"
                                     >
                                         <svg
-                                            class="w-3 h-3"
+                                            class="w-3.5 h-3.5"
                                             fill="none"
                                             stroke="currentColor"
                                             viewBox="0 0 24 24"
@@ -2037,7 +2076,7 @@
                                         class="sm-file-btn sm-file-btn-download"
                                     >
                                         <svg
-                                            class="w-3 h-3"
+                                            class="w-3.5 h-3.5"
                                             fill="none"
                                             stroke="currentColor"
                                             viewBox="0 0 24 24"
@@ -2091,7 +2130,7 @@
                                     <div class="sm-viewer-empty">
 
                                         <svg
-                                            class="w-9 h-9 text-slate-300"
+                                            class="w-10 h-10 text-slate-300"
                                             fill="none"
                                             stroke="currentColor"
                                             viewBox="0 0 24 24"
@@ -2174,7 +2213,7 @@
                         <div class="sm-disposition-icon">
 
                             <svg
-                                class="w-4 h-4"
+                                class="w-5 h-5"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -2214,7 +2253,7 @@
                             class="sm-create-btn"
                         >
                             <svg
-                                class="w-3 h-3"
+                                class="w-3.5 h-3.5"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -2341,7 +2380,7 @@
                                             </span>
 
                                             <svg
-                                                class="w-2.5 h-2.5 text-purple-300"
+                                                class="w-3 h-3 text-purple-300"
                                                 fill="none"
                                                 stroke="currentColor"
                                                 viewBox="0 0 24 24"
@@ -2426,7 +2465,7 @@
                             <div class="sm-empty-icon">
 
                                 <svg
-                                    class="w-5 h-5"
+                                    class="w-6 h-6"
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
@@ -2458,10 +2497,10 @@
                                 <a
                                     href="{{ route('disposisi.create', $suratMasuk) }}"
                                     class="sm-create-btn"
-                                    style="margin-top:10px;"
+                                    style="margin-top:11px;"
                                 >
                                     <svg
-                                        class="w-3 h-3"
+                                        class="w-3.5 h-3.5"
                                         fill="none"
                                         stroke="currentColor"
                                         viewBox="0 0 24 24"
