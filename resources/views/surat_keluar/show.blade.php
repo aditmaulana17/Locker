@@ -3,8 +3,20 @@
 @section('title', 'Detail Surat Keluar')
 
 @section('content')
+
 @php
-    $status = strtolower(trim((string) ($suratKeluar->status ?? 'draft')));
+    /*
+    |--------------------------------------------------------------------------
+    | DATA SURAT
+    |--------------------------------------------------------------------------
+    */
+
+    $status = strtolower(
+        trim(
+            (string) ($suratKeluar->status ?? 'draft')
+        )
+    );
+
     if ($status === 'draf') {
         $status = 'draft';
     }
@@ -17,23 +29,38 @@
         'diarsipkan' => 'Diarsipkan',
     ];
 
-    $statusBadgeClasses = [
-        'draft' => 'bg-slate-100 text-slate-700 border-slate-300',
-        'diproses' => 'bg-amber-100 text-amber-800 border-amber-300',
-        'disetujui' => 'bg-blue-100 text-blue-800 border-blue-300',
-        'dikirim' => 'bg-emerald-100 text-emerald-800 border-emerald-300',
-        'diarsipkan' => 'bg-purple-100 text-purple-800 border-purple-300',
+    $statusClasses = [
+        'draft' => 'status-draft',
+        'diproses' => 'status-processing',
+        'disetujui' => 'status-approved',
+        'dikirim' => 'status-sent',
+        'diarsipkan' => 'status-archived',
     ];
 
-    $statusLabel = $statusLabels[$status] ?? ucfirst($status);
-    $statusBadgeClass = $statusBadgeClasses[$status] ?? 'bg-slate-100 text-slate-700 border-slate-300';
+    $statusLabel =
+        $statusLabels[$status]
+        ?? ucfirst($status);
+
+    $statusClass =
+        $statusClasses[$status]
+        ?? 'status-draft';
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | TANGGAL
+    |--------------------------------------------------------------------------
+    */
 
     $tanggalSurat = '-';
     $tanggalKeluar = '-';
 
     try {
         if ($suratKeluar->tanggal_surat) {
-            $tanggalSurat = \Illuminate\Support\Carbon::parse($suratKeluar->tanggal_surat)->format('d/m/Y');
+            $tanggalSurat =
+                \Illuminate\Support\Carbon::parse(
+                    $suratKeluar->tanggal_surat
+                )->format('d/m/Y');
         }
     } catch (\Throwable $e) {
         $tanggalSurat = '-';
@@ -41,311 +68,1587 @@
 
     try {
         if ($suratKeluar->tanggal_keluar) {
-            $tanggalKeluar = \Illuminate\Support\Carbon::parse($suratKeluar->tanggal_keluar)->format('d/m/Y');
+            $tanggalKeluar =
+                \Illuminate\Support\Carbon::parse(
+                    $suratKeluar->tanggal_keluar
+                )->format('d/m/Y');
         }
     } catch (\Throwable $e) {
         $tanggalKeluar = '-';
     }
 
-    $tujuanSurat = trim((string) ($suratKeluar->pengirim ?? ''));
-    $tujuanSurat = $tujuanSurat !== '' ? $tujuanSurat : '-';
 
-    $nomorSurat = trim((string) ($suratKeluar->nomor_surat ?? ''));
-    $nomorSurat = $nomorSurat !== '' ? $nomorSurat : '-';
+    /*
+    |--------------------------------------------------------------------------
+    | INFORMASI
+    |--------------------------------------------------------------------------
+    */
 
-    $perihal = trim((string) ($suratKeluar->perihal ?? ''));
-    $perihal = $perihal !== '' ? $perihal : 'Tanpa Perihal';
+    $tujuanSurat =
+        trim(
+            (string) (
+                $suratKeluar->pengirim
+                ?? ''
+            )
+        );
 
-    $ringkasan = trim((string) ($suratKeluar->ringkasan ?? ''));
-    $kategoriNama = $suratKeluar->kategori?->nama_kategori ?? '-';
-    $pembuatNama = $suratKeluar->pembuat?->name ?? '-';
-    $penandatanganNama = $suratKeluar->penandatangan?->name ?? '-';
+    $tujuanSurat =
+        $tujuanSurat !== ''
+        ? $tujuanSurat
+        : '-';
 
-    $lampiranPath = $suratKeluar->lampiran_file ?? null;
+
+    $nomorSurat =
+        trim(
+            (string) (
+                $suratKeluar->nomor_surat
+                ?? ''
+            )
+        );
+
+    $nomorSurat =
+        $nomorSurat !== ''
+        ? $nomorSurat
+        : '-';
+
+
+    $perihal =
+        trim(
+            (string) (
+                $suratKeluar->perihal
+                ?? ''
+            )
+        );
+
+    $perihal =
+        $perihal !== ''
+        ? $perihal
+        : 'Tanpa Perihal';
+
+
+    $ringkasan =
+        trim(
+            (string) (
+                $suratKeluar->ringkasan
+                ?? ''
+            )
+        );
+
+
+    $kategoriNama =
+        $suratKeluar->kategori?->nama_kategori
+        ?? '-';
+
+
+    $pembuatNama =
+        $suratKeluar->pembuat?->name
+        ?? '-';
+
+
+    $penandatanganNama =
+        $suratKeluar->penandatangan?->name
+        ?? '-';
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | LAMPIRAN
+    |--------------------------------------------------------------------------
+    */
+
+    $lampiranPath =
+        $suratKeluar->lampiran_file
+        ?? null;
+
     $lampiranUrl = null;
 
     if (!empty($lampiranPath)) {
-        if (filter_var($lampiranPath, FILTER_VALIDATE_URL)) {
-            $lampiranUrl = $lampiranPath;
-        } elseif (\Illuminate\Support\Facades\Route::has('surat-keluar.preview-lampiran')) {
-            $lampiranUrl = route('surat-keluar.preview-lampiran', $suratKeluar);
+
+        if (
+            filter_var(
+                $lampiranPath,
+                FILTER_VALIDATE_URL
+            )
+        ) {
+
+            $lampiranUrl =
+                $lampiranPath;
+
+        } elseif (
+            \Illuminate\Support\Facades\Route::has(
+                'surat-keluar.preview-lampiran'
+            )
+        ) {
+
+            $lampiranUrl =
+                route(
+                    'surat-keluar.preview-lampiran',
+                    $suratKeluar
+                );
         }
     }
 
-    $lampiranExtension = !empty($lampiranPath)
-        ? strtolower(pathinfo($lampiranPath, PATHINFO_EXTENSION))
+
+    $lampiranExtension =
+        !empty($lampiranPath)
+        ? strtolower(
+            pathinfo(
+                $lampiranPath,
+                PATHINFO_EXTENSION
+            )
+        )
         : '';
 
-    $lampiranNama = !empty($lampiranPath) ? basename($lampiranPath) : null;
+
+    $lampiranNama =
+        !empty($lampiranPath)
+        ? basename($lampiranPath)
+        : null;
 @endphp
 
-<div class="mx-auto w-full max-w-7xl space-y-4 px-4 py-5 sm:space-y-5 sm:px-6 lg:px-8">
-    {{-- SUCCESS --}}
-    @if (session('success'))
-        <div id="success-alert" class="flex items-center justify-between gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-800 shadow-sm" role="alert">
-            <div class="flex min-w-0 items-center gap-3">
-                <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-emerald-100">
-                    <svg class="h-5 w-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+
+<style>
+    /* =========================================================
+       PAGE
+    ========================================================== */
+
+    .surat-keluar-detail-page {
+        width: 100%;
+        max-width: 1120px;
+        margin: 0 auto;
+        padding: 10px 16px 30px;
+        color: #334155;
+    }
+
+    .surat-keluar-detail-page *,
+    .surat-keluar-detail-page *::before,
+    .surat-keluar-detail-page *::after {
+        box-sizing: border-box;
+    }
+
+
+    /* =========================================================
+       ALERT
+    ========================================================== */
+
+    .detail-alert {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 12px;
+        padding: 10px 12px;
+        border: 2px solid;
+        border-radius: 9px;
+    }
+
+    .detail-alert-inner {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        min-width: 0;
+    }
+
+    .detail-alert-icon {
+        width: 29px;
+        height: 29px;
+        flex: 0 0 29px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 7px;
+    }
+
+    .detail-alert-text {
+        margin: 0;
+        font-size: 10px;
+        line-height: 1.45;
+        font-weight: 700;
+    }
+
+    .alert-success {
+        border-color: #86efac;
+        background: #f0fdf4;
+        color: #166534;
+    }
+
+    .alert-success .detail-alert-icon {
+        background: #dcfce7;
+        color: #16a34a;
+    }
+
+    .alert-error {
+        border-color: #fca5a5;
+        background: #fff1f2;
+        color: #991b1b;
+    }
+
+    .alert-error .detail-alert-icon {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+
+    .detail-alert-close {
+        width: 27px;
+        height: 27px;
+        flex: 0 0 27px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 0;
+        border-radius: 6px;
+        background: transparent;
+        cursor: pointer;
+    }
+
+    .alert-success .detail-alert-close {
+        color: #4ade80;
+    }
+
+    .alert-error .detail-alert-close {
+        color: #f87171;
+    }
+
+
+    /* =========================================================
+       HEADER
+    ========================================================== */
+
+    .detail-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        margin-bottom: 13px;
+        padding: 13px 15px;
+        border: 2px solid #334155;
+        border-radius: 11px;
+        background:
+            linear-gradient(
+                135deg,
+                #0f172a,
+                #1e293b,
+                #064e3b
+            );
+        color: #ffffff;
+        box-shadow:
+            0 4px 10px rgba(15, 23, 42, .10);
+    }
+
+    .detail-header-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+    }
+
+    .detail-header-back {
+        width: 35px;
+        height: 35px;
+        flex: 0 0 35px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid rgba(255,255,255,.18);
+        border-radius: 8px;
+        background: rgba(255,255,255,.08);
+        color: #ffffff;
+        text-decoration: none;
+        transition: .15s ease;
+    }
+
+    .detail-header-back:hover {
+        background: rgba(255,255,255,.16);
+    }
+
+    .detail-header-content {
+        min-width: 0;
+    }
+
+    .detail-breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        margin-bottom: 2px;
+        font-size: 8px;
+        line-height: 1.3;
+        color: #94a3b8;
+    }
+
+    .detail-breadcrumb a {
+        color: #cbd5e1;
+        text-decoration: none;
+    }
+
+    .detail-breadcrumb a:hover {
+        color: #ffffff;
+    }
+
+    .detail-header-title {
+        margin: 0;
+        font-size: 18px;
+        line-height: 1.25;
+        font-weight: 800;
+        letter-spacing: -.02em;
+    }
+
+    .detail-header-subtitle {
+        margin: 3px 0 0;
+        font-size: 9px;
+        line-height: 1.45;
+        color: #cbd5e1;
+    }
+
+    .detail-header-action {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        min-height: 35px;
+        padding: 0 11px;
+        border: 1px solid rgba(245,158,11,.35);
+        border-radius: 8px;
+        background: rgba(245,158,11,.16);
+        color: #fde68a;
+        font-size: 10px;
+        font-weight: 800;
+        text-decoration: none;
+        white-space: nowrap;
+        transition: .15s ease;
+    }
+
+    .detail-header-action:hover {
+        background: rgba(245,158,11,.25);
+    }
+
+
+    /* =========================================================
+       MAIN CARD
+    ========================================================== */
+
+    .main-card {
+        overflow: hidden;
+        border: 2px solid #64748b;
+        border-radius: 11px;
+        background: #ffffff;
+        box-shadow:
+            0 4px 10px rgba(15, 23, 42, .06);
+    }
+
+
+    /* =========================================================
+       HERO / TITLE
+    ========================================================== */
+
+    .letter-heading {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 15px;
+        border-bottom: 2px solid #94a3b8;
+        background:
+            linear-gradient(
+                to right,
+                #f8fafc,
+                #ffffff
+            );
+    }
+
+    .letter-heading-content {
+        min-width: 0;
+        flex: 1;
+    }
+
+    .letter-eyebrow {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 5px;
+    }
+
+    .letter-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 999px;
+        background: #10b981;
+        box-shadow: 0 0 0 3px #d1fae5;
+    }
+
+    .letter-eyebrow-text {
+        font-size: 8px;
+        line-height: 1.3;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        color: #047857;
+    }
+
+    .letter-title {
+        margin: 0;
+        font-size: 18px;
+        line-height: 1.4;
+        font-weight: 850;
+        letter-spacing: -.02em;
+        color: #0f172a;
+        overflow-wrap: anywhere;
+    }
+
+    .letter-meta-line {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px;
+        margin-top: 7px;
+    }
+
+    .letter-id {
+        display: inline-flex;
+        align-items: center;
+        min-height: 24px;
+        padding: 0 8px;
+        border: 1px solid #a7f3d0;
+        border-radius: 6px;
+        background: #ecfdf5;
+        color: #047857;
+        font-family:
+            ui-monospace,
+            SFMono-Regular,
+            Menlo,
+            Monaco,
+            Consolas,
+            monospace;
+        font-size: 8px;
+        font-weight: 800;
+    }
+
+    .letter-number {
+        font-size: 9px;
+        line-height: 1.4;
+        color: #64748b;
+        overflow-wrap: anywhere;
+    }
+
+    .letter-number strong {
+        color: #1e293b;
+    }
+
+
+    /* =========================================================
+       STATUS BADGE
+    ========================================================== */
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 28px;
+        padding: 0 10px;
+        border: 2px solid;
+        border-radius: 999px;
+        font-size: 9px;
+        line-height: 1;
+        font-weight: 800;
+        white-space: nowrap;
+        flex: 0 0 auto;
+    }
+
+    .status-draft {
+        border-color: #cbd5e1;
+        background: #f8fafc;
+        color: #475569;
+    }
+
+    .status-processing {
+        border-color: #fcd34d;
+        background: #fffbeb;
+        color: #b45309;
+    }
+
+    .status-approved {
+        border-color: #93c5fd;
+        background: #eff6ff;
+        color: #1d4ed8;
+    }
+
+    .status-sent {
+        border-color: #86efac;
+        background: #f0fdf4;
+        color: #15803d;
+    }
+
+    .status-archived {
+        border-color: #c4b5fd;
+        background: #f5f3ff;
+        color: #6d28d9;
+    }
+
+
+    /* =========================================================
+       BODY
+    ========================================================== */
+
+    .main-body {
+        padding: 14px;
+    }
+
+
+    /* =========================================================
+       META TABLE
+    ========================================================== */
+
+    .meta-table {
+        overflow: hidden;
+        border: 2px solid #64748b;
+        border-radius: 8px;
+        background: #ffffff;
+    }
+
+    .meta-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .meta-item {
+        min-width: 0;
+        padding: 10px;
+        border-right: 2px solid #94a3b8;
+        border-bottom: 2px solid #94a3b8;
+        background: #ffffff;
+    }
+
+    .meta-item:nth-child(4n) {
+        border-right: 0;
+    }
+
+    .meta-item:nth-last-child(-n + 4) {
+        border-bottom: 0;
+    }
+
+    .meta-item-wide {
+        grid-column: span 2;
+    }
+
+    .meta-label {
+        display: block;
+        margin-bottom: 4px;
+        font-size: 8px;
+        line-height: 1.3;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        color: #94a3b8;
+    }
+
+    .meta-value {
+        margin: 0;
+        font-size: 10px;
+        line-height: 1.5;
+        font-weight: 750;
+        color: #1e293b;
+        overflow-wrap: anywhere;
+    }
+
+
+    /* =========================================================
+       SECTION
+    ========================================================== */
+
+    .detail-section {
+        margin-top: 14px;
+        padding-top: 14px;
+        border-top: 2px solid #94a3b8;
+    }
+
+    .section-heading {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        margin-bottom: 7px;
+    }
+
+    .section-marker {
+        width: 4px;
+        height: 19px;
+        border-radius: 999px;
+        background: #059669;
+    }
+
+    .section-heading-text {
+        margin: 0;
+        font-size: 10px;
+        line-height: 1.3;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+        color: #334155;
+    }
+
+
+    /* =========================================================
+       TEXT CONTENT
+    ========================================================== */
+
+    .content-box {
+        padding: 10px 11px;
+        border: 2px solid #cbd5e1;
+        border-radius: 8px;
+        background: #f8fafc;
+    }
+
+    .content-box-text {
+        margin: 0;
+        font-size: 10px;
+        line-height: 1.65;
+        font-weight: 550;
+        color: #334155;
+        white-space: pre-line;
+        overflow-wrap: anywhere;
+    }
+
+    .summary-box {
+        border-color: #cbd5e1;
+        background: #ffffff;
+    }
+
+
+    /* =========================================================
+       ATTACHMENT
+    ========================================================== */
+
+    .attachment-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 8px;
+    }
+
+    .attachment-title {
+        margin: 0;
+        font-size: 10px;
+        line-height: 1.3;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+        color: #334155;
+    }
+
+    .attachment-filename {
+        margin: 3px 0 0;
+        font-size: 8px;
+        line-height: 1.4;
+        color: #94a3b8;
+        overflow-wrap: anywhere;
+    }
+
+    .attachment-extension {
+        display: inline-flex;
+        align-items: center;
+        min-height: 23px;
+        padding: 0 7px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        background: #f8fafc;
+        color: #64748b;
+        font-size: 8px;
+        font-weight: 800;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .attachment-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+        margin-bottom: 9px;
+    }
+
+    .attachment-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        min-height: 33px;
+        padding: 0 10px;
+        border-radius: 7px;
+        font-size: 9px;
+        font-weight: 800;
+        text-decoration: none;
+        transition: .15s ease;
+    }
+
+    .attachment-btn-primary {
+        border: 2px solid #047857;
+        background: #059669;
+        color: #ffffff;
+    }
+
+    .attachment-btn-primary:hover {
+        background: #047857;
+    }
+
+    .attachment-btn-secondary {
+        border: 2px solid #cbd5e1;
+        background: #ffffff;
+        color: #475569;
+    }
+
+    .attachment-btn-secondary:hover {
+        border-color: #94a3b8;
+        background: #f8fafc;
+    }
+
+
+    /* =========================================================
+       VIEWER
+    ========================================================== */
+
+    .viewer {
+        overflow: hidden;
+        border: 2px solid #64748b;
+        border-radius: 8px;
+        background: #0f172a;
+        padding: 7px;
+    }
+
+    .viewer-image-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 180px;
+        border-radius: 6px;
+        background: #111827;
+    }
+
+    .viewer-image {
+        display: block;
+        width: auto;
+        max-width: 100%;
+        max-height: 540px;
+        object-fit: contain;
+    }
+
+    .viewer-pdf {
+        width: 100%;
+        height: 560px;
+        display: block;
+        border: 0;
+        border-radius: 6px;
+        background: #ffffff;
+    }
+
+    .viewer-empty {
+        padding: 35px 15px;
+        border-radius: 6px;
+        background: #ffffff;
+        text-align: center;
+    }
+
+    .viewer-empty-title {
+        margin: 7px 0 0;
+        font-size: 10px;
+        font-weight: 800;
+        color: #334155;
+    }
+
+    .viewer-empty-text {
+        margin: 3px 0 0;
+        font-size: 8px;
+        line-height: 1.5;
+        color: #64748b;
+    }
+
+    .viewer-empty code {
+        padding: 2px 4px;
+        border-radius: 4px;
+        background: #f1f5f9;
+        color: #1e293b;
+        font-size: 8px;
+        font-weight: 800;
+    }
+
+
+    /* =========================================================
+       NO FILE
+    ========================================================== */
+
+    .no-file {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 11px;
+        border: 2px dashed #cbd5e1;
+        border-radius: 8px;
+        background: #f8fafc;
+        color: #64748b;
+    }
+
+    .no-file p {
+        margin: 0;
+        font-size: 9px;
+        line-height: 1.45;
+        font-weight: 600;
+    }
+
+
+    /* =========================================================
+       RESPONSIVE
+    ========================================================== */
+
+    @media (max-width: 950px) {
+        .meta-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .meta-item:nth-child(4n) {
+            border-right: 2px solid #94a3b8;
+        }
+
+        .meta-item:nth-child(2n) {
+            border-right: 0;
+        }
+
+        .meta-item:nth-last-child(-n + 4) {
+            border-bottom: 2px solid #94a3b8;
+        }
+
+        .meta-item:nth-last-child(-n + 2) {
+            border-bottom: 0;
+        }
+    }
+
+
+    @media (max-width: 700px) {
+        .surat-keluar-detail-page {
+            padding: 8px 10px 20px;
+        }
+
+        .detail-header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .detail-header-action {
+            width: 100%;
+        }
+
+        .letter-heading {
+            flex-direction: column;
+        }
+
+        .status-badge {
+            align-self: flex-start;
+        }
+
+        .main-body {
+            padding: 11px;
+        }
+    }
+
+
+    @media (max-width: 560px) {
+        .detail-header-left {
+            align-items: flex-start;
+        }
+
+        .detail-header-title {
+            font-size: 16px;
+        }
+
+        .detail-header-subtitle {
+            font-size: 8px;
+        }
+
+        .meta-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .meta-item,
+        .meta-item:nth-child(2n),
+        .meta-item:nth-child(4n),
+        .meta-item:nth-last-child(-n + 2),
+        .meta-item:nth-last-child(-n + 4) {
+            border-right: 0;
+            border-bottom: 2px solid #94a3b8;
+        }
+
+        .meta-item:last-child {
+            border-bottom: 0;
+        }
+
+        .meta-item-wide {
+            grid-column: auto;
+        }
+
+        .attachment-actions {
+            flex-direction: column;
+        }
+
+        .attachment-btn {
+            width: 100%;
+        }
+
+        .viewer-pdf {
+            height: 480px;
+        }
+    }
+
+
+    @media (max-width: 400px) {
+        .letter-title {
+            font-size: 16px;
+        }
+
+        .letter-number {
+            font-size: 8px;
+        }
+    }
+</style>
+
+
+<div class="surat-keluar-detail-page">
+
+    {{-- =========================================================
+         SUCCESS
+    ========================================================== --}}
+    @if(session('success'))
+
+        <div
+            id="success-alert"
+            class="detail-alert alert-success"
+            role="alert"
+        >
+
+            <div class="detail-alert-inner">
+
+                <div class="detail-alert-icon">
+
+                    <svg
+                        class="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M5 13l4 4L19 7"
+                        />
                     </svg>
+
                 </div>
-                <span class="text-xs font-medium sm:text-sm">{{ session('success') }}</span>
+
+                <p class="detail-alert-text">
+                    {{ session('success') }}
+                </p>
+
             </div>
+
             <button
                 type="button"
+                class="detail-alert-close"
                 onclick="document.getElementById('success-alert')?.remove()"
-                class="shrink-0 rounded-lg p-1 text-emerald-400 transition hover:bg-emerald-100/50 hover:text-emerald-700"
-                aria-label="Tutup pemberitahuan"
+                aria-label="Tutup"
             >
-                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M6 18L18 6M6 6l12 12"
+                    />
                 </svg>
             </button>
+
         </div>
+
     @endif
 
-    {{-- ERROR --}}
-    @if (session('error'))
-        <div id="error-alert" class="flex items-center justify-between gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-rose-800 shadow-sm" role="alert">
-            <div class="flex min-w-0 items-center gap-3">
-                <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-rose-100">
-                    <svg class="h-5 w-5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+
+    {{-- =========================================================
+         ERROR
+    ========================================================== --}}
+    @if(session('error'))
+
+        <div
+            id="error-alert"
+            class="detail-alert alert-error"
+            role="alert"
+        >
+
+            <div class="detail-alert-inner">
+
+                <div class="detail-alert-icon">
+
+                    <svg
+                        class="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
                     </svg>
+
                 </div>
-                <span class="text-xs font-medium sm:text-sm">{{ session('error') }}</span>
+
+                <p class="detail-alert-text">
+                    {{ session('error') }}
+                </p>
+
             </div>
+
             <button
                 type="button"
+                class="detail-alert-close"
                 onclick="document.getElementById('error-alert')?.remove()"
-                class="shrink-0 rounded-lg p-1 text-rose-400 transition hover:bg-rose-100/50 hover:text-rose-700"
-                aria-label="Tutup pemberitahuan"
+                aria-label="Tutup"
             >
-                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M6 18L18 6M6 6l12 12"
+                    />
                 </svg>
             </button>
+
         </div>
+
     @endif
 
-    {{-- HEADER --}}
-    <div class="flex flex-col justify-between gap-4 rounded-3xl border border-slate-800 bg-gradient-to-r from-slate-900 via-slate-800 to-emerald-950 p-5 text-white shadow-md sm:flex-row sm:items-center sm:p-6">
-        <div class="flex min-w-0 items-center gap-3 sm:gap-4">
+
+    {{-- =========================================================
+         HEADER
+    ========================================================== --}}
+    <div class="detail-header">
+
+        <div class="detail-header-left">
+
             <a
                 href="{{ route('surat-keluar.index') }}"
-                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-white backdrop-blur-sm transition hover:bg-white/20"
+                class="detail-header-back"
                 title="Kembali"
                 aria-label="Kembali ke surat keluar"
             >
-                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-            </a>
-            <div class="min-w-0">
-                <h1 class="text-lg font-bold tracking-tight sm:text-xl">Detail Surat Keluar</h1>
-                <p class="mt-0.5 text-xs text-slate-300 sm:text-sm">
-                    Informasi lengkap dan arsip dokumen surat keluar.
-                </p>
-            </div>
-        </div>
 
-        {{-- ACTION --}}
-        <div class="flex w-full items-center gap-2 sm:w-auto">
-            @if (\Illuminate\Support\Facades\Route::has('surat-keluar.edit'))
-                <a
-                    href="{{ route('surat-keluar.edit', $suratKeluar) }}"
-                    class="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-amber-500/30 bg-amber-500/20 px-4 py-2.5 text-xs font-semibold text-amber-300 shadow-sm backdrop-blur-sm transition hover:bg-amber-500/30 sm:w-auto"
+                <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
                 >
-                    <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
-                    Edit Arsip
-                </a>
-            @endif
-        </div>
-    </div>
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                    />
+                </svg>
 
-    {{-- MAIN CARD --}}
-    <div class="space-y-5 rounded-3xl border border-slate-200 bg-gradient-to-b from-white via-slate-50/50 to-slate-100/60 p-5 shadow-md sm:p-7">
-        {{-- TITLE + STATUS --}}
-        <div class="flex flex-col justify-between gap-4 border-b-2 border-slate-200 pb-5 sm:flex-row sm:items-start">
-            <div class="min-w-0 space-y-2">
-                <div class="flex items-center gap-2">
-                    <span class="h-2.5 w-2.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50"></span>
-                    <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-700">
-                        Arsip Surat Keluar
-                    </span>
+            </a>
+
+
+            <div class="detail-header-content">
+
+                <div class="detail-breadcrumb">
+
+                    <a href="{{ route('surat-keluar.index') }}">
+                        Surat Keluar
+                    </a>
+
+                    <span>/</span>
+
+                    <span>Detail</span>
+
                 </div>
 
-                <h2 class="break-words text-xl font-black leading-snug tracking-tight text-slate-900 sm:text-2xl">
+                <h1 class="detail-header-title">
+                    Detail Surat Keluar
+                </h1>
+
+                <p class="detail-header-subtitle">
+                    Informasi lengkap surat keluar dan dokumen digital.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        @if(
+            \Illuminate\Support\Facades\Route::has(
+                'surat-keluar.edit'
+            )
+        )
+
+            <a
+                href="{{ route('surat-keluar.edit', $suratKeluar) }}"
+                class="detail-header-action"
+            >
+
+                <svg
+                    class="w-3.5 h-3.5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                    />
+                </svg>
+
+                Edit Arsip
+
+            </a>
+
+        @endif
+
+    </div>
+
+
+    {{-- =========================================================
+         MAIN CARD
+    ========================================================== --}}
+    <div class="main-card">
+
+
+        {{-- =====================================================
+             LETTER HEADING
+        ====================================================== --}}
+        <div class="letter-heading">
+
+            <div class="letter-heading-content">
+
+                <div class="letter-eyebrow">
+
+                    <span class="letter-dot"></span>
+
+                    <span class="letter-eyebrow-text">
+                        Arsip Surat Keluar
+                    </span>
+
+                </div>
+
+
+                <h2 class="letter-title">
                     {{ $perihal }}
                 </h2>
 
-                <div class="flex flex-wrap items-center gap-2 pt-1">
-                    <span class="inline-flex items-center rounded-xl border border-emerald-300 bg-emerald-100 px-3 py-1 font-mono text-xs font-bold text-emerald-800">
+
+                <div class="letter-meta-line">
+
+                    <span class="letter-id">
                         #{{ $suratKeluar->id }}
                     </span>
-                    <span class="text-slate-400">&bull;</span>
-                    <span class="break-all text-xs text-slate-600">
-                        No. Surat:
-                        <strong class="font-semibold text-slate-900">{{ $nomorSurat }}</strong>
+
+                    <span class="letter-number">
+                        Nomor Surat:
+                        <strong>
+                            {{ $nomorSurat }}
+                        </strong>
                     </span>
+
                 </div>
+
             </div>
 
-            {{-- STATUS --}}
-            <div class="shrink-0">
-                <span class="inline-flex items-center rounded-2xl border-2 px-4 py-2 text-xs font-bold shadow-sm {{ $statusBadgeClass }}">
-                    {{ $statusLabel }}
-                </span>
-            </div>
+
+            <span class="status-badge {{ $statusClass }}">
+                {{ $statusLabel }}
+            </span>
+
         </div>
 
-        {{-- METADATA --}}
-        <dl class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <div class="rounded-2xl border-2 border-slate-200 bg-white p-4 shadow-sm">
-                <dt class="mb-2 text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Tujuan Surat</dt>
-                <dd class="break-words text-sm font-bold text-slate-900">{{ $tujuanSurat }}</dd>
-            </div>
 
-            <div class="rounded-2xl border-2 border-slate-200 bg-white p-4 shadow-sm">
-                <dt class="mb-2 text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Kategori Surat</dt>
-                <dd class="break-words text-sm font-bold text-slate-900">{{ $kategoriNama }}</dd>
-            </div>
+        {{-- =====================================================
+             BODY
+        ====================================================== --}}
+        <div class="main-body">
 
-            <div class="rounded-2xl border-2 border-slate-200 bg-white p-4 shadow-sm">
-                <dt class="mb-2 text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Tanggal Surat</dt>
-                <dd class="text-sm font-bold text-slate-900">{{ $tanggalSurat }}</dd>
-            </div>
 
-            <div class="rounded-2xl border-2 border-slate-200 bg-white p-4 shadow-sm">
-                <dt class="mb-2 text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Tanggal Keluar</dt>
-                <dd class="text-sm font-bold text-slate-900">{{ $tanggalKeluar }}</dd>
-            </div>
+            {{-- =================================================
+                 METADATA
+            ================================================== --}}
+            <div class="meta-table">
 
-            <div class="rounded-2xl border-2 border-slate-200 bg-white p-4 shadow-sm sm:col-span-2">
-                <dt class="mb-2 text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Dibuat Oleh</dt>
-                <dd class="break-words text-sm font-bold text-slate-900">{{ $pembuatNama }}</dd>
-            </div>
+                <div class="meta-grid">
 
-            <div class="rounded-2xl border-2 border-slate-200 bg-white p-4 shadow-sm sm:col-span-2">
-                <dt class="mb-2 text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Ditandatangani Oleh</dt>
-                <dd class="break-words text-sm font-bold text-slate-900">{{ $penandatanganNama }}</dd>
-            </div>
-        </dl>
+                    <div class="meta-item">
 
-        {{-- PERIHAL --}}
-        <div class="border-t-2 border-slate-200 pt-4">
-            <div class="space-y-2 rounded-2xl border-2 border-slate-200 bg-white p-5 shadow-sm">
-                <span class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Perihal Surat</span>
-                <div class="whitespace-pre-line break-words text-sm font-medium leading-relaxed text-slate-800">
-                    {{ $perihal }}
-                </div>
-            </div>
-        </div>
-
-        {{-- RINGKASAN --}}
-        @if ($ringkasan !== '')
-            <div>
-                <div class="space-y-2 rounded-2xl border-2 border-slate-200 bg-white p-5 shadow-sm">
-                    <span class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500">
-                        Ringkasan Isi Surat
-                    </span>
-                    <div class="whitespace-pre-line break-words text-sm font-medium leading-relaxed text-slate-700">
-                        {{ $ringkasan }}
-                    </div>
-                </div>
-            </div>
-        @endif
-
-        {{-- LAMPIRAN --}}
-        <div class="space-y-4 border-t-2 border-slate-200 pt-5">
-            <div class="flex items-center justify-between gap-3">
-                <div>
-                    <span class="block text-xs font-bold uppercase tracking-wider text-slate-600">
-                        Berkas Lampiran Digital
-                    </span>
-                    @if ($lampiranNama)
-                        <span class="mt-1 block break-all text-[11px] text-slate-400">
-                            {{ $lampiranNama }}
+                        <span class="meta-label">
+                            Tujuan Surat
                         </span>
-                    @endif
+
+                        <p class="meta-value">
+                            {{ $tujuanSurat }}
+                        </p>
+
+                    </div>
+
+
+                    <div class="meta-item">
+
+                        <span class="meta-label">
+                            Kategori Surat
+                        </span>
+
+                        <p class="meta-value">
+                            {{ $kategoriNama }}
+                        </p>
+
+                    </div>
+
+
+                    <div class="meta-item">
+
+                        <span class="meta-label">
+                            Tanggal Surat
+                        </span>
+
+                        <p class="meta-value">
+                            {{ $tanggalSurat }}
+                        </p>
+
+                    </div>
+
+
+                    <div class="meta-item">
+
+                        <span class="meta-label">
+                            Tanggal Keluar
+                        </span>
+
+                        <p class="meta-value">
+                            {{ $tanggalKeluar }}
+                        </p>
+
+                    </div>
+
+
+                    <div class="meta-item meta-item-wide">
+
+                        <span class="meta-label">
+                            Dibuat Oleh
+                        </span>
+
+                        <p class="meta-value">
+                            {{ $pembuatNama }}
+                        </p>
+
+                    </div>
+
+
+                    <div class="meta-item meta-item-wide">
+
+                        <span class="meta-label">
+                            Ditandatangani Oleh
+                        </span>
+
+                        <p class="meta-value">
+                            {{ $penandatanganNama }}
+                        </p>
+
+                    </div>
+
                 </div>
+
             </div>
 
-            @if (!empty($lampiranPath) && !empty($lampiranUrl))
-                {{-- ACTION --}}
-                <div class="flex flex-wrap items-center gap-2.5">
-                    <a
-                        href="{{ $lampiranUrl }}"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm shadow-emerald-600/20 transition hover:bg-emerald-700"
-                    >
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                        </svg>
-                        Buka Lampiran
-                    </a>
 
-                    <a
-                        href="{{ $lampiranUrl }}"
-                        download
-                        class="inline-flex items-center justify-center gap-2 rounded-2xl border-2 border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-100"
-                    >
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                        </svg>
-                        Unduh Berkas
-                    </a>
+            {{-- =================================================
+                 PERIHAL
+            ================================================== --}}
+            <section class="detail-section">
+
+                <div class="section-heading">
+
+                    <div class="section-marker"></div>
+
+                    <p class="section-heading-text">
+                        Perihal Surat
+                    </p>
+
                 </div>
 
-                {{-- VIEWER --}}
-                <div class="overflow-hidden rounded-2xl border-2 border-slate-300 bg-slate-900/10 p-3">
-                    @if (in_array($lampiranExtension, ['jpg', 'jpeg', 'png'], true))
-                        <div class="py-2 text-center">
-                            <img
-                                src="{{ $lampiranUrl }}"
-                                alt="Lampiran Surat Keluar"
-                                class="mx-auto max-h-[600px] rounded-xl border border-white object-contain shadow-md"
-                                loading="lazy"
-                            >
-                        </div>
-                    @elseif ($lampiranExtension === 'pdf')
-                        <iframe
-                            src="{{ $lampiranUrl }}"
-                            class="h-[600px] w-full rounded-xl border-0 bg-white shadow-sm"
-                            title="Pratinjau PDF Surat Keluar"
-                            loading="lazy"
-                        ></iframe>
-                    @else
-                        <div class="rounded-xl border border-slate-200 bg-white py-12 text-center">
-                            <svg class="mx-auto mb-3 h-12 w-12 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            <p class="text-xs font-medium text-slate-700">
-                                Pratinjau langsung tidak tersedia untuk format
-                                <code class="rounded bg-slate-100 px-1.5 py-0.5 font-bold text-slate-900">
-                                    .{{ $lampiranExtension ?: 'dokumen' }}
-                                </code>
-                            </p>
-                            <p class="mt-1 text-[11px] text-slate-500">
-                                Gunakan tombol buka atau unduh untuk melihat berkas.
-                            </p>
-                        </div>
-                    @endif
+
+                <div class="content-box">
+
+                    <p class="content-box-text">
+                        {{ $perihal }}
+                    </p>
+
                 </div>
-            @else
-                <div class="flex w-full items-center justify-center gap-3 rounded-2xl border-2 border-slate-200 bg-white p-6 text-slate-500 shadow-sm">
-                    <svg class="h-5 w-5 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-                    </svg>
-                    <span class="text-xs font-medium">
-                        Tidak ada berkas digital yang dilampirkan pada surat ini.
-                    </span>
-                </div>
+
+            </section>
+
+
+            {{-- =================================================
+                 RINGKASAN
+            ================================================== --}}
+            @if($ringkasan !== '')
+
+                <section class="detail-section">
+
+                    <div class="section-heading">
+
+                        <div
+                            class="section-marker"
+                            style="background:#4f46e5;"
+                        ></div>
+
+                        <p class="section-heading-text">
+                            Ringkasan Isi Surat
+                        </p>
+
+                    </div>
+
+
+                    <div class="content-box summary-box">
+
+                        <p class="content-box-text">
+                            {{ $ringkasan }}
+                        </p>
+
+                    </div>
+
+                </section>
+
             @endif
+
+
+            {{-- =================================================
+                 LAMPIRAN
+            ================================================== --}}
+            <section class="detail-section">
+
+                <div class="attachment-header">
+
+                    <div class="min-w-0">
+
+                        <h3 class="attachment-title">
+                            Berkas Lampiran Digital
+                        </h3>
+
+                        @if($lampiranNama)
+
+                            <p class="attachment-filename">
+                                {{ $lampiranNama }}
+                            </p>
+
+                        @endif
+
+                    </div>
+
+
+                    @if($lampiranExtension)
+
+                        <span class="attachment-extension">
+                            {{ $lampiranExtension }}
+                        </span>
+
+                    @endif
+
+                </div>
+
+
+                @if(
+                    !empty($lampiranPath) &&
+                    !empty($lampiranUrl)
+                )
+
+                    {{-- =================================================
+                         ACTION
+                    ================================================== --}}
+                    <div class="attachment-actions">
+
+                        <a
+                            href="{{ $lampiranUrl }}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="attachment-btn attachment-btn-primary"
+                        >
+
+                            <svg
+                                class="w-3.5 h-3.5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                                />
+                            </svg>
+
+                            Buka Lampiran
+
+                        </a>
+
+
+                        <a
+                            href="{{ $lampiranUrl }}"
+                            download
+                            class="attachment-btn attachment-btn-secondary"
+                        >
+
+                            <svg
+                                class="w-3.5 h-3.5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                                />
+                            </svg>
+
+                            Unduh Berkas
+
+                        </a>
+
+                    </div>
+
+
+                    {{-- =================================================
+                         VIEWER
+                    ================================================== --}}
+                    <div class="viewer">
+
+                        @if(
+                            in_array(
+                                $lampiranExtension,
+                                [
+                                    'jpg',
+                                    'jpeg',
+                                    'png'
+                                ],
+                                true
+                            )
+                        )
+
+                            <div class="viewer-image-wrapper">
+
+                                <img
+                                    src="{{ $lampiranUrl }}"
+                                    alt="Lampiran Surat Keluar"
+                                    class="viewer-image"
+                                    loading="lazy"
+                                >
+
+                            </div>
+
+
+                        @elseif($lampiranExtension === 'pdf')
+
+                            <iframe
+                                src="{{ $lampiranUrl }}"
+                                class="viewer-pdf"
+                                title="Pratinjau PDF Surat Keluar"
+                                loading="lazy"
+                            ></iframe>
+
+
+                        @else
+
+                            <div class="viewer-empty">
+
+                                <svg
+                                    class="mx-auto h-9 w-9 text-slate-400"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                    />
+                                </svg>
+
+                                <p class="viewer-empty-title">
+                                    Pratinjau langsung tidak tersedia
+                                </p>
+
+                                <p class="viewer-empty-text">
+
+                                    Format:
+
+                                    <code>
+                                        .{{ $lampiranExtension ?: 'dokumen' }}
+                                    </code>
+
+                                    tidak mendukung preview langsung.
+
+                                    Gunakan tombol buka atau unduh.
+
+                                </p>
+
+                            </div>
+
+                        @endif
+
+                    </div>
+
+
+                @else
+
+                    <div class="no-file">
+
+                        <svg
+                            class="w-4 h-4 shrink-0 text-slate-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"
+                            />
+                        </svg>
+
+                        <p>
+                            Tidak ada berkas digital yang dilampirkan pada surat ini.
+                        </p>
+
+                    </div>
+
+                @endif
+
+            </section>
+
         </div>
+
     </div>
+
 </div>
+
 @endsection
