@@ -292,7 +292,6 @@ $hasFilters = request()->filled('search')
             <table class="archive-table">
                 <thead>
                     <tr>
-                        <th>Nomor Agenda</th>
                         <th>Tanggal Terima</th>
                         <th>Pengirim</th>
                         <th>Perihal</th>
@@ -320,12 +319,6 @@ $hasFilters = request()->filled('search')
                         @endphp
 
                         <tr>
-                            <td>
-                                <span class="font-semibold text-slate-700">
-                                    {{ $surat->nomor_agenda ?? '-' }}
-                                </span>
-                            </td>
-
                             <td class="cell-date">{{ $tanggalTerima }}</td>
 
                             <td class="cell-sender">
