@@ -4,18 +4,49 @@
 
 @section('content')
 @php
-    $formErrors = $errors ?? session('errors');
-    if (!$formErrors || !is_object($formErrors) || !method_exists($formErrors, 'any')) {
-        $formErrors = new \Illuminate\Support\ViewErrorBag();
-        $messageBag = session('errors');
-        if ($messageBag instanceof \Illuminate\Support\MessageBag) {
-            $formErrors->put('default', $messageBag);
-        }
+$formErrors = $errors ?? session('errors');
+
+```
+if (!$formErrors || !is_object($formErrors) || !method_exists($formErrors, 'any')) {
+    $formErrors = new \Illuminate\Support\ViewErrorBag();
+    $messageBag = session('errors');
+
+    if ($messageBag instanceof \Illuminate\Support\MessageBag) {
+        $formErrors->put('default', $messageBag);
     }
-    $inputClass = 'block w-full rounded-lg border-2 border-slate-400 bg-white px-3 py-2 text-sm text-slate-800 shadow-sm outline-none transition placeholder:text-slate-400 hover:border-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-100';
-    $errorInputClass = 'border-rose-400 focus:border-rose-500 focus:ring-rose-100';
+}
+
+$inputClass = 'block w-full rounded-lg border-2 border-slate-400 bg-white px-3 py-2 text-sm text-slate-800 shadow-sm outline-none transition placeholder:text-slate-400 hover:border-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-100';
+$errorInputClass = 'border-rose-400 focus:border-rose-500 focus:ring-rose-100';
+```
+
 @endphp
 
+<div class="mx-auto w-full max-w-5xl px-2 sm:px-0">
+    {{-- HEADER --}}
+    <div class="mb-4 rounded-xl border-2 border-slate-400 bg-white shadow-sm">
+        <div class="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex min-w-0 items-center gap-3">
+                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border-2 border-blue-200 bg-blue-50 text-blue-600">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12h6m-6 4h6m-6-8h6M6 3h9l3 3v15H6a2 2 0 01-2-2V5a2 2 0 012-2z"/>
+                    </svg>
+                </div>
+                <div class="min-w-0">
+                    <h1 class="text-lg font-bold tracking-tight text-slate-800">Catat Surat Masuk</h1>
+                    <p class="text-xs text-slate-500">Tambahkan data surat masuk dan arsip digital ke dalam sistem.</p>
+                </div>
+            </div>
+            <a href="{{ route('surat-masuk.index') }}" class="inline-flex w-full shrink-0 items-center justify-center rounded-lg border-2 border-slate-400 bg-white px-3.5 py-2 text-xs font-bold text-slate-700 shadow-sm transition hover:border-blue-400 hover:bg-blue-50 hover:text-blue-700 sm:w-auto">
+                <svg class="mr-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                Kembali
+            </a>
+        </div>
+    </div>
+
+```
 {{-- ERROR --}}
 @if($formErrors->any())
     <div class="mb-4 rounded-xl border-2 border-rose-300 bg-rose-50 px-3.5 py-3 shadow-sm">
@@ -310,6 +341,7 @@
                             @if($formErrors->has('lampiran_file'))
                                 <p class="mt-1.5 text-[11px] font-medium text-rose-600">{{ $formErrors->first('lampiran_file') }}</p>
                             @endif
+
                             @if($formErrors->has('captured_image'))
                                 <p class="mt-1.5 text-[11px] font-medium text-rose-600">{{ $formErrors->first('captured_image') }}</p>
                             @endif
@@ -354,6 +386,7 @@
                                             Detail Posisi Lemari / Box
                                         </label>
                                         <input id="lokasi_arsip_fisik" name="lokasi_arsip_fisik" type="text" value="{{ old('lokasi_arsip_fisik') }}" placeholder="Contoh: Rak A-3 Box 12" class="{{ $inputClass }} {{ $formErrors->has('lokasi_arsip_fisik') ? $errorInputClass : '' }}">
+
                                         @if($formErrors->has('lokasi_arsip_fisik'))
                                             <p class="mt-1 text-[11px] font-medium text-rose-600">{{ $formErrors->first('lokasi_arsip_fisik') }}</p>
                                         @endif
@@ -383,6 +416,7 @@
             <a href="{{ route('surat-masuk.index') }}" class="inline-flex w-full items-center justify-center rounded-lg border-2 border-slate-400 bg-white px-4 py-2 text-xs font-bold text-slate-700 transition hover:bg-slate-100 sm:w-auto">
                 Batal
             </a>
+
             <button id="submit-btn" type="submit" class="inline-flex w-full items-center justify-center rounded-lg border-2 border-blue-600 bg-blue-600 px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto">
                 <svg class="mr-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
@@ -392,4 +426,554 @@
         </div>
     </div>
 </form>
+```
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    'use strict';
+
+    const form = document.getElementById('form-surat');
+    const uploadBtn = document.getElementById('btn-upload');
+    const cameraBtn = document.getElementById('btn-camera');
+    const uploadPanel = document.getElementById('upload-panel');
+    const cameraPanel = document.getElementById('camera-panel');
+    const fileInput = document.getElementById('lampiran_file');
+    const uploadBox = document.getElementById('upload-box');
+    const selectedFile = document.getElementById('selected-file');
+    const selectedFileName = document.getElementById('selected-file-name');
+    const selectedFileSize = document.getElementById('selected-file-size');
+    const clearFileBtn = document.getElementById('clear-file-btn');
+    const video = document.getElementById('video');
+    const imagePreview = document.getElementById('image-preview');
+    const cameraPlaceholder = document.getElementById('camera-placeholder');
+    const cameraPlaceholderText = document.getElementById('camera-placeholder-text');
+    const cameraError = document.getElementById('camera-error');
+    const startCamBtn = document.getElementById('start-cam-btn');
+    const captureBtn = document.getElementById('capture-btn');
+    const retakeBtn = document.getElementById('retake-btn');
+    const stopCamBtn = document.getElementById('stop-cam-btn');
+    const capturedInput = document.getElementById('captured_image');
+    const snapshotPreview = document.getElementById('snapshot-preview');
+    const submitBtn = document.getElementById('submit-btn');
+    const submitText = document.getElementById('submit-text');
+
+    if (!form || !fileInput || !capturedInput) return;
+
+    const CLIENT_MAX_FILE_SIZE = 10 * 1024 * 1024;
+    const CLIENT_TARGET_IMAGE_SIZE = 2.5 * 1024 * 1024;
+    const MAX_IMAGE_WIDTH = 2200;
+    const MAX_IMAGE_HEIGHT = 2200;
+
+    let cameraStream = null;
+    let previewObjectUrl = null;
+    let isSubmitting = false;
+
+    function formatFileSize(bytes) {
+        if (!Number.isFinite(bytes) || bytes <= 0) return '0 KB';
+        return bytes < 1024 * 1024
+            ? `${(bytes / 1024).toFixed(1)} KB`
+            : `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+    }
+
+    function showCameraError(message) {
+        if (!cameraError) return;
+        cameraError.textContent = message || '';
+        cameraError.classList.remove('hidden');
+    }
+
+    function clearCameraError() {
+        if (!cameraError) return;
+        cameraError.textContent = '';
+        cameraError.classList.add('hidden');
+    }
+
+    function revokePreviewUrl() {
+        if (!previewObjectUrl) return;
+        URL.revokeObjectURL(previewObjectUrl);
+        previewObjectUrl = null;
+    }
+
+    function setModeButtonState(uploadActive) {
+        if (uploadActive) {
+            uploadBtn?.classList.remove('border-slate-400', 'bg-white', 'text-slate-700');
+            uploadBtn?.classList.add('border-blue-600', 'bg-blue-600', 'text-white');
+            cameraBtn?.classList.remove('border-blue-600', 'bg-blue-600', 'text-white');
+            cameraBtn?.classList.add('border-slate-400', 'bg-white', 'text-slate-700');
+        } else {
+            cameraBtn?.classList.remove('border-slate-400', 'bg-white', 'text-slate-700');
+            cameraBtn?.classList.add('border-blue-600', 'bg-blue-600', 'text-white');
+            uploadBtn?.classList.remove('border-blue-600', 'bg-blue-600', 'text-white');
+            uploadBtn?.classList.add('border-slate-400', 'bg-white', 'text-slate-700');
+        }
+
+        uploadBtn?.setAttribute('aria-selected', uploadActive ? 'true' : 'false');
+        cameraBtn?.setAttribute('aria-selected', uploadActive ? 'false' : 'true');
+    }
+
+    function activateUploadMode() {
+        clearCameraError();
+        uploadPanel?.classList.remove('hidden');
+        cameraPanel?.classList.add('hidden');
+        setModeButtonState(true);
+        stopCamera();
+    }
+
+    function activateCameraMode() {
+        clearCameraError();
+        uploadPanel?.classList.add('hidden');
+        cameraPanel?.classList.remove('hidden');
+        setModeButtonState(false);
+        clearFileSelection();
+    }
+
+    uploadBtn?.addEventListener('click', activateUploadMode);
+    cameraBtn?.addEventListener('click', activateCameraMode);
+
+    fileInput.addEventListener('change', async () => {
+        clearCameraError();
+
+        const file = fileInput.files?.[0];
+        if (!file) return;
+
+        try {
+            if (file.type === 'application/pdf') {
+                if (file.size > CLIENT_MAX_FILE_SIZE) {
+                    clearFileSelection();
+                    alert('Ukuran PDF maksimal 10 MB.');
+                    return;
+                }
+
+                clearCapturedImage();
+                showSelectedFile(file, 'PDF disimpan tanpa kompresi');
+                return;
+            }
+
+            const allowedImageTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+
+            if (!allowedImageTypes.includes(file.type)) {
+                clearFileSelection();
+                alert('Format file tidak didukung. Gunakan PDF, JPG, JPEG, atau PNG.');
+                return;
+            }
+
+            if (file.size > CLIENT_MAX_FILE_SIZE) {
+                clearFileSelection();
+                alert('Ukuran gambar maksimal 10 MB.');
+                return;
+            }
+
+            const originalSize = file.size;
+            const compressedFile = await compressImageFile(file);
+
+            if (typeof DataTransfer !== 'undefined') {
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(compressedFile);
+                fileInput.files = dataTransfer.files;
+            }
+
+            clearCapturedImage();
+
+            const reduction = originalSize > 0
+                ? Math.max(0, Math.round((1 - compressedFile.size / originalSize) * 100))
+                : 0;
+
+            showSelectedFile(compressedFile, `Kompresi browser • ukuran turun ${reduction}%`);
+        } catch (error) {
+            console.error('Gagal melakukan kompresi:', error);
+            clearFileSelection();
+            alert(error?.message || 'Gagal memproses gambar.');
+        }
+    });
+
+    function showSelectedFile(file, note = '') {
+        if (!selectedFile) return;
+
+        if (selectedFileName) selectedFileName.textContent = file.name;
+
+        if (selectedFileSize) {
+            selectedFileSize.textContent = `${formatFileSize(file.size)}${note ? ` • ${note}` : ''}`;
+        }
+
+        selectedFile.classList.remove('hidden');
+        uploadBox?.classList.add('border-emerald-400', 'bg-emerald-50');
+    }
+
+    function clearFileSelection() {
+        if (fileInput) fileInput.value = '';
+        selectedFile?.classList.add('hidden');
+
+        if (selectedFileName) selectedFileName.textContent = '';
+        if (selectedFileSize) selectedFileSize.textContent = '';
+
+        uploadBox?.classList.remove('border-emerald-400', 'bg-emerald-50');
+    }
+
+    clearFileBtn?.addEventListener('click', clearFileSelection);
+
+    function clearCapturedImage() {
+        if (capturedInput) capturedInput.value = '';
+        snapshotPreview?.classList.add('hidden');
+        revokePreviewUrl();
+
+        if (imagePreview) {
+            imagePreview.src = '';
+            imagePreview.setAttribute('hidden', '');
+        }
+    }
+
+    function loadImageFromFile(file) {
+        return new Promise((resolve, reject) => {
+            const objectUrl = URL.createObjectURL(file);
+            const image = new Image();
+
+            image.onload = () => {
+                URL.revokeObjectURL(objectUrl);
+                resolve(image);
+            };
+
+            image.onerror = () => {
+                URL.revokeObjectURL(objectUrl);
+                reject(new Error('Gambar tidak dapat dibaca oleh browser.'));
+            };
+
+            image.src = objectUrl;
+        });
+    }
+
+    async function compressImageFile(file) {
+        const image = await loadImageFromFile(file);
+        return compressImageElement(image, file.name);
+    }
+
+    function compressImageElement(image, originalName = 'lampiran.jpg') {
+        return new Promise((resolve, reject) => {
+            let width = image.naturalWidth || image.width;
+            let height = image.naturalHeight || image.height;
+
+            if (width <= 0 || height <= 0) {
+                reject(new Error('Dimensi gambar tidak valid.'));
+                return;
+            }
+
+            const scale = Math.min(MAX_IMAGE_WIDTH / width, MAX_IMAGE_HEIGHT / height, 1);
+
+            width = Math.max(1, Math.round(width * scale));
+            height = Math.max(1, Math.round(height * scale));
+
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+
+            const context = canvas.getContext('2d', { alpha: false });
+
+            if (!context) {
+                reject(new Error('Browser tidak mendukung pemrosesan gambar.'));
+                return;
+            }
+
+            context.fillStyle = '#ffffff';
+            context.fillRect(0, 0, width, height);
+            context.imageSmoothingEnabled = true;
+            context.imageSmoothingQuality = 'high';
+            context.drawImage(image, 0, 0, width, height);
+
+            const qualities = [0.78, 0.70, 0.62, 0.54];
+
+            const tryQuality = index => {
+                if (index >= qualities.length) {
+                    canvas.toBlob(blob => {
+                        if (!blob) {
+                            reject(new Error('Browser gagal membuat file hasil kompresi.'));
+                            return;
+                        }
+
+                        resolve(createCompressedFile(blob, originalName));
+                    }, 'image/jpeg', 0.48);
+
+                    return;
+                }
+
+                canvas.toBlob(blob => {
+                    if (!blob) {
+                        reject(new Error('Browser gagal membuat file hasil kompresi.'));
+                        return;
+                    }
+
+                    if (blob.size <= CLIENT_TARGET_IMAGE_SIZE) {
+                        resolve(createCompressedFile(blob, originalName));
+                        return;
+                    }
+
+                    tryQuality(index + 1);
+                }, 'image/jpeg', qualities[index]);
+            };
+
+            tryQuality(0);
+        });
+    }
+
+    function createCompressedFile(blob, originalName) {
+        const baseName = originalName
+            .replace(/\.[^/.]+$/, '')
+            .replace(/[^a-zA-Z0-9_-]/g, '_');
+
+        const filename = `${baseName || 'lampiran'}_compressed.jpg`;
+
+        return new File([blob], filename, {
+            type: 'image/jpeg',
+            lastModified: Date.now()
+        });
+    }
+
+    startCamBtn?.addEventListener('click', async () => {
+        clearCameraError();
+
+        if (!navigator.mediaDevices?.getUserMedia) {
+            showCameraError('Browser atau perangkat ini tidak mendukung akses kamera.');
+            return;
+        }
+
+        try {
+            stopCameraTracksOnly();
+
+            cameraStream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    facingMode: { ideal: 'environment' },
+                    width: { ideal: 1920 },
+                    height: { ideal: 1080 }
+                },
+                audio: false
+            });
+
+            video.srcObject = cameraStream;
+            await video.play();
+
+            cameraPlaceholder?.classList.add('hidden');
+            imagePreview?.setAttribute('hidden', '');
+            startCamBtn?.classList.add('hidden');
+            captureBtn?.classList.remove('hidden');
+            retakeBtn?.classList.add('hidden');
+            stopCamBtn?.classList.remove('hidden');
+        } catch (error) {
+            console.error('Camera error:', error);
+            stopCameraTracksOnly();
+            showCameraError('Kamera tidak dapat diakses. Pastikan izin kamera telah diberikan pada browser.');
+        }
+    });
+
+    captureBtn?.addEventListener('click', async () => {
+        clearCameraError();
+
+        if (!video.videoWidth || !video.videoHeight) {
+            showCameraError('Kamera belum siap. Silakan tunggu sebentar.');
+            return;
+        }
+
+        try {
+            const canvas = document.createElement('canvas');
+
+            let width = video.videoWidth;
+            let height = video.videoHeight;
+
+            const scale = Math.min(MAX_IMAGE_WIDTH / width, MAX_IMAGE_HEIGHT / height, 1);
+
+            width = Math.max(1, Math.round(width * scale));
+            height = Math.max(1, Math.round(height * scale));
+
+            canvas.width = width;
+            canvas.height = height;
+
+            const context = canvas.getContext('2d', { alpha: false });
+
+            if (!context) throw new Error('Browser tidak mendukung canvas.');
+
+            context.fillStyle = '#ffffff';
+            context.fillRect(0, 0, width, height);
+            context.imageSmoothingEnabled = true;
+            context.imageSmoothingQuality = 'high';
+            context.drawImage(video, 0, 0, width, height);
+
+            const blob = await canvasToCompressedBlob(canvas);
+
+            if (blob.size > CLIENT_MAX_FILE_SIZE) {
+                throw new Error('Hasil scan masih terlalu besar.');
+            }
+
+            revokePreviewUrl();
+
+            previewObjectUrl = URL.createObjectURL(blob);
+            imagePreview.src = previewObjectUrl;
+            imagePreview.removeAttribute('hidden');
+
+            video.classList.add('hidden');
+            capturedInput.value = await blobToDataUrl(blob);
+
+            clearFileSelection();
+            snapshotPreview?.classList.remove('hidden');
+            captureBtn?.classList.add('hidden');
+            retakeBtn?.classList.remove('hidden');
+            cameraPlaceholder?.classList.add('hidden');
+
+            stopCameraTracksOnly();
+            stopCamBtn?.classList.add('hidden');
+        } catch (error) {
+            console.error('Gagal mengambil foto:', error);
+            showCameraError(error?.message || 'Gagal memproses hasil scan kamera.');
+        }
+    });
+
+    function canvasToCompressedBlob(canvas) {
+        return new Promise((resolve, reject) => {
+            const qualities = [0.78, 0.70, 0.62, 0.54];
+
+            const tryQuality = index => {
+                if (index >= qualities.length) {
+                    canvas.toBlob(blob => {
+                        if (!blob) {
+                            reject(new Error('Gagal membuat hasil scan.'));
+                            return;
+                        }
+
+                        resolve(blob);
+                    }, 'image/jpeg', 0.48);
+
+                    return;
+                }
+
+                canvas.toBlob(blob => {
+                    if (!blob) {
+                        reject(new Error('Gagal membuat hasil scan.'));
+                        return;
+                    }
+
+                    if (blob.size <= CLIENT_TARGET_IMAGE_SIZE) {
+                        resolve(blob);
+                        return;
+                    }
+
+                    tryQuality(index + 1);
+                }, 'image/jpeg', qualities[index]);
+            };
+
+            tryQuality(0);
+        });
+    }
+
+    function blobToDataUrl(blob) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = () => reject(new Error('Gagal menyiapkan file hasil scan.'));
+
+            reader.readAsDataURL(blob);
+        });
+    }
+
+    retakeBtn?.addEventListener('click', async () => {
+        clearCapturedImage();
+        video.classList.remove('hidden');
+        retakeBtn?.classList.add('hidden');
+        clearCameraError();
+
+        try {
+            await startCameraAgain();
+        } catch (error) {
+            console.error(error);
+            showCameraError('Kamera gagal diaktifkan kembali.');
+        }
+    });
+
+    async function startCameraAgain() {
+        if (!navigator.mediaDevices?.getUserMedia) {
+            throw new Error('Browser tidak mendukung kamera.');
+        }
+
+        stopCameraTracksOnly();
+
+        cameraStream = await navigator.mediaDevices.getUserMedia({
+            video: {
+                facingMode: { ideal: 'environment' },
+                width: { ideal: 1920 },
+                height: { ideal: 1080 }
+            },
+            audio: false
+        });
+
+        video.srcObject = cameraStream;
+        await video.play();
+
+        cameraPlaceholder?.classList.add('hidden');
+        captureBtn?.classList.remove('hidden');
+        stopCamBtn?.classList.remove('hidden');
+        startCamBtn?.classList.add('hidden');
+    }
+
+    stopCamBtn?.addEventListener('click', stopCamera);
+
+    function stopCamera() {
+        stopCameraTracksOnly();
+
+        if (video) {
+            video.srcObject = null;
+            video.classList.remove('hidden');
+        }
+
+        cameraPlaceholder?.classList.remove('hidden');
+
+        if (cameraPlaceholderText) {
+            cameraPlaceholderText.textContent = 'Kamera belum aktif';
+        }
+
+        startCamBtn?.classList.remove('hidden');
+        captureBtn?.classList.add('hidden');
+        retakeBtn?.classList.add('hidden');
+        stopCamBtn?.classList.add('hidden');
+    }
+
+    function stopCameraTracksOnly() {
+        if (!cameraStream) return;
+
+        cameraStream.getTracks().forEach(track => track.stop());
+        cameraStream = null;
+    }
+
+    form.addEventListener('submit', event => {
+        if (isSubmitting) {
+            event.preventDefault();
+            return;
+        }
+
+        const hasCapturedImage = Boolean(capturedInput.value);
+        const hasUploadedFile = Boolean(fileInput.files?.length);
+
+        if (!hasCapturedImage && !hasUploadedFile) {
+            event.preventDefault();
+            alert('Silakan upload berkas digital atau ambil foto menggunakan kamera.');
+            return;
+        }
+
+        isSubmitting = true;
+
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-60', 'cursor-not-allowed');
+        }
+
+        if (submitText) {
+            submitText.textContent = 'Memproses & menyimpan...';
+        }
+
+        stopCameraTracksOnly();
+    });
+
+    window.addEventListener('beforeunload', () => {
+        stopCameraTracksOnly();
+        revokePreviewUrl();
+    });
+});
+</script>
+
 @endsection
