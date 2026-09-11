@@ -15,11 +15,12 @@
         }
     }
 
-    $inputClass = 'block w-full rounded-md border-2 border-slate-400 bg-white px-2.5 py-1.5 text-xs text-slate-800 shadow-sm outline-none transition placeholder:text-slate-400 hover:border-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-100';
+    $inputClass = 'block w-full rounded-md border-2 border-slate-400 bg-white px-3 py-2 text-sm text-slate-800 shadow-sm outline-none transition placeholder:text-slate-400 hover:border-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-100';
     $errorInputClass = 'border-rose-400 focus:border-rose-500 focus:ring-rose-100';
 @endphp
 
 <div class="mx-auto w-full max-w-5xl px-3 sm:px-4 lg:px-5">
+
     @if($formErrors->any())
         <div class="mb-3 rounded-lg border-2 border-rose-300 bg-rose-50 px-3 py-2.5 shadow-sm">
             <div class="flex items-start gap-2">
@@ -30,7 +31,9 @@
                 </div>
 
                 <div class="min-w-0 flex-1">
-                    <p class="text-xs font-bold text-rose-700">Data belum dapat disimpan.</p>
+                    <p class="text-xs font-bold text-rose-700">
+                        Data belum dapat disimpan.
+                    </p>
 
                     <ul class="mt-0.5 space-y-0.5 text-[10px] leading-relaxed text-rose-600">
                         @foreach($formErrors->all() as $error)
@@ -60,28 +63,28 @@
         <div class="overflow-hidden rounded-lg border-2 border-slate-400 bg-white shadow-sm">
 
             {{-- AGENDA --}}
-            <div class="border-b-2 border-blue-300 bg-gradient-to-r from-blue-50 to-indigo-50 px-3 py-2.5">
-                <div class="flex items-center justify-between gap-2.5">
+            <div class="border-b-2 border-blue-300 bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-3">
+                <div class="flex items-center justify-between gap-3">
 
-                    <div class="flex items-center gap-2">
-                        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border-2 border-blue-300 bg-white text-blue-600 shadow-sm">
+                    <div class="flex items-center gap-2.5">
+                        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border-2 border-blue-300 bg-white text-blue-600 shadow-sm">
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a3 3 0 003 3h0a3 3 0 003-3M9 5a3 3 0 01-3-3h0a3 3 0 013 3m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
                             </svg>
                         </div>
 
                         <div>
-                            <p class="text-[8px] font-bold uppercase tracking-wider text-blue-600">
+                            <p class="text-[9px] font-bold uppercase tracking-wider text-blue-600">
                                 Nomor Agenda Sistem
                             </p>
 
-                            <p class="font-mono text-xs font-bold text-blue-900">
+                            <p class="font-mono text-sm font-bold text-blue-900">
                                 {{ $nomorAgenda ?? '-' }}
                             </p>
                         </div>
                     </div>
 
-                    <div class="hidden rounded-md border border-blue-300 bg-white/80 px-2.5 py-1 text-right sm:block">
+                    <div class="hidden rounded-md border border-blue-300 bg-white/80 px-3 py-1.5 text-right sm:block">
                         <p class="text-[8px] font-semibold uppercase tracking-wide text-blue-500">
                             Sistem
                         </p>
@@ -94,12 +97,12 @@
             </div>
 
             {{-- BODY --}}
-            <div class="p-3 sm:p-4">
+            <div class="p-4 sm:p-5">
 
                 {{-- INFORMASI UTAMA --}}
                 <section>
-                    <div class="mb-2.5 flex items-start gap-2 border-b-2 border-slate-300 pb-2">
-                        <div class="mt-0.5 h-6 w-1 shrink-0 rounded-full bg-blue-600"></div>
+                    <div class="mb-3 flex items-start gap-2.5 border-b-2 border-slate-300 pb-2.5">
+                        <div class="mt-0.5 h-7 w-1 shrink-0 rounded-full bg-blue-600"></div>
 
                         <div>
                             <h2 class="text-sm font-bold text-slate-800">
@@ -116,10 +119,10 @@
                         <div class="grid grid-cols-1 md:grid-cols-2">
 
                             {{-- NOMOR SURAT --}}
-                            <div class="border-b-2 border-slate-300 p-2.5 md:border-r-2">
+                            <div class="border-b-2 border-slate-300 p-3 md:border-r-2">
                                 <label
                                     for="nomor_surat"
-                                    class="mb-1 block text-[11px] font-bold text-slate-700"
+                                    class="mb-1.5 block text-[11px] font-bold text-slate-700"
                                 >
                                     Nomor Surat <span class="text-rose-500">*</span>
                                 </label>
@@ -143,10 +146,10 @@
                             </div>
 
                             {{-- PENGIRIM --}}
-                            <div class="border-b-2 border-slate-300 p-2.5">
+                            <div class="border-b-2 border-slate-300 p-3">
                                 <label
                                     for="pengirim"
-                                    class="mb-1 block text-[11px] font-bold text-slate-700"
+                                    class="mb-1.5 block text-[11px] font-bold text-slate-700"
                                 >
                                     Instansi Pengirim <span class="text-rose-500">*</span>
                                 </label>
@@ -170,10 +173,10 @@
                             </div>
 
                             {{-- TANGGAL SURAT --}}
-                            <div class="border-b-2 border-slate-300 p-2.5 md:border-r-2">
+                            <div class="border-b-2 border-slate-300 p-3 md:border-r-2">
                                 <label
                                     for="tanggal_surat"
-                                    class="mb-1 block text-[11px] font-bold text-slate-700"
+                                    class="mb-1.5 block text-[11px] font-bold text-slate-700"
                                 >
                                     Tanggal Surat <span class="text-rose-500">*</span>
                                 </label>
@@ -195,10 +198,10 @@
                             </div>
 
                             {{-- TANGGAL TERIMA --}}
-                            <div class="border-b-2 border-slate-300 p-2.5">
+                            <div class="border-b-2 border-slate-300 p-3">
                                 <label
                                     for="tanggal_terima"
-                                    class="mb-1 block text-[11px] font-bold text-slate-700"
+                                    class="mb-1.5 block text-[11px] font-bold text-slate-700"
                                 >
                                     Tanggal Diterima <span class="text-rose-500">*</span>
                                 </label>
@@ -220,10 +223,10 @@
                             </div>
 
                             {{-- KATEGORI --}}
-                            <div class="border-b-2 border-slate-300 p-2.5 md:border-r-2">
+                            <div class="border-b-2 border-slate-300 p-3 md:border-r-2">
                                 <label
                                     for="kategori_surat_id"
-                                    class="mb-1 block text-[11px] font-bold text-slate-700"
+                                    class="mb-1.5 block text-[11px] font-bold text-slate-700"
                                 >
                                     Kategori Surat <span class="text-rose-500">*</span>
                                 </label>
@@ -257,10 +260,10 @@
                             </div>
 
                             {{-- STATUS --}}
-                            <div class="border-b-2 border-slate-300 p-2.5">
+                            <div class="border-b-2 border-slate-300 p-3">
                                 <label
                                     for="status"
-                                    class="mb-1 block text-[11px] font-bold text-slate-700"
+                                    class="mb-1.5 block text-[11px] font-bold text-slate-700"
                                 >
                                     Status Surat <span class="text-rose-500">*</span>
                                 </label>
@@ -295,10 +298,10 @@
                             </div>
 
                             {{-- PERIHAL --}}
-                            <div class="border-b-2 border-slate-300 p-2.5 md:col-span-2">
+                            <div class="border-b-2 border-slate-300 p-3 md:col-span-2">
                                 <label
                                     for="perihal"
-                                    class="mb-1 block text-[11px] font-bold text-slate-700"
+                                    class="mb-1.5 block text-[11px] font-bold text-slate-700"
                                 >
                                     Perihal <span class="text-rose-500">*</span>
                                 </label>
@@ -320,10 +323,10 @@
                             </div>
 
                             {{-- RINGKASAN --}}
-                            <div class="p-2.5 md:col-span-2">
+                            <div class="p-3 md:col-span-2">
                                 <label
                                     for="ringkasan"
-                                    class="mb-1 block text-[11px] font-bold text-slate-700"
+                                    class="mb-1.5 block text-[11px] font-bold text-slate-700"
                                 >
                                     Ringkasan
                                     <span class="font-normal text-slate-400">(Opsional)</span>
@@ -347,12 +350,12 @@
                     </div>
                 </section>
 
-                <div class="my-3 border-t-2 border-slate-300"></div>
+                <div class="my-4 border-t-2 border-slate-300"></div>
 
                 {{-- LAMPIRAN --}}
                 <section>
-                    <div class="mb-2.5 flex items-start gap-2 border-b-2 border-slate-300 pb-2">
-                        <div class="mt-0.5 h-6 w-1 shrink-0 rounded-full bg-indigo-600"></div>
+                    <div class="mb-3 flex items-start gap-2.5 border-b-2 border-slate-300 pb-2.5">
+                        <div class="mt-0.5 h-7 w-1 shrink-0 rounded-full bg-indigo-600"></div>
 
                         <div>
                             <h2 class="text-sm font-bold text-slate-800">
@@ -365,16 +368,16 @@
                         </div>
                     </div>
 
-                    <div class="mx-auto grid w-full max-w-4xl grid-cols-1 gap-3 lg:grid-cols-2">
+                    <div class="mx-auto grid w-full max-w-4xl grid-cols-1 gap-3.5 lg:grid-cols-2">
 
                         {{-- BERKAS DIGITAL --}}
                         <div class="overflow-hidden rounded-md border-2 border-slate-400 bg-white shadow-sm">
 
-                            <div class="border-b-2 border-blue-300 bg-blue-50 px-2.5 py-2">
+                            <div class="border-b-2 border-blue-300 bg-blue-50 px-3 py-2.5">
                                 <div class="flex items-center justify-between gap-2">
 
                                     <div class="flex min-w-0 items-center gap-2">
-                                        <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-blue-300 bg-white text-blue-600">
+                                        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-blue-300 bg-white text-blue-600">
                                             <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M7 3h7l4 4v14H7a2 2 0 01-2-2V5a2 2 0 012-2z"/>
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M14 3v5h5"/>
@@ -398,9 +401,9 @@
                                 </div>
                             </div>
 
-                            <div class="p-2.5">
+                            <div class="p-3">
 
-                                <div class="mb-2 flex items-start gap-1.5 rounded-md border border-blue-200 bg-blue-50 px-2 py-1.5">
+                                <div class="mb-2.5 flex items-start gap-1.5 rounded-md border border-blue-200 bg-blue-50 px-2.5 py-2">
                                     <svg class="mt-0.5 h-3 w-3 shrink-0 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M12 21a9 9 0 100-18 9 9 0 000 18z"/>
                                     </svg>
@@ -416,12 +419,12 @@
                                     </div>
                                 </div>
 
-                                <div class="mb-2 grid grid-cols-2 gap-1">
+                                <div class="mb-2.5 grid grid-cols-2 gap-1.5">
                                     <button
                                         type="button"
                                         id="btn-upload"
                                         aria-selected="true"
-                                        class="flex items-center justify-center gap-1 rounded-md border-2 border-blue-600 bg-blue-600 px-2 py-1.5 text-[9px] font-bold text-white shadow-sm transition hover:bg-blue-700"
+                                        class="flex items-center justify-center gap-1 rounded-md border-2 border-blue-600 bg-blue-600 px-2.5 py-1.5 text-[9px] font-bold text-white shadow-sm transition hover:bg-blue-700"
                                     >
                                         <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M12 12V4m0 0L8 8m4-4l4 4"/>
@@ -433,7 +436,7 @@
                                         type="button"
                                         id="btn-camera"
                                         aria-selected="false"
-                                        class="flex items-center justify-center gap-1 rounded-md border-2 border-slate-400 bg-white px-2 py-1.5 text-[9px] font-bold text-slate-700 transition hover:border-blue-300 hover:bg-blue-50"
+                                        class="flex items-center justify-center gap-1 rounded-md border-2 border-slate-400 bg-white px-2.5 py-1.5 text-[9px] font-bold text-slate-700 transition hover:border-blue-300 hover:bg-blue-50"
                                     >
                                         <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8h2l2-3h10l2 3h2a2 2 0 012 2v9a2 2 0 01-2 2H3a2 2 0 01-2-2v-9a2 2 0 012-2zm9 3a3 3 0 100 6 3 3 0 000-6z"/>
@@ -448,9 +451,9 @@
                                     <label
                                         id="upload-box"
                                         for="lampiran_file"
-                                        class="flex min-h-[105px] cursor-pointer flex-col items-center justify-center rounded-md border-2 border-dashed border-slate-400 bg-slate-50 px-2 py-3 text-center transition hover:border-blue-400 hover:bg-blue-50"
+                                        class="flex min-h-[115px] cursor-pointer flex-col items-center justify-center rounded-md border-2 border-dashed border-slate-400 bg-slate-50 px-3 py-4 text-center transition hover:border-blue-400 hover:bg-blue-50"
                                     >
-                                        <div class="mb-1.5 flex h-8 w-8 items-center justify-center rounded-md border border-blue-200 bg-blue-100 text-blue-600">
+                                        <div class="mb-2 flex h-9 w-9 items-center justify-center rounded-md border border-blue-200 bg-blue-100 text-blue-600">
                                             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
                                             </svg>
@@ -479,7 +482,7 @@
 
                                     <div
                                         id="selected-file"
-                                        class="mt-1.5 hidden rounded-md border-2 border-emerald-300 bg-emerald-50 p-1.5"
+                                        class="mt-2 hidden rounded-md border-2 border-emerald-300 bg-emerald-50 p-2"
                                     >
                                         <div class="flex items-center gap-1.5">
 
@@ -578,7 +581,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="mt-1.5 flex flex-wrap justify-center gap-1">
+                                    <div class="mt-2 flex flex-wrap justify-center gap-1.5">
 
                                         <button
                                             type="button"
@@ -622,7 +625,7 @@
 
                                     <div
                                         id="snapshot-preview"
-                                        class="{{ old('captured_image') ? '' : 'hidden' }} mt-1.5 rounded-md border-2 border-emerald-300 bg-emerald-50 px-2 py-1 text-center text-[9px] font-bold text-emerald-600"
+                                        class="{{ old('captured_image') ? '' : 'hidden' }} mt-2 rounded-md border-2 border-emerald-300 bg-emerald-50 px-2 py-1.5 text-center text-[9px] font-bold text-emerald-600"
                                     >
                                         ✓ Hasil scan berhasil diambil.
                                     </div>
@@ -645,11 +648,11 @@
                         {{-- LOKASI ARSIP FISIK --}}
                         <div class="overflow-hidden rounded-md border-2 border-slate-400 bg-white shadow-sm">
 
-                            <div class="border-b-2 border-indigo-300 bg-indigo-50 px-2.5 py-2">
+                            <div class="border-b-2 border-indigo-300 bg-indigo-50 px-3 py-2.5">
                                 <div class="flex items-center justify-between gap-2">
 
                                     <div class="flex min-w-0 items-center gap-2">
-                                        <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-indigo-300 bg-white text-indigo-600">
+                                        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-indigo-300 bg-white text-indigo-600">
                                             <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                                             </svg>
@@ -672,13 +675,13 @@
                                 </div>
                             </div>
 
-                            <div class="flex min-h-[220px] flex-col p-3">
+                            <div class="flex min-h-[230px] flex-col p-3">
 
-                                <div class="flex flex-1 flex-col justify-center rounded-md border-2 border-dashed border-slate-400 bg-slate-50 p-2.5">
+                                <div class="flex flex-1 flex-col justify-center rounded-md border-2 border-dashed border-slate-400 bg-slate-50 p-3">
 
                                     <div class="mx-auto w-full max-w-xs text-center">
 
-                                        <div class="mx-auto mb-2 flex h-9 w-9 items-center justify-center rounded-md border-2 border-indigo-200 bg-indigo-100 text-indigo-600">
+                                        <div class="mx-auto mb-2.5 flex h-10 w-10 items-center justify-center rounded-md border-2 border-indigo-200 bg-indigo-100 text-indigo-600">
                                             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                                             </svg>
@@ -692,10 +695,10 @@
                                             Masukkan posisi rak, lemari, box, atau map tempat arsip fisik disimpan.
                                         </p>
 
-                                        <div class="mt-2.5 text-left">
+                                        <div class="mt-3 text-left">
                                             <label
                                                 for="lokasi_arsip_fisik"
-                                                class="mb-1 block text-[10px] font-bold text-slate-700"
+                                                class="mb-1.5 block text-[10px] font-bold text-slate-700"
                                             >
                                                 Detail Posisi Lemari / Box
                                             </label>
@@ -716,8 +719,8 @@
                                             @endif
                                         </div>
 
-                                        <div class="mt-2 rounded-md border-2 border-slate-300 bg-white px-2 py-1.5 text-left">
-                                            <div class="flex items-start gap-1">
+                                        <div class="mt-2.5 rounded-md border-2 border-slate-300 bg-white px-2.5 py-2 text-left">
+                                            <div class="flex items-start gap-1.5">
 
                                                 <svg
                                                     class="mt-0.5 h-3 w-3 shrink-0 text-indigo-500"
@@ -750,22 +753,38 @@
             </div>
 
             {{-- FOOTER --}}
-            <div class="flex flex-col-reverse gap-2 border-t-2 border-slate-400 bg-slate-50 px-3.5 py-3 sm:flex-row sm:items-center sm:justify-end">
+            <div class="flex flex-col gap-2 border-t-2 border-slate-400 bg-slate-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
 
+                {{-- KEMBALI --}}
                 <a
                     href="{{ route('surat-masuk.index') }}"
-                    class="inline-flex w-full items-center justify-center rounded-md border-2 border-slate-400 bg-white px-3.5 py-1.5 text-[10px] font-bold text-slate-700 transition hover:bg-slate-100 sm:w-auto"
+                    class="inline-flex w-full items-center justify-center gap-1.5 rounded-md border-2 border-slate-400 bg-white px-3 py-1.5 text-[10px] font-bold text-slate-700 transition hover:border-slate-500 hover:bg-slate-100 sm:w-auto"
                 >
-                    Batal
+                    <svg
+                        class="h-3.5 w-3.5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                        />
+                    </svg>
+
+                    Kembali ke Surat Masuk
                 </a>
 
+                {{-- SIMPAN --}}
                 <button
                     id="submit-btn"
                     type="submit"
-                    class="inline-flex w-full items-center justify-center rounded-md border-2 border-blue-600 bg-blue-600 px-3.5 py-1.5 text-[10px] font-bold text-white shadow-sm transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+                    class="inline-flex w-full items-center justify-center gap-1.5 rounded-md border-2 border-blue-600 bg-blue-600 px-3 py-1.5 text-[9px] font-bold text-white shadow-sm transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
                 >
                     <svg
-                        class="mr-1 h-3.5 w-3.5"
+                        class="h-3 w-3"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
