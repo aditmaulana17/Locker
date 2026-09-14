@@ -23,9 +23,9 @@
 @endphp
 
 <style>
-/* ============================================================
+/* ==========================================================================
    PAGE
-============================================================ */
+========================================================================== */
 
 .sm-create-page {
     width: 100%;
@@ -42,9 +42,9 @@
 }
 
 
-/* ============================================================
+/* ==========================================================================
    TOP ACTION
-============================================================ */
+========================================================================== */
 
 .sm-top-action {
     display: flex;
@@ -77,9 +77,9 @@
 }
 
 
-/* ============================================================
+/* ==========================================================================
    ERROR
-============================================================ */
+========================================================================== */
 
 .sm-error-box {
     margin-bottom: 12px;
@@ -125,9 +125,9 @@
 }
 
 
-/* ============================================================
+/* ==========================================================================
    MAIN CARD
-============================================================ */
+========================================================================== */
 
 .sm-main-card {
     width: 100%;
@@ -141,9 +141,9 @@
 }
 
 
-/* ============================================================
+/* ==========================================================================
    HEADER
-============================================================ */
+========================================================================== */
 
 .sm-system-header {
     display: flex;
@@ -223,18 +223,18 @@
 }
 
 
-/* ============================================================
+/* ==========================================================================
    BODY
-============================================================ */
+========================================================================== */
 
 .sm-main-body {
     padding: 16px;
 }
 
 
-/* ============================================================
+/* ==========================================================================
    SECTION
-============================================================ */
+========================================================================== */
 
 .sm-section {
     width: 100%;
@@ -282,9 +282,9 @@
 }
 
 
-/* ============================================================
+/* ==========================================================================
    FIELD
-============================================================ */
+========================================================================== */
 
 .sm-field-table {
     overflow: hidden;
@@ -315,14 +315,10 @@
     border-right: 0;
 }
 
-.sm-field:last-child {
-    border-bottom: 0;
-}
 
-
-/* ============================================================
+/* ==========================================================================
    LABEL
-============================================================ */
+========================================================================== */
 
 .sm-field-label,
 .sm-physical-label {
@@ -341,9 +337,9 @@
 }
 
 
-/* ============================================================
+/* ==========================================================================
    CONTROL
-============================================================ */
+========================================================================== */
 
 .sm-control {
     width: 100%;
@@ -402,17 +398,10 @@ textarea.sm-control {
     color: #dc2626;
 }
 
-.sm-help {
-    margin: 4px 0 0;
-    font-size: 7.5px;
-    line-height: 1.45;
-    color: #94a3b8;
-}
 
-
-/* ============================================================
+/* ==========================================================================
    ATTACHMENT GRID
-============================================================ */
+========================================================================== */
 
 .sm-attachment-grid {
     display: grid;
@@ -485,10 +474,10 @@ textarea.sm-control {
 .sm-attachment-badge {
     flex-shrink: 0;
     padding: 4px 7px;
-    border: 1px solid #cbd5e1;
+    border: 1px solid #fecaca;
     border-radius: 999px;
-    background: #ffffff;
-    color: #64748b;
+    background: #fff1f2;
+    color: #dc2626;
     font-size: 7px;
     font-weight: 800;
     text-transform: uppercase;
@@ -504,9 +493,9 @@ textarea.sm-control {
 }
 
 
-/* ============================================================
-   INFO BOX
-============================================================ */
+/* ==========================================================================
+   INFO
+========================================================================== */
 
 .sm-info-box {
     display: flex;
@@ -529,7 +518,7 @@ textarea.sm-control {
 .sm-info-text {
     margin: 0;
     font-size: 7.5px;
-    line-height: 1.5;
+    line-height: 1.55;
     color: #1d4ed8;
 }
 
@@ -538,9 +527,9 @@ textarea.sm-control {
 }
 
 
-/* ============================================================
+/* ==========================================================================
    MODE
-============================================================ */
+========================================================================== */
 
 .sm-mode-grid {
     display: grid;
@@ -549,7 +538,7 @@ textarea.sm-control {
 }
 
 .sm-mode-btn {
-    min-height: 40px;
+    min-height: 42px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -577,9 +566,9 @@ textarea.sm-control {
 }
 
 
-/* ============================================================
+/* ==========================================================================
    UPLOAD
-============================================================ */
+========================================================================== */
 
 .sm-upload-box {
     position: relative;
@@ -657,9 +646,9 @@ textarea.sm-control {
 }
 
 
-/* ============================================================
+/* ==========================================================================
    SELECTED FILE
-============================================================ */
+========================================================================== */
 
 .sm-selected-file {
     display: flex;
@@ -733,9 +722,9 @@ textarea.sm-control {
 }
 
 
-/* ============================================================
+/* ==========================================================================
    COMPRESSION
-============================================================ */
+========================================================================== */
 
 .sm-compression-status {
     padding: 8px 9px;
@@ -766,9 +755,9 @@ textarea.sm-control {
 }
 
 
-/* ============================================================
+/* ==========================================================================
    CAMERA
-============================================================ */
+========================================================================== */
 
 .sm-camera-box {
     overflow: hidden;
@@ -871,6 +860,10 @@ textarea.sm-control {
 
 .sm-camera-btn {
     min-height: 31px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
     padding: 0 5px;
     border-radius: 6px;
     font-size: 7px;
@@ -907,9 +900,9 @@ textarea.sm-control {
 }
 
 
-/* ============================================================
+/* ==========================================================================
    SNAPSHOT
-============================================================ */
+========================================================================== */
 
 .sm-snapshot-preview {
     display: flex;
@@ -954,9 +947,9 @@ textarea.sm-control {
 }
 
 
-/* ============================================================
+/* ==========================================================================
    PHYSICAL
-============================================================ */
+========================================================================== */
 
 .sm-physical-box {
     display: flex;
@@ -1033,9 +1026,9 @@ textarea.sm-control {
 }
 
 
-/* ============================================================
+/* ==========================================================================
    FOOTER
-============================================================ */
+========================================================================== */
 
 .sm-form-footer {
     display: flex;
@@ -1091,20 +1084,21 @@ textarea.sm-control {
 }
 
 
-/* ============================================================
+/* ==========================================================================
    UTILITY
-============================================================ */
+========================================================================== */
 
 .sm-hidden {
     display: none !important;
 }
 
 
-/* ============================================================
+/* ==========================================================================
    RESPONSIVE
-============================================================ */
+========================================================================== */
 
 @media (max-width: 820px) {
+
     .sm-create-page {
         max-width: 760px;
     }
@@ -1149,7 +1143,6 @@ textarea.sm-control {
     .sm-field:nth-child(2n) {
         padding: 10px;
         border-right: 0;
-        border-bottom: 1.5px solid #cbd5e1;
     }
 
     .sm-field-full {
@@ -1222,9 +1215,9 @@ textarea.sm-control {
 
 <div class="sm-create-page">
 
-    {{-- =========================================================
+    {{-- =========================================================================
          KEMBALI
-    ========================================================== --}}
+    ========================================================================= --}}
 
     <div class="sm-top-action">
 
@@ -1232,13 +1225,11 @@ textarea.sm-control {
             href="{{ route('surat-masuk.index') }}"
             class="sm-back-btn"
         >
-
             <svg
                 class="h-4 w-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
-                aria-hidden="true"
             >
                 <path
                     stroke-linecap="round"
@@ -1249,15 +1240,14 @@ textarea.sm-control {
             </svg>
 
             Kembali
-
         </a>
 
     </div>
 
 
-    {{-- =========================================================
+    {{-- =========================================================================
          ERROR
-    ========================================================== --}}
+    ========================================================================= --}}
 
     @if($formErrors->any())
 
@@ -1272,13 +1262,12 @@ textarea.sm-control {
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
-                        aria-hidden="true"
                     >
                         <path
                             stroke-linecap="round"
                             stroke-linejoin="round"
                             stroke-width="2"
-                            d="M12 9v4m0 4h.01M10.29 3.86l-8.82 15A2 2 0 003.2 21.86h17.6a2 2 0 001.73-3l8.82-15a2 2 0 003.42 0z"
+                            d="M12 9v4m0 4h.01M10.29 3.86l-8.82 15A2 2 0 003.2 21.86h17.6a2 2 0 001.73-3l-8.82-15a2 2 0 003.42 0z"
                         />
                     </svg>
 
@@ -1311,9 +1300,9 @@ textarea.sm-control {
     @endif
 
 
-    {{-- =========================================================
+    {{-- =========================================================================
          FORM
-    ========================================================== --}}
+    ========================================================================= --}}
 
     <form
         id="form-surat-masuk"
@@ -1324,17 +1313,19 @@ textarea.sm-control {
 
         @csrf
 
+
         <input
             type="hidden"
             name="nomor_agenda"
             value="{{ old('nomor_agenda', $nomorAgenda ?? '') }}"
         >
 
+
         <div class="sm-main-card">
 
-            {{-- =================================================
+            {{-- =========================================================================
                  HEADER
-            ================================================== --}}
+            ========================================================================= --}}
 
             <div class="sm-system-header">
 
@@ -1347,7 +1338,6 @@ textarea.sm-control {
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
-                            aria-hidden="true"
                         >
                             <path
                                 stroke-linecap="round"
@@ -1362,10 +1352,10 @@ textarea.sm-control {
                                 stroke-width="1.8"
                                 d="M8 11h8M8 15h5"
                             />
-
                         </svg>
 
                     </div>
+
 
                     <div class="min-w-0">
 
@@ -1385,6 +1375,7 @@ textarea.sm-control {
 
                 </div>
 
+
                 <span class="sm-system-header-badge">
                     Arsip Digital
                 </span>
@@ -1392,15 +1383,15 @@ textarea.sm-control {
             </div>
 
 
-            {{-- =================================================
+            {{-- =========================================================================
                  BODY
-            ================================================== --}}
+            ========================================================================= --}}
 
             <div class="sm-main-body">
 
-                {{-- =================================================
+                {{-- =========================================================================
                      INFORMASI UTAMA
-                ================================================== --}}
+                ========================================================================= --}}
 
                 <section class="sm-section">
 
@@ -1426,8 +1417,6 @@ textarea.sm-control {
                     <div class="sm-field-table">
 
                         <div class="sm-field-grid">
-
-                            {{-- NOMOR SURAT --}}
 
                             <div class="sm-field">
 
@@ -1462,8 +1451,6 @@ textarea.sm-control {
                             </div>
 
 
-                            {{-- PENGIRIM --}}
-
                             <div class="sm-field">
 
                                 <label
@@ -1497,8 +1484,6 @@ textarea.sm-control {
                             </div>
 
 
-                            {{-- TANGGAL SURAT --}}
-
                             <div class="sm-field">
 
                                 <label
@@ -1529,8 +1514,6 @@ textarea.sm-control {
                             </div>
 
 
-                            {{-- TANGGAL TERIMA --}}
-
                             <div class="sm-field">
 
                                 <label
@@ -1560,8 +1543,6 @@ textarea.sm-control {
 
                             </div>
 
-
-                            {{-- KATEGORI --}}
 
                             <div class="sm-field">
 
@@ -1596,7 +1577,9 @@ textarea.sm-control {
                                             {{ $kategori->nama_kategori }}
 
                                             @if(!empty($kategori->sifat))
+
                                                 ({{ ucfirst($kategori->sifat) }})
+
                                             @endif
 
                                         </option>
@@ -1615,8 +1598,6 @@ textarea.sm-control {
 
                             </div>
 
-
-                            {{-- STATUS --}}
 
                             <div class="sm-field">
 
@@ -1667,8 +1648,6 @@ textarea.sm-control {
                             </div>
 
 
-                            {{-- PERIHAL --}}
-
                             <div class="sm-field sm-field-full">
 
                                 <label
@@ -1706,9 +1685,9 @@ textarea.sm-control {
                 </section>
 
 
-                {{-- =================================================
+                {{-- =========================================================================
                      LAMPIRAN
-                ================================================== --}}
+                ========================================================================= --}}
 
                 <section class="sm-section">
 
@@ -1734,9 +1713,9 @@ textarea.sm-control {
 
                     <div class="sm-attachment-grid">
 
-                        {{-- =================================================
+                        {{-- =========================================================================
                              BERKAS DIGITAL
-                        ================================================== --}}
+                        ========================================================================= --}}
 
                         <div class="sm-attachment-card">
 
@@ -1751,7 +1730,6 @@ textarea.sm-control {
                                             fill="none"
                                             stroke="currentColor"
                                             viewBox="0 0 24 24"
-                                            aria-hidden="true"
                                         >
                                             <path
                                                 stroke-linecap="round"
@@ -1766,10 +1744,10 @@ textarea.sm-control {
                                                 stroke-width="1.8"
                                                 d="M14 3v5h5"
                                             />
-
                                         </svg>
 
                                     </div>
+
 
                                     <div class="min-w-0">
 
@@ -1785,10 +1763,8 @@ textarea.sm-control {
 
                                 </div>
 
-                                <span
-                                    class="sm-attachment-badge"
-                                    style="color:#dc2626;border-color:#fecaca;background:#fff1f2;"
-                                >
+
+                                <span class="sm-attachment-badge">
                                     Wajib
                                 </span>
 
@@ -1797,7 +1773,7 @@ textarea.sm-control {
 
                             <div class="sm-attachment-body">
 
-                                {{-- INFO KOMPRESI --}}
+                                {{-- INFO --}}
 
                                 <div class="sm-info-box">
 
@@ -1805,7 +1781,6 @@ textarea.sm-control {
                                         fill="none"
                                         stroke="currentColor"
                                         viewBox="0 0 24 24"
-                                        aria-hidden="true"
                                     >
                                         <path
                                             stroke-linecap="round"
@@ -1815,14 +1790,15 @@ textarea.sm-control {
                                         />
                                     </svg>
 
+
                                     <p class="sm-info-text">
 
                                         <strong>Maksimal 10 MB.</strong>
 
                                         PDF tetap PDF.
-                                        JPG/JPEG/PNG otomatis diproses,
-                                        di-resize bila diperlukan,
-                                        lalu dikompres menjadi JPG.
+
+                                        JPG/JPEG/PNG akan otomatis
+                                        dikompres dan dikonversi menjadi JPG.
 
                                     </p>
 
@@ -1836,8 +1812,8 @@ textarea.sm-control {
                                     <button
                                         type="button"
                                         id="sm-btn-upload"
-                                        aria-selected="true"
                                         class="sm-mode-btn active"
+                                        aria-selected="true"
                                     >
 
                                         <svg
@@ -1862,8 +1838,8 @@ textarea.sm-control {
                                     <button
                                         type="button"
                                         id="sm-btn-camera"
-                                        aria-selected="false"
                                         class="sm-mode-btn"
+                                        aria-selected="false"
                                     >
 
                                         <svg
@@ -1887,15 +1863,15 @@ textarea.sm-control {
                                 </div>
 
 
-                                {{-- =================================================
+                                {{-- =========================================================
                                      UPLOAD PANEL
-                                ================================================== --}}
+                                ========================================================== --}}
 
                                 <div id="sm-upload-panel">
 
                                     <label
-                                        for="lampiran_file"
                                         id="sm-upload-box"
+                                        for="lampiran_file"
                                         class="sm-upload-box"
                                     >
 
@@ -1917,6 +1893,7 @@ textarea.sm-control {
 
                                         </span>
 
+
                                         <span
                                             id="sm-upload-title"
                                             class="sm-upload-title"
@@ -1924,13 +1901,16 @@ textarea.sm-control {
                                             Klik untuk memilih file
                                         </span>
 
+
                                         <span class="sm-upload-format">
                                             PDF, JPG, JPEG, PNG
                                         </span>
 
+
                                         <span class="sm-upload-limit">
                                             Maksimal 10 MB
                                         </span>
+
 
                                         <input
                                             id="lampiran_file"
@@ -1968,16 +1948,19 @@ textarea.sm-control {
 
                                         </div>
 
+
                                         <div class="sm-selected-file-content">
 
                                             <p class="sm-selected-file-title">
-                                                File siap diproses
+                                                File siap digunakan
                                             </p>
+
 
                                             <p
                                                 id="sm-selected-file-name"
                                                 class="sm-selected-file-name"
                                             ></p>
+
 
                                             <p
                                                 id="sm-selected-file-size"
@@ -1985,6 +1968,7 @@ textarea.sm-control {
                                             ></p>
 
                                         </div>
+
 
                                         <button
                                             type="button"
@@ -2013,6 +1997,8 @@ textarea.sm-control {
                                     </div>
 
 
+                                    {{-- STATUS KOMPRESI --}}
+
                                     <div
                                         id="sm-compression-status"
                                         class="sm-compression-status sm-hidden"
@@ -2021,9 +2007,9 @@ textarea.sm-control {
                                 </div>
 
 
-                                {{-- =================================================
+                                {{-- =========================================================
                                      CAMERA PANEL
-                                ================================================== --}}
+                                ========================================================== --}}
 
                                 <div
                                     id="sm-camera-panel"
@@ -2042,12 +2028,14 @@ textarea.sm-control {
                                                 class="sm-camera-video"
                                             ></video>
 
+
                                             <img
                                                 id="sm-image-preview"
                                                 src=""
                                                 alt="Preview hasil scan"
                                                 class="sm-camera-image sm-hidden"
                                             >
+
 
                                             <div
                                                 id="sm-camera-placeholder"
@@ -2076,14 +2064,15 @@ textarea.sm-control {
                                                                 cy="12"
                                                                 r="3.5"
                                                             />
-
                                                         </svg>
 
                                                     </div>
 
+
                                                     <p class="sm-camera-placeholder-title">
                                                         Kamera belum aktif
                                                     </p>
+
 
                                                     <p
                                                         id="sm-camera-placeholder-text"
@@ -2096,11 +2085,13 @@ textarea.sm-control {
 
                                             </div>
 
+
                                             <div
                                                 id="sm-camera-error"
                                                 class="sm-camera-error sm-hidden"
                                                 role="alert"
                                             ></div>
+
 
                                             <div class="sm-camera-frame"></div>
 
@@ -2117,6 +2108,7 @@ textarea.sm-control {
                                                 Nyalakan Kamera
                                             </button>
 
+
                                             <button
                                                 type="button"
                                                 id="sm-capture"
@@ -2124,6 +2116,7 @@ textarea.sm-control {
                                             >
                                                 Ambil Foto
                                             </button>
+
 
                                             <button
                                                 type="button"
@@ -2155,6 +2148,7 @@ textarea.sm-control {
                                             id="sm-snapshot-text"
                                             class="sm-snapshot-text"
                                         ></div>
+
 
                                         <button
                                             type="button"
@@ -2207,9 +2201,9 @@ textarea.sm-control {
                         </div>
 
 
-                        {{-- =================================================
+                        {{-- =========================================================================
                              ARSIP FISIK
-                        ================================================== --}}
+                        ========================================================================= --}}
 
                         <div class="sm-attachment-card">
 
@@ -2229,11 +2223,12 @@ textarea.sm-control {
                                                 stroke-linecap="round"
                                                 stroke-linejoin="round"
                                                 stroke-width="1.8"
-                                                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                                                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0-2V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
                                             />
                                         </svg>
 
                                     </div>
+
 
                                     <div class="min-w-0">
 
@@ -2249,7 +2244,11 @@ textarea.sm-control {
 
                                 </div>
 
-                                <span class="sm-attachment-badge">
+
+                                <span
+                                    class="sm-attachment-badge"
+                                    style="color:#64748b;border-color:#cbd5e1;background:#ffffff;"
+                                >
                                     Opsional
                                 </span>
 
@@ -2272,20 +2271,23 @@ textarea.sm-control {
                                                 stroke-linecap="round"
                                                 stroke-linejoin="round"
                                                 stroke-width="1.8"
-                                                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                                                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0-2V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
                                             />
                                         </svg>
 
                                     </div>
 
+
                                     <h4 class="sm-physical-title">
                                         Detail Lokasi Penyimpanan
                                     </h4>
+
 
                                     <p class="sm-physical-description">
                                         Masukkan posisi rak, lemari, box,
                                         atau map tempat arsip fisik disimpan.
                                     </p>
+
 
                                     <div class="sm-physical-field">
 
@@ -2295,6 +2297,7 @@ textarea.sm-control {
                                         >
                                             Posisi Rak / Lemari / Box
                                         </label>
+
 
                                         <input
                                             id="lokasi_arsip_fisik"
@@ -2306,6 +2309,7 @@ textarea.sm-control {
                                             class="sm-control {{ $formErrors->has('lokasi_arsip_fisik') ? 'sm-control-error' : '' }}"
                                         >
 
+
                                         @if($formErrors->has('lokasi_arsip_fisik'))
 
                                             <p class="sm-field-error">
@@ -2316,6 +2320,7 @@ textarea.sm-control {
 
                                     </div>
 
+
                                     <div class="sm-physical-example">
 
                                         <p>
@@ -2325,6 +2330,7 @@ textarea.sm-control {
                                         </p>
 
                                     </div>
+
 
                                     <div class="sm-physical-note">
 
@@ -2349,9 +2355,9 @@ textarea.sm-control {
             </div>
 
 
-            {{-- =================================================
+            {{-- =========================================================================
                  FOOTER
-            ================================================== --}}
+            ========================================================================= --}}
 
             <div class="sm-form-footer">
 
@@ -2400,6 +2406,7 @@ textarea.sm-control {
                         />
                     </svg>
 
+
                     <svg
                         id="sm-submit-loading"
                         class="sm-hidden h-3.5 w-3.5"
@@ -2422,6 +2429,7 @@ textarea.sm-control {
                         />
                     </svg>
 
+
                     <span id="sm-submit-text">
                         Simpan Surat Masuk
                     </span>
@@ -2437,74 +2445,117 @@ textarea.sm-control {
 </div>
 
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
     'use strict';
 
-    /* =========================================================
+
+    /* =========================================================================
        ELEMENT
-    ========================================================= */
+    ========================================================================= */
 
     const form =
-        document.getElementById('form-surat-masuk');
+        document.getElementById(
+            'form-surat-masuk'
+        );
 
     const btnUpload =
-        document.getElementById('sm-btn-upload');
+        document.getElementById(
+            'sm-btn-upload'
+        );
 
     const btnCamera =
-        document.getElementById('sm-btn-camera');
+        document.getElementById(
+            'sm-btn-camera'
+        );
 
     const uploadPanel =
-        document.getElementById('sm-upload-panel');
+        document.getElementById(
+            'sm-upload-panel'
+        );
 
     const cameraPanel =
-        document.getElementById('sm-camera-panel');
+        document.getElementById(
+            'sm-camera-panel'
+        );
 
     const fileInput =
-        document.getElementById('lampiran_file');
+        document.getElementById(
+            'lampiran_file'
+        );
 
     const uploadBox =
-        document.getElementById('sm-upload-box');
+        document.getElementById(
+            'sm-upload-box'
+        );
 
     const uploadTitle =
-        document.getElementById('sm-upload-title');
+        document.getElementById(
+            'sm-upload-title'
+        );
 
     const selectedFile =
-        document.getElementById('sm-selected-file');
+        document.getElementById(
+            'sm-selected-file'
+        );
 
     const selectedFileName =
-        document.getElementById('sm-selected-file-name');
+        document.getElementById(
+            'sm-selected-file-name'
+        );
 
     const selectedFileSize =
-        document.getElementById('sm-selected-file-size');
+        document.getElementById(
+            'sm-selected-file-size'
+        );
 
     const clearFileBtn =
-        document.getElementById('sm-clear-file-btn');
+        document.getElementById(
+            'sm-clear-file-btn'
+        );
 
     const compressionStatus =
-        document.getElementById('sm-compression-status');
+        document.getElementById(
+            'sm-compression-status'
+        );
 
     const video =
-        document.getElementById('sm-video');
+        document.getElementById(
+            'sm-video'
+        );
 
     const imagePreview =
-        document.getElementById('sm-image-preview');
+        document.getElementById(
+            'sm-image-preview'
+        );
 
     const capturedImage =
-        document.getElementById('sm-captured-image');
+        document.getElementById(
+            'sm-captured-image'
+        );
 
     const startCameraBtn =
-        document.getElementById('sm-start-camera');
+        document.getElementById(
+            'sm-start-camera'
+        );
 
     const captureBtn =
-        document.getElementById('sm-capture');
+        document.getElementById(
+            'sm-capture'
+        );
 
     const stopCameraBtn =
-        document.getElementById('sm-stop-camera');
+        document.getElementById(
+            'sm-stop-camera'
+        );
 
     const retakeBtn =
-        document.getElementById('sm-retake');
+        document.getElementById(
+            'sm-retake'
+        );
 
     const cameraPlaceholder =
         document.getElementById(
@@ -2517,25 +2568,39 @@ document.addEventListener('DOMContentLoaded', function () {
         );
 
     const cameraError =
-        document.getElementById('sm-camera-error');
+        document.getElementById(
+            'sm-camera-error'
+        );
 
     const snapshotPreview =
-        document.getElementById('sm-snapshot-preview');
+        document.getElementById(
+            'sm-snapshot-preview'
+        );
 
     const snapshotText =
-        document.getElementById('sm-snapshot-text');
+        document.getElementById(
+            'sm-snapshot-text'
+        );
 
     const submitBtn =
-        document.getElementById('sm-submit-btn');
+        document.getElementById(
+            'sm-submit-btn'
+        );
 
     const submitIcon =
-        document.getElementById('sm-submit-icon');
+        document.getElementById(
+            'sm-submit-icon'
+        );
 
     const submitLoading =
-        document.getElementById('sm-submit-loading');
+        document.getElementById(
+            'sm-submit-loading'
+        );
 
     const submitText =
-        document.getElementById('sm-submit-text');
+        document.getElementById(
+            'sm-submit-text'
+        );
 
 
     if (
@@ -2547,9 +2612,9 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
-    /* =========================================================
+    /* =========================================================================
        CONFIG
-    ========================================================= */
+    ========================================================================= */
 
     const MAX_FILE_SIZE =
         10 * 1024 * 1024;
@@ -2557,8 +2622,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const IMAGE_TARGET_SIZE =
         2.5 * 1024 * 1024;
 
-    const IMAGE_MAX_SIZE =
-        5 * 1024 * 1024;
+    const IMAGE_MAX_RESULT_SIZE =
+        9.5 * 1024 * 1024;
 
     const IMAGE_MAX_DIMENSION =
         2200;
@@ -2567,6 +2632,7 @@ document.addEventListener('DOMContentLoaded', function () {
         1000;
 
     const JPEG_QUALITIES = [
+        0.90,
         0.86,
         0.82,
         0.78,
@@ -2578,7 +2644,8 @@ document.addEventListener('DOMContentLoaded', function () {
         0.54,
         0.50,
         0.46,
-        0.42
+        0.42,
+        0.38
     ];
 
     const CAMERA_MAX_WIDTH =
@@ -2600,12 +2667,17 @@ document.addEventListener('DOMContentLoaded', function () {
     let submitting =
         false;
 
+    let compressionToken =
+        0;
 
-    /* =========================================================
+
+    /* =========================================================================
        UTILITY
-    ========================================================= */
+    ========================================================================= */
 
-    function formatFileSize(bytes) {
+    function formatFileSize(
+        bytes
+    ) {
 
         if (
             !Number.isFinite(bytes) ||
@@ -2618,6 +2690,7 @@ document.addEventListener('DOMContentLoaded', function () {
             bytes <
             1024 * 1024
         ) {
+
             return (
                 (bytes / 1024).toFixed(1) +
                 ' KB'
@@ -2636,7 +2709,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function getReductionPercent(
         originalSize,
-        compressedSize
+        finalSize
     ) {
 
         if (
@@ -2651,7 +2724,7 @@ document.addEventListener('DOMContentLoaded', function () {
             Math.round(
                 (
                     1 -
-                    compressedSize /
+                    finalSize /
                     originalSize
                 ) * 100
             )
@@ -2659,7 +2732,9 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
-    function getExtension(file) {
+    function getExtension(
+        file
+    ) {
 
         return String(
             file?.name || ''
@@ -2667,6 +2742,35 @@ document.addEventListener('DOMContentLoaded', function () {
             .split('.')
             .pop()
             .toLowerCase();
+    }
+
+
+    function isAllowedExtension(
+        extension
+    ) {
+
+        return [
+            'pdf',
+            'jpg',
+            'jpeg',
+            'png'
+        ].includes(
+            extension
+        );
+    }
+
+
+    function isImageExtension(
+        extension
+    ) {
+
+        return [
+            'jpg',
+            'jpeg',
+            'png'
+        ].includes(
+            extension
+        );
     }
 
 
@@ -2685,20 +2789,24 @@ document.addEventListener('DOMContentLoaded', function () {
                 icon,
                 title,
                 text,
-                confirmButtonText: 'Mengerti',
-                confirmButtonColor: '#2563eb'
+                confirmButtonText:
+                    'Mengerti',
+                confirmButtonColor:
+                    '#2563eb'
             });
 
             return;
         }
 
-        window.alert(text);
+        window.alert(
+            text
+        );
     }
 
 
-    /* =========================================================
+    /* =========================================================================
        CAMERA ERROR
-    ========================================================= */
+    ========================================================================= */
 
     function showCameraError(
         message
@@ -2732,9 +2840,61 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
-    /* =========================================================
+    /* =========================================================================
+       COMPRESSION STATUS
+    ========================================================================= */
+
+    function setCompressionStatus(
+        html,
+        type = ''
+    ) {
+
+        if (!compressionStatus) {
+            return;
+        }
+
+        compressionStatus.classList.remove(
+            'sm-hidden',
+            'success',
+            'warning',
+            'error'
+        );
+
+        if (type) {
+            compressionStatus.classList.add(
+                type
+            );
+        }
+
+        compressionStatus.innerHTML =
+            html;
+    }
+
+
+    function clearCompressionStatus() {
+
+        if (!compressionStatus) {
+            return;
+        }
+
+        compressionStatus.innerHTML =
+            '';
+
+        compressionStatus.classList.remove(
+            'success',
+            'warning',
+            'error'
+        );
+
+        compressionStatus.classList.add(
+            'sm-hidden'
+        );
+    }
+
+
+    /* =========================================================================
        MODE
-    ========================================================= */
+    ========================================================================= */
 
     function setModeButton(
         button,
@@ -2761,9 +2921,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function setUploadMode() {
 
-        stopCamera();
+        compressionToken++;
 
-        clearCapturedPreview();
+        stopCameraTracks();
+
+        if (video) {
+            video.srcObject =
+                null;
+        }
 
         uploadPanel.classList.remove(
             'sm-hidden'
@@ -2784,10 +2949,21 @@ document.addEventListener('DOMContentLoaded', function () {
         );
 
         hideCameraError();
+
+        resetCameraButtons();
     }
 
 
     function setCameraMode() {
+
+        compressionToken++;
+
+        stopCameraTracks();
+
+        if (video) {
+            video.srcObject =
+                null;
+        }
 
         uploadPanel.classList.add(
             'sm-hidden'
@@ -2807,9 +2983,29 @@ document.addEventListener('DOMContentLoaded', function () {
             true
         );
 
+        /*
+         * File yang sebelumnya dipilih memang harus
+         * dihapus ketika memilih Scan Kamera.
+         */
+
         clearSelectedFile();
 
         hideCameraError();
+
+        resetCameraButtons();
+
+        if (
+            !capturedImage.value
+        ) {
+
+            cameraPlaceholder.classList.remove(
+                'sm-hidden'
+            );
+
+            video.classList.remove(
+                'sm-hidden'
+            );
+        }
     }
 
 
@@ -2825,13 +3021,13 @@ document.addEventListener('DOMContentLoaded', function () {
     );
 
 
-    /* =========================================================
+    /* =========================================================================
        SELECTED FILE
-    ========================================================= */
+    ========================================================================= */
 
     function showSelectedFile(
         file,
-        note
+        note = ''
     ) {
 
         selectedFile.classList.remove(
@@ -2842,7 +3038,9 @@ document.addEventListener('DOMContentLoaded', function () {
             file.name;
 
         selectedFileSize.textContent =
-            formatFileSize(file.size) +
+            formatFileSize(
+                file.size
+            ) +
             (
                 note
                     ? ' • ' + note
@@ -2854,11 +3052,13 @@ document.addEventListener('DOMContentLoaded', function () {
         );
 
         uploadTitle.textContent =
-            'File berhasil diproses';
+            'File siap digunakan';
     }
 
 
     function clearSelectedFile() {
+
+        compressionToken++;
 
         fileInput.value =
             '';
@@ -2873,39 +3073,33 @@ document.addEventListener('DOMContentLoaded', function () {
         selectedFileSize.textContent =
             '';
 
-        compressionStatus.classList.add(
-            'sm-hidden'
-        );
-
-        compressionStatus.textContent =
-            '';
-
-        compressionStatus.classList.remove(
-            'success',
-            'warning',
-            'error'
-        );
-
         uploadBox.classList.remove(
             'has-file'
         );
 
         uploadTitle.textContent =
             'Klik untuk memilih file';
+
+        clearCompressionStatus();
     }
 
 
     clearFileBtn?.addEventListener(
         'click',
-        clearSelectedFile
+        function () {
+
+            clearSelectedFile();
+        }
     );
 
 
-    /* =========================================================
-       IMAGE LOADER
-    ========================================================= */
+    /* =========================================================================
+       LOAD IMAGE
+    ========================================================================= */
 
-    function loadImage(file) {
+    function loadImage(
+        file
+    ) {
 
         return new Promise(
             function (
@@ -2954,9 +3148,9 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
-    /* =========================================================
-       DIMENSION
-    ========================================================= */
+    /* =========================================================================
+       DIMENSIONS
+    ========================================================================= */
 
     function calculateDimensions(
         width,
@@ -2968,6 +3162,7 @@ document.addEventListener('DOMContentLoaded', function () {
             width <= maxDimension &&
             height <= maxDimension
         ) {
+
             return {
                 width,
                 height
@@ -2981,18 +3176,21 @@ document.addEventListener('DOMContentLoaded', function () {
             );
 
         return {
-            width: Math.max(
-                1,
-                Math.round(
-                    width * scale
+            width:
+                Math.max(
+                    1,
+                    Math.round(
+                        width * scale
+                    )
+                ),
+
+            height:
+                Math.max(
+                    1,
+                    Math.round(
+                        height * scale
+                    )
                 )
-            ),
-            height: Math.max(
-                1,
-                Math.round(
-                    height * scale
-                )
-            )
         };
     }
 
@@ -3014,26 +3212,29 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const result = [];
 
+
         maxDimensions.forEach(
             function (
                 maxDimension
             ) {
 
-                const size =
+                const dimensions =
                     calculateDimensions(
                         width,
                         height,
                         maxDimension
                     );
 
+
                 if (
-                    size.width <
+                    dimensions.width <
                         IMAGE_MIN_DIMENSION &&
-                    size.height <
+                    dimensions.height <
                         IMAGE_MIN_DIMENSION
                 ) {
                     return;
                 }
+
 
                 const duplicate =
                     result.some(
@@ -3043,28 +3244,31 @@ document.addEventListener('DOMContentLoaded', function () {
 
                             return (
                                 existing.width ===
-                                    size.width &&
+                                    dimensions.width &&
                                 existing.height ===
-                                    size.height
+                                    dimensions.height
                             );
                         }
                     );
 
+
                 if (!duplicate) {
                     result.push(
-                        size
+                        dimensions
                     );
                 }
+
             }
         );
+
 
         return result;
     }
 
 
-    /* =========================================================
+    /* =========================================================================
        CANVAS TO FILE
-    ========================================================= */
+    ========================================================================= */
 
     function canvasToFile(
         image,
@@ -3091,6 +3295,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 canvas.height =
                     height;
 
+
                 const context =
                     canvas.getContext(
                         '2d',
@@ -3098,6 +3303,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             alpha: false
                         }
                     );
+
 
                 if (!context) {
 
@@ -3110,6 +3316,11 @@ document.addEventListener('DOMContentLoaded', function () {
                     return;
                 }
 
+
+                /*
+                 * Latar putih untuk PNG transparan.
+                 */
+
                 context.fillStyle =
                     '#ffffff';
 
@@ -3120,11 +3331,13 @@ document.addEventListener('DOMContentLoaded', function () {
                     height
                 );
 
+
                 context.imageSmoothingEnabled =
                     true;
 
                 context.imageSmoothingQuality =
                     'high';
+
 
                 context.drawImage(
                     image,
@@ -3133,6 +3346,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     width,
                     height
                 );
+
 
                 canvas.toBlob(
                     function (
@@ -3143,12 +3357,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
                             reject(
                                 new Error(
-                                    'Browser gagal membuat hasil kompresi.'
+                                    'Browser gagal membuat file JPG.'
                                 )
                             );
 
                             return;
                         }
+
 
                         const baseName =
                             String(
@@ -3164,12 +3379,14 @@ document.addEventListener('DOMContentLoaded', function () {
                                     '_'
                                 );
 
+
                         const fileName =
                             (
                                 baseName ||
                                 'lampiran'
                             ) +
                             '_compressed.jpg';
+
 
                         resolve(
                             new File(
@@ -3178,6 +3395,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 {
                                     type:
                                         'image/jpeg',
+
                                     lastModified:
                                         Date.now()
                                 }
@@ -3188,14 +3406,15 @@ document.addEventListener('DOMContentLoaded', function () {
                     'image/jpeg',
                     quality
                 );
+
             }
         );
     }
 
 
-    /* =========================================================
+    /* =========================================================================
        COMPRESS IMAGE
-    ========================================================= */
+    ========================================================================= */
 
     async function compressImageFile(
         file
@@ -3206,35 +3425,42 @@ document.addEventListener('DOMContentLoaded', function () {
                 file
             );
 
+
         const width =
             image.naturalWidth ||
             image.width;
+
 
         const height =
             image.naturalHeight ||
             image.height;
 
+
         if (
             width <= 0 ||
             height <= 0
         ) {
+
             throw new Error(
                 'Dimensi gambar tidak valid.'
             );
         }
 
-        const dimensions =
+
+        const dimensionList =
             buildDimensionList(
                 width,
                 height
             );
 
+
         let smallest =
             null;
 
+
         for (
             const dimension
-            of dimensions
+            of dimensionList
         ) {
 
             for (
@@ -3251,41 +3477,48 @@ document.addEventListener('DOMContentLoaded', function () {
                         file.name
                     );
 
+
                 if (
                     !smallest ||
                     compressed.size <
                         smallest.size
                 ) {
+
                     smallest =
                         compressed;
                 }
+
 
                 if (
                     compressed.size <=
                     IMAGE_TARGET_SIZE
                 ) {
+
                     return compressed;
                 }
             }
         }
 
+
         if (
             smallest &&
             smallest.size <=
-                IMAGE_MAX_SIZE
+                IMAGE_MAX_RESULT_SIZE
         ) {
+
             return smallest;
         }
 
+
         throw new Error(
-            'Gambar masih terlalu besar setelah kompresi.'
+            'Gambar masih terlalu besar setelah dikompres.'
         );
     }
 
 
-    /* =========================================================
+    /* =========================================================================
        FILE CHANGE
-    ========================================================= */
+    ========================================================================= */
 
     fileInput.addEventListener(
         'change',
@@ -3298,16 +3531,26 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
+
+            const currentToken =
+                ++compressionToken;
+
+
+            hideCameraError();
+
+
             const extension =
-                getExtension(file);
+                getExtension(
+                    file
+                );
+
+
+            /* ---------------------------------------------------------
+               VALIDASI FORMAT
+            --------------------------------------------------------- */
 
             if (
-                ![
-                    'pdf',
-                    'jpg',
-                    'jpeg',
-                    'png'
-                ].includes(
+                !isAllowedExtension(
                     extension
                 )
             ) {
@@ -3316,13 +3559,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 showAlert(
                     'warning',
-                    'Format file tidak didukung',
+                    'Format tidak didukung',
                     'Gunakan PDF, JPG, JPEG, atau PNG.'
                 );
 
                 return;
             }
 
+
+            /* ---------------------------------------------------------
+               FILE KOSONG
+            --------------------------------------------------------- */
 
             if (
                 file.size <= 0
@@ -3333,12 +3580,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 showAlert(
                     'warning',
                     'File tidak valid',
-                    'File kosong atau tidak dapat digunakan.'
+                    'File yang dipilih kosong.'
                 );
 
                 return;
             }
 
+
+            /* ---------------------------------------------------------
+               FILE ASLI > 10 MB
+            --------------------------------------------------------- */
 
             if (
                 file.size >
@@ -3350,16 +3601,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 showAlert(
                     'warning',
                     'File terlalu besar',
-                    'Ukuran file maksimal 10 MB.'
+                    'Ukuran file asli maksimal 10 MB.'
                 );
 
                 return;
             }
 
 
-            /* =================================================
+            /* ---------------------------------------------------------
                PDF
-            ================================================== */
+            --------------------------------------------------------- */
 
             if (
                 extension === 'pdf'
@@ -3370,66 +3621,81 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 clearCapturedPreview();
 
+
                 showSelectedFile(
                     file,
                     'PDF • tanpa kompresi'
                 );
 
-                compressionStatus.textContent =
-                    '✓ PDF tetap PDF dan tidak dikompres. Ukuran file: ' +
-                    formatFileSize(file.size) +
-                    '.';
 
-                compressionStatus.classList.remove(
-                    'sm-hidden'
-                );
-
-                compressionStatus.classList.add(
+                setCompressionStatus(
+                    '✓ <strong>PDF tetap PDF.</strong><br>' +
+                    'Ukuran file yang akan dikirim: <strong>' +
+                    formatFileSize(
+                        file.size
+                    ) +
+                    '</strong>.',
                     'success'
                 );
+
 
                 return;
             }
 
 
-            /* =================================================
+            /* ---------------------------------------------------------
                IMAGE
-            ================================================== */
+            --------------------------------------------------------- */
 
-            compressionStatus.textContent =
-                'Memproses gambar dan mencari ukuran hasil kompresi terbaik...';
+            if (
+                !isImageExtension(
+                    extension
+                )
+            ) {
+                return;
+            }
 
-            compressionStatus.classList.remove(
-                'sm-hidden'
+
+            const originalSize =
+                file.size;
+
+
+            showSelectedFile(
+                file,
+                'Sedang mengompres...'
             );
 
-            compressionStatus.classList.remove(
-                'success',
-                'warning',
-                'error'
+
+            setCompressionStatus(
+                '⏳ <strong>Sedang memproses gambar...</strong><br>' +
+                'Gambar sedang di-resize dan dikonversi menjadi JPG.'
             );
+
 
             try {
-
-                const originalSize =
-                    file.size;
 
                 const compressed =
                     await compressImageFile(
                         file
                     );
 
-                let finalFile =
-                    compressed;
+
+                /*
+                 * Abaikan hasil kompresi jika user
+                 * sudah memilih file lain.
+                 */
 
                 if (
-                    compressed.size >=
-                    originalSize
+                    currentToken !==
+                    compressionToken
                 ) {
-
-                    finalFile =
-                        file;
+                    return;
                 }
+
+
+                const finalFile =
+                    compressed;
+
 
                 if (
                     finalFile.size >
@@ -3438,26 +3704,46 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     clearSelectedFile();
 
+
+                    setCompressionStatus(
+                        '✕ Hasil kompresi masih lebih besar dari 10 MB.',
+                        'error'
+                    );
+
+
                     showAlert(
                         'error',
                         'Kompresi gagal',
-                        'Hasil gambar masih melebihi batas maksimal 10 MB.'
+                        'Hasil gambar masih melebihi batas 10 MB.'
                     );
+
 
                     return;
                 }
 
 
+                /*
+                 * Sangat penting:
+                 * hasil kompresi benar-benar menggantikan
+                 * file asli pada input multipart.
+                 */
+
                 const transfer =
                     new DataTransfer();
+
 
                 transfer.items.add(
                     finalFile
                 );
 
+
                 fileInput.files =
                     transfer.files;
 
+
+                /*
+                 * Hapus hasil kamera.
+                 */
 
                 capturedImage.value =
                     '';
@@ -3472,63 +3758,34 @@ document.addEventListener('DOMContentLoaded', function () {
                     );
 
 
-                if (
-                    finalFile === file
-                ) {
+                showSelectedFile(
+                    finalFile,
+                    'JPG • hasil kompresi'
+                );
 
-                    showSelectedFile(
-                        finalFile,
-                        'File asli digunakan • ' +
-                        formatFileSize(
-                            finalFile.size
-                        )
-                    );
 
-                    compressionStatus.textContent =
-                        '⚠ Hasil kompresi tidak lebih kecil. File asli digunakan. Ukuran: ' +
-                        formatFileSize(
-                            originalSize
-                        ) +
-                        '.';
+                setCompressionStatus(
+                    '✓ <strong>Kompresi berhasil.</strong><br>' +
+                    'Format asli: <strong>' +
+                    extension.toUpperCase() +
+                    '</strong><br>' +
+                    'Ukuran asli: <strong>' +
+                    formatFileSize(
+                        originalSize
+                    ) +
+                    '</strong><br>' +
+                    'Ukuran hasil: <strong>' +
+                    formatFileSize(
+                        finalFile.size
+                    ) +
+                    '</strong><br>' +
+                    'Penghematan: <strong>' +
+                    reduction +
+                    '%</strong><br>' +
+                    'Format akhir: <strong>JPG</strong>.',
+                    'success'
+                );
 
-                    compressionStatus.classList.add(
-                        'warning'
-                    );
-
-                } else {
-
-                    showSelectedFile(
-                        finalFile,
-                        'Hasil kompresi: ' +
-                        formatFileSize(
-                            finalFile.size
-                        ) +
-                        ' • Hemat ' +
-                        reduction +
-                        '%'
-                    );
-
-                    compressionStatus.innerHTML =
-                        '✓ Kompresi berhasil.<br>' +
-                        'Ukuran asli: <strong>' +
-                        formatFileSize(
-                            originalSize
-                        ) +
-                        '</strong> → ' +
-                        'hasil kompresi: <strong>' +
-                        formatFileSize(
-                            finalFile.size
-                        ) +
-                        '</strong> ' +
-                        '(' +
-                        reduction +
-                        '% lebih kecil).<br>' +
-                        'Format akhir: <strong>JPG</strong>.';
-
-                    compressionStatus.classList.add(
-                        'success'
-                    );
-                }
 
             } catch (error) {
 
@@ -3537,7 +3794,17 @@ document.addEventListener('DOMContentLoaded', function () {
                     error
                 );
 
+
+                if (
+                    currentToken !==
+                    compressionToken
+                ) {
+                    return;
+                }
+
+
                 clearSelectedFile();
+
 
                 showAlert(
                     'error',
@@ -3546,13 +3813,14 @@ document.addEventListener('DOMContentLoaded', function () {
                     'Browser gagal mengompres gambar.'
                 );
             }
+
         }
     );
 
 
-    /* =========================================================
+    /* =========================================================================
        CAMERA
-    ========================================================= */
+    ========================================================================= */
 
     startCameraBtn?.addEventListener(
         'click',
@@ -3564,6 +3832,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         hideCameraError();
 
+
         if (
             !window.isSecureContext
         ) {
@@ -3574,6 +3843,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             return;
         }
+
 
         if (
             !navigator.mediaDevices ||
@@ -3587,7 +3857,9 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
+
         stopCameraTracks();
+
 
         try {
 
@@ -3595,8 +3867,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 await navigator.mediaDevices.getUserMedia({
 
                     video: {
+
                         facingMode: {
-                            ideal: 'environment'
+                            ideal:
+                                'environment'
                         },
 
                         width: {
@@ -3608,6 +3882,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             ideal:
                                 CAMERA_MAX_HEIGHT
                         }
+
                     },
 
                     audio: false
@@ -3618,6 +3893,7 @@ document.addEventListener('DOMContentLoaded', function () {
             video.srcObject =
                 cameraStream;
 
+
             await video.play();
 
 
@@ -3625,28 +3901,35 @@ document.addEventListener('DOMContentLoaded', function () {
                 'sm-hidden'
             );
 
+
             imagePreview.classList.add(
                 'sm-hidden'
             );
 
+
             imagePreview.src =
                 '';
+
 
             cameraPlaceholder.classList.add(
                 'sm-hidden'
             );
 
+
             startCameraBtn.classList.add(
                 'sm-hidden'
             );
+
 
             captureBtn.classList.remove(
                 'sm-hidden'
             );
 
+
             stopCameraBtn.classList.remove(
                 'sm-hidden'
             );
+
 
         } catch (error) {
 
@@ -3655,8 +3938,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 error
             );
 
+
             let message =
                 'Kamera tidak dapat digunakan.';
+
 
             if (
                 error.name ===
@@ -3683,7 +3968,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 message =
                     'Kamera sedang digunakan aplikasi lain.';
+
+            } else if (
+                error.name ===
+                    'SecurityError'
+            ) {
+
+                message =
+                    'Akses kamera diblokir oleh browser.';
             }
+
 
             showCameraError(
                 message
@@ -3692,15 +3986,16 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
-    /* =========================================================
+    /* =========================================================================
        CAPTURE
-    ========================================================= */
+    ========================================================================= */
 
     captureBtn?.addEventListener(
         'click',
         function () {
 
             hideCameraError();
+
 
             if (
                 !cameraStream ||
@@ -3715,15 +4010,18 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
+
             try {
 
                 const imageData =
                     buildCameraImage();
 
+
                 const binarySize =
                     estimateBinarySize(
                         imageData
                     );
+
 
                 if (
                     binarySize >
@@ -3735,19 +4033,24 @@ document.addEventListener('DOMContentLoaded', function () {
                     );
                 }
 
+
                 capturedImage.value =
                     imageData;
 
+
                 imagePreview.src =
                     imageData;
+
 
                 imagePreview.classList.remove(
                     'sm-hidden'
                 );
 
+
                 video.classList.add(
                     'sm-hidden'
                 );
+
 
                 cameraPlaceholder.classList.add(
                     'sm-hidden'
@@ -3755,58 +4058,63 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
                 snapshotText.textContent =
-                    '✓ Hasil scan siap disimpan • ukuran sekitar ' +
+                    '✓ Hasil scan siap disimpan • ' +
                     formatFileSize(
                         binarySize
                     ) +
-                    '.';
+                    ' • JPG';
+
 
                 snapshotPreview.classList.remove(
                     'sm-hidden'
                 );
 
 
-                compressionStatus.innerHTML =
-                    '✓ Scan kamera berhasil diproses.<br>' +
-                    'Format: <strong>JPG</strong> • Ukuran hasil: <strong>' +
+                setCompressionStatus(
+                    '✓ <strong>Scan berhasil.</strong><br>' +
+                    'Format: <strong>JPG</strong><br>' +
+                    'Ukuran hasil: <strong>' +
                     formatFileSize(
                         binarySize
                     ) +
-                    '</strong>.';
-
-                compressionStatus.classList.remove(
-                    'sm-hidden'
-                );
-
-                compressionStatus.classList.remove(
-                    'warning',
-                    'error'
-                );
-
-                compressionStatus.classList.add(
+                    '</strong>.',
                     'success'
                 );
 
 
+                /*
+                 * Hapus upload file.
+                 */
+
                 clearSelectedFile();
 
+
+                /*
+                 * Matikan kamera.
+                 */
+
                 stopCamera();
+
 
                 cameraPlaceholder.classList.add(
                     'sm-hidden'
                 );
 
+
                 startCameraBtn.classList.add(
                     'sm-hidden'
                 );
+
 
                 captureBtn.classList.add(
                     'sm-hidden'
                 );
 
+
                 stopCameraBtn.classList.add(
                     'sm-hidden'
                 );
+
 
             } catch (error) {
 
@@ -3814,6 +4122,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     'Capture error:',
                     error
                 );
+
 
                 showCameraError(
                     error?.message ||
@@ -3824,9 +4133,9 @@ document.addEventListener('DOMContentLoaded', function () {
     );
 
 
-    /* =========================================================
+    /* =========================================================================
        BUILD CAMERA IMAGE
-    ========================================================= */
+    ========================================================================= */
 
     function buildCameraImage() {
 
@@ -3835,6 +4144,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 'canvas'
             );
 
+
         const dimensions =
             calculateDimensions(
                 video.videoWidth,
@@ -3842,11 +4152,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 CAMERA_MAX_WIDTH
             );
 
+
         canvas.width =
             dimensions.width;
 
+
         canvas.height =
             dimensions.height;
+
 
         const context =
             canvas.getContext(
@@ -3856,14 +4169,18 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             );
 
+
         if (!context) {
+
             throw new Error(
-                'Canvas tidak didukung browser.'
+                'Browser tidak mendukung canvas.'
             );
         }
 
+
         context.fillStyle =
             '#ffffff';
+
 
         context.fillRect(
             0,
@@ -3872,11 +4189,14 @@ document.addEventListener('DOMContentLoaded', function () {
             canvas.height
         );
 
+
         context.imageSmoothingEnabled =
             true;
 
+
         context.imageSmoothingQuality =
             'high';
+
 
         context.drawImage(
             video,
@@ -3887,11 +4207,16 @@ document.addEventListener('DOMContentLoaded', function () {
         );
 
 
+        let currentCanvas =
+            canvas;
+
+
         let quality =
             0.82;
 
+
         let dataUrl =
-            canvas.toDataURL(
+            currentCanvas.toDataURL(
                 'image/jpeg',
                 quality
             );
@@ -3903,22 +4228,20 @@ document.addEventListener('DOMContentLoaded', function () {
             ) >
                 CAMERA_TARGET_SIZE &&
             quality >
-                0.40
+                0.38
         ) {
 
             quality -=
-                0.06;
+                0.05;
+
 
             dataUrl =
-                canvas.toDataURL(
+                currentCanvas.toDataURL(
                     'image/jpeg',
                     quality
                 );
         }
 
-
-        let currentCanvas =
-            canvas;
 
         let attempt =
             0;
@@ -3930,17 +4253,19 @@ document.addEventListener('DOMContentLoaded', function () {
             ) >
                 CAMERA_TARGET_SIZE &&
             attempt <
-                4
+                5
         ) {
 
             attempt++;
 
-            const smaller =
+
+            const smallerCanvas =
                 document.createElement(
                     'canvas'
                 );
 
-            smaller.width =
+
+            smallerCanvas.width =
                 Math.max(
                     1,
                     Math.round(
@@ -3949,7 +4274,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     )
                 );
 
-            smaller.height =
+
+            smallerCanvas.height =
                 Math.max(
                     1,
                     Math.round(
@@ -3958,47 +4284,56 @@ document.addEventListener('DOMContentLoaded', function () {
                     )
                 );
 
+
             const smallerContext =
-                smaller.getContext(
+                smallerCanvas.getContext(
                     '2d',
                     {
                         alpha: false
                     }
                 );
 
+
             if (!smallerContext) {
 
                 throw new Error(
-                    'Canvas resize tidak tersedia.'
+                    'Resize kamera tidak tersedia.'
                 );
             }
+
 
             smallerContext.fillStyle =
                 '#ffffff';
 
+
             smallerContext.fillRect(
                 0,
                 0,
-                smaller.width,
-                smaller.height
+                smallerCanvas.width,
+                smallerCanvas.height
             );
+
 
             smallerContext.imageSmoothingEnabled =
                 true;
 
+
             smallerContext.imageSmoothingQuality =
                 'high';
+
 
             smallerContext.drawImage(
                 currentCanvas,
                 0,
                 0,
-                smaller.width,
-                smaller.height
+                smallerCanvas.width,
+                smallerCanvas.height
             );
 
+
             currentCanvas =
-                smaller;
+                smallerCanvas;
+
 
             dataUrl =
                 currentCanvas.toDataURL(
@@ -4012,9 +4347,9 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
-    /* =========================================================
+    /* =========================================================================
        BASE64 SIZE
-    ========================================================= */
+    ========================================================================= */
 
     function estimateBinarySize(
         dataUrl
@@ -4023,16 +4358,19 @@ document.addEventListener('DOMContentLoaded', function () {
         const comma =
             dataUrl.indexOf(',');
 
+
         if (
             comma === -1
         ) {
             return 0;
         }
 
+
         const base64 =
             dataUrl.substring(
                 comma + 1
             );
+
 
         const padding =
             base64.endsWith('==')
@@ -4040,6 +4378,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 : base64.endsWith('=')
                     ? 1
                     : 0;
+
 
         return Math.floor(
             (
@@ -4051,9 +4390,9 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
-    /* =========================================================
-       CLEAR CAMERA
-    ========================================================= */
+    /* =========================================================================
+       CLEAR CAMERA RESULT
+    ========================================================================= */
 
     function clearCapturedPreview() {
 
@@ -4076,9 +4415,9 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
-    /* =========================================================
+    /* =========================================================================
        RETAKE
-    ========================================================= */
+    ========================================================================= */
 
     retakeBtn?.addEventListener(
         'click',
@@ -4086,28 +4425,45 @@ document.addEventListener('DOMContentLoaded', function () {
 
             clearCapturedPreview();
 
-            compressionStatus.textContent =
-                '';
-
-            compressionStatus.classList.add(
-                'sm-hidden'
-            );
-
-            compressionStatus.classList.remove(
-                'success',
-                'warning',
-                'error'
-            );
+            clearCompressionStatus();
 
             hideCameraError();
 
-            setCameraMode();
+            /*
+             * Tetapkan mode kamera tanpa
+             * perlu menghapus file dua kali.
+             */
+
+            uploadPanel.classList.add(
+                'sm-hidden'
+            );
+
+            cameraPanel.classList.remove(
+                'sm-hidden'
+            );
+
+            setModeButton(
+                btnUpload,
+                false
+            );
+
+            setModeButton(
+                btnCamera,
+                true
+            );
+
+            resetCameraButtons();
 
             try {
 
                 await startCamera();
 
             } catch (error) {
+
+                console.error(
+                    'Retake error:',
+                    error
+                );
 
                 showCameraError(
                     'Kamera gagal diaktifkan kembali.'
@@ -4117,9 +4473,9 @@ document.addEventListener('DOMContentLoaded', function () {
     );
 
 
-    /* =========================================================
+    /* =========================================================================
        STOP CAMERA TRACKS
-    ========================================================= */
+    ========================================================================= */
 
     function stopCameraTracks() {
 
@@ -4127,30 +4483,63 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
+
         cameraStream
             .getTracks()
             .forEach(
                 function (
                     track
                 ) {
+
                     track.stop();
                 }
             );
+
 
         cameraStream =
             null;
     }
 
 
-    /* =========================================================
+    /* =========================================================================
+       RESET CAMERA BUTTONS
+    ========================================================================= */
+
+    function resetCameraButtons() {
+
+        startCameraBtn.classList.remove(
+            'sm-hidden'
+        );
+
+        captureBtn.classList.add(
+            'sm-hidden'
+        );
+
+        stopCameraBtn.classList.add(
+            'sm-hidden'
+        );
+
+        startCameraBtn.disabled =
+            false;
+
+        captureBtn.disabled =
+            false;
+
+        stopCameraBtn.disabled =
+            false;
+    }
+
+
+    /* =========================================================================
        STOP CAMERA
-    ========================================================= */
+    ========================================================================= */
 
     stopCameraBtn?.addEventListener(
         'click',
         function () {
 
             stopCamera();
+
 
             if (
                 capturedImage.value
@@ -4173,6 +4562,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (
                     cameraPlaceholderText
                 ) {
+
                     cameraPlaceholderText.textContent =
                         'Kamera belum aktif';
                 }
@@ -4187,10 +4577,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
         stopCameraTracks();
 
+
         if (video) {
+
             video.srcObject =
                 null;
         }
+
 
         if (
             !capturedImage.value
@@ -4207,25 +4600,9 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
-    function resetCameraButtons() {
-
-        startCameraBtn.classList.remove(
-            'sm-hidden'
-        );
-
-        captureBtn.classList.add(
-            'sm-hidden'
-        );
-
-        stopCameraBtn.classList.add(
-            'sm-hidden'
-        );
-    }
-
-
-    /* =========================================================
+    /* =========================================================================
        SUBMIT
-    ========================================================= */
+    ========================================================================= */
 
     form.addEventListener(
         'submit',
@@ -4243,16 +4620,61 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
 
+            const tanggalSurat =
+                document.getElementById(
+                    'tanggal_surat'
+                )?.value || '';
+
+
+            const tanggalTerima =
+                document.getElementById(
+                    'tanggal_terima'
+                )?.value || '';
+
+
+            /*
+             * Tanggal terima tidak boleh
+             * lebih awal dari tanggal surat.
+             */
+
+            if (
+                tanggalSurat &&
+                tanggalTerima &&
+                tanggalTerima <
+                    tanggalSurat
+            ) {
+
+                event.preventDefault();
+
+
+                showAlert(
+                    'warning',
+                    'Tanggal tidak valid',
+                    'Tanggal diterima tidak boleh lebih awal dari tanggal surat.'
+                );
+
+
+                return;
+            }
+
+
             const file =
                 fileInput.files?.[0] ||
                 null;
 
+
             const hasFile =
                 !!file;
+
 
             const hasCamera =
                 capturedImage.value.trim() !== '';
 
+
+            /*
+             * CREATE:
+             * salah satu lampiran wajib ada.
+             */
 
             if (
                 !hasFile &&
@@ -4261,15 +4683,22 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 event.preventDefault();
 
+
                 showAlert(
                     'warning',
                     'Berkas belum dipilih',
                     'Upload berkas atau gunakan Scan Kamera.'
                 );
 
+
                 return;
             }
 
+
+            /*
+             * Jangan sampai dua metode
+             * terkirim bersamaan.
+             */
 
             if (
                 hasFile &&
@@ -4277,6 +4706,7 @@ document.addEventListener('DOMContentLoaded', function () {
             ) {
 
                 event.preventDefault();
+
 
                 showAlert(
                     'warning',
@@ -4284,54 +4714,120 @@ document.addEventListener('DOMContentLoaded', function () {
                     'Gunakan Upload File atau Scan Kamera saja.'
                 );
 
-                return;
-            }
-
-
-            if (
-                hasFile &&
-                file.size >
-                    MAX_FILE_SIZE
-            ) {
-
-                event.preventDefault();
-
-                showAlert(
-                    'warning',
-                    'File terlalu besar',
-                    'Ukuran file maksimal 10 MB.'
-                );
 
                 return;
             }
 
 
+            /*
+             * VALIDASI FILE.
+             */
+
             if (
-                hasCamera
+                hasFile
             ) {
 
-                const cameraSize =
-                    estimateBinarySize(
-                        capturedImage.value
+                const extension =
+                    getExtension(
+                        file
                     );
 
+
                 if (
-                    cameraSize >
-                    CAMERA_MAX_DATA_SIZE
+                    !isAllowedExtension(
+                        extension
+                    )
                 ) {
 
                     event.preventDefault();
 
+
                     showAlert(
                         'warning',
-                        'Hasil scan terlalu besar',
-                        'Silakan scan ulang agar ukuran lebih kecil.'
+                        'Format tidak didukung',
+                        'Gunakan PDF, JPG, JPEG, atau PNG.'
                     );
+
+
+                    return;
+                }
+
+
+                if (
+                    file.size <= 0
+                ) {
+
+                    event.preventDefault();
+
+
+                    showAlert(
+                        'warning',
+                        'File tidak valid',
+                        'File yang dipilih kosong.'
+                    );
+
+
+                    return;
+                }
+
+
+                if (
+                    file.size >
+                    MAX_FILE_SIZE
+                ) {
+
+                    event.preventDefault();
+
+
+                    showAlert(
+                        'warning',
+                        'File terlalu besar',
+                        'Ukuran file maksimal 10 MB.'
+                    );
+
 
                     return;
                 }
             }
 
+
+            /*
+             * VALIDASI CAMERA.
+             */
+
+            if (
+                hasCamera
+            ) {
+
+                const binarySize =
+                    estimateBinarySize(
+                        capturedImage.value
+                    );
+
+
+                if (
+                    binarySize >
+                    CAMERA_MAX_DATA_SIZE
+                ) {
+
+                    event.preventDefault();
+
+
+                    showAlert(
+                        'warning',
+                        'Hasil scan terlalu besar',
+                        'Silakan scan ulang agar ukurannya lebih kecil.'
+                    );
+
+
+                    return;
+                }
+            }
+
+
+            /*
+             * LOCK SUBMIT.
+             */
 
             submitting =
                 true;
@@ -4343,13 +4839,16 @@ document.addEventListener('DOMContentLoaded', function () {
             submitBtn.disabled =
                 true;
 
+
             submitIcon.classList.add(
                 'sm-hidden'
             );
 
+
             submitLoading.classList.remove(
                 'sm-hidden'
             );
+
 
             submitText.textContent =
                 hasCamera
@@ -4360,9 +4859,9 @@ document.addEventListener('DOMContentLoaded', function () {
     );
 
 
-    /* =========================================================
-       OLD CAMERA DATA
-    ========================================================= */
+    /* =========================================================================
+       INITIAL STATE
+    ========================================================================= */
 
     if (
         capturedImage.value
@@ -4370,35 +4869,44 @@ document.addEventListener('DOMContentLoaded', function () {
 
         setCameraMode();
 
+
         imagePreview.src =
             capturedImage.value;
+
 
         imagePreview.classList.remove(
             'sm-hidden'
         );
 
+
         video.classList.add(
             'sm-hidden'
         );
+
 
         cameraPlaceholder.classList.add(
             'sm-hidden'
         );
 
+
         snapshotPreview.classList.remove(
             'sm-hidden'
         );
 
+
         snapshotText.textContent =
             '✓ Hasil scan sebelumnya masih tersedia.';
+
 
         startCameraBtn.classList.add(
             'sm-hidden'
         );
 
+
         captureBtn.classList.add(
             'sm-hidden'
         );
+
 
         stopCameraBtn.classList.add(
             'sm-hidden'
@@ -4406,21 +4914,19 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
-    /* =========================================================
+    /* =========================================================================
        CLEANUP
-    ========================================================= */
+    ========================================================================= */
 
     window.addEventListener(
         'beforeunload',
         function () {
+
             stopCameraTracks();
         }
     );
 
 });
 </script>
-
-
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 @endsection
