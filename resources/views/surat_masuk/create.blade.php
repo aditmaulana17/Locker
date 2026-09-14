@@ -44,11 +44,11 @@
 
         <a
             href="{{ route('surat-masuk.index') }}"
-            class="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-[9px] font-semibold text-slate-600 shadow-sm transition hover:border-slate-400 hover:bg-slate-50 hover:text-slate-800"
+            class="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3.5 py-2 text-[10px] font-semibold text-slate-600 shadow-sm transition hover:border-slate-400 hover:bg-slate-50 hover:text-slate-800"
         >
 
             <svg
-                class="h-3 w-3"
+                class="h-3.5 w-3.5"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -161,7 +161,6 @@
 
                 <div class="flex items-center justify-between gap-3">
 
-
                     <div class="flex items-center gap-2.5">
 
                         <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border-2 border-blue-300 bg-white text-blue-600 shadow-sm">
@@ -253,9 +252,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-2">
 
 
-                            {{-- =================================================
-                                 NOMOR SURAT
-                            ================================================== --}}
+                            {{-- NOMOR SURAT --}}
 
                             <div class="border-b-2 border-slate-300 p-3 md:border-r-2">
 
@@ -291,9 +288,7 @@
                             </div>
 
 
-                            {{-- =================================================
-                                 PENGIRIM
-                            ================================================== --}}
+                            {{-- PENGIRIM --}}
 
                             <div class="border-b-2 border-slate-300 p-3">
 
@@ -329,9 +324,7 @@
                             </div>
 
 
-                            {{-- =================================================
-                                 TANGGAL SURAT
-                            ================================================== --}}
+                            {{-- TANGGAL SURAT --}}
 
                             <div class="border-b-2 border-slate-300 p-3 md:border-r-2">
 
@@ -365,9 +358,7 @@
                             </div>
 
 
-                            {{-- =================================================
-                                 TANGGAL DITERIMA
-                            ================================================== --}}
+                            {{-- TANGGAL DITERIMA --}}
 
                             <div class="border-b-2 border-slate-300 p-3">
 
@@ -401,9 +392,7 @@
                             </div>
 
 
-                            {{-- =================================================
-                                 KATEGORI
-                            ================================================== --}}
+                            {{-- KATEGORI --}}
 
                             <div class="border-b-2 border-slate-300 p-3 md:border-r-2">
 
@@ -461,9 +450,7 @@
                             </div>
 
 
-                            {{-- =================================================
-                                 STATUS
-                            ================================================== --}}
+                            {{-- STATUS --}}
 
                             <div class="border-b-2 border-slate-300 p-3">
 
@@ -516,9 +503,7 @@
                             </div>
 
 
-                            {{-- =================================================
-                                 PERIHAL
-                            ================================================== --}}
+                            {{-- PERIHAL --}}
 
                             <div class="border-b-2 border-slate-300 p-3 md:col-span-2">
 
@@ -669,7 +654,7 @@
                                             stroke-linecap="round"
                                             stroke-linejoin="round"
                                             stroke-width="2"
-                                            d="M13 16h-1v-4h-1m1-4h.01M12 21a9 9 0 100-18 9 9 0 000 18z"
+                                            d="M13 16h-1v-4h-1m1-4h.01M12 21a9 9 0 100-18 9 9 0 000-18z"
                                         />
                                     </svg>
 
@@ -1232,7 +1217,6 @@
             ================================================== --}}
 
             <div class="flex flex-col gap-2 border-t-2 border-slate-400 bg-slate-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-end">
-
 
                 {{-- BATAL --}}
 
@@ -3280,12 +3264,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 capturedImage.value.trim() !== '';
 
 
-            /*
-            |----------------------------------------------------------------------
-            | Wajib ada file atau scan kamera
-            |----------------------------------------------------------------------
-            */
-
             if (
                 !hasFile &&
                 !hasCamera
@@ -3303,12 +3281,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
 
-            /*
-            |----------------------------------------------------------------------
-            | Tidak boleh dua sumber sekaligus
-            |----------------------------------------------------------------------
-            */
-
             if (
                 hasFile &&
                 hasCamera
@@ -3325,12 +3297,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
-
-            /*
-            |----------------------------------------------------------------------
-            | Maksimal file
-            |----------------------------------------------------------------------
-            */
 
             if (
                 hasFile &&
@@ -3350,12 +3316,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
 
-            /*
-            |----------------------------------------------------------------------
-            | Camera Base64
-            |----------------------------------------------------------------------
-            */
-
             if (
                 hasCamera &&
                 capturedImage.value.length >
@@ -3373,12 +3333,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
-
-            /*
-            |----------------------------------------------------------------------
-            | SUBMITTING
-            |----------------------------------------------------------------------
-            */
 
             submitting =
                 true;
