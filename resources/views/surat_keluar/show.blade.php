@@ -7,13 +7,48 @@
 @php
     /*
     |--------------------------------------------------------------------------
+    | ROLE PENGGUNA
+    |--------------------------------------------------------------------------
+    */
+
+    $user = auth()->user();
+
+    $userRole = strtolower(
+        trim(
+            (string) (
+                $user->role
+                ?? $user->jabatan
+                ?? ''
+            )
+        )
+    );
+
+    if ($userRole === 'staf') {
+        $userRole = 'staff';
+    }
+
+    $canManageSurat = in_array(
+        $userRole,
+        [
+            'admin',
+            'pimpinan',
+        ],
+        true
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
     | STATUS
     |--------------------------------------------------------------------------
     */
 
     $status = strtolower(
         trim(
-            (string) ($suratKeluar->status ?? 'draft')
+            (string) (
+                $suratKeluar->status
+                ?? 'draft'
+            )
         )
     );
 
@@ -37,8 +72,13 @@
         'diarsipkan' => 'sk-status-arsip',
     ];
 
-    $statusLabel = $statusLabels[$status] ?? ucfirst($status);
-    $statusClass = $statusClasses[$status] ?? 'sk-status-draft';
+    $statusLabel =
+        $statusLabels[$status]
+        ?? ucfirst($status);
+
+    $statusClass =
+        $statusClasses[$status]
+        ?? 'sk-status-draft';
 
 
     /*
@@ -52,9 +92,10 @@
 
     try {
         if ($suratKeluar->tanggal_surat) {
-            $tanggalSurat = \Illuminate\Support\Carbon::parse(
-                $suratKeluar->tanggal_surat
-            )->translatedFormat('d F Y');
+            $tanggalSurat =
+                \Illuminate\Support\Carbon::parse(
+                    $suratKeluar->tanggal_surat
+                )->translatedFormat('d F Y');
         }
     } catch (\Throwable $e) {
         $tanggalSurat = '-';
@@ -62,9 +103,10 @@
 
     try {
         if ($suratKeluar->tanggal_keluar) {
-            $tanggalKeluar = \Illuminate\Support\Carbon::parse(
-                $suratKeluar->tanggal_keluar
-            )->translatedFormat('d F Y');
+            $tanggalKeluar =
+                \Illuminate\Support\Carbon::parse(
+                    $suratKeluar->tanggal_keluar
+                )->translatedFormat('d F Y');
         }
     } catch (\Throwable $e) {
         $tanggalKeluar = '-';
@@ -78,7 +120,10 @@
     */
 
     $tujuanSurat = trim(
-        (string) ($suratKeluar->pengirim ?? '')
+        (string) (
+            $suratKeluar->pengirim
+            ?? ''
+        )
     );
 
     if ($tujuanSurat === '') {
@@ -86,7 +131,10 @@
     }
 
     $nomorSurat = trim(
-        (string) ($suratKeluar->nomor_surat ?? '')
+        (string) (
+            $suratKeluar->nomor_surat
+            ?? ''
+        )
     );
 
     if ($nomorSurat === '') {
@@ -94,7 +142,10 @@
     }
 
     $perihal = trim(
-        (string) ($suratKeluar->perihal ?? '')
+        (string) (
+            $suratKeluar->perihal
+            ?? ''
+        )
     );
 
     if ($perihal === '') {
@@ -102,14 +153,19 @@
     }
 
     $ringkasan = trim(
-        (string) ($suratKeluar->ringkasan ?? '')
+        (string) (
+            $suratKeluar->ringkasan
+            ?? ''
+        )
     );
 
     $kategoriNama =
-        $suratKeluar->kategori?->nama_kategori ?? '-';
+        $suratKeluar->kategori?->nama_kategori
+        ?? '-';
 
     $pembuatNama =
-        $suratKeluar->pembuat?->name ?? '-';
+        $suratKeluar->pembuat?->name
+        ?? '-';
 
 
     /*
@@ -119,7 +175,8 @@
     */
 
     $lampiranPath =
-        $suratKeluar->lampiran_file ?? null;
+        $suratKeluar->lampiran_file
+        ?? null;
 
     $lampiranUrl = null;
 
@@ -131,17 +188,19 @@
                 FILTER_VALIDATE_URL
             )
         ) {
-            $lampiranUrl = $lampiranPath;
+            $lampiranUrl =
+                $lampiranPath;
 
         } elseif (
             \Illuminate\Support\Facades\Route::has(
                 'surat-keluar.preview-lampiran'
             )
         ) {
-            $lampiranUrl = route(
-                'surat-keluar.preview-lampiran',
-                $suratKeluar
-            );
+            $lampiranUrl =
+                route(
+                    'surat-keluar.preview-lampiran',
+                    $suratKeluar
+                );
         }
     }
 
@@ -160,19 +219,21 @@
             ? basename($lampiranPath)
             : null;
 
-    $isImage = in_array(
-        $lampiranExtension,
-        [
-            'jpg',
-            'jpeg',
-            'png',
-            'webp',
-            'gif',
-        ],
-        true
-    );
+    $isImage =
+        in_array(
+            $lampiranExtension,
+            [
+                'jpg',
+                'jpeg',
+                'png',
+                'webp',
+                'gif',
+            ],
+            true
+        );
 
-    $isPdf = $lampiranExtension === 'pdf';
+    $isPdf =
+        $lampiranExtension === 'pdf';
 @endphp
 
 
@@ -194,7 +255,6 @@
     .sk-detail-page *::after {
         box-sizing: border-box;
     }
-
 
     /* =========================================================
        ALERT
@@ -270,7 +330,6 @@
     .sk-alert-close:hover {
         background: rgba(15, 23, 42, .05);
     }
-
 
     /* =========================================================
        HEADER
@@ -400,11 +459,8 @@
         background: rgba(245, 158, 11, .25);
     }
 
-
     /* =========================================================
        MAIN GRID
-       KIRI  = INFORMASI + PERIHAL
-       KANAN = STATUS ARSIP
     ========================================================== */
 
     .sk-top-grid {
@@ -429,7 +485,6 @@
         display: flex;
     }
 
-
     /* =========================================================
        CARD
     ========================================================== */
@@ -442,7 +497,6 @@
         box-shadow:
             0 7px 25px rgba(15, 23, 42, .055);
     }
-
 
     /* =========================================================
        CARD HEADER
@@ -499,7 +553,6 @@
         color: #94a3b8;
     }
 
-
     /* =========================================================
        STATUS
     ========================================================== */
@@ -540,7 +593,6 @@
         background: #f5f3ff;
         color: #6d28d9;
     }
-
 
     /* =========================================================
        INFORMASI SURAT
@@ -619,10 +671,8 @@
         color: #059669;
     }
 
-
     /* =========================================================
        PERIHAL
-       MENGISI SISA RUANG KOLOM KIRI
     ========================================================== */
 
     .sk-perihal-card {
@@ -662,9 +712,8 @@
         overflow-wrap: anywhere;
     }
 
-
     /* =========================================================
-       STATUS ARSIP / INFORMASI KANAN
+       SIDE
     ========================================================== */
 
     .sk-side-card {
@@ -757,7 +806,6 @@
         line-height: 1.6;
     }
 
-
     /* =========================================================
        RINGKASAN
     ========================================================== */
@@ -787,10 +835,8 @@
         overflow-wrap: anywhere;
     }
 
-
     /* =========================================================
-       LAMPIRAN DIGITAL
-       FULL WIDTH
+       ATTACHMENT
     ========================================================== */
 
     .sk-attachment-card {
@@ -823,7 +869,6 @@
         font-weight: 800;
         text-transform: uppercase;
     }
-
 
     /* =========================================================
        FILE BAR
@@ -918,7 +963,6 @@
         background: #f1f5f9;
     }
 
-
     /* =========================================================
        VIEWER
     ========================================================== */
@@ -1002,7 +1046,6 @@
         line-height: 1.5;
     }
 
-
     /* =========================================================
        FOOTER
     ========================================================== */
@@ -1020,13 +1063,11 @@
         color: #cbd5e1;
     }
 
-
     /* =========================================================
        TABLET
     ========================================================== */
 
     @media (max-width: 980px) {
-
         .sk-top-grid {
             grid-template-columns: 1fr;
             align-items: start;
@@ -1049,13 +1090,11 @@
         }
     }
 
-
     /* =========================================================
        MOBILE
     ========================================================== */
 
     @media (max-width: 700px) {
-
         .sk-detail-page {
             padding: 9px 10px 25px;
         }
@@ -1123,13 +1162,11 @@
         }
     }
 
-
     /* =========================================================
        SMALL MOBILE
     ========================================================== */
 
     @media (max-width: 470px) {
-
         .sk-header-title {
             font-size: 18px;
         }
@@ -1182,16 +1219,12 @@
     ====================================================== --}}
 
     @if(session('success'))
-
         <div
             class="sk-alert sk-alert-success"
             role="alert"
         >
-
             <div class="sk-alert-inner">
-
                 <div class="sk-alert-icon">
-
                     <svg
                         class="w-4 h-4"
                         fill="none"
@@ -1205,15 +1238,12 @@
                             d="M5 13l4 4L19 7"
                         />
                     </svg>
-
                 </div>
 
                 <p class="sk-alert-text">
                     {{ session('success') }}
                 </p>
-
             </div>
-
 
             <button
                 type="button"
@@ -1221,7 +1251,6 @@
                 onclick="this.closest('[role=alert]')?.remove()"
                 aria-label="Tutup"
             >
-
                 <svg
                     class="w-4 h-4"
                     fill="none"
@@ -1235,11 +1264,8 @@
                         d="M6 18L18 6M6 6l12 12"
                     />
                 </svg>
-
             </button>
-
         </div>
-
     @endif
 
 
@@ -1248,16 +1274,12 @@
     ====================================================== --}}
 
     @if(session('error'))
-
         <div
             class="sk-alert sk-alert-error"
             role="alert"
         >
-
             <div class="sk-alert-inner">
-
                 <div class="sk-alert-icon">
-
                     <svg
                         class="w-4 h-4"
                         fill="none"
@@ -1271,15 +1293,12 @@
                             d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                         />
                     </svg>
-
                 </div>
 
                 <p class="sk-alert-text">
                     {{ session('error') }}
                 </p>
-
             </div>
-
 
             <button
                 type="button"
@@ -1287,7 +1306,6 @@
                 onclick="this.closest('[role=alert]')?.remove()"
                 aria-label="Tutup"
             >
-
                 <svg
                     class="w-4 h-4"
                     fill="none"
@@ -1301,11 +1319,8 @@
                         d="M6 18L18 6M6 6l12 12"
                     />
                 </svg>
-
             </button>
-
         </div>
-
     @endif
 
 
@@ -1323,7 +1338,6 @@
                 title="Kembali"
                 aria-label="Kembali ke Surat Keluar"
             >
-
                 <svg
                     class="w-4 h-4"
                     fill="none"
@@ -1337,14 +1351,11 @@
                         d="M10 19l-7-7m0 0l7-7m-7 7h18"
                     />
                 </svg>
-
             </a>
-
 
             <div class="sk-header-content">
 
                 <div class="sk-breadcrumb">
-
                     <a href="{{ route('surat-keluar.index') }}">
                         Surat Keluar
                     </a>
@@ -1352,14 +1363,11 @@
                     <span>/</span>
 
                     <span>Detail Arsip</span>
-
                 </div>
-
 
                 <h1 class="sk-header-title">
                     Detail Surat Keluar
                 </h1>
-
 
                 <p class="sk-header-subtitle">
                     Informasi surat, status arsip, dan berkas digital.
@@ -1370,17 +1378,21 @@
         </div>
 
 
+        {{-- =================================================
+             EDIT HANYA ADMIN / PIMPINAN
+        ================================================== --}}
+
         @if(
+            $canManageSurat &&
             \Illuminate\Support\Facades\Route::has(
                 'surat-keluar.edit'
             )
         )
-
             <a
                 href="{{ route('surat-keluar.edit', $suratKeluar) }}"
                 class="sk-header-action"
+                title="Edit arsip surat"
             >
-
                 <svg
                     class="w-3.5 h-3.5"
                     fill="none"
@@ -1391,14 +1403,12 @@
                         stroke-linecap="round"
                         stroke-linejoin="round"
                         stroke-width="2"
-                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h5m5.5-1.5a2.121 2.121 0 003 0l5.5-5.5a2.121 2.121 0 00-3-3L15 10.5V13h-2.5z"
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h5m5.5-1.5a2.121 2.121 0 003 0l5.5-5.5a2.121 2.121 0 003-3L15 10.5V13h-2.5z"
                     />
                 </svg>
 
                 Edit Arsip
-
             </a>
-
         @endif
 
     </div>
@@ -1410,18 +1420,13 @@
 
     <div class="sk-top-grid">
 
-
         {{-- =================================================
              KIRI
-             INFORMASI + PERIHAL
         ================================================== --}}
 
         <div class="sk-left-column">
 
-
-            {{-- =================================================
-                 INFORMASI SURAT
-            ================================================== --}}
+            {{-- INFORMASI SURAT --}}
 
             <div class="sk-card sk-info-card">
 
@@ -1430,7 +1435,6 @@
                     <div class="sk-card-heading">
 
                         <div class="sk-card-heading-icon">
-
                             <svg
                                 class="w-4 h-4"
                                 fill="none"
@@ -1444,12 +1448,9 @@
                                     d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586A1.5 1.5 0 0118 8.5V19a2 2 0 01-2 2z"
                                 />
                             </svg>
-
                         </div>
 
-
                         <div>
-
                             <h2 class="sk-card-title">
                                 Informasi Surat
                             </h2>
@@ -1457,11 +1458,9 @@
                             <p class="sk-card-subtitle">
                                 Data utama arsip surat keluar.
                             </p>
-
                         </div>
 
                     </div>
-
 
                     <span class="sk-status {{ $statusClass }}">
                         {{ $statusLabel }}
@@ -1476,13 +1475,9 @@
 
                         <tbody>
 
-
-                            {{-- BARIS 1 --}}
-
                             <tr>
 
                                 <td>
-
                                     <span class="sk-info-label">
                                         Nomor Surat
                                     </span>
@@ -1490,12 +1485,9 @@
                                     <p class="sk-info-value">
                                         {{ $nomorSurat }}
                                     </p>
-
                                 </td>
 
-
                                 <td>
-
                                     <span class="sk-info-label">
                                         Tujuan Surat
                                     </span>
@@ -1503,12 +1495,9 @@
                                     <p class="sk-info-value">
                                         {{ $tujuanSurat }}
                                     </p>
-
                                 </td>
 
-
                                 <td>
-
                                     <span class="sk-info-label">
                                         Kategori Surat
                                     </span>
@@ -1516,18 +1505,13 @@
                                     <p class="sk-info-value">
                                         {{ $kategoriNama }}
                                     </p>
-
                                 </td>
 
                             </tr>
 
-
-                            {{-- BARIS 2 --}}
-
                             <tr>
 
                                 <td>
-
                                     <span class="sk-info-label">
                                         Tanggal Surat
                                     </span>
@@ -1553,12 +1537,9 @@
                                         </span>
 
                                     </p>
-
                                 </td>
 
-
                                 <td>
-
                                     <span class="sk-info-label">
                                         Tanggal Keluar
                                     </span>
@@ -1584,12 +1565,9 @@
                                         </span>
 
                                     </p>
-
                                 </td>
 
-
                                 <td>
-
                                     <span class="sk-info-label">
                                         Dibuat Oleh
                                     </span>
@@ -1597,7 +1575,6 @@
                                     <p class="sk-info-value">
                                         {{ $pembuatNama }}
                                     </p>
-
                                 </td>
 
                             </tr>
@@ -1611,9 +1588,7 @@
             </div>
 
 
-            {{-- =================================================
-                 PERIHAL
-            ================================================== --}}
+            {{-- PERIHAL --}}
 
             <div class="sk-card sk-perihal-card">
 
@@ -1638,7 +1613,6 @@
                             </svg>
 
                         </div>
-
 
                         <div>
 
@@ -1676,13 +1650,11 @@
 
         {{-- =================================================
              KANAN
-             STATUS ARSIP
         ================================================== --}}
 
         <div class="sk-right-column">
 
             <div class="sk-card sk-side-card">
-
 
                 <div class="sk-card-header">
 
@@ -1706,7 +1678,6 @@
 
                         </div>
 
-
                         <div>
 
                             <h2 class="sk-card-title">
@@ -1726,9 +1697,6 @@
 
                 <div class="sk-side-body">
 
-
-                    {{-- STATUS --}}
-
                     <div class="sk-side-status">
 
                         <span class="sk-status {{ $statusClass }}">
@@ -1738,10 +1706,7 @@
                     </div>
 
 
-                    {{-- DETAIL --}}
-
                     <div class="sk-side-list">
-
 
                         <div class="sk-side-item">
 
@@ -1794,7 +1759,6 @@
 
                         </div>
 
-
                     </div>
 
 
@@ -1822,7 +1786,6 @@
 
     {{-- =====================================================
          RINGKASAN
-         TETAP DITAMPILKAN BILA ADA ISINYA
     ====================================================== --}}
 
     @if($ringkasan !== '')
@@ -1850,7 +1813,6 @@
                         </svg>
 
                     </div>
-
 
                     <div>
 
@@ -1888,11 +1850,9 @@
 
     {{-- =====================================================
          LAMPIRAN DIGITAL
-         FULL WIDTH
     ====================================================== --}}
 
     <div class="sk-card sk-attachment-card">
-
 
         <div class="sk-card-header">
 
@@ -1915,7 +1875,6 @@
                     </svg>
 
                 </div>
-
 
                 <div>
 
@@ -1945,12 +1904,10 @@
 
         <div class="sk-attachment-body">
 
-
             @if(
                 !empty($lampiranPath) &&
                 !empty($lampiranUrl)
             )
-
 
                 {{-- FILE BAR --}}
 
@@ -1970,12 +1927,11 @@
                                     stroke-linecap="round"
                                     stroke-linejoin="round"
                                     stroke-width="1.8"
-                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586A1.5 1.5 0 0118 8.5V19a2 2 0 01-2-2"
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586A1.5 1.5 0 0118 8.5V19a2 2 0 01-2 2"
                                 />
                             </svg>
 
                         </div>
-
 
                         <div class="min-w-0">
 
@@ -2000,7 +1956,6 @@
                             rel="noopener noreferrer"
                             class="sk-file-btn sk-file-btn-open"
                         >
-
                             <svg
                                 class="w-3.5 h-3.5"
                                 fill="none"
@@ -2016,7 +1971,6 @@
                             </svg>
 
                             Buka
-
                         </a>
 
 
@@ -2025,7 +1979,6 @@
                             download
                             class="sk-file-btn sk-file-btn-download"
                         >
-
                             <svg
                                 class="w-3.5 h-3.5"
                                 fill="none"
@@ -2041,7 +1994,6 @@
                             </svg>
 
                             Unduh
-
                         </a>
 
                     </div>
@@ -2066,7 +2018,6 @@
 
                         </div>
 
-
                     @elseif($isPdf)
 
                         <iframe
@@ -2075,7 +2026,6 @@
                             title="Pratinjau PDF Surat Keluar"
                             loading="lazy"
                         ></iframe>
-
 
                     @else
 
@@ -2091,28 +2041,21 @@
                                     stroke-linecap="round"
                                     stroke-linejoin="round"
                                     stroke-width="1.5"
-                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586A1.5 1.5 0 0118 8.5V19a2 2 0 01-2 2z"
                                 />
                             </svg>
-
 
                             <p class="sk-viewer-empty-title">
                                 Pratinjau tidak tersedia
                             </p>
 
-
                             <p class="sk-viewer-empty-text">
-
                                 Format
-
                                 <strong>
                                     .{{ $lampiranExtension ?: 'dokumen' }}
                                 </strong>
-
                                 tidak dapat ditampilkan langsung.
-
                                 Gunakan tombol Buka atau Unduh.
-
                             </p>
 
                         </div>
@@ -2120,7 +2063,6 @@
                     @endif
 
                 </div>
-
 
             @else
 
@@ -2139,7 +2081,6 @@
                             d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636"
                         />
                     </svg>
-
 
                     <p>
                         Tidak ada berkas digital yang dilampirkan pada surat ini.
