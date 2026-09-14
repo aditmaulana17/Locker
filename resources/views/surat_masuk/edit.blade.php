@@ -83,7 +83,7 @@
     width: 100%;
     max-width: 1120px;
     margin: 0 auto;
-    padding: 8px 14px 28px;
+    padding: 10px 14px 28px;
     color: #334155;
 }
 
@@ -91,80 +91,6 @@
 .edit-page *::before,
 .edit-page *::after {
     box-sizing: border-box;
-}
-
-
-/* ============================================================
-   HEADER
-============================================================ */
-
-.edit-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 14px;
-    margin-bottom: 12px;
-}
-
-.edit-header-left {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    min-width: 0;
-}
-
-.edit-title-icon {
-    width: 40px;
-    height: 40px;
-    flex: 0 0 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 2px solid #c7d2fe;
-    border-radius: 9px;
-    background: #eef2ff;
-    color: #4f46e5;
-    box-shadow: 0 2px 5px rgba(15, 23, 42, .05);
-}
-
-.edit-title {
-    margin: 0;
-    font-size: 20px;
-    line-height: 1.2;
-    font-weight: 800;
-    color: #1e293b;
-}
-
-.edit-subtitle {
-    margin: 3px 0 0;
-    font-size: 11px;
-    line-height: 1.4;
-    color: #64748b;
-}
-
-.btn-back {
-    min-height: 38px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 7px;
-    padding: 0 14px;
-    flex: 0 0 auto;
-    border: 2px solid #94a3b8;
-    border-radius: 8px;
-    background: #fff;
-    color: #475569;
-    text-decoration: none;
-    font-size: 11px;
-    font-weight: 800;
-    white-space: nowrap;
-    transition: .15s ease;
-}
-
-.btn-back:hover {
-    background: #f8fafc;
-    border-color: #64748b;
-    color: #1e293b;
 }
 
 
@@ -222,7 +148,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 14px;
-    padding: 13px 16px;
+    padding: 14px 17px;
     border-bottom: 2px solid #c7d2fe;
     background: linear-gradient(
         135deg,
@@ -234,14 +160,14 @@
 .system-header-left {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 11px;
     min-width: 0;
 }
 
 .system-header-icon {
-    width: 40px;
-    height: 40px;
-    flex: 0 0 40px;
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -263,7 +189,7 @@
 
 .system-header-title {
     margin: 2px 0 0;
-    font-size: 15px;
+    font-size: 16px;
     line-height: 1.3;
     font-weight: 800;
     color: #1e3a8a;
@@ -280,8 +206,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 27px;
-    padding: 0 9px;
+    min-height: 29px;
+    padding: 0 10px;
     border: 1px solid #bfdbfe;
     border-radius: 999px;
     background: #fff;
@@ -378,9 +304,13 @@
     border-right: 0;
 }
 
+.field:last-child {
+    border-bottom: 0;
+}
+
 
 /* ============================================================
-   FIELD LABEL
+   LABEL
 ============================================================ */
 
 .field-label {
@@ -1245,15 +1175,6 @@ textarea.control {
 
 @media (max-width: 640px) {
 
-    .edit-header {
-        align-items: stretch;
-        flex-direction: column;
-    }
-
-    .btn-back {
-        width: 100%;
-    }
-
     .system-header {
         align-items: flex-start;
         flex-direction: column;
@@ -1285,10 +1206,6 @@ textarea.control {
         grid-column: auto;
     }
 
-    .field:last-child {
-        border-bottom: 0;
-    }
-
     input.control,
     select.control {
         height: 40px;
@@ -1316,14 +1233,6 @@ textarea.control {
 }
 
 @media (max-width: 420px) {
-
-    .edit-title {
-        font-size: 17px;
-    }
-
-    .edit-subtitle {
-        font-size: 10px;
-    }
 
     .system-header-title {
         font-size: 14px;
@@ -1355,75 +1264,6 @@ textarea.control {
 
 
 <div class="edit-page">
-
-    {{-- =========================================================
-         HEADER
-    ========================================================== --}}
-
-    <div class="edit-header">
-
-        <div class="edit-header-left">
-
-            <div class="edit-title-icon">
-
-                <svg
-                    class="h-5 w-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m1.5-7.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 7.5-7.5z"
-                    />
-                </svg>
-
-            </div>
-
-            <div class="min-w-0">
-
-                <h1 class="edit-title">
-                    Edit Surat Masuk
-                </h1>
-
-                <p class="edit-subtitle">
-                    Perbarui informasi surat masuk dan dokumen arsip yang tersimpan.
-                </p>
-
-            </div>
-
-        </div>
-
-
-        <a
-            href="{{ route('surat-masuk.index') }}"
-            class="btn-back"
-        >
-
-            <svg
-                class="h-4 w-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-            >
-                <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                />
-            </svg>
-
-            Kembali
-
-        </a>
-
-    </div>
-
 
     {{-- =========================================================
          ERROR
@@ -1468,8 +1308,7 @@ textarea.control {
         @csrf
         @method('PUT')
 
-
-        {{-- Tetap dipertahankan untuk kompatibilitas backend --}}
+        {{-- Dipertahankan untuk kompatibilitas backend --}}
         <input
             type="hidden"
             name="nomor_agenda"
@@ -1513,6 +1352,7 @@ textarea.control {
 
                     </div>
 
+
                     <div class="min-w-0">
 
                         <p class="system-header-label">
@@ -1520,7 +1360,7 @@ textarea.control {
                         </p>
 
                         <h2 class="system-header-title">
-                            Edit Surat Masuk
+                            Data Surat Masuk
                         </h2>
 
                         <p class="system-header-subtitle">
@@ -1599,9 +1439,11 @@ textarea.control {
                                 >
 
                                 @error('nomor_surat')
+
                                     <p class="field-error">
                                         {{ $message }}
                                     </p>
+
                                 @enderror
 
                             </div>
@@ -1632,9 +1474,11 @@ textarea.control {
                                 >
 
                                 @error('pengirim')
+
                                     <p class="field-error">
                                         {{ $message }}
                                     </p>
+
                                 @enderror
 
                             </div>
@@ -1662,9 +1506,11 @@ textarea.control {
                                 >
 
                                 @error('tanggal_surat')
+
                                     <p class="field-error">
                                         {{ $message }}
                                     </p>
+
                                 @enderror
 
                             </div>
@@ -1692,9 +1538,11 @@ textarea.control {
                                 >
 
                                 @error('tanggal_terima')
+
                                     <p class="field-error">
                                         {{ $message }}
                                     </p>
+
                                 @enderror
 
                             </div>
@@ -1736,11 +1584,13 @@ textarea.control {
                                                 (string) $kategori->id
                                             )
                                         >
+
                                             {{ $kategori->nama_kategori }}
 
                                             @if(!empty($kategori->sifat))
                                                 ({{ ucfirst($kategori->sifat) }})
                                             @endif
+
                                         </option>
 
                                     @endforeach
@@ -1759,9 +1609,11 @@ textarea.control {
                                 @endif
 
                                 @error('kategori_surat_id')
+
                                     <p class="field-error">
                                         {{ $message }}
                                     </p>
+
                                 @enderror
 
                             </div>
@@ -1803,9 +1655,11 @@ textarea.control {
                                 </select>
 
                                 @error('status')
+
                                     <p class="field-error">
                                         {{ $message }}
                                     </p>
+
                                 @enderror
 
                             </div>
@@ -1834,9 +1688,11 @@ textarea.control {
                                 >{{ old('perihal', $suratMasuk->perihal) }}</textarea>
 
                                 @error('perihal')
+
                                     <p class="field-error">
                                         {{ $message }}
                                     </p>
+
                                 @enderror
 
                             </div>
@@ -2122,19 +1978,21 @@ textarea.control {
 
                                         </span>
 
-                                        <span
-                                            class="upload-title"
-                                        >
+
+                                        <span class="upload-title">
                                             Pilih file baru
                                         </span>
+
 
                                         <span class="upload-format">
                                             PDF, JPG, JPEG, PNG
                                         </span>
 
+
                                         <span class="upload-limit">
                                             Maksimal 10 MB
                                         </span>
+
 
                                         <input
                                             type="file"
@@ -2467,7 +2325,7 @@ textarea.control {
                                             <path
                                                 stroke-linecap="round"
                                                 stroke-linejoin="round"
-                                                stroke-width="1.8"
+                                                stroke-width="2"
                                                 d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
                                             />
                                         </svg>
@@ -2655,134 +2513,82 @@ document.addEventListener('DOMContentLoaded', function () {
     ============================================================ */
 
     const form =
-        document.getElementById(
-            'form-surat'
-        );
+        document.getElementById('form-surat');
 
     const modeUploadBtn =
-        document.getElementById(
-            'mode-upload-btn'
-        );
+        document.getElementById('mode-upload-btn');
 
     const modeScanBtn =
-        document.getElementById(
-            'mode-scan-btn'
-        );
+        document.getElementById('mode-scan-btn');
 
     const uploadPanel =
-        document.getElementById(
-            'upload-panel'
-        );
+        document.getElementById('upload-panel');
 
     const scanPanel =
-        document.getElementById(
-            'scan-panel'
-        );
+        document.getElementById('scan-panel');
 
     const fileInput =
-        document.getElementById(
-            'lampiran_file'
-        );
+        document.getElementById('lampiran_file');
 
     const uploadBox =
-        document.getElementById(
-            'upload-box'
-        );
+        document.getElementById('upload-box');
 
     const selectedFile =
-        document.getElementById(
-            'selected-file'
-        );
+        document.getElementById('selected-file');
 
     const selectedFileName =
-        document.getElementById(
-            'selected-file-name'
-        );
+        document.getElementById('selected-file-name');
 
     const selectedFileSize =
-        document.getElementById(
-            'selected-file-size'
-        );
+        document.getElementById('selected-file-size');
 
     const clearFileBtn =
-        document.getElementById(
-            'clear-file-btn'
-        );
+        document.getElementById('clear-file-btn');
 
     const cameraVideo =
-        document.getElementById(
-            'camera-video'
-        );
+        document.getElementById('camera-video');
 
     const cameraPlaceholder =
-        document.getElementById(
-            'camera-placeholder'
-        );
+        document.getElementById('camera-placeholder');
 
     const cameraError =
-        document.getElementById(
-            'camera-error'
-        );
+        document.getElementById('camera-error');
 
     const startCameraBtn =
-        document.getElementById(
-            'start-camera-btn'
-        );
+        document.getElementById('start-camera-btn');
 
     const captureBtn =
-        document.getElementById(
-            'capture-btn'
-        );
+        document.getElementById('capture-btn');
 
     const stopCameraBtn =
-        document.getElementById(
-            'stop-camera-btn'
-        );
+        document.getElementById('stop-camera-btn');
 
     const retakeBtn =
-        document.getElementById(
-            'retake-btn'
-        );
+        document.getElementById('retake-btn');
 
     const scanResult =
-        document.getElementById(
-            'scan-result'
-        );
+        document.getElementById('scan-result');
 
     const scanPreviewImage =
-        document.getElementById(
-            'scan-preview-image'
-        );
+        document.getElementById('scan-preview-image');
 
     const scanCompressionInfo =
-        document.getElementById(
-            'scan-compression-info'
-        );
+        document.getElementById('scan-compression-info');
 
     const capturedInput =
-        document.getElementById(
-            'captured_image'
-        );
+        document.getElementById('captured_image');
 
     const submitBtn =
-        document.getElementById(
-            'submit-btn'
-        );
+        document.getElementById('submit-btn');
 
     const submitIcon =
-        document.getElementById(
-            'submit-icon'
-        );
+        document.getElementById('submit-icon');
 
     const submitLoading =
-        document.getElementById(
-            'submit-loading'
-        );
+        document.getElementById('submit-loading');
 
     const submitText =
-        document.getElementById(
-            'submit-text'
-        );
+        document.getElementById('submit-text');
 
 
     if (
@@ -2903,16 +2709,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 (
                     1 -
                     compressedSize /
-                        originalSize
+                    originalSize
                 ) * 100
             )
         );
     }
 
 
-    function getFileExtension(
-        file
-    ) {
+    function getFileExtension(file) {
 
         return String(
             file?.name || ''
@@ -2923,9 +2727,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
-    function isAllowedExtension(
-        extension
-    ) {
+    function isAllowedExtension(extension) {
 
         return [
             'pdf',
@@ -2942,9 +2744,7 @@ document.addEventListener('DOMContentLoaded', function () {
        CAMERA ERROR
     ============================================================ */
 
-    function showCameraError(
-        message
-    ) {
+    function showCameraError(message) {
 
         if (!cameraError) {
             return;
@@ -3041,7 +2841,6 @@ document.addEventListener('DOMContentLoaded', function () {
         );
 
         clearFileSelection();
-
         clearCameraError();
     }
 
@@ -3087,7 +2886,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     : ''
             );
 
-        uploadBox.classList.add(
+        uploadBox?.classList.add(
             'has-file'
         );
     }
@@ -3116,11 +2915,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 '';
         }
 
-        if (uploadBox) {
-            uploadBox.classList.remove(
-                'has-file'
-            );
-        }
+        uploadBox?.classList.remove(
+            'has-file'
+        );
     }
 
 
@@ -3244,6 +3041,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     compressedFile.size >=
                     originalSize
                 ) {
+
                     finalFile =
                         file;
                 }
@@ -3256,7 +3054,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     clearFileSelection();
 
                     alert(
-                        'Gambar masih terlalu besar setelah dikompres.\n\nSilakan gunakan gambar dengan resolusi lebih rendah.'
+                        'Gambar masih terlalu besar setelah dikompres.\n\nSilakan pilih gambar dengan resolusi lebih rendah.'
                     );
 
                     return;
@@ -3283,32 +3081,22 @@ document.addEventListener('DOMContentLoaded', function () {
                         finalFile.size
                     );
 
-                let note;
-
-                if (
+                const note =
                     finalFile === file
-                ) {
-
-                    note =
-                        'Gambar asli digunakan • ' +
-                        formatFileSize(
-                            finalFile.size
-                        );
-
-                } else {
-
-                    note =
-                        'Dikompres ' +
-                        reduction +
-                        '% • ' +
-                        formatFileSize(
-                            originalSize
-                        ) +
-                        ' → ' +
-                        formatFileSize(
-                            finalFile.size
-                        );
-                }
+                        ? 'Gambar asli digunakan • ' +
+                          formatFileSize(
+                              finalFile.size
+                          )
+                        : 'Dikompres ' +
+                          reduction +
+                          '% • ' +
+                          formatFileSize(
+                              originalSize
+                          ) +
+                          ' → ' +
+                          formatFileSize(
+                              finalFile.size
+                          );
 
                 showSelectedFile(
                     finalFile,
@@ -3337,9 +3125,7 @@ document.addEventListener('DOMContentLoaded', function () {
        LOAD IMAGE
     ============================================================ */
 
-    function loadImage(
-        file
-    ) {
+    function loadImage(file) {
 
         return new Promise(
             function (
@@ -3422,7 +3208,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     width * scale
                 )
             ),
-
             height: Math.max(
                 1,
                 Math.round(
@@ -3616,7 +3401,6 @@ document.addEventListener('DOMContentLoaded', function () {
                                 {
                                     type:
                                         'image/jpeg',
-
                                     lastModified:
                                         Date.now()
                                 }
@@ -3635,9 +3419,7 @@ document.addEventListener('DOMContentLoaded', function () {
        COMPRESS IMAGE
     ============================================================ */
 
-    async function compressImageFile(
-        file
-    ) {
+    async function compressImageFile(file) {
 
         const image =
             await loadImage(
@@ -3772,18 +3554,15 @@ document.addEventListener('DOMContentLoaded', function () {
                         facingMode: {
                             ideal: 'environment'
                         },
-
                         width: {
                             ideal:
                                 CAMERA_MAX_WIDTH
                         },
-
                         height: {
                             ideal:
                                 CAMERA_MAX_HEIGHT
                         }
                     },
-
                     audio: false
                 });
 
@@ -4124,7 +3903,6 @@ document.addEventListener('DOMContentLoaded', function () {
         if (
             commaIndex === -1
         ) {
-
             return 0;
         }
 
@@ -4292,7 +4070,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 cameraPlaceholder.classList.add(
                     'hidden'
                 );
-
             }
         }
     );
@@ -4345,12 +4122,6 @@ document.addEventListener('DOMContentLoaded', function () {
             const hasCamera =
                 capturedInput.value.trim() !== '';
 
-            /*
-            |--------------------------------------------------------------------------
-            | Tidak boleh dua sumber sekaligus
-            |--------------------------------------------------------------------------
-            */
-
             if (
                 hasFile &&
                 hasCamera
@@ -4364,12 +4135,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 return;
             }
-
-            /*
-            |--------------------------------------------------------------------------
-            | Ukuran file
-            |--------------------------------------------------------------------------
-            */
 
             if (
                 hasFile &&
@@ -4385,12 +4150,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 return;
             }
-
-            /*
-            |--------------------------------------------------------------------------
-            | Ukuran data kamera
-            |--------------------------------------------------------------------------
-            */
 
             if (
                 hasCamera &&
