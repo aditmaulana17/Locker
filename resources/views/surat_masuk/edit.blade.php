@@ -96,6 +96,49 @@
 
 
 /* ============================================================
+   TOP ACTION
+============================================================ */
+
+.top-action {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 10px;
+}
+
+.top-back-btn {
+    min-height: 35px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 0 11px;
+    border: 2px solid #94a3b8;
+    border-radius: 7px;
+    background: #ffffff;
+    color: #475569;
+    text-decoration: none;
+    font-size: 9px;
+    font-weight: 800;
+    white-space: nowrap;
+    transition:
+        background .15s ease,
+        border-color .15s ease,
+        color .15s ease,
+        transform .15s ease;
+}
+
+.top-back-btn:hover {
+    background: #f8fafc;
+    border-color: #64748b;
+    color: #1e293b;
+}
+
+.top-back-btn:active {
+    transform: translateY(1px);
+}
+
+
+/* ============================================================
    ERROR
 ============================================================ */
 
@@ -133,7 +176,7 @@
     overflow: hidden;
     border: 2px solid #64748b;
     border-radius: 12px;
-    background: #fff;
+    background: #ffffff;
     box-shadow:
         0 4px 10px rgba(15, 23, 42, .06),
         0 14px 30px rgba(15, 23, 42, .035);
@@ -205,41 +248,23 @@
 
 
 /* ============================================================
-   HEADER ACTION
+   HEADER BADGE
 ============================================================ */
 
-.system-header-actions {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    flex-shrink: 0;
-}
-
-.system-back-btn {
-    min-height: 32px;
+.system-header-badge {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    min-height: 29px;
     padding: 0 10px;
-    border: 2px solid #94a3b8;
-    border-radius: 7px;
+    flex-shrink: 0;
+    border: 1px solid #bfdbfe;
+    border-radius: 999px;
     background: #ffffff;
     color: #475569;
-    text-decoration: none;
-    font-size: 8.5px;
+    font-size: 8px;
     font-weight: 800;
     white-space: nowrap;
-    transition:
-        background .15s ease,
-        border-color .15s ease,
-        color .15s ease;
-}
-
-.system-back-btn:hover {
-    background: #f8fafc;
-    border-color: #64748b;
-    color: #1e293b;
 }
 
 
@@ -278,6 +303,10 @@
     background: #2563eb;
 }
 
+.section-marker-indigo {
+    background: #4f46e5;
+}
+
 .section-title {
     margin: 0;
     font-size: 14px;
@@ -302,7 +331,7 @@
     overflow: hidden;
     border: 2px solid #64748b;
     border-radius: 9px;
-    background: #fff;
+    background: #ffffff;
 }
 
 .field-grid {
@@ -317,7 +346,7 @@
     padding: 13px 14px;
     border-right: 2px solid #94a3b8;
     border-bottom: 2px solid #94a3b8;
-    background: #fff;
+    background: #ffffff;
 }
 
 .field:nth-child(2n) {
@@ -364,7 +393,7 @@
     padding: 9px 11px;
     border: 2px solid #94a3b8;
     border-radius: 8px;
-    background: #fff;
+    background: #ffffff;
     color: #1e293b;
     outline: none;
     font-size: 13px;
@@ -442,7 +471,7 @@ textarea.control {
     overflow: hidden;
     border: 2px solid #64748b;
     border-radius: 9px;
-    background: #fff;
+    background: #ffffff;
 }
 
 .attachment-header {
@@ -476,7 +505,7 @@ textarea.control {
     padding: 4px 7px;
     border: 1px solid #cbd5e1;
     border-radius: 999px;
-    background: #fff;
+    background: #ffffff;
     color: #64748b;
     font-size: 7.5px;
     font-weight: 800;
@@ -542,7 +571,7 @@ textarea.control {
     padding: 7px 8px;
     border: 2px solid #94a3b8;
     border-radius: 7px;
-    background: #fff;
+    background: #ffffff;
     color: #475569;
     cursor: pointer;
     transition: .15s ease;
@@ -939,7 +968,7 @@ textarea.control {
 .camera-btn-primary {
     border: 1px solid #4338ca;
     background: #4f46e5;
-    color: #fff;
+    color: #ffffff;
 }
 
 .camera-btn-primary:hover:not(:disabled) {
@@ -949,7 +978,7 @@ textarea.control {
 .camera-btn-success {
     border: 1px solid #059669;
     background: #10b981;
-    color: #fff;
+    color: #ffffff;
 }
 
 .camera-btn-success:hover:not(:disabled) {
@@ -958,7 +987,7 @@ textarea.control {
 
 .camera-btn-secondary {
     border: 1px solid #64748b;
-    background: #fff;
+    background: #ffffff;
     color: #334155;
 }
 
@@ -1004,7 +1033,7 @@ textarea.control {
     padding: 0 7px;
     border: 1px solid #6ee7b7;
     border-radius: 6px;
-    background: #fff;
+    background: #ffffff;
     color: #047857;
     font-size: 7.5px;
     font-weight: 800;
@@ -1019,7 +1048,7 @@ textarea.control {
     object-fit: contain;
     border: 1px solid #a7f3d0;
     border-radius: 6px;
-    background: #fff;
+    background: #ffffff;
 }
 
 .scan-info {
@@ -1082,7 +1111,7 @@ textarea.control {
     padding: 8px;
     border: 1px solid #cbd5e1;
     border-radius: 6px;
-    background: #fff;
+    background: #ffffff;
 }
 
 .physical-example p {
@@ -1106,7 +1135,7 @@ textarea.control {
     padding: 8px;
     border: 1px solid #cbd5e1;
     border-radius: 6px;
-    background: #fff;
+    background: #ffffff;
 }
 
 .bottom-note p {
@@ -1147,7 +1176,7 @@ textarea.control {
 
 .footer-cancel {
     border: 2px solid #94a3b8;
-    background: #fff;
+    background: #ffffff;
     color: #475569;
 }
 
@@ -1159,7 +1188,7 @@ textarea.control {
 .footer-submit {
     border: 2px solid #2563eb;
     background: #2563eb;
-    color: #fff;
+    color: #ffffff;
     box-shadow: 0 3px 8px rgba(37,99,235,.12);
 }
 
@@ -1198,19 +1227,24 @@ textarea.control {
     }
 }
 
+
 @media (max-width: 640px) {
+
+    .top-action {
+        justify-content: stretch;
+    }
+
+    .top-back-btn {
+        width: 100%;
+    }
 
     .system-header {
         align-items: flex-start;
         flex-direction: column;
     }
 
-    .system-header-actions {
-        width: 100%;
-    }
-
-    .system-back-btn {
-        width: 100%;
+    .system-header-badge {
+        align-self: flex-start;
     }
 
     .body {
@@ -1260,6 +1294,7 @@ textarea.control {
         width: 100%;
     }
 }
+
 
 @media (max-width: 420px) {
 
@@ -1324,6 +1359,39 @@ textarea.control {
 
 
     {{-- =========================================================
+         AKSI KEMBALI
+    ========================================================== --}}
+
+    <div class="top-action">
+
+        <a
+            href="{{ route('surat-masuk.index') }}"
+            class="top-back-btn"
+        >
+
+            <svg
+                class="h-3.5 w-3.5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+            >
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                />
+            </svg>
+
+            Kembali
+
+        </a>
+
+    </div>
+
+
+    {{-- =========================================================
          FORM
     ========================================================== --}}
 
@@ -1338,7 +1406,7 @@ textarea.control {
         @method('PUT')
 
 
-        {{-- Tetap dikirim untuk kompatibilitas backend --}}
+        {{-- Dipertahankan untuk kompatibilitas backend --}}
         <input
             type="hidden"
             name="nomor_agenda"
@@ -1403,36 +1471,12 @@ textarea.control {
 
 
                 {{-- =================================================
-                     AKSI KEMBALI
+                     ARSIP DIGITAL
                 ================================================== --}}
 
-                <div class="system-header-actions">
-
-                    <a
-                        href="{{ route('surat-masuk.index') }}"
-                        class="system-back-btn"
-                    >
-
-                        <svg
-                            class="h-3.5 w-3.5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                            aria-hidden="true"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                            />
-                        </svg>
-
-                        Kembali
-
-                    </a>
-
-                </div>
+                <span class="system-header-badge">
+                    Arsip Digital
+                </span>
 
             </div>
 
@@ -1662,15 +1706,11 @@ textarea.control {
                                                 (string) $kategori->id
                                             )
                                         >
-
                                             {{ $kategori->nama_kategori }}
 
                                             @if(!empty($kategori->sifat))
-
                                                 ({{ ucfirst($kategori->sifat) }})
-
                                             @endif
-
                                         </option>
 
                                     @endforeach
@@ -1801,11 +1841,7 @@ textarea.control {
 
                     <div class="section-head">
 
-                        <div
-                            class="section-marker"
-                            style="background:#4f46e5;"
-                        ></div>
-
+                        <div class="section-marker section-marker-indigo"></div>
 
                         <div>
 
@@ -1823,7 +1859,6 @@ textarea.control {
 
 
                     <div class="attachment-grid">
-
 
                         {{-- =================================================
                              BERKAS LAMPIRAN
@@ -2884,9 +2919,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
-    function getFileExtension(
-        file
-    ) {
+    function getFileExtension(file) {
 
         return String(
             file?.name || ''
@@ -3210,9 +3243,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
 
-            /* ====================================================
-               PDF
-            ==================================================== */
+            /* PDF */
 
             if (
                 extension === 'pdf' ||
@@ -3236,9 +3267,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
 
-            /* ====================================================
-               IMAGE
-            ==================================================== */
+            /* IMAGE */
 
             try {
 
@@ -3282,7 +3311,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     alert(
                         'Gambar masih terlalu besar setelah dikompres.\n\n' +
-                        'Silakan gunakan gambar dengan resolusi lebih rendah.'
+                        'Silakan pilih gambar dengan resolusi lebih rendah.'
                     );
 
 
@@ -3364,9 +3393,7 @@ document.addEventListener('DOMContentLoaded', function () {
        LOAD IMAGE
     ============================================================ */
 
-    function loadImage(
-        file
-    ) {
+    function loadImage(file) {
 
         return new Promise(
             function (
@@ -3451,7 +3478,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
         return {
-
             width:
                 Math.max(
                     1,
@@ -3677,12 +3703,12 @@ document.addEventListener('DOMContentLoaded', function () {
                                 {
                                     type:
                                         'image/jpeg',
-
                                     lastModified:
                                         Date.now()
                                 }
                             )
                         );
+
                     },
                     'image/jpeg',
                     quality
@@ -3841,7 +3867,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 await navigator.mediaDevices.getUserMedia({
                     video: {
                         facingMode: {
-                            ideal: 'environment'
+                            ideal:
+                                'environment'
                         },
 
                         width: {
@@ -4141,7 +4168,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 dataUrl
             ) >
                 CAMERA_TARGET_SIZE &&
-            attempt < 4
+            attempt <
+                4
         ) {
 
             attempt++;
@@ -4500,6 +4528,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 capturedInput.value.trim() !== '';
 
 
+            /*
+            |--------------------------------------------------------------------------
+            | Tidak boleh dua sumber lampiran sekaligus
+            |--------------------------------------------------------------------------
+            */
+
             if (
                 hasFile &&
                 hasCamera
@@ -4516,6 +4550,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
+
+            /*
+            |--------------------------------------------------------------------------
+            | Validasi ukuran file
+            |--------------------------------------------------------------------------
+            */
 
             if (
                 hasFile &&
@@ -4534,6 +4574,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
+
+            /*
+            |--------------------------------------------------------------------------
+            | Validasi data kamera
+            |--------------------------------------------------------------------------
+            */
 
             if (
                 hasCamera &&
