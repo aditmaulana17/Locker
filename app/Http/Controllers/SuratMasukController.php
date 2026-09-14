@@ -43,36 +43,14 @@ class SuratMasukController extends Controller
         'image/png',
     ];
 
-    /*
-    |--------------------------------------------------------------------------
-    | Batas file asli dari browser
-    |--------------------------------------------------------------------------
-    */
+    private const MAX_FILE_SIZE =
+        10 * 1024 * 1024;
 
-    private const MAX_FILE_SIZE = 10 * 1024 * 1024;
-
-    /*
-    |--------------------------------------------------------------------------
-    | Target maksimal hasil compression gambar
-    |--------------------------------------------------------------------------
-    */
-
-    private const MAX_COMPRESSED_IMAGE_SIZE = 9 * 1024 * 1024;
-
-    /*
-    |--------------------------------------------------------------------------
-    | Maksimal dimensi gambar hasil proses
-    |--------------------------------------------------------------------------
-    */
+    private const MAX_COMPRESSED_IMAGE_SIZE =
+        9 * 1024 * 1024;
 
     private const MAX_IMAGE_WIDTH = 2500;
     private const MAX_IMAGE_HEIGHT = 2500;
-
-    /*
-    |--------------------------------------------------------------------------
-    | Kualitas awal JPEG
-    |--------------------------------------------------------------------------
-    */
 
     private const JPEG_QUALITY = 82;
 
@@ -80,230 +58,37 @@ class SuratMasukController extends Controller
     |--------------------------------------------------------------------------
     | INDEX
     |--------------------------------------------------------------------------
+    |
+    | Halaman Surat Masuk menggunakan query yang sama dengan export.
+    |
     */
 
     public function index(Request $request)
     {
         $this->ensureUserAuthenticated();
 
-        $rawKategoriIds = $request->input(
-            'kategori_surat_id',
-            $request->input('kategori_id', [])
-        );
-
-        if (
-            is_scalar($rawKategoriIds) &&
-            trim((string) $rawKategoriIds) !== ''
-        ) {
-            $rawKategoriIds = [$rawKategoriIds];
-        }
-
-        if (!is_array($rawKategoriIds)) {
-            $rawKategoriIds = [];
-        }
-
-        $kategoriIds = collect($rawKategoriIds)
-            ->flatten()
-            ->filter(
-                fn ($id) =>
-                    is_scalar($id) &&
-                    is_numeric($id) &&
-                    (int) $id > 0
-            )
-            ->map(fn ($id) => (int) $id)
-            ->unique()
-            ->values()
-            ->all();
-
-        $rawStatuses = $request->input('status', []);
-
-        if (!is_array($rawStatuses)) {
-            $rawStatuses = [$rawStatuses];
-        }
-
-        $statuses = collect($rawStatuses)
-            ->filter(fn ($status) => is_scalar($status))
-            ->map(
-                fn ($status) =>
-                    strtolower(trim((string) $status))
-            )
-            ->filter(
-                fn ($status) =>
-                    in_array(
-                        $status,
-                        self::STATUS_OPTIONS,
-                        true
-                    )
-            )
-            ->unique()
-            ->values()
-            ->all();
-
-        $query = SuratMasuk::query()
-            ->with([
-                'kategori',
-                'penerima',
-            ]);
-
-        $search = trim(
-            (string) $request->input('search', '')
-        );
-
-        if ($search !== '') {
-            $keyword = '%' . $search . '%';
-
-            $query->where(
-                function (Builder $q) use ($keyword): void {
-                    $q->where(
-                        'nomor_agenda',
-                        'like',
-                        $keyword
-                    )
-                    ->orWhere(
-                        'nomor_surat',
-                        'like',
-                        $keyword
-                    )
-                    ->orWhere(
-                        'pengirim',
-                        'like',
-                        $keyword
-                    )
-                    ->orWhere(
-                        'perihal',
-                        'like',
-                        $keyword
-                    )
-                    ->orWhere(
-                        'ringkasan',
-                        'like',
-                        $keyword
-                    )
-                    ->orWhereHas(
-                        'kategori',
-                        function (
-                            Builder $kategori
-                        ) use ($keyword): void {
-                            $kategori
-                                ->where(
-                                    'nama_kategori',
-                                    'like',
-                                    $keyword
-                                )
-                                ->orWhere(
-                                    'kode',
-                                    'like',
-                                    $keyword
-                                )
-                                ->orWhere(
-                                    'sifat',
-                                    'like',
-                                    $keyword
-                                );
-                        }
-                    );
-                }
+        $query =
+            $this->buildSuratMasukQuery(
+                $request
             );
-        }
 
-        if (!empty($kategoriIds)) {
-            $query->whereIn(
-                'kategori_surat_id',
-                $kategoriIds
-            );
-        }
-
-        if (!empty($statuses)) {
-            $query->whereIn(
-                'status',
-                $statuses
-            );
-        }
-
-        $dariTanggal = trim(
-            (string) $request->input(
-                'dari_tanggal',
-                ''
-            )
-        );
-
-        $sampaiTanggal = trim(
-            (string) $request->input(
-                'sampai_tanggal',
-                ''
-            )
-        );
-
-        $validDariTanggal =
-            $this->isValidDate($dariTanggal);
-
-        $validSampaiTanggal =
-            $this->isValidDate($sampaiTanggal);
-
-        if (
-            $validDariTanggal &&
-            $validSampaiTanggal &&
-            $dariTanggal > $sampaiTanggal
-        ) {
-            [
-                $dariTanggal,
-                $sampaiTanggal
-            ] = [
-                $sampaiTanggal,
-                $dariTanggal
-            ];
-        }
-
-        if ($validDariTanggal) {
-            $query->whereDate(
-                'tanggal_terima',
-                '>=',
-                $dariTanggal
-            );
-        }
-
-        if ($validSampaiTanggal) {
-            $query->whereDate(
-                'tanggal_terima',
-                '<=',
-                $sampaiTanggal
-            );
-        }
-
-        if ($this->userIsStaff()) {
-            if (
-                method_exists(
-                    $query->getModel(),
-                    'scopeUntukStaff'
+        $suratMasuks =
+            $query
+                ->orderByDesc(
+                    'tanggal_terima'
                 )
-            ) {
-                $query->untukStaff(
-                    (int) Auth::id()
-                );
-            } else {
-                $query->whereHas(
-                    'disposisi',
-                    function (
-                        Builder $disposisi
-                    ): void {
-                        $disposisi->where(
-                            'kepada_user_id',
-                            (int) Auth::id()
-                        );
-                    }
-                );
-            }
-        }
+                ->orderByDesc(
+                    'id'
+                )
+                ->paginate(10)
+                ->withQueryString();
 
-        $suratMasuks = $query
-            ->orderByDesc('tanggal_terima')
-            ->orderByDesc('id')
-            ->paginate(10)
-            ->withQueryString();
-
-        $kategoris = KategoriSurat::query()
-            ->orderBy('nama_kategori')
-            ->get();
+        $kategoris =
+            KategoriSurat::query()
+                ->orderBy(
+                    'nama_kategori'
+                )
+                ->get();
 
         return view(
             'surat_masuk.index',
@@ -316,6 +101,363 @@ class SuratMasukController extends Controller
 
     /*
     |--------------------------------------------------------------------------
+    | BUILD QUERY SURAT MASUK
+    |--------------------------------------------------------------------------
+    |
+    | Ini adalah query utama Surat Masuk.
+    |
+    | Query ini dapat digunakan oleh:
+    |
+    | - index
+    | - export Excel
+    | - export PDF
+    |
+    | Hak akses:
+    |
+    | Admin:
+    |   semua surat
+    |
+    | Pimpinan:
+    |   semua surat
+    |
+    | Staff:
+    |   hanya surat yang didisposisikan kepada user tersebut
+    |
+    */
+
+    public function buildSuratMasukQuery(
+        Request $request
+    ): Builder {
+        $this->ensureUserAuthenticated();
+
+        $query =
+            SuratMasuk::query()
+                ->with([
+                    'kategori',
+                    'penerima',
+                ]);
+
+        /*
+        |--------------------------------------------------------------------------
+        | SEARCH
+        |--------------------------------------------------------------------------
+        */
+
+        $search =
+            trim(
+                (string) $request->input(
+                    'search',
+                    ''
+                )
+            );
+
+        if ($search !== '') {
+            $keyword =
+                '%' .
+                $search .
+                '%';
+
+            $query->where(
+                function (
+                    Builder $q
+                ) use (
+                    $keyword
+                ): void {
+                    $q
+                        ->where(
+                            'nomor_agenda',
+                            'like',
+                            $keyword
+                        )
+                        ->orWhere(
+                            'nomor_surat',
+                            'like',
+                            $keyword
+                        )
+                        ->orWhere(
+                            'pengirim',
+                            'like',
+                            $keyword
+                        )
+                        ->orWhere(
+                            'perihal',
+                            'like',
+                            $keyword
+                        )
+                        ->orWhere(
+                            'ringkasan',
+                            'like',
+                            $keyword
+                        )
+                        ->orWhereHas(
+                            'kategori',
+                            function (
+                                Builder $kategori
+                            ) use (
+                                $keyword
+                            ): void {
+                                $kategori
+                                    ->where(
+                                        'nama_kategori',
+                                        'like',
+                                        $keyword
+                                    )
+                                    ->orWhere(
+                                        'kode',
+                                        'like',
+                                        $keyword
+                                    )
+                                    ->orWhere(
+                                        'sifat',
+                                        'like',
+                                        $keyword
+                                    );
+                            }
+                        );
+                }
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | KATEGORI
+        |--------------------------------------------------------------------------
+        */
+
+        $rawKategoriIds =
+            $request->input(
+                'kategori_surat_id',
+                $request->input(
+                    'kategori_id',
+                    []
+                )
+            );
+
+        if (
+            is_scalar(
+                $rawKategoriIds
+            ) &&
+            trim(
+                (string) $rawKategoriIds
+            ) !== ''
+        ) {
+            $rawKategoriIds = [
+                $rawKategoriIds,
+            ];
+        }
+
+        if (
+            !is_array(
+                $rawKategoriIds
+            )
+        ) {
+            $rawKategoriIds = [];
+        }
+
+        $kategoriIds =
+            collect(
+                $rawKategoriIds
+            )
+                ->flatten()
+                ->filter(
+                    fn ($id) =>
+                        is_scalar($id) &&
+                        is_numeric($id) &&
+                        (int) $id > 0
+                )
+                ->map(
+                    fn ($id) =>
+                        (int) $id
+                )
+                ->unique()
+                ->values()
+                ->all();
+
+        if (
+            !empty(
+                $kategoriIds
+            )
+        ) {
+            $query->whereIn(
+                'kategori_surat_id',
+                $kategoriIds
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | STATUS
+        |--------------------------------------------------------------------------
+        */
+
+        $rawStatuses =
+            $request->input(
+                'status',
+                []
+            );
+
+        if (
+            !is_array(
+                $rawStatuses
+            )
+        ) {
+            $rawStatuses = [
+                $rawStatuses,
+            ];
+        }
+
+        $statuses =
+            collect(
+                $rawStatuses
+            )
+                ->filter(
+                    fn ($status) =>
+                        is_scalar($status)
+                )
+                ->map(
+                    fn ($status) =>
+                        strtolower(
+                            trim(
+                                (string) $status
+                            )
+                        )
+                )
+                ->filter(
+                    fn ($status) =>
+                        in_array(
+                            $status,
+                            self::STATUS_OPTIONS,
+                            true
+                        )
+                )
+                ->unique()
+                ->values()
+                ->all();
+
+        if (
+            !empty(
+                $statuses
+            )
+        ) {
+            $query->whereIn(
+                'status',
+                $statuses
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | TANGGAL DARI
+        |--------------------------------------------------------------------------
+        */
+
+        $dariTanggal =
+            trim(
+                (string) $request->input(
+                    'dari_tanggal',
+                    ''
+                )
+            );
+
+        /*
+        |--------------------------------------------------------------------------
+        | TANGGAL SAMPAI
+        |--------------------------------------------------------------------------
+        */
+
+        $sampaiTanggal =
+            trim(
+                (string) $request->input(
+                    'sampai_tanggal',
+                    ''
+                )
+            );
+
+        $validDariTanggal =
+            $this->isValidDate(
+                $dariTanggal
+            );
+
+        $validSampaiTanggal =
+            $this->isValidDate(
+                $sampaiTanggal
+            );
+
+        /*
+        |--------------------------------------------------------------------------
+        | Jika tanggal terbalik, tukarkan
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            $validDariTanggal &&
+            $validSampaiTanggal &&
+            $dariTanggal > $sampaiTanggal
+        ) {
+            [
+                $dariTanggal,
+                $sampaiTanggal,
+            ] = [
+                $sampaiTanggal,
+                $dariTanggal,
+            ];
+        }
+
+        if (
+            $validDariTanggal
+        ) {
+            $query->whereDate(
+                'tanggal_terima',
+                '>=',
+                $dariTanggal
+            );
+        }
+
+        if (
+            $validSampaiTanggal
+        ) {
+            $query->whereDate(
+                'tanggal_terima',
+                '<=',
+                $sampaiTanggal
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | HAK AKSES
+        |--------------------------------------------------------------------------
+        |
+        | Admin dan Pimpinan:
+        |   tidak diberikan filter tambahan.
+        |
+        | Staff:
+        |   hanya surat yang memiliki disposisi
+        |   kepada staff yang sedang login.
+        |
+        */
+
+        if (
+            $this->userIsStaff()
+        ) {
+            $query->whereHas(
+                'disposisi',
+                function (
+                    Builder $disposisi
+                ): void {
+                    $disposisi->where(
+                        'kepada_user_id',
+                        (int) Auth::id()
+                    );
+                }
+            );
+        }
+
+        return $query;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
     | CREATE
     |--------------------------------------------------------------------------
     */
@@ -324,9 +466,12 @@ class SuratMasukController extends Controller
     {
         $this->ensureUserCanManageSurat();
 
-        $kategoris = KategoriSurat::query()
-            ->orderBy('nama_kategori')
-            ->get();
+        $kategoris =
+            KategoriSurat::query()
+                ->orderBy(
+                    'nama_kategori'
+                )
+                ->get();
 
         $nomorAgenda =
             SuratMasuk::generateNomorAgenda();
@@ -351,11 +496,14 @@ class SuratMasukController extends Controller
     ) {
         $this->ensureUserCanManageSurat();
 
-        $data = $request->validated();
+        $data =
+            $request->validated();
 
-        $diskName = $this->getStorageDisk();
+        $diskName =
+            $this->getStorageDisk();
 
-        $uploadedPath = null;
+        $uploadedPath =
+            null;
 
         DB::beginTransaction();
 
@@ -366,12 +514,13 @@ class SuratMasukController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            $nomorInput = trim(
-                (string) $request->input(
-                    'nomor_agenda',
-                    ''
-                )
-            );
+            $nomorInput =
+                trim(
+                    (string) $request->input(
+                        'nomor_agenda',
+                        ''
+                    )
+                );
 
             if (
                 $nomorInput === '' ||
@@ -402,14 +551,15 @@ class SuratMasukController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            $status = strtolower(
-                trim(
-                    (string) (
-                        $data['status'] ??
-                        'baru'
+            $status =
+                strtolower(
+                    trim(
+                        (string) (
+                            $data['status'] ??
+                            'baru'
+                        )
                     )
-                )
-            );
+                );
 
             $data['status'] =
                 in_array(
@@ -423,17 +573,6 @@ class SuratMasukController extends Controller
             /*
             |--------------------------------------------------------------------------
             | FILE
-            |--------------------------------------------------------------------------
-            |
-            | Upload:
-            | Browser
-            |   ↓
-            | PHP temporary
-            |   ↓
-            | PDF     -> Supabase
-            | JPG/PNG -> GD -> JPG -> Supabase
-            |
-            | File asli tidak disimpan permanen di server.
             |--------------------------------------------------------------------------
             */
 
@@ -471,7 +610,7 @@ class SuratMasukController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | JANGAN SIMPAN BASE64 KE DATABASE
+            | BASE64 JANGAN MASUK DATABASE
             |--------------------------------------------------------------------------
             */
 
@@ -481,7 +620,7 @@ class SuratMasukController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | CREATE DATABASE
+            | SIMPAN
             |--------------------------------------------------------------------------
             */
 
@@ -509,22 +648,22 @@ class SuratMasukController extends Controller
             DB::commit();
 
             return redirect()
-                ->route('surat-masuk.index')
+                ->route(
+                    'surat-masuk.index'
+                )
                 ->with(
                     'success',
                     'Surat masuk berhasil dicatat dengan nomor agenda ' .
                     $surat->nomor_agenda
                 );
-        } catch (Throwable $e) {
+        } catch (
+            Throwable $e
+        ) {
             DB::rollBack();
 
-            /*
-            |--------------------------------------------------------------------------
-            | HAPUS FILE YANG SUDAH TERKIRIM JIKA DATABASE GAGAL
-            |--------------------------------------------------------------------------
-            */
-
-            if ($uploadedPath) {
+            if (
+                $uploadedPath
+            ) {
                 $this->deleteStorageFile(
                     $uploadedPath,
                     $diskName
@@ -590,7 +729,9 @@ class SuratMasukController extends Controller
                     true
                 )
                 ->where(
-                    function ($query): void {
+                    function (
+                        $query
+                    ): void {
                         $query
                             ->whereRaw(
                                 'LOWER(TRIM(role)) = ?',
@@ -602,7 +743,9 @@ class SuratMasukController extends Controller
                             );
                     }
                 )
-                ->orderBy('name')
+                ->orderBy(
+                    'name'
+                )
                 ->get();
 
         $fileUrl =
@@ -642,14 +785,18 @@ class SuratMasukController extends Controller
                             'users',
                             'id'
                         )->where(
-                            function ($query): void {
+                            function (
+                                $query
+                            ): void {
                                 $query
                                     ->where(
                                         'is_active',
                                         true
                                     )
                                     ->where(
-                                        function ($q): void {
+                                        function (
+                                            $q
+                                        ): void {
                                             $q
                                                 ->whereRaw(
                                                     'LOWER(TRIM(role)) = ?',
@@ -786,7 +933,9 @@ class SuratMasukController extends Controller
                 'success',
                 'Disposisi surat berhasil dikirim ke staff yang dituju.'
             );
-        } catch (Throwable $e) {
+        } catch (
+            Throwable $e
+        ) {
             DB::rollBack();
 
             Log::error(
@@ -826,7 +975,9 @@ class SuratMasukController extends Controller
 
         $kategoris =
             KategoriSurat::query()
-                ->orderBy('nama_kategori')
+                ->orderBy(
+                    'nama_kategori'
+                )
                 ->get();
 
         return view(
@@ -940,7 +1091,7 @@ class SuratMasukController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | BASE64 JANGAN MASUK DATABASE
+            | BASE64
             |--------------------------------------------------------------------------
             */
 
@@ -950,7 +1101,7 @@ class SuratMasukController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | UPDATE DATABASE
+            | UPDATE
             |--------------------------------------------------------------------------
             */
 
@@ -985,19 +1136,17 @@ class SuratMasukController extends Controller
             }
 
             return redirect()
-                ->route('surat-masuk.index')
+                ->route(
+                    'surat-masuk.index'
+                )
                 ->with(
                     'success',
                     'Surat masuk berhasil diperbarui.'
                 );
-        } catch (Throwable $e) {
+        } catch (
+            Throwable $e
+        ) {
             DB::rollBack();
-
-            /*
-            |--------------------------------------------------------------------------
-            | HAPUS FILE BARU JIKA DATABASE GAGAL
-            |--------------------------------------------------------------------------
-            */
 
             if (
                 $newFile &&
@@ -1074,7 +1223,9 @@ class SuratMasukController extends Controller
                 'success',
                 'Surat masuk berhasil dipindahkan ke arsip sampah.'
             );
-        } catch (Throwable $e) {
+        } catch (
+            Throwable $e
+        ) {
             Log::error(
                 'Gagal menghapus Surat Masuk.',
                 [
@@ -1165,12 +1316,6 @@ class SuratMasukController extends Controller
                     $diskName
                 );
 
-            /*
-            |--------------------------------------------------------------------------
-            | Jangan gunakan exists() sebagai syarat upload.
-            |--------------------------------------------------------------------------
-            */
-
             if (
                 !method_exists(
                     $disk,
@@ -1197,9 +1342,13 @@ class SuratMasukController extends Controller
             return redirect()->away(
                 $url
             );
-        } catch (HttpException $e) {
+        } catch (
+            HttpException $e
+        ) {
             throw $e;
-        } catch (Throwable $e) {
+        } catch (
+            Throwable $e
+        ) {
             Log::error(
                 'Gagal preview lampiran Surat Masuk.',
                 [
@@ -1305,9 +1454,13 @@ class SuratMasukController extends Controller
             return redirect()->away(
                 $url
             );
-        } catch (HttpException $e) {
+        } catch (
+            HttpException $e
+        ) {
             throw $e;
-        } catch (Throwable $e) {
+        } catch (
+            Throwable $e
+        ) {
             Log::error(
                 'Gagal download lampiran Surat Masuk.',
                 [
@@ -1374,20 +1527,39 @@ class SuratMasukController extends Controller
         $role =
             $this->resolveSuratUserRole();
 
+        /*
+        |--------------------------------------------------------------------------
+        | ADMIN
+        |--------------------------------------------------------------------------
+        */
+
         if (
-            in_array(
-                $role,
-                [
-                    'admin',
-                    'pimpinan',
-                ],
-                true
-            )
+            $role === 'admin'
         ) {
             return;
         }
 
-        if ($role === 'staff') {
+        /*
+        |--------------------------------------------------------------------------
+        | PIMPINAN
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            $role === 'pimpinan'
+        ) {
+            return;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | STAFF
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            $role === 'staff'
+        ) {
             $hasDisposisi =
                 $suratMasuk
                     ->disposisi()
@@ -1397,7 +1569,9 @@ class SuratMasukController extends Controller
                     )
                     ->exists();
 
-            if ($hasDisposisi) {
+            if (
+                $hasDisposisi
+            ) {
                 return;
             }
         }
@@ -1427,9 +1601,17 @@ class SuratMasukController extends Controller
                 )
             );
 
+        /*
+        |--------------------------------------------------------------------------
+        | Fallback jabatan
+        |--------------------------------------------------------------------------
+        */
+
         if (
             $role === '' &&
-            isset($user->jabatan)
+            isset(
+                $user->jabatan
+            )
         ) {
             $role =
                 strtolower(
@@ -1438,6 +1620,12 @@ class SuratMasukController extends Controller
                     )
                 );
         }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Normalisasi staf -> staff
+        |--------------------------------------------------------------------------
+        */
 
         return $role === 'staf'
             ? 'staff'
@@ -1462,13 +1650,9 @@ class SuratMasukController extends Controller
                 )
             );
 
-        /*
-        |--------------------------------------------------------------------------
-        | Wajib Supabase
-        |--------------------------------------------------------------------------
-        */
-
-        if ($disk !== 'supabase') {
+        if (
+            $disk !== 'supabase'
+        ) {
             throw new RuntimeException(
                 'FILESYSTEM_DISK harus diset ke "supabase". File surat tidak boleh disimpan permanen di server.'
             );
@@ -1552,12 +1736,6 @@ class SuratMasukController extends Controller
             );
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Maksimal 10 MB
-        |--------------------------------------------------------------------------
-        */
-
         if (
             $fileSize >
             self::MAX_FILE_SIZE
@@ -1575,8 +1753,11 @@ class SuratMasukController extends Controller
                 )
             );
 
-        if ($extension === 'jpeg') {
-            $extension = 'jpg';
+        if (
+            $extension === 'jpeg'
+        ) {
+            $extension =
+                'jpg';
         }
 
         if (
@@ -1596,7 +1777,9 @@ class SuratMasukController extends Controller
 
         if (
             !$realPath ||
-            !is_readable($realPath)
+            !is_readable(
+                $realPath
+            )
         ) {
             throw new RuntimeException(
                 'File temporary upload tidak dapat dibaca.'
@@ -1607,14 +1790,11 @@ class SuratMasukController extends Controller
         |--------------------------------------------------------------------------
         | PDF
         |--------------------------------------------------------------------------
-        |
-        | PDF tetap PDF.
-        | Tidak disimpan di filesystem Docker.
-        | Langsung dikirim ke Supabase.
-        |--------------------------------------------------------------------------
         */
 
-        if ($extension === 'pdf') {
+        if (
+            $extension === 'pdf'
+        ) {
             $mime =
                 strtolower(
                     (string) $file->getMimeType()
@@ -1656,20 +1836,6 @@ class SuratMasukController extends Controller
         |--------------------------------------------------------------------------
         | IMAGE
         |--------------------------------------------------------------------------
-        |
-        | JPG / JPEG / PNG:
-        |
-        | temporary file
-        |      ↓
-        | GD
-        |      ↓
-        | resize
-        |      ↓
-        | JPEG compression
-        |      ↓
-        | Supabase
-        |
-        |--------------------------------------------------------------------------
         */
 
         $contents =
@@ -1691,7 +1857,9 @@ class SuratMasukController extends Controller
                 $contents
             );
 
-        if ($imageInfo === false) {
+        if (
+            $imageInfo === false
+        ) {
             throw new RuntimeException(
                 'File bukan gambar yang valid.'
             );
@@ -1705,7 +1873,10 @@ class SuratMasukController extends Controller
                 )
             );
 
-        if ($actualMime === 'image/jpg') {
+        if (
+            $actualMime ===
+            'image/jpg'
+        ) {
             $actualMime =
                 'image/jpeg';
         }
@@ -1740,9 +1911,13 @@ class SuratMasukController extends Controller
         string $diskName
     ): string {
         $base64String =
-            trim($base64String);
+            trim(
+                $base64String
+            );
 
-        if ($base64String === '') {
+        if (
+            $base64String === ''
+        ) {
             throw new RuntimeException(
                 'Data gambar kamera kosong.'
             );
@@ -1795,7 +1970,9 @@ class SuratMasukController extends Controller
         }
 
         if (
-            strlen($decodedData) >
+            strlen(
+                $decodedData
+            ) >
             self::MAX_FILE_SIZE
         ) {
             throw new RuntimeException(
@@ -1825,7 +2002,8 @@ class SuratMasukController extends Controller
             );
 
         if (
-            $actualMime === 'image/jpg'
+            $actualMime ===
+            'image/jpg'
         ) {
             $actualMime =
                 'image/jpeg';
@@ -1896,7 +2074,8 @@ class SuratMasukController extends Controller
             );
 
         if (
-            $mime === 'image/jpg'
+            $mime ===
+            'image/jpg'
         ) {
             $mime =
                 'image/jpeg';
@@ -1937,7 +2116,7 @@ class SuratMasukController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Lindungi memory PHP
+        | PROTEKSI MEMORY
         |--------------------------------------------------------------------------
         */
 
@@ -1956,7 +2135,7 @@ class SuratMasukController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | LOAD SOURCE
+        | LOAD IMAGE
         |--------------------------------------------------------------------------
         */
 
@@ -1975,7 +2154,7 @@ class SuratMasukController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | HITUNG UKURAN BARU
+        | HITUNG DIMENSI
         |--------------------------------------------------------------------------
         */
 
@@ -2092,7 +2271,7 @@ class SuratMasukController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | COMPRESSION BERTAHAP
+        | COMPRESSION
         |--------------------------------------------------------------------------
         */
 
@@ -2155,13 +2334,10 @@ class SuratMasukController extends Controller
         |--------------------------------------------------------------------------
         | RESIZE LANJUTAN
         |--------------------------------------------------------------------------
-        |
-        | Jika masih > 9 MB, kecilkan 75%
-        | maksimal 5 kali.
-        |--------------------------------------------------------------------------
         */
 
-        $attempt = 0;
+        $attempt =
+            0;
 
         while (
             $compressedData !== null &&
@@ -2177,7 +2353,9 @@ class SuratMasukController extends Controller
                 max(
                     1,
                     (int) floor(
-                        imagesx($canvas) *
+                        imagesx(
+                            $canvas
+                        ) *
                         0.75
                     )
                 );
@@ -2186,7 +2364,9 @@ class SuratMasukController extends Controller
                 max(
                     1,
                     (int) floor(
-                        imagesy($canvas) *
+                        imagesy(
+                            $canvas
+                        ) *
                         0.75
                     )
                 );
@@ -2290,7 +2470,7 @@ class SuratMasukController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | DESTROY CANVAS
+        | DESTROY
         |--------------------------------------------------------------------------
         */
 
@@ -2326,7 +2506,7 @@ class SuratMasukController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | SIMPAN HANYA HASIL JPEG
+        | SIMPAN JPEG
         |--------------------------------------------------------------------------
         */
 
@@ -2361,7 +2541,9 @@ class SuratMasukController extends Controller
         }
 
         if (
-            strlen($contents) >
+            strlen(
+                $contents
+            ) >
             self::MAX_FILE_SIZE
         ) {
             throw new RuntimeException(
@@ -2396,7 +2578,9 @@ class SuratMasukController extends Controller
             ) .
             '.' .
             strtolower(
-                trim($extension)
+                trim(
+                    $extension
+                )
             );
 
         $path =
@@ -2408,15 +2592,6 @@ class SuratMasukController extends Controller
                 Storage::disk(
                     'supabase'
                 );
-
-            /*
-            |--------------------------------------------------------------------------
-            | Upload
-            |--------------------------------------------------------------------------
-            |
-            | Yang dikirim hanya $contents.
-            |--------------------------------------------------------------------------
-            */
 
             $saved =
                 $disk->put(
@@ -2431,15 +2606,6 @@ class SuratMasukController extends Controller
                     ]
                 );
 
-            /*
-            |--------------------------------------------------------------------------
-            | JANGAN menjalankan $disk->exists($path)
-            |--------------------------------------------------------------------------
-            |
-            | Keberhasilan put() digunakan sebagai indikator utama.
-            |--------------------------------------------------------------------------
-            */
-
             if (!$saved) {
                 throw new RuntimeException(
                     'Supabase menolak penyimpanan file.'
@@ -2447,7 +2613,9 @@ class SuratMasukController extends Controller
             }
 
             return $path;
-        } catch (Throwable $e) {
+        } catch (
+            Throwable $e
+        ) {
             Log::error(
                 'Gagal menyimpan binary Surat Masuk ke Supabase.',
                 [
@@ -2464,7 +2632,9 @@ class SuratMasukController extends Controller
                         $mimeType,
 
                     'size' =>
-                        strlen($contents),
+                        strlen(
+                            $contents
+                        ),
 
                     'disk' =>
                         'supabase',
@@ -2526,7 +2696,9 @@ class SuratMasukController extends Controller
                 );
 
             return $url ?: null;
-        } catch (Throwable $e) {
+        } catch (
+            Throwable $e
+        ) {
             Log::warning(
                 'Gagal membuat URL lampiran Surat Masuk.',
                 [
@@ -2574,20 +2746,18 @@ class SuratMasukController extends Controller
                     $diskName
                 );
 
-            /*
-            |--------------------------------------------------------------------------
-            | exists() hanya digunakan saat DELETE.
-            |--------------------------------------------------------------------------
-            */
-
             if (
-                $disk->exists($file)
+                $disk->exists(
+                    $file
+                )
             ) {
                 $disk->delete(
                     $file
                 );
             }
-        } catch (Throwable $e) {
+        } catch (
+            Throwable $e
+        ) {
             Log::warning(
                 'Gagal menghapus file Surat Masuk.',
                 [
@@ -2645,18 +2815,16 @@ class SuratMasukController extends Controller
     private function isValidDate(
         ?string $date
     ): bool {
-        if ($date === null) {
+        if (
+            $date === null
+        ) {
             return false;
         }
 
         $date =
-            trim($date);
-
-        /*
-        |--------------------------------------------------------------------------
-        | REGEX YANG BENAR
-        |--------------------------------------------------------------------------
-        */
+            trim(
+                $date
+            );
 
         if (
             !preg_match(
@@ -2674,7 +2842,9 @@ class SuratMasukController extends Controller
             );
 
         if (
-            count($parts) !== 3
+            count(
+                $parts
+            ) !== 3
         ) {
             return false;
         }
@@ -2713,7 +2883,9 @@ class SuratMasukController extends Controller
                     $description
                 );
             }
-        } catch (Throwable $e) {
+        } catch (
+            Throwable $e
+        ) {
             Log::warning(
                 'Gagal mencatat Activity Log Surat Masuk.',
                 [
@@ -2738,13 +2910,21 @@ class SuratMasukController extends Controller
 
     private function ensureUserAuthenticated(): void
     {
-        if (!Auth::check()) {
+        if (
+            !Auth::check()
+        ) {
             abort(
                 401,
                 'Anda harus login terlebih dahulu.'
             );
         }
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | MANAGE SURAT
+    |--------------------------------------------------------------------------
+    */
 
     private function ensureUserCanManageSurat(): void
     {
@@ -2769,6 +2949,12 @@ class SuratMasukController extends Controller
             );
         }
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | STAFF CHECK
+    |--------------------------------------------------------------------------
+    */
 
     private function userIsStaff(): bool
     {

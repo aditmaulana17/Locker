@@ -41,7 +41,8 @@ class SuratKeluarController extends Controller
         'png',
     ];
 
-    private const MAX_FILE_SIZE = 10 * 1024 * 1024;
+    private const MAX_FILE_SIZE =
+        10 * 1024 * 1024;
 
     /*
     |--------------------------------------------------------------------------
@@ -59,7 +60,11 @@ class SuratKeluarController extends Controller
 
         $role = strtolower(
             trim(
-                (string) ($user->role ?? '')
+                (string) (
+                    $user->role ??
+                    $user->jabatan ??
+                    ''
+                )
             )
         );
 
@@ -72,29 +77,33 @@ class SuratKeluarController extends Controller
 
     private function ensureUserAuthenticated(): void
     {
-        abort_unless(
-            Auth::check(),
-            401,
-            'Anda harus login terlebih dahulu.'
-        );
+        if (!Auth::check()) {
+            abort(
+                401,
+                'Anda harus login terlebih dahulu.'
+            );
+        }
     }
 
     private function authorizeManageSurat(): void
     {
         $this->ensureUserAuthenticated();
 
-        abort_unless(
-            in_array(
+        if (
+            !in_array(
                 $this->userRole(),
                 [
                     'admin',
                     'pimpinan',
                 ],
                 true
-            ),
-            403,
-            'Anda tidak memiliki hak akses untuk mengelola surat keluar.'
-        );
+            )
+        ) {
+            abort(
+                403,
+                'Anda tidak memiliki hak akses untuk mengelola surat keluar.'
+            );
+        }
     }
 
     /*
@@ -103,8 +112,9 @@ class SuratKeluarController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    private function normalizeStatus(?string $status): string
-    {
+    private function normalizeStatus(
+        ?string $status
+    ): string {
         $status = strtolower(
             trim(
                 (string) $status
@@ -116,9 +126,11 @@ class SuratKeluarController extends Controller
             : $status;
     }
 
-    private function getValidStatus(?string $status): string
-    {
-        $status = $this->normalizeStatus($status);
+    private function getValidStatus(
+        ?string $status
+    ): string {
+        $status =
+            $this->normalizeStatus($status);
 
         return in_array(
             $status,
@@ -131,14 +143,29 @@ class SuratKeluarController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | INDEX
+    | QUERY SURAT KELUAR
+    |--------------------------------------------------------------------------
+    |
+    | Semua filter halaman Surat Keluar dipusatkan di sini.
+    |
+    | Filter:
+    | - search
+    | - kategori_id
+    | - status
+    | - dari_tanggal
+    | - sampai_tanggal
+    |
+    | Method ini dapat digunakan oleh:
+    | - index
+    | - export Excel
+    | - export PDF
+    |
     |--------------------------------------------------------------------------
     */
 
-    public function index(Request $request)
-    {
-        $this->ensureUserAuthenticated();
-
+    public function buildFilteredQuery(
+        Request $request
+    ): Builder {
         $query = SuratKeluar::query()
             ->with([
                 'kategori',
@@ -163,12 +190,18 @@ class SuratKeluarController extends Controller
             $keyword = '%' . $search . '%';
 
             $query->where(
-                function (Builder $q) use ($keyword): void {
-                    $q->where(
-                        'nomor_surat',
-                        'like',
-                        $keyword
-                    )
+                function (
+                    Builder $q
+                ) use (
+                    $keyword
+                ): void {
+
+                    $q
+                        ->where(
+                            'nomor_surat',
+                            'like',
+                            $keyword
+                        )
                         ->orWhere(
                             'tujuan_surat',
                             'like',
@@ -186,7 +219,12 @@ class SuratKeluarController extends Controller
                         )
                         ->orWhereHas(
                             'kategori',
-                            function (Builder $kategori) use ($keyword): void {
+                            function (
+                                Builder $kategori
+                            ) use (
+                                $keyword
+                            ): void {
+
                                 $kategori
                                     ->where(
                                         'nama_kategori',
@@ -204,6 +242,58 @@ class SuratKeluarController extends Controller
                                         $keyword
                                     );
                             }
+                        )
+                        ->orWhereHas(
+                            'pembuat',
+                            function (
+                                Builder $user
+                            ) use (
+                                $keyword
+                            ): void {
+
+                                $user
+                                    ->where(
+                                        'name',
+                                        'like',
+                                        $keyword
+                                    )
+                                    ->orWhere(
+                                        'email',
+                                        'like',
+                                        $keyword
+                                    )
+                                    ->orWhere(
+                                        'jabatan',
+                                        'like',
+                                        $keyword
+                                    );
+                            }
+                        )
+                        ->orWhereHas(
+                            'penandatangan',
+                            function (
+                                Builder $user
+                            ) use (
+                                $keyword
+                            ): void {
+
+                                $user
+                                    ->where(
+                                        'name',
+                                        'like',
+                                        $keyword
+                                    )
+                                    ->orWhere(
+                                        'email',
+                                        'like',
+                                        $keyword
+                                    )
+                                    ->orWhere(
+                                        'jabatan',
+                                        'like',
+                                        $keyword
+                                    );
+                            }
                         );
                 }
             );
@@ -217,24 +307,38 @@ class SuratKeluarController extends Controller
 
         $kategoriInput = $request->input(
             'kategori_id',
-            []
+            $request->input(
+                'kategori_surat_id',
+                []
+            )
         );
 
-        if (!is_array($kategoriInput)) {
+        if (
+            is_scalar($kategoriInput) &&
+            trim((string) $kategoriInput) !== ''
+        ) {
             $kategoriInput = [
                 $kategoriInput,
             ];
         }
 
-        $kategoriIds = collect($kategoriInput)
+        if (!is_array($kategoriInput)) {
+            $kategoriInput = [];
+        }
+
+        $kategoriIds = collect(
+            $kategoriInput
+        )
+            ->flatten()
             ->filter(
                 fn ($id) =>
-                    is_scalar($id)
-                    && is_numeric($id)
-                    && (int) $id > 0
+                    is_scalar($id) &&
+                    is_numeric($id) &&
+                    (int) $id > 0
             )
             ->map(
-                fn ($id) => (int) $id
+                fn ($id) =>
+                    (int) $id
             )
             ->unique()
             ->values();
@@ -257,13 +361,23 @@ class SuratKeluarController extends Controller
             []
         );
 
-        if (!is_array($statusInput)) {
+        if (
+            is_scalar($statusInput) &&
+            trim((string) $statusInput) !== ''
+        ) {
             $statusInput = [
                 $statusInput,
             ];
         }
 
-        $statuses = collect($statusInput)
+        if (!is_array($statusInput)) {
+            $statusInput = [];
+        }
+
+        $statuses = collect(
+            $statusInput
+        )
+            ->flatten()
             ->filter(
                 fn ($status) =>
                     is_scalar($status)
@@ -312,18 +426,26 @@ class SuratKeluarController extends Controller
             )
         );
 
-        $validDariTanggal = $this->isValidDate(
-            $dariTanggal
-        );
+        $validDariTanggal =
+            $this->isValidDate(
+                $dariTanggal
+            );
 
-        $validSampaiTanggal = $this->isValidDate(
-            $sampaiTanggal
-        );
+        $validSampaiTanggal =
+            $this->isValidDate(
+                $sampaiTanggal
+            );
+
+        /*
+        |--------------------------------------------------------------------------
+        | TUKAR TANGGAL JIKA TERBALIK
+        |--------------------------------------------------------------------------
+        */
 
         if (
-            $validDariTanggal
-            && $validSampaiTanggal
-            && $dariTanggal > $sampaiTanggal
+            $validDariTanggal &&
+            $validSampaiTanggal &&
+            $dariTanggal > $sampaiTanggal
         ) {
             [
                 $dariTanggal,
@@ -350,6 +472,31 @@ class SuratKeluarController extends Controller
             );
         }
 
+        return $query;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | INDEX
+    |--------------------------------------------------------------------------
+    */
+
+    public function index(
+        Request $request
+    ) {
+        $this->ensureUserAuthenticated();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Gunakan query yang sama dengan export
+        |--------------------------------------------------------------------------
+        */
+
+        $query =
+            $this->buildFilteredQuery(
+                $request
+            );
+
         /*
         |--------------------------------------------------------------------------
         | SORTING
@@ -366,6 +513,9 @@ class SuratKeluarController extends Controller
             ->orderByDesc(
                 'created_at'
             )
+            ->orderByDesc(
+                'id'
+            )
             ->paginate(10)
             ->withQueryString();
 
@@ -375,11 +525,12 @@ class SuratKeluarController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $kategoris = KategoriSurat::query()
-            ->orderBy(
-                'nama_kategori'
-            )
-            ->get();
+        $kategoris =
+            KategoriSurat::query()
+                ->orderBy(
+                    'nama_kategori'
+                )
+                ->get();
 
         return view(
             'surat_keluar.index',
@@ -400,21 +551,23 @@ class SuratKeluarController extends Controller
     {
         $this->authorizeManageSurat();
 
-        $kategoris = KategoriSurat::query()
-            ->orderBy(
-                'nama_kategori'
-            )
-            ->get();
+        $kategoris =
+            KategoriSurat::query()
+                ->orderBy(
+                    'nama_kategori'
+                )
+                ->get();
 
-        $users = User::query()
-            ->where(
-                'is_active',
-                true
-            )
-            ->orderBy(
-                'name'
-            )
-            ->get();
+        $users =
+            User::query()
+                ->where(
+                    'is_active',
+                    true
+                )
+                ->orderBy(
+                    'name'
+                )
+                ->get();
 
         return view(
             'surat_keluar.create',
@@ -436,13 +589,17 @@ class SuratKeluarController extends Controller
     ) {
         $this->authorizeManageSurat();
 
-        $data = $request->validated();
+        $data =
+            $request->validated();
 
-        $data['dibuat_oleh'] = Auth::id();
+        $data['dibuat_oleh'] =
+            Auth::id();
 
-        $data['status'] = $this->getValidStatus(
-            $data['status'] ?? 'draft'
-        );
+        $data['status'] =
+            $this->getValidStatus(
+                $data['status'] ??
+                'draft'
+            );
 
         $storedAttachment = null;
 
@@ -453,12 +610,20 @@ class SuratKeluarController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            if ($request->hasFile('lampiran_file')) {
-                $storedAttachment = $this->storeUploadedFile(
-                    $request->file('lampiran_file')
-                );
+            if (
+                $request->hasFile(
+                    'lampiran_file'
+                )
+            ) {
+                $storedAttachment =
+                    $this->storeUploadedFile(
+                        $request->file(
+                            'lampiran_file'
+                        )
+                    );
 
-                $data['lampiran_file'] = $storedAttachment;
+                $data['lampiran_file'] =
+                    $storedAttachment;
             }
 
             /*
@@ -467,9 +632,10 @@ class SuratKeluarController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            $suratKeluar = SuratKeluar::create(
-                $data
-            );
+            $suratKeluar =
+                SuratKeluar::create(
+                    $data
+                );
 
             /*
             |--------------------------------------------------------------------------
@@ -480,7 +646,8 @@ class SuratKeluarController extends Controller
             $this->logActivity(
                 'create',
                 'surat_keluar',
-                'Menambahkan surat keluar #' . $suratKeluar->id
+                'Menambahkan surat keluar #' .
+                $suratKeluar->id
             );
 
             return redirect()
@@ -491,7 +658,15 @@ class SuratKeluarController extends Controller
                     'success',
                     'Surat keluar berhasil ditambahkan.'
                 );
+
         } catch (Throwable $e) {
+
+            /*
+            |--------------------------------------------------------------------------
+            | HAPUS FILE JIKA DATABASE GAGAL
+            |--------------------------------------------------------------------------
+            */
+
             if ($storedAttachment) {
                 $this->deleteAttachment(
                     $storedAttachment
@@ -501,14 +676,25 @@ class SuratKeluarController extends Controller
             Log::error(
                 'Gagal menyimpan surat keluar.',
                 [
-                    'message' => $e->getMessage(),
-                    'user_id' => Auth::id(),
-                    'disk' => $this->getStorageDisk(),
-                    'file' => $request->hasFile('lampiran_file')
-                        ? $request
-                            ->file('lampiran_file')
-                            ->getClientOriginalName()
-                        : null,
+                    'message' =>
+                        $e->getMessage(),
+
+                    'user_id' =>
+                        Auth::id(),
+
+                    'disk' =>
+                        $this->getStorageDisk(),
+
+                    'file' =>
+                        $request->hasFile(
+                            'lampiran_file'
+                        )
+                            ? $request
+                                ->file(
+                                    'lampiran_file'
+                                )
+                                ->getClientOriginalName()
+                            : null,
                 ]
             );
 
@@ -558,21 +744,23 @@ class SuratKeluarController extends Controller
     ) {
         $this->authorizeManageSurat();
 
-        $kategoris = KategoriSurat::query()
-            ->orderBy(
-                'nama_kategori'
-            )
-            ->get();
+        $kategoris =
+            KategoriSurat::query()
+                ->orderBy(
+                    'nama_kategori'
+                )
+                ->get();
 
-        $users = User::query()
-            ->where(
-                'is_active',
-                true
-            )
-            ->orderBy(
-                'name'
-            )
-            ->get();
+        $users =
+            User::query()
+                ->where(
+                    'is_active',
+                    true
+                )
+                ->orderBy(
+                    'name'
+                )
+                ->get();
 
         return view(
             'surat_keluar.edit',
@@ -596,15 +784,23 @@ class SuratKeluarController extends Controller
     ) {
         $this->authorizeManageSurat();
 
-        $data = $request->validated();
+        $data =
+            $request->validated();
 
-        if (array_key_exists('status', $data)) {
-            $data['status'] = $this->getValidStatus(
-                $data['status']
-            );
+        if (
+            array_key_exists(
+                'status',
+                $data
+            )
+        ) {
+            $data['status'] =
+                $this->getValidStatus(
+                    $data['status']
+                );
         }
 
-        $oldAttachment = $suratKeluar->lampiran_file;
+        $oldAttachment =
+            $suratKeluar->lampiran_file;
 
         $newAttachment = null;
 
@@ -615,12 +811,21 @@ class SuratKeluarController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            if ($request->hasFile('lampiran_file')) {
-                $newAttachment = $this->storeUploadedFile(
-                    $request->file('lampiran_file')
-                );
+            if (
+                $request->hasFile(
+                    'lampiran_file'
+                )
+            ) {
+                $newAttachment =
+                    $this->storeUploadedFile(
+                        $request->file(
+                            'lampiran_file'
+                        )
+                    );
 
-                $data['lampiran_file'] = $newAttachment;
+                $data['lampiran_file'] =
+                    $newAttachment;
+
             } else {
                 unset(
                     $data['lampiran_file']
@@ -644,9 +849,10 @@ class SuratKeluarController extends Controller
             */
 
             if (
-                $newAttachment
-                && $oldAttachment
-                && $oldAttachment !== $newAttachment
+                $newAttachment &&
+                $oldAttachment &&
+                $oldAttachment !==
+                    $newAttachment
             ) {
                 $this->deleteAttachment(
                     $oldAttachment
@@ -662,7 +868,8 @@ class SuratKeluarController extends Controller
             $this->logActivity(
                 'update',
                 'surat_keluar',
-                'Mengubah surat keluar #' . $suratKeluar->id
+                'Mengubah surat keluar #' .
+                $suratKeluar->id
             );
 
             return redirect()
@@ -673,10 +880,19 @@ class SuratKeluarController extends Controller
                     'success',
                     'Surat keluar berhasil diperbarui.'
                 );
+
         } catch (Throwable $e) {
+
+            /*
+            |--------------------------------------------------------------------------
+            | HAPUS FILE BARU JIKA GAGAL
+            |--------------------------------------------------------------------------
+            */
+
             if (
-                $newAttachment
-                && $newAttachment !== $oldAttachment
+                $newAttachment &&
+                $newAttachment !==
+                    $oldAttachment
             ) {
                 $this->deleteAttachment(
                     $newAttachment
@@ -686,10 +902,17 @@ class SuratKeluarController extends Controller
             Log::error(
                 'Gagal memperbarui surat keluar.',
                 [
-                    'surat_keluar_id' => $suratKeluar->id,
-                    'message' => $e->getMessage(),
-                    'user_id' => Auth::id(),
-                    'disk' => $this->getStorageDisk(),
+                    'surat_keluar_id' =>
+                        $suratKeluar->id,
+
+                    'message' =>
+                        $e->getMessage(),
+
+                    'user_id' =>
+                        Auth::id(),
+
+                    'disk' =>
+                        $this->getStorageDisk(),
                 ]
             );
 
@@ -714,12 +937,26 @@ class SuratKeluarController extends Controller
     ) {
         $this->authorizeManageSurat();
 
-        $id = $suratKeluar->id;
+        $id =
+            $suratKeluar->id;
 
-        $attachment = $suratKeluar->lampiran_file;
+        $attachment =
+            $suratKeluar->lampiran_file;
 
         try {
+            /*
+            |--------------------------------------------------------------------------
+            | SOFT DELETE
+            |--------------------------------------------------------------------------
+            */
+
             $suratKeluar->delete();
+
+            /*
+            |--------------------------------------------------------------------------
+            | HAPUS LAMPIRAN
+            |--------------------------------------------------------------------------
+            */
 
             if ($attachment) {
                 $this->deleteAttachment(
@@ -727,10 +964,17 @@ class SuratKeluarController extends Controller
                 );
             }
 
+            /*
+            |--------------------------------------------------------------------------
+            | LOG
+            |--------------------------------------------------------------------------
+            */
+
             $this->logActivity(
                 'delete',
                 'surat_keluar',
-                'Menghapus surat keluar #' . $id
+                'Menghapus surat keluar #' .
+                $id
             );
 
             return redirect()
@@ -741,13 +985,20 @@ class SuratKeluarController extends Controller
                     'success',
                     'Surat keluar berhasil dipindahkan ke sampah.'
                 );
+
         } catch (Throwable $e) {
+
             Log::error(
                 'Gagal menghapus surat keluar.',
                 [
-                    'surat_keluar_id' => $id,
-                    'message' => $e->getMessage(),
-                    'user_id' => Auth::id(),
+                    'surat_keluar_id' =>
+                        $id,
+
+                    'message' =>
+                        $e->getMessage(),
+
+                    'user_id' =>
+                        Auth::id(),
                 ]
             );
 
@@ -771,7 +1022,8 @@ class SuratKeluarController extends Controller
     ) {
         $this->ensureUserAuthenticated();
 
-        $path = $suratKeluar->lampiran_file;
+        $path =
+            $suratKeluar->lampiran_file;
 
         if (!$path) {
             abort(
@@ -797,10 +1049,12 @@ class SuratKeluarController extends Controller
             );
         }
 
-        $diskName = $this->getStorageDisk();
+        $diskName =
+            $this->getStorageDisk();
 
         try {
-            $disk = $this->storage();
+            $disk =
+                $this->storage();
 
             /*
             |--------------------------------------------------------------------------
@@ -808,7 +1062,11 @@ class SuratKeluarController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            if (!$disk->exists($path)) {
+            if (
+                !$disk->exists(
+                    $path
+                )
+            ) {
                 abort(
                     404,
                     'File lampiran tidak ditemukan di storage.'
@@ -822,27 +1080,33 @@ class SuratKeluarController extends Controller
             */
 
             if (
-                $diskName === 'supabase'
-                && method_exists(
+                $diskName === 'supabase' &&
+                method_exists(
                     $disk,
                     'temporaryUrl'
                 )
             ) {
                 try {
-                    $temporaryUrl = $disk->temporaryUrl(
-                        $path,
-                        now()->addMinutes(10)
-                    );
+                    $temporaryUrl =
+                        $disk->temporaryUrl(
+                            $path,
+                            now()->addMinutes(10)
+                        );
 
                     return redirect()->away(
                         $temporaryUrl
                     );
+
                 } catch (Throwable $e) {
+
                     Log::warning(
                         'Gagal membuat temporary URL surat keluar.',
                         [
-                            'path' => $path,
-                            'message' => $e->getMessage(),
+                            'path' =>
+                                $path,
+
+                            'message' =>
+                                $e->getMessage(),
                         ]
                     );
                 }
@@ -854,7 +1118,10 @@ class SuratKeluarController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            $stream = $disk->readStream($path);
+            $stream =
+                $disk->readStream(
+                    $path
+                );
 
             if ($stream === false) {
                 throw new RuntimeException(
@@ -863,17 +1130,30 @@ class SuratKeluarController extends Controller
             }
 
             return response()->stream(
-                function () use ($stream): void {
-                    fpassthru($stream);
+                function () use (
+                    $stream
+                ): void {
 
-                    if (is_resource($stream)) {
-                        fclose($stream);
+                    fpassthru(
+                        $stream
+                    );
+
+                    if (
+                        is_resource(
+                            $stream
+                        )
+                    ) {
+                        fclose(
+                            $stream
+                        );
                     }
                 },
                 200,
                 [
                     'Content-Type' =>
-                        $this->getMimeTypeFromPath($path),
+                        $this->getMimeTypeFromPath(
+                            $path
+                        ),
 
                     'Content-Disposition' =>
                         'inline',
@@ -882,14 +1162,23 @@ class SuratKeluarController extends Controller
                         'private, max-age=300',
                 ]
             );
+
         } catch (Throwable $e) {
+
             Log::error(
                 'Gagal preview lampiran surat keluar.',
                 [
-                    'path' => $path,
-                    'message' => $e->getMessage(),
-                    'disk' => $diskName,
-                    'surat_keluar_id' => $suratKeluar->id,
+                    'path' =>
+                        $path,
+
+                    'message' =>
+                        $e->getMessage(),
+
+                    'disk' =>
+                        $diskName,
+
+                    'surat_keluar_id' =>
+                        $suratKeluar->id,
                 ]
             );
 
@@ -978,24 +1267,27 @@ class SuratKeluarController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | STORAGE
+    | STORAGE DISK
     |--------------------------------------------------------------------------
     */
 
     private function getStorageDisk(): string
     {
-        $disk = strtolower(
-            trim(
-                (string) config(
-                    'filesystems.default',
-                    'public'
+        $disk =
+            strtolower(
+                trim(
+                    (string) config(
+                        'filesystems.default',
+                        'supabase'
+                    )
                 )
-            )
-        );
+            );
 
-        return $disk !== ''
-            ? $disk
-            : 'public';
+        if ($disk === '') {
+            return 'supabase';
+        }
+
+        return $disk;
     }
 
     private function storage(): FilesystemAdapter
@@ -1011,19 +1303,6 @@ class SuratKeluarController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    /**
-     * Menyimpan file upload langsung ke storage.
-     *
-     * Tidak menggunakan GD.
-     * Tidak menggunakan file_get_contents().
-     *
-     * Validasi berdasarkan signature/header:
-     * - PDF
-     * - JPG/JPEG
-     * - PNG
-     *
-     * Maksimal 10 MB.
-     */
     private function storeUploadedFile(
         ?UploadedFile $file
     ): string {
@@ -1059,7 +1338,8 @@ class SuratKeluarController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $fileSize = $file->getSize();
+        $fileSize =
+            $file->getSize();
 
         if (
             $fileSize === false ||
@@ -1071,7 +1351,8 @@ class SuratKeluarController extends Controller
         }
 
         if (
-            $fileSize > self::MAX_FILE_SIZE
+            $fileSize >
+            self::MAX_FILE_SIZE
         ) {
             throw new RuntimeException(
                 'Ukuran file lampiran maksimal 10 MB.'
@@ -1084,13 +1365,17 @@ class SuratKeluarController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $extension = strtolower(
-            trim(
-                (string) $file->getClientOriginalExtension()
-            )
-        );
+        $extension =
+            strtolower(
+                trim(
+                    (string) $file
+                        ->getClientOriginalExtension()
+                )
+            );
 
-        if ($extension === 'jpeg') {
+        if (
+            $extension === 'jpeg'
+        ) {
             $extension = 'jpg';
         }
 
@@ -1113,7 +1398,8 @@ class SuratKeluarController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $realPath = $file->getRealPath();
+        $realPath =
+            $file->getRealPath();
 
         if (
             !$realPath ||
@@ -1128,17 +1414,13 @@ class SuratKeluarController extends Controller
         |--------------------------------------------------------------------------
         | BACA SIGNATURE
         |--------------------------------------------------------------------------
-        |
-        | Hanya membaca 16 byte pertama.
-        | Tidak menggunakan GD.
-        | Tidak menggunakan file_get_contents().
-        |
         */
 
-        $handle = fopen(
-            $realPath,
-            'rb'
-        );
+        $handle =
+            fopen(
+                $realPath,
+                'rb'
+            );
 
         if ($handle === false) {
             throw new RuntimeException(
@@ -1146,12 +1428,15 @@ class SuratKeluarController extends Controller
             );
         }
 
-        $header = fread(
-            $handle,
-            16
-        );
+        $header =
+            fread(
+                $handle,
+                16
+            );
 
-        fclose($handle);
+        fclose(
+            $handle
+        );
 
         if (
             $header === false ||
@@ -1168,20 +1453,23 @@ class SuratKeluarController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $isPng = str_starts_with(
-            $header,
-            "\x89PNG\r\n\x1a\n"
-        );
+        $isPng =
+            str_starts_with(
+                $header,
+                "\x89PNG\r\n\x1a\n"
+            );
 
-        $isJpeg = str_starts_with(
-            $header,
-            "\xFF\xD8\xFF"
-        );
+        $isJpeg =
+            str_starts_with(
+                $header,
+                "\xFF\xD8\xFF"
+            );
 
-        $isPdf = str_starts_with(
-            $header,
-            '%PDF'
-        );
+        $isPdf =
+            str_starts_with(
+                $header,
+                '%PDF'
+            );
 
         /*
         |--------------------------------------------------------------------------
@@ -1221,40 +1509,42 @@ class SuratKeluarController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | TENTUKAN MIME DARI SIGNATURE
+        | MIME
         |--------------------------------------------------------------------------
         */
 
-        $mimeType = match (true) {
-            $isPng =>
-                'image/png',
+        $mimeType =
+            match (true) {
+                $isPng =>
+                    'image/png',
 
-            $isJpeg =>
-                'image/jpeg',
+                $isJpeg =>
+                    'image/jpeg',
 
-            $isPdf =>
-                'application/pdf',
+                $isPdf =>
+                    'application/pdf',
 
-            default =>
-                null,
-        };
+                default =>
+                    null,
+            };
 
         if ($mimeType === null) {
             throw new RuntimeException(
-                'Isi file tidak dikenali sebagai ' .
-                'PDF, JPG/JPEG, atau PNG.'
+                'Isi file tidak dikenali sebagai PDF, JPG/JPEG, atau PNG.'
             );
         }
 
         /*
         |--------------------------------------------------------------------------
-        | NAMA FILE
+        | FILE NAME
         |--------------------------------------------------------------------------
         */
 
         $fileName =
             'surat-keluar_' .
-            now()->format('Ymd_His') .
+            now()->format(
+                'Ymd_His'
+            ) .
             '_' .
             Str::lower(
                 Str::random(20)
@@ -1278,19 +1568,16 @@ class SuratKeluarController extends Controller
         */
 
         $options = [
-            'ContentType' => $mimeType,
+            'ContentType' =>
+                $mimeType,
         ];
 
-        /*
-        |--------------------------------------------------------------------------
-        | SUPABASE
-        |--------------------------------------------------------------------------
-        */
-
         if (
-            $this->getStorageDisk() === 'supabase'
+            $this->getStorageDisk() ===
+            'supabase'
         ) {
-            $options['visibility'] = 'private';
+            $options['visibility'] =
+                'private';
         }
 
         /*
@@ -1300,14 +1587,16 @@ class SuratKeluarController extends Controller
         */
 
         try {
-            $disk = $this->storage();
+            $disk =
+                $this->storage();
 
-            $savedPath = $disk->putFileAs(
-                $directory,
-                $file,
-                $fileName,
-                $options
-            );
+            $savedPath =
+                $disk->putFileAs(
+                    $directory,
+                    $file,
+                    $fileName,
+                    $options
+                );
 
             if (
                 $savedPath === false ||
@@ -1321,7 +1610,7 @@ class SuratKeluarController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | VERIFIKASI FILE
+            | VERIFIKASI STORAGE
             |--------------------------------------------------------------------------
             */
 
@@ -1336,11 +1625,14 @@ class SuratKeluarController extends Controller
             }
 
             return $savedPath;
+
         } catch (Throwable $e) {
+
             Log::error(
                 'Gagal menyimpan file surat keluar.',
                 [
-                    'message' => $e->getMessage(),
+                    'message' =>
+                        $e->getMessage(),
 
                     'path' =>
                         $directory .
@@ -1364,8 +1656,7 @@ class SuratKeluarController extends Controller
             throw new RuntimeException(
                 'Gagal menyimpan file ke storage: ' .
                 $e->getMessage(),
-                0,
-                $e
+                previous: $e
             );
         }
     }
@@ -1388,7 +1679,7 @@ class SuratKeluarController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | JANGAN HAPUS URL EXTERNAL
+        | URL EXTERNAL JANGAN DIHAPUS
         |--------------------------------------------------------------------------
         */
 
@@ -1402,7 +1693,8 @@ class SuratKeluarController extends Controller
         }
 
         try {
-            $disk = $this->storage();
+            $disk =
+                $this->storage();
 
             if (
                 $disk->exists(
@@ -1413,13 +1705,20 @@ class SuratKeluarController extends Controller
                     $path
                 );
             }
+
         } catch (Throwable $e) {
+
             Log::warning(
                 'Gagal menghapus lampiran surat keluar.',
                 [
-                    'path' => $path,
-                    'message' => $e->getMessage(),
-                    'disk' => $this->getStorageDisk(),
+                    'path' =>
+                        $path,
+
+                    'message' =>
+                        $e->getMessage(),
+
+                    'disk' =>
+                        $this->getStorageDisk(),
                 ]
             );
         }
@@ -1464,19 +1763,20 @@ class SuratKeluarController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | MIME TYPE DARI PATH
+    | MIME TYPE
     |--------------------------------------------------------------------------
     */
 
     private function getMimeTypeFromPath(
         string $path
     ): string {
-        $extension = strtolower(
-            pathinfo(
-                $path,
-                PATHINFO_EXTENSION
-            )
-        );
+        $extension =
+            strtolower(
+                pathinfo(
+                    $path,
+                    PATHINFO_EXTENSION
+                )
+            );
 
         return match ($extension) {
             'pdf' =>
@@ -1507,13 +1807,8 @@ class SuratKeluarController extends Controller
             return false;
         }
 
-        $date = trim($date);
-
-        /*
-        |--------------------------------------------------------------------------
-        | FORMAT YYYY-MM-DD
-        |--------------------------------------------------------------------------
-        */
+        $date =
+            trim($date);
 
         if (
             !preg_match(
@@ -1524,10 +1819,11 @@ class SuratKeluarController extends Controller
             return false;
         }
 
-        $parts = explode(
-            '-',
-            $date
-        );
+        $parts =
+            explode(
+                '-',
+                $date
+            );
 
         if (
             count($parts) !== 3
@@ -1569,20 +1865,20 @@ class SuratKeluarController extends Controller
                     $description
                 );
             }
+
         } catch (Throwable $e) {
-            /*
-            |--------------------------------------------------------------------------
-            | Activity log tidak boleh menggagalkan
-            | proses surat.
-            |--------------------------------------------------------------------------
-            */
 
             Log::warning(
                 'Gagal mencatat Activity Log surat keluar.',
                 [
-                    'message' => $e->getMessage(),
-                    'action' => $action,
-                    'module' => $module,
+                    'message' =>
+                        $e->getMessage(),
+
+                    'action' =>
+                        $action,
+
+                    'module' =>
+                        $module,
                 ]
             );
         }

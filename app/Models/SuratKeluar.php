@@ -103,8 +103,10 @@ class SuratKeluar extends Model
      * Generate nomor surat otomatis.
      *
      * Contoh:
-     *
      * 001/ABC/IX/2026
+     *
+     * Nomor urut berdasarkan jumlah surat keluar
+     * pada tahun berjalan.
      */
     public static function generateNomorSurat(
         string $kodeKategori
@@ -128,10 +130,15 @@ class SuratKeluar extends Model
         $bulan = $romawi[now()->month];
 
         $urutan = self::withTrashed()
-            ->whereYear('created_at', $tahun)
+            ->whereYear(
+                'created_at',
+                $tahun
+            )
             ->count() + 1;
 
-        $kodeKategori = trim($kodeKategori);
+        $kodeKategori = trim(
+            $kodeKategori
+        );
 
         if ($kodeKategori === '') {
             $kodeKategori = 'SURAT';
@@ -155,122 +162,165 @@ class SuratKeluar extends Model
     /**
      * Scope filter surat keluar.
      *
-     * Mendukung:
+     * Filter yang didukung:
      *
      * - search
-     * - kategori
+     * - kategori_surat_id
+     * - kategori_id
      * - status
      * - pengirim
-     * - tanggal keluar
+     * - dari_tanggal
+     * - sampai_tanggal
      */
     public function scopeFilter(
         Builder $query,
         array $filters = []
     ): Builder {
+
         /*
         |--------------------------------------------------------------------------
         | SEARCH
         |--------------------------------------------------------------------------
         */
 
-        $search = isset($filters['search'])
-            ? trim((string) $filters['search'])
+        $search = isset(
+            $filters['search']
+        )
+            ? trim(
+                (string) $filters['search']
+            )
             : '';
 
         if ($search !== '') {
-            $keyword = '%' . $search . '%';
+            $keyword =
+                '%' .
+                $search .
+                '%';
 
             $query->where(
-                function (Builder $q) use ($keyword): void {
-                    $q->where(
-                        'nomor_surat',
-                        'like',
-                        $keyword
-                    )
-                    ->orWhere(
-                        'perihal',
-                        'like',
-                        $keyword
-                    )
-                    ->orWhere(
-                        'pengirim',
-                        'like',
-                        $keyword
-                    )
-                    ->orWhere(
-                        'ringkasan',
-                        'like',
-                        $keyword
-                    )
-                    ->orWhereHas(
-                        'kategori',
-                        function (
-                            Builder $kategori
-                        ) use ($keyword): void {
-                            $kategori
-                                ->where(
-                                    'nama_kategori',
-                                    'like',
-                                    $keyword
-                                )
-                                ->orWhere(
-                                    'kode',
-                                    'like',
-                                    $keyword
-                                )
-                                ->orWhere(
-                                    'sifat',
-                                    'like',
-                                    $keyword
-                                );
-                        }
-                    )
-                    ->orWhereHas(
-                        'pembuat',
-                        function (
-                            Builder $user
-                        ) use ($keyword): void {
-                            $user
-                                ->where(
-                                    'name',
-                                    'like',
-                                    $keyword
-                                )
-                                ->orWhere(
-                                    'email',
-                                    'like',
-                                    $keyword
-                                )
-                                ->orWhere(
-                                    'jabatan',
-                                    'like',
-                                    $keyword
-                                );
-                        }
-                    )
-                    ->orWhereHas(
-                        'penandatangan',
-                        function (
-                            Builder $user
-                        ) use ($keyword): void {
-                            $user
-                                ->where(
-                                    'name',
-                                    'like',
-                                    $keyword
-                                )
-                                ->orWhere(
-                                    'email',
-                                    'like',
-                                    $keyword
-                                )
-                                ->orWhere(
-                                    'jabatan',
-                                    'like',
-                                    $keyword
-                                );
-                        }
-                    );
+                function (
+                    Builder $q
+                ) use (
+                    $keyword
+                ): void {
+
+                    $q
+                        ->where(
+                            'nomor_surat',
+                            'like',
+                            $keyword
+                        )
+
+                        ->orWhere(
+                            'perihal',
+                            'like',
+                            $keyword
+                        )
+
+                        ->orWhere(
+                            'pengirim',
+                            'like',
+                            $keyword
+                        )
+
+                        ->orWhere(
+                            'tujuan_surat',
+                            'like',
+                            $keyword
+                        )
+
+                        ->orWhere(
+                            'ringkasan',
+                            'like',
+                            $keyword
+                        )
+
+                        ->orWhereHas(
+                            'kategori',
+                            function (
+                                Builder $kategori
+                            ) use (
+                                $keyword
+                            ): void {
+
+                                $kategori
+                                    ->where(
+                                        'nama_kategori',
+                                        'like',
+                                        $keyword
+                                    )
+
+                                    ->orWhere(
+                                        'kode',
+                                        'like',
+                                        $keyword
+                                    )
+
+                                    ->orWhere(
+                                        'sifat',
+                                        'like',
+                                        $keyword
+                                    );
+                            }
+                        )
+
+                        ->orWhereHas(
+                            'pembuat',
+                            function (
+                                Builder $user
+                            ) use (
+                                $keyword
+                            ): void {
+
+                                $user
+                                    ->where(
+                                        'name',
+                                        'like',
+                                        $keyword
+                                    )
+
+                                    ->orWhere(
+                                        'email',
+                                        'like',
+                                        $keyword
+                                    )
+
+                                    ->orWhere(
+                                        'jabatan',
+                                        'like',
+                                        $keyword
+                                    );
+                            }
+                        )
+
+                        ->orWhereHas(
+                            'penandatangan',
+                            function (
+                                Builder $user
+                            ) use (
+                                $keyword
+                            ): void {
+
+                                $user
+                                    ->where(
+                                        'name',
+                                        'like',
+                                        $keyword
+                                    )
+
+                                    ->orWhere(
+                                        'email',
+                                        'like',
+                                        $keyword
+                                    )
+
+                                    ->orWhere(
+                                        'jabatan',
+                                        'like',
+                                        $keyword
+                                    );
+                            }
+                        );
                 }
             );
         }
@@ -287,33 +337,50 @@ class SuratKeluar extends Model
             ?? [];
 
         if (
-            is_scalar($rawKategoriIds)
-            && trim((string) $rawKategoriIds) !== ''
+            is_scalar(
+                $rawKategoriIds
+            ) &&
+            trim(
+                (string) $rawKategoriIds
+            ) !== ''
         ) {
             $rawKategoriIds = [
                 $rawKategoriIds,
             ];
         }
 
-        $kategoriIds = collect(
-            $rawKategoriIds
-        )
-            ->flatten()
-            ->filter(
-                fn ($id) =>
-                    is_scalar($id)
-                    && is_numeric($id)
-                    && (int) $id > 0
+        if (
+            !is_array(
+                $rawKategoriIds
             )
-            ->map(
-                fn ($id) =>
-                    (int) $id
-            )
-            ->unique()
-            ->values()
-            ->all();
+        ) {
+            $rawKategoriIds = [];
+        }
 
-        if (!empty($kategoriIds)) {
+        $kategoriIds =
+            collect(
+                $rawKategoriIds
+            )
+                ->flatten()
+                ->filter(
+                    fn ($id) =>
+                        is_scalar($id) &&
+                        is_numeric($id) &&
+                        (int) $id > 0
+                )
+                ->map(
+                    fn ($id) =>
+                        (int) $id
+                )
+                ->unique()
+                ->values()
+                ->all();
+
+        if (
+            !empty(
+                $kategoriIds
+            )
+        ) {
             $query->whereIn(
                 'kategori_surat_id',
                 $kategoriIds
@@ -339,47 +406,66 @@ class SuratKeluar extends Model
             ?? [];
 
         if (
-            is_scalar($rawStatuses)
-            && trim((string) $rawStatuses) !== ''
+            is_scalar(
+                $rawStatuses
+            ) &&
+            trim(
+                (string) $rawStatuses
+            ) !== ''
         ) {
             $rawStatuses = [
                 $rawStatuses,
             ];
         }
 
-        $statuses = collect(
-            $rawStatuses
-        )
-            ->flatten()
-            ->filter(
-                fn ($status) =>
-                    is_scalar($status)
+        if (
+            !is_array(
+                $rawStatuses
             )
-            ->map(
-                fn ($status) =>
-                    strtolower(
-                        trim((string) $status)
-                    )
-            )
-            ->map(
-                fn ($status) =>
-                    $status === 'draf'
-                        ? 'draft'
-                        : $status
-            )
-            ->filter(
-                fn ($status) =>
-                    in_array(
-                        $status,
-                        $allowedStatuses,
-                        true
-                    )
-            )
-            ->unique()
-            ->values()
-            ->all();
+        ) {
+            $rawStatuses = [];
+        }
 
-        if (!empty($statuses)) {
+        $statuses =
+            collect(
+                $rawStatuses
+            )
+                ->flatten()
+                ->filter(
+                    fn ($status) =>
+                        is_scalar($status)
+                )
+                ->map(
+                    fn ($status) =>
+                        strtolower(
+                            trim(
+                                (string) $status
+                            )
+                        )
+                )
+                ->map(
+                    fn ($status) =>
+                        $status === 'draf'
+                            ? 'draft'
+                            : $status
+                )
+                ->filter(
+                    fn ($status) =>
+                        in_array(
+                            $status,
+                            $allowedStatuses,
+                            true
+                        )
+                )
+                ->unique()
+                ->values()
+                ->all();
+
+        if (
+            !empty(
+                $statuses
+            )
+        ) {
             $query->whereIn(
                 'status',
                 $statuses
@@ -392,26 +478,34 @@ class SuratKeluar extends Model
         |--------------------------------------------------------------------------
         */
 
-        $pengirim = isset(
-            $filters['pengirim']
-        )
-            ? trim(
-                (string) $filters['pengirim']
+        $pengirim =
+            isset(
+                $filters['pengirim']
             )
-            : '';
+                ? trim(
+                    (string) $filters['pengirim']
+                )
+                : '';
 
-        if ($pengirim !== '') {
+        if (
+            $pengirim !== ''
+        ) {
             $query->where(
                 'pengirim',
                 'like',
-                '%' . $pengirim . '%'
+                '%' .
+                $pengirim .
+                '%'
             );
         }
 
         /*
         |--------------------------------------------------------------------------
-        | FILTER TANGGAL KELUAR
+        | FILTER TANGGAL
         |--------------------------------------------------------------------------
+        |
+        | Menggunakan tanggal_keluar.
+        |
         */
 
         $dariTanggal =
@@ -424,12 +518,16 @@ class SuratKeluar extends Model
 
         $dariTanggal =
             is_scalar($dariTanggal)
-                ? trim((string) $dariTanggal)
+                ? trim(
+                    (string) $dariTanggal
+                )
                 : '';
 
         $sampaiTanggal =
             is_scalar($sampaiTanggal)
-                ? trim((string) $sampaiTanggal)
+                ? trim(
+                    (string) $sampaiTanggal
+                )
                 : '';
 
         $validDariTanggal =
@@ -444,14 +542,14 @@ class SuratKeluar extends Model
 
         /*
         |--------------------------------------------------------------------------
-        | NORMALISASI RENTANG TANGGAL
+        | NORMALISASI TANGGAL
         |--------------------------------------------------------------------------
         */
 
         if (
-            $validDariTanggal
-            && $validSampaiTanggal
-            && $dariTanggal > $sampaiTanggal
+            $validDariTanggal &&
+            $validSampaiTanggal &&
+            $dariTanggal > $sampaiTanggal
         ) {
             [
                 $dariTanggal,
@@ -468,7 +566,9 @@ class SuratKeluar extends Model
         |--------------------------------------------------------------------------
         */
 
-        if ($validDariTanggal) {
+        if (
+            $validDariTanggal
+        ) {
             $query->whereDate(
                 'tanggal_keluar',
                 '>=',
@@ -482,7 +582,9 @@ class SuratKeluar extends Model
         |--------------------------------------------------------------------------
         */
 
-        if ($validSampaiTanggal) {
+        if (
+            $validSampaiTanggal
+        ) {
             $query->whereDate(
                 'tanggal_keluar',
                 '<=',
@@ -500,24 +602,28 @@ class SuratKeluar extends Model
     */
 
     /**
-     * Scope berdasarkan status.
+     * Scope berdasarkan satu status.
      */
     public function scopeStatus(
         Builder $query,
         ?string $status
     ): Builder {
+
         if (
-            $status === null
-            || trim($status) === ''
+            $status === null ||
+            trim($status) === ''
         ) {
             return $query;
         }
 
-        $status = strtolower(
-            trim($status)
-        );
+        $status =
+            strtolower(
+                trim($status)
+            );
 
-        if ($status === 'draf') {
+        if (
+            $status === 'draf'
+        ) {
             $status = 'draft';
         }
 
@@ -582,6 +688,48 @@ class SuratKeluar extends Model
         );
     }
 
+    /**
+     * Surat yang selesai.
+     */
+    public function scopeSelesai(
+        Builder $query
+    ): Builder {
+        return $query->whereIn(
+            'status',
+            [
+                'dikirim',
+                'diarsipkan',
+            ]
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | URUTAN DATA
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * Surat terbaru berdasarkan tanggal keluar.
+     */
+    public function scopeTerbaru(
+        Builder $query
+    ): Builder {
+        return $query
+            ->orderByRaw(
+                'tanggal_keluar IS NULL ASC'
+            )
+            ->orderByDesc(
+                'tanggal_keluar'
+            )
+            ->orderByDesc(
+                'created_at'
+            )
+            ->orderByDesc(
+                'id'
+            );
+    }
+
     /*
     |--------------------------------------------------------------------------
     | STATUS CHECK
@@ -590,27 +738,37 @@ class SuratKeluar extends Model
 
     public function isDraft(): bool
     {
-        return $this->status_normalized === 'draft';
+        return
+            $this->status_normalized ===
+            'draft';
     }
 
     public function isDiproses(): bool
     {
-        return $this->status_normalized === 'diproses';
+        return
+            $this->status_normalized ===
+            'diproses';
     }
 
     public function isDisetujui(): bool
     {
-        return $this->status_normalized === 'disetujui';
+        return
+            $this->status_normalized ===
+            'disetujui';
     }
 
     public function isDikirim(): bool
     {
-        return $this->status_normalized === 'dikirim';
+        return
+            $this->status_normalized ===
+            'dikirim';
     }
 
     public function isDiarsipkan(): bool
     {
-        return $this->status_normalized === 'diarsipkan';
+        return
+            $this->status_normalized ===
+            'diarsipkan';
     }
 
     /*
@@ -620,21 +778,20 @@ class SuratKeluar extends Model
     */
 
     /**
-     * Status yang sudah dinormalisasi.
+     * Status yang telah dinormalisasi.
      */
     public function getStatusNormalizedAttribute(): string
     {
-        $status = strtolower(
-            trim(
-                (string) $this->status
-            )
-        );
+        $status =
+            strtolower(
+                trim(
+                    (string) $this->status
+                )
+            );
 
-        if ($status === 'draf') {
-            return 'draft';
-        }
-
-        return $status;
+        return $status === 'draf'
+            ? 'draft'
+            : $status;
     }
 
     /**
@@ -728,7 +885,9 @@ class SuratKeluar extends Model
      */
     public function getNamaLampiranAttribute(): ?string
     {
-        if (!$this->hasLampiran()) {
+        if (
+            !$this->hasLampiran()
+        ) {
             return null;
         }
 
@@ -744,8 +903,7 @@ class SuratKeluar extends Model
     */
 
     /**
-     * Mengecek apakah surat masih dapat diedit
-     * berdasarkan status.
+     * Mengecek apakah surat masih dapat diedit.
      */
     public function isEditable(): bool
     {
@@ -754,6 +912,28 @@ class SuratKeluar extends Model
             [
                 'draft',
                 'diproses',
+            ],
+            true
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | STATUS SELESAI
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * Mengecek apakah surat sudah selesai
+     * atau masuk arsip.
+     */
+    public function isSelesai(): bool
+    {
+        return in_array(
+            $this->status_normalized,
+            [
+                'dikirim',
+                'diarsipkan',
             ],
             true
         );
@@ -773,17 +953,23 @@ class SuratKeluar extends Model
     private static function validDate(
         mixed $value
     ): bool {
-        if ($value === null) {
+
+        if (
+            $value === null
+        ) {
             return false;
         }
 
-        if (!is_scalar($value)) {
+        if (
+            !is_scalar($value)
+        ) {
             return false;
         }
 
-        $value = trim(
-            (string) $value
-        );
+        $value =
+            trim(
+                (string) $value
+            );
 
         /*
         |--------------------------------------------------------------------------
@@ -800,22 +986,22 @@ class SuratKeluar extends Model
             return false;
         }
 
-        [
-            $year,
-            $month,
-            $day,
-        ] = array_map(
-            'intval',
+        $parts =
             explode(
                 '-',
                 $value
-            )
-        );
+            );
+
+        if (
+            count($parts) !== 3
+        ) {
+            return false;
+        }
 
         return checkdate(
-            $month,
-            $day,
-            $year
+            (int) $parts[1],
+            (int) $parts[2],
+            (int) $parts[0]
         );
     }
 }
