@@ -5,174 +5,355 @@
 @section('content')
 
 @php
+    /* =========================================================
+       STATUS
+    ========================================================== */
+
     $statusClasses = [
-        'menunggu' => 'status-waiting',
-        'diproses' => 'status-processing',
-        'proses'   => 'status-processing',
-        'selesai'  => 'status-done',
+        'menunggu' => 'dd-status-menunggu',
+        'diproses' => 'dd-status-diproses',
+        'proses'   => 'dd-status-diproses',
+        'selesai'  => 'dd-status-selesai',
     ];
 
-    $st = strtolower(trim((string) ($disposisi->status ?? 'menunggu')));
-
-    $statusLabel = [
+    $statusLabels = [
         'menunggu' => 'Menunggu',
         'diproses' => 'Diproses',
         'proses'   => 'Diproses',
         'selesai'  => 'Selesai',
-    ][$st] ?? ucfirst($st);
+    ];
 
-    $isAdmin = auth()->user()->isAdmin();
-    $isSender = auth()->id() === $disposisi->dari_user_id;
-    $isReceiver = auth()->id() === $disposisi->kepada_user_id;
+    $st = strtolower(
+        trim(
+            (string) ($disposisi->status ?? 'menunggu')
+        )
+    );
+
+    $statusLabel =
+        $statusLabels[$st]
+        ?? ucfirst($st);
+
+    $statusClass =
+        $statusClasses[$st]
+        ?? 'dd-status-menunggu';
+
+
+    /* =========================================================
+       HAK AKSES
+    ========================================================== */
+
+    $isAdmin =
+        auth()->user()->isAdmin();
+
+    $isSender =
+        auth()->id() ===
+        $disposisi->dari_user_id;
+
+    $isReceiver =
+        auth()->id() ===
+        $disposisi->kepada_user_id;
+
+
+    /* =========================================================
+       DATA DISPOSISI
+    ========================================================== */
+
+    $pengirimDisposisi =
+        $disposisi->dari?->name
+        ?? $disposisi->pengirim
+        ?? '-';
+
+    $penerimaDisposisi =
+        $disposisi->kepada?->name
+        ?? $disposisi->penerima
+        ?? $disposisi->tujuan
+        ?? '-';
+
+    $jabatanPengirim =
+        $disposisi->dari?->jabatan
+        ?? null;
+
+    $jabatanPenerima =
+        $disposisi->kepada?->jabatan
+        ?? null;
+
+    $instruksi =
+        $disposisi->instruksi
+        ?? $disposisi->catatan
+        ?? $disposisi->isi_disposisi
+        ?? '';
+
+    if (trim((string) $instruksi) === '') {
+        $instruksi =
+            'Tidak ada instruksi atau catatan khusus.';
+    }
+
+
+    /* =========================================================
+       TANGGAL
+    ========================================================== */
+
+    $batasWaktu = '-';
+    $tanggalDibuat = '-';
+
+    try {
+        if ($disposisi->batas_waktu) {
+            $batasWaktu =
+                \Illuminate\Support\Carbon::parse(
+                    $disposisi->batas_waktu
+                )->translatedFormat(
+                    'd F Y'
+                );
+        }
+    } catch (\Throwable $e) {
+        $batasWaktu =
+            (string) $disposisi->batas_waktu;
+    }
+
+    try {
+        if ($disposisi->created_at) {
+            $tanggalDibuat =
+                \Illuminate\Support\Carbon::parse(
+                    $disposisi->created_at
+                )->translatedFormat(
+                    'd F Y H:i'
+                );
+        }
+    } catch (\Throwable $e) {
+        $tanggalDibuat =
+            (string) $disposisi->created_at;
+    }
+
+
+    /* =========================================================
+       SURAT MASUK TERKAIT
+    ========================================================== */
+
+    $suratMasuk =
+        $disposisi->suratMasuk
+        ?? null;
+
+    $nomorAgendaSurat =
+        '-';
+
+    if ($suratMasuk) {
+
+        if (
+            !empty(
+                $suratMasuk->nomor_agenda
+            )
+        ) {
+            $nomorAgendaSurat =
+                'AG/' .
+                $suratMasuk->nomor_agenda;
+        } else {
+            $nomorAgendaSurat =
+                '#' .
+                $suratMasuk->id;
+        }
+    }
 @endphp
+
 
 <style>
     /* =========================================================
        PAGE
-    ========================================================= */
+    ========================================================== */
 
-    .disposisi-detail-page {
+    .dd-detail-page {
         width: 100%;
-        max-width: 1120px;
+        max-width: 1280px;
         margin: 0 auto;
-        padding: 12px 16px 32px;
+        padding: 14px 18px 36px;
         color: #334155;
     }
 
-    .disposisi-detail-page *,
-    .disposisi-detail-page *::before,
-    .disposisi-detail-page *::after {
+    .dd-detail-page *,
+    .dd-detail-page *::before,
+    .dd-detail-page *::after {
         box-sizing: border-box;
     }
 
+
     /* =========================================================
        FLASH
-    ========================================================= */
+    ========================================================== */
 
-    .flash-success {
+    .dd-alert {
         display: flex;
         align-items: center;
-        gap: 10px;
+        justify-content: space-between;
+        gap: 12px;
         margin-bottom: 14px;
-        padding: 10px 13px;
-        border: 2px solid #86efac;
-        border-radius: 10px;
+        padding: 11px 14px;
+        border-radius: 11px;
+    }
+
+    .dd-alert-success {
         background: #f0fdf4;
         color: #166534;
     }
 
-    .flash-success-icon {
+    .dd-alert-inner {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        min-width: 0;
+    }
+
+    .dd-alert-icon {
         width: 30px;
         height: 30px;
-        flex: 0 0 30px;
         display: flex;
         align-items: center;
         justify-content: center;
-        border: 1px solid #86efac;
+        flex: 0 0 30px;
         border-radius: 8px;
         background: #dcfce7;
         color: #16a34a;
     }
 
-    .flash-success-text {
+    .dd-alert-text {
         margin: 0;
         font-size: 11px;
-        line-height: 1.45;
+        line-height: 1.5;
         font-weight: 700;
     }
 
-    /* =========================================================
-       HEADER
-    ========================================================= */
-
-    .page-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 14px;
-        margin-bottom: 14px;
-        padding: 13px 15px;
-        border: 2px solid #64748b;
-        border-radius: 11px;
-        background: #ffffff;
-        box-shadow: 0 3px 8px rgba(15, 23, 42, .05);
-    }
-
-    .page-header-left {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        min-width: 0;
-    }
-
-    .page-back {
-        width: 34px;
-        height: 34px;
-        flex: 0 0 34px;
+    .dd-alert-close {
+        width: 27px;
+        height: 27px;
         display: flex;
         align-items: center;
         justify-content: center;
-        border: 2px solid #cbd5e1;
-        border-radius: 8px;
-        background: #f8fafc;
-        color: #475569;
-        text-decoration: none;
-        transition: .15s ease;
+        flex: 0 0 27px;
+        border: 0;
+        border-radius: 7px;
+        background: transparent;
+        color: #4ade80;
+        cursor: pointer;
     }
 
-    .page-back:hover {
-        border-color: #94a3b8;
-        background: #f1f5f9;
-        color: #1e293b;
+    .dd-alert-close:hover {
+        background: rgba(15, 23, 42, .05);
     }
 
-    .page-header-content {
+
+    /* =========================================================
+       HEADER
+    ========================================================== */
+
+    .dd-header {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        min-height: 84px;
+        margin-bottom: 16px;
+        padding: 17px 20px;
+        overflow: hidden;
+        border-radius: 16px;
+        background:
+            linear-gradient(
+                135deg,
+                #0f172a 0%,
+                #1e293b 55%,
+                #312e81 100%
+            );
+        color: #fff;
+        box-shadow:
+            0 10px 30px rgba(15, 23, 42, .10);
+    }
+
+    .dd-header::after {
+        content: "";
+        position: absolute;
+        width: 180px;
+        height: 180px;
+        right: -70px;
+        top: -100px;
+        border-radius: 50%;
+        background: rgba(99, 102, 241, .15);
+        pointer-events: none;
+    }
+
+    .dd-header-left {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        gap: 12px;
         min-width: 0;
     }
 
-    .breadcrumb {
+    .dd-back {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 40px;
+        border-radius: 10px;
+        background: rgba(255,255,255,.09);
+        color: #fff;
+        text-decoration: none;
+        transition: .16s ease;
+    }
+
+    .dd-back:hover {
+        background: rgba(255,255,255,.17);
+        transform: translateX(-2px);
+    }
+
+    .dd-header-content {
+        min-width: 0;
+    }
+
+    .dd-breadcrumb {
         display: flex;
         align-items: center;
         flex-wrap: wrap;
-        gap: 5px;
-        margin-bottom: 2px;
+        gap: 6px;
+        margin-bottom: 3px;
         font-size: 9px;
         color: #94a3b8;
     }
 
-    .breadcrumb a {
-        color: #64748b;
+    .dd-breadcrumb a {
+        color: #cbd5e1;
         text-decoration: none;
     }
 
-    .breadcrumb a:hover {
-        color: #334155;
+    .dd-breadcrumb a:hover {
+        color: #fff;
     }
 
-    .page-title {
+    .dd-header-title {
         margin: 0;
-        font-size: 18px;
-        line-height: 1.25;
+        font-size: 20px;
+        line-height: 1.3;
         font-weight: 800;
         letter-spacing: -.02em;
-        color: #0f172a;
     }
 
-    .page-subtitle {
-        margin: 3px 0 0;
+    .dd-header-subtitle {
+        margin: 4px 0 0;
         font-size: 10px;
-        line-height: 1.45;
-        color: #64748b;
+        line-height: 1.5;
+        color: #cbd5e1;
     }
 
-    .page-actions {
+    .dd-header-actions {
+        position: relative;
+        z-index: 1;
         display: flex;
         align-items: center;
         gap: 7px;
-        flex: 0 0 auto;
+        flex-wrap: wrap;
     }
 
-    .action-btn {
+    .dd-header-btn {
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -180,208 +361,291 @@
         min-height: 34px;
         padding: 0 11px;
         border-radius: 8px;
-        font-size: 10px;
+        font-size: 9px;
         font-weight: 800;
         text-decoration: none;
-        cursor: pointer;
+        white-space: nowrap;
         transition: .15s ease;
     }
 
-    .action-btn-secondary {
-        border: 2px solid #cbd5e1;
-        background: #f8fafc;
-        color: #475569;
+    .dd-header-btn-back {
+        background: rgba(255,255,255,.09);
+        color: #e2e8f0;
     }
 
-    .action-btn-secondary:hover {
-        border-color: #94a3b8;
-        background: #f1f5f9;
+    .dd-header-btn-back:hover {
+        background: rgba(255,255,255,.17);
     }
 
-    .action-btn-edit {
-        border: 2px solid #d97706;
-        background: #f59e0b;
-        color: #ffffff;
-        box-shadow: 0 2px 5px rgba(245, 158, 11, .15);
+    .dd-header-btn-edit {
+        background: rgba(245,158,11,.15);
+        color: #fde68a;
     }
 
-    .action-btn-edit:hover {
-        background: #d97706;
+    .dd-header-btn-edit:hover {
+        background: rgba(245,158,11,.25);
     }
+
 
     /* =========================================================
-       MAIN LAYOUT
-    ========================================================= */
+       MAIN GRID
+    ========================================================== */
 
-    .content-grid {
+    .dd-top-grid {
         display: grid;
-        grid-template-columns: minmax(0, 1.7fr) minmax(300px, .9fr);
-        gap: 14px;
-        align-items: start;
+        grid-template-columns:
+            minmax(0, 2fr)
+            minmax(330px, .9fr);
+        gap: 16px;
+        align-items: stretch;
     }
+
+    .dd-left-column {
+        min-width: 0;
+        min-height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .dd-right-column {
+        min-width: 0;
+        min-height: 100%;
+        display: flex;
+    }
+
 
     /* =========================================================
        CARD
-    ========================================================= */
+    ========================================================== */
 
-    .card {
+    .dd-card {
+        width: 100%;
         overflow: hidden;
-        border: 2px solid #64748b;
-        border-radius: 11px;
-        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        background: #fff;
         box-shadow:
-            0 3px 8px rgba(15, 23, 42, .05),
-            0 12px 24px rgba(15, 23, 42, .025);
+            0 7px 25px rgba(15,23,42,.055);
     }
 
-    .card-header {
+    .dd-card-header {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 10px;
-        padding: 11px 13px;
-        border-bottom: 2px solid #94a3b8;
-        background: #f8fafc;
+        gap: 12px;
+        min-height: 61px;
+        padding: 11px 15px;
+        border-bottom: 1px solid #e5e7eb;
+        background:
+            linear-gradient(
+                135deg,
+                #f8fafc 0%,
+                #ffffff 55%,
+                #f5f3ff 100%
+            );
     }
 
-    .card-header-title {
-        margin: 0;
-        font-size: 10px;
-        line-height: 1.3;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: .07em;
-        color: #475569;
+    .dd-card-heading {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        min-width: 0;
     }
+
+    .dd-card-heading-icon {
+        width: 34px;
+        height: 34px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 34px;
+        border-radius: 9px;
+        background: #eef2ff;
+        color: #4f46e5;
+    }
+
+    .dd-card-title {
+        margin: 0;
+        font-size: 12px;
+        line-height: 1.35;
+        font-weight: 800;
+        color: #1e293b;
+    }
+
+    .dd-card-subtitle {
+        margin: 2px 0 0;
+        font-size: 9px;
+        line-height: 1.4;
+        color: #94a3b8;
+    }
+
 
     /* =========================================================
-       STATUS
-    ========================================================= */
+       STATUS BADGE
+    ========================================================== */
 
-    .status-badge {
+    .dd-status {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        min-height: 25px;
-        padding: 0 9px;
+        min-height: 27px;
+        padding: 0 10px;
         border-radius: 999px;
-        border: 1.5px solid;
         font-size: 9px;
         font-weight: 800;
-        text-transform: capitalize;
         white-space: nowrap;
     }
 
-    .status-waiting {
-        border-color: #fcd34d;
+    .dd-status-menunggu {
         background: #fffbeb;
         color: #b45309;
     }
 
-    .status-processing {
-        border-color: #93c5fd;
+    .dd-status-diproses {
         background: #eff6ff;
         color: #1d4ed8;
     }
 
-    .status-done {
-        border-color: #86efac;
+    .dd-status-selesai {
         background: #f0fdf4;
         color: #15803d;
     }
 
-    /* =========================================================
-       PRIMARY DETAIL BODY
-    ========================================================= */
 
-    .primary-body {
-        padding: 13px;
+    /* =========================================================
+       DETAIL CARD
+    ========================================================== */
+
+    .dd-detail-card {
+        flex: 1 1 auto;
+        display: flex;
+        flex-direction: column;
     }
+
+    .dd-detail-body {
+        flex: 1 1 auto;
+        padding: 16px 17px 18px;
+        display: flex;
+        flex-direction: column;
+    }
+
 
     /* =========================================================
        META TABLE
-    ========================================================= */
+    ========================================================== */
 
-    .meta-table {
+    .dd-meta-table-wrap {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .dd-meta-table {
+        width: 100%;
+        min-width: 700px;
+        border-collapse: collapse;
+        table-layout: fixed;
         overflow: hidden;
-        border: 2px solid #64748b;
-        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+        border-radius: 11px;
     }
 
-    .meta-grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+    .dd-meta-table td {
+        width: 50%;
+        min-height: 104px;
+        padding: 16px 17px;
+        vertical-align: top;
+        border-right: 1px solid #e5e7eb;
+        border-bottom: 1px solid #e5e7eb;
     }
 
-    .meta-item {
-        min-width: 0;
-        padding: 10px;
-        border-right: 2px solid #94a3b8;
-        border-bottom: 2px solid #94a3b8;
-        background: #ffffff;
-    }
-
-    .meta-item:nth-child(2n) {
+    .dd-meta-table td:last-child {
         border-right: 0;
     }
 
-    .meta-item:nth-last-child(-n + 2) {
+    .dd-meta-table tr:last-child td {
         border-bottom: 0;
     }
 
-    .meta-label {
+    .dd-meta-table tr:nth-child(odd) td:first-child,
+    .dd-meta-table tr:nth-child(even) td:last-child) {
+        background: #f8fafc;
+    }
+
+    .dd-meta-label {
         display: block;
-        margin-bottom: 4px;
+        margin-bottom: 8px;
         font-size: 8px;
         line-height: 1.3;
         font-weight: 800;
         text-transform: uppercase;
-        letter-spacing: .06em;
+        letter-spacing: .08em;
         color: #94a3b8;
     }
 
-    .meta-value {
+    .dd-meta-value {
         margin: 0;
-        font-size: 11px;
-        line-height: 1.45;
+        font-size: 12px;
+        line-height: 1.55;
         font-weight: 750;
         color: #1e293b;
-        word-break: break-word;
+        overflow-wrap: anywhere;
     }
 
-    .meta-secondary {
-        margin: 2px 0 0;
+    .dd-meta-secondary {
+        margin: 3px 0 0;
         font-size: 9px;
-        line-height: 1.35;
+        line-height: 1.4;
         color: #64748b;
     }
 
-    /* =========================================================
-       INSTRUCTION
-    ========================================================= */
-
-    .section-block {
-        margin-top: 13px;
+    .dd-date-value {
+        display: flex;
+        align-items: flex-start;
+        gap: 7px;
     }
 
-    .section-label {
+    .dd-date-icon {
+        width: 15px;
+        height: 15px;
+        flex: 0 0 15px;
+        margin-top: 2px;
+        color: #6366f1;
+    }
+
+
+    /* =========================================================
+       INSTRUKSI
+    ========================================================== */
+
+    .dd-instruction-section {
+        margin-top: 16px;
+        flex: 1 1 auto;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .dd-section-heading {
         display: flex;
         align-items: center;
-        gap: 7px;
-        margin-bottom: 6px;
+        gap: 9px;
+        margin-bottom: 8px;
     }
 
-    .section-marker {
-        width: 4px;
-        height: 18px;
-        flex: 0 0 4px;
-        border-radius: 999px;
-        background: #4f46e5;
+    .dd-section-icon {
+        width: 31px;
+        height: 31px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 31px;
+        border-radius: 9px;
+        background: #eef2ff;
+        color: #4f46e5;
     }
 
-    .section-label-text {
+    .dd-section-title {
         margin: 0;
-        font-size: 10px;
+        font-size: 11px;
         line-height: 1.3;
         font-weight: 800;
         text-transform: uppercase;
@@ -389,44 +653,55 @@
         color: #334155;
     }
 
-    .instruction-box {
-        min-height: 95px;
-        padding: 10px 11px;
-        border: 2px solid #94a3b8;
-        border-radius: 8px;
+    .dd-section-subtitle {
+        margin: 2px 0 0;
+        font-size: 9px;
+        color: #94a3b8;
+    }
+
+    .dd-instruction-box {
+        flex: 1 1 auto;
+        min-height: 140px;
+        padding: 15px 16px;
+        border: 1px solid #e5e7eb;
+        border-radius: 11px;
         background: #f8fafc;
-        color: #334155;
-        font-size: 10px;
-        line-height: 1.65;
-        font-weight: 550;
+    }
+
+    .dd-instruction-text {
+        margin: 0;
+        font-size: 12px;
+        line-height: 1.75;
+        color: #475569;
         white-space: pre-line;
         overflow-wrap: anywhere;
     }
 
-    /* =========================================================
-       STATUS UPDATE
-    ========================================================= */
 
-    .status-update-box {
-        margin-top: 13px;
-        padding-top: 13px;
-        border-top: 2px solid #94a3b8;
+    /* =========================================================
+       UPDATE STATUS
+    ========================================================== */
+
+    .dd-status-update {
+        margin-top: 16px;
+        padding-top: 15px;
+        border-top: 1px solid #e5e7eb;
     }
 
-    .status-form {
+    .dd-status-form {
         display: flex;
         align-items: center;
-        gap: 7px;
+        gap: 8px;
     }
 
-    .status-select {
+    .dd-status-select {
         flex: 1;
         min-width: 0;
-        height: 35px;
-        padding: 0 9px;
-        border: 2px solid #94a3b8;
+        height: 36px;
+        padding: 0 10px;
+        border: 1px solid #d1d5db;
         border-radius: 8px;
-        background: #ffffff;
+        background: #fff;
         color: #334155;
         font-size: 10px;
         font-weight: 700;
@@ -434,244 +709,377 @@
         transition: .15s ease;
     }
 
-    .status-select:focus {
+    .dd-status-select:focus {
         border-color: #6366f1;
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, .08);
+        box-shadow:
+            0 0 0 3px rgba(99,102,241,.08);
     }
 
-    .status-submit {
-        min-height: 35px;
+    .dd-status-submit {
+        min-height: 36px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
         gap: 6px;
-        padding: 0 11px;
-        border: 2px solid #4338ca;
+        padding: 0 12px;
+        border: 1px solid #4f46e5;
         border-radius: 8px;
         background: #4f46e5;
-        color: #ffffff;
+        color: #fff;
         font-size: 10px;
         font-weight: 800;
         cursor: pointer;
-        transition: .15s ease;
         white-space: nowrap;
+        transition: .15s ease;
     }
 
-    .status-submit:hover {
+    .dd-status-submit:hover {
         background: #4338ca;
     }
 
+
     /* =========================================================
-       RELATED LETTER CARD
-    ========================================================= */
+       SURAT TERKAIT
+    ========================================================== */
 
-    .related-header {
-        padding: 12px 13px;
-        border-bottom: 2px solid #334155;
-        background: linear-gradient(
-            135deg,
-            #0f172a,
-            #312e81
-        );
-        color: #ffffff;
-    }
-
-    .related-header-top {
+    .dd-related-card {
+        width: 100%;
+        height: 100%;
         display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 8px;
+        flex-direction: column;
     }
 
-    .related-title {
-        margin: 0;
-        font-size: 10px;
+    .dd-related-body {
+        flex: 1 1 auto;
+        display: flex;
+        flex-direction: column;
+        padding: 16px;
+    }
+
+    .dd-related-agenda {
+        display: inline-flex;
+        align-items: center;
+        align-self: flex-start;
+        min-height: 25px;
+        padding: 0 9px;
+        margin-bottom: 12px;
+        border-radius: 7px;
+        background: #eef2ff;
+        color: #4338ca;
+        font-family:
+            ui-monospace,
+            SFMono-Regular,
+            Menlo,
+            Monaco,
+            Consolas,
+            monospace;
+        font-size: 8px;
+        font-weight: 800;
+    }
+
+    .dd-related-items {
+        display: flex;
+        flex-direction: column;
+        gap: 9px;
+    }
+
+    .dd-related-item {
+        padding: 13px 14px;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        background: #f8fafc;
+    }
+
+    .dd-related-label {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 8px;
         line-height: 1.3;
         font-weight: 800;
         text-transform: uppercase;
         letter-spacing: .07em;
-        color: #c7d2fe;
-    }
-
-    .related-agenda {
-        display: inline-flex;
-        align-items: center;
-        min-height: 22px;
-        padding: 0 7px;
-        border: 1px solid rgba(255,255,255,.16);
-        border-radius: 6px;
-        background: rgba(255,255,255,.08);
-        color: #e0e7ff;
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-        font-size: 8px;
-        font-weight: 800;
-        white-space: nowrap;
-    }
-
-    .related-body {
-        padding: 13px;
-    }
-
-    .related-item {
-        padding: 10px;
-        border: 2px solid #cbd5e1;
-        border-radius: 8px;
-        background: #f8fafc;
-    }
-
-    .related-item + .related-item {
-        margin-top: 8px;
-    }
-
-    .related-label {
-        display: block;
-        margin-bottom: 3px;
-        font-size: 8px;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: .05em;
         color: #94a3b8;
     }
 
-    .related-value {
+    .dd-related-value {
         margin: 0;
-        font-size: 10px;
-        line-height: 1.5;
+        font-size: 11px;
+        line-height: 1.55;
         font-weight: 750;
-        color: #1e293b;
+        color: #334155;
         overflow-wrap: anywhere;
     }
 
-    .related-detail-btn {
+    .dd-related-button {
         width: 100%;
         min-height: 36px;
-        margin-top: 10px;
+        margin-top: auto;
+        padding: 0 10px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
         gap: 6px;
-        border: 2px solid #334155;
         border-radius: 8px;
-        background: #1e293b;
-        color: #ffffff;
-        font-size: 10px;
-        font-weight: 800;
+        background: #4f46e5;
+        color: #fff;
         text-decoration: none;
+        font-size: 9px;
+        font-weight: 800;
         transition: .15s ease;
     }
 
-    .related-detail-btn:hover {
-        background: #0f172a;
+    .dd-related-button:hover {
+        background: #4338ca;
     }
 
-    .empty-related {
-        padding: 16px 10px;
+    .dd-related-empty {
+        flex: 1 1 auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 280px;
+        padding: 28px 12px;
         text-align: center;
-        border: 2px dashed #cbd5e1;
-        border-radius: 8px;
-        background: #f8fafc;
     }
 
-    .empty-related p {
+    .dd-related-empty-icon {
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 11px;
+        border-radius: 14px;
+        background: #f8fafc;
+        color: #94a3b8;
+    }
+
+    .dd-related-empty-title {
         margin: 0;
         font-size: 10px;
+        font-weight: 800;
+        color: #475569;
+    }
+
+    .dd-related-empty-text {
+        margin: 4px 0 0;
+        font-size: 9px;
         line-height: 1.5;
         color: #94a3b8;
-        font-style: italic;
     }
+
 
     /* =========================================================
-       RESPONSIVE
-    ========================================================= */
+       FOOTER
+    ========================================================== */
 
-    @media (max-width: 900px) {
-        .content-grid {
+    .dd-footer {
+        margin-top: 12px;
+        text-align: center;
+    }
+
+    .dd-footer span {
+        font-size: 8px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        color: #cbd5e1;
+    }
+
+
+    /* =========================================================
+       TABLET
+    ========================================================== */
+
+    @media (max-width: 980px) {
+
+        .dd-top-grid {
             grid-template-columns: 1fr;
+            align-items: start;
+        }
+
+        .dd-right-column {
+            min-height: auto;
+        }
+
+        .dd-related-card {
+            height: auto;
+        }
+
+        .dd-related-button {
+            margin-top: 16px;
         }
     }
 
-    @media (max-width: 680px) {
-        .disposisi-detail-page {
-            padding: 8px 10px 20px;
+
+    /* =========================================================
+       MOBILE
+    ========================================================== */
+
+    @media (max-width: 700px) {
+
+        .dd-detail-page {
+            padding: 9px 10px 25px;
         }
 
-        .page-header {
-            align-items: stretch;
-            flex-direction: column;
-        }
-
-        .page-actions {
-            width: 100%;
-        }
-
-        .action-btn {
-            flex: 1;
-        }
-
-        .meta-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .meta-item,
-        .meta-item:nth-child(2n),
-        .meta-item:nth-last-child(-n + 2) {
-            border-right: 0;
-            border-bottom: 2px solid #94a3b8;
-        }
-
-        .meta-item:last-child {
-            border-bottom: 0;
-        }
-
-        .status-form {
-            flex-direction: column;
-            align-items: stretch;
-        }
-
-        .status-select,
-        .status-submit {
-            width: 100%;
-        }
-    }
-
-    @media (max-width: 450px) {
-        .page-header-left {
+        .dd-header {
             align-items: flex-start;
+            flex-direction: column;
+            padding: 15px;
         }
 
-        .page-title {
-            font-size: 16px;
+        .dd-header-left {
+            width: 100%;
         }
 
-        .page-subtitle {
+        .dd-header-actions {
+            width: 100%;
+            justify-content: flex-start;
+            padding-top: 9px;
+            border-top: 1px solid rgba(255,255,255,.10);
+        }
+
+        .dd-header-btn {
+            flex: 1 1 auto;
+        }
+
+        .dd-card-header {
+            padding: 11px 13px;
+        }
+
+        .dd-meta-table {
+            min-width: 620px;
+        }
+
+        .dd-meta-table td {
+            min-height: 98px;
+            padding: 15px;
+        }
+
+        .dd-detail-body,
+        .dd-related-body {
+            padding: 14px;
+        }
+
+        .dd-status-form {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .dd-status-select,
+        .dd-status-submit {
+            width: 100%;
+        }
+    }
+
+
+    /* =========================================================
+       SMALL MOBILE
+    ========================================================== */
+
+    @media (max-width: 470px) {
+
+        .dd-header-title {
+            font-size: 18px;
+        }
+
+        .dd-header-subtitle {
             font-size: 9px;
         }
 
-        .page-actions {
+        .dd-header-actions {
             flex-direction: column;
         }
 
-        .action-btn {
+        .dd-header-btn {
             width: 100%;
         }
 
-        .related-header-top {
-            align-items: flex-start;
-            flex-direction: column;
+        .dd-card-subtitle,
+        .dd-section-subtitle {
+            display: none;
+        }
+
+        .dd-meta-table {
+            min-width: 0;
+        }
+
+        .dd-meta-table,
+        .dd-meta-table tbody,
+        .dd-meta-table tr,
+        .dd-meta-table td {
+            display: block;
+            width: 100%;
+        }
+
+        .dd-meta-table td {
+            min-height: 82px;
+            border-right: 0;
+        }
+
+        .dd-meta-table tr:last-child td:last-child {
+            border-bottom: 0;
+        }
+
+        .dd-meta-value {
+            font-size: 11px;
+        }
+
+        .dd-instruction-box {
+            min-height: 130px;
         }
     }
 </style>
 
 
-<div class="disposisi-detail-page">
+<div class="dd-detail-page">
 
-    {{-- =========================================================
+    {{-- =====================================================
          FLASH SUCCESS
-    ========================================================== --}}
-    @if(session('success'))
-        <div class="flash-success">
+    ====================================================== --}}
 
-            <div class="flash-success-icon">
+    @if(session('success'))
+
+        <div
+            class="dd-alert dd-alert-success"
+            role="alert"
+        >
+
+            <div class="dd-alert-inner">
+
+                <div class="dd-alert-icon">
+
+                    <svg
+                        class="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M5 13l4 4L19 7"
+                        />
+                    </svg>
+
+                </div>
+
+                <p class="dd-alert-text">
+                    {{ session('success') }}
+                </p>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="dd-alert-close"
+                onclick="this.closest('[role=alert]')?.remove()"
+                aria-label="Tutup"
+            >
+
                 <svg
                     class="w-4 h-4"
                     fill="none"
@@ -682,31 +1090,32 @@
                         stroke-linecap="round"
                         stroke-linejoin="round"
                         stroke-width="2"
-                        d="M5 13l4 4L19 7"
+                        d="M6 18L18 6M6 6l12 12"
                     />
                 </svg>
-            </div>
 
-            <p class="flash-success-text">
-                {{ session('success') }}
-            </p>
+            </button>
 
         </div>
+
     @endif
 
 
-    {{-- =========================================================
-         PAGE HEADER
-    ========================================================== --}}
-    <div class="page-header">
+    {{-- =====================================================
+         HEADER
+    ====================================================== --}}
 
-        <div class="page-header-left">
+    <div class="dd-header">
+
+        <div class="dd-header-left">
 
             <a
                 href="{{ route('disposisi.index') }}"
-                class="page-back"
-                title="Kembali ke daftar disposisi"
+                class="dd-back"
+                title="Kembali"
+                aria-label="Kembali ke daftar disposisi"
             >
+
                 <svg
                     class="w-4 h-4"
                     fill="none"
@@ -720,12 +1129,14 @@
                         d="M10 19l-7-7m0 0l7-7m-7 7h18"
                     />
                 </svg>
+
             </a>
 
 
-            <div class="page-header-content">
+            <div class="dd-header-content">
 
-                <div class="breadcrumb">
+                <div class="dd-breadcrumb">
+
                     <a href="{{ route('disposisi.index') }}">
                         Disposisi
                     </a>
@@ -735,14 +1146,17 @@
                     <span>
                         Detail
                     </span>
+
                 </div>
 
-                <h1 class="page-title">
-                    Detail Disposisi Surat
+
+                <h1 class="dd-header-title">
+                    Detail Disposisi
                 </h1>
 
-                <p class="page-subtitle">
-                    Informasi lengkap disposisi dan surat masuk yang terkait.
+
+                <p class="dd-header-subtitle">
+                    Informasi disposisi dan surat masuk yang terkait.
                 </p>
 
             </div>
@@ -750,12 +1164,13 @@
         </div>
 
 
-        <div class="page-actions">
+        <div class="dd-header-actions">
 
             <a
                 href="{{ route('disposisi.index') }}"
-                class="action-btn action-btn-secondary"
+                class="dd-header-btn dd-header-btn-back"
             >
+
                 <svg
                     class="w-3.5 h-3.5"
                     fill="none"
@@ -771,6 +1186,7 @@
                 </svg>
 
                 Kembali
+
             </a>
 
 
@@ -778,8 +1194,9 @@
 
                 <a
                     href="{{ route('disposisi.edit', $disposisi) }}"
-                    class="action-btn action-btn-edit"
+                    class="dd-header-btn dd-header-btn-edit"
                 >
+
                     <svg
                         class="w-3.5 h-3.5"
                         fill="none"
@@ -795,6 +1212,7 @@
                     </svg>
 
                     Edit Disposisi
+
                 </a>
 
             @endif
@@ -804,240 +1222,219 @@
     </div>
 
 
-    {{-- =========================================================
-         MAIN GRID
-    ========================================================== --}}
-    <div class="content-grid">
+    {{-- =====================================================
+         TOP GRID
+    ====================================================== --}}
+
+    <div class="dd-top-grid">
 
 
-        {{-- =====================================================
-             LEFT / PRIMARY
-        ====================================================== --}}
-        <div class="card">
+        {{-- =================================================
+             KIRI
+             INFORMASI + INSTRUKSI + STATUS
+        ================================================== --}}
 
-            <div class="card-header">
+        <div class="dd-left-column">
 
-                <p class="card-header-title">
-                    Informasi Disposisi
-                </p>
+            <div class="dd-card dd-detail-card">
 
 
-                <span class="status-badge {{ $statusClasses[$st] ?? 'status-processing' }}">
-                    {{ $statusLabel }}
-                </span>
+                {{-- =============================================
+                     CARD HEADER
+                ============================================== --}}
 
-            </div>
+                <div class="dd-card-header">
 
+                    <div class="dd-card-heading">
 
-            <div class="primary-body">
+                        <div class="dd-card-heading-icon">
 
-                {{-- =================================================
-                     META TABLE
-                ================================================== --}}
-                <div class="meta-table">
-
-                    <div class="meta-grid">
-
-
-                        {{-- PENGIRIM --}}
-                        <div class="meta-item">
-
-                            <span class="meta-label">
-                                Pengirim Disposisi
-                            </span>
-
-                            <p class="meta-value">
-                                {{ $disposisi->dari?->name
-                                    ?? $disposisi->pengirim
-                                    ?? '-' }}
-                            </p>
-
-                            @if($disposisi->dari?->jabatan)
-
-                                <p class="meta-secondary">
-                                    {{ $disposisi->dari->jabatan }}
-                                </p>
-
-                            @endif
+                            <svg
+                                class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="1.8"
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586A1.5 1.5 0 0118 8.5V19a2 2 0 01-2 2z"
+                                />
+                            </svg>
 
                         </div>
 
 
-                        {{-- PENERIMA --}}
-                        <div class="meta-item">
+                        <div>
 
-                            <span class="meta-label">
-                                Penerima Disposisi
-                            </span>
+                            <h2 class="dd-card-title">
+                                Informasi Disposisi
+                            </h2>
 
-                            <p class="meta-value">
-                                {{ $disposisi->kepada?->name
-                                    ?? $disposisi->penerima
-                                    ?? $disposisi->tujuan
-                                    ?? '-' }}
-                            </p>
-
-                            @if($disposisi->kepada?->jabatan)
-
-                                <p class="meta-secondary">
-                                    {{ $disposisi->kepada->jabatan }}
-                                </p>
-
-                            @endif
-
-                        </div>
-
-
-                        {{-- BATAS WAKTU --}}
-                        <div class="meta-item">
-
-                            <span class="meta-label">
-                                Batas Waktu
-                            </span>
-
-                            <p class="meta-value">
-
-                                @if($disposisi->batas_waktu)
-
-                                    {{ \Carbon\Carbon::parse(
-                                        $disposisi->batas_waktu
-                                    )->translatedFormat('d F Y') }}
-
-                                @else
-
-                                    -
-
-                                @endif
-
-                            </p>
-
-                        </div>
-
-
-                        {{-- TANGGAL --}}
-                        <div class="meta-item">
-
-                            <span class="meta-label">
-                                Tanggal Dibuat
-                            </span>
-
-                            <p class="meta-value">
-
-                                @if($disposisi->created_at)
-
-                                    {{ $disposisi->created_at->translatedFormat(
-                                        'd F Y H:i'
-                                    ) }}
-
-                                @else
-
-                                    -
-
-                                @endif
-
+                            <p class="dd-card-subtitle">
+                                Detail pengiriman dan penerimaan disposisi.
                             </p>
 
                         </div>
 
                     </div>
+
+
+                    <span class="dd-status {{ $statusClass }}">
+                        {{ $statusLabel }}
+                    </span>
 
                 </div>
 
 
-                {{-- =================================================
-                     INSTRUKSI
-                ================================================== --}}
-                <div class="section-block">
+                {{-- =============================================
+                     BODY
+                ============================================== --}}
 
-                    <div class="section-label">
+                <div class="dd-detail-body">
 
-                        <div class="section-marker"></div>
 
-                        <p class="section-label-text">
-                            Instruksi & Catatan Penanganan
-                        </p>
+                    {{-- =================================================
+                         META
+                    ================================================== --}}
+
+                    <div class="dd-meta-table-wrap">
+
+                        <table class="dd-meta-table">
+
+                            <tbody>
+
+                                <tr>
+
+                                    <td>
+
+                                        <span class="dd-meta-label">
+                                            Pengirim Disposisi
+                                        </span>
+
+                                        <p class="dd-meta-value">
+                                            {{ $pengirimDisposisi }}
+                                        </p>
+
+                                        @if($jabatanPengirim)
+
+                                            <p class="dd-meta-secondary">
+                                                {{ $jabatanPengirim }}
+                                            </p>
+
+                                        @endif
+
+                                    </td>
+
+
+                                    <td>
+
+                                        <span class="dd-meta-label">
+                                            Penerima Disposisi
+                                        </span>
+
+                                        <p class="dd-meta-value">
+                                            {{ $penerimaDisposisi }}
+                                        </p>
+
+                                        @if($jabatanPenerima)
+
+                                            <p class="dd-meta-secondary">
+                                                {{ $jabatanPenerima }}
+                                            </p>
+
+                                        @endif
+
+                                    </td>
+
+                                </tr>
+
+
+                                <tr>
+
+                                    <td>
+
+                                        <span class="dd-meta-label">
+                                            Batas Waktu
+                                        </span>
+
+                                        <p class="dd-meta-value dd-date-value">
+
+                                            <svg
+                                                class="dd-date-icon"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    d="M8 2v4M16 2v4M3 10h18M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z"
+                                                />
+                                            </svg>
+
+                                            <span>
+                                                {{ $batasWaktu }}
+                                            </span>
+
+                                        </p>
+
+                                    </td>
+
+
+                                    <td>
+
+                                        <span class="dd-meta-label">
+                                            Tanggal Dibuat
+                                        </span>
+
+                                        <p class="dd-meta-value dd-date-value">
+
+                                            <svg
+                                                class="dd-date-icon"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    d="M8 2v4M16 2v4M3 10h18M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z"
+                                                />
+                                            </svg>
+
+                                            <span>
+                                                {{ $tanggalDibuat }}
+                                            </span>
+
+                                        </p>
+
+                                    </td>
+
+                                </tr>
+
+                            </tbody>
+
+                        </table>
 
                     </div>
 
 
-                    <div class="instruction-box">
-                        {{ $disposisi->instruksi
-                            ?? $disposisi->catatan
-                            ?? $disposisi->isi_disposisi
-                            ?? 'Tidak ada instruksi atau catatan khusus.' }}
-                    </div>
+                    {{-- =================================================
+                         INSTRUKSI
+                    ================================================== --}}
 
-                </div>
+                    <section class="dd-instruction-section">
 
+                        <div class="dd-section-heading">
 
-                {{-- =================================================
-                     UPDATE STATUS
-                ================================================== --}}
-                @if($isAdmin || $isReceiver)
-
-                    <div class="status-update-box">
-
-                        <div class="section-label">
-
-                            <div
-                                class="section-marker"
-                                style="background:#7c3aed;"
-                            ></div>
-
-                            <p class="section-label-text">
-                                Perbarui Status Pekerjaan
-                            </p>
-
-                        </div>
-
-
-                        <form
-                            action="{{ route('disposisi.status', $disposisi) }}"
-                            method="POST"
-                            class="status-form"
-                        >
-                            @csrf
-                            @method('PATCH')
-
-                            <select
-                                name="status"
-                                class="status-select"
-                            >
-
-                                <option
-                                    value="menunggu"
-                                    @selected($st === 'menunggu')
-                                >
-                                    Menunggu
-                                </option>
-
-                                <option
-                                    value="diproses"
-                                    @selected(
-                                        $st === 'diproses' ||
-                                        $st === 'proses'
-                                    )
-                                >
-                                    Diproses
-                                </option>
-
-                                <option
-                                    value="selesai"
-                                    @selected($st === 'selesai')
-                                >
-                                    Selesai
-                                </option>
-
-                            </select>
-
-
-                            <button
-                                type="submit"
-                                class="status-submit"
-                            >
+                            <div class="dd-section-icon">
 
                                 <svg
-                                    class="w-3.5 h-3.5"
+                                    class="w-4 h-4"
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
@@ -1045,49 +1442,169 @@
                                     <path
                                         stroke-linecap="round"
                                         stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M5 13l4 4L19 7"
+                                        stroke-width="1.8"
+                                        d="M4 6h16M4 12h16M4 18h10"
                                     />
                                 </svg>
 
-                                Simpan Status
-
-                            </button>
-
-                        </form>
-
-                    </div>
-
-                @endif
-
-            </div>
-
-        </div>
+                            </div>
 
 
-        {{-- =====================================================
-             RIGHT / RELATED LETTER
-        ====================================================== --}}
-        <div class="card">
+                            <div>
 
-            <div class="related-header">
+                                <h3 class="dd-section-title">
+                                    Instruksi & Catatan
+                                </h3>
 
-                <div class="related-header-top">
+                                <p class="dd-section-subtitle">
+                                    Arahan atau pekerjaan yang diberikan.
+                                </p>
 
-                    <h2 class="related-title">
-                        Surat Masuk Terkait
-                    </h2>
+                            </div>
+
+                        </div>
 
 
-                    @if($disposisi->suratMasuk)
+                        <div class="dd-instruction-box">
 
-                        <span class="related-agenda">
+                            <p class="dd-instruction-text">
+                                {{ $instruksi }}
+                            </p>
 
-                            #{{ $disposisi->suratMasuk->nomor_agenda
-                                ? 'AG/' . $disposisi->suratMasuk->nomor_agenda
-                                : $disposisi->suratMasuk->id }}
+                        </div>
 
-                        </span>
+                    </section>
+
+
+                    {{-- =================================================
+                         UPDATE STATUS
+                    ================================================== --}}
+
+                    @if($isAdmin || $isReceiver)
+
+                        <div class="dd-status-update">
+
+                            <div class="dd-section-heading">
+
+                                <div
+                                    class="dd-section-icon"
+                                    style="
+                                        background:#f5f3ff;
+                                        color:#7c3aed;
+                                    "
+                                >
+
+                                    <svg
+                                        class="w-4 h-4"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="1.8"
+                                            d="M12 6v6l4 2"
+                                        />
+                                        <circle
+                                            cx="12"
+                                            cy="12"
+                                            r="9"
+                                            stroke-width="1.8"
+                                        />
+                                    </svg>
+
+                                </div>
+
+
+                                <div>
+
+                                    <h3 class="dd-section-title">
+                                        Perbarui Status
+                                    </h3>
+
+                                    <p class="dd-section-subtitle">
+                                        Ubah status pekerjaan disposisi.
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+
+                            <form
+                                action="{{ route(
+                                    'disposisi.status',
+                                    $disposisi
+                                ) }}"
+                                method="POST"
+                                class="dd-status-form"
+                            >
+
+                                @csrf
+                                @method('PATCH')
+
+
+                                <select
+                                    name="status"
+                                    class="dd-status-select"
+                                >
+
+                                    <option
+                                        value="menunggu"
+                                        @selected($st === 'menunggu')
+                                    >
+                                        Menunggu
+                                    </option>
+
+
+                                    <option
+                                        value="diproses"
+                                        @selected(
+                                            $st === 'diproses' ||
+                                            $st === 'proses'
+                                        )
+                                    >
+                                        Diproses
+                                    </option>
+
+
+                                    <option
+                                        value="selesai"
+                                        @selected($st === 'selesai')
+                                    >
+                                        Selesai
+                                    </option>
+
+                                </select>
+
+
+                                <button
+                                    type="submit"
+                                    class="dd-status-submit"
+                                >
+
+                                    <svg
+                                        class="w-3.5 h-3.5"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M5 13l4 4L19 7"
+                                        />
+                                    </svg>
+
+                                    Simpan Status
+
+                                </button>
+
+                            </form>
+
+                        </div>
 
                     @endif
 
@@ -1095,98 +1612,253 @@
 
             </div>
 
+        </div>
 
-            <div class="related-body">
 
-                @if($disposisi->suratMasuk)
+        {{-- =================================================
+             KANAN
+             SURAT MASUK TERKAIT
+        ================================================== --}}
 
-                    {{-- PERIHAL --}}
-                    <div class="related-item">
+        <div class="dd-right-column">
 
-                        <span class="related-label">
-                            Perihal
-                        </span>
+            <div class="dd-card dd-related-card">
 
-                        <p class="related-value">
-                            {{ $disposisi->suratMasuk->perihal
-                                ?? 'Tanpa Perihal' }}
-                        </p>
+
+                <div class="dd-card-header">
+
+                    <div class="dd-card-heading">
+
+                        <div class="dd-card-heading-icon">
+
+                            <svg
+                                class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="1.8"
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586A1.5 1.5 0 0118 8.5V19a2 2 0 01-2 2z"
+                                />
+                            </svg>
+
+                        </div>
+
+
+                        <div>
+
+                            <h2 class="dd-card-title">
+                                Surat Masuk Terkait
+                            </h2>
+
+                            <p class="dd-card-subtitle">
+                                Surat yang menjadi sumber disposisi.
+                            </p>
+
+                        </div>
 
                     </div>
 
+                </div>
 
-                    {{-- NOMOR SURAT --}}
-                    <div class="related-item">
 
-                        <span class="related-label">
-                            Nomor Surat
+                <div class="dd-related-body">
+
+                    @if($suratMasuk)
+
+                        <span class="dd-related-agenda">
+                            {{ $nomorAgendaSurat }}
                         </span>
 
-                        <p class="related-value">
-                            {{ $disposisi->suratMasuk->nomor_surat ?? '-' }}
-                        </p>
 
-                    </div>
+                        <div class="dd-related-items">
 
 
-                    {{-- PENGIRIM --}}
-                    <div class="related-item">
+                            {{-- =====================================
+                                 PERIHAL
+                            ====================================== --}}
 
-                        <span class="related-label">
-                            Asal / Pengirim Surat
-                        </span>
+                            <div class="dd-related-item">
 
-                        <p class="related-value">
-                            {{ $disposisi->suratMasuk->pengirim
-                                ?? $disposisi->suratMasuk->instansi?->nama_instansi
-                                ?? '-' }}
-                        </p>
+                                <span class="dd-related-label">
+                                    Perihal
+                                </span>
 
-                    </div>
+                                <p class="dd-related-value">
+                                    {{ $suratMasuk->perihal
+                                        ?? 'Tanpa Perihal' }}
+                                </p>
+
+                            </div>
 
 
-                    {{-- DETAIL --}}
-                    <a
-                        href="{{ route(
-                            'surat-masuk.show',
-                            $disposisi->suratMasuk
-                        ) }}"
-                        class="related-detail-btn"
-                    >
+                            {{-- =====================================
+                                 NOMOR SURAT
+                            ====================================== --}}
 
-                        Lihat Detail Surat
+                            <div class="dd-related-item">
 
-                        <svg
-                            class="w-3.5 h-3.5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
+                                <span class="dd-related-label">
+                                    Nomor Surat
+                                </span>
+
+                                <p class="dd-related-value">
+                                    {{ $suratMasuk->nomor_surat ?? '-' }}
+                                </p>
+
+                            </div>
+
+
+                            {{-- =====================================
+                                 PENGIRIM
+                            ====================================== --}}
+
+                            <div class="dd-related-item">
+
+                                <span class="dd-related-label">
+                                    Asal / Pengirim
+                                </span>
+
+                                <p class="dd-related-value">
+                                    {{ $suratMasuk->pengirim
+                                        ?? $suratMasuk->instansi?->nama_instansi
+                                        ?? '-' }}
+                                </p>
+
+                            </div>
+
+
+                            {{-- =====================================
+                                 TANGGAL SURAT
+                            ====================================== --}}
+
+                            <div class="dd-related-item">
+
+                                <span class="dd-related-label">
+                                    Tanggal Surat
+                                </span>
+
+                                <p class="dd-related-value">
+
+                                    @if($suratMasuk->tanggal_surat)
+
+                                        @try
+
+                                            {{
+                                                \Illuminate\Support\Carbon::parse(
+                                                    $suratMasuk->tanggal_surat
+                                                )->translatedFormat(
+                                                    'd F Y'
+                                                )
+                                            }}
+
+                                        @catch(\Throwable $e)
+
+                                            {{ $suratMasuk->tanggal_surat }}
+
+                                        @endtry
+
+                                    @else
+
+                                        -
+
+                                    @endif
+
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        {{-- =========================================
+                             DETAIL SURAT
+                        ========================================== --}}
+
+                        <a
+                            href="{{ route(
+                                'surat-masuk.show',
+                                $suratMasuk
+                            ) }}"
+                            class="dd-related-button"
                         >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                            />
-                        </svg>
 
-                    </a>
+                            Lihat Detail Surat
 
-                @else
+                            <svg
+                                class="w-3.5 h-3.5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                                />
+                            </svg>
 
-                    <div class="empty-related">
+                        </a>
 
-                        <p>
-                            Data surat masuk terkait tidak ditemukan.
-                        </p>
+                    @else
 
-                    </div>
+                        <div class="dd-related-empty">
 
-                @endif
+                            <div class="dd-related-empty-icon">
+
+                                <svg
+                                    class="w-6 h-6"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="1.5"
+                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586A1.5 1.5 0 0118 8.5V19a2 2 0 01-2 2z"
+                                    />
+                                </svg>
+
+                            </div>
+
+
+                            <p class="dd-related-empty-title">
+                                Surat terkait tidak ditemukan
+                            </p>
+
+
+                            <p class="dd-related-empty-text">
+                                Data surat masuk yang menjadi sumber
+                                disposisi tidak tersedia.
+                            </p>
+
+                        </div>
+
+                    @endif
+
+                </div>
 
             </div>
 
         </div>
+
+    </div>
+
+
+    {{-- =====================================================
+         FOOTER
+    ====================================================== --}}
+
+    <div class="dd-footer">
+
+        <span>
+            Sistem Manajemen Disposisi
+        </span>
 
     </div>
 
