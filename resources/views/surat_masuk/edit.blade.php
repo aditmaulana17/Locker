@@ -74,271 +74,1175 @@
     ];
 @endphp
 
+
 <style>
-    /* ============================================================
-       PAGE
-    ============================================================ */
+/* ============================================================
+   PAGE
+============================================================ */
+
+.edit-page {
+    width: 100%;
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 8px 14px 28px;
+    color: #334155;
+}
+
+.edit-page *,
+.edit-page *::before,
+.edit-page *::after {
+    box-sizing: border-box;
+}
+
+
+/* ============================================================
+   HEADER
+============================================================ */
+
+.edit-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 12px;
+}
+
+.edit-header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.edit-title-icon {
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #c7d2fe;
+    border-radius: 9px;
+    background: #eef2ff;
+    color: #4f46e5;
+}
+
+.edit-title {
+    margin: 0;
+    font-size: 19px;
+    line-height: 1.2;
+    font-weight: 800;
+    color: #1e293b;
+}
+
+.edit-subtitle {
+    margin: 3px 0 0;
+    font-size: 11px;
+    line-height: 1.4;
+    color: #64748b;
+}
+
+.btn-back {
+    min-height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 0 12px;
+    flex: 0 0 auto;
+    border: 2px solid #94a3b8;
+    border-radius: 8px;
+    background: #fff;
+    color: #475569;
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: 800;
+    white-space: nowrap;
+    transition: .15s ease;
+}
+
+.btn-back:hover {
+    background: #f8fafc;
+    border-color: #64748b;
+    color: #1e293b;
+}
+
+
+/* ============================================================
+   ERROR
+============================================================ */
+
+.error-box {
+    margin-bottom: 12px;
+    padding: 10px 12px;
+    border: 2px solid #fca5a5;
+    border-radius: 9px;
+    background: #fff1f2;
+}
+
+.error-box-title {
+    margin: 0 0 4px;
+    font-size: 11px;
+    line-height: 1.35;
+    font-weight: 800;
+    color: #991b1b;
+}
+
+.error-box-list {
+    margin: 0;
+    padding-left: 17px;
+    font-size: 10px;
+    line-height: 1.5;
+    color: #b91c1c;
+}
+
+
+/* ============================================================
+   MAIN CARD
+============================================================ */
+
+.main-card {
+    overflow: hidden;
+    border: 2px solid #64748b;
+    border-radius: 11px;
+    background: #fff;
+    box-shadow:
+        0 3px 8px rgba(15, 23, 42, .06),
+        0 12px 24px rgba(15, 23, 42, .04);
+}
+
+
+/* ============================================================
+   AGENDA
+============================================================ */
+
+.agenda-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 11px 14px;
+    border-bottom: 2px solid #94a3b8;
+    background: linear-gradient(
+        to right,
+        #eff6ff,
+        #eef2ff
+    );
+}
+
+.agenda-left {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    min-width: 0;
+}
+
+.agenda-icon {
+    width: 34px;
+    height: 34px;
+    flex: 0 0 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #bfdbfe;
+    border-radius: 8px;
+    background: #fff;
+    color: #2563eb;
+}
+
+.agenda-label {
+    margin: 0;
+    font-size: 8px;
+    line-height: 1.25;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: #2563eb;
+}
+
+.agenda-number {
+    margin: 2px 0 0;
+    font-size: 13px;
+    line-height: 1.3;
+    font-weight: 800;
+    color: #1e3a8a;
+}
+
+.agenda-badge {
+    padding: 4px 8px;
+    border: 1px solid #bfdbfe;
+    border-radius: 999px;
+    background: #fff;
+    color: #475569;
+    font-size: 8px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+
+/* ============================================================
+   BODY
+============================================================ */
+
+.body {
+    padding: 14px;
+}
+
+
+/* ============================================================
+   SECTION
+============================================================ */
+
+.section + .section {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 2px solid #94a3b8;
+}
+
+.section-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 9px;
+}
+
+.section-marker {
+    width: 4px;
+    height: 23px;
+    flex: 0 0 4px;
+    border-radius: 999px;
+    background: #4f46e5;
+}
+
+.section-title {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.3;
+    font-weight: 800;
+    color: #1e293b;
+}
+
+.section-description {
+    margin: 2px 0 0;
+    font-size: 9px;
+    line-height: 1.4;
+    color: #64748b;
+}
+
+
+/* ============================================================
+   MAIN FIELD TABLE
+============================================================ */
+
+.field-table {
+    overflow: hidden;
+    border: 2px solid #64748b;
+    border-radius: 9px;
+    background: #fff;
+}
+
+.field-grid {
+    display: grid;
+    grid-template-columns:
+        minmax(0, 1fr)
+        minmax(0, 1fr);
+}
+
+.field {
+    min-width: 0;
+    padding: 11px 12px;
+    border-right: 2px solid #94a3b8;
+    border-bottom: 2px solid #94a3b8;
+    background: #fff;
+}
+
+.field:nth-child(2n) {
+    border-right: 0;
+}
+
+.field-full {
+    grid-column: 1 / -1;
+    border-right: 0;
+}
+
+.field-label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 10px;
+    line-height: 1.3;
+    font-weight: 800;
+    color: #334155;
+}
+
+.required {
+    color: #dc2626;
+}
+
+
+/* ============================================================
+   INPUT / SELECT / TEXTAREA
+============================================================ */
+
+.control {
+    width: 100%;
+    border: 2px solid #94a3b8;
+    border-radius: 7px;
+    background: #fff;
+    color: #1e293b;
+    outline: none;
+    font-size: 11px;
+    line-height: 1.35;
+    transition:
+        border-color .15s ease,
+        box-shadow .15s ease,
+        background .15s ease;
+}
+
+input.control,
+select.control {
+    height: 38px;
+    padding: 0 10px;
+}
+
+textarea.control {
+    min-height: 78px;
+    padding: 9px 10px;
+    line-height: 1.5;
+    resize: vertical;
+}
+
+.control::placeholder {
+    color: #94a3b8;
+}
+
+.control:hover {
+    border-color: #64748b;
+}
+
+.control:focus {
+    border-color: #4f46e5;
+    box-shadow:
+        0 0 0 3px
+        rgba(79, 70, 229, .08);
+}
+
+.control.border-red-500 {
+    border-color: #ef4444;
+    background: #fff8f8;
+}
+
+
+/* ============================================================
+   ERROR FIELD
+============================================================ */
+
+.field-error {
+    margin: 4px 0 0;
+    font-size: 9px;
+    line-height: 1.4;
+    font-weight: 700;
+    color: #dc2626;
+}
+
+
+/* ============================================================
+   ATTACHMENT
+============================================================ */
+
+.attachment-grid {
+    display: grid;
+    grid-template-columns:
+        minmax(0, 1fr)
+        minmax(0, 1fr);
+    gap: 12px;
+    align-items: stretch;
+}
+
+.attachment-card {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    overflow: hidden;
+    border: 2px solid #64748b;
+    border-radius: 9px;
+    background: #fff;
+}
+
+.attachment-header {
+    min-height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 10px 11px;
+    border-bottom: 2px solid #94a3b8;
+    background: #f8fafc;
+}
+
+.attachment-title {
+    margin: 0;
+    font-size: 11px;
+    line-height: 1.3;
+    font-weight: 800;
+    color: #1e293b;
+}
+
+.attachment-desc {
+    margin: 2px 0 0;
+    font-size: 8.5px;
+    line-height: 1.4;
+    color: #64748b;
+}
+
+.attachment-badge {
+    flex-shrink: 0;
+    padding: 4px 7px;
+    border: 1px solid #cbd5e1;
+    border-radius: 999px;
+    background: #fff;
+    color: #64748b;
+    font-size: 7.5px;
+    font-weight: 800;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.attachment-body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 9px;
+    padding: 11px;
+}
+
+
+/* ============================================================
+   INFO
+============================================================ */
+
+.info {
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    padding: 8px;
+    border: 1px solid #bfdbfe;
+    border-radius: 7px;
+    background: #eff6ff;
+}
+
+.info-icon {
+    width: 13px;
+    height: 13px;
+    flex: 0 0 13px;
+    margin-top: 1px;
+    color: #2563eb;
+}
+
+.info p {
+    margin: 0;
+    font-size: 8.5px;
+    line-height: 1.45;
+    color: #1d4ed8;
+}
+
+
+/* ============================================================
+   MODE
+============================================================ */
+
+.mode-grid {
+    display: grid;
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+    gap: 6px;
+}
+
+.mode-button {
+    min-height: 43px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px;
+    border: 2px solid #94a3b8;
+    border-radius: 7px;
+    background: #fff;
+    color: #475569;
+    cursor: pointer;
+    transition: .15s ease;
+}
+
+.mode-button:hover {
+    border-color: #6366f1;
+    background: #eef2ff;
+}
+
+.mode-button.active {
+    border-color: #4f46e5;
+    background: #eef2ff;
+    color: #3730a3;
+}
+
+.mode-icon {
+    width: 27px;
+    height: 27px;
+    flex: 0 0 27px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    background: #f1f5f9;
+    color: #64748b;
+}
+
+.mode-button.active .mode-icon {
+    background: #e0e7ff;
+    color: #4f46e5;
+}
+
+.mode-name {
+    display: block;
+    font-size: 9px;
+    line-height: 1.3;
+    font-weight: 800;
+    color: #334155;
+}
+
+.mode-desc {
+    display: block;
+    margin-top: 1px;
+    font-size: 7.5px;
+    line-height: 1.3;
+    color: #64748b;
+}
+
+
+/* ============================================================
+   CURRENT FILE
+============================================================ */
+
+.current-file {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 45px;
+    padding: 7px;
+    border: 2px solid #cbd5e1;
+    border-radius: 7px;
+    background: #f8fafc;
+}
+
+.current-file-icon {
+    width: 27px;
+    height: 27px;
+    flex: 0 0 27px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    background: #e2e8f0;
+    color: #64748b;
+}
+
+.current-file-content {
+    min-width: 0;
+    flex: 1;
+}
+
+.current-file-label {
+    margin: 0;
+    font-size: 7.5px;
+    line-height: 1.2;
+    font-weight: 800;
+    color: #64748b;
+}
+
+.current-file-name {
+    display: block;
+    margin-top: 1px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 8.5px;
+    line-height: 1.3;
+    font-weight: 700;
+    color: #334155;
+}
+
+.current-file-empty {
+    margin: 0;
+    font-size: 8.5px;
+    font-weight: 700;
+    color: #b45309;
+}
+
+.current-file-empty-text {
+    margin: 1px 0 0;
+    font-size: 7.5px;
+    color: #64748b;
+}
+
+.view-btn {
+    min-height: 27px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 8px;
+    border-radius: 6px;
+    background: #e0e7ff;
+    color: #4338ca;
+    text-decoration: none;
+    font-size: 8px;
+    font-weight: 800;
+    white-space: nowrap;
+    transition: .15s ease;
+}
+
+.view-btn:hover {
+    background: #c7d2fe;
+    color: #3730a3;
+}
+
+
+/* ============================================================
+   UPLOAD
+============================================================ */
+
+.upload-box {
+    min-height: 115px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 11px;
+    border: 2px dashed #94a3b8;
+    border-radius: 8px;
+    background: #f8fafc;
+    text-align: center;
+    cursor: pointer;
+    transition: .15s ease;
+}
+
+.upload-box:hover {
+    border-color: #6366f1;
+    background: #eef2ff;
+}
+
+.upload-box.has-file {
+    border-color: #34d399;
+    background: #ecfdf5;
+}
+
+.upload-icon {
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 5px;
+    border-radius: 7px;
+    background: #e0e7ff;
+    color: #4f46e5;
+}
+
+.upload-box.has-file .upload-icon {
+    background: #d1fae5;
+    color: #059669;
+}
+
+.upload-title {
+    font-size: 9px;
+    line-height: 1.3;
+    font-weight: 800;
+    color: #334155;
+}
+
+.upload-format {
+    margin-top: 2px;
+    font-size: 7.5px;
+    color: #64748b;
+}
+
+.upload-limit {
+    margin-top: 2px;
+    font-size: 7px;
+    color: #94a3b8;
+}
+
+
+/* ============================================================
+   SELECTED FILE
+============================================================ */
+
+.selected-file {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px;
+    border: 2px solid #a7f3d0;
+    border-radius: 7px;
+    background: #ecfdf5;
+}
+
+.selected-file-icon {
+    width: 27px;
+    height: 27px;
+    flex: 0 0 27px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    background: #d1fae5;
+    color: #059669;
+}
+
+.selected-file-content {
+    min-width: 0;
+    flex: 1;
+}
+
+.selected-file-title {
+    margin: 0;
+    font-size: 7.5px;
+    line-height: 1.2;
+    font-weight: 800;
+    color: #047857;
+}
+
+.selected-file-name {
+    margin: 1px 0 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 8px;
+    line-height: 1.3;
+    font-weight: 700;
+    color: #334155;
+}
+
+.selected-file-size {
+    margin: 1px 0 0;
+    font-size: 7px;
+    line-height: 1.3;
+    color: #64748b;
+}
+
+.clear-file-btn {
+    width: 26px;
+    height: 26px;
+    flex: 0 0 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: #94a3b8;
+    cursor: pointer;
+}
+
+.clear-file-btn:hover {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+
+/* ============================================================
+   CAMERA
+============================================================ */
+
+.camera-box {
+    overflow: hidden;
+    border: 2px solid #475569;
+    border-radius: 8px;
+    background: #0f172a;
+}
+
+.camera-preview {
+    position: relative;
+    min-height: 215px;
+    background: #0f172a;
+}
+
+.camera-video {
+    width: 100%;
+    height: 215px;
+    display: block;
+    object-fit: contain;
+    background: #0f172a;
+}
+
+.camera-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px;
+    background: #0f172a;
+    text-align: center;
+}
+
+.camera-placeholder-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 6px;
+    border-radius: 8px;
+    background: rgba(255,255,255,.08);
+    color: #94a3b8;
+}
+
+.camera-placeholder-title {
+    margin: 0;
+    font-size: 9px;
+    font-weight: 800;
+    color: #cbd5e1;
+}
+
+.camera-placeholder-desc {
+    margin: 2px 0 0;
+    font-size: 7px;
+    line-height: 1.35;
+    color: #64748b;
+}
+
+.camera-error {
+    position: absolute;
+    left: 7px;
+    right: 7px;
+    bottom: 7px;
+    z-index: 5;
+    padding: 6px 7px;
+    border-radius: 6px;
+    background: rgba(127,29,29,.94);
+    color: #fecaca;
+    font-size: 7.5px;
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+.camera-frame {
+    position: absolute;
+    inset: 25px;
+    border: 1.5px dashed rgba(255,255,255,.28);
+    border-radius: 7px;
+    pointer-events: none;
+}
+
+.camera-actions {
+    display: grid;
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+    gap: 5px;
+    padding: 7px;
+    background: #111827;
+}
+
+.camera-btn {
+    min-height: 31px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 0 6px;
+    border-radius: 6px;
+    font-size: 8px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: .15s ease;
+}
+
+.camera-btn:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+}
+
+.camera-btn-primary {
+    border: 1px solid #4338ca;
+    background: #4f46e5;
+    color: #fff;
+}
+
+.camera-btn-primary:hover:not(:disabled) {
+    background: #4338ca;
+}
+
+.camera-btn-success {
+    border: 1px solid #059669;
+    background: #10b981;
+    color: #fff;
+}
+
+.camera-btn-success:hover:not(:disabled) {
+    background: #059669;
+}
+
+.camera-btn-secondary {
+    border: 1px solid #64748b;
+    background: #fff;
+    color: #334155;
+}
+
+.camera-btn-secondary:hover:not(:disabled) {
+    background: #f1f5f9;
+}
+
+
+/* ============================================================
+   SCAN RESULT
+============================================================ */
+
+.scan-result {
+    padding: 7px;
+    border-top: 2px solid #6ee7b7;
+    background: #ecfdf5;
+}
+
+.scan-result-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.scan-result-title {
+    margin: 0;
+    font-size: 9px;
+    line-height: 1.3;
+    font-weight: 800;
+    color: #065f46;
+}
+
+.scan-result-desc {
+    margin: 2px 0 0;
+    font-size: 7.5px;
+    line-height: 1.4;
+    color: #047857;
+}
+
+.retake-btn {
+    min-height: 25px;
+    padding: 0 7px;
+    border: 1px solid #6ee7b7;
+    border-radius: 6px;
+    background: #fff;
+    color: #047857;
+    font-size: 7.5px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.scan-image {
+    display: block;
+    width: 100%;
+    max-height: 280px;
+    margin-top: 6px;
+    object-fit: contain;
+    border: 1px solid #a7f3d0;
+    border-radius: 6px;
+    background: #fff;
+}
+
+.scan-info {
+    margin-top: 4px;
+    text-align: center;
+    font-size: 7.5px;
+    line-height: 1.3;
+    font-weight: 800;
+    color: #047857;
+}
+
+
+/* ============================================================
+   PHYSICAL ARCHIVE
+============================================================ */
+
+.physical-box {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    padding: 14px;
+    border: 2px dashed #94a3b8;
+    border-radius: 8px;
+    background: #f8fafc;
+}
+
+.physical-icon {
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: #e0e7ff;
+    color: #4f46e5;
+}
+
+.physical-title {
+    margin: 8px 0 0;
+    font-size: 11px;
+    line-height: 1.3;
+    font-weight: 800;
+    color: #334155;
+}
+
+.physical-desc {
+    margin: 3px 0 0;
+    font-size: 8px;
+    line-height: 1.5;
+    color: #64748b;
+}
+
+.physical-field {
+    margin-top: 12px;
+}
+
+.physical-example {
+    margin-top: 7px;
+    padding: 7px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    background: #fff;
+}
+
+.physical-example p {
+    margin: 0;
+    font-size: 7.5px;
+    line-height: 1.45;
+    color: #64748b;
+}
+
+.physical-example strong {
+    color: #334155;
+}
+
+
+/* ============================================================
+   NOTE
+============================================================ */
+
+.bottom-note {
+    margin-top: auto;
+    padding: 7px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    background: #fff;
+}
+
+.bottom-note p {
+    margin: 0;
+    font-size: 7.5px;
+    line-height: 1.45;
+    color: #64748b;
+}
+
+
+/* ============================================================
+   FOOTER
+============================================================ */
+
+.footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 7px;
+    padding: 9px 14px;
+    border-top: 2px solid #64748b;
+    background: #f8fafc;
+}
+
+.footer-btn {
+    min-height: 35px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 0 12px;
+    border-radius: 7px;
+    font-size: 9px;
+    font-weight: 800;
+    text-decoration: none;
+    cursor: pointer;
+    transition: .15s ease;
+}
+
+.footer-cancel {
+    border: 2px solid #94a3b8;
+    background: #fff;
+    color: #475569;
+}
+
+.footer-cancel:hover {
+    background: #f1f5f9;
+    border-color: #64748b;
+}
+
+.footer-submit {
+    border: 2px solid #4f46e5;
+    background: #4f46e5;
+    color: #fff;
+}
+
+.footer-submit:hover:not(:disabled) {
+    background: #4338ca;
+}
+
+.footer-submit:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+}
+
+
+/* ============================================================
+   UTILITY
+============================================================ */
+
+.hidden {
+    display: none !important;
+}
+
+
+/* ============================================================
+   RESPONSIVE
+============================================================ */
+
+@media (max-width: 820px) {
 
     .edit-page {
-        width: 100%;
-        max-width: 1080px;
-        margin: 0 auto;
-        padding: 8px 14px 24px;
-        color: #334155;
+        padding-left: 10px;
+        padding-right: 10px;
     }
 
-    .edit-page *,
-    .edit-page *::before,
-    .edit-page *::after {
-        box-sizing: border-box;
+    .attachment-grid {
+        grid-template-columns: 1fr;
     }
+}
 
-    /* ============================================================
-       HEADER
-    ============================================================ */
+@media (max-width: 640px) {
 
     .edit-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 14px;
-        margin-bottom: 12px;
-    }
-
-    .edit-header-left {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        min-width: 0;
-    }
-
-    .edit-title-icon {
-        width: 38px;
-        height: 38px;
-        flex: 0 0 38px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: 2px solid #c7d2fe;
-        border-radius: 9px;
-        background: #eef2ff;
-        color: #4f46e5;
-    }
-
-    .edit-title {
-        margin: 0;
-        font-size: 19px;
-        line-height: 1.2;
-        font-weight: 800;
-        color: #1e293b;
-    }
-
-    .edit-subtitle {
-        margin: 3px 0 0;
-        font-size: 11px;
-        line-height: 1.4;
-        color: #64748b;
+        align-items: stretch;
+        flex-direction: column;
     }
 
     .btn-back {
-        min-height: 36px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-        padding: 0 12px;
-        flex: 0 0 auto;
-        border: 2px solid #94a3b8;
-        border-radius: 8px;
-        background: #fff;
-        color: #475569;
-        text-decoration: none;
-        font-size: 11px;
-        font-weight: 800;
-        white-space: nowrap;
-        transition: .15s ease;
+        width: 100%;
     }
-
-    .btn-back:hover {
-        background: #f8fafc;
-        border-color: #64748b;
-        color: #1e293b;
-    }
-
-    /* ============================================================
-       ERROR
-    ============================================================ */
-
-    .error-box {
-        margin-bottom: 12px;
-        padding: 10px 12px;
-        border: 2px solid #fca5a5;
-        border-radius: 9px;
-        background: #fff1f2;
-    }
-
-    .error-box-title {
-        margin: 0 0 4px;
-        font-size: 11px;
-        line-height: 1.35;
-        font-weight: 800;
-        color: #991b1b;
-    }
-
-    .error-box-list {
-        margin: 0;
-        padding-left: 16px;
-        font-size: 10px;
-        line-height: 1.5;
-        color: #b91c1c;
-    }
-
-    /* ============================================================
-       MAIN CARD
-    ============================================================ */
-
-    .main-card {
-        overflow: hidden;
-        border: 2px solid #64748b;
-        border-radius: 12px;
-        background: #fff;
-        box-shadow:
-            0 3px 8px rgba(15, 23, 42, .06),
-            0 12px 24px rgba(15, 23, 42, .04);
-    }
-
-    /* ============================================================
-       AGENDA
-    ============================================================ */
 
     .agenda-bar {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 14px;
-        padding: 10px 14px;
-        border-bottom: 2px solid #64748b;
-        background: linear-gradient(
-            to right,
-            #eff6ff,
-            #eef2ff
-        );
-    }
-
-    .agenda-left {
-        display: flex;
-        align-items: center;
-        gap: 9px;
-        min-width: 0;
-    }
-
-    .agenda-icon {
-        width: 34px;
-        height: 34px;
-        flex: 0 0 34px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: 2px solid #bfdbfe;
-        border-radius: 8px;
-        background: #fff;
-        color: #2563eb;
-    }
-
-    .agenda-label {
-        margin: 0;
-        font-size: 8px;
-        line-height: 1.25;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: .08em;
-        color: #2563eb;
-    }
-
-    .agenda-number {
-        margin: 2px 0 0;
-        font-size: 13px;
-        line-height: 1.3;
-        font-weight: 800;
-        color: #1e3a8a;
-    }
-
-    .agenda-badge {
-        padding: 4px 8px;
-        border: 1px solid #bfdbfe;
-        border-radius: 999px;
-        background: #fff;
-        color: #475569;
-        font-size: 8px;
-        font-weight: 800;
-        white-space: nowrap;
-    }
-
-    /* ============================================================
-       BODY
-    ============================================================ */
-
-    .body {
-        padding: 16px;
-    }
-
-    .section + .section {
-        margin-top: 16px;
-        padding-top: 16px;
-        border-top: 2px solid #94a3b8;
-    }
-
-    .section-head {
-        display: flex;
         align-items: flex-start;
-        gap: 8px;
-        margin-bottom: 10px;
-    }
-
-    .section-marker {
-        width: 4px;
-        height: 25px;
-        flex: 0 0 4px;
-        border-radius: 999px;
-        background: #4f46e5;
-    }
-
-    .section-title {
-        margin: 0;
-        font-size: 13px;
-        line-height: 1.3;
-        font-weight: 800;
-        color: #1e293b;
-    }
-
-    .section-description {
-        margin: 2px 0 0;
-        font-size: 9px;
-        line-height: 1.45;
-        color: #64748b;
-    }
-
-    /* ============================================================
-       MAIN FIELD TABLE
-    ============================================================ */
-
-    .field-table {
-        overflow: hidden;
-        border: 2px solid #64748b;
-        border-radius: 8px;
-        background: #fff;
+        flex-direction: column;
     }
 
     .field-grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: 1fr;
     }
 
     .field {
-        min-width: 0;
-        padding: 10px;
-        border-right: 2px solid #94a3b8;
+        border-right: 0;
         border-bottom: 2px solid #94a3b8;
+        padding: 10px;
     }
 
     .field:nth-child(2n) {
@@ -346,910 +1250,61 @@
     }
 
     .field-full {
-        grid-column: 1 / -1;
-        border-right: 0;
+        grid-column: auto;
     }
 
     .field:last-child {
         border-bottom: 0;
     }
 
-    .field-full:last-child {
-        border-bottom: 0;
+    .mode-grid {
+        grid-template-columns: 1fr;
     }
 
-    .field-label {
-        display: block;
-        margin-bottom: 5px;
-        font-size: 10px;
-        line-height: 1.3;
-        font-weight: 800;
-        color: #334155;
+    .camera-actions {
+        grid-template-columns: 1fr;
     }
 
-    .required {
-        color: #dc2626;
+    .footer {
+        flex-direction: column-reverse;
     }
 
-    .control {
+    .footer-btn {
         width: 100%;
-        border: 2px solid #94a3b8;
-        border-radius: 7px;
-        background: #fff;
-        color: #1e293b;
-        outline: none;
-        font-size: 11px;
-        transition:
-            border-color .15s ease,
-            box-shadow .15s ease,
-            background .15s ease;
+    }
+}
+
+@media (max-width: 420px) {
+
+    .edit-title {
+        font-size: 17px;
+    }
+
+    .edit-subtitle {
+        font-size: 10px;
+    }
+
+    .body {
+        padding: 11px;
+    }
+
+    .field {
+        padding: 9px;
+    }
+
+    .attachment-body {
+        padding: 9px;
     }
 
     input.control,
     select.control {
-        height: 36px;
-        padding: 0 9px;
+        height: 37px;
     }
 
     textarea.control {
-        min-height: 70px;
-        padding: 8px 9px;
-        line-height: 1.45;
-        resize: vertical;
+        min-height: 75px;
     }
-
-    .control::placeholder {
-        color: #94a3b8;
-    }
-
-    .control:focus {
-        border-color: #4f46e5;
-        box-shadow: 0 0 0 3px rgba(79, 70, 229, .08);
-    }
-
-    .control.border-red-500 {
-        border-color: #ef4444;
-    }
-
-    .field-error {
-        margin: 4px 0 0;
-        font-size: 9px;
-        line-height: 1.4;
-        font-weight: 700;
-        color: #dc2626;
-    }
-
-    /* ============================================================
-       ATTACHMENT GRID
-    ============================================================ */
-
-    .attachment-grid {
-        display: grid;
-        grid-template-columns:
-            minmax(0, 1fr)
-            minmax(0, 1fr);
-        gap: 12px;
-        align-items: stretch;
-    }
-
-    .attachment-card {
-        display: flex;
-        flex-direction: column;
-        min-width: 0;
-        overflow: hidden;
-        border: 2px solid #64748b;
-        border-radius: 9px;
-        background: #fff;
-    }
-
-    .attachment-header {
-        min-height: 50px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 8px;
-        padding: 9px 10px;
-        border-bottom: 2px solid #94a3b8;
-        background: #f8fafc;
-    }
-
-    .attachment-title {
-        margin: 0;
-        font-size: 11px;
-        line-height: 1.3;
-        font-weight: 800;
-        color: #1e293b;
-    }
-
-    .attachment-desc {
-        margin: 2px 0 0;
-        font-size: 8.5px;
-        line-height: 1.35;
-        color: #64748b;
-    }
-
-    .attachment-badge {
-        padding: 4px 7px;
-        border: 1px solid #cbd5e1;
-        border-radius: 999px;
-        background: #fff;
-        color: #64748b;
-        font-size: 7.5px;
-        font-weight: 800;
-        text-transform: uppercase;
-        white-space: nowrap;
-    }
-
-    .attachment-body {
-        display: flex;
-        flex: 1;
-        flex-direction: column;
-        gap: 9px;
-        padding: 10px;
-    }
-
-    /* ============================================================
-       INFO
-    ============================================================ */
-
-    .info {
-        display: flex;
-        align-items: flex-start;
-        gap: 7px;
-        padding: 8px;
-        border: 1px solid #bfdbfe;
-        border-radius: 7px;
-        background: #eff6ff;
-    }
-
-    .info-icon {
-        width: 13px;
-        height: 13px;
-        flex: 0 0 13px;
-        margin-top: 1px;
-        color: #2563eb;
-    }
-
-    .info p {
-        margin: 0;
-        font-size: 8.5px;
-        line-height: 1.45;
-        color: #1d4ed8;
-    }
-
-    /* ============================================================
-       MODE BUTTON
-    ============================================================ */
-
-    .mode-grid {
-        display: grid;
-        grid-template-columns:
-            repeat(2, minmax(0, 1fr));
-        gap: 6px;
-    }
-
-    .mode-button {
-        min-height: 43px;
-        display: flex;
-        align-items: center;
-        gap: 7px;
-        padding: 7px;
-        border: 2px solid #94a3b8;
-        border-radius: 7px;
-        background: #fff;
-        color: #475569;
-        cursor: pointer;
-        transition: .15s ease;
-    }
-
-    .mode-button:hover {
-        border-color: #6366f1;
-        background: #eef2ff;
-    }
-
-    .mode-button.active {
-        border-color: #4f46e5;
-        background: #eef2ff;
-        color: #3730a3;
-    }
-
-    .mode-icon {
-        width: 27px;
-        height: 27px;
-        flex: 0 0 27px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 6px;
-        background: #f1f5f9;
-        color: #64748b;
-    }
-
-    .mode-button.active .mode-icon {
-        background: #e0e7ff;
-        color: #4f46e5;
-    }
-
-    .mode-name {
-        display: block;
-        font-size: 9px;
-        line-height: 1.3;
-        font-weight: 800;
-        color: #334155;
-    }
-
-    .mode-desc {
-        display: block;
-        margin-top: 1px;
-        font-size: 7.5px;
-        line-height: 1.3;
-        color: #64748b;
-    }
-
-    /* ============================================================
-       CURRENT FILE
-    ============================================================ */
-
-    .current-file {
-        display: flex;
-        align-items: center;
-        gap: 7px;
-        min-height: 43px;
-        padding: 7px;
-        border: 2px solid #cbd5e1;
-        border-radius: 7px;
-        background: #f8fafc;
-    }
-
-    .current-file-icon {
-        width: 27px;
-        height: 27px;
-        flex: 0 0 27px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 6px;
-        background: #e2e8f0;
-        color: #64748b;
-    }
-
-    .current-file-content {
-        min-width: 0;
-        flex: 1;
-    }
-
-    .current-file-label {
-        margin: 0;
-        font-size: 7.5px;
-        line-height: 1.2;
-        font-weight: 800;
-        color: #64748b;
-    }
-
-    .current-file-name {
-        display: block;
-        margin-top: 1px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        font-size: 8.5px;
-        line-height: 1.3;
-        font-weight: 700;
-        color: #334155;
-    }
-
-    .current-file-empty {
-        margin: 0;
-        font-size: 8.5px;
-        font-weight: 700;
-        color: #b45309;
-    }
-
-    .current-file-empty-text {
-        margin: 1px 0 0;
-        font-size: 7.5px;
-        color: #64748b;
-    }
-
-    .view-btn {
-        min-height: 27px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        padding: 0 8px;
-        border-radius: 6px;
-        background: #e2e8f0;
-        color: #475569;
-        text-decoration: none;
-        font-size: 8px;
-        font-weight: 800;
-        white-space: nowrap;
-        transition: .15s ease;
-    }
-
-    .view-btn:hover {
-        background: #e0e7ff;
-        color: #4338ca;
-    }
-
-    /* ============================================================
-       UPLOAD BOX
-    ============================================================ */
-
-    .upload-box {
-        min-height: 105px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 10px;
-        border: 2px dashed #94a3b8;
-        border-radius: 8px;
-        background: #f8fafc;
-        text-align: center;
-        cursor: pointer;
-        transition: .15s ease;
-    }
-
-    .upload-box:hover {
-        border-color: #6366f1;
-        background: #eef2ff;
-    }
-
-    .upload-box.has-file {
-        border-color: #34d399;
-        background: #ecfdf5;
-    }
-
-    .upload-icon {
-        width: 33px;
-        height: 33px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: 5px;
-        border-radius: 7px;
-        background: #e0e7ff;
-        color: #4f46e5;
-    }
-
-    .upload-box.has-file .upload-icon {
-        background: #d1fae5;
-        color: #059669;
-    }
-
-    .upload-title {
-        font-size: 9px;
-        line-height: 1.3;
-        font-weight: 800;
-        color: #334155;
-    }
-
-    .upload-format {
-        margin-top: 2px;
-        font-size: 7.5px;
-        color: #64748b;
-    }
-
-    .upload-limit {
-        margin-top: 2px;
-        font-size: 7px;
-        color: #94a3b8;
-    }
-
-    /* ============================================================
-       SELECTED FILE
-    ============================================================ */
-
-    .selected-file {
-        display: flex;
-        align-items: center;
-        gap: 7px;
-        padding: 7px;
-        border: 2px solid #a7f3d0;
-        border-radius: 7px;
-        background: #ecfdf5;
-    }
-
-    .selected-file-icon {
-        width: 27px;
-        height: 27px;
-        flex: 0 0 27px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 6px;
-        background: #d1fae5;
-        color: #059669;
-    }
-
-    .selected-file-content {
-        min-width: 0;
-        flex: 1;
-    }
-
-    .selected-file-title {
-        margin: 0;
-        font-size: 7.5px;
-        line-height: 1.2;
-        font-weight: 800;
-        color: #047857;
-    }
-
-    .selected-file-name {
-        margin: 1px 0 0;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        font-size: 8px;
-        line-height: 1.3;
-        font-weight: 700;
-        color: #334155;
-    }
-
-    .selected-file-size {
-        margin: 1px 0 0;
-        font-size: 7px;
-        line-height: 1.3;
-        color: #64748b;
-    }
-
-    .clear-file-btn {
-        width: 26px;
-        height: 26px;
-        flex: 0 0 26px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: 0;
-        border-radius: 6px;
-        background: transparent;
-        color: #94a3b8;
-        cursor: pointer;
-    }
-
-    .clear-file-btn:hover {
-        background: #fee2e2;
-        color: #dc2626;
-    }
-
-    /* ============================================================
-       CAMERA
-    ============================================================ */
-
-    .camera-box {
-        overflow: hidden;
-        border: 2px solid #475569;
-        border-radius: 8px;
-        background: #0f172a;
-    }
-
-    .camera-preview {
-        position: relative;
-        min-height: 215px;
-        background: #0f172a;
-    }
-
-    .camera-video {
-        width: 100%;
-        height: 215px;
-        display: block;
-        object-fit: contain;
-        background: #0f172a;
-    }
-
-    .camera-placeholder {
-        position: absolute;
-        inset: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 14px;
-        background: #0f172a;
-        text-align: center;
-    }
-
-    .camera-placeholder-icon {
-        width: 40px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 6px;
-        border-radius: 8px;
-        background: rgba(255,255,255,.08);
-        color: #94a3b8;
-    }
-
-    .camera-placeholder-title {
-        margin: 0;
-        font-size: 9px;
-        font-weight: 800;
-        color: #cbd5e1;
-    }
-
-    .camera-placeholder-desc {
-        margin: 2px 0 0;
-        font-size: 7px;
-        line-height: 1.35;
-        color: #64748b;
-    }
-
-    .camera-error {
-        position: absolute;
-        left: 7px;
-        right: 7px;
-        bottom: 7px;
-        z-index: 5;
-        padding: 6px 7px;
-        border-radius: 6px;
-        background: rgba(127,29,29,.94);
-        color: #fecaca;
-        font-size: 7.5px;
-        font-weight: 700;
-        line-height: 1.4;
-    }
-
-    .camera-frame {
-        position: absolute;
-        inset: 25px;
-        border: 1.5px dashed rgba(255,255,255,.28);
-        border-radius: 7px;
-        pointer-events: none;
-    }
-
-    .camera-actions {
-        display: grid;
-        grid-template-columns:
-            repeat(3, minmax(0, 1fr));
-        gap: 5px;
-        padding: 7px;
-        background: #111827;
-    }
-
-    .camera-btn {
-        min-height: 31px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 5px;
-        padding: 0 6px;
-        border-radius: 6px;
-        font-size: 8px;
-        font-weight: 800;
-        cursor: pointer;
-        transition: .15s ease;
-    }
-
-    .camera-btn:disabled {
-        opacity: .45;
-        cursor: not-allowed;
-    }
-
-    .camera-btn-primary {
-        border: 1px solid #4338ca;
-        background: #4f46e5;
-        color: #fff;
-    }
-
-    .camera-btn-primary:hover:not(:disabled) {
-        background: #4338ca;
-    }
-
-    .camera-btn-success {
-        border: 1px solid #059669;
-        background: #10b981;
-        color: #fff;
-    }
-
-    .camera-btn-success:hover:not(:disabled) {
-        background: #059669;
-    }
-
-    .camera-btn-secondary {
-        border: 1px solid #64748b;
-        background: #fff;
-        color: #334155;
-    }
-
-    .camera-btn-secondary:hover:not(:disabled) {
-        background: #f1f5f9;
-    }
-
-    /* ============================================================
-       SCAN RESULT
-    ============================================================ */
-
-    .scan-result {
-        padding: 7px;
-        border-top: 2px solid #6ee7b7;
-        background: #ecfdf5;
-    }
-
-    .scan-result-top {
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        gap: 8px;
-    }
-
-    .scan-result-title {
-        margin: 0;
-        font-size: 9px;
-        line-height: 1.3;
-        font-weight: 800;
-        color: #065f46;
-    }
-
-    .scan-result-desc {
-        margin: 2px 0 0;
-        font-size: 7.5px;
-        line-height: 1.4;
-        color: #047857;
-    }
-
-    .retake-btn {
-        min-height: 25px;
-        padding: 0 7px;
-        border: 1px solid #6ee7b7;
-        border-radius: 6px;
-        background: #fff;
-        color: #047857;
-        font-size: 7.5px;
-        font-weight: 800;
-        cursor: pointer;
-    }
-
-    .scan-image {
-        display: block;
-        width: 100%;
-        max-height: 280px;
-        margin-top: 6px;
-        object-fit: contain;
-        border: 1px solid #a7f3d0;
-        border-radius: 6px;
-        background: #fff;
-    }
-
-    .scan-info {
-        margin-top: 4px;
-        text-align: center;
-        font-size: 7.5px;
-        line-height: 1.3;
-        font-weight: 800;
-        color: #047857;
-    }
-
-    /* ============================================================
-       PHYSICAL ARCHIVE
-    ============================================================ */
-
-    .physical-box {
-        display: flex;
-        flex: 1;
-        flex-direction: column;
-        justify-content: center;
-        padding: 14px;
-        border: 2px dashed #94a3b8;
-        border-radius: 8px;
-        background: #f8fafc;
-    }
-
-    .physical-icon {
-        width: 38px;
-        height: 38px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 8px;
-        background: #e0e7ff;
-        color: #4f46e5;
-    }
-
-    .physical-title {
-        margin: 8px 0 0;
-        font-size: 11px;
-        line-height: 1.3;
-        font-weight: 800;
-        color: #334155;
-    }
-
-    .physical-desc {
-        margin: 3px 0 0;
-        font-size: 8px;
-        line-height: 1.5;
-        color: #64748b;
-    }
-
-    .physical-field {
-        margin-top: 12px;
-    }
-
-    .physical-example {
-        margin-top: 7px;
-        padding: 7px;
-        border: 1px solid #cbd5e1;
-        border-radius: 6px;
-        background: #fff;
-    }
-
-    .physical-example p {
-        margin: 0;
-        font-size: 7.5px;
-        line-height: 1.45;
-        color: #64748b;
-    }
-
-    .physical-example strong {
-        color: #334155;
-    }
-
-    /* ============================================================
-       NOTE
-    ============================================================ */
-
-    .bottom-note {
-        margin-top: auto;
-        padding: 7px;
-        border: 1px solid #cbd5e1;
-        border-radius: 6px;
-        background: #fff;
-    }
-
-    .bottom-note p {
-        margin: 0;
-        font-size: 7.5px;
-        line-height: 1.45;
-        color: #64748b;
-    }
-
-    /* ============================================================
-       FOOTER
-    ============================================================ */
-
-    .footer {
-        display: flex;
-        justify-content: flex-end;
-        gap: 7px;
-        padding: 9px 14px;
-        border-top: 2px solid #64748b;
-        background: #f8fafc;
-    }
-
-    .footer-btn {
-        min-height: 35px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-        padding: 0 12px;
-        border-radius: 7px;
-        font-size: 9px;
-        font-weight: 800;
-        text-decoration: none;
-        cursor: pointer;
-        transition: .15s ease;
-    }
-
-    .footer-cancel {
-        border: 2px solid #94a3b8;
-        background: #fff;
-        color: #475569;
-    }
-
-    .footer-cancel:hover {
-        background: #f1f5f9;
-        border-color: #64748b;
-    }
-
-    .footer-submit {
-        border: 2px solid #4338ca;
-        background: #4f46e5;
-        color: #fff;
-    }
-
-    .footer-submit:hover:not(:disabled) {
-        background: #4338ca;
-    }
-
-    .footer-submit:disabled {
-        opacity: .6;
-        cursor: not-allowed;
-    }
-
-    /* ============================================================
-       UTILITY
-    ============================================================ */
-
-    .hidden {
-        display: none !important;
-    }
-
-    /* ============================================================
-       RESPONSIVE
-    ============================================================ */
-
-    @media (max-width: 820px) {
-        .edit-page {
-            padding-left: 10px;
-            padding-right: 10px;
-        }
-
-        .attachment-grid {
-            grid-template-columns: 1fr;
-        }
-    }
-
-    @media (max-width: 640px) {
-        .edit-header {
-            align-items: stretch;
-            flex-direction: column;
-        }
-
-        .btn-back {
-            width: 100%;
-        }
-
-        .agenda-bar {
-            align-items: flex-start;
-            flex-direction: column;
-        }
-
-        .field-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .field {
-            border-right: 0;
-            border-bottom: 2px solid #94a3b8;
-        }
-
-        .field:nth-child(2n) {
-            border-right: 0;
-        }
-
-        .field-full {
-            grid-column: auto;
-        }
-
-        .field:last-child {
-            border-bottom: 0;
-        }
-
-        .mode-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .camera-actions {
-            grid-template-columns: 1fr;
-        }
-
-        .footer {
-            flex-direction: column-reverse;
-        }
-
-        .footer-btn {
-            width: 100%;
-        }
-    }
-
-    @media (max-width: 420px) {
-        .edit-title {
-            font-size: 17px;
-        }
-
-        .edit-subtitle {
-            font-size: 10px;
-        }
-
-        .body {
-            padding: 12px;
-        }
-
-        .attachment-body {
-            padding: 9px;
-        }
-    }
+}
 </style>
 
 
@@ -1264,6 +1319,7 @@
         <div class="edit-header-left">
 
             <div class="edit-title-icon">
+
                 <svg
                     class="h-4 w-4"
                     fill="none"
@@ -1277,7 +1333,9 @@
                         d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.5-7.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 7.5-7.5z"
                     />
                 </svg>
+
             </div>
+
 
             <div class="min-w-0">
 
@@ -1293,10 +1351,12 @@
 
         </div>
 
+
         <a
             href="{{ route('surat-masuk.index') }}"
             class="btn-back"
         >
+
             <svg
                 class="h-3.5 w-3.5"
                 fill="none"
@@ -1312,6 +1372,7 @@
             </svg>
 
             Kembali
+
         </a>
 
     </div>
@@ -1332,7 +1393,11 @@
             <ul class="error-box-list">
 
                 @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
+
+                    <li>
+                        {{ $error }}
+                    </li>
+
                 @endforeach
 
             </ul>
@@ -1356,6 +1421,7 @@
         @csrf
         @method('PUT')
 
+
         <input
             type="hidden"
             name="nomor_agenda"
@@ -1364,6 +1430,7 @@
 
 
         <div class="main-card">
+
 
             {{-- =================================================
                  AGENDA
@@ -1391,6 +1458,7 @@
 
                     </div>
 
+
                     <div class="min-w-0">
 
                         <p class="agenda-label">
@@ -1405,6 +1473,7 @@
 
                 </div>
 
+
                 <span class="agenda-badge">
                     Tidak diubah
                 </span>
@@ -1417,6 +1486,7 @@
             ================================================== --}}
 
             <div class="body">
+
 
                 {{-- =================================================
                      INFORMASI UTAMA
@@ -1447,6 +1517,7 @@
 
                         <div class="field-grid">
 
+
                             {{-- NOMOR SURAT --}}
 
                             <div class="field">
@@ -1459,21 +1530,26 @@
                                     <span class="required">*</span>
                                 </label>
 
+
                                 <input
                                     id="nomor_surat"
                                     name="nomor_surat"
                                     type="text"
                                     required
                                     autocomplete="off"
+                                    maxlength="255"
                                     value="{{ old('nomor_surat', $suratMasuk->nomor_surat) }}"
                                     placeholder="Contoh: 005/B/I/2026"
                                     class="control @error('nomor_surat') border-red-500 @enderror"
                                 >
 
+
                                 @error('nomor_surat')
+
                                     <p class="field-error">
                                         {{ $message }}
                                     </p>
+
                                 @enderror
 
                             </div>
@@ -1491,21 +1567,26 @@
                                     <span class="required">*</span>
                                 </label>
 
+
                                 <input
                                     id="pengirim"
                                     name="pengirim"
                                     type="text"
                                     required
                                     autocomplete="organization"
+                                    maxlength="255"
                                     value="{{ old('pengirim', $suratMasuk->pengirim) }}"
                                     placeholder="Nama instansi pengirim"
                                     class="control @error('pengirim') border-red-500 @enderror"
                                 >
 
+
                                 @error('pengirim')
+
                                     <p class="field-error">
                                         {{ $message }}
                                     </p>
+
                                 @enderror
 
                             </div>
@@ -1523,6 +1604,7 @@
                                     <span class="required">*</span>
                                 </label>
 
+
                                 <input
                                     id="tanggal_surat"
                                     name="tanggal_surat"
@@ -1532,16 +1614,19 @@
                                     class="control @error('tanggal_surat') border-red-500 @enderror"
                                 >
 
+
                                 @error('tanggal_surat')
+
                                     <p class="field-error">
                                         {{ $message }}
                                     </p>
+
                                 @enderror
 
                             </div>
 
 
-                            {{-- TANGGAL TERIMA --}}
+                            {{-- TANGGAL DITERIMA --}}
 
                             <div class="field">
 
@@ -1553,6 +1638,7 @@
                                     <span class="required">*</span>
                                 </label>
 
+
                                 <input
                                     id="tanggal_terima"
                                     name="tanggal_terima"
@@ -1562,10 +1648,13 @@
                                     class="control @error('tanggal_terima') border-red-500 @enderror"
                                 >
 
+
                                 @error('tanggal_terima')
+
                                     <p class="field-error">
                                         {{ $message }}
                                     </p>
+
                                 @enderror
 
                             </div>
@@ -1583,6 +1672,7 @@
                                     <span class="required">*</span>
                                 </label>
 
+
                                 <select
                                     id="kategori_surat_id"
                                     name="kategori_surat_id"
@@ -1598,6 +1688,7 @@
                                         Pilih kategori
                                     </option>
 
+
                                     @foreach(($kategoris ?? collect()) as $kategori)
 
                                         <option
@@ -1612,17 +1703,31 @@
                                             @if(!empty($kategori->sifat))
                                                 ({{ ucfirst($kategori->sifat) }})
                                             @endif
-
                                         </option>
 
                                     @endforeach
 
                                 </select>
 
+
+                                @if(
+                                    !isset($kategoris) ||
+                                    $kategoris->isEmpty()
+                                )
+
+                                    <p class="field-error">
+                                        Belum ada kategori surat yang tersedia.
+                                    </p>
+
+                                @endif
+
+
                                 @error('kategori_surat_id')
+
                                     <p class="field-error">
                                         {{ $message }}
                                     </p>
+
                                 @enderror
 
                             </div>
@@ -1640,6 +1745,7 @@
                                     <span class="required">*</span>
                                 </label>
 
+
                                 <select
                                     id="status"
                                     name="status"
@@ -1651,7 +1757,9 @@
 
                                         <option
                                             value="{{ $value }}"
-                                            @selected($currentStatus === $value)
+                                            @selected(
+                                                $currentStatus === $value
+                                            )
                                         >
                                             {{ $label }}
                                         </option>
@@ -1660,10 +1768,13 @@
 
                                 </select>
 
+
                                 @error('status')
+
                                     <p class="field-error">
                                         {{ $message }}
                                     </p>
+
                                 @enderror
 
                             </div>
@@ -1681,19 +1792,24 @@
                                     <span class="required">*</span>
                                 </label>
 
+
                                 <textarea
                                     id="perihal"
                                     name="perihal"
                                     rows="3"
+                                    maxlength="1000"
                                     required
                                     placeholder="Tuliskan perihal surat"
                                     class="control @error('perihal') border-red-500 @enderror"
                                 >{{ old('perihal', $suratMasuk->perihal) }}</textarea>
 
+
                                 @error('perihal')
+
                                     <p class="field-error">
                                         {{ $message }}
                                     </p>
+
                                 @enderror
 
                             </div>
@@ -1732,6 +1848,7 @@
 
                     <div class="attachment-grid">
 
+
                         {{-- =================================================
                              BERKAS LAMPIRAN
                         ================================================== --}}
@@ -1752,6 +1869,7 @@
 
                                 </div>
 
+
                                 <span class="attachment-badge">
                                     Opsional
                                 </span>
@@ -1760,6 +1878,7 @@
 
 
                             <div class="attachment-body">
+
 
                                 {{-- INFO --}}
 
@@ -1778,6 +1897,7 @@
                                             d="M13 16h-1v-4h-1m1-4h.01M12 21a9 9 0 100-18 9 9 0 000 18z"
                                         />
                                     </svg>
+
 
                                     <p>
                                         Maksimal
@@ -1819,6 +1939,7 @@
 
                                         </span>
 
+
                                         <span>
 
                                             <span class="mode-name">
@@ -1859,6 +1980,7 @@
 
                                         </span>
 
+
                                         <span>
 
                                             <span class="mode-name">
@@ -1898,6 +2020,7 @@
 
                                     </div>
 
+
                                     <div class="current-file-content">
 
                                         @if($suratMasuk->lampiran_file)
@@ -1926,6 +2049,7 @@
                                         @endif
 
                                     </div>
+
 
                                     @if($suratMasuk->lampiran_file)
 
@@ -1971,17 +2095,21 @@
 
                                         </span>
 
+
                                         <span class="upload-title">
                                             Pilih file baru
                                         </span>
+
 
                                         <span class="upload-format">
                                             PDF, JPG, JPEG, PNG
                                         </span>
 
+
                                         <span class="upload-limit">
                                             Maksimal 10 MB
                                         </span>
+
 
                                         <input
                                             type="file"
@@ -2019,6 +2147,7 @@
 
                                         </div>
 
+
                                         <div class="selected-file-content">
 
                                             <p class="selected-file-title">
@@ -2036,6 +2165,7 @@
                                             ></p>
 
                                         </div>
+
 
                                         <button
                                             type="button"
@@ -2107,6 +2237,7 @@
                                                                 stroke-width="2"
                                                                 d="M3 7h4l2-3h6l2 3h4a2 2 0 012 2v10a2 2 0 01-2 2H3a2 2 0 01-2-2V9a2 2 0 012-2z"
                                                             />
+
                                                             <circle
                                                                 cx="12"
                                                                 cy="13"
@@ -2116,9 +2247,11 @@
 
                                                     </div>
 
+
                                                     <p class="camera-placeholder-title">
                                                         Kamera belum aktif
                                                     </p>
+
 
                                                     <p class="camera-placeholder-desc">
                                                         Aktifkan kamera untuk scan dokumen.
@@ -2135,6 +2268,7 @@
                                                 role="alert"
                                             ></div>
 
+
                                             <div class="camera-frame"></div>
 
                                         </div>
@@ -2150,6 +2284,7 @@
                                                 Aktifkan Kamera
                                             </button>
 
+
                                             <button
                                                 type="button"
                                                 id="capture-btn"
@@ -2158,6 +2293,7 @@
                                             >
                                                 Ambil Gambar
                                             </button>
+
 
                                             <button
                                                 type="button"
@@ -2189,6 +2325,7 @@
                                                     </p>
 
                                                 </div>
+
 
                                                 <button
                                                     type="button"
@@ -2264,7 +2401,7 @@
 
 
                         {{-- =================================================
-                             LOKASI FISIK
+                             LOKASI ARSIP FISIK
                         ================================================== --}}
 
                         <div class="attachment-card">
@@ -2282,6 +2419,7 @@
                                     </p>
 
                                 </div>
+
 
                                 <span class="attachment-badge">
                                     Opsional
@@ -2333,14 +2471,17 @@
                                             Posisi Lemari / Rak / Box
                                         </label>
 
+
                                         <input
                                             id="lokasi_arsip_fisik"
                                             name="lokasi_arsip_fisik"
                                             type="text"
                                             value="{{ old('lokasi_arsip_fisik', $suratMasuk->lokasi_arsip_fisik) }}"
                                             placeholder="Contoh: Rak A-3 Box 12"
+                                            maxlength="255"
                                             class="control @error('lokasi_arsip_fisik') border-red-500 @enderror"
                                         >
+
 
                                         @error('lokasi_arsip_fisik')
 
@@ -2368,7 +2509,7 @@
 
                                         <p>
                                             Lokasi fisik hanya menyimpan informasi
-                                            posisi arsip dan tidak memengaruhi
+                                            posisi arsip dan tidak mengubah
                                             dokumen digital.
                                         </p>
 
@@ -2397,7 +2538,23 @@
                     href="{{ route('surat-masuk.index') }}"
                     class="footer-btn footer-cancel"
                 >
+
+                    <svg
+                        class="h-3.5 w-3.5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12"
+                        />
+                    </svg>
+
                     Batal
+
                 </a>
 
 
@@ -2408,6 +2565,7 @@
                 >
 
                     <svg
+                        id="submit-icon"
                         class="h-3.5 w-3.5"
                         fill="none"
                         stroke="currentColor"
@@ -2420,6 +2578,30 @@
                             d="M5 13l4 4L19 7"
                         />
                     </svg>
+
+
+                    <svg
+                        id="submit-loading"
+                        class="hidden h-3.5 w-3.5 animate-spin"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                    >
+                        <circle
+                            class="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            stroke-width="4"
+                        />
+
+                        <path
+                            class="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                        />
+                    </svg>
+
 
                     <span id="submit-text">
                         Perbarui Surat
@@ -2438,71 +2620,113 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+
     'use strict';
+
 
     /* ============================================================
        ELEMENT
     ============================================================ */
 
     const form =
-        document.getElementById('form-surat');
+        document.getElementById(
+            'form-surat'
+        );
 
     const modeUploadBtn =
-        document.getElementById('mode-upload-btn');
+        document.getElementById(
+            'mode-upload-btn'
+        );
 
     const modeScanBtn =
-        document.getElementById('mode-scan-btn');
+        document.getElementById(
+            'mode-scan-btn'
+        );
 
     const uploadPanel =
-        document.getElementById('upload-panel');
+        document.getElementById(
+            'upload-panel'
+        );
 
     const scanPanel =
-        document.getElementById('scan-panel');
+        document.getElementById(
+            'scan-panel'
+        );
 
     const fileInput =
-        document.getElementById('lampiran_file');
+        document.getElementById(
+            'lampiran_file'
+        );
 
     const uploadBox =
-        document.getElementById('upload-box');
+        document.getElementById(
+            'upload-box'
+        );
 
     const selectedFile =
-        document.getElementById('selected-file');
+        document.getElementById(
+            'selected-file'
+        );
 
     const selectedFileName =
-        document.getElementById('selected-file-name');
+        document.getElementById(
+            'selected-file-name'
+        );
 
     const selectedFileSize =
-        document.getElementById('selected-file-size');
+        document.getElementById(
+            'selected-file-size'
+        );
 
     const clearFileBtn =
-        document.getElementById('clear-file-btn');
+        document.getElementById(
+            'clear-file-btn'
+        );
 
     const cameraVideo =
-        document.getElementById('camera-video');
+        document.getElementById(
+            'camera-video'
+        );
 
     const cameraPlaceholder =
-        document.getElementById('camera-placeholder');
+        document.getElementById(
+            'camera-placeholder'
+        );
 
     const cameraError =
-        document.getElementById('camera-error');
+        document.getElementById(
+            'camera-error'
+        );
 
     const startCameraBtn =
-        document.getElementById('start-camera-btn');
+        document.getElementById(
+            'start-camera-btn'
+        );
 
     const captureBtn =
-        document.getElementById('capture-btn');
+        document.getElementById(
+            'capture-btn'
+        );
 
     const stopCameraBtn =
-        document.getElementById('stop-camera-btn');
+        document.getElementById(
+            'stop-camera-btn'
+        );
 
     const retakeBtn =
-        document.getElementById('retake-btn');
+        document.getElementById(
+            'retake-btn'
+        );
 
     const scanResult =
-        document.getElementById('scan-result');
+        document.getElementById(
+            'scan-result'
+        );
 
     const scanPreviewImage =
-        document.getElementById('scan-preview-image');
+        document.getElementById(
+            'scan-preview-image'
+        );
 
     const scanCompressionInfo =
         document.getElementById(
@@ -2510,13 +2734,29 @@ document.addEventListener('DOMContentLoaded', function () {
         );
 
     const capturedInput =
-        document.getElementById('captured_image');
+        document.getElementById(
+            'captured_image'
+        );
 
     const submitBtn =
-        document.getElementById('submit-btn');
+        document.getElementById(
+            'submit-btn'
+        );
+
+    const submitIcon =
+        document.getElementById(
+            'submit-icon'
+        );
+
+    const submitLoading =
+        document.getElementById(
+            'submit-loading'
+        );
 
     const submitText =
-        document.getElementById('submit-text');
+        document.getElementById(
+            'submit-text'
+        );
 
 
     if (
@@ -2535,33 +2775,18 @@ document.addEventListener('DOMContentLoaded', function () {
     const MAX_FILE_SIZE =
         10 * 1024 * 1024;
 
-    /*
-     * Target normal upload.
-     */
     const IMAGE_TARGET_SIZE =
         2.5 * 1024 * 1024;
 
-    /*
-     * Hard limit hasil compression browser.
-     */
     const IMAGE_MAX_SIZE =
         5 * 1024 * 1024;
 
-    /*
-     * Maksimal resolusi sisi gambar.
-     */
     const IMAGE_MAX_DIMENSION =
         2200;
 
-    /*
-     * Resolusi minimal yang masih dicoba.
-     */
     const IMAGE_MIN_DIMENSION =
         1000;
 
-    /*
-     * Kualitas JPEG bertahap.
-     */
     const IMAGE_QUALITIES = [
         0.86,
         0.82,
@@ -2574,12 +2799,9 @@ document.addEventListener('DOMContentLoaded', function () {
         0.54,
         0.50,
         0.46,
-        0.42,
+        0.42
     ];
 
-    /*
-     * Kamera dibuat lebih kecil supaya POST tidak membengkak.
-     */
     const CAMERA_MAX_WIDTH =
         1600;
 
@@ -2589,10 +2811,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const CAMERA_TARGET_SIZE =
         2.5 * 1024 * 1024;
 
-    /*
-     * Data URI berisi Base64 sehingga ukurannya
-     * lebih besar dari binary asli.
-     */
     const CAMERA_MAX_DATA_URL_LENGTH =
         7 * 1024 * 1024;
 
@@ -2611,7 +2829,9 @@ document.addEventListener('DOMContentLoaded', function () {
        HELPER
     ============================================================ */
 
-    function formatFileSize(bytes) {
+    function formatFileSize(
+        bytes
+    ) {
 
         if (
             !Number.isFinite(bytes) ||
@@ -2620,16 +2840,19 @@ document.addEventListener('DOMContentLoaded', function () {
             return '0 KB';
         }
 
+
         if (
             bytes <
             1024 * 1024
         ) {
+
             return (
                 (bytes / 1024)
                     .toFixed(1) +
                 ' KB'
             );
         }
+
 
         return (
             (
@@ -2653,6 +2876,7 @@ document.addEventListener('DOMContentLoaded', function () {
             return 0;
         }
 
+
         return Math.max(
             0,
             Math.round(
@@ -2667,38 +2891,30 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
-    /* ============================================================
-       CAMERA ERROR
-    ============================================================ */
-
-    function showCameraError(
-        message
+    function getFileExtension(
+        file
     ) {
 
-        if (!cameraError) {
-            return;
-        }
-
-        cameraError.textContent =
-            message;
-
-        cameraError.classList.remove(
-            'hidden'
-        );
+        return String(
+            file?.name || ''
+        )
+            .split('.')
+            .pop()
+            .toLowerCase();
     }
 
 
-    function clearCameraError() {
+    function allowedExtension(
+        extension
+    ) {
 
-        if (!cameraError) {
-            return;
-        }
-
-        cameraError.textContent =
-            '';
-
-        cameraError.classList.add(
-            'hidden'
+        return [
+            'pdf',
+            'jpg',
+            'jpeg',
+            'png'
+        ].includes(
+            extension
         );
     }
 
@@ -2708,6 +2924,16 @@ document.addEventListener('DOMContentLoaded', function () {
     ============================================================ */
 
     function activateUploadMode() {
+
+        stopCameraTracks();
+
+        uploadPanel.classList.remove(
+            'hidden'
+        );
+
+        scanPanel.classList.add(
+            'hidden'
+        );
 
         modeUploadBtn.classList.add(
             'active'
@@ -2726,22 +2952,18 @@ document.addEventListener('DOMContentLoaded', function () {
             'aria-selected',
             'false'
         );
-
-        uploadPanel.classList.remove(
-            'hidden'
-        );
-
-        scanPanel.classList.add(
-            'hidden'
-        );
-
-        stopCamera();
-
-        clearCameraError();
     }
 
 
     function activateScanMode() {
+
+        uploadPanel.classList.add(
+            'hidden'
+        );
+
+        scanPanel.classList.remove(
+            'hidden'
+        );
 
         modeUploadBtn.classList.remove(
             'active'
@@ -2759,14 +2981,6 @@ document.addEventListener('DOMContentLoaded', function () {
         modeScanBtn.setAttribute(
             'aria-selected',
             'true'
-        );
-
-        uploadPanel.classList.add(
-            'hidden'
-        );
-
-        scanPanel.classList.remove(
-            'hidden'
         );
 
         clearFileSelection();
@@ -2787,40 +3001,63 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     /* ============================================================
-       FILE VALIDATION
+       FILE
     ============================================================ */
 
-    function getFileExtension(
-        file
+    function showSelectedFile(
+        file,
+        note
     ) {
 
-        return String(
-            file.name || ''
-        )
-            .split('.')
-            .pop()
-            .toLowerCase();
-    }
+        selectedFile.classList.remove(
+            'hidden'
+        );
 
+        selectedFileName.textContent =
+            file.name;
 
-    function isAllowedExtension(
-        extension
-    ) {
+        selectedFileSize.textContent =
+            formatFileSize(
+                file.size
+            ) +
+            (
+                note
+                    ? ' • ' + note
+                    : ''
+            );
 
-        return [
-            'pdf',
-            'jpg',
-            'jpeg',
-            'png'
-        ].includes(
-            extension
+        uploadBox.classList.add(
+            'has-file'
         );
     }
 
 
-    /* ============================================================
-       FILE UPLOAD
-    ============================================================ */
+    function clearFileSelection() {
+
+        fileInput.value =
+            '';
+
+        selectedFile.classList.add(
+            'hidden'
+        );
+
+        selectedFileName.textContent =
+            '';
+
+        selectedFileSize.textContent =
+            '';
+
+        uploadBox.classList.remove(
+            'has-file'
+        );
+    }
+
+
+    clearFileBtn.addEventListener(
+        'click',
+        clearFileSelection
+    );
+
 
     fileInput.addEventListener(
         'change',
@@ -2841,7 +3078,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 );
 
             if (
-                !isAllowedExtension(
+                !allowedExtension(
                     extension
                 )
             ) {
@@ -2878,22 +3115,21 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 alert(
                     'Ukuran file terlalu besar.\n\n' +
-                    'Maksimal file asli adalah 10 MB.'
+                    'Maksimal 10 MB.'
                 );
 
                 return;
             }
 
+
             /*
-            |--------------------------------------------------------
+            |--------------------------------------------------------------------------
             | PDF
-            |--------------------------------------------------------
+            |--------------------------------------------------------------------------
             */
 
             if (
-                extension === 'pdf' ||
-                file.type ===
-                    'application/pdf'
+                extension === 'pdf'
             ) {
 
                 capturedInput.value =
@@ -2909,10 +3145,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
+
             /*
-            |--------------------------------------------------------
+            |--------------------------------------------------------------------------
             | IMAGE
-            |--------------------------------------------------------
+            |--------------------------------------------------------------------------
             */
 
             try {
@@ -2922,23 +3159,20 @@ document.addEventListener('DOMContentLoaded', function () {
                     'Sedang mengompres...'
                 );
 
+
                 const originalSize =
                     file.size;
 
+
                 const compressedFile =
-                    await compressUploadedImage(
+                    await compressImageFile(
                         file
                     );
+
 
                 let finalFile =
                     compressedFile;
 
-                /*
-                |------------------------------------------------------
-                | Jangan gunakan hasil compression
-                | jika ternyata lebih besar dari asli.
-                |------------------------------------------------------
-                */
 
                 if (
                     compressedFile.size >=
@@ -2949,11 +3183,6 @@ document.addEventListener('DOMContentLoaded', function () {
                         file;
                 }
 
-                /*
-                |------------------------------------------------------
-                | Hard limit 10 MB.
-                |------------------------------------------------------
-                */
 
                 if (
                     finalFile.size >
@@ -2963,19 +3192,12 @@ document.addEventListener('DOMContentLoaded', function () {
                     clearFileSelection();
 
                     alert(
-                        'Gambar masih terlalu besar setelah dikompres.\n\n' +
-                        'Silakan pilih gambar dengan resolusi lebih rendah.'
+                        'Gambar masih terlalu besar setelah kompresi.'
                     );
 
                     return;
                 }
 
-                /*
-                |------------------------------------------------------
-                | Masukkan file hasil compression
-                | ke input file.
-                |------------------------------------------------------
-                */
 
                 const dataTransfer =
                     new DataTransfer();
@@ -2987,16 +3209,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 fileInput.files =
                     dataTransfer.files;
 
-                /*
-                |------------------------------------------------------
-                | Hapus camera source.
-                |------------------------------------------------------
-                */
 
                 capturedInput.value =
                     '';
 
                 clearScanResult();
+
 
                 const reduction =
                     getReductionPercent(
@@ -3004,32 +3222,24 @@ document.addEventListener('DOMContentLoaded', function () {
                         finalFile.size
                     );
 
-                let note;
 
-                if (
+                const note =
                     finalFile === file
-                ) {
+                        ? 'Gambar asli digunakan • ' +
+                          formatFileSize(
+                              finalFile.size
+                          )
+                        : 'Dikompres ' +
+                          reduction +
+                          '% • ' +
+                          formatFileSize(
+                              originalSize
+                          ) +
+                          ' → ' +
+                          formatFileSize(
+                              finalFile.size
+                          );
 
-                    note =
-                        'Tidak dikompres • ' +
-                        formatFileSize(
-                            finalFile.size
-                        );
-
-                } else {
-
-                    note =
-                        'Dikompres ' +
-                        reduction +
-                        '% • ' +
-                        formatFileSize(
-                            originalSize
-                        ) +
-                        ' → ' +
-                        formatFileSize(
-                            finalFile.size
-                        );
-                }
 
                 showSelectedFile(
                     finalFile,
@@ -3039,7 +3249,7 @@ document.addEventListener('DOMContentLoaded', function () {
             } catch (error) {
 
                 console.error(
-                    'Compression upload gagal:',
+                    'Compression error:',
                     error
                 );
 
@@ -3047,7 +3257,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 alert(
                     error?.message ||
-                    'Gagal mengompres gambar.'
+                    'Gagal memproses gambar.'
                 );
             }
         }
@@ -3055,97 +3265,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     /* ============================================================
-       SHOW SELECTED FILE
+       IMAGE LOAD
     ============================================================ */
 
-    function showSelectedFile(
-        file,
-        note
-    ) {
-
-        if (!selectedFile) {
-            return;
-        }
-
-        selectedFile.classList.remove(
-            'hidden'
-        );
-
-        if (selectedFileName) {
-
-            selectedFileName.textContent =
-                file.name;
-        }
-
-        if (selectedFileSize) {
-
-            selectedFileSize.textContent =
-                formatFileSize(
-                    file.size
-                ) +
-                (
-                    note
-                        ? ' • ' + note
-                        : ''
-                );
-        }
-
-        uploadBox?.classList.add(
-            'has-file'
-        );
-    }
-
-
-    /* ============================================================
-       CLEAR FILE
-    ============================================================ */
-
-    function clearFileSelection() {
-
-        if (fileInput) {
-            fileInput.value =
-                '';
-        }
-
-        if (selectedFile) {
-
-            selectedFile.classList.add(
-                'hidden'
-            );
-        }
-
-        if (selectedFileName) {
-
-            selectedFileName.textContent =
-                '';
-        }
-
-        if (selectedFileSize) {
-
-            selectedFileSize.textContent =
-                '';
-        }
-
-        uploadBox?.classList.remove(
-            'has-file'
-        );
-    }
-
-
-    clearFileBtn.addEventListener(
-        'click',
-        function () {
-
-            clearFileSelection();
-        }
-    );
-
-
-    /* ============================================================
-       LOAD IMAGE
-    ============================================================ */
-
-    function loadImageFromFile(
+    function loadImage(
         file
     ) {
 
@@ -3155,7 +3278,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 reject
             ) {
 
-                const objectUrl =
+                const url =
                     URL.createObjectURL(
                         file
                     );
@@ -3167,7 +3290,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     function () {
 
                         URL.revokeObjectURL(
-                            objectUrl
+                            url
                         );
 
                         resolve(
@@ -3179,7 +3302,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     function () {
 
                         URL.revokeObjectURL(
-                            objectUrl
+                            url
                         );
 
                         reject(
@@ -3190,7 +3313,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     };
 
                 image.src =
-                    objectUrl;
+                    url;
             }
         );
     }
@@ -3217,11 +3340,13 @@ document.addEventListener('DOMContentLoaded', function () {
             };
         }
 
+
         const scale =
             Math.min(
                 maxDimension / width,
                 maxDimension / height
             );
+
 
         return {
             width: Math.max(
@@ -3256,7 +3381,9 @@ document.addEventListener('DOMContentLoaded', function () {
             IMAGE_MIN_DIMENSION
         ];
 
-        const list = [];
+
+        const result = [];
+
 
         maxDimensions.forEach(
             function (
@@ -3270,179 +3397,147 @@ document.addEventListener('DOMContentLoaded', function () {
                         maxDimension
                     );
 
+
                 if (
                     dimensions.width <
                         IMAGE_MIN_DIMENSION &&
                     dimensions.height <
                         IMAGE_MIN_DIMENSION
                 ) {
+
                     return;
                 }
 
-                list.push(
-                    dimensions
-                );
-            }
-        );
 
-        return list.filter(
-            function (
-                item,
-                index,
-                array
-            ) {
-
-                return (
-                    index ===
-                    array.findIndex(
+                const duplicate =
+                    result.some(
                         function (
-                            value
+                            existing
                         ) {
 
                             return (
-                                value.width ===
-                                    item.width &&
-                                value.height ===
-                                    item.height
+                                existing.width ===
+                                    dimensions.width &&
+                                existing.height ===
+                                    dimensions.height
                             );
                         }
-                    )
-                );
+                    );
+
+
+                if (!duplicate) {
+
+                    result.push(
+                        dimensions
+                    );
+                }
             }
         );
+
+
+        return result;
     }
 
 
     /* ============================================================
-       COMPRESS UPLOADED IMAGE
+       COMPRESS IMAGE
     ============================================================ */
 
-    async function compressUploadedImage(
+    async function compressImageFile(
         file
     ) {
 
         const image =
-            await loadImageFromFile(
+            await loadImage(
                 file
             );
 
-        const sourceWidth =
+
+        const width =
             image.naturalWidth ||
             image.width;
 
-        const sourceHeight =
+
+        const height =
             image.naturalHeight ||
             image.height;
 
-        if (
-            sourceWidth <= 0 ||
-            sourceHeight <= 0
-        ) {
-
-            throw new Error(
-                'Dimensi gambar tidak valid.'
-            );
-        }
 
         const dimensionsList =
             buildDimensionList(
-                sourceWidth,
-                sourceHeight
+                width,
+                height
             );
 
-        let smallestFile =
+
+        let smallest =
             null;
 
-        /*
-        |------------------------------------------------------------
-        | Resolusi
-        |------------------------------------------------------------
-        */
 
         for (
             const dimensions
             of dimensionsList
         ) {
 
-            /*
-            |----------------------------------------------------------
-            | JPEG quality
-            |----------------------------------------------------------
-            */
-
             for (
                 const quality
                 of IMAGE_QUALITIES
             ) {
 
-                const result =
-                    await compressImageToFile(
+                const compressed =
+                    await canvasToFile(
                         image,
                         dimensions.width,
                         dimensions.height,
-                        file.name,
-                        quality
+                        quality,
+                        file.name
                     );
 
+
                 if (
-                    !smallestFile ||
-                    result.size <
-                        smallestFile.size
+                    !smallest ||
+                    compressed.size <
+                        smallest.size
                 ) {
 
-                    smallestFile =
-                        result;
+                    smallest =
+                        compressed;
                 }
 
-                /*
-                |------------------------------------------------------
-                | Target tercapai.
-                |------------------------------------------------------
-                */
 
                 if (
-                    result.size <=
+                    compressed.size <=
                     IMAGE_TARGET_SIZE
                 ) {
 
-                    return result;
+                    return compressed;
                 }
             }
         }
 
-        /*
-        |------------------------------------------------------------
-        | Jika target 2.5 MB tidak tercapai,
-        | tetapi masih <= 5 MB.
-        |------------------------------------------------------------
-        */
 
         if (
-            smallestFile &&
-            smallestFile.size <=
+            smallest &&
+            smallest.size <=
                 IMAGE_MAX_SIZE
         ) {
 
-            return smallestFile;
+            return smallest;
         }
 
+
         throw new Error(
-            'Gambar masih terlalu besar setelah dikompres. ' +
-            'Silakan gunakan gambar dengan resolusi lebih rendah.'
+            'Gambar masih terlalu besar setelah dikompres.'
         );
     }
 
 
-    /* ============================================================
-       COMPRESS IMAGE TO FILE
-    ============================================================ */
-
-    function compressImageToFile(
+    function canvasToFile(
         image,
         width,
         height,
-        originalName,
-        quality
+        quality,
+        originalName
     ) {
 
         return new Promise(
@@ -3456,11 +3551,13 @@ document.addEventListener('DOMContentLoaded', function () {
                         'canvas'
                     );
 
+
                 canvas.width =
                     width;
 
                 canvas.height =
                     height;
+
 
                 const context =
                     canvas.getContext(
@@ -3470,25 +3567,22 @@ document.addEventListener('DOMContentLoaded', function () {
                         }
                     );
 
+
                 if (!context) {
 
                     reject(
                         new Error(
-                            'Browser tidak mendukung pemrosesan gambar.'
+                            'Browser tidak mendukung canvas.'
                         )
                     );
 
                     return;
                 }
 
-                /*
-                |------------------------------------------------------
-                | Background putih.
-                |------------------------------------------------------
-                */
 
                 context.fillStyle =
                     '#ffffff';
+
 
                 context.fillRect(
                     0,
@@ -3497,23 +3591,14 @@ document.addEventListener('DOMContentLoaded', function () {
                     height
                 );
 
-                /*
-                |------------------------------------------------------
-                | Smoothing.
-                |------------------------------------------------------
-                */
 
                 context.imageSmoothingEnabled =
                     true;
 
+
                 context.imageSmoothingQuality =
                     'high';
 
-                /*
-                |------------------------------------------------------
-                | Draw.
-                |------------------------------------------------------
-                */
 
                 context.drawImage(
                     image,
@@ -3523,11 +3608,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     height
                 );
 
-                /*
-                |------------------------------------------------------
-                | Blob JPEG.
-                |------------------------------------------------------
-                */
 
                 canvas.toBlob(
                     function (
@@ -3538,12 +3618,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
                             reject(
                                 new Error(
-                                    'Browser gagal membuat hasil kompresi.'
+                                    'Browser gagal menghasilkan gambar.'
                                 )
                             );
 
                             return;
                         }
+
 
                         const baseName =
                             String(
@@ -3559,6 +3640,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                     '_'
                                 );
 
+
                         const fileName =
                             (
                                 baseName ||
@@ -3566,7 +3648,8 @@ document.addEventListener('DOMContentLoaded', function () {
                             ) +
                             '_compressed.jpg';
 
-                        const resultFile =
+
+                        resolve(
                             new File(
                                 [
                                     blob
@@ -3575,15 +3658,12 @@ document.addEventListener('DOMContentLoaded', function () {
                                 {
                                     type:
                                         'image/jpeg',
-
                                     lastModified:
                                         Date.now()
                                 }
-                            );
-
-                        resolve(
-                            resultFile
+                            )
                         );
+
                     },
                     'image/jpeg',
                     quality
@@ -3597,6 +3677,38 @@ document.addEventListener('DOMContentLoaded', function () {
        CAMERA
     ============================================================ */
 
+    function clearCameraError() {
+
+        if (!cameraError) {
+            return;
+        }
+
+        cameraError.textContent =
+            '';
+
+        cameraError.classList.add(
+            'hidden'
+        );
+    }
+
+
+    function showCameraError(
+        message
+    ) {
+
+        if (!cameraError) {
+            return;
+        }
+
+        cameraError.textContent =
+            message;
+
+        cameraError.classList.remove(
+            'hidden'
+        );
+    }
+
+
     startCameraBtn.addEventListener(
         'click',
         startCamera
@@ -3607,16 +3719,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
         clearCameraError();
 
+
         if (
             !window.isSecureContext
         ) {
 
             showCameraError(
-                'Kamera membutuhkan HTTPS. Gunakan website melalui HTTPS.'
+                'Kamera membutuhkan HTTPS.'
             );
 
             return;
         }
+
 
         if (
             !navigator.mediaDevices ||
@@ -3630,43 +3744,55 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
+
         stopCameraTracks();
+
 
         try {
 
             cameraStream =
                 await navigator.mediaDevices.getUserMedia({
+
                     video: {
                         facingMode: {
                             ideal: 'environment'
                         },
 
                         width: {
-                            ideal: CAMERA_MAX_WIDTH
+                            ideal:
+                                CAMERA_MAX_WIDTH
                         },
 
                         height: {
-                            ideal: CAMERA_MAX_HEIGHT
+                            ideal:
+                                CAMERA_MAX_HEIGHT
                         }
                     },
 
                     audio: false
+
                 });
+
 
             cameraVideo.srcObject =
                 cameraStream;
 
+
             await cameraVideo.play();
+
 
             cameraPlaceholder.classList.add(
                 'hidden'
             );
 
+
             startCameraBtn.disabled =
                 true;
 
+
             captureBtn.disabled =
                 false;
+
 
             stopCameraBtn.disabled =
                 false;
@@ -3678,28 +3804,26 @@ document.addEventListener('DOMContentLoaded', function () {
                 error
             );
 
+
             let message =
                 'Kamera tidak dapat digunakan.';
 
+
             if (
                 error.name ===
-                    'NotAllowedError' ||
-                error.name ===
-                    'PermissionDeniedError'
+                    'NotAllowedError'
             ) {
 
                 message =
-                    'Izin kamera ditolak. Izinkan kamera pada browser.';
+                    'Akses kamera ditolak. Izinkan kamera pada browser.';
 
             } else if (
                 error.name ===
-                    'NotFoundError' ||
-                error.name ===
-                    'DevicesNotFoundError'
+                    'NotFoundError'
             ) {
 
                 message =
-                    'Kamera tidak ditemukan pada perangkat.';
+                    'Kamera tidak ditemukan.';
 
             } else if (
                 error.name ===
@@ -3708,15 +3832,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 message =
                     'Kamera sedang digunakan aplikasi lain.';
-
-            } else if (
-                error.name ===
-                    'SecurityError'
-            ) {
-
-                message =
-                    'Akses kamera diblokir oleh browser.';
             }
+
 
             showCameraError(
                 message
@@ -3726,7 +3843,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     /* ============================================================
-       CAPTURE CAMERA
+       CAPTURE
     ============================================================ */
 
     captureBtn.addEventListener(
@@ -3734,6 +3851,7 @@ document.addEventListener('DOMContentLoaded', function () {
         async function () {
 
             clearCameraError();
+
 
             if (
                 !cameraVideo.videoWidth ||
@@ -3747,37 +3865,29 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
+
             try {
-
-                let width =
-                    cameraVideo.videoWidth;
-
-                let height =
-                    cameraVideo.videoHeight;
 
                 const dimensions =
                     calculateDimensions(
-                        width,
-                        height,
+                        cameraVideo.videoWidth,
+                        cameraVideo.videoHeight,
                         CAMERA_MAX_WIDTH
                     );
 
-                width =
-                    dimensions.width;
-
-                height =
-                    dimensions.height;
 
                 const canvas =
                     document.createElement(
                         'canvas'
                     );
 
+
                 canvas.width =
-                    width;
+                    dimensions.width;
 
                 canvas.height =
-                    height;
+                    dimensions.height;
+
 
                 const context =
                     canvas.getContext(
@@ -3787,6 +3897,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         }
                     );
 
+
                 if (!context) {
 
                     throw new Error(
@@ -3794,34 +3905,41 @@ document.addEventListener('DOMContentLoaded', function () {
                     );
                 }
 
+
                 context.fillStyle =
                     '#ffffff';
+
 
                 context.fillRect(
                     0,
                     0,
-                    width,
-                    height
+                    canvas.width,
+                    canvas.height
                 );
+
 
                 context.imageSmoothingEnabled =
                     true;
 
+
                 context.imageSmoothingQuality =
                     'high';
+
 
                 context.drawImage(
                     cameraVideo,
                     0,
                     0,
-                    width,
-                    height
+                    canvas.width,
+                    canvas.height
                 );
 
+
                 const dataUrl =
-                    await createCompressedCameraData(
+                    await compressCameraCanvas(
                         canvas
                     );
+
 
                 if (
                     dataUrl.length >
@@ -3829,68 +3947,22 @@ document.addEventListener('DOMContentLoaded', function () {
                 ) {
 
                     throw new Error(
-                        'Hasil scan terlalu besar. Silakan scan ulang dengan jarak kamera lebih dekat atau resolusi lebih rendah.'
+                        'Hasil scan terlalu besar.'
                     );
                 }
+
 
                 capturedInput.value =
                     dataUrl;
 
-                /*
-                |--------------------------------------------------------
-                | Preview.
-                |--------------------------------------------------------
-                */
 
-                if (
-                    previewObjectUrl
-                ) {
-
-                    URL.revokeObjectURL(
-                        previewObjectUrl
-                    );
-
-                    previewObjectUrl =
-                        null;
-                }
-
-                const blob =
-                    await dataUrlToBlob(
-                        dataUrl
-                    );
-
-                previewObjectUrl =
-                    URL.createObjectURL(
-                        blob
-                    );
-
-                scanPreviewImage.src =
-                    previewObjectUrl;
-
-                scanResult.classList.remove(
-                    'hidden'
+                await showScanResult(
+                    dataUrl
                 );
 
-                scanCompressionInfo.textContent =
-                    'Hasil scan: ' +
-                    formatFileSize(
-                        blob.size
-                    ) +
-                    ' • JPEG terkompresi';
-
-                /*
-                |--------------------------------------------------------
-                | Scan menggantikan upload file.
-                |--------------------------------------------------------
-                */
 
                 clearFileSelection();
 
-                /*
-                |--------------------------------------------------------
-                | Matikan kamera.
-                |--------------------------------------------------------
-                */
 
                 stopCamera();
 
@@ -3901,34 +3973,27 @@ document.addEventListener('DOMContentLoaded', function () {
                     error
                 );
 
+
                 showCameraError(
                     error?.message ||
-                    'Gagal mengambil hasil scan.'
+                    'Gagal mengambil gambar.'
                 );
             }
         }
     );
 
 
-    /* ============================================================
-       CAMERA COMPRESSION
-    ============================================================ */
-
-    async function createCompressedCameraData(
+    async function compressCameraCanvas(
         canvas
     ) {
 
         let currentCanvas =
             canvas;
 
+
         let quality =
             0.82;
 
-        /*
-        |------------------------------------------------------------
-        | Tahap kualitas.
-        |------------------------------------------------------------
-        */
 
         let dataUrl =
             currentCanvas.toDataURL(
@@ -3936,8 +4001,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 quality
             );
 
+
         while (
-            getDataUrlBinarySize(
+            estimateDataSize(
                 dataUrl
             ) >
                 CAMERA_TARGET_SIZE &&
@@ -3948,6 +4014,7 @@ document.addEventListener('DOMContentLoaded', function () {
             quality -=
                 0.06;
 
+
             dataUrl =
                 currentCanvas.toDataURL(
                     'image/jpeg',
@@ -3955,18 +4022,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 );
         }
 
-        /*
-        |------------------------------------------------------------
-        | Jika masih terlalu besar,
-        | resize menjadi 75%.
-        |------------------------------------------------------------
-        */
 
         let attempt =
             0;
 
+
         while (
-            getDataUrlBinarySize(
+            estimateDataSize(
                 dataUrl
             ) >
                 CAMERA_TARGET_SIZE &&
@@ -3976,134 +4038,205 @@ document.addEventListener('DOMContentLoaded', function () {
 
             attempt++;
 
-            const smallerCanvas =
+
+            const smaller =
                 document.createElement(
                     'canvas'
                 );
 
-            smallerCanvas.width =
+
+            smaller.width =
                 Math.max(
                     1,
                     Math.round(
                         currentCanvas.width *
-                        0.75
+                        .75
                     )
                 );
 
-            smallerCanvas.height =
+
+            smaller.height =
                 Math.max(
                     1,
                     Math.round(
                         currentCanvas.height *
-                        0.75
+                        .75
                     )
                 );
 
-            const smallerContext =
-                smallerCanvas.getContext(
+
+            const context =
+                smaller.getContext(
                     '2d',
                     {
                         alpha: false
                     }
                 );
 
-            if (!smallerContext) {
 
-                throw new Error(
-                    'Browser tidak mendukung resize kamera.'
-                );
-            }
-
-            smallerContext.fillStyle =
+            context.fillStyle =
                 '#ffffff';
 
-            smallerContext.fillRect(
+
+            context.fillRect(
                 0,
                 0,
-                smallerCanvas.width,
-                smallerCanvas.height
+                smaller.width,
+                smaller.height
             );
 
-            smallerContext.imageSmoothingEnabled =
+
+            context.imageSmoothingEnabled =
                 true;
 
-            smallerContext.imageSmoothingQuality =
+
+            context.imageSmoothingQuality =
                 'high';
 
-            smallerContext.drawImage(
+
+            context.drawImage(
                 currentCanvas,
                 0,
                 0,
-                smallerCanvas.width,
-                smallerCanvas.height
+                smaller.width,
+                smaller.height
             );
 
-            currentCanvas =
-                smallerCanvas;
 
-            quality =
-                0.60;
+            currentCanvas =
+                smaller;
+
 
             dataUrl =
                 currentCanvas.toDataURL(
                     'image/jpeg',
-                    quality
+                    .58
                 );
         }
+
 
         return dataUrl;
     }
 
 
-    function getDataUrlBinarySize(
+    function estimateDataSize(
         dataUrl
     ) {
 
-        const commaIndex =
+        const comma =
             dataUrl.indexOf(',');
 
+
         if (
-            commaIndex === -1
+            comma === -1
         ) {
             return 0;
         }
 
+
         const base64 =
             dataUrl.substring(
-                commaIndex + 1
+                comma + 1
             );
 
+
         const padding =
-            (
-                base64.endsWith('==')
-                    ? 2
-                    : base64.endsWith('=')
-                        ? 1
-                        : 0
-            );
+            base64.endsWith('==')
+                ? 2
+                : base64.endsWith('=')
+                    ? 1
+                    : 0;
+
 
         return Math.floor(
             (
-                base64.length * 3
+                base64.length *
+                3
             ) / 4
-        ) - padding;
+        ) -
+        padding;
     }
 
 
-    function dataUrlToBlob(
+    /* ============================================================
+       SCAN PREVIEW
+    ============================================================ */
+
+    async function showScanResult(
         dataUrl
     ) {
 
-        return fetch(
-            dataUrl
-        ).then(
-            function (
-                response
-            ) {
+        if (
+            previewObjectUrl
+        ) {
 
-                return response.blob();
-            }
+            URL.revokeObjectURL(
+                previewObjectUrl
+            );
+
+            previewObjectUrl =
+                null;
+        }
+
+
+        const blob =
+            await (
+                await fetch(
+                    dataUrl
+                )
+            ).blob();
+
+
+        previewObjectUrl =
+            URL.createObjectURL(
+                blob
+            );
+
+
+        scanPreviewImage.src =
+            previewObjectUrl;
+
+
+        scanCompressionInfo.textContent =
+            'Hasil scan: ' +
+            formatFileSize(
+                blob.size
+            ) +
+            ' • JPEG terkompresi';
+
+
+        scanResult.classList.remove(
+            'hidden'
         );
+    }
+
+
+    function clearScanResult() {
+
+        scanResult.classList.add(
+            'hidden'
+        );
+
+
+        scanPreviewImage.src =
+            '';
+
+
+        scanCompressionInfo.textContent =
+            '';
+
+
+        if (
+            previewObjectUrl
+        ) {
+
+            URL.revokeObjectURL(
+                previewObjectUrl
+            );
+
+            previewObjectUrl =
+                null;
+        }
     }
 
 
@@ -4117,6 +4250,7 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
+
         cameraStream
             .getTracks()
             .forEach(
@@ -4128,6 +4262,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             );
 
+
         cameraStream =
             null;
     }
@@ -4137,29 +4272,26 @@ document.addEventListener('DOMContentLoaded', function () {
 
         stopCameraTracks();
 
-        if (cameraVideo) {
-            cameraVideo.srcObject =
-                null;
-        }
+
+        cameraVideo.srcObject =
+            null;
+
 
         cameraPlaceholder.classList.remove(
             'hidden'
         );
 
-        if (startCameraBtn) {
-            startCameraBtn.disabled =
-                false;
-        }
 
-        if (captureBtn) {
-            captureBtn.disabled =
-                true;
-        }
+        startCameraBtn.disabled =
+            false;
 
-        if (stopCameraBtn) {
-            stopCameraBtn.disabled =
-                true;
-        }
+
+        captureBtn.disabled =
+            true;
+
+
+        stopCameraBtn.disabled =
+            true;
     }
 
 
@@ -4179,41 +4311,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
             clearScanResult();
 
+
             capturedInput.value =
                 '';
+
 
             await startCamera();
         }
     );
-
-
-    function clearScanResult() {
-
-        capturedInput.value =
-            '';
-
-        scanResult.classList.add(
-            'hidden'
-        );
-
-        scanPreviewImage.src =
-            '';
-
-        scanCompressionInfo.textContent =
-            '';
-
-        if (
-            previewObjectUrl
-        ) {
-
-            URL.revokeObjectURL(
-                previewObjectUrl
-            );
-
-            previewObjectUrl =
-                null;
-        }
-    }
 
 
     /* ============================================================
@@ -4226,28 +4331,28 @@ document.addEventListener('DOMContentLoaded', function () {
             event
         ) {
 
-            if (submitting) {
+            if (
+                submitting
+            ) {
 
                 event.preventDefault();
 
                 return;
             }
 
-            const selectedFileElement =
+
+            const file =
                 fileInput.files?.[0] ||
                 null;
 
+
             const hasFile =
-                !!selectedFileElement;
+                !!file;
+
 
             const hasCamera =
                 capturedInput.value.trim() !== '';
 
-            /*
-            |--------------------------------------------------------
-            | Tidak boleh dua sumber sekaligus.
-            |--------------------------------------------------------
-            */
 
             if (
                 hasFile &&
@@ -4256,39 +4361,33 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 event.preventDefault();
 
+
                 alert(
                     'Gunakan salah satu metode saja: Upload File atau Scan Kamera.'
                 );
 
+
                 return;
             }
 
-            /*
-            |--------------------------------------------------------
-            | File > 10 MB
-            |--------------------------------------------------------
-            */
 
             if (
                 hasFile &&
-                selectedFileElement.size >
+                file.size >
                     MAX_FILE_SIZE
             ) {
 
                 event.preventDefault();
 
+
                 alert(
                     'Ukuran file melebihi 10 MB.'
                 );
 
+
                 return;
             }
 
-            /*
-            |--------------------------------------------------------
-            | Camera Data URI.
-            |--------------------------------------------------------
-            */
 
             if (
                 hasCamera &&
@@ -4298,26 +4397,36 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 event.preventDefault();
 
+
                 alert(
                     'Hasil scan terlalu besar. Silakan scan ulang.'
                 );
 
+
                 return;
             }
 
-            /*
-            |--------------------------------------------------------
-            | Submit.
-            |--------------------------------------------------------
-            */
 
             submitting =
                 true;
 
+
             stopCamera();
+
 
             submitBtn.disabled =
                 true;
+
+
+            submitIcon.classList.add(
+                'hidden'
+            );
+
+
+            submitLoading.classList.remove(
+                'hidden'
+            );
+
 
             submitText.textContent =
                 'Menyimpan...';
@@ -4335,12 +4444,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
         activateScanMode();
 
+
         scanResult.classList.remove(
             'hidden'
         );
 
+
         scanPreviewImage.src =
             capturedInput.value;
+
 
         scanCompressionInfo.textContent =
             'Hasil scan sebelumnya masih tersedia.';
@@ -4357,6 +4469,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             stopCameraTracks();
 
+
             if (
                 previewObjectUrl
             ) {
@@ -4370,6 +4483,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
     );
+
 });
 </script>
 
