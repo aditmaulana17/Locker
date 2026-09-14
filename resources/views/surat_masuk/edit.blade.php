@@ -7,47 +7,23 @@
 @php
     use Illuminate\Support\Carbon;
 
-    /*
-    |--------------------------------------------------------------------------
-    | DATA FORM
-    |--------------------------------------------------------------------------
-    */
-
     $tanggalSurat = old('tanggal_surat');
 
-    if (
-        $tanggalSurat === null &&
-        $suratMasuk->tanggal_surat
-    ) {
+    if ($tanggalSurat === null && $suratMasuk->tanggal_surat) {
         try {
-            $tanggalSurat = Carbon::parse(
-                $suratMasuk->tanggal_surat
-            )->format('Y-m-d');
+            $tanggalSurat = Carbon::parse($suratMasuk->tanggal_surat)->format('Y-m-d');
         } catch (\Throwable $e) {
-            $tanggalSurat = substr(
-                (string) $suratMasuk->tanggal_surat,
-                0,
-                10
-            );
+            $tanggalSurat = substr((string) $suratMasuk->tanggal_surat, 0, 10);
         }
     }
 
     $tanggalTerima = old('tanggal_terima');
 
-    if (
-        $tanggalTerima === null &&
-        $suratMasuk->tanggal_terima
-    ) {
+    if ($tanggalTerima === null && $suratMasuk->tanggal_terima) {
         try {
-            $tanggalTerima = Carbon::parse(
-                $suratMasuk->tanggal_terima
-            )->format('Y-m-d');
+            $tanggalTerima = Carbon::parse($suratMasuk->tanggal_terima)->format('Y-m-d');
         } catch (\Throwable $e) {
-            $tanggalTerima = substr(
-                (string) $suratMasuk->tanggal_terima,
-                0,
-                10
-            );
+            $tanggalTerima = substr((string) $suratMasuk->tanggal_terima, 0, 10);
         }
     }
 
@@ -74,7 +50,6 @@
     ];
 @endphp
 
-
 <style>
 /* ============================================================
    PAGE
@@ -82,9 +57,9 @@
 
 .edit-page {
     width: 100%;
-    max-width: 1120px;
+    max-width: 1040px;
     margin: 0 auto;
-    padding: 10px 14px 28px;
+    padding: 12px 18px 32px;
     color: #334155;
 }
 
@@ -106,35 +81,27 @@
 }
 
 .top-back-btn {
-    min-height: 35px;
+    min-height: 36px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    padding: 0 11px;
-    border: 2px solid #94a3b8;
-    border-radius: 7px;
+    gap: 7px;
+    padding: 0 13px;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 8px;
     background: #ffffff;
     color: #475569;
     text-decoration: none;
-    font-size: 9px;
-    font-weight: 800;
+    font-size: 10px;
+    font-weight: 700;
     white-space: nowrap;
-    transition:
-        background .15s ease,
-        border-color .15s ease,
-        color .15s ease,
-        transform .15s ease;
+    transition: all .15s ease;
 }
 
 .top-back-btn:hover {
-    background: #f8fafc;
-    border-color: #64748b;
-    color: #1e293b;
-}
-
-.top-back-btn:active {
-    transform: translateY(1px);
+    border-color: #6366f1;
+    background: #eef2ff;
+    color: #4338ca;
 }
 
 
@@ -143,18 +110,17 @@
 ============================================================ */
 
 .error-box {
+    width: 100%;
     margin-bottom: 12px;
     padding: 11px 13px;
-    border: 2px solid #fca5a5;
+    border: 1.5px solid #fecaca;
     border-radius: 9px;
-    background: #fff1f2;
-    box-shadow: 0 2px 6px rgba(244, 63, 94, .05);
+    background: #fff7f7;
 }
 
 .error-box-title {
     margin: 0 0 4px;
-    font-size: 11px;
-    line-height: 1.35;
+    font-size: 10px;
     font-weight: 800;
     color: #991b1b;
 }
@@ -162,8 +128,8 @@
 .error-box-list {
     margin: 0;
     padding-left: 17px;
-    font-size: 10px;
-    line-height: 1.55;
+    font-size: 9px;
+    line-height: 1.5;
     color: #b91c1c;
 }
 
@@ -173,13 +139,14 @@
 ============================================================ */
 
 .main-card {
+    width: 100%;
     overflow: hidden;
-    border: 2px solid #64748b;
+    border: 1.5px solid #cbd5e1;
     border-radius: 12px;
     background: #ffffff;
     box-shadow:
-        0 4px 10px rgba(15, 23, 42, .06),
-        0 14px 30px rgba(15, 23, 42, .035);
+        0 8px 22px rgba(15, 23, 42, .06),
+        0 2px 6px rgba(15, 23, 42, .04);
 }
 
 
@@ -191,12 +158,12 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 14px;
-    padding: 14px 17px;
-    border-bottom: 2px solid #c7d2fe;
+    gap: 16px;
+    padding: 15px 18px;
+    border-bottom: 1.5px solid #dbeafe;
     background: linear-gradient(
         135deg,
-        #eff6ff 0%,
+        #f8fbff 0%,
         #eef2ff 100%
     );
 }
@@ -209,56 +176,51 @@
 }
 
 .system-header-icon {
-    width: 42px;
-    height: 42px;
-    flex: 0 0 42px;
+    width: 40px;
+    height: 40px;
+    flex: 0 0 40px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 2px solid #bfdbfe;
+    border: 1.5px solid #c7d2fe;
     border-radius: 9px;
     background: #ffffff;
-    color: #2563eb;
+    color: #4f46e5;
 }
 
 .system-header-label {
     margin: 0;
-    font-size: 9px;
-    line-height: 1.25;
+    font-size: 8px;
+    line-height: 1.2;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: .08em;
-    color: #2563eb;
+    color: #4f46e5;
 }
 
 .system-header-title {
     margin: 2px 0 0;
-    font-size: 16px;
+    font-size: 17px;
     line-height: 1.3;
     font-weight: 800;
-    color: #1e3a8a;
+    color: #1e293b;
 }
 
 .system-header-subtitle {
-    margin: 2px 0 0;
+    margin: 3px 0 0;
     font-size: 9px;
-    line-height: 1.45;
+    line-height: 1.4;
     color: #64748b;
 }
 
-
-/* ============================================================
-   HEADER BADGE
-============================================================ */
-
 .system-header-badge {
+    flex-shrink: 0;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 29px;
+    min-height: 28px;
     padding: 0 10px;
-    flex-shrink: 0;
-    border: 1px solid #bfdbfe;
+    border: 1px solid #c7d2fe;
     border-radius: 999px;
     background: #ffffff;
     color: #475569;
@@ -273,7 +235,7 @@
 ============================================================ */
 
 .body {
-    padding: 18px;
+    padding: 16px;
 }
 
 
@@ -282,22 +244,22 @@
 ============================================================ */
 
 .section + .section {
-    margin-top: 18px;
-    padding-top: 18px;
-    border-top: 2px solid #94a3b8;
+    margin-top: 17px;
+    padding-top: 17px;
+    border-top: 1.5px solid #e2e8f0;
 }
 
 .section-head {
     display: flex;
     align-items: flex-start;
-    gap: 9px;
-    margin-bottom: 11px;
+    gap: 8px;
+    margin-bottom: 10px;
 }
 
 .section-marker {
-    width: 5px;
-    height: 29px;
-    flex: 0 0 5px;
+    width: 4px;
+    height: 27px;
+    flex: 0 0 4px;
     margin-top: 1px;
     border-radius: 999px;
     background: #2563eb;
@@ -309,7 +271,7 @@
 
 .section-title {
     margin: 0;
-    font-size: 14px;
+    font-size: 13px;
     line-height: 1.3;
     font-weight: 800;
     color: #1e293b;
@@ -317,8 +279,8 @@
 
 .section-description {
     margin: 3px 0 0;
-    font-size: 9px;
-    line-height: 1.45;
+    font-size: 8.5px;
+    line-height: 1.4;
     color: #64748b;
 }
 
@@ -329,23 +291,21 @@
 
 .field-table {
     overflow: hidden;
-    border: 2px solid #64748b;
+    border: 1.5px solid #cbd5e1;
     border-radius: 9px;
     background: #ffffff;
 }
 
 .field-grid {
     display: grid;
-    grid-template-columns:
-        minmax(0, 1fr)
-        minmax(0, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .field {
     min-width: 0;
-    padding: 13px 14px;
-    border-right: 2px solid #94a3b8;
-    border-bottom: 2px solid #94a3b8;
+    padding: 11px 12px;
+    border-right: 1.5px solid #e2e8f0;
+    border-bottom: 1.5px solid #e2e8f0;
     background: #ffffff;
 }
 
@@ -369,13 +329,13 @@
 
 .field-label {
     display: block;
-    margin-bottom: 6px;
-    font-size: 10px;
+    margin-bottom: 5px;
+    font-size: 9px;
     line-height: 1.3;
     font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: .035em;
-    color: #334155;
+    letter-spacing: .025em;
+    color: #475569;
 }
 
 .required {
@@ -384,36 +344,35 @@
 
 
 /* ============================================================
-   INPUT
+   CONTROL
 ============================================================ */
 
 .control {
     width: 100%;
-    min-height: 42px;
-    padding: 9px 11px;
-    border: 2px solid #94a3b8;
-    border-radius: 8px;
+    min-height: 40px;
+    padding: 8px 10px;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 7px;
     background: #ffffff;
     color: #1e293b;
     outline: none;
-    font-size: 13px;
+    font-size: 12px;
     line-height: 1.35;
     transition:
         border-color .15s ease,
-        box-shadow .15s ease,
-        background .15s ease;
+        box-shadow .15s ease;
 }
 
 input.control,
 select.control {
-    height: 42px;
-    padding: 0 11px;
+    height: 40px;
+    padding: 0 10px;
 }
 
 textarea.control {
-    min-height: 92px;
-    padding: 10px 11px;
-    line-height: 1.55;
+    min-height: 82px;
+    padding: 9px 10px;
+    line-height: 1.5;
     resize: vertical;
 }
 
@@ -422,14 +381,13 @@ textarea.control {
 }
 
 .control:hover {
-    border-color: #64748b;
+    border-color: #94a3b8;
 }
 
 .control:focus {
-    border-color: #4f46e5;
+    border-color: #6366f1;
     box-shadow:
-        0 0 0 3px
-        rgba(79, 70, 229, .08);
+        0 0 0 3px rgba(99,102,241,.08);
 }
 
 .control.border-red-500 {
@@ -443,8 +401,8 @@ textarea.control {
 ============================================================ */
 
 .field-error {
-    margin: 5px 0 0;
-    font-size: 9px;
+    margin: 4px 0 0;
+    font-size: 8px;
     line-height: 1.4;
     font-weight: 700;
     color: #dc2626;
@@ -458,9 +416,9 @@ textarea.control {
 .attachment-grid {
     display: grid;
     grid-template-columns:
-        minmax(0, 1.15fr)
-        minmax(0, .85fr);
-    gap: 13px;
+        minmax(0, 1fr)
+        minmax(0, 1fr);
+    gap: 12px;
     align-items: stretch;
 }
 
@@ -469,25 +427,25 @@ textarea.control {
     flex-direction: column;
     min-width: 0;
     overflow: hidden;
-    border: 2px solid #64748b;
+    border: 1.5px solid #cbd5e1;
     border-radius: 9px;
     background: #ffffff;
 }
 
 .attachment-header {
-    min-height: 58px;
+    min-height: 54px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 8px;
-    padding: 10px 12px;
-    border-bottom: 2px solid #94a3b8;
+    padding: 9px 11px;
+    border-bottom: 1.5px solid #e2e8f0;
     background: #f8fafc;
 }
 
 .attachment-title {
     margin: 0;
-    font-size: 11px;
+    font-size: 10px;
     line-height: 1.3;
     font-weight: 800;
     color: #1e293b;
@@ -495,7 +453,7 @@ textarea.control {
 
 .attachment-desc {
     margin: 2px 0 0;
-    font-size: 8.5px;
+    font-size: 8px;
     line-height: 1.4;
     color: #64748b;
 }
@@ -507,7 +465,7 @@ textarea.control {
     border-radius: 999px;
     background: #ffffff;
     color: #64748b;
-    font-size: 7.5px;
+    font-size: 7px;
     font-weight: 800;
     text-transform: uppercase;
     white-space: nowrap;
@@ -517,8 +475,8 @@ textarea.control {
     display: flex;
     flex: 1;
     flex-direction: column;
-    gap: 9px;
-    padding: 11px;
+    gap: 8px;
+    padding: 10px;
 }
 
 
@@ -529,8 +487,8 @@ textarea.control {
 .info {
     display: flex;
     align-items: flex-start;
-    gap: 7px;
-    padding: 9px;
+    gap: 6px;
+    padding: 8px;
     border: 1px solid #bfdbfe;
     border-radius: 7px;
     background: #eff6ff;
@@ -546,52 +504,51 @@ textarea.control {
 
 .info p {
     margin: 0;
-    font-size: 8.5px;
-    line-height: 1.55;
+    font-size: 8px;
+    line-height: 1.5;
     color: #1d4ed8;
 }
 
 
 /* ============================================================
-   MODE BUTTON
+   MODE
 ============================================================ */
 
 .mode-grid {
     display: grid;
-    grid-template-columns:
-        repeat(2, minmax(0, 1fr));
-    gap: 7px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
 }
 
 .mode-button {
-    min-height: 44px;
+    min-height: 42px;
     display: flex;
     align-items: center;
     gap: 7px;
-    padding: 7px 8px;
-    border: 2px solid #94a3b8;
+    padding: 7px;
+    border: 1.5px solid #cbd5e1;
     border-radius: 7px;
     background: #ffffff;
     color: #475569;
     cursor: pointer;
-    transition: .15s ease;
+    transition: all .15s ease;
 }
 
 .mode-button:hover {
-    border-color: #6366f1;
+    border-color: #818cf8;
     background: #eef2ff;
 }
 
 .mode-button.active {
-    border-color: #4f46e5;
+    border-color: #6366f1;
     background: #eef2ff;
-    color: #3730a3;
+    color: #4338ca;
 }
 
 .mode-icon {
-    width: 28px;
-    height: 28px;
-    flex: 0 0 28px;
+    width: 27px;
+    height: 27px;
+    flex: 0 0 27px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -607,7 +564,7 @@ textarea.control {
 
 .mode-name {
     display: block;
-    font-size: 9px;
+    font-size: 8px;
     line-height: 1.3;
     font-weight: 800;
     color: #334155;
@@ -616,7 +573,7 @@ textarea.control {
 .mode-desc {
     display: block;
     margin-top: 1px;
-    font-size: 7.5px;
+    font-size: 7px;
     line-height: 1.3;
     color: #64748b;
 }
@@ -630,17 +587,17 @@ textarea.control {
     display: flex;
     align-items: center;
     gap: 7px;
-    min-height: 46px;
-    padding: 8px;
-    border: 2px solid #cbd5e1;
+    min-height: 44px;
+    padding: 7px;
+    border: 1.5px solid #dbe2ea;
     border-radius: 7px;
     background: #f8fafc;
 }
 
 .current-file-icon {
-    width: 28px;
-    height: 28px;
-    flex: 0 0 28px;
+    width: 27px;
+    height: 27px;
+    flex: 0 0 27px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -656,7 +613,7 @@ textarea.control {
 
 .current-file-label {
     margin: 0;
-    font-size: 7.5px;
+    font-size: 7px;
     line-height: 1.2;
     font-weight: 800;
     color: #64748b;
@@ -668,7 +625,7 @@ textarea.control {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    font-size: 8.5px;
+    font-size: 8px;
     line-height: 1.3;
     font-weight: 700;
     color: #334155;
@@ -676,36 +633,34 @@ textarea.control {
 
 .current-file-empty {
     margin: 0;
-    font-size: 8.5px;
+    font-size: 8px;
     font-weight: 700;
     color: #b45309;
 }
 
 .current-file-empty-text {
     margin: 1px 0 0;
-    font-size: 7.5px;
+    font-size: 7px;
     color: #64748b;
 }
 
 .view-btn {
-    min-height: 28px;
+    min-height: 27px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 0 9px;
+    padding: 0 8px;
     border-radius: 6px;
     background: #e0e7ff;
     color: #4338ca;
     text-decoration: none;
-    font-size: 8px;
+    font-size: 7.5px;
     font-weight: 800;
     white-space: nowrap;
-    transition: .15s ease;
 }
 
 .view-btn:hover {
     background: #c7d2fe;
-    color: #3730a3;
 }
 
 
@@ -714,18 +669,18 @@ textarea.control {
 ============================================================ */
 
 .upload-box {
-    min-height: 125px;
+    min-height: 108px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 12px;
-    border: 2px dashed #94a3b8;
+    padding: 10px;
+    border: 1.5px dashed #94a3b8;
     border-radius: 8px;
     background: #f8fafc;
     text-align: center;
     cursor: pointer;
-    transition: .15s ease;
+    transition: all .15s ease;
 }
 
 .upload-box:hover {
@@ -739,12 +694,12 @@ textarea.control {
 }
 
 .upload-icon {
-    width: 37px;
-    height: 37px;
+    width: 34px;
+    height: 34px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 6px;
+    margin-bottom: 5px;
     border-radius: 7px;
     background: #e0e7ff;
     color: #4f46e5;
@@ -756,7 +711,7 @@ textarea.control {
 }
 
 .upload-title {
-    font-size: 9px;
+    font-size: 8.5px;
     line-height: 1.3;
     font-weight: 800;
     color: #334155;
@@ -764,13 +719,13 @@ textarea.control {
 
 .upload-format {
     margin-top: 2px;
-    font-size: 7.5px;
+    font-size: 7px;
     color: #64748b;
 }
 
 .upload-limit {
-    margin-top: 3px;
-    font-size: 7px;
+    margin-top: 2px;
+    font-size: 6.5px;
     color: #94a3b8;
 }
 
@@ -783,16 +738,16 @@ textarea.control {
     display: flex;
     align-items: center;
     gap: 7px;
-    padding: 8px;
-    border: 2px solid #a7f3d0;
+    padding: 7px;
+    border: 1.5px solid #a7f3d0;
     border-radius: 7px;
     background: #ecfdf5;
 }
 
 .selected-file-icon {
-    width: 28px;
-    height: 28px;
-    flex: 0 0 28px;
+    width: 27px;
+    height: 27px;
+    flex: 0 0 27px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -808,7 +763,7 @@ textarea.control {
 
 .selected-file-title {
     margin: 0;
-    font-size: 7.5px;
+    font-size: 7px;
     line-height: 1.2;
     font-weight: 800;
     color: #047857;
@@ -819,7 +774,7 @@ textarea.control {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    font-size: 8px;
+    font-size: 7.5px;
     line-height: 1.3;
     font-weight: 700;
     color: #334155;
@@ -827,15 +782,15 @@ textarea.control {
 
 .selected-file-size {
     margin: 1px 0 0;
-    font-size: 7px;
+    font-size: 6.5px;
     line-height: 1.3;
     color: #64748b;
 }
 
 .clear-file-btn {
-    width: 27px;
-    height: 27px;
-    flex: 0 0 27px;
+    width: 26px;
+    height: 26px;
+    flex: 0 0 26px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -858,20 +813,20 @@ textarea.control {
 
 .camera-box {
     overflow: hidden;
-    border: 2px solid #475569;
+    border: 1.5px solid #475569;
     border-radius: 8px;
     background: #0f172a;
 }
 
 .camera-preview {
     position: relative;
-    min-height: 255px;
+    min-height: 220px;
     background: #0f172a;
 }
 
 .camera-video {
     width: 100%;
-    height: 255px;
+    height: 220px;
     display: block;
     object-fit: contain;
     background: #0f172a;
@@ -883,81 +838,79 @@ textarea.control {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 14px;
+    padding: 12px;
     background: #0f172a;
     text-align: center;
 }
 
 .camera-placeholder-icon {
-    width: 42px;
-    height: 42px;
+    width: 38px;
+    height: 38px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto 6px;
-    border-radius: 8px;
+    margin: 0 auto 5px;
+    border-radius: 7px;
     background: rgba(255,255,255,.08);
     color: #94a3b8;
 }
 
 .camera-placeholder-title {
     margin: 0;
-    font-size: 9px;
+    font-size: 8px;
     font-weight: 800;
     color: #cbd5e1;
 }
 
 .camera-placeholder-desc {
     margin: 2px 0 0;
-    font-size: 7px;
+    font-size: 6.5px;
     line-height: 1.35;
     color: #64748b;
 }
 
 .camera-error {
     position: absolute;
-    left: 7px;
-    right: 7px;
-    bottom: 7px;
+    left: 6px;
+    right: 6px;
+    bottom: 6px;
     z-index: 5;
-    padding: 6px 7px;
+    padding: 6px;
     border-radius: 6px;
     background: rgba(127,29,29,.94);
     color: #fecaca;
-    font-size: 7.5px;
+    font-size: 7px;
     font-weight: 700;
     line-height: 1.4;
 }
 
 .camera-frame {
     position: absolute;
-    inset: 25px;
-    border: 1.5px dashed rgba(255,255,255,.28);
-    border-radius: 7px;
+    inset: 22px;
+    border: 1px dashed rgba(255,255,255,.28);
+    border-radius: 6px;
     pointer-events: none;
 }
 
 .camera-actions {
     display: grid;
-    grid-template-columns:
-        repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 5px;
-    padding: 7px;
+    padding: 6px;
     background: #111827;
 }
 
 .camera-btn {
-    min-height: 32px;
+    min-height: 31px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 5px;
-    padding: 0 6px;
+    gap: 4px;
+    padding: 0 5px;
     border-radius: 6px;
-    font-size: 8px;
+    font-size: 7px;
     font-weight: 800;
     cursor: pointer;
-    transition: .15s ease;
 }
 
 .camera-btn:disabled {
@@ -1002,7 +955,7 @@ textarea.control {
 
 .scan-result {
     padding: 7px;
-    border-top: 2px solid #6ee7b7;
+    border-top: 1.5px solid #6ee7b7;
     background: #ecfdf5;
 }
 
@@ -1015,7 +968,7 @@ textarea.control {
 
 .scan-result-title {
     margin: 0;
-    font-size: 9px;
+    font-size: 8px;
     line-height: 1.3;
     font-weight: 800;
     color: #065f46;
@@ -1023,19 +976,19 @@ textarea.control {
 
 .scan-result-desc {
     margin: 2px 0 0;
-    font-size: 7.5px;
+    font-size: 6.8px;
     line-height: 1.4;
     color: #047857;
 }
 
 .retake-btn {
-    min-height: 25px;
+    min-height: 24px;
     padding: 0 7px;
     border: 1px solid #6ee7b7;
     border-radius: 6px;
     background: #ffffff;
     color: #047857;
-    font-size: 7.5px;
+    font-size: 7px;
     font-weight: 800;
     cursor: pointer;
 }
@@ -1043,8 +996,8 @@ textarea.control {
 .scan-image {
     display: block;
     width: 100%;
-    max-height: 280px;
-    margin-top: 6px;
+    max-height: 240px;
+    margin-top: 5px;
     object-fit: contain;
     border: 1px solid #a7f3d0;
     border-radius: 6px;
@@ -1052,9 +1005,9 @@ textarea.control {
 }
 
 .scan-info {
-    margin-top: 4px;
+    margin-top: 3px;
     text-align: center;
-    font-size: 7.5px;
+    font-size: 7px;
     line-height: 1.3;
     font-weight: 800;
     color: #047857;
@@ -1070,26 +1023,26 @@ textarea.control {
     flex: 1;
     flex-direction: column;
     justify-content: center;
-    padding: 15px;
-    border: 2px dashed #94a3b8;
+    padding: 13px;
+    border: 1.5px dashed #94a3b8;
     border-radius: 8px;
     background: #f8fafc;
 }
 
 .physical-icon {
-    width: 40px;
-    height: 40px;
+    width: 37px;
+    height: 37px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 8px;
+    border-radius: 7px;
     background: #e0e7ff;
     color: #4f46e5;
 }
 
 .physical-title {
-    margin: 8px 0 0;
-    font-size: 11px;
+    margin: 7px 0 0;
+    font-size: 10px;
     line-height: 1.3;
     font-weight: 800;
     color: #334155;
@@ -1097,18 +1050,18 @@ textarea.control {
 
 .physical-desc {
     margin: 3px 0 0;
-    font-size: 8px;
+    font-size: 7.5px;
     line-height: 1.5;
     color: #64748b;
 }
 
 .physical-field {
-    margin-top: 13px;
+    margin-top: 11px;
 }
 
 .physical-example {
-    margin-top: 7px;
-    padding: 8px;
+    margin-top: 6px;
+    padding: 7px;
     border: 1px solid #cbd5e1;
     border-radius: 6px;
     background: #ffffff;
@@ -1116,7 +1069,7 @@ textarea.control {
 
 .physical-example p {
     margin: 0;
-    font-size: 7.5px;
+    font-size: 7px;
     line-height: 1.45;
     color: #64748b;
 }
@@ -1132,7 +1085,7 @@ textarea.control {
 
 .bottom-note {
     margin-top: auto;
-    padding: 8px;
+    padding: 7px;
     border: 1px solid #cbd5e1;
     border-radius: 6px;
     background: #ffffff;
@@ -1140,7 +1093,7 @@ textarea.control {
 
 .bottom-note p {
     margin: 0;
-    font-size: 7.5px;
+    font-size: 7px;
     line-height: 1.45;
     color: #64748b;
 }
@@ -1152,44 +1105,45 @@ textarea.control {
 
 .footer {
     display: flex;
+    align-items: center;
     justify-content: flex-end;
     gap: 7px;
     padding: 10px 14px;
-    border-top: 2px solid #64748b;
+    border-top: 1.5px solid #e2e8f0;
     background: #f8fafc;
 }
 
 .footer-btn {
-    min-height: 36px;
+    min-height: 35px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 6px;
     padding: 0 13px;
     border-radius: 7px;
-    font-size: 9px;
+    font-size: 8.5px;
     font-weight: 800;
     text-decoration: none;
     cursor: pointer;
-    transition: .15s ease;
+    transition: all .15s ease;
 }
 
 .footer-cancel {
-    border: 2px solid #94a3b8;
+    border: 1.5px solid #cbd5e1;
     background: #ffffff;
     color: #475569;
 }
 
 .footer-cancel:hover {
+    border-color: #94a3b8;
     background: #f1f5f9;
-    border-color: #64748b;
 }
 
 .footer-submit {
-    border: 2px solid #2563eb;
+    border: 1.5px solid #2563eb;
     background: #2563eb;
     color: #ffffff;
-    box-shadow: 0 3px 8px rgba(37,99,235,.12);
+    box-shadow: 0 3px 7px rgba(37,99,235,.12);
 }
 
 .footer-submit:hover:not(:disabled) {
@@ -1215,11 +1169,12 @@ textarea.control {
    RESPONSIVE
 ============================================================ */
 
-@media (max-width: 860px) {
+@media (max-width: 820px) {
 
     .edit-page {
-        padding-left: 10px;
-        padding-right: 10px;
+        max-width: 760px;
+        padding-left: 12px;
+        padding-right: 12px;
     }
 
     .attachment-grid {
@@ -1248,7 +1203,7 @@ textarea.control {
     }
 
     .body {
-        padding: 12px;
+        padding: 11px;
     }
 
     .field-grid {
@@ -1256,9 +1211,8 @@ textarea.control {
     }
 
     .field {
-        padding: 11px;
+        padding: 10px;
         border-right: 0;
-        border-bottom: 2px solid #94a3b8;
     }
 
     .field:nth-child(2n) {
@@ -1267,15 +1221,6 @@ textarea.control {
 
     .field-full {
         grid-column: auto;
-    }
-
-    input.control,
-    select.control {
-        height: 40px;
-    }
-
-    textarea.control {
-        min-height: 86px;
     }
 
     .mode-grid {
@@ -1298,30 +1243,39 @@ textarea.control {
 
 @media (max-width: 420px) {
 
+    .edit-page {
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+
+    .system-header {
+        padding: 12px;
+    }
+
     .system-header-title {
-        font-size: 14px;
+        font-size: 15px;
     }
 
     .body {
-        padding: 10px;
+        padding: 9px;
     }
 
     .field {
-        padding: 10px;
+        padding: 9px;
     }
 
     .attachment-body {
-        padding: 9px;
+        padding: 8px;
     }
 
     input.control,
     select.control {
         height: 39px;
-        font-size: 12px;
+        font-size: 11px;
     }
 
     textarea.control {
-        min-height: 82px;
+        min-height: 78px;
     }
 }
 </style>
@@ -1330,45 +1284,14 @@ textarea.control {
 <div class="edit-page">
 
     {{-- =========================================================
-         ERROR
-    ========================================================== --}}
-
-    @if($errors->any())
-
-        <div class="error-box">
-
-            <p class="error-box-title">
-                Data belum dapat diperbarui.
-            </p>
-
-            <ul class="error-box-list">
-
-                @foreach($errors->all() as $error)
-
-                    <li>
-                        {{ $error }}
-                    </li>
-
-                @endforeach
-
-            </ul>
-
-        </div>
-
-    @endif
-
-
-    {{-- =========================================================
          AKSI KEMBALI
     ========================================================== --}}
 
     <div class="top-action">
-
         <a
             href="{{ route('surat-masuk.index') }}"
             class="top-back-btn"
         >
-
             <svg
                 class="h-3.5 w-3.5"
                 fill="none"
@@ -1385,10 +1308,29 @@ textarea.control {
             </svg>
 
             Kembali
-
         </a>
-
     </div>
+
+
+    {{-- =========================================================
+         ERROR
+    ========================================================== --}}
+
+    @if($errors->any())
+        <div class="error-box">
+
+            <p class="error-box-title">
+                Data belum dapat diperbarui.
+            </p>
+
+            <ul class="error-box-list">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+
+        </div>
+    @endif
 
 
     {{-- =========================================================
@@ -1405,8 +1347,6 @@ textarea.control {
         @csrf
         @method('PUT')
 
-
-        {{-- Dipertahankan untuk kompatibilitas backend --}}
         <input
             type="hidden"
             name="nomor_agenda"
@@ -1417,7 +1357,7 @@ textarea.control {
         <div class="main-card">
 
             {{-- =================================================
-                 SYSTEM HEADER
+                 HEADER
             ================================================== --}}
 
             <div class="system-header">
@@ -1470,10 +1410,6 @@ textarea.control {
                 </div>
 
 
-                {{-- =================================================
-                     ARSIP DIGITAL
-                ================================================== --}}
-
                 <span class="system-header-badge">
                     Arsip Digital
                 </span>
@@ -1516,9 +1452,7 @@ textarea.control {
 
                         <div class="field-grid">
 
-                            {{-- =================================================
-                                 NOMOR SURAT
-                            ================================================== --}}
+                            {{-- NOMOR SURAT --}}
 
                             <div class="field">
 
@@ -1530,34 +1464,26 @@ textarea.control {
                                     <span class="required">*</span>
                                 </label>
 
-
                                 <input
                                     id="nomor_surat"
                                     name="nomor_surat"
                                     type="text"
                                     required
-                                    autocomplete="off"
                                     maxlength="255"
+                                    autocomplete="off"
                                     value="{{ old('nomor_surat', $suratMasuk->nomor_surat) }}"
                                     placeholder="Contoh: 005/B/I/2026"
                                     class="control @error('nomor_surat') border-red-500 @enderror"
                                 >
 
-
                                 @error('nomor_surat')
-
-                                    <p class="field-error">
-                                        {{ $message }}
-                                    </p>
-
+                                    <p class="field-error">{{ $message }}</p>
                                 @enderror
 
                             </div>
 
 
-                            {{-- =================================================
-                                 PENGIRIM
-                            ================================================== --}}
+                            {{-- PENGIRIM --}}
 
                             <div class="field">
 
@@ -1569,34 +1495,26 @@ textarea.control {
                                     <span class="required">*</span>
                                 </label>
 
-
                                 <input
                                     id="pengirim"
                                     name="pengirim"
                                     type="text"
                                     required
-                                    autocomplete="organization"
                                     maxlength="255"
+                                    autocomplete="organization"
                                     value="{{ old('pengirim', $suratMasuk->pengirim) }}"
                                     placeholder="Nama instansi pengirim"
                                     class="control @error('pengirim') border-red-500 @enderror"
                                 >
 
-
                                 @error('pengirim')
-
-                                    <p class="field-error">
-                                        {{ $message }}
-                                    </p>
-
+                                    <p class="field-error">{{ $message }}</p>
                                 @enderror
 
                             </div>
 
 
-                            {{-- =================================================
-                                 TANGGAL SURAT
-                            ================================================== --}}
+                            {{-- TANGGAL SURAT --}}
 
                             <div class="field">
 
@@ -1608,7 +1526,6 @@ textarea.control {
                                     <span class="required">*</span>
                                 </label>
 
-
                                 <input
                                     id="tanggal_surat"
                                     name="tanggal_surat"
@@ -1618,21 +1535,14 @@ textarea.control {
                                     class="control @error('tanggal_surat') border-red-500 @enderror"
                                 >
 
-
                                 @error('tanggal_surat')
-
-                                    <p class="field-error">
-                                        {{ $message }}
-                                    </p>
-
+                                    <p class="field-error">{{ $message }}</p>
                                 @enderror
 
                             </div>
 
 
-                            {{-- =================================================
-                                 TANGGAL DITERIMA
-                            ================================================== --}}
+                            {{-- TANGGAL DITERIMA --}}
 
                             <div class="field">
 
@@ -1644,7 +1554,6 @@ textarea.control {
                                     <span class="required">*</span>
                                 </label>
 
-
                                 <input
                                     id="tanggal_terima"
                                     name="tanggal_terima"
@@ -1654,21 +1563,14 @@ textarea.control {
                                     class="control @error('tanggal_terima') border-red-500 @enderror"
                                 >
 
-
                                 @error('tanggal_terima')
-
-                                    <p class="field-error">
-                                        {{ $message }}
-                                    </p>
-
+                                    <p class="field-error">{{ $message }}</p>
                                 @enderror
 
                             </div>
 
 
-                            {{-- =================================================
-                                 KATEGORI
-                            ================================================== --}}
+                            {{-- KATEGORI --}}
 
                             <div class="field">
 
@@ -1679,7 +1581,6 @@ textarea.control {
                                     Kategori Surat
                                     <span class="required">*</span>
                                 </label>
-
 
                                 <select
                                     id="kategori_surat_id"
@@ -1695,7 +1596,6 @@ textarea.control {
                                     >
                                         Pilih kategori
                                     </option>
-
 
                                     @foreach(($kategoris ?? collect()) as $kategori)
 
@@ -1717,33 +1617,23 @@ textarea.control {
 
                                 </select>
 
-
                                 @if(
                                     !isset($kategoris) ||
                                     $kategoris->isEmpty()
                                 )
-
                                     <p class="field-error">
                                         Belum ada kategori surat yang tersedia.
                                     </p>
-
                                 @endif
 
-
                                 @error('kategori_surat_id')
-
-                                    <p class="field-error">
-                                        {{ $message }}
-                                    </p>
-
+                                    <p class="field-error">{{ $message }}</p>
                                 @enderror
 
                             </div>
 
 
-                            {{-- =================================================
-                                 STATUS
-                            ================================================== --}}
+                            {{-- STATUS --}}
 
                             <div class="field">
 
@@ -1754,7 +1644,6 @@ textarea.control {
                                     Status Surat
                                     <span class="required">*</span>
                                 </label>
-
 
                                 <select
                                     id="status"
@@ -1767,9 +1656,7 @@ textarea.control {
 
                                         <option
                                             value="{{ $value }}"
-                                            @selected(
-                                                $currentStatus === $value
-                                            )
+                                            @selected($currentStatus === $value)
                                         >
                                             {{ $label }}
                                         </option>
@@ -1778,21 +1665,14 @@ textarea.control {
 
                                 </select>
 
-
                                 @error('status')
-
-                                    <p class="field-error">
-                                        {{ $message }}
-                                    </p>
-
+                                    <p class="field-error">{{ $message }}</p>
                                 @enderror
 
                             </div>
 
 
-                            {{-- =================================================
-                                 PERIHAL
-                            ================================================== --}}
+                            {{-- PERIHAL --}}
 
                             <div class="field field-full">
 
@@ -1804,7 +1684,6 @@ textarea.control {
                                     <span class="required">*</span>
                                 </label>
 
-
                                 <textarea
                                     id="perihal"
                                     name="perihal"
@@ -1815,13 +1694,8 @@ textarea.control {
                                     class="control @error('perihal') border-red-500 @enderror"
                                 >{{ old('perihal', $suratMasuk->perihal) }}</textarea>
 
-
                                 @error('perihal')
-
-                                    <p class="field-error">
-                                        {{ $message }}
-                                    </p>
-
+                                    <p class="field-error">{{ $message }}</p>
                                 @enderror
 
                             </div>
@@ -1834,7 +1708,7 @@ textarea.control {
 
 
                 {{-- =================================================
-                     LAMPIRAN
+                     LAMPIRAN DAN FISIK
                 ================================================== --}}
 
                 <section class="section">
@@ -1861,7 +1735,7 @@ textarea.control {
                     <div class="attachment-grid">
 
                         {{-- =================================================
-                             BERKAS LAMPIRAN
+                             LAMPIRAN DIGITAL
                         ================================================== --}}
 
                         <div class="attachment-card">
@@ -1880,7 +1754,6 @@ textarea.control {
 
                                 </div>
 
-
                                 <span class="attachment-badge">
                                     Opsional
                                 </span>
@@ -1889,8 +1762,6 @@ textarea.control {
 
 
                             <div class="attachment-body">
-
-                                {{-- INFO --}}
 
                                 <div class="info">
 
@@ -1909,19 +1780,14 @@ textarea.control {
                                         />
                                     </svg>
 
-
                                     <p>
-                                        Maksimal
-                                        <strong>10 MB</strong>.
+                                        Maksimal <strong>10 MB</strong>.
                                         PDF tetap PDF.
-                                        JPG/JPEG/PNG dikompres otomatis
-                                        sebelum dikirim ke server.
+                                        JPG/JPEG/PNG dikompres otomatis.
                                     </p>
 
                                 </div>
 
-
-                                {{-- MODE --}}
 
                                 <div class="mode-grid">
 
@@ -1950,7 +1816,6 @@ textarea.control {
                                             </svg>
 
                                         </span>
-
 
                                         <span>
 
@@ -1993,7 +1858,6 @@ textarea.control {
 
                                         </span>
 
-
                                         <span>
 
                                             <span class="mode-name">
@@ -2010,8 +1874,6 @@ textarea.control {
 
                                 </div>
 
-
-                                {{-- FILE LAMA --}}
 
                                 <div class="current-file">
 
@@ -2042,7 +1904,6 @@ textarea.control {
                                             <p class="current-file-label">
                                                 File tersimpan
                                             </p>
-
 
                                             <span
                                                 class="current-file-name"
@@ -2082,9 +1943,7 @@ textarea.control {
                                 </div>
 
 
-                                {{-- =================================================
-                                     UPLOAD PANEL
-                                ================================================== --}}
+                                {{-- UPLOAD PANEL --}}
 
                                 <div id="upload-panel">
 
@@ -2113,21 +1972,17 @@ textarea.control {
 
                                         </span>
 
-
                                         <span class="upload-title">
                                             Pilih file baru
                                         </span>
-
 
                                         <span class="upload-format">
                                             PDF, JPG, JPEG, PNG
                                         </span>
 
-
                                         <span class="upload-limit">
                                             Maksimal 10 MB
                                         </span>
-
 
                                         <input
                                             type="file"
@@ -2139,8 +1994,6 @@ textarea.control {
 
                                     </label>
 
-
-                                    {{-- FILE BARU --}}
 
                                     <div
                                         id="selected-file"
@@ -2173,12 +2026,10 @@ textarea.control {
                                                 File siap digunakan
                                             </p>
 
-
                                             <p
                                                 id="selected-file-name"
                                                 class="selected-file-name"
                                             ></p>
-
 
                                             <p
                                                 id="selected-file-size"
@@ -2201,7 +2052,6 @@ textarea.control {
                                                 fill="none"
                                                 stroke="currentColor"
                                                 viewBox="0 0 24 24"
-                                                aria-hidden="true"
                                             >
                                                 <path
                                                     stroke-linecap="round"
@@ -2218,9 +2068,7 @@ textarea.control {
                                 </div>
 
 
-                                {{-- =================================================
-                                     SCAN PANEL
-                                ================================================== --}}
+                                {{-- SCAN PANEL --}}
 
                                 <div
                                     id="scan-panel"
@@ -2254,7 +2102,6 @@ textarea.control {
                                                             fill="none"
                                                             stroke="currentColor"
                                                             viewBox="0 0 24 24"
-                                                            aria-hidden="true"
                                                         >
                                                             <path
                                                                 stroke-linecap="round"
@@ -2273,11 +2120,9 @@ textarea.control {
 
                                                     </div>
 
-
                                                     <p class="camera-placeholder-title">
                                                         Kamera belum aktif
                                                     </p>
-
 
                                                     <p class="camera-placeholder-desc">
                                                         Aktifkan kamera untuk scan dokumen.
@@ -2310,7 +2155,6 @@ textarea.control {
                                                 Aktifkan Kamera
                                             </button>
 
-
                                             <button
                                                 type="button"
                                                 id="capture-btn"
@@ -2319,7 +2163,6 @@ textarea.control {
                                             >
                                                 Ambil Gambar
                                             </button>
-
 
                                             <button
                                                 type="button"
@@ -2351,7 +2194,6 @@ textarea.control {
                                                     </p>
 
                                                 </div>
-
 
                                                 <button
                                                     type="button"
@@ -2392,10 +2234,6 @@ textarea.control {
                                 </div>
 
 
-                                {{-- =================================================
-                                     CATATAN
-                                ================================================== --}}
-
                                 <div class="bottom-note">
 
                                     <p>
@@ -2407,20 +2245,11 @@ textarea.control {
 
 
                                 @error('lampiran_file')
-
-                                    <p class="field-error">
-                                        {{ $message }}
-                                    </p>
-
+                                    <p class="field-error">{{ $message }}</p>
                                 @enderror
 
-
                                 @error('captured_image')
-
-                                    <p class="field-error">
-                                        {{ $message }}
-                                    </p>
-
+                                    <p class="field-error">{{ $message }}</p>
                                 @enderror
 
                             </div>
@@ -2429,7 +2258,7 @@ textarea.control {
 
 
                         {{-- =================================================
-                             LOKASI ARSIP FISIK
+                             ARSIP FISIK
                         ================================================== --}}
 
                         <div class="attachment-card">
@@ -2447,7 +2276,6 @@ textarea.control {
                                     </p>
 
                                 </div>
-
 
                                 <span class="attachment-badge">
                                     Opsional
@@ -2513,11 +2341,9 @@ textarea.control {
 
 
                                         @error('lokasi_arsip_fisik')
-
                                             <p class="field-error">
                                                 {{ $message }}
                                             </p>
-
                                         @enderror
 
                                     </div>
@@ -2573,7 +2399,6 @@ textarea.control {
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
-                        aria-hidden="true"
                     >
                         <path
                             stroke-linecap="round"
@@ -2600,7 +2425,6 @@ textarea.control {
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
-                        aria-hidden="true"
                     >
                         <path
                             stroke-linecap="round"
@@ -2616,7 +2440,6 @@ textarea.control {
                         class="hidden h-3.5 w-3.5 animate-spin"
                         fill="none"
                         viewBox="0 0 24 24"
-                        aria-hidden="true"
                     >
                         <circle
                             class="opacity-25"
@@ -2655,318 +2478,112 @@ document.addEventListener('DOMContentLoaded', function () {
 
     'use strict';
 
+    const form = document.getElementById('form-surat');
+    const modeUploadBtn = document.getElementById('mode-upload-btn');
+    const modeScanBtn = document.getElementById('mode-scan-btn');
+    const uploadPanel = document.getElementById('upload-panel');
+    const scanPanel = document.getElementById('scan-panel');
+    const fileInput = document.getElementById('lampiran_file');
+    const uploadBox = document.getElementById('upload-box');
+    const selectedFile = document.getElementById('selected-file');
+    const selectedFileName = document.getElementById('selected-file-name');
+    const selectedFileSize = document.getElementById('selected-file-size');
+    const clearFileBtn = document.getElementById('clear-file-btn');
+    const cameraVideo = document.getElementById('camera-video');
+    const cameraPlaceholder = document.getElementById('camera-placeholder');
+    const cameraError = document.getElementById('camera-error');
+    const startCameraBtn = document.getElementById('start-camera-btn');
+    const captureBtn = document.getElementById('capture-btn');
+    const stopCameraBtn = document.getElementById('stop-camera-btn');
+    const retakeBtn = document.getElementById('retake-btn');
+    const scanResult = document.getElementById('scan-result');
+    const scanPreviewImage = document.getElementById('scan-preview-image');
+    const scanCompressionInfo = document.getElementById('scan-compression-info');
+    const capturedInput = document.getElementById('captured_image');
+    const submitBtn = document.getElementById('submit-btn');
+    const submitIcon = document.getElementById('submit-icon');
+    const submitLoading = document.getElementById('submit-loading');
+    const submitText = document.getElementById('submit-text');
 
-    /* ============================================================
-       ELEMENT
-    ============================================================ */
-
-    const form =
-        document.getElementById(
-            'form-surat'
-        );
-
-    const modeUploadBtn =
-        document.getElementById(
-            'mode-upload-btn'
-        );
-
-    const modeScanBtn =
-        document.getElementById(
-            'mode-scan-btn'
-        );
-
-    const uploadPanel =
-        document.getElementById(
-            'upload-panel'
-        );
-
-    const scanPanel =
-        document.getElementById(
-            'scan-panel'
-        );
-
-    const fileInput =
-        document.getElementById(
-            'lampiran_file'
-        );
-
-    const uploadBox =
-        document.getElementById(
-            'upload-box'
-        );
-
-    const selectedFile =
-        document.getElementById(
-            'selected-file'
-        );
-
-    const selectedFileName =
-        document.getElementById(
-            'selected-file-name'
-        );
-
-    const selectedFileSize =
-        document.getElementById(
-            'selected-file-size'
-        );
-
-    const clearFileBtn =
-        document.getElementById(
-            'clear-file-btn'
-        );
-
-    const cameraVideo =
-        document.getElementById(
-            'camera-video'
-        );
-
-    const cameraPlaceholder =
-        document.getElementById(
-            'camera-placeholder'
-        );
-
-    const cameraError =
-        document.getElementById(
-            'camera-error'
-        );
-
-    const startCameraBtn =
-        document.getElementById(
-            'start-camera-btn'
-        );
-
-    const captureBtn =
-        document.getElementById(
-            'capture-btn'
-        );
-
-    const stopCameraBtn =
-        document.getElementById(
-            'stop-camera-btn'
-        );
-
-    const retakeBtn =
-        document.getElementById(
-            'retake-btn'
-        );
-
-    const scanResult =
-        document.getElementById(
-            'scan-result'
-        );
-
-    const scanPreviewImage =
-        document.getElementById(
-            'scan-preview-image'
-        );
-
-    const scanCompressionInfo =
-        document.getElementById(
-            'scan-compression-info'
-        );
-
-    const capturedInput =
-        document.getElementById(
-            'captured_image'
-        );
-
-    const submitBtn =
-        document.getElementById(
-            'submit-btn'
-        );
-
-    const submitIcon =
-        document.getElementById(
-            'submit-icon'
-        );
-
-    const submitLoading =
-        document.getElementById(
-            'submit-loading'
-        );
-
-    const submitText =
-        document.getElementById(
-            'submit-text'
-        );
-
-
-    if (
-        !form ||
-        !fileInput ||
-        !capturedInput
-    ) {
+    if (!form || !fileInput || !capturedInput) {
         return;
     }
 
-
-    /* ============================================================
-       CONFIGURATION
-    ============================================================ */
-
-    const MAX_FILE_SIZE =
-        10 * 1024 * 1024;
-
-    const IMAGE_TARGET_SIZE =
-        2.5 * 1024 * 1024;
-
-    const IMAGE_MAX_SIZE =
-        5 * 1024 * 1024;
-
-    const IMAGE_MAX_DIMENSION =
-        2200;
-
-    const IMAGE_MIN_DIMENSION =
-        1000;
+    const MAX_FILE_SIZE = 10 * 1024 * 1024;
+    const IMAGE_TARGET_SIZE = 2.5 * 1024 * 1024;
+    const IMAGE_MAX_SIZE = 5 * 1024 * 1024;
+    const IMAGE_MAX_DIMENSION = 2200;
+    const IMAGE_MIN_DIMENSION = 1000;
 
     const IMAGE_QUALITIES = [
-        0.86,
-        0.82,
-        0.78,
-        0.74,
-        0.70,
-        0.66,
-        0.62,
-        0.58,
-        0.54,
-        0.50,
-        0.46,
-        0.42
+        0.86, 0.82, 0.78, 0.74,
+        0.70, 0.66, 0.62, 0.58,
+        0.54, 0.50, 0.46, 0.42
     ];
 
-    const CAMERA_MAX_WIDTH =
-        1600;
+    const CAMERA_MAX_WIDTH = 1600;
+    const CAMERA_MAX_HEIGHT = 1600;
+    const CAMERA_TARGET_SIZE = 2.5 * 1024 * 1024;
+    const CAMERA_MAX_DATA_URL_LENGTH = 7 * 1024 * 1024;
 
-    const CAMERA_MAX_HEIGHT =
-        1600;
-
-    const CAMERA_TARGET_SIZE =
-        2.5 * 1024 * 1024;
-
-    const CAMERA_MAX_DATA_URL_LENGTH =
-        7 * 1024 * 1024;
-
-
-    let cameraStream =
-        null;
-
-    let previewObjectUrl =
-        null;
-
-    let submitting =
-        false;
-
-
-    /* ============================================================
-       HELPER
-    ============================================================ */
+    let cameraStream = null;
+    let previewObjectUrl = null;
+    let submitting = false;
 
     function formatFileSize(bytes) {
 
-        if (
-            !Number.isFinite(bytes) ||
-            bytes <= 0
-        ) {
+        if (!Number.isFinite(bytes) || bytes <= 0) {
             return '0 KB';
         }
 
-
-        if (
-            bytes <
-            1024 * 1024
-        ) {
-            return (
-                (bytes / 1024)
-                    .toFixed(1) +
-                ' KB'
-            );
+        if (bytes < 1024 * 1024) {
+            return (bytes / 1024).toFixed(1) + ' KB';
         }
 
-
-        return (
-            (
-                bytes /
-                (1024 * 1024)
-            ).toFixed(2) +
-            ' MB'
-        );
+        return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
     }
 
+    function getReductionPercent(originalSize, compressedSize) {
 
-    function getReductionPercent(
-        originalSize,
-        compressedSize
-    ) {
-
-        if (
-            !originalSize ||
-            originalSize <= 0
-        ) {
+        if (!originalSize || originalSize <= 0) {
             return 0;
         }
-
 
         return Math.max(
             0,
             Math.round(
-                (
-                    1 -
-                    compressedSize /
-                        originalSize
-                ) * 100
+                (1 - compressedSize / originalSize) * 100
             )
         );
     }
 
-
     function getFileExtension(file) {
 
-        return String(
-            file?.name || ''
-        )
+        return String(file?.name || '')
             .split('.')
             .pop()
             .toLowerCase();
     }
 
-
-    function isAllowedExtension(
-        extension
-    ) {
+    function isAllowedExtension(extension) {
 
         return [
             'pdf',
             'jpg',
             'jpeg',
             'png'
-        ].includes(
-            extension
-        );
+        ].includes(extension);
     }
 
-
-    /* ============================================================
-       CAMERA ERROR
-    ============================================================ */
-
-    function showCameraError(
-        message
-    ) {
+    function showCameraError(message) {
 
         if (!cameraError) {
             return;
         }
 
-
-        cameraError.textContent =
-            message;
-
-
-        cameraError.classList.remove(
-            'hidden'
-        );
+        cameraError.textContent = message;
+        cameraError.classList.remove('hidden');
     }
-
 
     function clearCameraError() {
 
@@ -2974,300 +2591,156 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-
-        cameraError.textContent =
-            '';
-
-
-        cameraError.classList.add(
-            'hidden'
-        );
+        cameraError.textContent = '';
+        cameraError.classList.add('hidden');
     }
-
-
-    /* ============================================================
-       MODE
-    ============================================================ */
 
     function activateUploadMode() {
 
         stopCamera();
 
+        uploadPanel.classList.remove('hidden');
+        scanPanel.classList.add('hidden');
 
-        uploadPanel.classList.remove(
-            'hidden'
-        );
+        modeUploadBtn.classList.add('active');
+        modeScanBtn.classList.remove('active');
 
-
-        scanPanel.classList.add(
-            'hidden'
-        );
-
-
-        modeUploadBtn.classList.add(
-            'active'
-        );
-
-
-        modeScanBtn.classList.remove(
-            'active'
-        );
-
-
-        modeUploadBtn.setAttribute(
-            'aria-selected',
-            'true'
-        );
-
-
-        modeScanBtn.setAttribute(
-            'aria-selected',
-            'false'
-        );
-
+        modeUploadBtn.setAttribute('aria-selected', 'true');
+        modeScanBtn.setAttribute('aria-selected', 'false');
 
         clearCameraError();
     }
 
-
     function activateScanMode() {
 
-        uploadPanel.classList.add(
-            'hidden'
-        );
+        uploadPanel.classList.add('hidden');
+        scanPanel.classList.remove('hidden');
 
+        modeUploadBtn.classList.remove('active');
+        modeScanBtn.classList.add('active');
 
-        scanPanel.classList.remove(
-            'hidden'
-        );
-
-
-        modeUploadBtn.classList.remove(
-            'active'
-        );
-
-
-        modeScanBtn.classList.add(
-            'active'
-        );
-
-
-        modeUploadBtn.setAttribute(
-            'aria-selected',
-            'false'
-        );
-
-
-        modeScanBtn.setAttribute(
-            'aria-selected',
-            'true'
-        );
-
+        modeUploadBtn.setAttribute('aria-selected', 'false');
+        modeScanBtn.setAttribute('aria-selected', 'true');
 
         clearFileSelection();
         clearCameraError();
     }
-
 
     modeUploadBtn?.addEventListener(
         'click',
         activateUploadMode
     );
 
-
     modeScanBtn?.addEventListener(
         'click',
         activateScanMode
     );
 
-
-    /* ============================================================
-       FILE DISPLAY
-    ============================================================ */
-
-    function showSelectedFile(
-        file,
-        note
-    ) {
+    function showSelectedFile(file, note) {
 
         if (!selectedFile) {
             return;
         }
 
+        selectedFile.classList.remove('hidden');
 
-        selectedFile.classList.remove(
-            'hidden'
-        );
-
-
-        selectedFileName.textContent =
-            file.name;
-
+        selectedFileName.textContent = file.name;
 
         selectedFileSize.textContent =
-            formatFileSize(
-                file.size
-            ) +
-            (
-                note
-                    ? ' • ' + note
-                    : ''
-            );
+            formatFileSize(file.size) +
+            (note ? ' • ' + note : '');
 
-
-        uploadBox?.classList.add(
-            'has-file'
-        );
+        uploadBox?.classList.add('has-file');
     }
-
 
     function clearFileSelection() {
 
         if (fileInput) {
-
-            fileInput.value =
-                '';
+            fileInput.value = '';
         }
-
 
         if (selectedFile) {
-
-            selectedFile.classList.add(
-                'hidden'
-            );
+            selectedFile.classList.add('hidden');
         }
-
 
         if (selectedFileName) {
-
-            selectedFileName.textContent =
-                '';
+            selectedFileName.textContent = '';
         }
-
 
         if (selectedFileSize) {
-
-            selectedFileSize.textContent =
-                '';
+            selectedFileSize.textContent = '';
         }
 
-
-        uploadBox?.classList.remove(
-            'has-file'
-        );
+        uploadBox?.classList.remove('has-file');
     }
-
 
     clearFileBtn?.addEventListener(
         'click',
         clearFileSelection
     );
 
-
-    /* ============================================================
-       FILE CHANGE
-    ============================================================ */
-
     fileInput.addEventListener(
         'change',
         async function () {
 
-            const file =
-                fileInput.files?.[0];
-
+            const file = fileInput.files?.[0];
 
             if (!file) {
                 return;
             }
 
-
             clearCameraError();
 
+            const extension = getFileExtension(file);
 
-            const extension =
-                getFileExtension(
-                    file
-                );
-
-
-            if (
-                !isAllowedExtension(
-                    extension
-                )
-            ) {
+            if (!isAllowedExtension(extension)) {
 
                 clearFileSelection();
-
 
                 alert(
                     'Format file tidak didukung.\n\n' +
                     'Gunakan PDF, JPG, JPEG, atau PNG.'
                 );
 
+                return;
+            }
+
+            if (file.size <= 0) {
+
+                clearFileSelection();
+
+                alert('File kosong atau tidak valid.');
 
                 return;
             }
 
-
-            if (
-                file.size <= 0
-            ) {
+            if (file.size > MAX_FILE_SIZE) {
 
                 clearFileSelection();
-
-
-                alert(
-                    'File kosong atau tidak valid.'
-                );
-
-
-                return;
-            }
-
-
-            if (
-                file.size >
-                MAX_FILE_SIZE
-            ) {
-
-                clearFileSelection();
-
 
                 alert(
                     'Ukuran file terlalu besar.\n\n' +
                     'Maksimal file asli adalah 10 MB.'
                 );
 
-
                 return;
             }
-
-
-            /* PDF */
 
             if (
                 extension === 'pdf' ||
                 file.type === 'application/pdf'
             ) {
 
-                capturedInput.value =
-                    '';
-
-
+                capturedInput.value = '';
                 clearScanResult();
-
 
                 showSelectedFile(
                     file,
                     'PDF • tanpa kompresi'
                 );
 
-
                 return;
             }
-
-
-            /* IMAGE */
 
             try {
 
@@ -3276,68 +2749,36 @@ document.addEventListener('DOMContentLoaded', function () {
                     'Sedang mengompres...'
                 );
 
-
-                const originalSize =
-                    file.size;
-
+                const originalSize = file.size;
 
                 const compressedFile =
-                    await compressImageFile(
-                        file
-                    );
+                    await compressImageFile(file);
 
+                let finalFile = compressedFile;
 
-                let finalFile =
-                    compressedFile;
-
-
-                if (
-                    compressedFile.size >=
-                    originalSize
-                ) {
-
-                    finalFile =
-                        file;
+                if (compressedFile.size >= originalSize) {
+                    finalFile = file;
                 }
 
-
-                if (
-                    finalFile.size >
-                    MAX_FILE_SIZE
-                ) {
+                if (finalFile.size > MAX_FILE_SIZE) {
 
                     clearFileSelection();
-
 
                     alert(
                         'Gambar masih terlalu besar setelah dikompres.\n\n' +
                         'Silakan pilih gambar dengan resolusi lebih rendah.'
                     );
 
-
                     return;
                 }
 
+                const dataTransfer = new DataTransfer();
 
-                const dataTransfer =
-                    new DataTransfer();
+                dataTransfer.items.add(finalFile);
+                fileInput.files = dataTransfer.files;
 
-
-                dataTransfer.items.add(
-                    finalFile
-                );
-
-
-                fileInput.files =
-                    dataTransfer.files;
-
-
-                capturedInput.value =
-                    '';
-
-
+                capturedInput.value = '';
                 clearScanResult();
-
 
                 const reduction =
                     getReductionPercent(
@@ -3345,24 +2786,16 @@ document.addEventListener('DOMContentLoaded', function () {
                         finalFile.size
                     );
 
-
                 const note =
                     finalFile === file
                         ? 'Gambar asli digunakan • ' +
-                          formatFileSize(
-                              finalFile.size
-                          )
+                          formatFileSize(finalFile.size)
                         : 'Dikompres ' +
                           reduction +
                           '% • ' +
-                          formatFileSize(
-                              originalSize
-                          ) +
+                          formatFileSize(originalSize) +
                           ' → ' +
-                          formatFileSize(
-                              finalFile.size
-                          );
-
+                          formatFileSize(finalFile.size);
 
                 showSelectedFile(
                     finalFile,
@@ -3376,9 +2809,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     error
                 );
 
-
                 clearFileSelection();
-
 
                 alert(
                     error?.message ||
@@ -3388,69 +2819,35 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     );
 
-
-    /* ============================================================
-       LOAD IMAGE
-    ============================================================ */
-
     function loadImage(file) {
 
-        return new Promise(
-            function (
-                resolve,
-                reject
-            ) {
+        return new Promise(function (resolve, reject) {
 
-                const objectUrl =
-                    URL.createObjectURL(
-                        file
-                    );
+            const objectUrl =
+                URL.createObjectURL(file);
 
+            const image = new Image();
 
-                const image =
-                    new Image();
+            image.onload = function () {
 
+                URL.revokeObjectURL(objectUrl);
+                resolve(image);
+            };
 
-                image.onload =
-                    function () {
+            image.onerror = function () {
 
-                        URL.revokeObjectURL(
-                            objectUrl
-                        );
+                URL.revokeObjectURL(objectUrl);
 
+                reject(
+                    new Error(
+                        'Gambar tidak dapat dibaca oleh browser.'
+                    )
+                );
+            };
 
-                        resolve(
-                            image
-                        );
-                    };
-
-
-                image.onerror =
-                    function () {
-
-                        URL.revokeObjectURL(
-                            objectUrl
-                        );
-
-
-                        reject(
-                            new Error(
-                                'Gambar tidak dapat dibaca oleh browser.'
-                            )
-                        );
-                    };
-
-
-                image.src =
-                    objectUrl;
-            }
-        );
+            image.src = objectUrl;
+        });
     }
-
-
-    /* ============================================================
-       DIMENSION
-    ============================================================ */
 
     function calculateDimensions(
         width,
@@ -3469,33 +2866,24 @@ document.addEventListener('DOMContentLoaded', function () {
             };
         }
 
-
         const scale =
             Math.min(
                 maxDimension / width,
                 maxDimension / height
             );
 
-
         return {
-            width:
-                Math.max(
-                    1,
-                    Math.round(
-                        width * scale
-                    )
-                ),
+            width: Math.max(
+                1,
+                Math.round(width * scale)
+            ),
 
-            height:
-                Math.max(
-                    1,
-                    Math.round(
-                        height * scale
-                    )
-                )
+            height: Math.max(
+                1,
+                Math.round(height * scale)
+            )
         };
     }
-
 
     function buildDimensionList(
         width,
@@ -3512,67 +2900,44 @@ document.addEventListener('DOMContentLoaded', function () {
             IMAGE_MIN_DIMENSION
         ];
 
-
         const result = [];
 
+        maxDimensions.forEach(function (maxDimension) {
 
-        maxDimensions.forEach(
-            function (
-                maxDimension
+            const dimensions =
+                calculateDimensions(
+                    width,
+                    height,
+                    maxDimension
+                );
+
+            if (
+                dimensions.width <
+                    IMAGE_MIN_DIMENSION &&
+                dimensions.height <
+                    IMAGE_MIN_DIMENSION
             ) {
-
-                const dimensions =
-                    calculateDimensions(
-                        width,
-                        height,
-                        maxDimension
-                    );
-
-
-                if (
-                    dimensions.width <
-                        IMAGE_MIN_DIMENSION &&
-                    dimensions.height <
-                        IMAGE_MIN_DIMENSION
-                ) {
-
-                    return;
-                }
-
-
-                const duplicate =
-                    result.some(
-                        function (
-                            existing
-                        ) {
-
-                            return (
-                                existing.width ===
-                                    dimensions.width &&
-                                existing.height ===
-                                    dimensions.height
-                            );
-                        }
-                    );
-
-
-                if (!duplicate) {
-
-                    result.push(
-                        dimensions
-                    );
-                }
+                return;
             }
-        );
 
+            const duplicate =
+                result.some(function (existing) {
+
+                    return (
+                        existing.width ===
+                            dimensions.width &&
+                        existing.height ===
+                            dimensions.height
+                    );
+                });
+
+            if (!duplicate) {
+                result.push(dimensions);
+            }
+        });
 
         return result;
     }
-
-
-    /* ============================================================
-       CANVAS TO FILE
-    ============================================================ */
 
     function canvasToFile(
         image,
@@ -3582,176 +2947,121 @@ document.addEventListener('DOMContentLoaded', function () {
         originalName
     ) {
 
-        return new Promise(
-            function (
-                resolve,
-                reject
-            ) {
+        return new Promise(function (resolve, reject) {
 
-                const canvas =
-                    document.createElement(
-                        'canvas'
-                    );
+            const canvas =
+                document.createElement('canvas');
 
+            canvas.width = width;
+            canvas.height = height;
 
-                canvas.width =
-                    width;
-
-
-                canvas.height =
-                    height;
-
-
-                const context =
-                    canvas.getContext(
-                        '2d',
-                        {
-                            alpha: false
-                        }
-                    );
-
-
-                if (!context) {
-
-                    reject(
-                        new Error(
-                            'Browser tidak mendukung pemrosesan gambar.'
-                        )
-                    );
-
-
-                    return;
-                }
-
-
-                context.fillStyle =
-                    '#ffffff';
-
-
-                context.fillRect(
-                    0,
-                    0,
-                    width,
-                    height
+            const context =
+                canvas.getContext(
+                    '2d',
+                    { alpha: false }
                 );
 
+            if (!context) {
 
-                context.imageSmoothingEnabled =
-                    true;
-
-
-                context.imageSmoothingQuality =
-                    'high';
-
-
-                context.drawImage(
-                    image,
-                    0,
-                    0,
-                    width,
-                    height
+                reject(
+                    new Error(
+                        'Browser tidak mendukung pemrosesan gambar.'
+                    )
                 );
 
+                return;
+            }
 
-                canvas.toBlob(
-                    function (
-                        blob
-                    ) {
+            context.fillStyle = '#ffffff';
 
-                        if (!blob) {
+            context.fillRect(
+                0,
+                0,
+                width,
+                height
+            );
 
-                            reject(
-                                new Error(
-                                    'Browser gagal membuat file hasil kompresi.'
-                                )
-                            );
+            context.imageSmoothingEnabled = true;
+            context.imageSmoothingQuality = 'high';
 
+            context.drawImage(
+                image,
+                0,
+                0,
+                width,
+                height
+            );
 
-                            return;
-                        }
+            canvas.toBlob(
+                function (blob) {
 
+                    if (!blob) {
 
-                        const baseName =
-                            String(
-                                originalName ||
-                                'lampiran'
-                            )
-                                .replace(
-                                    /\.[^/.]+$/,
-                                    ''
-                                )
-                                .replace(
-                                    /[^a-zA-Z0-9_-]/g,
-                                    '_'
-                                );
-
-
-                        const fileName =
-                            (
-                                baseName ||
-                                'lampiran'
-                            ) +
-                            '_compressed.jpg';
-
-
-                        resolve(
-                            new File(
-                                [
-                                    blob
-                                ],
-                                fileName,
-                                {
-                                    type:
-                                        'image/jpeg',
-                                    lastModified:
-                                        Date.now()
-                                }
+                        reject(
+                            new Error(
+                                'Browser gagal membuat file hasil kompresi.'
                             )
                         );
 
-                    },
-                    'image/jpeg',
-                    quality
-                );
-            }
-        );
+                        return;
+                    }
+
+                    const baseName =
+                        String(
+                            originalName ||
+                            'lampiran'
+                        )
+                            .replace(
+                                /\.[^/.]+$/,
+                                ''
+                            )
+                            .replace(
+                                /[^a-zA-Z0-9_-]/g,
+                                '_'
+                            );
+
+                    const fileName =
+                        (
+                            baseName ||
+                            'lampiran'
+                        ) +
+                        '_compressed.jpg';
+
+                    resolve(
+                        new File(
+                            [blob],
+                            fileName,
+                            {
+                                type: 'image/jpeg',
+                                lastModified: Date.now()
+                            }
+                        )
+                    );
+                },
+                'image/jpeg',
+                quality
+            );
+        });
     }
 
+    async function compressImageFile(file) {
 
-    /* ============================================================
-       COMPRESS IMAGE
-    ============================================================ */
-
-    async function compressImageFile(
-        file
-    ) {
-
-        const image =
-            await loadImage(
-                file
-            );
-
+        const image = await loadImage(file);
 
         const width =
             image.naturalWidth ||
             image.width;
 
-
         const height =
             image.naturalHeight ||
             image.height;
 
-
-        if (
-            width <= 0 ||
-            height <= 0
-        ) {
+        if (width <= 0 || height <= 0) {
 
             throw new Error(
                 'Dimensi gambar tidak valid.'
             );
         }
-
 
         const dimensionList =
             buildDimensionList(
@@ -3759,20 +3069,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 height
             );
 
+        let smallest = null;
 
-        let smallest =
-            null;
+        for (const dimensions of dimensionList) {
 
-
-        for (
-            const dimensions
-            of dimensionList
-        ) {
-
-            for (
-                const quality
-                of IMAGE_QUALITIES
-            ) {
+            for (const quality of IMAGE_QUALITIES) {
 
                 const compressed =
                     await canvasToFile(
@@ -3783,66 +3084,47 @@ document.addEventListener('DOMContentLoaded', function () {
                         file.name
                     );
 
-
                 if (
                     !smallest ||
                     compressed.size <
                         smallest.size
                 ) {
-
-                    smallest =
-                        compressed;
+                    smallest = compressed;
                 }
-
 
                 if (
                     compressed.size <=
                     IMAGE_TARGET_SIZE
                 ) {
-
                     return compressed;
                 }
             }
         }
 
-
         if (
             smallest &&
-            smallest.size <=
-                IMAGE_MAX_SIZE
+            smallest.size <= IMAGE_MAX_SIZE
         ) {
-
             return smallest;
         }
 
-
         throw new Error(
-            'Gambar masih terlalu besar setelah dikompres. Silakan gunakan gambar dengan resolusi lebih rendah.'
+            'Gambar masih terlalu besar setelah dikompres.'
         );
     }
-
-
-    /* ============================================================
-       CAMERA
-    ============================================================ */
 
     async function startCamera() {
 
         clearCameraError();
 
-
-        if (
-            !window.isSecureContext
-        ) {
+        if (!window.isSecureContext) {
 
             showCameraError(
-                'Kamera membutuhkan HTTPS. Gunakan website melalui HTTPS.'
+                'Kamera membutuhkan HTTPS.'
             );
-
 
             return;
         }
-
 
         if (
             !navigator.mediaDevices ||
@@ -3853,61 +3135,43 @@ document.addEventListener('DOMContentLoaded', function () {
                 'Browser tidak mendukung akses kamera.'
             );
 
-
             return;
         }
 
-
         stopCameraTracks();
-
 
         try {
 
             cameraStream =
                 await navigator.mediaDevices.getUserMedia({
+
                     video: {
                         facingMode: {
-                            ideal:
-                                'environment'
+                            ideal: 'environment'
                         },
 
                         width: {
-                            ideal:
-                                CAMERA_MAX_WIDTH
+                            ideal: CAMERA_MAX_WIDTH
                         },
 
                         height: {
-                            ideal:
-                                CAMERA_MAX_HEIGHT
+                            ideal: CAMERA_MAX_HEIGHT
                         }
                     },
 
                     audio: false
                 });
 
-
             cameraVideo.srcObject =
                 cameraStream;
 
-
             await cameraVideo.play();
 
+            cameraPlaceholder.classList.add('hidden');
 
-            cameraPlaceholder.classList.add(
-                'hidden'
-            );
-
-
-            startCameraBtn.disabled =
-                true;
-
-
-            captureBtn.disabled =
-                false;
-
-
-            stopCameraBtn.disabled =
-                false;
+            startCameraBtn.disabled = true;
+            captureBtn.disabled = false;
+            stopCameraBtn.disabled = false;
 
         } catch (error) {
 
@@ -3916,72 +3180,54 @@ document.addEventListener('DOMContentLoaded', function () {
                 error
             );
 
-
             let message =
                 'Kamera tidak dapat digunakan.';
 
-
             if (
-                error.name ===
-                    'NotAllowedError' ||
-                error.name ===
-                    'PermissionDeniedError'
+                error.name === 'NotAllowedError' ||
+                error.name === 'PermissionDeniedError'
             ) {
 
                 message =
                     'Izin kamera ditolak. Izinkan kamera pada browser.';
 
             } else if (
-                error.name ===
-                    'NotFoundError' ||
-                error.name ===
-                    'DevicesNotFoundError'
+                error.name === 'NotFoundError' ||
+                error.name === 'DevicesNotFoundError'
             ) {
 
                 message =
                     'Kamera tidak ditemukan.';
 
             } else if (
-                error.name ===
-                    'NotReadableError'
+                error.name === 'NotReadableError'
             ) {
 
                 message =
                     'Kamera sedang digunakan aplikasi lain.';
 
             } else if (
-                error.name ===
-                    'SecurityError'
+                error.name === 'SecurityError'
             ) {
 
                 message =
                     'Akses kamera diblokir oleh browser.';
             }
 
-
-            showCameraError(
-                message
-            );
+            showCameraError(message);
         }
     }
-
 
     startCameraBtn.addEventListener(
         'click',
         startCamera
     );
 
-
-    /* ============================================================
-       CAPTURE
-    ============================================================ */
-
     captureBtn.addEventListener(
         'click',
         async function () {
 
             clearCameraError();
-
 
             if (
                 !cameraVideo.videoWidth ||
@@ -3992,10 +3238,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     'Kamera belum siap. Tunggu beberapa saat.'
                 );
 
-
                 return;
             }
-
 
             try {
 
@@ -4006,29 +3250,20 @@ document.addEventListener('DOMContentLoaded', function () {
                         CAMERA_MAX_WIDTH
                     );
 
-
                 const canvas =
-                    document.createElement(
-                        'canvas'
-                    );
-
+                    document.createElement('canvas');
 
                 canvas.width =
                     dimensions.width;
 
-
                 canvas.height =
                     dimensions.height;
-
 
                 const context =
                     canvas.getContext(
                         '2d',
-                        {
-                            alpha: false
-                        }
+                        { alpha: false }
                     );
-
 
                 if (!context) {
 
@@ -4037,10 +3272,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     );
                 }
 
-
-                context.fillStyle =
-                    '#ffffff';
-
+                context.fillStyle = '#ffffff';
 
                 context.fillRect(
                     0,
@@ -4049,14 +3281,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     canvas.height
                 );
 
-
-                context.imageSmoothingEnabled =
-                    true;
-
-
-                context.imageSmoothingQuality =
-                    'high';
-
+                context.imageSmoothingEnabled = true;
+                context.imageSmoothingQuality = 'high';
 
                 context.drawImage(
                     cameraVideo,
@@ -4066,12 +3292,10 @@ document.addEventListener('DOMContentLoaded', function () {
                     canvas.height
                 );
 
-
                 const dataUrl =
                     await compressCameraCanvas(
                         canvas
                     );
-
 
                 if (
                     dataUrl.length >
@@ -4083,19 +3307,14 @@ document.addEventListener('DOMContentLoaded', function () {
                     );
                 }
 
-
                 capturedInput.value =
                     dataUrl;
-
 
                 await showScanResult(
                     dataUrl
                 );
 
-
                 clearFileSelection();
-
-
                 stopCamera();
 
             } catch (error) {
@@ -4105,7 +3324,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     error
                 );
 
-
                 showCameraError(
                     error?.message ||
                     'Gagal mengambil hasil scan.'
@@ -4114,22 +3332,10 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     );
 
+    async function compressCameraCanvas(canvas) {
 
-    /* ============================================================
-       CAMERA COMPRESSION
-    ============================================================ */
-
-    async function compressCameraCanvas(
-        canvas
-    ) {
-
-        let currentCanvas =
-            canvas;
-
-
-        let quality =
-            0.82;
-
+        let currentCanvas = canvas;
+        let quality = 0.82;
 
         let dataUrl =
             currentCanvas.toDataURL(
@@ -4137,19 +3343,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 quality
             );
 
-
         while (
-            getDataUrlBinarySize(
-                dataUrl
-            ) >
+            getDataUrlBinarySize(dataUrl) >
                 CAMERA_TARGET_SIZE &&
             quality >
                 0.40
         ) {
 
-            quality -=
-                0.06;
-
+            quality -= 0.06;
 
             dataUrl =
                 currentCanvas.toDataURL(
@@ -4158,28 +3359,20 @@ document.addEventListener('DOMContentLoaded', function () {
                 );
         }
 
-
-        let attempt =
-            0;
-
+        let attempt = 0;
 
         while (
-            getDataUrlBinarySize(
-                dataUrl
-            ) >
+            getDataUrlBinarySize(dataUrl) >
                 CAMERA_TARGET_SIZE &&
-            attempt <
-                4
+            attempt < 4
         ) {
 
             attempt++;
-
 
             const smallerCanvas =
                 document.createElement(
                     'canvas'
                 );
-
 
             smallerCanvas.width =
                 Math.max(
@@ -4190,7 +3383,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     )
                 );
 
-
             smallerCanvas.height =
                 Math.max(
                     1,
@@ -4200,15 +3392,11 @@ document.addEventListener('DOMContentLoaded', function () {
                     )
                 );
 
-
             const smallerContext =
                 smallerCanvas.getContext(
                     '2d',
-                    {
-                        alpha: false
-                    }
+                    { alpha: false }
                 );
-
 
             if (!smallerContext) {
 
@@ -4217,10 +3405,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 );
             }
 
-
             smallerContext.fillStyle =
                 '#ffffff';
-
 
             smallerContext.fillRect(
                 0,
@@ -4229,14 +3415,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 smallerCanvas.height
             );
 
-
             smallerContext.imageSmoothingEnabled =
                 true;
 
-
             smallerContext.imageSmoothingQuality =
                 'high';
-
 
             smallerContext.drawImage(
                 currentCanvas,
@@ -4246,14 +3429,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 smallerCanvas.height
             );
 
-
             currentCanvas =
                 smallerCanvas;
 
-
-            quality =
-                0.60;
-
+            quality = 0.60;
 
             dataUrl =
                 currentCanvas.toDataURL(
@@ -4262,32 +3441,22 @@ document.addEventListener('DOMContentLoaded', function () {
                 );
         }
 
-
         return dataUrl;
     }
 
-
-    function getDataUrlBinarySize(
-        dataUrl
-    ) {
+    function getDataUrlBinarySize(dataUrl) {
 
         const commaIndex =
             dataUrl.indexOf(',');
 
-
-        if (
-            commaIndex === -1
-        ) {
-
+        if (commaIndex === -1) {
             return 0;
         }
-
 
         const base64 =
             dataUrl.substring(
                 commaIndex + 1
             );
-
 
         const padding =
             base64.endsWith('==')
@@ -4296,110 +3465,65 @@ document.addEventListener('DOMContentLoaded', function () {
                     ? 1
                     : 0;
 
-
         return Math.floor(
-            (
-                base64.length *
-                3
-            ) / 4
-        ) -
-        padding;
+            (base64.length * 3) / 4
+        ) - padding;
     }
 
+    async function showScanResult(dataUrl) {
 
-    async function showScanResult(
-        dataUrl
-    ) {
-
-        if (
-            previewObjectUrl
-        ) {
+        if (previewObjectUrl) {
 
             URL.revokeObjectURL(
                 previewObjectUrl
             );
 
-
-            previewObjectUrl =
-                null;
+            previewObjectUrl = null;
         }
 
-
         const response =
-            await fetch(
-                dataUrl
-            );
-
+            await fetch(dataUrl);
 
         const blob =
             await response.blob();
 
-
         previewObjectUrl =
-            URL.createObjectURL(
-                blob
-            );
-
+            URL.createObjectURL(blob);
 
         scanPreviewImage.src =
             previewObjectUrl;
 
-
         scanCompressionInfo.textContent =
             'Hasil scan: ' +
-            formatFileSize(
-                blob.size
-            ) +
+            formatFileSize(blob.size) +
             ' • JPEG terkompresi';
-
 
         scanResult.classList.remove(
             'hidden'
         );
     }
 
-
-    /* ============================================================
-       CLEAR SCAN
-    ============================================================ */
-
     function clearScanResult() {
 
-        capturedInput.value =
-            '';
-
+        capturedInput.value = '';
 
         scanResult.classList.add(
             'hidden'
         );
 
+        scanPreviewImage.src = '';
 
-        scanPreviewImage.src =
-            '';
+        scanCompressionInfo.textContent = '';
 
-
-        scanCompressionInfo.textContent =
-            '';
-
-
-        if (
-            previewObjectUrl
-        ) {
+        if (previewObjectUrl) {
 
             URL.revokeObjectURL(
                 previewObjectUrl
             );
 
-
-            previewObjectUrl =
-                null;
+            previewObjectUrl = null;
         }
     }
-
-
-    /* ============================================================
-       STOP CAMERA
-    ============================================================ */
 
     function stopCameraTracks() {
 
@@ -4407,53 +3531,31 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-
         cameraStream
             .getTracks()
-            .forEach(
-                function (
-                    track
-                ) {
+            .forEach(function (track) {
+                track.stop();
+            });
 
-                    track.stop();
-                }
-            );
-
-
-        cameraStream =
-            null;
+        cameraStream = null;
     }
-
 
     function stopCamera() {
 
         stopCameraTracks();
 
-
         if (cameraVideo) {
-
-            cameraVideo.srcObject =
-                null;
+            cameraVideo.srcObject = null;
         }
-
 
         cameraPlaceholder.classList.remove(
             'hidden'
         );
 
-
-        startCameraBtn.disabled =
-            false;
-
-
-        captureBtn.disabled =
-            true;
-
-
-        stopCameraBtn.disabled =
-            true;
+        startCameraBtn.disabled = false;
+        captureBtn.disabled = true;
+        stopCameraBtn.disabled = true;
     }
-
 
     stopCameraBtn.addEventListener(
         'click',
@@ -4461,11 +3563,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             stopCamera();
 
-
-            if (
-                capturedInput.value
-            ) {
-
+            if (capturedInput.value) {
                 cameraPlaceholder.classList.add(
                     'hidden'
                 );
@@ -4473,89 +3571,47 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     );
 
-
-    /* ============================================================
-       RETAKE
-    ============================================================ */
-
     retakeBtn.addEventListener(
         'click',
         async function () {
 
             clearScanResult();
-
-
-            capturedInput.value =
-                '';
-
+            capturedInput.value = '';
 
             await startCamera();
         }
     );
 
-
-    /* ============================================================
-       SUBMIT
-    ============================================================ */
-
     form.addEventListener(
         'submit',
-        function (
-            event
-        ) {
+        function (event) {
 
-            if (
-                submitting
-            ) {
+            if (submitting) {
 
                 event.preventDefault();
-
 
                 return;
             }
 
-
             const selectedFileElement =
-                fileInput.files?.[0] ||
-                null;
-
+                fileInput.files?.[0] || null;
 
             const hasFile =
                 !!selectedFileElement;
 
-
             const hasCamera =
                 capturedInput.value.trim() !== '';
 
-
-            /*
-            |--------------------------------------------------------------------------
-            | Tidak boleh dua sumber lampiran sekaligus
-            |--------------------------------------------------------------------------
-            */
-
-            if (
-                hasFile &&
-                hasCamera
-            ) {
+            if (hasFile && hasCamera) {
 
                 event.preventDefault();
-
 
                 alert(
                     'Gunakan salah satu metode saja: Upload File atau Scan Kamera.'
                 );
 
-
                 return;
             }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | Validasi ukuran file
-            |--------------------------------------------------------------------------
-            */
 
             if (
                 hasFile &&
@@ -4565,21 +3621,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 event.preventDefault();
 
-
                 alert(
                     'Ukuran file melebihi 10 MB.'
                 );
 
-
                 return;
             }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | Validasi data kamera
-            |--------------------------------------------------------------------------
-            */
 
             if (
                 hasCamera &&
@@ -4589,71 +3636,46 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 event.preventDefault();
 
-
                 alert(
                     'Hasil scan terlalu besar. Silakan scan ulang.'
                 );
 
-
                 return;
             }
 
-
-            submitting =
-                true;
-
+            submitting = true;
 
             stopCamera();
 
-
-            submitBtn.disabled =
-                true;
-
+            submitBtn.disabled = true;
 
             submitIcon.classList.add(
                 'hidden'
             );
 
-
             submitLoading.classList.remove(
                 'hidden'
             );
-
 
             submitText.textContent =
                 'Menyimpan...';
         }
     );
 
-
-    /* ============================================================
-       OLD CAMERA DATA
-    ============================================================ */
-
-    if (
-        capturedInput.value
-    ) {
+    if (capturedInput.value) {
 
         activateScanMode();
-
 
         scanResult.classList.remove(
             'hidden'
         );
 
-
         scanPreviewImage.src =
             capturedInput.value;
-
 
         scanCompressionInfo.textContent =
             'Hasil scan sebelumnya masih tersedia.';
     }
-
-
-    /* ============================================================
-       CLEANUP
-    ============================================================ */
 
     window.addEventListener(
         'beforeunload',
@@ -4661,22 +3683,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
             stopCameraTracks();
 
-
-            if (
-                previewObjectUrl
-            ) {
+            if (previewObjectUrl) {
 
                 URL.revokeObjectURL(
                     previewObjectUrl
                 );
 
-
-                previewObjectUrl =
-                    null;
+                previewObjectUrl = null;
             }
         }
     );
-
 });
 </script>
 
