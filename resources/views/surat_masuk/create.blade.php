@@ -40,7 +40,7 @@
          TOMBOL KEMBALI
     ====================================================== --}}
 
-    <div class="mb-2 flex justify-end">
+    <div class="mb-4 flex justify-end">
 
         <a
             href="{{ route('surat-masuk.index') }}"
