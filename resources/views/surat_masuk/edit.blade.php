@@ -285,7 +285,7 @@
 ============================================================ */
 
 .body {
-    padding: 14px;
+    padding: 18px;
 }
 
 
@@ -294,8 +294,8 @@
 ============================================================ */
 
 .section + .section {
-    margin-top: 15px;
-    padding-top: 15px;
+    margin-top: 16px;
+    padding-top: 16px;
     border-top: 2px solid #94a3b8;
 }
 
@@ -303,12 +303,12 @@
     display: flex;
     align-items: flex-start;
     gap: 8px;
-    margin-bottom: 9px;
+    margin-bottom: 10px;
 }
 
 .section-marker {
     width: 4px;
-    height: 23px;
+    height: 25px;
     flex: 0 0 4px;
     border-radius: 999px;
     background: #4f46e5;
@@ -325,7 +325,7 @@
 .section-description {
     margin: 2px 0 0;
     font-size: 9px;
-    line-height: 1.4;
+    line-height: 1.45;
     color: #64748b;
 }
 
@@ -350,7 +350,7 @@
 
 .field {
     min-width: 0;
-    padding: 11px 12px;
+    padding: 13px 14px;
     border-right: 2px solid #94a3b8;
     border-bottom: 2px solid #94a3b8;
     background: #fff;
@@ -380,7 +380,7 @@
 
 
 /* ============================================================
-   INPUT / SELECT / TEXTAREA
+   INPUT
 ============================================================ */
 
 .control {
@@ -400,13 +400,13 @@
 
 input.control,
 select.control {
-    height: 38px;
-    padding: 0 10px;
+    height: 40px;
+    padding: 0 11px;
 }
 
 textarea.control {
-    min-height: 78px;
-    padding: 9px 10px;
+    min-height: 88px;
+    padding: 10px 11px;
     line-height: 1.5;
     resize: vertical;
 }
@@ -433,7 +433,7 @@ textarea.control {
 
 
 /* ============================================================
-   ERROR FIELD
+   FIELD ERROR
 ============================================================ */
 
 .field-error {
@@ -446,7 +446,7 @@ textarea.control {
 
 
 /* ============================================================
-   ATTACHMENT
+   ATTACHMENT GRID
 ============================================================ */
 
 .attachment-grid {
@@ -547,7 +547,7 @@ textarea.control {
 
 
 /* ============================================================
-   MODE
+   MODE BUTTON
 ============================================================ */
 
 .mode-grid {
@@ -1063,6 +1063,7 @@ textarea.control {
     display: flex;
     flex: 1;
     flex-direction: column;
+    justify-content: center;
     padding: 14px;
     border: 2px dashed #94a3b8;
     border-radius: 8px;
@@ -1179,7 +1180,7 @@ textarea.control {
 }
 
 .footer-submit {
-    border: 2px solid #4f46e5;
+    border: 2px solid #4338ca;
     background: #4f46e5;
     color: #fff;
 }
@@ -1240,9 +1241,9 @@ textarea.control {
     }
 
     .field {
+        padding: 11px;
         border-right: 0;
         border-bottom: 2px solid #94a3b8;
-        padding: 10px;
     }
 
     .field:nth-child(2n) {
@@ -1255,6 +1256,15 @@ textarea.control {
 
     .field:last-child {
         border-bottom: 0;
+    }
+
+    input.control,
+    select.control {
+        height: 39px;
+    }
+
+    textarea.control {
+        min-height: 82px;
     }
 
     .mode-grid {
@@ -1285,11 +1295,11 @@ textarea.control {
     }
 
     .body {
-        padding: 11px;
+        padding: 12px;
     }
 
     .field {
-        padding: 9px;
+        padding: 10px;
     }
 
     .attachment-body {
@@ -1298,11 +1308,11 @@ textarea.control {
 
     input.control,
     select.control {
-        height: 37px;
+        height: 38px;
     }
 
     textarea.control {
-        min-height: 75px;
+        min-height: 80px;
     }
 }
 </style>
@@ -1351,6 +1361,8 @@ textarea.control {
 
         </div>
 
+
+        {{-- KEMBALI --}}
 
         <a
             href="{{ route('surat-masuk.index') }}"
@@ -1518,7 +1530,9 @@ textarea.control {
                         <div class="field-grid">
 
 
-                            {{-- NOMOR SURAT --}}
+                            {{-- =================================================
+                                 NOMOR SURAT
+                            ================================================== --}}
 
                             <div class="field">
 
@@ -1555,7 +1569,9 @@ textarea.control {
                             </div>
 
 
-                            {{-- PENGIRIM --}}
+                            {{-- =================================================
+                                 PENGIRIM
+                            ================================================== --}}
 
                             <div class="field">
 
@@ -1592,7 +1608,9 @@ textarea.control {
                             </div>
 
 
-                            {{-- TANGGAL SURAT --}}
+                            {{-- =================================================
+                                 TANGGAL SURAT
+                            ================================================== --}}
 
                             <div class="field">
 
@@ -1626,7 +1644,9 @@ textarea.control {
                             </div>
 
 
-                            {{-- TANGGAL DITERIMA --}}
+                            {{-- =================================================
+                                 TANGGAL DITERIMA
+                            ================================================== --}}
 
                             <div class="field">
 
@@ -1660,7 +1680,9 @@ textarea.control {
                             </div>
 
 
-                            {{-- KATEGORI --}}
+                            {{-- =================================================
+                                 KATEGORI
+                            ================================================== --}}
 
                             <div class="field">
 
@@ -1698,11 +1720,15 @@ textarea.control {
                                                 (string) $kategori->id
                                             )
                                         >
+
                                             {{ $kategori->nama_kategori }}
 
                                             @if(!empty($kategori->sifat))
+
                                                 ({{ ucfirst($kategori->sifat) }})
+
                                             @endif
+
                                         </option>
 
                                     @endforeach
@@ -1733,7 +1759,9 @@ textarea.control {
                             </div>
 
 
-                            {{-- STATUS --}}
+                            {{-- =================================================
+                                 STATUS
+                            ================================================== --}}
 
                             <div class="field">
 
@@ -1758,7 +1786,8 @@ textarea.control {
                                         <option
                                             value="{{ $value }}"
                                             @selected(
-                                                $currentStatus === $value
+                                                $currentStatus ===
+                                                $value
                                             )
                                         >
                                             {{ $label }}
@@ -1780,7 +1809,9 @@ textarea.control {
                             </div>
 
 
-                            {{-- PERIHAL --}}
+                            {{-- =================================================
+                                 PERIHAL
+                            ================================================== --}}
 
                             <div class="field field-full">
 
@@ -2243,6 +2274,7 @@ textarea.control {
                                                                 cy="13"
                                                                 r="3"
                                                             />
+
                                                         </svg>
 
                                                     </div>
@@ -2476,9 +2508,9 @@ textarea.control {
                                             id="lokasi_arsip_fisik"
                                             name="lokasi_arsip_fisik"
                                             type="text"
+                                            maxlength="255"
                                             value="{{ old('lokasi_arsip_fisik', $suratMasuk->lokasi_arsip_fisik) }}"
                                             placeholder="Contoh: Rak A-3 Box 12"
-                                            maxlength="255"
                                             class="control @error('lokasi_arsip_fisik') border-red-500 @enderror"
                                         >
 
@@ -2509,7 +2541,7 @@ textarea.control {
 
                                         <p>
                                             Lokasi fisik hanya menyimpan informasi
-                                            posisi arsip dan tidak mengubah
+                                            posisi arsip dan tidak memengaruhi
                                             dokumen digital.
                                         </p>
 
@@ -2629,104 +2661,64 @@ document.addEventListener('DOMContentLoaded', function () {
     ============================================================ */
 
     const form =
-        document.getElementById(
-            'form-surat'
-        );
+        document.getElementById('form-surat');
 
     const modeUploadBtn =
-        document.getElementById(
-            'mode-upload-btn'
-        );
+        document.getElementById('mode-upload-btn');
 
     const modeScanBtn =
-        document.getElementById(
-            'mode-scan-btn'
-        );
+        document.getElementById('mode-scan-btn');
 
     const uploadPanel =
-        document.getElementById(
-            'upload-panel'
-        );
+        document.getElementById('upload-panel');
 
     const scanPanel =
-        document.getElementById(
-            'scan-panel'
-        );
+        document.getElementById('scan-panel');
 
     const fileInput =
-        document.getElementById(
-            'lampiran_file'
-        );
+        document.getElementById('lampiran_file');
 
     const uploadBox =
-        document.getElementById(
-            'upload-box'
-        );
+        document.getElementById('upload-box');
 
     const selectedFile =
-        document.getElementById(
-            'selected-file'
-        );
+        document.getElementById('selected-file');
 
     const selectedFileName =
-        document.getElementById(
-            'selected-file-name'
-        );
+        document.getElementById('selected-file-name');
 
     const selectedFileSize =
-        document.getElementById(
-            'selected-file-size'
-        );
+        document.getElementById('selected-file-size');
 
     const clearFileBtn =
-        document.getElementById(
-            'clear-file-btn'
-        );
+        document.getElementById('clear-file-btn');
 
     const cameraVideo =
-        document.getElementById(
-            'camera-video'
-        );
+        document.getElementById('camera-video');
 
     const cameraPlaceholder =
-        document.getElementById(
-            'camera-placeholder'
-        );
+        document.getElementById('camera-placeholder');
 
     const cameraError =
-        document.getElementById(
-            'camera-error'
-        );
+        document.getElementById('camera-error');
 
     const startCameraBtn =
-        document.getElementById(
-            'start-camera-btn'
-        );
+        document.getElementById('start-camera-btn');
 
     const captureBtn =
-        document.getElementById(
-            'capture-btn'
-        );
+        document.getElementById('capture-btn');
 
     const stopCameraBtn =
-        document.getElementById(
-            'stop-camera-btn'
-        );
+        document.getElementById('stop-camera-btn');
 
     const retakeBtn =
-        document.getElementById(
-            'retake-btn'
-        );
+        document.getElementById('retake-btn');
 
     const scanResult =
-        document.getElementById(
-            'scan-result'
-        );
+        document.getElementById('scan-result');
 
     const scanPreviewImage =
-        document.getElementById(
-            'scan-preview-image'
-        );
+        document.getElementById('scan-preview-image');
 
     const scanCompressionInfo =
         document.getElementById(
@@ -2734,29 +2726,19 @@ document.addEventListener('DOMContentLoaded', function () {
         );
 
     const capturedInput =
-        document.getElementById(
-            'captured_image'
-        );
+        document.getElementById('captured_image');
 
     const submitBtn =
-        document.getElementById(
-            'submit-btn'
-        );
+        document.getElementById('submit-btn');
 
     const submitIcon =
-        document.getElementById(
-            'submit-icon'
-        );
+        document.getElementById('submit-icon');
 
     const submitLoading =
-        document.getElementById(
-            'submit-loading'
-        );
+        document.getElementById('submit-loading');
 
     const submitText =
-        document.getElementById(
-            'submit-text'
-        );
+        document.getElementById('submit-text');
 
 
     if (
@@ -2829,9 +2811,7 @@ document.addEventListener('DOMContentLoaded', function () {
        HELPER
     ============================================================ */
 
-    function formatFileSize(
-        bytes
-    ) {
+    function formatFileSize(bytes) {
 
         if (
             !Number.isFinite(bytes) ||
@@ -2891,6 +2871,142 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
+    /* ============================================================
+       CAMERA ERROR
+    ============================================================ */
+
+    function showCameraError(
+        message
+    ) {
+
+        if (!cameraError) {
+            return;
+        }
+
+
+        cameraError.textContent =
+            message;
+
+
+        cameraError.classList.remove(
+            'hidden'
+        );
+    }
+
+
+    function clearCameraError() {
+
+        if (!cameraError) {
+            return;
+        }
+
+
+        cameraError.textContent =
+            '';
+
+
+        cameraError.classList.add(
+            'hidden'
+        );
+    }
+
+
+    /* ============================================================
+       MODE
+    ============================================================ */
+
+    function activateUploadMode() {
+
+        stopCamera();
+
+
+        uploadPanel.classList.remove(
+            'hidden'
+        );
+
+        scanPanel.classList.add(
+            'hidden'
+        );
+
+
+        modeUploadBtn.classList.add(
+            'active'
+        );
+
+        modeScanBtn.classList.remove(
+            'active'
+        );
+
+
+        modeUploadBtn.setAttribute(
+            'aria-selected',
+            'true'
+        );
+
+        modeScanBtn.setAttribute(
+            'aria-selected',
+            'false'
+        );
+
+
+        clearCameraError();
+    }
+
+
+    function activateScanMode() {
+
+        uploadPanel.classList.add(
+            'hidden'
+        );
+
+        scanPanel.classList.remove(
+            'hidden'
+        );
+
+
+        modeUploadBtn.classList.remove(
+            'active'
+        );
+
+        modeScanBtn.classList.add(
+            'active'
+        );
+
+
+        modeUploadBtn.setAttribute(
+            'aria-selected',
+            'false'
+        );
+
+        modeScanBtn.setAttribute(
+            'aria-selected',
+            'true'
+        );
+
+
+        clearFileSelection();
+
+
+        clearCameraError();
+    }
+
+
+    modeUploadBtn.addEventListener(
+        'click',
+        activateUploadMode
+    );
+
+
+    modeScanBtn.addEventListener(
+        'click',
+        activateScanMode
+    );
+
+
+    /* ============================================================
+       FILE
+    ============================================================ */
+
     function getFileExtension(
         file
     ) {
@@ -2904,7 +3020,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
-    function allowedExtension(
+    function isAllowedExtension(
         extension
     ) {
 
@@ -2919,91 +3035,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
-    /* ============================================================
-       MODE
-    ============================================================ */
-
-    function activateUploadMode() {
-
-        stopCameraTracks();
-
-        uploadPanel.classList.remove(
-            'hidden'
-        );
-
-        scanPanel.classList.add(
-            'hidden'
-        );
-
-        modeUploadBtn.classList.add(
-            'active'
-        );
-
-        modeScanBtn.classList.remove(
-            'active'
-        );
-
-        modeUploadBtn.setAttribute(
-            'aria-selected',
-            'true'
-        );
-
-        modeScanBtn.setAttribute(
-            'aria-selected',
-            'false'
-        );
-    }
-
-
-    function activateScanMode() {
-
-        uploadPanel.classList.add(
-            'hidden'
-        );
-
-        scanPanel.classList.remove(
-            'hidden'
-        );
-
-        modeUploadBtn.classList.remove(
-            'active'
-        );
-
-        modeScanBtn.classList.add(
-            'active'
-        );
-
-        modeUploadBtn.setAttribute(
-            'aria-selected',
-            'false'
-        );
-
-        modeScanBtn.setAttribute(
-            'aria-selected',
-            'true'
-        );
-
-        clearFileSelection();
-
-        clearCameraError();
-    }
-
-
-    modeUploadBtn.addEventListener(
-        'click',
-        activateUploadMode
-    );
-
-    modeScanBtn.addEventListener(
-        'click',
-        activateScanMode
-    );
-
-
-    /* ============================================================
-       FILE
-    ============================================================ */
-
     function showSelectedFile(
         file,
         note
@@ -3013,8 +3044,10 @@ document.addEventListener('DOMContentLoaded', function () {
             'hidden'
         );
 
+
         selectedFileName.textContent =
             file.name;
+
 
         selectedFileSize.textContent =
             formatFileSize(
@@ -3025,6 +3058,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     ? ' • ' + note
                     : ''
             );
+
 
         uploadBox.classList.add(
             'has-file'
@@ -3037,15 +3071,19 @@ document.addEventListener('DOMContentLoaded', function () {
         fileInput.value =
             '';
 
+
         selectedFile.classList.add(
             'hidden'
         );
 
+
         selectedFileName.textContent =
             '';
 
+
         selectedFileSize.textContent =
             '';
+
 
         uploadBox.classList.remove(
             'has-file'
@@ -3066,32 +3104,39 @@ document.addEventListener('DOMContentLoaded', function () {
             const file =
                 fileInput.files?.[0];
 
+
             if (!file) {
                 return;
             }
 
+
             clearCameraError();
+
 
             const extension =
                 getFileExtension(
                     file
                 );
 
+
             if (
-                !allowedExtension(
+                !isAllowedExtension(
                     extension
                 )
             ) {
 
                 clearFileSelection();
 
+
                 alert(
                     'Format file tidak didukung.\n\n' +
                     'Gunakan PDF, JPG, JPEG, atau PNG.'
                 );
 
+
                 return;
             }
+
 
             if (
                 file.size <= 0
@@ -3099,12 +3144,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 clearFileSelection();
 
+
                 alert(
                     'File kosong atau tidak valid.'
                 );
 
+
                 return;
             }
+
 
             if (
                 file.size >
@@ -3113,19 +3161,21 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 clearFileSelection();
 
+
                 alert(
                     'Ukuran file terlalu besar.\n\n' +
-                    'Maksimal 10 MB.'
+                    'Maksimal file asli adalah 10 MB.'
                 );
+
 
                 return;
             }
 
 
             /*
-            |--------------------------------------------------------------------------
+            |--------------------------------------------------------
             | PDF
-            |--------------------------------------------------------------------------
+            |--------------------------------------------------------
             */
 
             if (
@@ -3135,21 +3185,24 @@ document.addEventListener('DOMContentLoaded', function () {
                 capturedInput.value =
                     '';
 
+
                 clearScanResult();
+
 
                 showSelectedFile(
                     file,
                     'PDF • tanpa kompresi'
                 );
 
+
                 return;
             }
 
 
             /*
-            |--------------------------------------------------------------------------
+            |--------------------------------------------------------
             | IMAGE
-            |--------------------------------------------------------------------------
+            |--------------------------------------------------------
             */
 
             try {
@@ -3191,9 +3244,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     clearFileSelection();
 
+
                     alert(
-                        'Gambar masih terlalu besar setelah kompresi.'
+                        'Gambar masih terlalu besar setelah dikompres.\n\n' +
+                        'Silakan pilih gambar dengan resolusi lebih rendah.'
                     );
+
 
                     return;
                 }
@@ -3202,9 +3258,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 const dataTransfer =
                     new DataTransfer();
 
+
                 dataTransfer.items.add(
                     finalFile
                 );
+
 
                 fileInput.files =
                     dataTransfer.files;
@@ -3212,6 +3270,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 capturedInput.value =
                     '';
+
 
                 clearScanResult();
 
@@ -3246,6 +3305,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     note
                 );
 
+
             } catch (error) {
 
                 console.error(
@@ -3253,7 +3313,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     error
                 );
 
+
                 clearFileSelection();
+
 
                 alert(
                     error?.message ||
@@ -3283,8 +3345,10 @@ document.addEventListener('DOMContentLoaded', function () {
                         file
                     );
 
+
                 const image =
                     new Image();
+
 
                 image.onload =
                     function () {
@@ -3297,6 +3361,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             image
                         );
                     };
+
 
                 image.onerror =
                     function () {
@@ -3312,6 +3377,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         );
                     };
 
+
                 image.src =
                     url;
             }
@@ -3320,7 +3386,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     /* ============================================================
-       DIMENSION
+       DIMENSIONS
     ============================================================ */
 
     function calculateDimensions(
@@ -3349,19 +3415,21 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
         return {
-            width: Math.max(
-                1,
-                Math.round(
-                    width * scale
-                )
-            ),
+            width:
+                Math.max(
+                    1,
+                    Math.round(
+                        width * scale
+                    )
+                ),
 
-            height: Math.max(
-                1,
-                Math.round(
-                    height * scale
+            height:
+                Math.max(
+                    1,
+                    Math.round(
+                        height * scale
+                    )
                 )
-            )
         };
     }
 
@@ -3371,7 +3439,7 @@ document.addEventListener('DOMContentLoaded', function () {
         height
     ) {
 
-        const maxDimensions = [
+        const dimensions = [
             IMAGE_MAX_DIMENSION,
             2000,
             1800,
@@ -3385,12 +3453,12 @@ document.addEventListener('DOMContentLoaded', function () {
         const result = [];
 
 
-        maxDimensions.forEach(
+        dimensions.forEach(
             function (
                 maxDimension
             ) {
 
-                const dimensions =
+                const size =
                     calculateDimensions(
                         width,
                         height,
@@ -3399,9 +3467,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
                 if (
-                    dimensions.width <
+                    size.width <
                         IMAGE_MIN_DIMENSION &&
-                    dimensions.height <
+                    size.height <
                         IMAGE_MIN_DIMENSION
                 ) {
 
@@ -3417,9 +3485,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
                             return (
                                 existing.width ===
-                                    dimensions.width &&
+                                    size.width &&
                                 existing.height ===
-                                    dimensions.height
+                                    size.height
                             );
                         }
                     );
@@ -3428,7 +3496,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (!duplicate) {
 
                     result.push(
-                        dimensions
+                        size
                     );
                 }
             }
@@ -3463,7 +3531,18 @@ document.addEventListener('DOMContentLoaded', function () {
             image.height;
 
 
-        const dimensionsList =
+        if (
+            width <= 0 ||
+            height <= 0
+        ) {
+
+            throw new Error(
+                'Dimensi gambar tidak valid.'
+            );
+        }
+
+
+        const dimensionList =
             buildDimensionList(
                 width,
                 height
@@ -3475,8 +3554,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
         for (
-            const dimensions
-            of dimensionsList
+            const dimension
+            of dimensionList
         ) {
 
             for (
@@ -3487,8 +3566,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 const compressed =
                     await canvasToFile(
                         image,
-                        dimensions.width,
-                        dimensions.height,
+                        dimension.width,
+                        dimension.height,
                         quality,
                         file.name
                     );
@@ -3572,7 +3651,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     reject(
                         new Error(
-                            'Browser tidak mendukung canvas.'
+                            'Browser tidak mendukung pemrosesan gambar.'
                         )
                     );
 
@@ -3618,7 +3697,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                             reject(
                                 new Error(
-                                    'Browser gagal menghasilkan gambar.'
+                                    'Browser gagal membuat gambar hasil kompresi.'
                                 )
                             );
 
@@ -3677,44 +3756,6 @@ document.addEventListener('DOMContentLoaded', function () {
        CAMERA
     ============================================================ */
 
-    function clearCameraError() {
-
-        if (!cameraError) {
-            return;
-        }
-
-        cameraError.textContent =
-            '';
-
-        cameraError.classList.add(
-            'hidden'
-        );
-    }
-
-
-    function showCameraError(
-        message
-    ) {
-
-        if (!cameraError) {
-            return;
-        }
-
-        cameraError.textContent =
-            message;
-
-        cameraError.classList.remove(
-            'hidden'
-        );
-    }
-
-
-    startCameraBtn.addEventListener(
-        'click',
-        startCamera
-    );
-
-
     async function startCamera() {
 
         clearCameraError();
@@ -3728,6 +3769,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 'Kamera membutuhkan HTTPS.'
             );
 
+
             return;
         }
 
@@ -3740,6 +3782,7 @@ document.addEventListener('DOMContentLoaded', function () {
             showCameraError(
                 'Browser tidak mendukung akses kamera.'
             );
+
 
             return;
         }
@@ -3811,15 +3854,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (
                 error.name ===
-                    'NotAllowedError'
+                    'NotAllowedError' ||
+                error.name ===
+                    'PermissionDeniedError'
             ) {
 
                 message =
-                    'Akses kamera ditolak. Izinkan kamera pada browser.';
+                    'Izin kamera ditolak. Izinkan kamera pada browser.';
 
             } else if (
                 error.name ===
-                    'NotFoundError'
+                    'NotFoundError' ||
+                error.name ===
+                    'DevicesNotFoundError'
             ) {
 
                 message =
@@ -3832,6 +3879,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 message =
                     'Kamera sedang digunakan aplikasi lain.';
+
+            } else if (
+                error.name ===
+                    'SecurityError'
+            ) {
+
+                message =
+                    'Akses kamera diblokir oleh browser.';
             }
 
 
@@ -3840,6 +3895,12 @@ document.addEventListener('DOMContentLoaded', function () {
             );
         }
     }
+
+
+    startCameraBtn.addEventListener(
+        'click',
+        startCamera
+    );
 
 
     /* ============================================================
@@ -3861,6 +3922,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 showCameraError(
                     'Kamera belum siap. Tunggu beberapa saat.'
                 );
+
 
                 return;
             }
@@ -3884,6 +3946,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 canvas.width =
                     dimensions.width;
+
 
                 canvas.height =
                     dimensions.height;
@@ -3947,7 +4010,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 ) {
 
                     throw new Error(
-                        'Hasil scan terlalu besar.'
+                        'Hasil scan terlalu besar. Silakan scan ulang.'
                     );
                 }
 
@@ -3966,6 +4029,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 stopCamera();
 
+
             } catch (error) {
 
                 console.error(
@@ -3976,12 +4040,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 showCameraError(
                     error?.message ||
-                    'Gagal mengambil gambar.'
+                    'Gagal mengambil hasil scan.'
                 );
             }
         }
     );
 
+
+    /* ============================================================
+       CAMERA COMPRESSION
+    ============================================================ */
 
     async function compressCameraCanvas(
         canvas
@@ -4003,7 +4071,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
         while (
-            estimateDataSize(
+            getDataUrlBinarySize(
                 dataUrl
             ) >
                 CAMERA_TARGET_SIZE &&
@@ -4028,7 +4096,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
         while (
-            estimateDataSize(
+            getDataUrlBinarySize(
                 dataUrl
             ) >
                 CAMERA_TARGET_SIZE &&
@@ -4039,34 +4107,34 @@ document.addEventListener('DOMContentLoaded', function () {
             attempt++;
 
 
-            const smaller =
+            const smallerCanvas =
                 document.createElement(
                     'canvas'
                 );
 
 
-            smaller.width =
+            smallerCanvas.width =
                 Math.max(
                     1,
                     Math.round(
                         currentCanvas.width *
-                        .75
+                        0.75
                     )
                 );
 
 
-            smaller.height =
+            smallerCanvas.height =
                 Math.max(
                     1,
                     Math.round(
                         currentCanvas.height *
-                        .75
+                        0.75
                     )
                 );
 
 
-            const context =
-                smaller.getContext(
+            const smallerContext =
+                smallerCanvas.getContext(
                     '2d',
                     {
                         alpha: false
@@ -4074,43 +4142,55 @@ document.addEventListener('DOMContentLoaded', function () {
                 );
 
 
-            context.fillStyle =
+            if (!smallerContext) {
+
+                throw new Error(
+                    'Browser tidak mendukung resize kamera.'
+                );
+            }
+
+
+            smallerContext.fillStyle =
                 '#ffffff';
 
 
-            context.fillRect(
+            smallerContext.fillRect(
                 0,
                 0,
-                smaller.width,
-                smaller.height
+                smallerCanvas.width,
+                smallerCanvas.height
             );
 
 
-            context.imageSmoothingEnabled =
+            smallerContext.imageSmoothingEnabled =
                 true;
 
 
-            context.imageSmoothingQuality =
+            smallerContext.imageSmoothingQuality =
                 'high';
 
 
-            context.drawImage(
+            smallerContext.drawImage(
                 currentCanvas,
                 0,
                 0,
-                smaller.width,
-                smaller.height
+                smallerCanvas.width,
+                smallerCanvas.height
             );
 
 
             currentCanvas =
-                smaller;
+                smallerCanvas;
+
+
+            quality =
+                0.60;
 
 
             dataUrl =
                 currentCanvas.toDataURL(
                     'image/jpeg',
-                    .58
+                    quality
                 );
         }
 
@@ -4119,7 +4199,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
-    function estimateDataSize(
+    function getDataUrlBinarySize(
         dataUrl
     ) {
 
@@ -4130,6 +4210,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (
             comma === -1
         ) {
+
             return 0;
         }
 
@@ -4158,10 +4239,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
-    /* ============================================================
-       SCAN PREVIEW
-    ============================================================ */
-
     async function showScanResult(
         dataUrl
     ) {
@@ -4174,17 +4251,20 @@ document.addEventListener('DOMContentLoaded', function () {
                 previewObjectUrl
             );
 
+
             previewObjectUrl =
                 null;
         }
 
 
+        const response =
+            await fetch(
+                dataUrl
+            );
+
+
         const blob =
-            await (
-                await fetch(
-                    dataUrl
-                )
-            ).blob();
+            await response.blob();
 
 
         previewObjectUrl =
@@ -4213,6 +4293,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function clearScanResult() {
 
+        capturedInput.value =
+            '';
+
+
         scanResult.classList.add(
             'hidden'
         );
@@ -4233,6 +4317,7 @@ document.addEventListener('DOMContentLoaded', function () {
             URL.revokeObjectURL(
                 previewObjectUrl
             );
+
 
             previewObjectUrl =
                 null;
@@ -4273,8 +4358,11 @@ document.addEventListener('DOMContentLoaded', function () {
         stopCameraTracks();
 
 
-        cameraVideo.srcObject =
-            null;
+        if (cameraVideo) {
+
+            cameraVideo.srcObject =
+                null;
+        }
 
 
         cameraPlaceholder.classList.remove(
@@ -4341,13 +4429,13 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
 
-            const file =
+            const selectedFileElement =
                 fileInput.files?.[0] ||
                 null;
 
 
             const hasFile =
-                !!file;
+                !!selectedFileElement;
 
 
             const hasCamera =
@@ -4373,7 +4461,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (
                 hasFile &&
-                file.size >
+                selectedFileElement.size >
                     MAX_FILE_SIZE
             ) {
 
@@ -4477,6 +4565,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 URL.revokeObjectURL(
                     previewObjectUrl
                 );
+
 
                 previewObjectUrl =
                     null;
