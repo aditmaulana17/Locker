@@ -167,17 +167,11 @@
 
                     </div>
 
-                    {{-- =================================================
-                         FIELD GRID
-                    ================================================== --}}
-
                     <div class="overflow-hidden rounded-md border-2 border-slate-400">
 
                         <div class="grid grid-cols-1 md:grid-cols-2">
 
-                            {{-- =================================================
-                                 NOMOR SURAT
-                            ================================================== --}}
+                            {{-- NOMOR SURAT --}}
 
                             <div class="border-b-2 border-slate-300 p-3 md:border-r-2">
 
@@ -209,9 +203,7 @@
 
                             </div>
 
-                            {{-- =================================================
-                                 TUJUAN SURAT
-                            ================================================== --}}
+                            {{-- TUJUAN SURAT --}}
 
                             <div class="border-b-2 border-slate-300 p-3">
 
@@ -247,9 +239,7 @@
 
                             </div>
 
-                            {{-- =================================================
-                                 TANGGAL SURAT
-                            ================================================== --}}
+                            {{-- TANGGAL SURAT --}}
 
                             <div class="border-b-2 border-slate-300 p-3 md:border-r-2">
 
@@ -278,9 +268,7 @@
 
                             </div>
 
-                            {{-- =================================================
-                                 TANGGAL KELUAR
-                            ================================================== --}}
+                            {{-- TANGGAL KELUAR --}}
 
                             <div class="border-b-2 border-slate-300 p-3">
 
@@ -313,9 +301,7 @@
 
                             </div>
 
-                            {{-- =================================================
-                                 KATEGORI
-                            ================================================== --}}
+                            {{-- KATEGORI --}}
 
                             <div class="border-b-2 border-slate-300 p-3 md:border-r-2">
 
@@ -379,9 +365,7 @@
 
                             </div>
 
-                            {{-- =================================================
-                                 STATUS
-                            ================================================== --}}
+                            {{-- STATUS --}}
 
                             <div class="border-b-2 border-slate-300 p-3">
 
@@ -445,9 +429,7 @@
 
                             </div>
 
-                            {{-- =================================================
-                                 PERIHAL
-                            ================================================== --}}
+                            {{-- PERIHAL --}}
 
                             <div class="border-b-2 border-slate-300 p-3 md:col-span-2">
 
@@ -477,9 +459,7 @@
 
                             </div>
 
-                            {{-- =================================================
-                                 RINGKASAN
-                            ================================================== --}}
+                            {{-- RINGKASAN --}}
 
                             <div class="p-3 md:col-span-2">
 
@@ -545,9 +525,7 @@
 
                     <div class="overflow-hidden rounded-md border-2 border-slate-400 bg-white shadow-sm">
 
-                        {{-- =================================================
-                             HEADER LAMPIRAN
-                        ================================================== --}}
+                        {{-- HEADER LAMPIRAN --}}
 
                         <div class="border-b-2 border-blue-300 bg-blue-50 px-3 py-2.5">
 
@@ -581,7 +559,7 @@
 
                                     </div>
 
-                                    <div>
+                                    <div class="min-w-0">
 
                                         <h3 class="text-[11px] font-bold text-slate-800">
                                             Dokumen Surat
@@ -603,20 +581,16 @@
 
                         </div>
 
-                        {{-- =================================================
-                             BODY LAMPIRAN
-                        ================================================== --}}
+                        {{-- BODY LAMPIRAN --}}
 
                         <div class="p-3 sm:p-4">
 
-                            {{-- =================================================
-                                 INFORMASI KOMPRESI
-                            ================================================== --}}
+                            {{-- INFO KOMPRESI --}}
 
-                            <div class="mb-2.5 flex items-start gap-1.5 rounded-md border border-blue-200 bg-blue-50 px-2.5 py-2">
+                            <div class="mb-2.5 flex items-start gap-1.5 rounded-md border border-indigo-200 bg-indigo-50 px-2.5 py-2">
 
                                 <svg
-                                    class="mt-0.5 h-3 w-3 shrink-0 text-blue-600"
+                                    class="mt-0.5 h-3 w-3 shrink-0 text-indigo-600"
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
@@ -625,30 +599,28 @@
                                         stroke-linecap="round"
                                         stroke-linejoin="round"
                                         stroke-width="2"
-                                        d="M13 16h-1v-4h-1m1-4h.01M12 21a9 9 0 100-18 9 9 0 000 18z"
+                                        d="M13 16h-1v-4h-1m1-4h.01M12 21a9 9 0 100-18 9 9 0 000-18z"
                                     />
                                 </svg>
 
                                 <div class="text-[9px] leading-relaxed">
 
-                                    <p class="font-bold text-blue-700">
-                                        Pemrosesan lampiran otomatis
+                                    <p class="font-bold text-indigo-700">
+                                        Kompresi gambar otomatis
                                     </p>
 
-                                    <p class="text-blue-600">
-                                        PDF akan disimpan sebagai PDF.
-                                        JPG, JPEG, dan PNG akan otomatis diproses,
-                                        di-resize bila diperlukan, kemudian dikompres
-                                        menjadi JPG sebelum disimpan ke server/storage.
+                                    <p class="text-indigo-600">
+                                        JPG, JPEG, dan PNG akan diproses oleh server,
+                                        di-resize maksimal 2500 × 2500 piksel,
+                                        kemudian dikompres menjadi JPG.
+                                        PDF tetap disimpan sebagai PDF.
                                     </p>
 
                                 </div>
 
                             </div>
 
-                            {{-- =================================================
-                                 INFO BATAS FILE
-                            ================================================== --}}
+                            {{-- RINGKASAN BATAS FILE --}}
 
                             <div class="mb-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
 
@@ -667,11 +639,11 @@
                                 <div class="rounded-md border border-slate-200 bg-slate-50 px-2.5 py-2">
 
                                     <p class="text-[8px] font-bold uppercase tracking-wide text-slate-400">
-                                        Dokumen
+                                        PDF
                                     </p>
 
                                     <p class="mt-0.5 text-[10px] font-bold text-slate-700">
-                                        PDF
+                                        Tetap PDF
                                     </p>
 
                                 </div>
@@ -683,16 +655,14 @@
                                     </p>
 
                                     <p class="mt-0.5 text-[10px] font-bold text-slate-700">
-                                        JPG / JPEG / PNG
+                                        Otomatis → JPG
                                     </p>
 
                                 </div>
 
                             </div>
 
-                            {{-- =================================================
-                                 UPLOAD BOX
-                            ================================================== --}}
+                            {{-- UPLOAD BOX --}}
 
                             <label
                                 for="lampiran_file"
@@ -702,7 +672,7 @@
 
                                 <div
                                     id="uploadIcon"
-                                    class="mb-2.5 flex h-10 w-10 items-center justify-center rounded-md border-2 border-blue-200 bg-blue-100 text-blue-600 transition group-hover:border-blue-300 group-hover:bg-blue-100"
+                                    class="mb-2.5 flex h-10 w-10 items-center justify-center rounded-md border-2 border-blue-200 bg-blue-100 text-blue-600 transition"
                                 >
 
                                     <svg
@@ -750,34 +720,91 @@
 
                             </label>
 
-                            {{-- =================================================
-                                 FILE INFO
-                            ================================================== --}}
+                            {{-- FILE INFO --}}
 
                             <div
                                 id="file-info"
                                 class="mt-2 hidden rounded-md border border-emerald-200 bg-emerald-50 px-2.5 py-2 text-[9px] leading-relaxed text-emerald-700"
                             ></div>
 
-                            {{-- =================================================
-                                 COMPRESSION INFO
-                            ================================================== --}}
+                            {{-- COMPRESSION INFO --}}
 
                             <div
                                 id="compression-info"
                                 class="mt-2 hidden rounded-md border border-indigo-200 bg-indigo-50 px-2.5 py-2 text-[9px] leading-relaxed text-indigo-700"
                             ></div>
 
-                            {{-- =================================================
-                                 ERROR FILE
-                            ================================================== --}}
+                            {{-- COMPRESSION DETAIL --}}
+
+                            <div
+                                id="compression-detail"
+                                class="mt-2 hidden overflow-hidden rounded-md border border-slate-200 bg-slate-50"
+                            >
+
+                                <div class="grid grid-cols-1 sm:grid-cols-3">
+
+                                    <div class="border-b border-slate-200 px-3 py-2 sm:border-b-0 sm:border-r">
+
+                                        <p class="text-[8px] font-bold uppercase tracking-wide text-slate-400">
+                                            Ukuran Asli
+                                        </p>
+
+                                        <p
+                                            id="original-size"
+                                            class="mt-0.5 text-[10px] font-bold text-slate-700"
+                                        >
+                                            -
+                                        </p>
+
+                                    </div>
+
+                                    <div class="border-b border-slate-200 px-3 py-2 sm:border-b-0 sm:border-r">
+
+                                        <p class="text-[8px] font-bold uppercase tracking-wide text-slate-400">
+                                            Estimasi Hasil
+                                        </p>
+
+                                        <p
+                                            id="compressed-size"
+                                            class="mt-0.5 text-[10px] font-bold text-indigo-700"
+                                        >
+                                            -
+                                        </p>
+
+                                    </div>
+
+                                    <div class="px-3 py-2">
+
+                                        <p class="text-[8px] font-bold uppercase tracking-wide text-slate-400">
+                                            Pengurangan
+                                        </p>
+
+                                        <p
+                                            id="compression-percent"
+                                            class="mt-0.5 text-[10px] font-bold text-emerald-700"
+                                        >
+                                            -
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            {{-- STATUS PROSES --}}
+
+                            <div
+                                id="compression-status"
+                                class="mt-2 hidden rounded-md border border-amber-200 bg-amber-50 px-2.5 py-2 text-[9px] leading-relaxed text-amber-700"
+                            ></div>
+
+                            {{-- ERROR --}}
 
                             @error('lampiran_file')
-
                                 <p class="mt-1.5 text-[10px] font-medium text-rose-600">
                                     {{ $message }}
                                 </p>
-
                             @enderror
 
                         </div>
@@ -786,9 +813,7 @@
 
                 </section>
 
-                {{-- =================================================
-                     VALIDATION SUMMARY
-                ================================================== --}}
+                {{-- ERROR SUMMARY --}}
 
                 @if($errors->any())
 
@@ -841,13 +866,9 @@
 
             </div>
 
-            {{-- =================================================
-                 FOOTER
-            ================================================== --}}
+            {{-- FOOTER --}}
 
             <div class="flex flex-col gap-2 border-t-2 border-slate-400 bg-slate-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-end">
-
-                {{-- BATAL --}}
 
                 <a
                     href="{{ route('surat-keluar.index') }}"
@@ -859,6 +880,7 @@
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
+                        aria-hidden="true"
                     >
                         <path
                             stroke-linecap="round"
@@ -871,8 +893,6 @@
                     Batal
 
                 </a>
-
-                {{-- SIMPAN --}}
 
                 <button
                     type="submit"
@@ -913,47 +933,38 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-
     'use strict';
 
-    const form =
-        document.getElementById('form-surat');
+    const form = document.getElementById('form-surat');
+    const fileInput = document.getElementById('lampiran_file');
+    const fileLabelText = document.getElementById('file-label-text');
+    const fileSubLabel = document.getElementById('file-sub-label');
+    const fileInfo = document.getElementById('file-info');
+    const compressionInfo = document.getElementById('compression-info');
+    const compressionDetail = document.getElementById('compression-detail');
+    const compressionStatus = document.getElementById('compression-status');
 
-    const fileInput =
-        document.getElementById('lampiran_file');
+    const originalSize = document.getElementById('original-size');
+    const compressedSize = document.getElementById('compressed-size');
+    const compressionPercent = document.getElementById('compression-percent');
 
-    const fileLabelText =
-        document.getElementById('file-label-text');
+    const uploadBox = document.getElementById('uploadBox');
+    const uploadIcon = document.getElementById('uploadIcon');
+    const submitButton = document.getElementById('submit-btn');
 
-    const fileSubLabel =
-        document.getElementById('file-sub-label');
+    const tanggalSurat = document.getElementById('tanggal_surat');
+    const tanggalKeluar = document.getElementById('tanggal_keluar');
 
-    const fileInfo =
-        document.getElementById('file-info');
-
-    const compressionInfo =
-        document.getElementById('compression-info');
-
-    const uploadBox =
-        document.getElementById('uploadBox');
-
-    const uploadIcon =
-        document.getElementById('uploadIcon');
-
-    const submitButton =
-        document.getElementById('submit-btn');
-
-    const tanggalSurat =
-        document.getElementById('tanggal_surat');
-
-    const tanggalKeluar =
-        document.getElementById('tanggal_keluar');
-
-    const MAX_FILE_SIZE =
-        10 * 1024 * 1024;
+    const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
     const ALLOWED_EXTENSIONS = [
         'pdf',
+        'jpg',
+        'jpeg',
+        'png'
+    ];
+
+    const IMAGE_EXTENSIONS = [
         'jpg',
         'jpeg',
         'png'
@@ -963,11 +974,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     /*
     |--------------------------------------------------------------------------
-    | FORMAT UKURAN FILE
+    | FORMAT UKURAN
     |--------------------------------------------------------------------------
     */
 
     function formatFileSize(bytes) {
+        if (!Number.isFinite(bytes) || bytes < 0) {
+            return '0 B';
+        }
 
         if (bytes < 1024) {
             return bytes + ' B';
@@ -988,18 +1002,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
     /*
     |--------------------------------------------------------------------------
-    | RESET FILE
+    | RESET
     |--------------------------------------------------------------------------
     */
 
-    function resetFileInput() {
-
-        if (fileInput) {
-            fileInput.value = '';
-        }
+    function resetVisual() {
 
         if (fileLabelText) {
-
             fileLabelText.textContent =
                 'Klik untuk memilih file';
 
@@ -1014,13 +1023,12 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         if (fileSubLabel) {
-
             fileSubLabel.textContent =
                 'PDF, JPG, JPEG, PNG';
 
             fileSubLabel.classList.remove(
-                'text-rose-600',
-                'text-indigo-600'
+                'text-indigo-600',
+                'text-rose-600'
             );
 
             fileSubLabel.classList.add(
@@ -1029,25 +1037,61 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         if (fileInfo) {
-
             fileInfo.textContent = '';
+            fileInfo.classList.add('hidden');
+
+            fileInfo.classList.remove(
+                'border-rose-200',
+                'bg-rose-50',
+                'text-rose-700'
+            );
 
             fileInfo.classList.add(
-                'hidden'
+                'border-emerald-200',
+                'bg-emerald-50',
+                'text-emerald-700'
             );
         }
 
         if (compressionInfo) {
-
             compressionInfo.textContent = '';
+            compressionInfo.classList.add('hidden');
+        }
 
-            compressionInfo.classList.add(
-                'hidden'
+        if (compressionDetail) {
+            compressionDetail.classList.add('hidden');
+        }
+
+        if (compressionStatus) {
+            compressionStatus.textContent = '';
+            compressionStatus.classList.add('hidden');
+
+            compressionStatus.classList.remove(
+                'border-blue-200',
+                'bg-blue-50',
+                'text-blue-700'
+            );
+
+            compressionStatus.classList.add(
+                'border-amber-200',
+                'bg-amber-50',
+                'text-amber-700'
             );
         }
 
-        if (uploadBox) {
+        if (originalSize) {
+            originalSize.textContent = '-';
+        }
 
+        if (compressedSize) {
+            compressedSize.textContent = '-';
+        }
+
+        if (compressionPercent) {
+            compressionPercent.textContent = '-';
+        }
+
+        if (uploadBox) {
             uploadBox.classList.remove(
                 'border-emerald-400',
                 'bg-emerald-50',
@@ -1062,7 +1106,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         if (uploadIcon) {
-
             uploadIcon.classList.remove(
                 'border-emerald-300',
                 'bg-emerald-100',
@@ -1089,7 +1132,6 @@ document.addEventListener('DOMContentLoaded', function () {
     function showFileError(message) {
 
         if (fileLabelText) {
-
             fileLabelText.textContent =
                 'File tidak dapat digunakan';
 
@@ -1104,15 +1146,10 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         if (fileInfo) {
-
-            fileInfo.textContent =
-                message;
+            fileInfo.textContent = message;
 
             fileInfo.classList.remove(
-                'hidden'
-            );
-
-            fileInfo.classList.remove(
+                'hidden',
                 'border-emerald-200',
                 'bg-emerald-50',
                 'text-emerald-700'
@@ -1126,7 +1163,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         if (uploadBox) {
-
             uploadBox.classList.remove(
                 'border-slate-400',
                 'bg-slate-50'
@@ -1139,7 +1175,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         if (uploadIcon) {
-
             uploadIcon.classList.remove(
                 'border-blue-200',
                 'bg-blue-100',
@@ -1156,21 +1191,275 @@ document.addEventListener('DOMContentLoaded', function () {
 
     /*
     |--------------------------------------------------------------------------
+    | ESTIMASI KOMPRESI
+    |--------------------------------------------------------------------------
+    */
+
+    function estimateImageCompression(file) {
+
+        return new Promise(function (resolve, reject) {
+
+            const objectUrl =
+                URL.createObjectURL(file);
+
+            const image =
+                new Image();
+
+            image.onload = function () {
+
+                try {
+
+                    const MAX_WIDTH = 2500;
+                    const MAX_HEIGHT = 2500;
+                    const QUALITY = 0.78;
+
+                    const scale =
+                        Math.min(
+                            MAX_WIDTH / image.width,
+                            MAX_HEIGHT / image.height,
+                            1
+                        );
+
+                    const width =
+                        Math.max(
+                            1,
+                            Math.round(
+                                image.width *
+                                scale
+                            )
+                        );
+
+                    const height =
+                        Math.max(
+                            1,
+                            Math.round(
+                                image.height *
+                                scale
+                            )
+                        );
+
+                    const canvas =
+                        document.createElement(
+                            'canvas'
+                        );
+
+                    canvas.width = width;
+                    canvas.height = height;
+
+                    const context =
+                        canvas.getContext(
+                            '2d'
+                        );
+
+                    if (!context) {
+                        throw new Error(
+                            'Canvas tidak tersedia.'
+                        );
+                    }
+
+                    /*
+                    |----------------------------------------------------------------------
+                    | Background putih
+                    |---------------------------------------------------------------------- 
+                    */
+
+                    context.fillStyle =
+                        '#ffffff';
+
+                    context.fillRect(
+                        0,
+                        0,
+                        width,
+                        height
+                    );
+
+                    /*
+                    |----------------------------------------------------------------------
+                    | Gambar
+                    |---------------------------------------------------------------------- 
+                    */
+
+                    context.drawImage(
+                        image,
+                        0,
+                        0,
+                        width,
+                        height
+                    );
+
+                    /*
+                    |----------------------------------------------------------------------
+                    | Encode JPEG
+                    |---------------------------------------------------------------------- 
+                    */
+
+                    canvas.toBlob(
+                        function (blob) {
+
+                            URL.revokeObjectURL(
+                                objectUrl
+                            );
+
+                            if (!blob) {
+                                reject(
+                                    new Error(
+                                        'Estimasi kompresi gagal.'
+                                    )
+                                );
+
+                                return;
+                            }
+
+                            const reduction =
+                                file.size > 0
+                                    ? (
+                                        (
+                                            1 -
+                                            (
+                                                blob.size /
+                                                file.size
+                                            )
+                                        ) *
+                                        100
+                                    )
+                                    : 0;
+
+                            resolve({
+
+                                originalSize:
+                                    file.size,
+
+                                compressedSize:
+                                    blob.size,
+
+                                width:
+                                    width,
+
+                                height:
+                                    height,
+
+                                reduction:
+                                    Math.max(
+                                        0,
+                                        reduction
+                                    )
+                            });
+
+                        },
+                        'image/jpeg',
+                        QUALITY
+                    );
+
+                } catch (error) {
+
+                    URL.revokeObjectURL(
+                        objectUrl
+                    );
+
+                    reject(error);
+                }
+            };
+
+            image.onerror = function () {
+
+                URL.revokeObjectURL(
+                    objectUrl
+                );
+
+                reject(
+                    new Error(
+                        'Gambar tidak dapat dibaca.'
+                    )
+                );
+            };
+
+            image.src = objectUrl;
+        });
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | TAMPILKAN HASIL
+    |--------------------------------------------------------------------------
+    */
+
+    function showCompressionResult(result) {
+
+        if (compressionDetail) {
+            compressionDetail.classList.remove(
+                'hidden'
+            );
+        }
+
+        if (originalSize) {
+            originalSize.textContent =
+                formatFileSize(
+                    result.originalSize
+                );
+        }
+
+        if (compressedSize) {
+            compressedSize.textContent =
+                formatFileSize(
+                    result.compressedSize
+                );
+        }
+
+        if (compressionPercent) {
+
+            if (result.reduction > 0) {
+
+                compressionPercent.textContent =
+                    result.reduction.toFixed(1) +
+                    '% lebih kecil';
+
+            } else {
+
+                compressionPercent.textContent =
+                    'Tidak berkurang';
+            }
+        }
+
+        if (compressionInfo) {
+
+            compressionInfo.textContent =
+                'Estimasi hasil kompresi: ' +
+                formatFileSize(
+                    result.originalSize
+                ) +
+                ' → ' +
+                formatFileSize(
+                    result.compressedSize
+                ) +
+                ' (' +
+                result.reduction.toFixed(1) +
+                '% lebih kecil).';
+
+            compressionInfo.classList.remove(
+                'hidden'
+            );
+        }
+    }
+
+    /*
+    |--------------------------------------------------------------------------
     | FILE CHANGE
     |--------------------------------------------------------------------------
     */
 
     fileInput?.addEventListener(
         'change',
-        function () {
+        async function () {
 
             if (
                 !fileInput.files ||
                 fileInput.files.length === 0
             ) {
-                resetFileInput();
+                resetVisual();
                 return;
             }
+
+            resetVisual();
 
             const file =
                 fileInput.files[0];
@@ -1183,7 +1472,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             /*
             |--------------------------------------------------------------------------
-            | CEK EXTENSION
+            | EXTENSION
             |--------------------------------------------------------------------------
             */
 
@@ -1193,7 +1482,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 )
             ) {
 
-                resetFileInput();
+                fileInput.value = '';
 
                 showFileError(
                     'Format file tidak didukung. Gunakan PDF, JPG, JPEG, atau PNG.'
@@ -1204,7 +1493,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             /*
             |--------------------------------------------------------------------------
-            | CEK UKURAN
+            | SIZE
             |--------------------------------------------------------------------------
             */
 
@@ -1213,10 +1502,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 MAX_FILE_SIZE
             ) {
 
-                resetFileInput();
+                fileInput.value = '';
 
                 showFileError(
-                    'Ukuran file melebihi batas 10 MB. Silakan pilih file yang lebih kecil.'
+                    'Ukuran file melebihi batas 10 MB.'
                 );
 
                 return;
@@ -1224,14 +1513,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
             /*
             |--------------------------------------------------------------------------
-            | TAMPILKAN FILE
+            | FILE INFO
             |--------------------------------------------------------------------------
             */
 
             if (fileLabelText) {
 
                 fileLabelText.textContent =
-                    'Terpilih: ' + file.name;
+                    'Terpilih: ' +
+                    file.name;
 
                 fileLabelText.classList.remove(
                     'text-slate-700',
@@ -1245,25 +1535,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (fileInfo) {
 
+                fileInfo.textContent =
+                    'Ukuran file asli: ' +
+                    formatFileSize(
+                        file.size
+                    );
+
                 fileInfo.classList.remove(
                     'hidden'
                 );
-
-                fileInfo.classList.remove(
-                    'border-rose-200',
-                    'bg-rose-50',
-                    'text-rose-700'
-                );
-
-                fileInfo.classList.add(
-                    'border-emerald-200',
-                    'bg-emerald-50',
-                    'text-emerald-700'
-                );
-
-                fileInfo.textContent =
-                    'File siap diproses • Ukuran asli: ' +
-                    formatFileSize(file.size);
             }
 
             if (uploadBox) {
@@ -1296,54 +1576,163 @@ document.addEventListener('DOMContentLoaded', function () {
 
             /*
             |--------------------------------------------------------------------------
-            | INFORMASI PROSES KOMPRESI
+            | PDF
+            |--------------------------------------------------------------------------
+            */
+
+            if (extension === 'pdf') {
+
+                if (fileSubLabel) {
+
+                    fileSubLabel.textContent =
+                        'PDF • Disimpan sebagai PDF';
+
+                    fileSubLabel.classList.remove(
+                        'text-slate-500'
+                    );
+
+                    fileSubLabel.classList.add(
+                        'text-indigo-600'
+                    );
+                }
+
+                if (compressionInfo) {
+
+                    compressionInfo.textContent =
+                        'PDF tidak diproses sebagai gambar. File PDF akan disimpan sebagai PDF.';
+
+                    compressionInfo.classList.remove(
+                        'hidden'
+                    );
+                }
+
+                if (compressionStatus) {
+
+                    compressionStatus.textContent =
+                        'Tidak ada kompresi gambar karena file yang dipilih adalah PDF.';
+
+                    compressionStatus.classList.remove(
+                        'hidden'
+                    );
+
+                    compressionStatus.classList.remove(
+                        'border-amber-200',
+                        'bg-amber-50',
+                        'text-amber-700'
+                    );
+
+                    compressionStatus.classList.add(
+                        'border-blue-200',
+                        'bg-blue-50',
+                        'text-blue-700'
+                    );
+                }
+
+                return;
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | IMAGE
             |--------------------------------------------------------------------------
             */
 
             if (
-                compressionInfo &&
-                (
-                    extension === 'jpg' ||
-                    extension === 'jpeg' ||
-                    extension === 'png'
+                IMAGE_EXTENSIONS.includes(
+                    extension
                 )
             ) {
 
-                compressionInfo.textContent =
-                    'Gambar akan otomatis diproses oleh server: ' +
-                    'resize bila diperlukan dan kompresi ke format JPG sebelum disimpan.';
+                if (fileSubLabel) {
 
-                compressionInfo.classList.remove(
-                    'hidden'
-                );
-            } else if (
-                compressionInfo &&
-                extension === 'pdf'
-            ) {
+                    fileSubLabel.textContent =
+                        'Gambar • Otomatis diproses menjadi JPG';
 
-                compressionInfo.textContent =
-                    'PDF akan disimpan sebagai PDF tanpa kompresi gambar.';
+                    fileSubLabel.classList.remove(
+                        'text-slate-500'
+                    );
 
-                compressionInfo.classList.remove(
-                    'hidden'
-                );
-            }
+                    fileSubLabel.classList.add(
+                        'text-indigo-600'
+                    );
+                }
 
-            if (fileSubLabel) {
+                if (compressionStatus) {
 
-                fileSubLabel.textContent =
-                    extension === 'pdf'
-                        ? 'PDF • Disimpan sebagai PDF'
-                        : 'Gambar • Otomatis dikompres menjadi JPG';
+                    compressionStatus.textContent =
+                        'Menghitung estimasi ukuran setelah kompresi...';
 
-                fileSubLabel.classList.remove(
-                    'text-slate-500',
-                    'text-rose-600'
-                );
+                    compressionStatus.classList.remove(
+                        'hidden'
+                    );
+                }
 
-                fileSubLabel.classList.add(
-                    'text-indigo-600'
-                );
+                try {
+
+                    const result =
+                        await estimateImageCompression(
+                            file
+                        );
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Pastikan file belum berubah saat
+                    | proses estimasi selesai
+                    |--------------------------------------------------------------------------
+                    */
+
+                    if (
+                        !fileInput.files ||
+                        fileInput.files.length === 0 ||
+                        fileInput.files[0] !== file
+                    ) {
+                        return;
+                    }
+
+                    showCompressionResult(
+                        result
+                    );
+
+                    if (compressionStatus) {
+
+                        compressionStatus.textContent =
+                            'Estimasi selesai. Hasil sebenarnya dapat sedikit berbeda karena kompresi final dilakukan oleh server.';
+
+                        compressionStatus.classList.remove(
+                            'border-amber-200',
+                            'bg-amber-50',
+                            'text-amber-700'
+                        );
+
+                        compressionStatus.classList.add(
+                            'border-blue-200',
+                            'bg-blue-50',
+                            'text-blue-700'
+                        );
+                    }
+
+                } catch (error) {
+
+                    if (compressionInfo) {
+
+                        compressionInfo.textContent =
+                            'File gambar valid dan akan dikompres otomatis oleh server saat disimpan.';
+
+                        compressionInfo.classList.remove(
+                            'hidden'
+                        );
+                    }
+
+                    if (compressionStatus) {
+
+                        compressionStatus.textContent =
+                            'Estimasi ukuran tidak dapat dihitung di browser. Kompresi server tetap akan dilakukan.';
+
+                        compressionStatus.classList.remove(
+                            'hidden'
+                        );
+                    }
+                }
             }
         }
     );
@@ -1361,13 +1750,12 @@ document.addEventListener('DOMContentLoaded', function () {
             if (isSubmitting) {
 
                 event.preventDefault();
-
                 return;
             }
 
             /*
             |--------------------------------------------------------------------------
-            | VALIDASI TANGGAL
+            | TANGGAL
             |--------------------------------------------------------------------------
             */
 
@@ -1453,7 +1841,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     } else {
 
                         window.alert(
-                            'Gunakan PDF, JPG, JPEG, atau PNG.'
+                            'Format file tidak valid.'
                         );
                     }
 
@@ -1493,7 +1881,53 @@ document.addEventListener('DOMContentLoaded', function () {
 
             /*
             |--------------------------------------------------------------------------
-            | LOCK SUBMIT
+            | STATUS PROSES
+            |--------------------------------------------------------------------------
+            */
+
+            const selectedFile =
+                fileInput?.files?.[0] || null;
+
+            if (
+                selectedFile &&
+                compressionStatus
+            ) {
+
+                const extension =
+                    selectedFile.name
+                        .split('.')
+                        .pop()
+                        ?.toLowerCase() || '';
+
+                if (
+                    IMAGE_EXTENSIONS.includes(
+                        extension
+                    )
+                ) {
+
+                    compressionStatus.textContent =
+                        'File sedang dikirim. Kompresi final sedang dilakukan oleh server sebelum disimpan ke storage.';
+
+                    compressionStatus.classList.remove(
+                        'hidden'
+                    );
+
+                } else if (
+                    extension === 'pdf'
+                ) {
+
+                    compressionStatus.textContent =
+                        'File PDF sedang dikirim ke server untuk disimpan sebagai PDF.';
+
+                    compressionStatus.classList.remove(
+                        'hidden'
+                    );
+                }
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | LOCK BUTTON
             |--------------------------------------------------------------------------
             */
 
@@ -1527,45 +1961,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         ></path>
                     </svg>
 
-                    Menyimpan...
+                    Memproses & Menyimpan...
                 `;
-            }
-
-            /*
-            |--------------------------------------------------------------------------
-            | UPDATE STATUS PEMROSESAN
-            |--------------------------------------------------------------------------
-            */
-
-            if (
-                compressionInfo &&
-                fileInput &&
-                fileInput.files &&
-                fileInput.files.length > 0
-            ) {
-
-                const file =
-                    fileInput.files[0];
-
-                const extension =
-                    file.name
-                        .split('.')
-                        .pop()
-                        ?.toLowerCase() || '';
-
-                if (
-                    extension === 'jpg' ||
-                    extension === 'jpeg' ||
-                    extension === 'png'
-                ) {
-
-                    compressionInfo.textContent =
-                        'Sedang mengirim file. Gambar akan dikompres otomatis oleh server sebelum disimpan.';
-                } else {
-
-                    compressionInfo.textContent =
-                        'Sedang mengirim file PDF ke server.';
-                }
             }
         }
     );
