@@ -24,61 +24,64 @@
         $currentStatus = 'draft';
     }
 
-
     /*
     |--------------------------------------------------------------------------
-    | TANGGAL
+    | TANGGAL SURAT
     |--------------------------------------------------------------------------
     */
 
     try {
-        $tanggalSurat =
-            old(
-                'tanggal_surat',
-                $suratKeluar->tanggal_surat
-                    ? \Illuminate\Support\Carbon::parse(
-                        $suratKeluar->tanggal_surat
-                    )->format('Y-m-d')
-                    : ''
-            );
-    } catch (\Throwable $e) {
-        $tanggalSurat =
-            old(
-                'tanggal_surat',
-                ''
-            );
-    }
-
-
-    try {
-        $tanggalKeluar =
-            old(
-                'tanggal_keluar',
-                $suratKeluar->tanggal_keluar
-                    ? \Illuminate\Support\Carbon::parse(
-                        $suratKeluar->tanggal_keluar
-                    )->format('Y-m-d')
-                    : ''
-            );
-    } catch (\Throwable $e) {
-        $tanggalKeluar =
-            old(
-                'tanggal_keluar',
-                ''
-            );
-    }
-
-
-    $kategoriSuratId =
-        old(
-            'kategori_surat_id',
-            $suratKeluar->kategori_surat_id
+        $tanggalSurat = old(
+            'tanggal_surat',
+            $suratKeluar->tanggal_surat
+                ? \Illuminate\Support\Carbon::parse(
+                    $suratKeluar->tanggal_surat
+                )->format('Y-m-d')
+                : ''
         );
-
+    } catch (\Throwable $e) {
+        $tanggalSurat = old(
+            'tanggal_surat',
+            ''
+        );
+    }
 
     /*
     |--------------------------------------------------------------------------
-    | CLASS INPUT
+    | TANGGAL KELUAR
+    |--------------------------------------------------------------------------
+    */
+
+    try {
+        $tanggalKeluar = old(
+            'tanggal_keluar',
+            $suratKeluar->tanggal_keluar
+                ? \Illuminate\Support\Carbon::parse(
+                    $suratKeluar->tanggal_keluar
+                )->format('Y-m-d')
+                : ''
+        );
+    } catch (\Throwable $e) {
+        $tanggalKeluar = old(
+            'tanggal_keluar',
+            ''
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | KATEGORI
+    |--------------------------------------------------------------------------
+    */
+
+    $kategoriSuratId = old(
+        'kategori_surat_id',
+        $suratKeluar->kategori_surat_id
+    );
+
+    /*
+    |--------------------------------------------------------------------------
+    | INPUT CLASS
     |--------------------------------------------------------------------------
     */
 
@@ -88,26 +91,43 @@
     $errorInputClass =
         'border-rose-400 bg-rose-50 focus:border-rose-500 focus:ring-rose-100';
 
-
     /*
     |--------------------------------------------------------------------------
-    | FILE LAMA
+    | LAMPIRAN LAMA
     |--------------------------------------------------------------------------
     */
 
     $hasCurrentAttachment =
         !empty(
-            $suratKeluar->lampiran_file
+            trim(
+                (string) $suratKeluar->lampiran_file
+            )
         );
+
+    $currentAttachmentPath =
+        $hasCurrentAttachment
+            ? trim(
+                (string) $suratKeluar->lampiran_file
+            )
+            : null;
 
     $currentAttachmentName =
         $hasCurrentAttachment
             ? basename(
-                $suratKeluar->lampiran_file
+                $currentAttachmentPath
             )
             : null;
-@endphp
 
+    $currentAttachmentExtension =
+        $hasCurrentAttachment
+            ? strtolower(
+                pathinfo(
+                    $currentAttachmentPath,
+                    PATHINFO_EXTENSION
+                )
+            )
+            : '';
+@endphp
 
 <div class="mx-auto w-full max-w-5xl px-3 pb-6 sm:px-4 lg:px-5">
 
@@ -143,7 +163,6 @@
 
     </div>
 
-
     {{-- =====================================================
          FORM
     ====================================================== --}}
@@ -159,13 +178,11 @@
         @csrf
         @method('PUT')
 
-
         {{-- =================================================
              MAIN CARD
         ================================================== --}}
 
         <div class="overflow-hidden rounded-lg border-2 border-slate-400 bg-white shadow-sm">
-
 
             {{-- =================================================
                  HEADER
@@ -210,7 +227,6 @@
 
                         </div>
 
-
                         <div>
 
                             <p class="text-[9px] font-bold uppercase tracking-wider text-emerald-600">
@@ -224,7 +240,6 @@
                         </div>
 
                     </div>
-
 
                     <div class="hidden rounded-md border border-emerald-300 bg-white/80 px-3 py-1.5 text-right sm:block">
 
@@ -242,13 +257,11 @@
 
             </div>
 
-
             {{-- =================================================
                  BODY
             ================================================== --}}
 
             <div class="p-4 sm:p-5">
-
 
                 {{-- =================================================
                      INFORMASI UTAMA
@@ -259,7 +272,6 @@
                     <div class="mb-3 flex items-start gap-2.5 border-b-2 border-slate-300 pb-2.5">
 
                         <div class="mt-0.5 h-7 w-1 shrink-0 rounded-full bg-emerald-600"></div>
-
 
                         <div>
 
@@ -275,15 +287,11 @@
 
                     </div>
 
-
                     <div class="overflow-hidden rounded-md border-2 border-slate-400">
 
                         <div class="grid grid-cols-1 md:grid-cols-2">
 
-
-                            {{-- =================================================
-                                 NOMOR SURAT
-                            ================================================== --}}
+                            {{-- NOMOR SURAT --}}
 
                             <div class="border-b-2 border-slate-300 p-3 md:border-r-2">
 
@@ -294,7 +302,6 @@
                                     Nomor Surat
                                     <span class="text-rose-500">*</span>
                                 </label>
-
 
                                 <input
                                     type="text"
@@ -308,21 +315,15 @@
                                     class="{{ $inputClass }} @error('nomor_surat') {{ $errorInputClass }} @enderror"
                                 >
 
-
                                 @error('nomor_surat')
-
                                     <p class="mt-1 text-[10px] font-medium text-rose-600">
                                         {{ $message }}
                                     </p>
-
                                 @enderror
 
                             </div>
 
-
-                            {{-- =================================================
-                                 TUJUAN SURAT
-                            ================================================== --}}
+                            {{-- TUJUAN SURAT --}}
 
                             <div class="border-b-2 border-slate-300 p-3">
 
@@ -334,7 +335,6 @@
                                     <span class="text-rose-500">*</span>
                                 </label>
 
-
                                 <input
                                     type="text"
                                     id="pengirim"
@@ -342,31 +342,24 @@
                                     value="{{ old('pengirim', $suratKeluar->pengirim) }}"
                                     placeholder="Contoh: PT Maju Takgentar"
                                     autocomplete="organization"
-                                    maxlength="255"
+                                    maxlength="150"
                                     required
                                     class="{{ $inputClass }} @error('pengirim') {{ $errorInputClass }} @enderror"
                                 >
-
 
                                 <p class="mt-1 text-[9px] leading-relaxed text-slate-400">
                                     Instansi, lembaga, organisasi, atau pihak tujuan surat.
                                 </p>
 
-
                                 @error('pengirim')
-
                                     <p class="mt-1 text-[10px] font-medium text-rose-600">
                                         {{ $message }}
                                     </p>
-
                                 @enderror
 
                             </div>
 
-
-                            {{-- =================================================
-                                 TANGGAL SURAT
-                            ================================================== --}}
+                            {{-- TANGGAL SURAT --}}
 
                             <div class="border-b-2 border-slate-300 p-3 md:border-r-2">
 
@@ -378,7 +371,6 @@
                                     <span class="text-rose-500">*</span>
                                 </label>
 
-
                                 <input
                                     type="date"
                                     id="tanggal_surat"
@@ -388,21 +380,15 @@
                                     class="{{ $inputClass }} @error('tanggal_surat') {{ $errorInputClass }} @enderror"
                                 >
 
-
                                 @error('tanggal_surat')
-
                                     <p class="mt-1 text-[10px] font-medium text-rose-600">
                                         {{ $message }}
                                     </p>
-
                                 @enderror
 
                             </div>
 
-
-                            {{-- =================================================
-                                 TANGGAL KELUAR
-                            ================================================== --}}
+                            {{-- TANGGAL KELUAR --}}
 
                             <div class="border-b-2 border-slate-300 p-3">
 
@@ -414,7 +400,6 @@
                                     <span class="text-rose-500">*</span>
                                 </label>
 
-
                                 <input
                                     type="date"
                                     id="tanggal_keluar"
@@ -424,26 +409,19 @@
                                     class="{{ $inputClass }} @error('tanggal_keluar') {{ $errorInputClass }} @enderror"
                                 >
 
-
                                 <p class="mt-1 text-[9px] leading-relaxed text-slate-400">
                                     Tanggal surat resmi keluar atau dikirim.
                                 </p>
 
-
                                 @error('tanggal_keluar')
-
                                     <p class="mt-1 text-[10px] font-medium text-rose-600">
                                         {{ $message }}
                                     </p>
-
                                 @enderror
 
                             </div>
 
-
-                            {{-- =================================================
-                                 KATEGORI
-                            ================================================== --}}
+                            {{-- KATEGORI --}}
 
                             <div class="border-b-2 border-slate-300 p-3 md:border-r-2">
 
@@ -454,7 +432,6 @@
                                     Kategori Surat
                                     <span class="text-rose-500">*</span>
                                 </label>
-
 
                                 <select
                                     id="kategori_surat_id"
@@ -471,7 +448,6 @@
                                         Pilih kategori surat
                                     </option>
 
-
                                     @foreach($kategoris ?? [] as $kategori)
 
                                         <option
@@ -481,46 +457,35 @@
                                                 (string) $kategori->id
                                             )
                                         >
-
                                             {{ $kategori->nama_kategori }}
 
                                             @if(!empty($kategori->sifat))
                                                 ({{ ucfirst($kategori->sifat) }})
                                             @endif
-
                                         </option>
 
                                     @endforeach
 
                                 </select>
 
-
                                 @if(
                                     !isset($kategoris) ||
                                     $kategoris->isEmpty()
                                 )
-
                                     <p class="mt-1 text-[9px] leading-relaxed text-amber-600">
                                         Belum ada kategori surat yang tersedia.
                                     </p>
-
                                 @endif
 
-
                                 @error('kategori_surat_id')
-
                                     <p class="mt-1 text-[10px] font-medium text-rose-600">
                                         {{ $message }}
                                     </p>
-
                                 @enderror
 
                             </div>
 
-
-                            {{-- =================================================
-                                 STATUS
-                            ================================================== --}}
+                            {{-- STATUS --}}
 
                             <div class="border-b-2 border-slate-300 p-3">
 
@@ -532,7 +497,6 @@
                                     <span class="text-rose-500">*</span>
                                 </label>
 
-
                                 <select
                                     id="status"
                                     name="status"
@@ -542,70 +506,50 @@
 
                                     <option
                                         value="draft"
-                                        @selected(
-                                            $currentStatus === 'draft'
-                                        )
+                                        @selected($currentStatus === 'draft')
                                     >
                                         Draft
                                     </option>
 
-
                                     <option
                                         value="diproses"
-                                        @selected(
-                                            $currentStatus === 'diproses'
-                                        )
+                                        @selected($currentStatus === 'diproses')
                                     >
                                         Diproses
                                     </option>
 
-
                                     <option
                                         value="disetujui"
-                                        @selected(
-                                            $currentStatus === 'disetujui'
-                                        )
+                                        @selected($currentStatus === 'disetujui')
                                     >
                                         Disetujui
                                     </option>
 
-
                                     <option
                                         value="dikirim"
-                                        @selected(
-                                            $currentStatus === 'dikirim'
-                                        )
+                                        @selected($currentStatus === 'dikirim')
                                     >
                                         Dikirim
                                     </option>
 
-
                                     <option
                                         value="diarsipkan"
-                                        @selected(
-                                            $currentStatus === 'diarsipkan'
-                                        )
+                                        @selected($currentStatus === 'diarsipkan')
                                     >
                                         Diarsipkan
                                     </option>
 
                                 </select>
 
-
                                 @error('status')
-
                                     <p class="mt-1 text-[10px] font-medium text-rose-600">
                                         {{ $message }}
                                     </p>
-
                                 @enderror
 
                             </div>
 
-
-                            {{-- =================================================
-                                 PERIHAL
-                            ================================================== --}}
+                            {{-- PERIHAL --}}
 
                             <div class="border-b-2 border-slate-300 p-3 md:col-span-2">
 
@@ -617,24 +561,52 @@
                                     <span class="text-rose-500">*</span>
                                 </label>
 
-
                                 <textarea
                                     id="perihal"
                                     name="perihal"
                                     rows="2"
-                                    maxlength="1000"
+                                    maxlength="255"
                                     required
                                     placeholder="Tuliskan perihal surat secara jelas..."
                                     class="{{ $inputClass }} resize-y @error('perihal') {{ $errorInputClass }} @enderror"
                                 >{{ old('perihal', $suratKeluar->perihal) }}</textarea>
 
-
                                 @error('perihal')
-
                                     <p class="mt-1 text-[10px] font-medium text-rose-600">
                                         {{ $message }}
                                     </p>
+                                @enderror
 
+                            </div>
+
+                            {{-- RINGKASAN --}}
+
+                            <div class="p-3 md:col-span-2">
+
+                                <label
+                                    for="ringkasan"
+                                    class="mb-1.5 block text-[11px] font-bold text-slate-700"
+                                >
+                                    Ringkasan Isi Surat
+                                </label>
+
+                                <textarea
+                                    id="ringkasan"
+                                    name="ringkasan"
+                                    rows="3"
+                                    maxlength="5000"
+                                    placeholder="Tuliskan ringkasan singkat isi surat..."
+                                    class="{{ $inputClass }} resize-y @error('ringkasan') {{ $errorInputClass }} @enderror"
+                                >{{ old('ringkasan', $suratKeluar->ringkasan) }}</textarea>
+
+                                <p class="mt-1 text-[9px] leading-relaxed text-slate-400">
+                                    Maksimal 5.000 karakter.
+                                </p>
+
+                                @error('ringkasan')
+                                    <p class="mt-1 text-[10px] font-medium text-rose-600">
+                                        {{ $message }}
+                                    </p>
                                 @enderror
 
                             </div>
@@ -645,9 +617,7 @@
 
                 </section>
 
-
                 <div class="my-4 border-t-2 border-slate-300"></div>
-
 
                 {{-- =================================================
                      LAMPIRAN
@@ -659,7 +629,6 @@
 
                         <div class="mt-0.5 h-7 w-1 shrink-0 rounded-full bg-indigo-600"></div>
 
-
                         <div>
 
                             <h2 class="text-sm font-bold text-slate-800">
@@ -667,19 +636,17 @@
                             </h2>
 
                             <p class="text-[10px] text-slate-500">
-                                Periksa lampiran yang tersimpan atau upload dokumen pengganti.
+                                Periksa lampiran lama atau upload dokumen pengganti.
                             </p>
 
                         </div>
 
                     </div>
 
-
                     <div class="grid grid-cols-1 gap-3.5 lg:grid-cols-2">
 
-
                         {{-- =================================================
-                             LAMPIRAN SAAT INI
+                             LAMPIRAN LAMA
                         ================================================== --}}
 
                         @if($hasCurrentAttachment)
@@ -711,7 +678,6 @@
 
                                             </div>
 
-
                                             <div class="min-w-0">
 
                                                 <h3 class="text-[11px] font-bold text-slate-800">
@@ -726,7 +692,6 @@
 
                                         </div>
 
-
                                         <span class="shrink-0 rounded-full border border-emerald-200 bg-white px-1.5 py-0.5 text-[8px] font-bold uppercase text-emerald-600">
                                             Tersimpan
                                         </span>
@@ -735,8 +700,7 @@
 
                                 </div>
 
-
-                                <div class="flex min-h-[205px] flex-col justify-between p-3">
+                                <div class="flex min-h-[215px] flex-col justify-between p-3">
 
                                     <div class="rounded-md border-2 border-slate-300 bg-slate-50 p-3">
 
@@ -749,6 +713,7 @@
                                                     fill="none"
                                                     stroke="currentColor"
                                                     viewBox="0 0 24 24"
+                                                    aria-hidden="true"
                                                 >
                                                     <path
                                                         stroke-linecap="round"
@@ -759,7 +724,6 @@
                                                 </svg>
 
                                             </div>
-
 
                                             <div class="min-w-0 flex-1">
 
@@ -774,12 +738,19 @@
                                                     {{ $currentAttachmentName }}
                                                 </p>
 
+                                                @if($currentAttachmentExtension)
+
+                                                    <span class="mt-2 inline-flex rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[8px] font-bold uppercase text-slate-500">
+                                                        .{{ $currentAttachmentExtension }}
+                                                    </span>
+
+                                                @endif
+
                                             </div>
 
                                         </div>
 
                                     </div>
-
 
                                     <a
                                         href="{{ route('surat-keluar.preview-lampiran', $suratKeluar) }}"
@@ -793,6 +764,7 @@
                                             fill="none"
                                             stroke="currentColor"
                                             viewBox="0 0 24 24"
+                                            aria-hidden="true"
                                         >
                                             <path
                                                 stroke-linecap="round"
@@ -812,9 +784,8 @@
 
                         @endif
 
-
                         {{-- =================================================
-                             LAMPIRAN BARU
+                             UPLOAD BARU
                         ================================================== --}}
 
                         <div class="overflow-hidden rounded-md border-2 border-slate-400 bg-white shadow-sm {{ !$hasCurrentAttachment ? 'lg:col-span-2' : '' }}">
@@ -851,7 +822,6 @@
 
                                         </div>
 
-
                                         <div>
 
                                             <h3 class="text-[11px] font-bold text-slate-800">
@@ -866,7 +836,6 @@
 
                                     </div>
 
-
                                     <span class="shrink-0 rounded-full border border-slate-300 bg-white px-1.5 py-0.5 text-[8px] font-bold uppercase text-slate-500">
                                         Opsional
                                     </span>
@@ -875,11 +844,9 @@
 
                             </div>
 
-
                             <div class="p-3">
 
-
-                                {{-- INFO --}}
+                                {{-- INFO KOMPRESI --}}
 
                                 <div class="mb-2.5 flex items-start gap-1.5 rounded-md border border-blue-200 bg-blue-50 px-2.5 py-2">
 
@@ -888,6 +855,7 @@
                                         fill="none"
                                         stroke="currentColor"
                                         viewBox="0 0 24 24"
+                                        aria-hidden="true"
                                     >
                                         <path
                                             stroke-linecap="round"
@@ -897,31 +865,94 @@
                                         />
                                     </svg>
 
-
                                     <div class="text-[9px] leading-relaxed">
 
                                         <p class="font-bold text-blue-700">
-                                            Maksimal 10 MB
+                                            Pemrosesan lampiran otomatis
                                         </p>
 
                                         <p class="text-blue-600">
-                                            Format yang diperbolehkan:
-                                            PDF, JPG, JPEG, atau PNG.
+                                            PDF akan tetap menjadi PDF.
+                                            JPG, JPEG, dan PNG akan otomatis
+                                            diproses, di-resize bila diperlukan,
+                                            kemudian dikompres menjadi JPG
+                                            sebelum disimpan.
                                         </p>
 
                                     </div>
 
                                 </div>
 
+                                {{-- STATUS FILE --}}
+
+                                <div
+                                    id="current-file-note"
+                                    class="mb-2.5 rounded-md border border-slate-200 bg-slate-50 px-2.5 py-2"
+                                >
+
+                                    <p class="text-[9px] leading-relaxed text-slate-500">
+
+                                        Tidak memilih file baru berarti
+                                        lampiran saat ini tetap dipertahankan.
+
+                                    </p>
+
+                                </div>
+
+                                {{-- INFO BATAS --}}
+
+                                <div class="mb-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
+
+                                    <div class="rounded-md border border-slate-200 bg-slate-50 px-2.5 py-2">
+
+                                        <p class="text-[8px] font-bold uppercase tracking-wide text-slate-400">
+                                            Batas File
+                                        </p>
+
+                                        <p class="mt-0.5 text-[10px] font-bold text-slate-700">
+                                            Maks. 10 MB
+                                        </p>
+
+                                    </div>
+
+                                    <div class="rounded-md border border-slate-200 bg-slate-50 px-2.5 py-2">
+
+                                        <p class="text-[8px] font-bold uppercase tracking-wide text-slate-400">
+                                            Dokumen
+                                        </p>
+
+                                        <p class="mt-0.5 text-[10px] font-bold text-slate-700">
+                                            PDF
+                                        </p>
+
+                                    </div>
+
+                                    <div class="rounded-md border border-slate-200 bg-slate-50 px-2.5 py-2">
+
+                                        <p class="text-[8px] font-bold uppercase tracking-wide text-slate-400">
+                                            Gambar
+                                        </p>
+
+                                        <p class="mt-0.5 text-[10px] font-bold text-slate-700">
+                                            JPG / PNG → JPG
+                                        </p>
+
+                                    </div>
+
+                                </div>
 
                                 {{-- UPLOAD BOX --}}
 
                                 <label
                                     for="lampiran_file"
-                                    class="group relative flex min-h-[150px] cursor-pointer flex-col items-center justify-center rounded-md border-2 border-dashed border-slate-400 bg-slate-50 px-4 py-5 text-center transition hover:border-blue-400 hover:bg-blue-50"
+                                    id="uploadBox"
+                                    class="group relative flex min-h-[155px] cursor-pointer flex-col items-center justify-center rounded-md border-2 border-dashed border-slate-400 bg-slate-50 px-4 py-5 text-center transition hover:border-blue-400 hover:bg-blue-50"
                                 >
 
-                                    <div class="mb-2.5 flex h-10 w-10 items-center justify-center rounded-md border-2 border-blue-200 bg-blue-100 text-blue-600">
+                                    <div
+                                        id="uploadIcon"
+                                        class="mb-2.5 flex h-10 w-10 items-center justify-center rounded-md border-2 border-blue-200 bg-blue-100 text-blue-600"
+                                    >
 
                                         <svg
                                             class="h-5 w-5"
@@ -940,7 +971,6 @@
 
                                     </div>
 
-
                                     <span
                                         id="file-label-text"
                                         class="text-[11px] font-bold text-slate-700"
@@ -948,16 +978,16 @@
                                         Klik untuk memilih file baru
                                     </span>
 
-
-                                    <span class="mt-1 text-[9px] text-slate-500">
+                                    <span
+                                        id="file-sub-label"
+                                        class="mt-1 text-[9px] text-slate-500"
+                                    >
                                         PDF, JPG, JPEG, PNG
                                     </span>
-
 
                                     <span class="mt-1.5 rounded-full bg-blue-100 px-2 py-0.5 text-[8px] font-semibold text-blue-600">
                                         Maksimal 10 MB
                                     </span>
-
 
                                     <input
                                         type="file"
@@ -969,30 +999,21 @@
 
                                 </label>
 
-
                                 {{-- FILE INFO --}}
 
-                                <p
+                                <div
                                     id="file-info"
                                     class="mt-2 hidden rounded-md border border-emerald-200 bg-emerald-50 px-2.5 py-2 text-[9px] leading-relaxed text-emerald-700"
-                                ></p>
+                                ></div>
 
+                                {{-- COMPRESSION INFO --}}
 
-                                {{-- NOTE --}}
+                                <div
+                                    id="compression-info"
+                                    class="mt-2 hidden rounded-md border border-indigo-200 bg-indigo-50 px-2.5 py-2 text-[9px] leading-relaxed text-indigo-700"
+                                ></div>
 
-                                <div class="mt-2 rounded-md border border-slate-200 bg-slate-50 px-2.5 py-2">
-
-                                    <p class="text-[9px] leading-relaxed text-slate-500">
-
-                                        Tidak memilih file baru berarti
-                                        lampiran yang sekarang tetap dipertahankan.
-
-                                    </p>
-
-                                </div>
-
-
-                                {{-- ERROR --}}
+                                {{-- ERROR FILE --}}
 
                                 @error('lampiran_file')
 
@@ -1009,7 +1030,6 @@
                     </div>
 
                 </section>
-
 
                 {{-- =================================================
                      ERROR SUMMARY
@@ -1029,6 +1049,7 @@
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
+                                aria-hidden="true"
                             >
                                 <path
                                     stroke-linecap="round"
@@ -1038,13 +1059,11 @@
                                 />
                             </svg>
 
-
                             <div>
 
                                 <p class="font-bold">
                                     Terdapat kesalahan pada formulir.
                                 </p>
-
 
                                 <ul class="mt-1 list-inside list-disc space-y-0.5">
 
@@ -1068,13 +1087,11 @@
 
             </div>
 
-
             {{-- =================================================
-                 FOOTER AKSI
+                 FOOTER
             ================================================== --}}
 
             <div class="flex flex-col gap-2 border-t-2 border-slate-400 bg-slate-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-end">
-
 
                 {{-- BATAL --}}
 
@@ -1088,6 +1105,7 @@
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
+                        aria-hidden="true"
                     >
                         <path
                             stroke-linecap="round"
@@ -1100,7 +1118,6 @@
                     Batal
 
                 </a>
-
 
                 {{-- PERBARUI --}}
 
@@ -1126,7 +1143,6 @@
                         />
                     </svg>
 
-
                     <svg
                         id="submit-loading"
                         class="hidden h-3.5 w-3.5 animate-spin"
@@ -1150,7 +1166,6 @@
                         />
                     </svg>
 
-
                     <span id="submit-text">
                         Perbarui Surat Keluar
                     </span>
@@ -1165,72 +1180,6 @@
 
 </div>
 
-
-<style>
-    /*
-    |--------------------------------------------------------------------------
-    | INPUT
-    |--------------------------------------------------------------------------
-    */
-
-    .form-control-custom {
-        width: 100%;
-        min-height: 40px;
-        padding: .48rem .7rem;
-        background: #fff;
-        color: #334155;
-        border: 2px solid #94a3b8;
-        border-radius: .6rem;
-        outline: none;
-        font-size: .8rem;
-        line-height: 1.25;
-        transition:
-            border-color .15s ease,
-            background-color .15s ease,
-            box-shadow .15s ease;
-    }
-
-
-    .form-control-custom:hover {
-        border-color: #64748b;
-    }
-
-
-    .form-control-custom:focus {
-        border-color: #2563eb;
-        background: #fff;
-        box-shadow:
-            0 0 0 3px
-            rgba(37,99,235,.08);
-    }
-
-
-    .form-control-custom::placeholder {
-        color: #94a3b8;
-    }
-
-
-    .form-textarea {
-        min-height: 82px;
-        resize: vertical;
-    }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | RESPONSIVE
-    |--------------------------------------------------------------------------
-    */
-
-    @media (max-width: 640px) {
-
-        .form-control-custom {
-            min-height: 40px;
-        }
-    }
-</style>
-
-
 @push('scripts')
 
 <script>
@@ -1238,74 +1187,65 @@ document.addEventListener('DOMContentLoaded', function () {
 
     'use strict';
 
-
-    /* ============================================================
-       ELEMENT
-    ============================================================ */
+    /*
+    |--------------------------------------------------------------------------
+    | ELEMENT
+    |--------------------------------------------------------------------------
+    */
 
     const form =
-        document.getElementById(
-            'form-surat'
-        );
-
+        document.getElementById('form-surat');
 
     const fileInput =
-        document.getElementById(
-            'lampiran_file'
-        );
-
+        document.getElementById('lampiran_file');
 
     const fileLabelText =
-        document.getElementById(
-            'file-label-text'
-        );
+        document.getElementById('file-label-text');
 
+    const fileSubLabel =
+        document.getElementById('file-sub-label');
 
     const fileInfo =
-        document.getElementById(
-            'file-info'
-        );
+        document.getElementById('file-info');
 
+    const compressionInfo =
+        document.getElementById('compression-info');
+
+    const uploadBox =
+        document.getElementById('uploadBox');
+
+    const uploadIcon =
+        document.getElementById('uploadIcon');
+
+    const currentFileNote =
+        document.getElementById('current-file-note');
 
     const submitButton =
-        document.getElementById(
-            'submit-btn'
-        );
-
+        document.getElementById('submit-btn');
 
     const submitIcon =
-        document.getElementById(
-            'submit-icon'
-        );
-
+        document.getElementById('submit-icon');
 
     const submitLoading =
-        document.getElementById(
-            'submit-loading'
-        );
-
+        document.getElementById('submit-loading');
 
     const submitText =
-        document.getElementById(
-            'submit-text'
-        );
-
+        document.getElementById('submit-text');
 
     const tanggalSurat =
-        document.getElementById(
-            'tanggal_surat'
-        );
-
+        document.getElementById('tanggal_surat');
 
     const tanggalKeluar =
-        document.getElementById(
-            'tanggal_keluar'
-        );
+        document.getElementById('tanggal_keluar');
 
+    /*
+    |--------------------------------------------------------------------------
+    | KONFIGURASI
+    |--------------------------------------------------------------------------
+    */
 
     const MAX_FILE_SIZE =
         10 * 1024 * 1024;
-
 
     const ALLOWED_EXTENSIONS = [
         'pdf',
@@ -1314,21 +1254,75 @@ document.addEventListener('DOMContentLoaded', function () {
         'png'
     ];
 
+    let isSubmitting = false;
 
-    let isSubmitting =
-        false;
+    /*
+    |--------------------------------------------------------------------------
+    | FORMAT FILE SIZE
+    |--------------------------------------------------------------------------
+    */
 
+    function formatFileSize(bytes) {
 
-    /* ============================================================
-       RESET FILE
-    ============================================================ */
+        if (bytes < 1024) {
+            return bytes + ' B';
+        }
+
+        if (bytes < 1024 * 1024) {
+            return (
+                (bytes / 1024).toFixed(1) +
+                ' KB'
+            );
+        }
+
+        return (
+            (bytes / 1024 / 1024).toFixed(2) +
+            ' MB'
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | SHOW ALERT
+    |--------------------------------------------------------------------------
+    */
+
+    function showAlert(
+        icon,
+        title,
+        text
+    ) {
+
+        if (
+            typeof window.Swal !==
+            'undefined'
+        ) {
+
+            window.Swal.fire({
+                icon: icon,
+                title: title,
+                text: text,
+                confirmButtonText: 'Mengerti',
+                confirmButtonColor: '#059669'
+            });
+
+            return;
+        }
+
+        window.alert(text);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | RESET FILE
+    |--------------------------------------------------------------------------
+    */
 
     function resetFileInput() {
 
         if (fileInput) {
             fileInput.value = '';
         }
-
 
         if (fileLabelText) {
 
@@ -1345,108 +1339,168 @@ document.addEventListener('DOMContentLoaded', function () {
             );
         }
 
+        if (fileSubLabel) {
+
+            fileSubLabel.textContent =
+                'PDF, JPG, JPEG, PNG';
+
+            fileSubLabel.classList.remove(
+                'text-indigo-600',
+                'text-rose-600'
+            );
+
+            fileSubLabel.classList.add(
+                'text-slate-500'
+            );
+        }
 
         if (fileInfo) {
 
-            fileInfo.textContent =
-                '';
+            fileInfo.textContent = '';
+
+            fileInfo.classList.remove(
+                'border-rose-200',
+                'bg-rose-50',
+                'text-rose-700'
+            );
 
             fileInfo.classList.add(
+                'hidden',
+                'border-emerald-200',
+                'bg-emerald-50',
+                'text-emerald-700'
+            );
+        }
+
+        if (compressionInfo) {
+
+            compressionInfo.textContent = '';
+
+            compressionInfo.classList.add(
                 'hidden'
             );
         }
-    }
 
+        if (uploadBox) {
 
-    /* ============================================================
-       FILE SIZE
-    ============================================================ */
+            uploadBox.classList.remove(
+                'border-emerald-400',
+                'bg-emerald-50',
+                'border-rose-400',
+                'bg-rose-50'
+            );
 
-    function formatFileSize(
-        bytes
-    ) {
-
-        if (
-            bytes <
-            1024
-        ) {
-
-            return (
-                bytes +
-                ' B'
+            uploadBox.classList.add(
+                'border-slate-400',
+                'bg-slate-50'
             );
         }
 
+        if (uploadIcon) {
 
-        if (
-            bytes <
-            1024 * 1024
-        ) {
+            uploadIcon.classList.remove(
+                'border-emerald-300',
+                'bg-emerald-100',
+                'text-emerald-600',
+                'border-rose-300',
+                'bg-rose-100',
+                'text-rose-600'
+            );
 
-            return (
-                (
-                    bytes /
-                    1024
-                ).toFixed(1) +
-                ' KB'
+            uploadIcon.classList.add(
+                'border-blue-200',
+                'bg-blue-100',
+                'text-blue-600'
             );
         }
 
+        if (currentFileNote) {
 
-        return (
-            (
-                bytes /
-                1024 /
-                1024
-            ).toFixed(2) +
-            ' MB'
-        );
+            currentFileNote.innerHTML = `
+                <p class="text-[9px] leading-relaxed text-slate-500">
+                    Tidak memilih file baru berarti
+                    lampiran saat ini tetap dipertahankan.
+                </p>
+            `;
+        }
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | SHOW FILE ERROR
+    |--------------------------------------------------------------------------
+    */
 
-    /* ============================================================
-       ALERT
-    ============================================================ */
+    function showFileError(message) {
 
-    function showAlert(
-        icon,
-        title,
-        text
-    ) {
+        if (fileLabelText) {
 
-        if (
-            typeof window.Swal !==
-            'undefined'
-        ) {
+            fileLabelText.textContent =
+                'File tidak dapat digunakan';
 
-            window.Swal.fire({
+            fileLabelText.classList.remove(
+                'text-slate-700',
+                'text-blue-600'
+            );
 
-                icon,
+            fileLabelText.classList.add(
+                'text-rose-600'
+            );
+        }
 
-                title,
+        if (fileInfo) {
 
-                text,
+            fileInfo.classList.remove(
+                'hidden',
+                'border-emerald-200',
+                'bg-emerald-50',
+                'text-emerald-700'
+            );
 
-                confirmButtonText:
-                    'Mengerti',
+            fileInfo.classList.add(
+                'border-rose-200',
+                'bg-rose-50',
+                'text-rose-700'
+            );
 
-                confirmButtonColor:
-                    '#059669'
+            fileInfo.textContent =
+                message;
+        }
 
-            });
+        if (uploadBox) {
 
-        } else {
+            uploadBox.classList.remove(
+                'border-slate-400',
+                'bg-slate-50'
+            );
 
-            window.alert(
-                text
+            uploadBox.classList.add(
+                'border-rose-400',
+                'bg-rose-50'
+            );
+        }
+
+        if (uploadIcon) {
+
+            uploadIcon.classList.remove(
+                'border-blue-200',
+                'bg-blue-100',
+                'text-blue-600'
+            );
+
+            uploadIcon.classList.add(
+                'border-rose-300',
+                'bg-rose-100',
+                'text-rose-600'
             );
         }
     }
 
-
-    /* ============================================================
-       FILE CHANGE
-    ============================================================ */
+    /*
+    |--------------------------------------------------------------------------
+    | FILE CHANGE
+    |--------------------------------------------------------------------------
+    */
 
     fileInput?.addEventListener(
         'change',
@@ -1454,8 +1508,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (
                 !fileInput.files ||
-                fileInput.files.length ===
-                    0
+                fileInput.files.length === 0
             ) {
 
                 resetFileInput();
@@ -1463,20 +1516,20 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
-
             const file =
                 fileInput.files[0];
-
 
             const extension =
                 file.name
                     .split('.')
                     .pop()
-                    ?.toLowerCase() ||
-                '';
+                    ?.toLowerCase() || '';
 
-
-            /* FORMAT */
+            /*
+            |--------------------------------------------------------------------------
+            | VALIDASI EXTENSION
+            |--------------------------------------------------------------------------
+            */
 
             if (
                 !ALLOWED_EXTENSIONS.includes(
@@ -1486,39 +1539,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 resetFileInput();
 
-
-                if (fileLabelText) {
-
-                    fileLabelText.textContent =
-                        'Format file tidak didukung';
-
-                    fileLabelText.classList.remove(
-                        'text-slate-700',
-                        'text-blue-600'
-                    );
-
-                    fileLabelText.classList.add(
-                        'text-rose-600'
-                    );
-                }
-
-
-                if (fileInfo) {
-
-                    fileInfo.textContent =
-                        'Gunakan PDF, JPG, JPEG, atau PNG.';
-
-                    fileInfo.classList.remove(
-                        'hidden'
-                    );
-                }
-
+                showFileError(
+                    'Format file tidak didukung. Gunakan PDF, JPG, JPEG, atau PNG.'
+                );
 
                 return;
             }
 
-
-            /* SIZE */
+            /*
+            |--------------------------------------------------------------------------
+            | VALIDASI SIZE
+            |--------------------------------------------------------------------------
+            */
 
             if (
                 file.size >
@@ -1527,44 +1559,24 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 resetFileInput();
 
-
-                if (fileLabelText) {
-
-                    fileLabelText.textContent =
-                        'Ukuran file melebihi 10 MB';
-
-                    fileLabelText.classList.remove(
-                        'text-slate-700',
-                        'text-blue-600'
-                    );
-
-                    fileLabelText.classList.add(
-                        'text-rose-600'
-                    );
-                }
-
-
-                if (fileInfo) {
-
-                    fileInfo.textContent =
-                        'Silakan pilih file dengan ukuran maksimal 10 MB.';
-
-                    fileInfo.classList.remove(
-                        'hidden'
-                    );
-                }
-
+                showFileError(
+                    'Ukuran file melebihi batas 10 MB. Silakan pilih file yang lebih kecil.'
+                );
 
                 return;
             }
 
-
-            /* SUCCESS */
+            /*
+            |--------------------------------------------------------------------------
+            | FILE VALID
+            |--------------------------------------------------------------------------
+            */
 
             if (fileLabelText) {
 
                 fileLabelText.textContent =
-                    `File baru: ${file.name}`;
+                    'File baru: ' +
+                    file.name;
 
                 fileLabelText.classList.remove(
                     'text-slate-700',
@@ -1576,66 +1588,155 @@ document.addEventListener('DOMContentLoaded', function () {
                 );
             }
 
+            if (fileSubLabel) {
+
+                fileSubLabel.classList.remove(
+                    'text-slate-500',
+                    'text-rose-600'
+                );
+
+                fileSubLabel.classList.add(
+                    'text-indigo-600'
+                );
+
+                if (extension === 'pdf') {
+
+                    fileSubLabel.textContent =
+                        'PDF • Akan disimpan sebagai PDF';
+
+                } else {
+
+                    fileSubLabel.textContent =
+                        'Gambar • Akan dikompres menjadi JPG';
+                }
+            }
 
             if (fileInfo) {
 
-                fileInfo.textContent =
-                    `File siap digunakan • Ukuran: ${formatFileSize(file.size)}`;
-
                 fileInfo.classList.remove(
+                    'hidden',
+                    'border-rose-200',
+                    'bg-rose-50',
+                    'text-rose-700'
+                );
+
+                fileInfo.classList.add(
+                    'border-emerald-200',
+                    'bg-emerald-50',
+                    'text-emerald-700'
+                );
+
+                fileInfo.textContent =
+                    'File siap digunakan • Ukuran asli: ' +
+                    formatFileSize(file.size);
+            }
+
+            if (compressionInfo) {
+
+                compressionInfo.classList.remove(
                     'hidden'
+                );
+
+                if (
+                    extension === 'jpg' ||
+                    extension === 'jpeg' ||
+                    extension === 'png'
+                ) {
+
+                    compressionInfo.textContent =
+                        'Gambar akan diproses otomatis oleh server: ' +
+                        'resize bila diperlukan, dikompres bertahap, ' +
+                        'kemudian disimpan sebagai JPG.';
+
+                } else {
+
+                    compressionInfo.textContent =
+                        'PDF akan langsung disimpan sebagai PDF.';
+                }
+            }
+
+            if (currentFileNote) {
+
+                currentFileNote.innerHTML = `
+                    <p class="text-[9px] leading-relaxed text-blue-600">
+                        File baru dipilih.
+                        Lampiran lama akan diganti setelah proses
+                        update berhasil.
+                    </p>
+                `;
+            }
+
+            if (uploadBox) {
+
+                uploadBox.classList.remove(
+                    'border-slate-400',
+                    'bg-slate-50',
+                    'border-rose-400',
+                    'bg-rose-50'
+                );
+
+                uploadBox.classList.add(
+                    'border-emerald-400',
+                    'bg-emerald-50'
                 );
             }
 
+            if (uploadIcon) {
+
+                uploadIcon.classList.remove(
+                    'border-blue-200',
+                    'bg-blue-100',
+                    'text-blue-600',
+                    'border-rose-300',
+                    'bg-rose-100',
+                    'text-rose-600'
+                );
+
+                uploadIcon.classList.add(
+                    'border-emerald-300',
+                    'bg-emerald-100',
+                    'text-emerald-600'
+                );
+            }
         }
     );
 
-
-    /* ============================================================
-       SUBMIT
-    ============================================================ */
+    /*
+    |--------------------------------------------------------------------------
+    | SUBMIT
+    |--------------------------------------------------------------------------
+    */
 
     form?.addEventListener(
         'submit',
-        function (
-            event
-        ) {
+        function (event) {
 
-            if (
-                isSubmitting
-            ) {
+            if (isSubmitting) {
 
                 event.preventDefault();
 
                 return;
             }
 
-
-            const suratDate =
-                tanggalSurat?.value ||
-                '';
-
-
-            const keluarDate =
-                tanggalKeluar?.value ||
-                '';
-
-
             /*
             |--------------------------------------------------------------------------
-            | TANGGAL
+            | VALIDASI TANGGAL
             |--------------------------------------------------------------------------
             */
+
+            const suratDate =
+                tanggalSurat?.value || '';
+
+            const keluarDate =
+                tanggalKeluar?.value || '';
 
             if (
                 suratDate &&
                 keluarDate &&
-                keluarDate <
-                    suratDate
+                keluarDate < suratDate
             ) {
 
                 event.preventDefault();
-
 
                 showAlert(
                     'warning',
@@ -1643,35 +1744,29 @@ document.addEventListener('DOMContentLoaded', function () {
                     'Tanggal keluar tidak boleh lebih awal dari tanggal surat.'
                 );
 
-
                 return;
             }
 
-
             /*
             |--------------------------------------------------------------------------
-            | FILE
+            | VALIDASI FILE
             |--------------------------------------------------------------------------
             */
 
             if (
                 fileInput &&
                 fileInput.files &&
-                fileInput.files.length >
-                    0
+                fileInput.files.length > 0
             ) {
 
                 const file =
                     fileInput.files[0];
 
-
                 const extension =
                     file.name
                         .split('.')
                         .pop()
-                        ?.toLowerCase() ||
-                    '';
-
+                        ?.toLowerCase() || '';
 
                 if (
                     !ALLOWED_EXTENSIONS.includes(
@@ -1681,17 +1776,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     event.preventDefault();
 
-
                     showAlert(
                         'warning',
                         'Format file tidak didukung',
                         'Gunakan PDF, JPG, JPEG, atau PNG.'
                     );
 
-
                     return;
                 }
-
 
                 if (
                     file.size >
@@ -1700,41 +1792,65 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     event.preventDefault();
 
-
                     showAlert(
                         'warning',
                         'File terlalu besar',
                         'Ukuran lampiran maksimal 10 MB.'
                     );
 
-
                     return;
                 }
 
-            }
+                /*
+                |--------------------------------------------------------------------------
+                | INFORMASI SEBELUM UPDATE
+                |--------------------------------------------------------------------------
+                */
 
+                if (compressionInfo) {
+
+                    if (
+                        extension === 'jpg' ||
+                        extension === 'jpeg' ||
+                        extension === 'png'
+                    ) {
+
+                        compressionInfo.classList.remove(
+                            'hidden'
+                        );
+
+                        compressionInfo.textContent =
+                            'Sedang mengirim gambar. Server akan melakukan ' +
+                            'resize dan compression sebelum menyimpan file baru.';
+
+                    } else {
+
+                        compressionInfo.classList.remove(
+                            'hidden'
+                        );
+
+                        compressionInfo.textContent =
+                            'Sedang mengirim file PDF ke server.';
+                    }
+                }
+            }
 
             /*
             |--------------------------------------------------------------------------
-            | SUBMITTING
+            | SUBMIT LOCK
             |--------------------------------------------------------------------------
             */
 
-            isSubmitting =
-                true;
-
+            isSubmitting = true;
 
             if (submitButton) {
 
-                submitButton.disabled =
-                    true;
-
+                submitButton.disabled = true;
 
                 submitButton.classList.add(
                     'opacity-70'
                 );
             }
-
 
             if (submitIcon) {
 
@@ -1743,7 +1859,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 );
             }
 
-
             if (submitLoading) {
 
                 submitLoading.classList.remove(
@@ -1751,19 +1866,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 );
             }
 
-
             if (submitText) {
 
                 submitText.textContent =
                     'Memperbarui...';
             }
-
         }
     );
 
 });
 </script>
-
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 

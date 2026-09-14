@@ -176,7 +176,6 @@ class SuratKeluar extends Model
         Builder $query,
         array $filters = []
     ): Builder {
-
         /*
         |--------------------------------------------------------------------------
         | SEARCH
@@ -203,38 +202,32 @@ class SuratKeluar extends Model
                 ) use (
                     $keyword
                 ): void {
-
                     $q
                         ->where(
                             'nomor_surat',
                             'like',
                             $keyword
                         )
-
                         ->orWhere(
                             'perihal',
                             'like',
                             $keyword
                         )
-
                         ->orWhere(
                             'pengirim',
                             'like',
                             $keyword
                         )
-
                         ->orWhere(
                             'tujuan_surat',
                             'like',
                             $keyword
                         )
-
                         ->orWhere(
                             'ringkasan',
                             'like',
                             $keyword
                         )
-
                         ->orWhereHas(
                             'kategori',
                             function (
@@ -242,20 +235,17 @@ class SuratKeluar extends Model
                             ) use (
                                 $keyword
                             ): void {
-
                                 $kategori
                                     ->where(
                                         'nama_kategori',
                                         'like',
                                         $keyword
                                     )
-
                                     ->orWhere(
                                         'kode',
                                         'like',
                                         $keyword
                                     )
-
                                     ->orWhere(
                                         'sifat',
                                         'like',
@@ -263,7 +253,6 @@ class SuratKeluar extends Model
                                     );
                             }
                         )
-
                         ->orWhereHas(
                             'pembuat',
                             function (
@@ -271,20 +260,17 @@ class SuratKeluar extends Model
                             ) use (
                                 $keyword
                             ): void {
-
                                 $user
                                     ->where(
                                         'name',
                                         'like',
                                         $keyword
                                     )
-
                                     ->orWhere(
                                         'email',
                                         'like',
                                         $keyword
                                     )
-
                                     ->orWhere(
                                         'jabatan',
                                         'like',
@@ -292,7 +278,6 @@ class SuratKeluar extends Model
                                     );
                             }
                         )
-
                         ->orWhereHas(
                             'penandatangan',
                             function (
@@ -300,20 +285,17 @@ class SuratKeluar extends Model
                             ) use (
                                 $keyword
                             ): void {
-
                                 $user
                                     ->where(
                                         'name',
                                         'like',
                                         $keyword
                                     )
-
                                     ->orWhere(
                                         'email',
                                         'like',
                                         $keyword
                                     )
-
                                     ->orWhere(
                                         'jabatan',
                                         'like',
@@ -517,14 +499,18 @@ class SuratKeluar extends Model
             ?? null;
 
         $dariTanggal =
-            is_scalar($dariTanggal)
+            is_scalar(
+                $dariTanggal
+            )
                 ? trim(
                     (string) $dariTanggal
                 )
                 : '';
 
         $sampaiTanggal =
-            is_scalar($sampaiTanggal)
+            is_scalar(
+                $sampaiTanggal
+            )
                 ? trim(
                     (string) $sampaiTanggal
                 )
@@ -608,7 +594,6 @@ class SuratKeluar extends Model
         Builder $query,
         ?string $status
     ): Builder {
-
         if (
             $status === null ||
             trim($status) === ''
@@ -689,7 +674,7 @@ class SuratKeluar extends Model
     }
 
     /**
-     * Surat yang selesai.
+     * Surat yang sudah selesai.
      */
     public function scopeSelesai(
         Builder $query
@@ -802,6 +787,7 @@ class SuratKeluar extends Model
         return match (
             $this->status_normalized
         ) {
+
             'draft' =>
                 'Draft',
 
@@ -836,6 +822,7 @@ class SuratKeluar extends Model
         return match (
             $this->status_normalized
         ) {
+
             'draft' =>
                 'bg-slate-100 text-slate-700',
 
@@ -953,7 +940,6 @@ class SuratKeluar extends Model
     private static function validDate(
         mixed $value
     ): bool {
-
         if (
             $value === null
         ) {
@@ -970,12 +956,6 @@ class SuratKeluar extends Model
             trim(
                 (string) $value
             );
-
-        /*
-        |--------------------------------------------------------------------------
-        | REGEX YANG BENAR
-        |--------------------------------------------------------------------------
-        */
 
         if (
             !preg_match(

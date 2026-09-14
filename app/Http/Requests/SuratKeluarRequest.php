@@ -22,7 +22,6 @@ class SuratKeluarRequest extends FormRequest
         'jpg',
         'jpeg',
         'png',
-        'zip',
     ];
 
     private const ALLOWED_STATUSES = [
@@ -50,26 +49,39 @@ class SuratKeluarRequest extends FormRequest
 
         $role = '';
 
-        if (method_exists($user, 'normalizedRole')) {
-            $role = $user->normalizedRole();
-        } elseif (method_exists(User::class, 'normalizeRole')) {
-            $role = User::normalizeRole(
-                (string) (
-                    $user->role
-                    ?? $user->jabatan
-                    ?? ''
-                )
-            );
-        } else {
-            $role = strtolower(
-                trim(
+        if (
+            method_exists(
+                $user,
+                'normalizedRole'
+            )
+        ) {
+            $role =
+                $user->normalizedRole();
+        } elseif (
+            method_exists(
+                User::class,
+                'normalizeRole'
+            )
+        ) {
+            $role =
+                User::normalizeRole(
                     (string) (
                         $user->role
                         ?? $user->jabatan
                         ?? ''
                     )
-                )
-            );
+                );
+        } else {
+            $role =
+                strtolower(
+                    trim(
+                        (string) (
+                            $user->role
+                            ?? $user->jabatan
+                            ?? ''
+                        )
+                    )
+                );
 
             if ($role === 'staf') {
                 $role = 'staff';
@@ -101,27 +113,50 @@ class SuratKeluarRequest extends FormRequest
         $suratKeluarId = null;
 
         if (is_object($suratKeluar)) {
-            $suratKeluarId = $suratKeluar->id ?? null;
+            $suratKeluarId =
+                $suratKeluar->id ?? null;
         } elseif (is_numeric($suratKeluar)) {
-            $suratKeluarId = (int) $suratKeluar;
+            $suratKeluarId =
+                (int) $suratKeluar;
         }
 
         return [
+
+            /*
+            |--------------------------------------------------------------------------
+            | NOMOR SURAT
+            |--------------------------------------------------------------------------
+            */
 
             'nomor_surat' => [
                 'nullable',
                 'string',
                 'max:255',
+
                 Rule::unique(
                     'surat_keluars',
                     'nomor_surat'
-                )->ignore($suratKeluarId),
+                )->ignore(
+                    $suratKeluarId
+                ),
             ],
+
+            /*
+            |--------------------------------------------------------------------------
+            | TANGGAL SURAT
+            |--------------------------------------------------------------------------
+            */
 
             'tanggal_surat' => [
                 'required',
                 'date',
             ],
+
+            /*
+            |--------------------------------------------------------------------------
+            | TANGGAL KELUAR
+            |--------------------------------------------------------------------------
+            */
 
             'tanggal_keluar' => [
                 'required',
@@ -129,11 +164,26 @@ class SuratKeluarRequest extends FormRequest
                 'after_or_equal:tanggal_surat',
             ],
 
+            /*
+            |--------------------------------------------------------------------------
+            | TUJUAN / PENGIRIM
+            |--------------------------------------------------------------------------
+            |
+            | Field database tetap menggunakan nama pengirim.
+            |
+            */
+
             'pengirim' => [
                 'required',
                 'string',
                 'max:150',
             ],
+
+            /*
+            |--------------------------------------------------------------------------
+            | KATEGORI
+            |--------------------------------------------------------------------------
+            */
 
             'kategori_surat_id' => [
                 'required',
@@ -141,11 +191,23 @@ class SuratKeluarRequest extends FormRequest
                 'exists:kategori_surats,id',
             ],
 
+            /*
+            |--------------------------------------------------------------------------
+            | PERIHAL
+            |--------------------------------------------------------------------------
+            */
+
             'perihal' => [
                 'required',
                 'string',
                 'max:255',
             ],
+
+            /*
+            |--------------------------------------------------------------------------
+            | RINGKASAN
+            |--------------------------------------------------------------------------
+            */
 
             'ringkasan' => [
                 'nullable',
@@ -158,25 +220,43 @@ class SuratKeluarRequest extends FormRequest
             | LAMPIRAN
             |--------------------------------------------------------------------------
             |
-            | PDF / JPG / JPEG / PNG / ZIP
-            | Maksimal 10 MB.
+            | PDF:
+            | tetap PDF.
             |
-            | Tidak menggunakan mimetypes karena MIME browser/server
-            | dapat berbeda walaupun file sebenarnya valid.
+            | JPG/JPEG/PNG:
+            | dapat dikompres terlebih dahulu di browser.
+            |
+            | Batas maksimal tetap 10 MB.
             |
             */
 
             'lampiran_file' => [
                 'nullable',
                 'file',
-                'max:' . self::MAX_FILE_SIZE_KB,
-                'mimes:pdf,jpg,jpeg,png,zip',
+                'max:' .
+                    self::MAX_FILE_SIZE_KB,
+
+                'mimes:pdf,jpg,jpeg,png',
             ],
+
+            /*
+            |--------------------------------------------------------------------------
+            | STATUS
+            |--------------------------------------------------------------------------
+            */
 
             'status' => [
                 'nullable',
-                Rule::in(self::ALLOWED_STATUSES),
+                Rule::in(
+                    self::ALLOWED_STATUSES
+                ),
             ],
+
+            /*
+            |--------------------------------------------------------------------------
+            | PENANDATANGAN
+            |--------------------------------------------------------------------------
+            */
 
             'ditandatangani_oleh' => [
                 'nullable',
@@ -196,44 +276,72 @@ class SuratKeluarRequest extends FormRequest
     {
         $data = [];
 
-        $data['nomor_surat'] = $this->nullableString(
-            $this->input('nomor_surat')
-        );
+        $data['nomor_surat'] =
+            $this->nullableString(
+                $this->input(
+                    'nomor_surat'
+                )
+            );
 
-        $data['tanggal_surat'] = $this->nullableString(
-            $this->input('tanggal_surat')
-        );
+        $data['tanggal_surat'] =
+            $this->nullableString(
+                $this->input(
+                    'tanggal_surat'
+                )
+            );
 
-        $data['tanggal_keluar'] = $this->nullableString(
-            $this->input('tanggal_keluar')
-        );
+        $data['tanggal_keluar'] =
+            $this->nullableString(
+                $this->input(
+                    'tanggal_keluar'
+                )
+            );
 
-        $data['pengirim'] = $this->nullableString(
-            $this->input('pengirim')
-        );
+        $data['pengirim'] =
+            $this->nullableString(
+                $this->input(
+                    'pengirim'
+                )
+            );
 
-        $data['kategori_surat_id'] = $this->nullableInteger(
-            $this->input('kategori_surat_id')
-        );
+        $data['kategori_surat_id'] =
+            $this->nullableInteger(
+                $this->input(
+                    'kategori_surat_id'
+                )
+            );
 
-        $data['perihal'] = $this->nullableString(
-            $this->input('perihal')
-        );
+        $data['perihal'] =
+            $this->nullableString(
+                $this->input(
+                    'perihal'
+                )
+            );
 
-        $data['ringkasan'] = $this->nullableString(
-            $this->input('ringkasan')
-        );
+        $data['ringkasan'] =
+            $this->nullableString(
+                $this->input(
+                    'ringkasan'
+                )
+            );
 
-        $data['status'] = $this->normalizeStatus(
-            $this->input('status')
-        );
+        $data['status'] =
+            $this->normalizeStatus(
+                $this->input(
+                    'status'
+                )
+            );
 
         $data['ditandatangani_oleh'] =
             $this->nullableInteger(
-                $this->input('ditandatangani_oleh')
+                $this->input(
+                    'ditandatangani_oleh'
+                )
             );
 
-        $this->merge($data);
+        $this->merge(
+            $data
+        );
     }
 
     /*
@@ -246,12 +354,21 @@ class SuratKeluarRequest extends FormRequest
         Validator $validator
     ): void {
         $validator->after(
-            function (Validator $validator): void {
-
-                $file = $this->file('lampiran_file');
+            function (
+                Validator $validator
+            ): void {
+                $file =
+                    $this->file(
+                        'lampiran_file'
+                    );
 
                 /*
-                | Edit tanpa mengganti file
+                |--------------------------------------------------------------------------
+                | Tidak ada file
+                |--------------------------------------------------------------------------
+                |
+                | Pada halaman edit, file lama boleh tetap dipakai.
+                |
                 */
 
                 if (!$file) {
@@ -259,34 +376,43 @@ class SuratKeluarRequest extends FormRequest
                 }
 
                 /*
-                | Cek upload PHP
+                |--------------------------------------------------------------------------
+                | CEK UPLOAD PHP
+                |--------------------------------------------------------------------------
                 */
 
                 if (!$file->isValid()) {
-                    $validator->errors()->add(
-                        'lampiran_file',
-                        $this->getUploadErrorMessage(
-                            $file->getError()
-                        )
-                    );
+                    $validator
+                        ->errors()
+                        ->add(
+                            'lampiran_file',
+                            $this->getUploadErrorMessage(
+                                $file->getError()
+                            )
+                        );
 
                     return;
                 }
 
                 /*
-                | Cek ukuran
+                |--------------------------------------------------------------------------
+                | CEK UKURAN
+                |--------------------------------------------------------------------------
                 */
 
-                $fileSize = $file->getSize();
+                $fileSize =
+                    $file->getSize();
 
                 if (
                     $fileSize === false ||
                     $fileSize <= 0
                 ) {
-                    $validator->errors()->add(
-                        'lampiran_file',
-                        'Ukuran file tidak dapat dibaca.'
-                    );
+                    $validator
+                        ->errors()
+                        ->add(
+                            'lampiran_file',
+                            'Ukuran file tidak dapat dibaca.'
+                        );
 
                     return;
                 }
@@ -295,23 +421,35 @@ class SuratKeluarRequest extends FormRequest
                     $fileSize >
                     self::MAX_FILE_SIZE_KB * 1024
                 ) {
-                    $validator->errors()->add(
-                        'lampiran_file',
-                        'Ukuran file lampiran maksimal 10 MB.'
-                    );
+                    $validator
+                        ->errors()
+                        ->add(
+                            'lampiran_file',
+                            'Ukuran file lampiran maksimal 10 MB.'
+                        );
 
                     return;
                 }
 
                 /*
-                | Cek extension asli
+                |--------------------------------------------------------------------------
+                | CEK EXTENSION
+                |--------------------------------------------------------------------------
                 */
 
-                $extension = strtolower(
-                    trim(
-                        (string) $file->getClientOriginalExtension()
-                    )
-                );
+                $extension =
+                    strtolower(
+                        trim(
+                            (string) $file
+                                ->getClientOriginalExtension()
+                        )
+                    );
+
+                if (
+                    $extension === 'jpeg'
+                ) {
+                    $extension = 'jpg';
+                }
 
                 if (
                     !in_array(
@@ -320,11 +458,160 @@ class SuratKeluarRequest extends FormRequest
                         true
                     )
                 ) {
-                    $validator->errors()->add(
-                        'lampiran_file',
-                        'Format file tidak didukung. ' .
-                        'Gunakan PDF, JPG, JPEG, PNG, atau ZIP.'
+                    $validator
+                        ->errors()
+                        ->add(
+                            'lampiran_file',
+                            'Format file tidak didukung. ' .
+                            'Gunakan PDF, JPG, JPEG, atau PNG.'
+                        );
+
+                    return;
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | CEK SIGNATURE FILE
+                |--------------------------------------------------------------------------
+                |
+                | Ini menambah keamanan agar extension tidak dipalsukan.
+                |
+                */
+
+                $realPath =
+                    $file->getRealPath();
+
+                if (
+                    !$realPath ||
+                    !is_readable($realPath)
+                ) {
+                    $validator
+                        ->errors()
+                        ->add(
+                            'lampiran_file',
+                            'File upload tidak dapat dibaca oleh server.'
+                        );
+
+                    return;
+                }
+
+                $handle =
+                    fopen(
+                        $realPath,
+                        'rb'
                     );
+
+                if ($handle === false) {
+                    $validator
+                        ->errors()
+                        ->add(
+                            'lampiran_file',
+                            'File upload tidak dapat dibuka oleh server.'
+                        );
+
+                    return;
+                }
+
+                $header =
+                    fread(
+                        $handle,
+                        16
+                    );
+
+                fclose(
+                    $handle
+                );
+
+                if (
+                    $header === false ||
+                    $header === ''
+                ) {
+                    $validator
+                        ->errors()
+                        ->add(
+                            'lampiran_file',
+                            'File upload kosong atau tidak valid.'
+                        );
+
+                    return;
+                }
+
+                $isPdf =
+                    str_starts_with(
+                        $header,
+                        '%PDF'
+                    );
+
+                $isJpeg =
+                    str_starts_with(
+                        $header,
+                        "\xFF\xD8\xFF"
+                    );
+
+                $isPng =
+                    str_starts_with(
+                        $header,
+                        "\x89PNG\r\n\x1a\n"
+                    );
+
+                /*
+                |--------------------------------------------------------------------------
+                | PDF
+                |--------------------------------------------------------------------------
+                */
+
+                if (
+                    $extension === 'pdf' &&
+                    !$isPdf
+                ) {
+                    $validator
+                        ->errors()
+                        ->add(
+                            'lampiran_file',
+                            'File PDF tidak valid.'
+                        );
+
+                    return;
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | JPG / JPEG
+                |--------------------------------------------------------------------------
+                */
+
+                if (
+                    $extension === 'jpg' &&
+                    !$isJpeg
+                ) {
+                    $validator
+                        ->errors()
+                        ->add(
+                            'lampiran_file',
+                            'File JPG/JPEG tidak valid.'
+                        );
+
+                    return;
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | PNG
+                |--------------------------------------------------------------------------
+                */
+
+                if (
+                    $extension === 'png' &&
+                    !$isPng
+                ) {
+                    $validator
+                        ->errors()
+                        ->add(
+                            'lampiran_file',
+                            'File PNG tidak valid.'
+                        );
+
+                    return;
                 }
             }
         );
@@ -343,7 +630,10 @@ class SuratKeluarRequest extends FormRequest
             return null;
         }
 
-        $value = trim((string) $value);
+        $value =
+            trim(
+                (string) $value
+            );
 
         return $value !== ''
             ? $value
@@ -370,7 +660,8 @@ class SuratKeluarRequest extends FormRequest
             return null;
         }
 
-        $value = (int) $value;
+        $value =
+            (int) $value;
 
         return $value > 0
             ? $value
@@ -390,9 +681,12 @@ class SuratKeluarRequest extends FormRequest
             return 'draft';
         }
 
-        $status = strtolower(
-            trim((string) $status)
-        );
+        $status =
+            strtolower(
+                trim(
+                    (string) $status
+                )
+            );
 
         if ($status === '') {
             return 'draft';
@@ -439,7 +733,8 @@ class SuratKeluarRequest extends FormRequest
 
             default =>
                 'File gagal diupload oleh PHP. ' .
-                'Kode error: ' . $error,
+                'Kode error: ' .
+                $error,
         };
     }
 
@@ -514,7 +809,7 @@ class SuratKeluarRequest extends FormRequest
                 'Lampiran harus berupa file yang valid.',
 
             'lampiran_file.mimes' =>
-                'Lampiran hanya boleh berupa PDF, JPG, JPEG, PNG, atau ZIP.',
+                'Lampiran hanya boleh berupa PDF, JPG, JPEG, atau PNG.',
 
             'lampiran_file.max' =>
                 'Ukuran file lampiran maksimal 10 MB.',

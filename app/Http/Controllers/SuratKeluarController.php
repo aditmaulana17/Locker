@@ -41,8 +41,13 @@ class SuratKeluarController extends Controller
         'png',
     ];
 
-    private const MAX_FILE_SIZE =
-        10 * 1024 * 1024;
+    /*
+    |--------------------------------------------------------------------------
+    | MAKSIMAL FILE
+    |--------------------------------------------------------------------------
+    */
+
+    private const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
     /*
     |--------------------------------------------------------------------------
@@ -89,16 +94,14 @@ class SuratKeluarController extends Controller
     {
         $this->ensureUserAuthenticated();
 
-        if (
-            !in_array(
-                $this->userRole(),
-                [
-                    'admin',
-                    'pimpinan',
-                ],
-                true
-            )
-        ) {
+        if (!in_array(
+            $this->userRole(),
+            [
+                'admin',
+                'pimpinan',
+            ],
+            true
+        )) {
             abort(
                 403,
                 'Anda tidak memiliki hak akses untuk mengelola surat keluar.'
@@ -121,16 +124,19 @@ class SuratKeluarController extends Controller
             )
         );
 
-        return $status === 'draf'
-            ? 'draft'
-            : $status;
+        if ($status === 'draf') {
+            return 'draft';
+        }
+
+        return $status;
     }
 
     private function getValidStatus(
         ?string $status
     ): string {
-        $status =
-            $this->normalizeStatus($status);
+        $status = $this->normalizeStatus(
+            $status
+        );
 
         return in_array(
             $status,
@@ -143,24 +149,19 @@ class SuratKeluarController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | QUERY SURAT KELUAR
+    | BUILD FILTERED QUERY
     |--------------------------------------------------------------------------
     |
-    | Semua filter halaman Surat Keluar dipusatkan di sini.
+    | Query ini digunakan bersama oleh halaman index dan export.
     |
     | Filter:
     | - search
     | - kategori_id
+    | - kategori_surat_id
     | - status
     | - dari_tanggal
     | - sampai_tanggal
     |
-    | Method ini dapat digunakan oleh:
-    | - index
-    | - export Excel
-    | - export PDF
-    |
-    |--------------------------------------------------------------------------
     */
 
     public function buildFilteredQuery(
@@ -195,7 +196,6 @@ class SuratKeluarController extends Controller
                 ) use (
                     $keyword
                 ): void {
-
                     $q
                         ->where(
                             'nomor_surat',
@@ -217,6 +217,11 @@ class SuratKeluarController extends Controller
                             'like',
                             $keyword
                         )
+                        ->orWhere(
+                            'pengirim',
+                            'like',
+                            $keyword
+                        )
                         ->orWhereHas(
                             'kategori',
                             function (
@@ -224,7 +229,6 @@ class SuratKeluarController extends Controller
                             ) use (
                                 $keyword
                             ): void {
-
                                 $kategori
                                     ->where(
                                         'nama_kategori',
@@ -250,7 +254,6 @@ class SuratKeluarController extends Controller
                             ) use (
                                 $keyword
                             ): void {
-
                                 $user
                                     ->where(
                                         'name',
@@ -276,7 +279,6 @@ class SuratKeluarController extends Controller
                             ) use (
                                 $keyword
                             ): void {
-
                                 $user
                                     ->where(
                                         'name',
@@ -301,7 +303,7 @@ class SuratKeluarController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | FILTER KATEGORI
+        | KATEGORI
         |--------------------------------------------------------------------------
         */
 
@@ -352,7 +354,7 @@ class SuratKeluarController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | FILTER STATUS
+        | STATUS
         |--------------------------------------------------------------------------
         */
 
@@ -408,7 +410,7 @@ class SuratKeluarController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | FILTER TANGGAL
+        | TANGGAL
         |--------------------------------------------------------------------------
         */
 
@@ -435,12 +437,6 @@ class SuratKeluarController extends Controller
             $this->isValidDate(
                 $sampaiTanggal
             );
-
-        /*
-        |--------------------------------------------------------------------------
-        | TUKAR TANGGAL JIKA TERBALIK
-        |--------------------------------------------------------------------------
-        */
 
         if (
             $validDariTanggal &&
@@ -486,22 +482,10 @@ class SuratKeluarController extends Controller
     ) {
         $this->ensureUserAuthenticated();
 
-        /*
-        |--------------------------------------------------------------------------
-        | Gunakan query yang sama dengan export
-        |--------------------------------------------------------------------------
-        */
-
         $query =
             $this->buildFilteredQuery(
                 $request
             );
-
-        /*
-        |--------------------------------------------------------------------------
-        | SORTING
-        |--------------------------------------------------------------------------
-        */
 
         $suratKeluars = $query
             ->orderByRaw(
@@ -518,12 +502,6 @@ class SuratKeluarController extends Controller
             )
             ->paginate(10)
             ->withQueryString();
-
-        /*
-        |--------------------------------------------------------------------------
-        | KATEGORI
-        |--------------------------------------------------------------------------
-        */
 
         $kategoris =
             KategoriSurat::query()
@@ -608,6 +586,14 @@ class SuratKeluarController extends Controller
             |--------------------------------------------------------------------------
             | UPLOAD LAMPIRAN
             |--------------------------------------------------------------------------
+            |
+            | PDF:
+            | tetap PDF
+            |
+            | JPG/JPEG/PNG:
+            | normalnya sudah dikompres oleh browser
+            | sebelum dikirim ke server.
+            |
             */
 
             if (
@@ -658,9 +644,7 @@ class SuratKeluarController extends Controller
                     'success',
                     'Surat keluar berhasil ditambahkan.'
                 );
-
         } catch (Throwable $e) {
-
             /*
             |--------------------------------------------------------------------------
             | HAPUS FILE JIKA DATABASE GAGAL
@@ -807,7 +791,7 @@ class SuratKeluarController extends Controller
         try {
             /*
             |--------------------------------------------------------------------------
-            | UPLOAD FILE BARU
+            | FILE BARU
             |--------------------------------------------------------------------------
             */
 
@@ -825,7 +809,6 @@ class SuratKeluarController extends Controller
 
                 $data['lampiran_file'] =
                     $newAttachment;
-
             } else {
                 unset(
                     $data['lampiran_file']
@@ -861,7 +844,7 @@ class SuratKeluarController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | ACTIVITY LOG
+            | LOG
             |--------------------------------------------------------------------------
             */
 
@@ -880,9 +863,7 @@ class SuratKeluarController extends Controller
                     'success',
                     'Surat keluar berhasil diperbarui.'
                 );
-
         } catch (Throwable $e) {
-
             /*
             |--------------------------------------------------------------------------
             | HAPUS FILE BARU JIKA GAGAL
@@ -954,7 +935,7 @@ class SuratKeluarController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | HAPUS LAMPIRAN
+            | HAPUS LAMPIRAN DARI STORAGE
             |--------------------------------------------------------------------------
             */
 
@@ -985,9 +966,7 @@ class SuratKeluarController extends Controller
                     'success',
                     'Surat keluar berhasil dipindahkan ke sampah.'
                 );
-
         } catch (Throwable $e) {
-
             Log::error(
                 'Gagal menghapus surat keluar.',
                 [
@@ -1034,7 +1013,7 @@ class SuratKeluarController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | URL EXTERNAL
+        | EXTERNAL URL
         |--------------------------------------------------------------------------
         */
 
@@ -1058,29 +1037,14 @@ class SuratKeluarController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | CEK FILE
-            |--------------------------------------------------------------------------
-            */
-
-            if (
-                !$disk->exists(
-                    $path
-                )
-            ) {
-                abort(
-                    404,
-                    'File lampiran tidak ditemukan di storage.'
-                );
-            }
-
-            /*
-            |--------------------------------------------------------------------------
             | SUPABASE PRIVATE URL
             |--------------------------------------------------------------------------
+            |
+            | Tidak menggunakan exists() sebagai syarat.
+            |
             */
 
             if (
-                $diskName === 'supabase' &&
                 method_exists(
                     $disk,
                     'temporaryUrl'
@@ -1093,12 +1057,12 @@ class SuratKeluarController extends Controller
                             now()->addMinutes(10)
                         );
 
-                    return redirect()->away(
-                        $temporaryUrl
-                    );
-
+                    if ($temporaryUrl) {
+                        return redirect()->away(
+                            $temporaryUrl
+                        );
+                    }
                 } catch (Throwable $e) {
-
                     Log::warning(
                         'Gagal membuat temporary URL surat keluar.',
                         [
@@ -1133,7 +1097,6 @@ class SuratKeluarController extends Controller
                 function () use (
                     $stream
                 ): void {
-
                     fpassthru(
                         $stream
                     );
@@ -1162,9 +1125,7 @@ class SuratKeluarController extends Controller
                         'private, max-age=300',
                 ]
             );
-
         } catch (Throwable $e) {
-
             Log::error(
                 'Gagal preview lampiran surat keluar.',
                 [
@@ -1287,7 +1248,13 @@ class SuratKeluarController extends Controller
             return 'supabase';
         }
 
-        return $disk;
+        if ($disk !== 'supabase') {
+            throw new RuntimeException(
+                'FILESYSTEM_DISK harus diset ke "supabase".'
+            );
+        }
+
+        return 'supabase';
     }
 
     private function storage(): FilesystemAdapter
@@ -1299,19 +1266,21 @@ class SuratKeluarController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | UPLOAD FILE
+    | STORE UPLOADED FILE
     |--------------------------------------------------------------------------
+    |
+    | File dari browser sudah bisa berupa hasil kompresi.
+    |
+    | PDF  -> tetap PDF
+    | JPG  -> tetap JPG
+    | JPEG -> disimpan sebagai JPG
+    | PNG  -> diterima sebagai PNG jika dikirim langsung
+    |
     */
 
     private function storeUploadedFile(
         ?UploadedFile $file
     ): string {
-        /*
-        |--------------------------------------------------------------------------
-        | CEK FILE
-        |--------------------------------------------------------------------------
-        */
-
         if (!$file) {
             throw new RuntimeException(
                 'File lampiran tidak ditemukan.'
@@ -1320,7 +1289,7 @@ class SuratKeluarController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | CEK UPLOAD PHP
+        | VALIDASI UPLOAD PHP
         |--------------------------------------------------------------------------
         */
 
@@ -1334,7 +1303,7 @@ class SuratKeluarController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | CEK UKURAN
+        | VALIDASI UKURAN
         |--------------------------------------------------------------------------
         */
 
@@ -1373,9 +1342,7 @@ class SuratKeluarController extends Controller
                 )
             );
 
-        if (
-            $extension === 'jpeg'
-        ) {
+        if ($extension === 'jpeg') {
             $extension = 'jpg';
         }
 
@@ -1394,7 +1361,7 @@ class SuratKeluarController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | FILE TEMPORARY
+        | PATH TEMPORARY
         |--------------------------------------------------------------------------
         */
 
@@ -1412,7 +1379,7 @@ class SuratKeluarController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | BACA SIGNATURE
+        | SIGNATURE
         |--------------------------------------------------------------------------
         */
 
@@ -1509,20 +1476,20 @@ class SuratKeluarController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | MIME
+        | MIME TYPE
         |--------------------------------------------------------------------------
         */
 
         $mimeType =
             match (true) {
-                $isPng =>
-                    'image/png',
+                $isPdf =>
+                    'application/pdf',
 
                 $isJpeg =>
                     'image/jpeg',
 
-                $isPdf =>
-                    'application/pdf',
+                $isPng =>
+                    'image/png',
 
                 default =>
                     null,
@@ -1536,7 +1503,63 @@ class SuratKeluarController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | FILE NAME
+        | BACA BINARY
+        |--------------------------------------------------------------------------
+        */
+
+        $contents =
+            file_get_contents(
+                $realPath
+            );
+
+        if (
+            $contents === false ||
+            $contents === ''
+        ) {
+            throw new RuntimeException(
+                'Gagal membaca isi file upload.'
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | VALIDASI UKURAN FINAL
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            strlen($contents) >
+            self::MAX_FILE_SIZE
+        ) {
+            throw new RuntimeException(
+                'File hasil upload melebihi batas 10 MB.'
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | NORMALISASI EXTENSION
+        |--------------------------------------------------------------------------
+        */
+
+        if ($isJpeg) {
+            $extension = 'jpg';
+            $mimeType = 'image/jpeg';
+        }
+
+        if ($isPdf) {
+            $extension = 'pdf';
+            $mimeType = 'application/pdf';
+        }
+
+        if ($isPng) {
+            $extension = 'png';
+            $mimeType = 'image/png';
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | NAMA FILE
         |--------------------------------------------------------------------------
         */
 
@@ -1554,90 +1577,61 @@ class SuratKeluarController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | DIRECTORY
+        | PATH
         |--------------------------------------------------------------------------
         */
 
-        $directory =
-            'lampiran/surat_keluar';
+        $path =
+            'lampiran/surat_keluar/' .
+            $fileName;
 
         /*
         |--------------------------------------------------------------------------
-        | STORAGE OPTIONS
-        |--------------------------------------------------------------------------
-        */
-
-        $options = [
-            'ContentType' =>
-                $mimeType,
-        ];
-
-        if (
-            $this->getStorageDisk() ===
-            'supabase'
-        ) {
-            $options['visibility'] =
-                'private';
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | SIMPAN FILE
+        | SIMPAN KE SUPABASE
         |--------------------------------------------------------------------------
         */
 
         try {
             $disk =
-                $this->storage();
-
-            $savedPath =
-                $disk->putFileAs(
-                    $directory,
-                    $file,
-                    $fileName,
-                    $options
+                Storage::disk(
+                    'supabase'
                 );
 
-            if (
-                $savedPath === false ||
-                $savedPath === null ||
-                $savedPath === ''
-            ) {
-                throw new RuntimeException(
-                    'File gagal disimpan ke storage.'
+            $saved =
+                $disk->put(
+                    $path,
+                    $contents,
+                    [
+                        'visibility' =>
+                            'private',
+
+                        'ContentType' =>
+                            $mimeType,
+                    ]
                 );
-            }
 
             /*
             |--------------------------------------------------------------------------
-            | VERIFIKASI STORAGE
+            | CEK HASIL UPLOAD
             |--------------------------------------------------------------------------
             */
 
-            if (
-                !$disk->exists(
-                    $savedPath
-                )
-            ) {
+            if (!$saved) {
                 throw new RuntimeException(
-                    'File berhasil diproses tetapi tidak ditemukan di storage.'
+                    'Supabase menolak penyimpanan file.'
                 );
             }
 
-            return $savedPath;
-
+            return $path;
         } catch (Throwable $e) {
-
             Log::error(
-                'Gagal menyimpan file surat keluar.',
+                'Gagal menyimpan file surat keluar ke Supabase.',
                 [
                     'message' =>
                         $e->getMessage(),
 
                     'path' =>
-                        $directory .
-                        '/' .
-                        $fileName,
+                        $path,
 
                     'extension' =>
                         $extension,
@@ -1646,15 +1640,15 @@ class SuratKeluarController extends Controller
                         $mimeType,
 
                     'size' =>
-                        $fileSize,
+                        strlen($contents),
 
                     'disk' =>
-                        $this->getStorageDisk(),
+                        'supabase',
                 ]
             );
 
             throw new RuntimeException(
-                'Gagal menyimpan file ke storage: ' .
+                'Gagal menyimpan file ke Supabase: ' .
                 $e->getMessage(),
                 previous: $e
             );
@@ -1696,6 +1690,12 @@ class SuratKeluarController extends Controller
             $disk =
                 $this->storage();
 
+            /*
+            |--------------------------------------------------------------------------
+            | exists() hanya untuk proses DELETE.
+            |--------------------------------------------------------------------------
+            */
+
             if (
                 $disk->exists(
                     $path
@@ -1705,9 +1705,7 @@ class SuratKeluarController extends Controller
                     $path
                 );
             }
-
         } catch (Throwable $e) {
-
             Log::warning(
                 'Gagal menghapus lampiran surat keluar.',
                 [
@@ -1865,9 +1863,7 @@ class SuratKeluarController extends Controller
                     $description
                 );
             }
-
         } catch (Throwable $e) {
-
             Log::warning(
                 'Gagal mencatat Activity Log surat keluar.',
                 [
