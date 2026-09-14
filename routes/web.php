@@ -46,7 +46,6 @@ Route::middleware('guest')->group(function () {
         [LoginController::class, 'login']
     )->name('login.attempt');
 
-
     /*
     |--------------------------------------------------------------------------
     | REGISTER
@@ -96,7 +95,6 @@ Route::middleware('auth')->group(function () {
         [DashboardController::class, 'index']
     )->name('dashboard');
 
-
     /*
     |--------------------------------------------------------------------------
     | ADMIN ONLY - SYSTEM
@@ -123,7 +121,6 @@ Route::middleware('auth')->group(function () {
             }
         )->name('clear-cache');
 
-
         /*
         |--------------------------------------------------------------------------
         | STORAGE LINK
@@ -145,7 +142,8 @@ Route::middleware('auth')->group(function () {
 
                     return response()->json([
                         'status' => 'error',
-                        'message' => 'Gagal membuat storage link: ' .
+                        'message' =>
+                            'Gagal membuat storage link: ' .
                             $e->getMessage(),
                     ], 500);
                 }
@@ -153,39 +151,30 @@ Route::middleware('auth')->group(function () {
         )->name('link-storage');
     });
 
-
     /*
     |--------------------------------------------------------------------------
     | SURAT MASUK
     |--------------------------------------------------------------------------
-    |
-    | Struktur route:
-    |
-    | GET    /surat-masuk
-    | POST   /surat-masuk
-    | GET    /surat-masuk/create
-    | GET    /surat-masuk/{id}
-    | GET    /surat-masuk/{id}/edit
-    | PUT    /surat-masuk/{id}
-    | DELETE /surat-masuk/{id}
-    |
-    | Route statis dan route khusus diletakkan lebih dahulu.
-    | Route parameter {suratMasuk} diletakkan paling bawah.
-    |
     */
-
 
     /*
     |--------------------------------------------------------------------------
     | SURAT MASUK - ADMIN / PIMPINAN
     |--------------------------------------------------------------------------
+    |
+    | Admin dan Pimpinan:
+    | - dapat membuat surat
+    | - dapat mengubah surat
+    | - dapat menghapus surat
+    | - dapat mengirim disposisi
+    |
     */
 
     Route::middleware('role:admin,pimpinan')->group(function () {
 
         /*
         |--------------------------------------------------------------------------
-        | CREATE SURAT MASUK
+        | CREATE
         |--------------------------------------------------------------------------
         */
 
@@ -194,10 +183,9 @@ Route::middleware('auth')->group(function () {
             [SuratMasukController::class, 'create']
         )->name('surat-masuk.create');
 
-
         /*
         |--------------------------------------------------------------------------
-        | STORE SURAT MASUK
+        | STORE
         |--------------------------------------------------------------------------
         */
 
@@ -206,10 +194,9 @@ Route::middleware('auth')->group(function () {
             [SuratMasukController::class, 'store']
         )->name('surat-masuk.store');
 
-
         /*
         |--------------------------------------------------------------------------
-        | EDIT SURAT MASUK
+        | EDIT
         |--------------------------------------------------------------------------
         */
 
@@ -218,10 +205,9 @@ Route::middleware('auth')->group(function () {
             [SuratMasukController::class, 'edit']
         )->name('surat-masuk.edit');
 
-
         /*
         |--------------------------------------------------------------------------
-        | UPDATE SURAT MASUK
+        | UPDATE
         |--------------------------------------------------------------------------
         */
 
@@ -230,10 +216,9 @@ Route::middleware('auth')->group(function () {
             [SuratMasukController::class, 'update']
         )->name('surat-masuk.update');
 
-
         /*
         |--------------------------------------------------------------------------
-        | DELETE SURAT MASUK
+        | DELETE
         |--------------------------------------------------------------------------
         */
 
@@ -242,38 +227,50 @@ Route::middleware('auth')->group(function () {
             [SuratMasukController::class, 'destroy']
         )->name('surat-masuk.destroy');
 
-
         /*
         |--------------------------------------------------------------------------
-        | STORE DISPOSISI
+        | DISPOSISI LANGSUNG
         |--------------------------------------------------------------------------
-        |
-        | POST:
-        | /surat-masuk/{suratMasuk}/disposisi
-        |
-        | Ditangani oleh:
-        | SuratMasukController@storeDisposisi
-        |
         */
 
         Route::post(
             'surat-masuk/{suratMasuk}/disposisi',
             [SuratMasukController::class, 'storeDisposisi']
         )->name('surat-masuk.disposisi.store');
-    });
 
+        /*
+        |--------------------------------------------------------------------------
+        | CREATE DISPOSISI
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            'surat-masuk/{suratMasuk}/disposisi/create',
+            [DisposisiController::class, 'create']
+        )->name('disposisi.create');
+    });
 
     /*
     |--------------------------------------------------------------------------
     | SURAT MASUK - ADMIN / PIMPINAN / STAFF
     |--------------------------------------------------------------------------
+    |
+    | Semua role dapat membuka route.
+    |
+    | Pembatasan data dilakukan di:
+    | SuratMasukController@index
+    | SuratMasukController@show
+    |
+    | Staff hanya mendapatkan:
+    | surat yang memiliki disposisi kepadanya.
+    |
     */
 
     Route::middleware('role:admin,pimpinan,staff')->group(function () {
 
         /*
         |--------------------------------------------------------------------------
-        | INDEX SURAT MASUK
+        | INDEX
         |--------------------------------------------------------------------------
         */
 
@@ -282,21 +279,16 @@ Route::middleware('auth')->group(function () {
             [SuratMasukController::class, 'index']
         )->name('surat-masuk.index');
 
-
         /*
         |--------------------------------------------------------------------------
         | PREVIEW LAMPIRAN
         |--------------------------------------------------------------------------
-        |
-        | File diambil dari Supabase menggunakan temporary URL.
-        |
         */
 
         Route::get(
             'surat-masuk/{suratMasuk}/preview-lampiran',
             [SuratMasukController::class, 'previewLampiran']
         )->name('surat-masuk.preview-lampiran');
-
 
         /*
         |--------------------------------------------------------------------------
@@ -309,10 +301,9 @@ Route::middleware('auth')->group(function () {
             [SuratMasukController::class, 'downloadLampiran']
         )->name('surat-masuk.download-lampiran');
 
-
         /*
         |--------------------------------------------------------------------------
-        | CETAK LABEL
+        | LABEL
         |--------------------------------------------------------------------------
         */
 
@@ -320,7 +311,6 @@ Route::middleware('auth')->group(function () {
             'surat-masuk/{suratMasuk}/label',
             [SuratMasukController::class, 'cetakLabel']
         )->name('surat-masuk.label');
-
 
         /*
         |--------------------------------------------------------------------------
@@ -333,14 +323,12 @@ Route::middleware('auth')->group(function () {
             [SuratMasukController::class, 'cetakDisposisi']
         )->name('surat-masuk.cetak-disposisi');
 
-
         /*
         |--------------------------------------------------------------------------
-        | DETAIL SURAT MASUK
+        | DETAIL
         |--------------------------------------------------------------------------
         |
-        | PENTING:
-        | Route ini harus paling bawah karena menggunakan parameter dinamis.
+        | Route dinamis diletakkan paling bawah.
         |
         */
 
@@ -350,13 +338,11 @@ Route::middleware('auth')->group(function () {
         )->name('surat-masuk.show');
     });
 
-
     /*
     |--------------------------------------------------------------------------
     | DISPOSISI
     |--------------------------------------------------------------------------
     */
-
 
     /*
     |--------------------------------------------------------------------------
@@ -365,33 +351,6 @@ Route::middleware('auth')->group(function () {
     */
 
     Route::middleware('role:admin,pimpinan')->group(function () {
-
-        /*
-        |--------------------------------------------------------------------------
-        | CREATE DISPOSISI
-        |--------------------------------------------------------------------------
-        |
-        | GET:
-        | /surat-masuk/{suratMasuk}/disposisi/create
-        |
-        | Digunakan untuk membuka halaman form disposisi.
-        |
-        */
-
-        Route::get(
-            'surat-masuk/{suratMasuk}/disposisi/create',
-            [DisposisiController::class, 'create']
-        )->name('disposisi.create');
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | RESOURCE DISPOSISI
-        |--------------------------------------------------------------------------
-        |
-        | index, show, create dibuat manual di bawah.
-        |
-        */
 
         Route::resource(
             'disposisi',
@@ -403,7 +362,6 @@ Route::middleware('auth')->group(function () {
         ]);
     });
 
-
     /*
     |--------------------------------------------------------------------------
     | DISPOSISI - ADMIN / PIMPINAN / STAFF
@@ -414,7 +372,7 @@ Route::middleware('auth')->group(function () {
 
         /*
         |--------------------------------------------------------------------------
-        | INDEX DISPOSISI
+        | INDEX
         |--------------------------------------------------------------------------
         */
 
@@ -423,10 +381,9 @@ Route::middleware('auth')->group(function () {
             [DisposisiController::class, 'index']
         )->name('disposisi.index');
 
-
         /*
         |--------------------------------------------------------------------------
-        | DETAIL DISPOSISI
+        | DETAIL
         |--------------------------------------------------------------------------
         */
 
@@ -435,10 +392,9 @@ Route::middleware('auth')->group(function () {
             [DisposisiController::class, 'show']
         )->name('disposisi.show');
 
-
         /*
         |--------------------------------------------------------------------------
-        | UPDATE STATUS DISPOSISI
+        | UPDATE STATUS
         |--------------------------------------------------------------------------
         */
 
@@ -448,13 +404,11 @@ Route::middleware('auth')->group(function () {
         )->name('disposisi.status');
     });
 
-
     /*
     |--------------------------------------------------------------------------
     | SURAT KELUAR
     |--------------------------------------------------------------------------
     */
-
 
     /*
     |--------------------------------------------------------------------------
@@ -475,7 +429,6 @@ Route::middleware('auth')->group(function () {
             [SuratKeluarController::class, 'create']
         )->name('surat-keluar.create');
 
-
         /*
         |--------------------------------------------------------------------------
         | STORE
@@ -486,7 +439,6 @@ Route::middleware('auth')->group(function () {
             'surat-keluar',
             [SuratKeluarController::class, 'store']
         )->name('surat-keluar.store');
-
 
         /*
         |--------------------------------------------------------------------------
@@ -499,7 +451,6 @@ Route::middleware('auth')->group(function () {
             [SuratKeluarController::class, 'edit']
         )->name('surat-keluar.edit');
 
-
         /*
         |--------------------------------------------------------------------------
         | UPDATE
@@ -510,7 +461,6 @@ Route::middleware('auth')->group(function () {
             'surat-keluar/{suratKeluar}',
             [SuratKeluarController::class, 'update']
         )->name('surat-keluar.update');
-
 
         /*
         |--------------------------------------------------------------------------
@@ -523,7 +473,6 @@ Route::middleware('auth')->group(function () {
             [SuratKeluarController::class, 'destroy']
         )->name('surat-keluar.destroy');
 
-
         /*
         |--------------------------------------------------------------------------
         | ACTIVITY LOG
@@ -535,7 +484,6 @@ Route::middleware('auth')->group(function () {
             [SuratKeluarController::class, 'storeLog']
         )->name('surat-keluar.log.store');
     });
-
 
     /*
     |--------------------------------------------------------------------------
@@ -556,7 +504,6 @@ Route::middleware('auth')->group(function () {
             [SuratKeluarController::class, 'index']
         )->name('surat-keluar.index');
 
-
         /*
         |--------------------------------------------------------------------------
         | PREVIEW LAMPIRAN
@@ -567,7 +514,6 @@ Route::middleware('auth')->group(function () {
             'surat-keluar/{suratKeluar}/preview-lampiran',
             [SuratKeluarController::class, 'previewLampiran']
         )->name('surat-keluar.preview-lampiran');
-
 
         /*
         |--------------------------------------------------------------------------
@@ -580,7 +526,6 @@ Route::middleware('auth')->group(function () {
             [SuratKeluarController::class, 'cetak']
         )->name('surat-keluar.cetak');
 
-
         /*
         |--------------------------------------------------------------------------
         | LABEL
@@ -591,7 +536,6 @@ Route::middleware('auth')->group(function () {
             'surat-keluar/{suratKeluar}/label',
             [SuratKeluarController::class, 'label']
         )->name('surat-keluar.label');
-
 
         /*
         |--------------------------------------------------------------------------
@@ -605,14 +549,39 @@ Route::middleware('auth')->group(function () {
         )->name('surat-keluar.show');
     });
 
-
     /*
     |--------------------------------------------------------------------------
     | EXPORT
     |--------------------------------------------------------------------------
+    |
+    | PENTING:
+    |
+    | Semua export wajib melewati auth + role.
+    |
+    | SURAT MASUK:
+    |
+    | Admin    -> semua surat masuk
+    | Pimpinan -> semua surat masuk
+    | Staff    -> hanya surat yang didisposisikan kepadanya
+    |
+    | SURAT KELUAR:
+    |
+    | Admin    -> semua surat keluar
+    | Pimpinan -> semua surat keluar
+    | Staff    -> mengikuti data yang memang terlihat pada halaman surat keluar
+    |
+    | Filter:
+    | - search
+    | - kategori_id / kategori_surat_id
+    | - status
+    | - dari_tanggal
+    | - sampai_tanggal
+    |
     */
 
-    Route::middleware('role:admin,pimpinan,staff')
+    Route::middleware(
+        'role:admin,pimpinan,staff'
+    )
         ->prefix('export')
         ->name('export.')
         ->group(function () {
@@ -625,9 +594,13 @@ Route::middleware('auth')->group(function () {
 
             Route::get(
                 'surat-masuk/excel',
-                [ExportController::class, 'suratMasukExcel']
-            )->name('surat-masuk.excel');
-
+                [
+                    ExportController::class,
+                    'suratMasukExcel',
+                ]
+            )->name(
+                'surat-masuk.excel'
+            );
 
             /*
             |--------------------------------------------------------------------------
@@ -637,9 +610,13 @@ Route::middleware('auth')->group(function () {
 
             Route::get(
                 'surat-masuk/pdf',
-                [ExportController::class, 'suratMasukPdf']
-            )->name('surat-masuk.pdf');
-
+                [
+                    ExportController::class,
+                    'suratMasukPdf',
+                ]
+            )->name(
+                'surat-masuk.pdf'
+            );
 
             /*
             |--------------------------------------------------------------------------
@@ -649,9 +626,13 @@ Route::middleware('auth')->group(function () {
 
             Route::get(
                 'surat-keluar/excel',
-                [ExportController::class, 'suratKeluarExcel']
-            )->name('surat-keluar.excel');
-
+                [
+                    ExportController::class,
+                    'suratKeluarExcel',
+                ]
+            )->name(
+                'surat-keluar.excel'
+            );
 
             /*
             |--------------------------------------------------------------------------
@@ -661,10 +642,14 @@ Route::middleware('auth')->group(function () {
 
             Route::get(
                 'surat-keluar/pdf',
-                [ExportController::class, 'suratKeluarPdf']
-            )->name('surat-keluar.pdf');
+                [
+                    ExportController::class,
+                    'suratKeluarPdf',
+                ]
+            )->name(
+                'surat-keluar.pdf'
+            );
         });
-
 
     /*
     |--------------------------------------------------------------------------
@@ -687,7 +672,6 @@ Route::middleware('auth')->group(function () {
             'show',
         ]);
 
-
         /*
         |--------------------------------------------------------------------------
         | USERS
@@ -702,7 +686,6 @@ Route::middleware('auth')->group(function () {
         ]);
     });
 });
-
 
 /*
 |--------------------------------------------------------------------------
