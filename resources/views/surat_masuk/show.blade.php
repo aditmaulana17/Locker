@@ -11,22 +11,26 @@
        DATA SURAT
     ========================================================== */
 
-    $status = strtolower(trim((string) ($suratMasuk->status ?? 'baru')));
+    $status = strtolower(
+        trim(
+            (string) ($suratMasuk->status ?? 'baru')
+        )
+    );
 
     $statusLabels = [
-        'baru' => 'Baru',
-        'diproses' => 'Diproses',
+        'baru'           => 'Baru',
+        'diproses'       => 'Diproses',
         'didisposisikan' => 'Didisposisikan',
-        'selesai' => 'Selesai',
-        'diarsipkan' => 'Diarsipkan',
+        'selesai'        => 'Selesai',
+        'diarsipkan'     => 'Diarsipkan',
     ];
 
     $statusClasses = [
-        'baru' => 'sm-status-baru',
-        'diproses' => 'sm-status-diproses',
+        'baru'           => 'sm-status-baru',
+        'diproses'       => 'sm-status-diproses',
         'didisposisikan' => 'sm-status-disposisi',
-        'selesai' => 'sm-status-selesai',
-        'diarsipkan' => 'sm-status-arsip',
+        'selesai'        => 'sm-status-selesai',
+        'diarsipkan'     => 'sm-status-arsip',
     ];
 
     $statusLabel = $statusLabels[$status] ?? ucfirst($status);
@@ -70,19 +74,29 @@
     $lampiranExtension = '';
 
     if (!empty($lampiranPath)) {
-        if (filter_var($lampiranPath, FILTER_VALIDATE_URL)) {
+
+        if (
+            filter_var(
+                $lampiranPath,
+                FILTER_VALIDATE_URL
+            )
+        ) {
             $lampiranUrl = $lampiranPath;
-        } elseif (Route::has('surat-masuk.preview-lampiran')) {
+
+        } elseif (
+            Route::has('surat-masuk.preview-lampiran')
+        ) {
             $lampiranUrl = route(
                 'surat-masuk.preview-lampiran',
                 $suratMasuk
             );
         }
 
-        $cleanPath = parse_url(
-            $lampiranPath,
-            PHP_URL_PATH
-        ) ?: $lampiranPath;
+        $cleanPath =
+            parse_url(
+                $lampiranPath,
+                PHP_URL_PATH
+            ) ?: $lampiranPath;
 
         $lampiranExtension = strtolower(
             pathinfo(
@@ -94,15 +108,22 @@
 
     $isImage = in_array(
         $lampiranExtension,
-        ['jpg', 'jpeg', 'png', 'webp', 'gif'],
+        [
+            'jpg',
+            'jpeg',
+            'png',
+            'webp',
+            'gif',
+        ],
         true
     );
 
     $isPdf = $lampiranExtension === 'pdf';
 
-    $lampiranNama = !empty($lampiranPath)
-        ? basename($lampiranPath)
-        : null;
+    $lampiranNama =
+        !empty($lampiranPath)
+            ? basename($lampiranPath)
+            : null;
 
 
     /* =========================================================
@@ -127,7 +148,10 @@
 
     $canManage = in_array(
         $userRole,
-        ['admin', 'pimpinan'],
+        [
+            'admin',
+            'pimpinan',
+        ],
         true
     );
 
@@ -136,20 +160,21 @@
        DISPOSISI
     ========================================================== */
 
-    $disposisis = $suratMasuk->disposisi ?? collect();
+    $disposisis =
+        $suratMasuk->disposisi ?? collect();
 @endphp
 
 
 <style>
     /* =========================================================
-       ROOT
+       PAGE
     ========================================================== */
 
     .sm-detail-page {
         width: 100%;
         max-width: 1280px;
         margin: 0 auto;
-        padding: 16px 18px 36px;
+        padding: 14px 18px 36px;
         color: #334155;
     }
 
@@ -246,19 +271,21 @@
         align-items: center;
         justify-content: space-between;
         gap: 20px;
-        min-height: 86px;
+        min-height: 84px;
         margin-bottom: 16px;
         padding: 17px 20px;
         overflow: hidden;
         border-radius: 16px;
-        background: linear-gradient(
-            135deg,
-            #0f172a 0%,
-            #1e293b 55%,
-            #312e81 100%
-        );
+        background:
+            linear-gradient(
+                135deg,
+                #0f172a 0%,
+                #1e293b 55%,
+                #312e81 100%
+            );
         color: #fff;
-        box-shadow: 0 10px 30px rgba(15, 23, 42, .10);
+        box-shadow:
+            0 10px 30px rgba(15, 23, 42, .10);
     }
 
     .sm-header::after {
@@ -290,14 +317,14 @@
         justify-content: center;
         flex: 0 0 40px;
         border-radius: 10px;
-        background: rgba(255,255,255,.09);
+        background: rgba(255, 255, 255, .09);
         color: #fff;
         text-decoration: none;
         transition: .16s ease;
     }
 
     .sm-back:hover {
-        background: rgba(255,255,255,.17);
+        background: rgba(255, 255, 255, .17);
         transform: translateX(-2px);
     }
 
@@ -335,6 +362,7 @@
     .sm-header-subtitle {
         margin: 4px 0 0;
         font-size: 10px;
+        line-height: 1.5;
         color: #cbd5e1;
     }
 
@@ -364,56 +392,64 @@
     }
 
     .sm-header-btn-edit {
-        background: rgba(245,158,11,.15);
+        background: rgba(245, 158, 11, .15);
         color: #fde68a;
     }
 
     .sm-header-btn-edit:hover {
-        background: rgba(245,158,11,.25);
+        background: rgba(245, 158, 11, .25);
     }
 
     .sm-header-btn-print {
-        background: rgba(16,185,129,.13);
+        background: rgba(16, 185, 129, .13);
         color: #a7f3d0;
     }
 
     .sm-header-btn-print:hover {
-        background: rgba(16,185,129,.23);
+        background: rgba(16, 185, 129, .23);
     }
 
     .sm-header-btn-label {
-        background: rgba(96,165,250,.12);
+        background: rgba(96, 165, 250, .12);
         color: #bfdbfe;
     }
 
     .sm-header-btn-label:hover {
-        background: rgba(96,165,250,.22);
+        background: rgba(96, 165, 250, .22);
     }
 
 
     /* =========================================================
-       MAIN TOP GRID
-       KIRI BESAR - KANAN KECIL
+       TOP LAYOUT
+       KIRI  = INFORMASI + PERIHAL
+       KANAN = RIWAYAT DISPOSISI
     ========================================================== */
 
     .sm-top-grid {
         display: grid;
-        grid-template-columns: minmax(0, 2fr) minmax(330px, .9fr);
+        grid-template-columns:
+            minmax(0, 2fr)
+            minmax(330px, .9fr);
         gap: 16px;
-        align-items: start;
+        align-items: stretch;
     }
 
     .sm-left-column {
         min-width: 0;
+        min-height: 100%;
+        display: flex;
+        flex-direction: column;
     }
 
     .sm-right-column {
         min-width: 0;
+        min-height: 100%;
+        display: flex;
     }
 
 
     /* =========================================================
-       CARD
+       GENERAL CARD
     ========================================================== */
 
     .sm-card {
@@ -421,17 +457,14 @@
         border: 1px solid #e5e7eb;
         border-radius: 16px;
         background: #fff;
-        box-shadow: 0 7px 25px rgba(15,23,42,.055);
+        box-shadow:
+            0 7px 25px rgba(15, 23, 42, .055);
     }
 
 
     /* =========================================================
-       INFORMATION CARD
+       CARD HEADER
     ========================================================== */
-
-    .sm-info-card {
-        overflow: hidden;
-    }
 
     .sm-card-header {
         display: flex;
@@ -441,12 +474,13 @@
         min-height: 61px;
         padding: 11px 15px;
         border-bottom: 1px solid #e5e7eb;
-        background: linear-gradient(
-            135deg,
-            #f8fafc 0%,
-            #ffffff 55%,
-            #f5f3ff 100%
-        );
+        background:
+            linear-gradient(
+                135deg,
+                #f8fafc 0%,
+                #ffffff 55%,
+                #f5f3ff 100%
+            );
     }
 
     .sm-card-heading {
@@ -479,6 +513,7 @@
     .sm-card-subtitle {
         margin: 2px 0 0;
         font-size: 9px;
+        line-height: 1.4;
         color: #94a3b8;
     }
 
@@ -526,9 +561,13 @@
 
 
     /* =========================================================
-       INFO TABLE
-       3 KOLOM x 2 BARIS
+       INFORMASI SURAT
     ========================================================== */
+
+    .sm-info-card {
+        flex: 0 0 auto;
+        overflow: hidden;
+    }
 
     .sm-info-table-wrap {
         width: 100%;
@@ -537,15 +576,15 @@
 
     .sm-info-table {
         width: 100%;
-        min-width: 700px;
+        min-width: 760px;
         border-collapse: collapse;
         table-layout: fixed;
     }
 
     .sm-info-table td {
         width: 33.333%;
-        height: 105px;
-        padding: 17px 18px;
+        height: 108px;
+        padding: 18px 19px;
         vertical-align: top;
         border-right: 1px solid #e5e7eb;
         border-bottom: 1px solid #e5e7eb;
@@ -559,7 +598,8 @@
         border-bottom: 0;
     }
 
-    .sm-info-table td:nth-child(odd) {
+    .sm-info-table tr:first-child td:nth-child(odd),
+    .sm-info-table tr:last-child td:nth-child(odd) {
         background: #f8fafc;
     }
 
@@ -577,7 +617,7 @@
     .sm-info-value {
         margin: 0;
         font-size: 12px;
-        line-height: 1.55;
+        line-height: 1.6;
         font-weight: 750;
         color: #1e293b;
         overflow-wrap: anywhere;
@@ -593,25 +633,38 @@
         width: 15px;
         height: 15px;
         flex: 0 0 15px;
-        margin-top: 1px;
+        margin-top: 2px;
         color: #6366f1;
     }
 
 
     /* =========================================================
        PERIHAL
+       MENGISI SELURUH RUANG YANG TERSISA
     ========================================================== */
 
     .sm-perihal-card {
+        width: 100%;
+        min-height: 0;
         margin-top: 16px;
         overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        flex: 1 1 auto;
     }
 
     .sm-perihal-body {
-        padding: 17px 18px;
+        flex: 1 1 auto;
+        display: flex;
+        padding: 16px 17px 17px;
     }
 
     .sm-perihal-box {
+        width: 100%;
+        min-height: 110px;
+        flex: 1 1 auto;
+        display: flex;
+        align-items: flex-start;
         padding: 15px 16px;
         border: 1px solid #e5e7eb;
         border-radius: 11px;
@@ -633,11 +686,17 @@
     ========================================================== */
 
     .sm-disposition-card {
+        width: 100%;
+        height: 100%;
         overflow: hidden;
+        display: flex;
+        flex-direction: column;
     }
 
     .sm-disposition-body {
+        flex: 1 1 auto;
         padding: 15px 16px 18px;
+        overflow: hidden;
     }
 
     .sm-create-btn {
@@ -668,6 +727,22 @@
 
     .sm-timeline {
         position: relative;
+        max-height: 100%;
+        overflow-y: auto;
+        padding-right: 4px;
+    }
+
+    .sm-timeline::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    .sm-timeline::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .sm-timeline::-webkit-scrollbar-thumb {
+        background: #ddd6fe;
+        border-radius: 999px;
     }
 
     .sm-timeline-item {
@@ -701,7 +776,8 @@
         height: 11px;
         border-radius: 50%;
         background: #7c3aed;
-        box-shadow: 0 0 0 4px #f5f3ff;
+        box-shadow:
+            0 0 0 4px #f5f3ff;
     }
 
     .sm-disp-route {
@@ -735,6 +811,7 @@
         border-radius: 6px;
         font-size: 8px;
         font-weight: 800;
+        white-space: nowrap;
     }
 
     .sm-disp-menunggu {
@@ -796,11 +873,18 @@
 
 
     /* =========================================================
-       EMPTY DISPOSITION
+       EMPTY
     ========================================================== */
 
     .sm-empty {
-        padding: 38px 10px 35px;
+        width: 100%;
+        min-height: 260px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 30px 10px;
         text-align: center;
     }
 
@@ -810,7 +894,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0 auto 11px;
+        margin-bottom: 11px;
         border-radius: 13px;
         background: #f8fafc;
         color: #94a3b8;
@@ -826,14 +910,14 @@
     .sm-empty-text {
         margin: 4px 0 0;
         font-size: 9px;
-        color: #94a3b8;
         line-height: 1.5;
+        color: #94a3b8;
     }
 
 
     /* =========================================================
-       ATTACHMENT
-       FULL WIDTH - DI LUAR TOP GRID
+       LAMPIRAN DIGITAL
+       FULL WIDTH
     ========================================================== */
 
     .sm-attachment-card {
@@ -939,6 +1023,7 @@
         font-weight: 800;
         text-decoration: none;
         white-space: nowrap;
+        transition: .15s ease;
     }
 
     .sm-file-btn-open {
@@ -962,7 +1047,7 @@
 
 
     /* =========================================================
-       FILE VIEWER
+       VIEWER
     ========================================================== */
 
     .sm-viewer {
@@ -1041,6 +1126,7 @@
     .sm-no-file p {
         margin: 0;
         font-size: 9px;
+        line-height: 1.5;
     }
 
 
@@ -1066,28 +1152,35 @@
        TABLET
     ========================================================== */
 
-    @media (max-width: 1050px) {
-        .sm-top-grid {
-            grid-template-columns: minmax(0, 1.7fr) minmax(290px, .9fr);
-        }
-
-        .sm-info-table {
-            min-width: 650px;
-        }
-    }
-
-
-    /* =========================================================
-       MOBILE / TABLET KECIL
-    ========================================================== */
-
-    @media (max-width: 900px) {
+    @media (max-width: 980px) {
         .sm-top-grid {
             grid-template-columns: 1fr;
+            align-items: start;
         }
 
         .sm-right-column {
-            width: 100%;
+            min-height: auto;
+        }
+
+        .sm-disposition-card {
+            height: auto;
+        }
+
+        .sm-timeline {
+            max-height: none;
+            overflow: visible;
+        }
+
+        .sm-perihal-card {
+            flex: 0 0 auto;
+        }
+
+        .sm-perihal-body {
+            flex: 0 0 auto;
+        }
+
+        .sm-perihal-box {
+            min-height: 110px;
         }
     }
 
@@ -1097,14 +1190,19 @@
     ========================================================== */
 
     @media (max-width: 700px) {
+
         .sm-detail-page {
-            padding: 10px;
+            padding: 9px 10px 25px;
         }
 
         .sm-header {
             align-items: flex-start;
             flex-direction: column;
             padding: 15px;
+        }
+
+        .sm-header-left {
+            width: 100%;
         }
 
         .sm-header-actions {
@@ -1122,26 +1220,25 @@
             padding: 11px 13px;
         }
 
+        .sm-card-subtitle {
+            font-size: 8px;
+        }
+
+        .sm-info-table-wrap {
+            overflow-x: auto;
+        }
+
         .sm-info-table {
-            min-width: 0;
-        }
-
-        .sm-info-table,
-        .sm-info-table tbody,
-        .sm-info-table tr,
-        .sm-info-table td {
-            display: block;
-            width: 100%;
+            min-width: 680px;
         }
 
         .sm-info-table td {
-            height: auto;
-            min-height: 92px;
-            border-right: 0;
+            height: 100px;
+            padding: 15px;
         }
 
-        .sm-info-table tr:last-child td:last-child {
-            border-bottom: 0;
+        .sm-perihal-body {
+            padding: 14px;
         }
 
         .sm-file-bar {
@@ -1172,6 +1269,7 @@
     ========================================================== */
 
     @media (max-width: 470px) {
+
         .sm-header-title {
             font-size: 18px;
         }
@@ -1188,14 +1286,30 @@
             width: 100%;
         }
 
-        .sm-card-subtitle,
-        .sm-attachment-description {
+        .sm-card-subtitle {
             display: none;
         }
 
+        .sm-info-table {
+            min-width: 0;
+        }
+
+        .sm-info-table,
+        .sm-info-table tbody,
+        .sm-info-table tr,
         .sm-info-table td {
-            min-height: 84px;
-            padding: 14px;
+            display: block;
+            width: 100%;
+        }
+
+        .sm-info-table td {
+            height: auto;
+            min-height: 82px;
+            border-right: 0;
+        }
+
+        .sm-info-table td:last-child {
+            border-right: 0;
         }
 
         .sm-info-value {
@@ -1224,12 +1338,16 @@
     ====================================================== --}}
 
     @if(session('success'))
+
         <div
             class="sm-alert sm-alert-success"
             role="alert"
         >
+
             <div class="sm-alert-inner">
+
                 <div class="sm-alert-icon">
+
                     <svg
                         class="w-4 h-4"
                         fill="none"
@@ -1243,12 +1361,15 @@
                             d="M5 13l4 4L19 7"
                         />
                     </svg>
+
                 </div>
 
                 <p class="sm-alert-text">
                     {{ session('success') }}
                 </p>
+
             </div>
+
 
             <button
                 type="button"
@@ -1256,6 +1377,7 @@
                 onclick="this.closest('[role=alert]')?.remove()"
                 aria-label="Tutup"
             >
+
                 <svg
                     class="w-4 h-4"
                     fill="none"
@@ -1269,8 +1391,11 @@
                         d="M6 18L18 6M6 6l12 12"
                     />
                 </svg>
+
             </button>
+
         </div>
+
     @endif
 
 
@@ -1279,12 +1404,16 @@
     ====================================================== --}}
 
     @if(session('error'))
+
         <div
             class="sm-alert sm-alert-error"
             role="alert"
         >
+
             <div class="sm-alert-inner">
+
                 <div class="sm-alert-icon">
+
                     <svg
                         class="w-4 h-4"
                         fill="none"
@@ -1298,12 +1427,15 @@
                             d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                         />
                     </svg>
+
                 </div>
 
                 <p class="sm-alert-text">
                     {{ session('error') }}
                 </p>
+
             </div>
+
 
             <button
                 type="button"
@@ -1311,6 +1443,7 @@
                 onclick="this.closest('[role=alert]')?.remove()"
                 aria-label="Tutup"
             >
+
                 <svg
                     class="w-4 h-4"
                     fill="none"
@@ -1324,8 +1457,11 @@
                         d="M6 18L18 6M6 6l12 12"
                     />
                 </svg>
+
             </button>
+
         </div>
+
     @endif
 
 
@@ -1341,7 +1477,9 @@
                 href="{{ route('surat-masuk.index') }}"
                 class="sm-back"
                 title="Kembali"
+                aria-label="Kembali ke Surat Masuk"
             >
+
                 <svg
                     class="w-4 h-4"
                     fill="none"
@@ -1355,11 +1493,14 @@
                         d="M10 19l-7-7m0 0l7-7m-7 7h18"
                     />
                 </svg>
+
             </a>
+
 
             <div class="sm-header-content">
 
                 <div class="sm-breadcrumb">
+
                     <a href="{{ route('surat-masuk.index') }}">
                         Surat Masuk
                     </a>
@@ -1367,11 +1508,14 @@
                     <span>/</span>
 
                     <span>Detail Arsip</span>
+
                 </div>
+
 
                 <h1 class="sm-header-title">
                     Detail Surat Masuk
                 </h1>
+
 
                 <p class="sm-header-subtitle">
                     Informasi surat, dokumen digital, dan riwayat disposisi.
@@ -1388,10 +1532,12 @@
                 $canManage &&
                 Route::has('surat-masuk.edit')
             )
+
                 <a
                     href="{{ route('surat-masuk.edit', $suratMasuk) }}"
                     class="sm-header-btn sm-header-btn-edit"
                 >
+
                     <svg
                         class="w-3.5 h-3.5"
                         fill="none"
@@ -1407,17 +1553,23 @@
                     </svg>
 
                     Edit Surat
+
                 </a>
+
             @endif
 
 
-            @if(Route::has('surat-masuk.cetak-disposisi'))
+            @if(
+                Route::has('surat-masuk.cetak-disposisi')
+            )
+
                 <a
                     href="{{ route('surat-masuk.cetak-disposisi', $suratMasuk) }}"
                     target="_blank"
                     rel="noopener noreferrer"
                     class="sm-header-btn sm-header-btn-print"
                 >
+
                     <svg
                         class="w-3.5 h-3.5"
                         fill="none"
@@ -1433,17 +1585,23 @@
                     </svg>
 
                     Cetak Disposisi
+
                 </a>
+
             @endif
 
 
-            @if(Route::has('surat-masuk.cetak-label'))
+            @if(
+                Route::has('surat-masuk.cetak-label')
+            )
+
                 <a
                     href="{{ route('surat-masuk.cetak-label', $suratMasuk) }}"
                     target="_blank"
                     rel="noopener noreferrer"
                     class="sm-header-btn sm-header-btn-label"
                 >
+
                     <svg
                         class="w-3.5 h-3.5"
                         fill="none"
@@ -1459,7 +1617,9 @@
                     </svg>
 
                     Cetak Label
+
                 </a>
+
             @endif
 
         </div>
@@ -1468,16 +1628,19 @@
 
 
     {{-- =====================================================
-         TOP GRID
+         INFORMASI SURAT + DISPOSISI
     ====================================================== --}}
 
     <div class="sm-top-grid">
 
+
         {{-- =================================================
-             KOLOM KIRI
+             KIRI
+             INFORMASI SURAT + PERIHAL
         ================================================== --}}
 
         <div class="sm-left-column">
+
 
             {{-- =============================================
                  INFORMASI SURAT
@@ -1490,6 +1653,7 @@
                     <div class="sm-card-heading">
 
                         <div class="sm-card-heading-icon">
+
                             <svg
                                 class="w-4 h-4"
                                 fill="none"
@@ -1503,9 +1667,12 @@
                                     d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586A1.5 1.5 0 0118 8.5V19a2 2 0 01-2 2z"
                                 />
                             </svg>
+
                         </div>
 
+
                         <div>
+
                             <h2 class="sm-card-title">
                                 Informasi Surat
                             </h2>
@@ -1513,9 +1680,11 @@
                             <p class="sm-card-subtitle">
                                 Data utama arsip surat masuk.
                             </p>
+
                         </div>
 
                     </div>
+
 
                     <span class="sm-status {{ $statusClass }}">
                         {{ $statusLabel }}
@@ -1530,9 +1699,12 @@
 
                         <tbody>
 
+                            {{-- BARIS 1 --}}
+
                             <tr>
 
                                 <td>
+
                                     <span class="sm-info-label">
                                         Nomor Surat
                                     </span>
@@ -1540,9 +1712,12 @@
                                     <p class="sm-info-value">
                                         {{ $suratMasuk->nomor_surat ?? '-' }}
                                     </p>
+
                                 </td>
 
+
                                 <td>
+
                                     <span class="sm-info-label">
                                         Pengirim
                                     </span>
@@ -1550,9 +1725,12 @@
                                     <p class="sm-info-value">
                                         {{ $suratMasuk->pengirim ?? '-' }}
                                     </p>
+
                                 </td>
 
+
                                 <td>
+
                                     <span class="sm-info-label">
                                         Kategori Surat
                                     </span>
@@ -1560,14 +1738,18 @@
                                     <p class="sm-info-value">
                                         {{ $suratMasuk->kategori?->nama_kategori ?? '-' }}
                                     </p>
+
                                 </td>
 
                             </tr>
 
 
+                            {{-- BARIS 2 --}}
+
                             <tr>
 
                                 <td>
+
                                     <span class="sm-info-label">
                                         Tanggal Surat
                                     </span>
@@ -1593,9 +1775,12 @@
                                         </span>
 
                                     </p>
+
                                 </td>
 
+
                                 <td>
+
                                     <span class="sm-info-label">
                                         Tanggal Diterima
                                     </span>
@@ -1621,9 +1806,12 @@
                                         </span>
 
                                     </p>
+
                                 </td>
 
+
                                 <td>
+
                                     <span class="sm-info-label">
                                         Lokasi Arsip Fisik
                                     </span>
@@ -1631,6 +1819,7 @@
                                     <p class="sm-info-value">
                                         {{ $suratMasuk->lokasi_arsip_fisik ?: '-' }}
                                     </p>
+
                                 </td>
 
                             </tr>
@@ -1646,6 +1835,7 @@
 
             {{-- =============================================
                  PERIHAL
+                 TINGGI MENGISI RUANG KOSONG
             ============================================== --}}
 
             <div class="sm-card sm-perihal-card">
@@ -1655,6 +1845,7 @@
                     <div class="sm-card-heading">
 
                         <div class="sm-card-heading-icon">
+
                             <svg
                                 class="w-4 h-4"
                                 fill="none"
@@ -1668,9 +1859,12 @@
                                     d="M4 6h16M4 12h16M4 18h10"
                                 />
                             </svg>
+
                         </div>
 
+
                         <div>
+
                             <h2 class="sm-card-title">
                                 Perihal Surat
                             </h2>
@@ -1678,6 +1872,7 @@
                             <p class="sm-card-subtitle">
                                 Pokok atau tujuan utama surat.
                             </p>
+
                         </div>
 
                     </div>
@@ -1703,12 +1898,14 @@
 
 
         {{-- =================================================
-             KOLOM KANAN
+             KANAN
+             RIWAYAT DISPOSISI
         ================================================== --}}
 
         <div class="sm-right-column">
 
             <div class="sm-card sm-disposition-card">
+
 
                 <div class="sm-card-header">
 
@@ -1718,6 +1915,7 @@
                             class="sm-card-heading-icon"
                             style="background:#f5f3ff;color:#7c3aed;"
                         >
+
                             <svg
                                 class="w-5 h-5"
                                 fill="none"
@@ -1731,9 +1929,12 @@
                                     d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"
                                 />
                             </svg>
+
                         </div>
 
+
                         <div>
+
                             <h2 class="sm-card-title">
                                 Riwayat Disposisi
                             </h2>
@@ -1741,6 +1942,7 @@
                             <p class="sm-card-subtitle">
                                 Instruksi dan tindak lanjut surat.
                             </p>
+
                         </div>
 
                     </div>
@@ -1750,10 +1952,12 @@
                         $canManage &&
                         Route::has('disposisi.create')
                     )
+
                         <a
                             href="{{ route('disposisi.create', $suratMasuk) }}"
                             class="sm-create-btn"
                         >
+
                             <svg
                                 class="w-3.5 h-3.5"
                                 fill="none"
@@ -1769,7 +1973,9 @@
                             </svg>
 
                             Buat
+
                         </a>
+
                     @endif
 
                 </div>
@@ -1784,28 +1990,33 @@
                             @foreach($disposisis as $d)
 
                                 @php
-                                    $disposisiStatus = strtolower(
-                                        trim(
-                                            (string) (
-                                                $d->status
-                                                ?? 'menunggu'
+
+                                    $disposisiStatus =
+                                        strtolower(
+                                            trim(
+                                                (string) (
+                                                    $d->status
+                                                    ?? 'menunggu'
+                                                )
                                             )
-                                        )
-                                    );
+                                        );
+
 
                                     $disposisiLabels = [
                                         'menunggu' => 'Menunggu',
                                         'diproses' => 'Diproses',
-                                        'selesai' => 'Selesai',
-                                        'ditolak' => 'Ditolak',
+                                        'selesai'  => 'Selesai',
+                                        'ditolak'  => 'Ditolak',
                                     ];
+
 
                                     $disposisiClasses = [
                                         'menunggu' => 'sm-disp-menunggu',
                                         'diproses' => 'sm-disp-diproses',
-                                        'selesai' => 'sm-disp-selesai',
-                                        'ditolak' => 'sm-disp-ditolak',
+                                        'selesai'  => 'sm-disp-selesai',
+                                        'ditolak'  => 'sm-disp-ditolak',
                                     ];
+
 
                                     $disposisiLabel =
                                         $disposisiLabels[
@@ -1814,6 +2025,7 @@
                                         ?? ucfirst(
                                             $disposisiStatus
                                         );
+
 
                                     $disposisiClass =
                                         $disposisiClasses[
@@ -1824,35 +2036,49 @@
 
                                     $tanggalDisposisi = '-';
 
+
                                     if ($d->created_at) {
+
                                         try {
+
                                             $tanggalDisposisi =
                                                 Carbon::parse(
                                                     $d->created_at
                                                 )->translatedFormat(
                                                     'd/m/Y H:i'
                                                 );
+
                                         } catch (\Throwable $e) {
+
                                             $tanggalDisposisi =
                                                 (string) $d->created_at;
+
                                         }
+
                                     }
 
 
                                     $batasWaktu = null;
 
+
                                     if ($d->batas_waktu) {
+
                                         try {
+
                                             $batasWaktu =
                                                 Carbon::parse(
                                                     $d->batas_waktu
                                                 )->translatedFormat(
                                                     'd/m/Y'
                                                 );
+
                                         } catch (\Throwable $e) {
+
                                             $batasWaktu =
                                                 (string) $d->batas_waktu;
+
                                         }
+
                                     }
 
 
@@ -1861,6 +2087,7 @@
                                         ?? $d->instruksi
                                         ?? $d->catatan
                                         ?? '';
+
                                 @endphp
 
 
@@ -1877,6 +2104,7 @@
                                             {{ $d->dari?->name ?? '-' }}
                                         </span>
 
+
                                         <svg
                                             class="w-3 h-3 text-purple-300"
                                             fill="none"
@@ -1890,6 +2118,7 @@
                                                 d="M14 5l7 7m0 0l-7 7m7-7H3"
                                             />
                                         </svg>
+
 
                                         <span class="sm-disp-to">
                                             {{ $d->kepada?->name ?? '-' }}
@@ -1910,11 +2139,15 @@
                                         <p class="sm-disp-text">
 
                                             @if(filled($isiDisposisi))
+
                                                 {{ $isiDisposisi }}
+
                                             @else
+
                                                 <span class="text-slate-300">
                                                     Tidak ada instruksi atau catatan.
                                                 </span>
+
                                             @endif
 
                                         </p>
@@ -1925,10 +2158,14 @@
                                     <div class="sm-disp-meta">
 
                                         @if($batasWaktu)
+
                                             <span class="sm-disp-deadline">
-                                                Batas: {{ $batasWaktu }}
+                                                Batas:
+                                                {{ $batasWaktu }}
                                             </span>
+
                                         @endif
+
 
                                         <span class="sm-disp-date">
                                             {{ $tanggalDisposisi }}
@@ -1947,6 +2184,7 @@
                         <div class="sm-empty">
 
                             <div class="sm-empty-icon">
+
                                 <svg
                                     class="w-6 h-6"
                                     fill="none"
@@ -1960,11 +2198,14 @@
                                         d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
                                     />
                                 </svg>
+
                             </div>
+
 
                             <p class="sm-empty-title">
                                 Belum ada disposisi
                             </p>
+
 
                             <p class="sm-empty-text">
                                 Belum ada instruksi atau tindak lanjut.
@@ -1975,11 +2216,13 @@
                                 $canManage &&
                                 Route::has('disposisi.create')
                             )
+
                                 <a
                                     href="{{ route('disposisi.create', $suratMasuk) }}"
                                     class="sm-create-btn"
                                     style="margin-top:12px;"
                                 >
+
                                     <svg
                                         class="w-3.5 h-3.5"
                                         fill="none"
@@ -1995,7 +2238,9 @@
                                     </svg>
 
                                     Buat Disposisi
+
                                 </a>
+
                             @endif
 
                         </div>
@@ -2013,16 +2258,18 @@
 
     {{-- =====================================================
          LAMPIRAN DIGITAL
-         FULL WIDTH
+         FULL WIDTH DI BAWAH
     ====================================================== --}}
 
     <div class="sm-card sm-attachment-card">
+
 
         <div class="sm-card-header">
 
             <div class="sm-card-heading">
 
                 <div class="sm-card-heading-icon">
+
                     <svg
                         class="w-4 h-4"
                         fill="none"
@@ -2036,9 +2283,12 @@
                             d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586A1.5 1.5 0 0118 8.5V19a2 2 0 01-2 2z"
                         />
                     </svg>
+
                 </div>
 
+
                 <div>
+
                     <h2 class="sm-card-title">
                         Berkas Lampiran Digital
                     </h2>
@@ -2046,15 +2296,18 @@
                     <p class="sm-card-subtitle">
                         Dokumen digital yang tersimpan pada arsip surat ini.
                     </p>
+
                 </div>
 
             </div>
 
 
             @if($lampiranExtension)
+
                 <span class="sm-extension">
                     .{{ $lampiranExtension }}
                 </span>
+
             @endif
 
         </div>
@@ -2067,11 +2320,13 @@
                 !empty($lampiranUrl)
             )
 
+
                 <div class="sm-file-bar">
 
                     <div class="sm-file-info">
 
                         <div class="sm-file-icon">
+
                             <svg
                                 class="w-4 h-4"
                                 fill="none"
@@ -2082,10 +2337,12 @@
                                     stroke-linecap="round"
                                     stroke-linejoin="round"
                                     stroke-width="1.8"
-                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586A1.5 1.5 0 0118 8.5V19a2 2 0 01-2 2v-5a2 2 0 00-2-2z"
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586A1.5 1.5 0 0118 8.5V19a2 2 0 01-2 2"
                                 />
                             </svg>
+
                         </div>
+
 
                         <div class="min-w-0">
 
@@ -2110,6 +2367,7 @@
                             rel="noopener noreferrer"
                             class="sm-file-btn sm-file-btn-open"
                         >
+
                             <svg
                                 class="w-3.5 h-3.5"
                                 fill="none"
@@ -2125,6 +2383,7 @@
                             </svg>
 
                             Buka
+
                         </a>
 
 
@@ -2133,6 +2392,7 @@
                             download
                             class="sm-file-btn sm-file-btn-download"
                         >
+
                             <svg
                                 class="w-3.5 h-3.5"
                                 fill="none"
@@ -2148,6 +2408,7 @@
                             </svg>
 
                             Unduh
+
                         </a>
 
                     </div>
@@ -2155,9 +2416,9 @@
                 </div>
 
 
-                {{-- =============================================
-                     PREVIEW
-                ============================================== --}}
+                {{-- =================================================
+                     VIEWER
+                ================================================== --}}
 
                 <div class="sm-viewer">
 
@@ -2174,6 +2435,7 @@
 
                         </div>
 
+
                     @elseif($isPdf)
 
                         <iframe
@@ -2182,6 +2444,7 @@
                             class="sm-pdf"
                             loading="lazy"
                         ></iframe>
+
 
                     @else
 
@@ -2197,19 +2460,23 @@
                                     stroke-linecap="round"
                                     stroke-linejoin="round"
                                     stroke-width="1.5"
-                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586A1.5 1.5 0 0118 8.5V19a2 2 0 01-2 2v-5a2 2 0 00-2-2z"
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586A1.5 1.5 0 0118 8.5V19a2 2 0 01-2 2"
                                 />
                             </svg>
+
 
                             <p class="sm-viewer-empty-title">
                                 Pratinjau tidak tersedia
                             </p>
 
+
                             <p class="sm-viewer-empty-text">
                                 Format
+
                                 <strong>
                                     .{{ $lampiranExtension ?: 'dokumen' }}
                                 </strong>
+
                                 tidak dapat ditampilkan langsung.
                                 Gunakan tombol Buka atau Unduh.
                             </p>
@@ -2238,6 +2505,7 @@
                         />
                     </svg>
 
+
                     <p>
                         Tidak ada berkas digital yang dilampirkan pada surat ini.
                     </p>
@@ -2256,9 +2524,11 @@
     ====================================================== --}}
 
     <div class="sm-system-footer">
+
         <span>
             Sistem Kendali Surat Masuk
         </span>
+
     </div>
 
 </div>
