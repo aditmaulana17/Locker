@@ -27,7 +27,7 @@
    PAGE
 ============================================================ */
 
-.create-surat-page {
+.sm-create-page {
     width: 100%;
     max-width: 1040px;
     margin: 0 auto;
@@ -35,9 +35,9 @@
     color: #334155;
 }
 
-.create-surat-page *,
-.create-surat-page *::before,
-.create-surat-page *::after {
+.sm-create-page *,
+.sm-create-page *::before,
+.sm-create-page *::after {
     box-sizing: border-box;
 }
 
@@ -46,13 +46,13 @@
    TOP ACTION
 ============================================================ */
 
-.top-action {
+.sm-top-action {
     display: flex;
     justify-content: flex-end;
     margin-bottom: 10px;
 }
 
-.top-back-btn {
+.sm-back-btn {
     min-height: 36px;
     display: inline-flex;
     align-items: center;
@@ -70,14 +70,10 @@
     transition: all .15s ease;
 }
 
-.top-back-btn:hover {
+.sm-back-btn:hover {
     border-color: #6366f1;
     background: #eef2ff;
     color: #4338ca;
-}
-
-.top-back-btn:active {
-    transform: translateY(1px);
 }
 
 
@@ -85,7 +81,7 @@
    ERROR
 ============================================================ */
 
-.error-box {
+.sm-error-box {
     margin-bottom: 12px;
     padding: 11px 13px;
     border: 1.5px solid #fecaca;
@@ -93,13 +89,13 @@
     background: #fff7f7;
 }
 
-.error-box-inner {
+.sm-error-inner {
     display: flex;
     align-items: flex-start;
     gap: 9px;
 }
 
-.error-icon {
+.sm-error-icon {
     width: 30px;
     height: 30px;
     flex: 0 0 30px;
@@ -112,7 +108,7 @@
     color: #e11d48;
 }
 
-.error-title {
+.sm-error-title {
     margin: 0;
     font-size: 10px;
     line-height: 1.35;
@@ -120,7 +116,7 @@
     color: #be123c;
 }
 
-.error-list {
+.sm-error-list {
     margin: 3px 0 0;
     padding-left: 16px;
     font-size: 9px;
@@ -133,7 +129,7 @@
    MAIN CARD
 ============================================================ */
 
-.main-card {
+.sm-main-card {
     width: 100%;
     overflow: hidden;
     border: 1.5px solid #cbd5e1;
@@ -146,31 +142,33 @@
 
 
 /* ============================================================
-   SYSTEM HEADER
+   HEADER
 ============================================================ */
 
-.system-header {
+.sm-system-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 16px;
     padding: 15px 18px;
-    border-bottom: 1.5px solid #dbeafe;
-    background: linear-gradient(
-        135deg,
-        #f8fbff 0%,
-        #eef2ff 100%
-    );
+    border-bottom: 1.5px solid #c7d2fe;
+    background:
+        linear-gradient(
+            135deg,
+            #f8fbff 0%,
+            #eef2ff 52%,
+            #ecfdf5 100%
+        );
 }
 
-.system-header-left {
+.sm-system-header-left {
     display: flex;
     align-items: center;
     gap: 11px;
     min-width: 0;
 }
 
-.system-header-icon {
+.sm-system-header-icon {
     width: 40px;
     height: 40px;
     flex: 0 0 40px;
@@ -183,7 +181,7 @@
     color: #4f46e5;
 }
 
-.system-header-label {
+.sm-system-header-label {
     margin: 0;
     font-size: 8px;
     line-height: 1.2;
@@ -193,7 +191,7 @@
     color: #4f46e5;
 }
 
-.system-header-title {
+.sm-system-header-title {
     margin: 2px 0 0;
     font-size: 17px;
     line-height: 1.3;
@@ -201,14 +199,14 @@
     color: #1e293b;
 }
 
-.system-header-subtitle {
+.sm-system-header-subtitle {
     margin: 3px 0 0;
     font-size: 9px;
     line-height: 1.4;
     color: #64748b;
 }
 
-.system-header-badge {
+.sm-system-header-badge {
     flex-shrink: 0;
     display: inline-flex;
     align-items: center;
@@ -229,7 +227,7 @@
    BODY
 ============================================================ */
 
-.main-body {
+.sm-main-body {
     padding: 16px;
 }
 
@@ -238,24 +236,24 @@
    SECTION
 ============================================================ */
 
-.section {
+.sm-section {
     width: 100%;
 }
 
-.section + .section {
+.sm-section + .sm-section {
     margin-top: 17px;
     padding-top: 17px;
     border-top: 1.5px solid #e2e8f0;
 }
 
-.section-heading {
+.sm-section-heading {
     display: flex;
     align-items: flex-start;
     gap: 8px;
     margin-bottom: 10px;
 }
 
-.section-marker {
+.sm-section-marker {
     width: 4px;
     height: 27px;
     flex: 0 0 4px;
@@ -264,11 +262,11 @@
     background: #2563eb;
 }
 
-.section-marker-indigo {
+.sm-section-marker-indigo {
     background: #4f46e5;
 }
 
-.section-title {
+.sm-section-title {
     margin: 0;
     font-size: 13px;
     line-height: 1.3;
@@ -276,7 +274,7 @@
     color: #1e293b;
 }
 
-.section-description {
+.sm-section-description {
     margin: 3px 0 0;
     font-size: 8.5px;
     line-height: 1.4;
@@ -285,39 +283,39 @@
 
 
 /* ============================================================
-   FIELD TABLE
+   FIELD
 ============================================================ */
 
-.field-table {
+.sm-field-table {
     overflow: hidden;
-    border: 1.5px solid #cbd5e1;
+    border: 1.5px solid #94a3b8;
     border-radius: 9px;
     background: #ffffff;
 }
 
-.field-grid {
+.sm-field-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.field {
+.sm-field {
     min-width: 0;
     padding: 11px 12px;
-    border-right: 1.5px solid #e2e8f0;
-    border-bottom: 1.5px solid #e2e8f0;
+    border-right: 1.5px solid #cbd5e1;
+    border-bottom: 1.5px solid #cbd5e1;
     background: #ffffff;
 }
 
-.field:nth-child(2n) {
+.sm-field:nth-child(2n) {
     border-right: 0;
 }
 
-.field-full {
+.sm-field-full {
     grid-column: 1 / -1;
     border-right: 0;
 }
 
-.field:last-child {
+.sm-field:last-child {
     border-bottom: 0;
 }
 
@@ -326,8 +324,8 @@
    LABEL
 ============================================================ */
 
-.field-label,
-.physical-label {
+.sm-field-label,
+.sm-physical-label {
     display: block;
     margin-bottom: 5px;
     font-size: 9px;
@@ -338,7 +336,7 @@
     color: #475569;
 }
 
-.required {
+.sm-required {
     color: #dc2626;
 }
 
@@ -347,11 +345,11 @@
    CONTROL
 ============================================================ */
 
-.control {
+.sm-control {
     width: 100%;
     min-height: 40px;
     padding: 8px 10px;
-    border: 1.5px solid #cbd5e1;
+    border: 1.5px solid #94a3b8;
     border-radius: 7px;
     background: #ffffff;
     color: #1e293b;
@@ -364,39 +362,39 @@
         background-color .15s ease;
 }
 
-input.control,
-select.control {
+input.sm-control,
+select.sm-control {
     height: 40px;
     padding: 0 10px;
 }
 
-textarea.control {
+textarea.sm-control {
     min-height: 82px;
     padding: 9px 10px;
     line-height: 1.5;
     resize: vertical;
 }
 
-.control::placeholder {
+.sm-control::placeholder {
     color: #94a3b8;
 }
 
-.control:hover {
-    border-color: #94a3b8;
+.sm-control:hover {
+    border-color: #64748b;
 }
 
-.control:focus {
-    border-color: #6366f1;
+.sm-control:focus {
+    border-color: #2563eb;
     box-shadow:
-        0 0 0 3px rgba(99,102,241,.08);
+        0 0 0 3px rgba(37,99,235,.08);
 }
 
-.control-error {
+.sm-control-error {
     border-color: #ef4444 !important;
     background: #fff7f7 !important;
 }
 
-.field-error {
+.sm-field-error {
     margin: 4px 0 0;
     font-size: 8px;
     line-height: 1.4;
@@ -404,47 +402,54 @@ textarea.control {
     color: #dc2626;
 }
 
+.sm-help {
+    margin: 4px 0 0;
+    font-size: 7.5px;
+    line-height: 1.45;
+    color: #94a3b8;
+}
+
 
 /* ============================================================
    ATTACHMENT GRID
 ============================================================ */
 
-.attachment-grid {
+.sm-attachment-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
     align-items: stretch;
 }
 
-.attachment-card {
+.sm-attachment-card {
     min-width: 0;
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    border: 1.5px solid #cbd5e1;
+    border: 1.5px solid #94a3b8;
     border-radius: 9px;
     background: #ffffff;
 }
 
-.attachment-header {
+.sm-attachment-header {
     min-height: 54px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 8px;
     padding: 9px 11px;
-    border-bottom: 1.5px solid #e2e8f0;
+    border-bottom: 1.5px solid #cbd5e1;
     background: #f8fafc;
 }
 
-.attachment-header-left {
+.sm-attachment-header-left {
     display: flex;
     align-items: center;
     gap: 8px;
     min-width: 0;
 }
 
-.attachment-icon {
+.sm-attachment-icon {
     width: 32px;
     height: 32px;
     flex: 0 0 32px;
@@ -457,12 +462,12 @@ textarea.control {
     color: #2563eb;
 }
 
-.attachment-icon.physical {
+.sm-attachment-icon.physical {
     border-color: #c7d2fe;
     color: #4f46e5;
 }
 
-.attachment-title {
+.sm-attachment-title {
     margin: 0;
     font-size: 10px;
     line-height: 1.3;
@@ -470,14 +475,14 @@ textarea.control {
     color: #1e293b;
 }
 
-.attachment-description {
+.sm-attachment-description {
     margin: 2px 0 0;
     font-size: 7.5px;
     line-height: 1.4;
     color: #64748b;
 }
 
-.attachment-badge {
+.sm-attachment-badge {
     flex-shrink: 0;
     padding: 4px 7px;
     border: 1px solid #cbd5e1;
@@ -490,7 +495,7 @@ textarea.control {
     white-space: nowrap;
 }
 
-.attachment-body {
+.sm-attachment-body {
     display: flex;
     flex: 1;
     flex-direction: column;
@@ -503,7 +508,7 @@ textarea.control {
    INFO BOX
 ============================================================ */
 
-.info-box {
+.sm-info-box {
     display: flex;
     align-items: flex-start;
     gap: 6px;
@@ -513,7 +518,7 @@ textarea.control {
     background: #eff6ff;
 }
 
-.info-box svg {
+.sm-info-box svg {
     width: 14px;
     height: 14px;
     flex: 0 0 14px;
@@ -521,14 +526,14 @@ textarea.control {
     color: #2563eb;
 }
 
-.info-box-text {
+.sm-info-text {
     margin: 0;
     font-size: 7.5px;
     line-height: 1.5;
     color: #1d4ed8;
 }
 
-.info-box-text strong {
+.sm-info-text strong {
     font-weight: 800;
 }
 
@@ -537,13 +542,13 @@ textarea.control {
    MODE
 ============================================================ */
 
-.mode-grid {
+.sm-mode-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 6px;
 }
 
-.mode-btn {
+.sm-mode-btn {
     min-height: 40px;
     display: flex;
     align-items: center;
@@ -560,12 +565,12 @@ textarea.control {
     transition: all .15s ease;
 }
 
-.mode-btn:hover {
+.sm-mode-btn:hover {
     border-color: #818cf8;
     background: #eef2ff;
 }
 
-.mode-btn.active {
+.sm-mode-btn.active {
     border-color: #4f46e5;
     background: #eef2ff;
     color: #4338ca;
@@ -576,9 +581,9 @@ textarea.control {
    UPLOAD
 ============================================================ */
 
-.upload-box {
+.sm-upload-box {
     position: relative;
-    min-height: 108px;
+    min-height: 110px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -592,17 +597,17 @@ textarea.control {
     transition: all .15s ease;
 }
 
-.upload-box:hover {
+.sm-upload-box:hover {
     border-color: #6366f1;
     background: #eef2ff;
 }
 
-.upload-box.has-file {
+.sm-upload-box.has-file {
     border-color: #34d399;
     background: #ecfdf5;
 }
 
-.upload-icon {
+.sm-upload-icon {
     width: 34px;
     height: 34px;
     display: flex;
@@ -614,25 +619,25 @@ textarea.control {
     color: #4f46e5;
 }
 
-.upload-box.has-file .upload-icon {
+.sm-upload-box.has-file .sm-upload-icon {
     background: #d1fae5;
     color: #059669;
 }
 
-.upload-title {
+.sm-upload-title {
     font-size: 8px;
     line-height: 1.3;
     font-weight: 800;
     color: #334155;
 }
 
-.upload-format {
+.sm-upload-format {
     margin-top: 2px;
     font-size: 7px;
     color: #64748b;
 }
 
-.upload-limit {
+.sm-upload-limit {
     margin-top: 3px;
     padding: 3px 7px;
     border-radius: 999px;
@@ -642,12 +647,21 @@ textarea.control {
     font-weight: 700;
 }
 
+.sm-upload-input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    opacity: 0;
+}
+
 
 /* ============================================================
    SELECTED FILE
 ============================================================ */
 
-.selected-file {
+.sm-selected-file {
     display: flex;
     align-items: center;
     gap: 7px;
@@ -657,7 +671,7 @@ textarea.control {
     background: #ecfdf5;
 }
 
-.selected-file-icon {
+.sm-selected-file-icon {
     width: 27px;
     height: 27px;
     flex: 0 0 27px;
@@ -669,12 +683,12 @@ textarea.control {
     color: #059669;
 }
 
-.selected-file-content {
+.sm-selected-file-content {
     min-width: 0;
     flex: 1;
 }
 
-.selected-file-title {
+.sm-selected-file-title {
     margin: 0;
     font-size: 7px;
     line-height: 1.2;
@@ -682,7 +696,7 @@ textarea.control {
     color: #047857;
 }
 
-.selected-file-name {
+.sm-selected-file-name {
     margin: 1px 0 0;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -693,14 +707,14 @@ textarea.control {
     color: #334155;
 }
 
-.selected-file-size {
+.sm-selected-file-size {
     margin: 1px 0 0;
     font-size: 6.5px;
     line-height: 1.3;
     color: #64748b;
 }
 
-.clear-file-btn {
+.sm-clear-file-btn {
     width: 26px;
     height: 26px;
     flex: 0 0 26px;
@@ -712,10 +726,9 @@ textarea.control {
     background: #ffffff;
     color: #059669;
     cursor: pointer;
-    transition: all .15s ease;
 }
 
-.clear-file-btn:hover {
+.sm-clear-file-btn:hover {
     background: #dcfce7;
 }
 
@@ -724,14 +737,32 @@ textarea.control {
    COMPRESSION
 ============================================================ */
 
-.compression-status {
-    padding: 7px 8px;
-    border: 1px solid #bfdbfe;
+.sm-compression-status {
+    padding: 8px 9px;
+    border: 1px solid #c7d2fe;
     border-radius: 7px;
-    background: #eff6ff;
-    color: #1d4ed8;
+    background: #eef2ff;
+    color: #4338ca;
     font-size: 7px;
-    line-height: 1.45;
+    line-height: 1.55;
+}
+
+.sm-compression-status.success {
+    border-color: #a7f3d0;
+    background: #ecfdf5;
+    color: #047857;
+}
+
+.sm-compression-status.warning {
+    border-color: #fde68a;
+    background: #fffbeb;
+    color: #a16207;
+}
+
+.sm-compression-status.error {
+    border-color: #fecaca;
+    background: #fff1f2;
+    color: #be123c;
 }
 
 
@@ -739,20 +770,20 @@ textarea.control {
    CAMERA
 ============================================================ */
 
-.camera-box {
+.sm-camera-box {
     overflow: hidden;
     border: 1.5px solid #475569;
     border-radius: 8px;
     background: #0f172a;
 }
 
-.camera-preview {
+.sm-camera-preview {
     position: relative;
     min-height: 220px;
     background: #0f172a;
 }
 
-.camera-video {
+.sm-camera-video {
     width: 100%;
     height: 220px;
     display: block;
@@ -760,7 +791,7 @@ textarea.control {
     background: #0f172a;
 }
 
-.camera-image-preview {
+.sm-camera-image {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -770,7 +801,7 @@ textarea.control {
     background: #0f172a;
 }
 
-.camera-placeholder {
+.sm-camera-placeholder {
     position: absolute;
     inset: 0;
     display: flex;
@@ -781,7 +812,7 @@ textarea.control {
     text-align: center;
 }
 
-.camera-placeholder-icon {
+.sm-camera-placeholder-icon {
     width: 38px;
     height: 38px;
     display: flex;
@@ -793,21 +824,21 @@ textarea.control {
     color: #94a3b8;
 }
 
-.camera-placeholder-title {
+.sm-camera-placeholder-title {
     margin: 0;
     font-size: 8px;
     font-weight: 800;
     color: #cbd5e1;
 }
 
-.camera-placeholder-desc {
+.sm-camera-placeholder-desc {
     margin: 2px 0 0;
     font-size: 6.5px;
     line-height: 1.35;
     color: #64748b;
 }
 
-.camera-error {
+.sm-camera-error {
     position: absolute;
     left: 6px;
     right: 6px;
@@ -822,7 +853,7 @@ textarea.control {
     line-height: 1.4;
 }
 
-.camera-frame {
+.sm-camera-frame {
     position: absolute;
     inset: 22px;
     border: 1px dashed rgba(255,255,255,.22);
@@ -830,7 +861,7 @@ textarea.control {
     pointer-events: none;
 }
 
-.camera-actions {
+.sm-camera-actions {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 5px;
@@ -838,7 +869,7 @@ textarea.control {
     background: #111827;
 }
 
-.camera-btn {
+.sm-camera-btn {
     min-height: 31px;
     padding: 0 5px;
     border-radius: 6px;
@@ -848,28 +879,28 @@ textarea.control {
     transition: all .15s ease;
 }
 
-.camera-btn:hover:not(:disabled) {
+.sm-camera-btn:hover:not(:disabled) {
     filter: brightness(.96);
 }
 
-.camera-btn:disabled {
+.sm-camera-btn:disabled {
     opacity: .45;
     cursor: not-allowed;
 }
 
-.camera-btn-primary {
+.sm-camera-btn-primary {
     border: 1px solid #4338ca;
     background: #4f46e5;
     color: #ffffff;
 }
 
-.camera-btn-success {
+.sm-camera-btn-success {
     border: 1px solid #059669;
     background: #10b981;
     color: #ffffff;
 }
 
-.camera-btn-secondary {
+.sm-camera-btn-secondary {
     border: 1px solid #64748b;
     background: #ffffff;
     color: #334155;
@@ -877,10 +908,10 @@ textarea.control {
 
 
 /* ============================================================
-   SCAN RESULT
+   SNAPSHOT
 ============================================================ */
 
-.snapshot-preview {
+.sm-snapshot-preview {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -894,13 +925,13 @@ textarea.control {
     font-weight: 800;
 }
 
-.snapshot-preview-text {
+.sm-snapshot-text {
     min-width: 0;
     flex: 1;
     line-height: 1.45;
 }
 
-.retake-btn {
+.sm-retake-btn {
     min-height: 29px;
     flex: 0 0 auto;
     display: inline-flex;
@@ -915,21 +946,19 @@ textarea.control {
     font-size: 7px;
     font-weight: 800;
     cursor: pointer;
-    transition: all .15s ease;
 }
 
-.retake-btn:hover {
+.sm-retake-btn:hover {
     border-color: #818cf8;
     background: #eef2ff;
-    color: #3730a3;
 }
 
 
 /* ============================================================
-   PHYSICAL ARCHIVE
+   PHYSICAL
 ============================================================ */
 
-.physical-box {
+.sm-physical-box {
     display: flex;
     flex: 1;
     flex-direction: column;
@@ -939,7 +968,7 @@ textarea.control {
     background: #f8fafc;
 }
 
-.physical-icon {
+.sm-physical-icon {
     width: 37px;
     height: 37px;
     display: flex;
@@ -950,7 +979,7 @@ textarea.control {
     color: #4f46e5;
 }
 
-.physical-title {
+.sm-physical-title {
     margin: 7px 0 0;
     font-size: 10px;
     line-height: 1.3;
@@ -958,18 +987,18 @@ textarea.control {
     color: #334155;
 }
 
-.physical-description {
+.sm-physical-description {
     margin: 3px 0 0;
     font-size: 7.5px;
     line-height: 1.5;
     color: #64748b;
 }
 
-.physical-field {
+.sm-physical-field {
     margin-top: 11px;
 }
 
-.physical-example {
+.sm-physical-example {
     margin-top: 6px;
     padding: 7px;
     border: 1px solid #cbd5e1;
@@ -977,18 +1006,18 @@ textarea.control {
     background: #ffffff;
 }
 
-.physical-example p {
+.sm-physical-example p {
     margin: 0;
     font-size: 7px;
     line-height: 1.45;
     color: #64748b;
 }
 
-.physical-example strong {
+.sm-physical-example strong {
     color: #334155;
 }
 
-.physical-note {
+.sm-physical-note {
     margin-top: auto;
     padding: 7px;
     border: 1px solid #cbd5e1;
@@ -996,7 +1025,7 @@ textarea.control {
     background: #ffffff;
 }
 
-.physical-note p {
+.sm-physical-note p {
     margin: 0;
     font-size: 7px;
     line-height: 1.45;
@@ -1008,17 +1037,17 @@ textarea.control {
    FOOTER
 ============================================================ */
 
-.form-footer {
+.sm-form-footer {
     display: flex;
     align-items: center;
     justify-content: flex-end;
     gap: 7px;
     padding: 10px 14px;
-    border-top: 1.5px solid #e2e8f0;
+    border-top: 1.5px solid #cbd5e1;
     background: #f8fafc;
 }
 
-.footer-btn {
+.sm-footer-btn {
     min-height: 35px;
     display: inline-flex;
     align-items: center;
@@ -1033,30 +1062,30 @@ textarea.control {
     transition: all .15s ease;
 }
 
-.footer-cancel {
+.sm-footer-cancel {
     border: 1.5px solid #cbd5e1;
     background: #ffffff;
     color: #475569;
 }
 
-.footer-cancel:hover {
+.sm-footer-cancel:hover {
     border-color: #94a3b8;
     background: #f1f5f9;
 }
 
-.footer-submit {
+.sm-footer-submit {
     border: 1.5px solid #2563eb;
     background: #2563eb;
     color: #ffffff;
     box-shadow: 0 3px 7px rgba(37,99,235,.12);
 }
 
-.footer-submit:hover:not(:disabled) {
+.sm-footer-submit:hover:not(:disabled) {
     border-color: #1d4ed8;
     background: #1d4ed8;
 }
 
-.footer-submit:disabled {
+.sm-footer-submit:disabled {
     opacity: .6;
     cursor: not-allowed;
 }
@@ -1066,7 +1095,7 @@ textarea.control {
    UTILITY
 ============================================================ */
 
-.hidden {
+.sm-hidden {
     display: none !important;
 }
 
@@ -1076,133 +1105,132 @@ textarea.control {
 ============================================================ */
 
 @media (max-width: 820px) {
-
-    .create-surat-page {
+    .sm-create-page {
         max-width: 760px;
     }
 
-    .attachment-grid {
+    .sm-attachment-grid {
         grid-template-columns: 1fr;
     }
 }
 
 @media (max-width: 640px) {
 
-    .create-surat-page {
+    .sm-create-page {
         padding: 6px 9px 20px;
     }
 
-    .top-action {
+    .sm-top-action {
         justify-content: stretch;
     }
 
-    .top-back-btn {
+    .sm-back-btn {
         width: 100%;
     }
 
-    .system-header {
+    .sm-system-header {
         align-items: flex-start;
         flex-direction: column;
     }
 
-    .system-header-badge {
+    .sm-system-header-badge {
         align-self: flex-start;
     }
 
-    .main-body {
+    .sm-main-body {
         padding: 11px;
     }
 
-    .field-grid {
+    .sm-field-grid {
         grid-template-columns: 1fr;
     }
 
-    .field,
-    .field:nth-child(2n) {
+    .sm-field,
+    .sm-field:nth-child(2n) {
         padding: 10px;
         border-right: 0;
-        border-bottom: 1.5px solid #e2e8f0;
+        border-bottom: 1.5px solid #cbd5e1;
     }
 
-    .field-full {
+    .sm-field-full {
         grid-column: auto;
     }
 
-    .mode-grid {
+    .sm-mode-grid {
         grid-template-columns: 1fr;
     }
 
-    .camera-actions {
+    .sm-camera-actions {
         grid-template-columns: 1fr;
     }
 
-    .snapshot-preview {
+    .sm-snapshot-preview {
         align-items: stretch;
         flex-direction: column;
     }
 
-    .retake-btn {
+    .sm-retake-btn {
         width: 100%;
     }
 
-    .form-footer {
+    .sm-form-footer {
         flex-direction: column-reverse;
         align-items: stretch;
     }
 
-    .footer-btn {
+    .sm-footer-btn {
         width: 100%;
     }
 }
 
 @media (max-width: 420px) {
 
-    .system-header {
+    .sm-system-header {
         padding: 12px;
     }
 
-    .system-header-title {
+    .sm-system-header-title {
         font-size: 15px;
     }
 
-    .main-body {
+    .sm-main-body {
         padding: 9px;
     }
 
-    .field {
+    .sm-field {
         padding: 9px;
     }
 
-    .attachment-body {
+    .sm-attachment-body {
         padding: 8px;
     }
 
-    .control {
+    .sm-control {
         font-size: 11px;
     }
 
-    .camera-preview {
+    .sm-camera-preview {
         min-height: 200px;
     }
 
-    .camera-video {
+    .sm-camera-video {
         height: 200px;
     }
 }
 </style>
 
 
-<div class="create-surat-page">
+<div class="sm-create-page">
 
     {{-- =========================================================
-         TOMBOL KEMBALI
+         KEMBALI
     ========================================================== --}}
 
-    <div class="top-action">
+    <div class="sm-top-action">
 
         <a
             href="{{ route('surat-masuk.index') }}"
-            class="top-back-btn"
+            class="sm-back-btn"
         >
 
             <svg
@@ -1233,11 +1261,11 @@ textarea.control {
 
     @if($formErrors->any())
 
-        <div class="error-box">
+        <div class="sm-error-box">
 
-            <div class="error-box-inner">
+            <div class="sm-error-inner">
 
-                <div class="error-icon">
+                <div class="sm-error-icon">
 
                     <svg
                         class="h-4 w-4"
@@ -1250,7 +1278,7 @@ textarea.control {
                             stroke-linecap="round"
                             stroke-linejoin="round"
                             stroke-width="2"
-                            d="M12 9v4m0 4h.01M10.29 3.86l-8.82 15A2 2 0 003.2 21.86h17.6a2 2 0 001.73-3l-8.82-15a2 2 0 00-3.42 0z"
+                            d="M12 9v4m0 4h.01M10.29 3.86l-8.82 15A2 2 0 003.2 21.86h17.6a2 2 0 001.73-3l8.82-15a2 2 0 003.42 0z"
                         />
                     </svg>
 
@@ -1258,11 +1286,11 @@ textarea.control {
 
                 <div>
 
-                    <p class="error-title">
+                    <p class="sm-error-title">
                         Data belum dapat disimpan.
                     </p>
 
-                    <ul class="error-list">
+                    <ul class="sm-error-list">
 
                         @foreach($formErrors->all() as $error)
 
@@ -1288,7 +1316,7 @@ textarea.control {
     ========================================================== --}}
 
     <form
-        id="form-surat"
+        id="form-surat-masuk"
         method="POST"
         action="{{ route('surat-masuk.store') }}"
         enctype="multipart/form-data"
@@ -1302,18 +1330,17 @@ textarea.control {
             value="{{ old('nomor_agenda', $nomorAgenda ?? '') }}"
         >
 
-
-        <div class="main-card">
+        <div class="sm-main-card">
 
             {{-- =================================================
                  HEADER
             ================================================== --}}
 
-            <div class="system-header">
+            <div class="sm-system-header">
 
-                <div class="system-header-left">
+                <div class="sm-system-header-left">
 
-                    <div class="system-header-icon">
+                    <div class="sm-system-header-icon">
 
                         <svg
                             class="h-5 w-5"
@@ -1340,18 +1367,17 @@ textarea.control {
 
                     </div>
 
-
                     <div class="min-w-0">
 
-                        <p class="system-header-label">
+                        <p class="sm-system-header-label">
                             Sistem Arsip Masuk
                         </p>
 
-                        <h1 class="system-header-title">
+                        <h1 class="sm-system-header-title">
                             Input Surat Masuk
                         </h1>
 
-                        <p class="system-header-subtitle">
+                        <p class="sm-system-header-subtitle">
                             Masukkan data surat masuk untuk disimpan ke dalam arsip digital.
                         </p>
 
@@ -1359,8 +1385,7 @@ textarea.control {
 
                 </div>
 
-
-                <span class="system-header-badge">
+                <span class="sm-system-header-badge">
                     Arsip Digital
                 </span>
 
@@ -1371,25 +1396,25 @@ textarea.control {
                  BODY
             ================================================== --}}
 
-            <div class="main-body">
+            <div class="sm-main-body">
 
                 {{-- =================================================
                      INFORMASI UTAMA
                 ================================================== --}}
 
-                <section class="section">
+                <section class="sm-section">
 
-                    <div class="section-heading">
+                    <div class="sm-section-heading">
 
-                        <div class="section-marker"></div>
+                        <div class="sm-section-marker"></div>
 
                         <div>
 
-                            <h2 class="section-title">
+                            <h2 class="sm-section-title">
                                 Informasi Utama Surat
                             </h2>
 
-                            <p class="section-description">
+                            <p class="sm-section-description">
                                 Lengkapi identitas dan informasi utama surat masuk.
                             </p>
 
@@ -1398,20 +1423,20 @@ textarea.control {
                     </div>
 
 
-                    <div class="field-table">
+                    <div class="sm-field-table">
 
-                        <div class="field-grid">
+                        <div class="sm-field-grid">
 
                             {{-- NOMOR SURAT --}}
 
-                            <div class="field">
+                            <div class="sm-field">
 
                                 <label
                                     for="nomor_surat"
-                                    class="field-label"
+                                    class="sm-field-label"
                                 >
                                     Nomor Surat
-                                    <span class="required">*</span>
+                                    <span class="sm-required">*</span>
                                 </label>
 
                                 <input
@@ -1423,12 +1448,12 @@ textarea.control {
                                     autocomplete="off"
                                     maxlength="255"
                                     required
-                                    class="control {{ $formErrors->has('nomor_surat') ? 'control-error' : '' }}"
+                                    class="sm-control {{ $formErrors->has('nomor_surat') ? 'sm-control-error' : '' }}"
                                 >
 
                                 @if($formErrors->has('nomor_surat'))
 
-                                    <p class="field-error">
+                                    <p class="sm-field-error">
                                         {{ $formErrors->first('nomor_surat') }}
                                     </p>
 
@@ -1439,14 +1464,14 @@ textarea.control {
 
                             {{-- PENGIRIM --}}
 
-                            <div class="field">
+                            <div class="sm-field">
 
                                 <label
                                     for="pengirim"
-                                    class="field-label"
+                                    class="sm-field-label"
                                 >
                                     Instansi Pengirim
-                                    <span class="required">*</span>
+                                    <span class="sm-required">*</span>
                                 </label>
 
                                 <input
@@ -1458,12 +1483,12 @@ textarea.control {
                                     autocomplete="organization"
                                     maxlength="255"
                                     required
-                                    class="control {{ $formErrors->has('pengirim') ? 'control-error' : '' }}"
+                                    class="sm-control {{ $formErrors->has('pengirim') ? 'sm-control-error' : '' }}"
                                 >
 
                                 @if($formErrors->has('pengirim'))
 
-                                    <p class="field-error">
+                                    <p class="sm-field-error">
                                         {{ $formErrors->first('pengirim') }}
                                     </p>
 
@@ -1474,14 +1499,14 @@ textarea.control {
 
                             {{-- TANGGAL SURAT --}}
 
-                            <div class="field">
+                            <div class="sm-field">
 
                                 <label
                                     for="tanggal_surat"
-                                    class="field-label"
+                                    class="sm-field-label"
                                 >
                                     Tanggal Surat
-                                    <span class="required">*</span>
+                                    <span class="sm-required">*</span>
                                 </label>
 
                                 <input
@@ -1490,12 +1515,12 @@ textarea.control {
                                     type="date"
                                     value="{{ old('tanggal_surat') }}"
                                     required
-                                    class="control {{ $formErrors->has('tanggal_surat') ? 'control-error' : '' }}"
+                                    class="sm-control {{ $formErrors->has('tanggal_surat') ? 'sm-control-error' : '' }}"
                                 >
 
                                 @if($formErrors->has('tanggal_surat'))
 
-                                    <p class="field-error">
+                                    <p class="sm-field-error">
                                         {{ $formErrors->first('tanggal_surat') }}
                                     </p>
 
@@ -1504,16 +1529,16 @@ textarea.control {
                             </div>
 
 
-                            {{-- TANGGAL DITERIMA --}}
+                            {{-- TANGGAL TERIMA --}}
 
-                            <div class="field">
+                            <div class="sm-field">
 
                                 <label
                                     for="tanggal_terima"
-                                    class="field-label"
+                                    class="sm-field-label"
                                 >
                                     Tanggal Diterima
-                                    <span class="required">*</span>
+                                    <span class="sm-required">*</span>
                                 </label>
 
                                 <input
@@ -1522,12 +1547,12 @@ textarea.control {
                                     type="date"
                                     value="{{ old('tanggal_terima', now()->format('Y-m-d')) }}"
                                     required
-                                    class="control {{ $formErrors->has('tanggal_terima') ? 'control-error' : '' }}"
+                                    class="sm-control {{ $formErrors->has('tanggal_terima') ? 'sm-control-error' : '' }}"
                                 >
 
                                 @if($formErrors->has('tanggal_terima'))
 
-                                    <p class="field-error">
+                                    <p class="sm-field-error">
                                         {{ $formErrors->first('tanggal_terima') }}
                                     </p>
 
@@ -1538,21 +1563,21 @@ textarea.control {
 
                             {{-- KATEGORI --}}
 
-                            <div class="field">
+                            <div class="sm-field">
 
                                 <label
                                     for="kategori_surat_id"
-                                    class="field-label"
+                                    class="sm-field-label"
                                 >
                                     Kategori Surat
-                                    <span class="required">*</span>
+                                    <span class="sm-required">*</span>
                                 </label>
 
                                 <select
                                     id="kategori_surat_id"
                                     name="kategori_surat_id"
                                     required
-                                    class="control {{ $formErrors->has('kategori_surat_id') ? 'control-error' : '' }}"
+                                    class="sm-control {{ $formErrors->has('kategori_surat_id') ? 'sm-control-error' : '' }}"
                                 >
 
                                     <option value="">
@@ -1571,9 +1596,7 @@ textarea.control {
                                             {{ $kategori->nama_kategori }}
 
                                             @if(!empty($kategori->sifat))
-
                                                 ({{ ucfirst($kategori->sifat) }})
-
                                             @endif
 
                                         </option>
@@ -1584,7 +1607,7 @@ textarea.control {
 
                                 @if($formErrors->has('kategori_surat_id'))
 
-                                    <p class="field-error">
+                                    <p class="sm-field-error">
                                         {{ $formErrors->first('kategori_surat_id') }}
                                     </p>
 
@@ -1595,21 +1618,21 @@ textarea.control {
 
                             {{-- STATUS --}}
 
-                            <div class="field">
+                            <div class="sm-field">
 
                                 <label
                                     for="status"
-                                    class="field-label"
+                                    class="sm-field-label"
                                 >
                                     Status Surat
-                                    <span class="required">*</span>
+                                    <span class="sm-required">*</span>
                                 </label>
 
                                 <select
                                     id="status"
                                     name="status"
                                     required
-                                    class="control {{ $formErrors->has('status') ? 'control-error' : '' }}"
+                                    class="sm-control {{ $formErrors->has('status') ? 'sm-control-error' : '' }}"
                                 >
 
                                     @foreach([
@@ -1635,7 +1658,7 @@ textarea.control {
 
                                 @if($formErrors->has('status'))
 
-                                    <p class="field-error">
+                                    <p class="sm-field-error">
                                         {{ $formErrors->first('status') }}
                                     </p>
 
@@ -1646,14 +1669,14 @@ textarea.control {
 
                             {{-- PERIHAL --}}
 
-                            <div class="field field-full">
+                            <div class="sm-field sm-field-full">
 
                                 <label
                                     for="perihal"
-                                    class="field-label"
+                                    class="sm-field-label"
                                 >
                                     Perihal
-                                    <span class="required">*</span>
+                                    <span class="sm-required">*</span>
                                 </label>
 
                                 <textarea
@@ -1663,12 +1686,12 @@ textarea.control {
                                     maxlength="1000"
                                     required
                                     placeholder="Tuliskan perihal surat secara jelas"
-                                    class="control {{ $formErrors->has('perihal') ? 'control-error' : '' }}"
+                                    class="sm-control {{ $formErrors->has('perihal') ? 'sm-control-error' : '' }}"
                                 >{{ old('perihal') }}</textarea>
 
                                 @if($formErrors->has('perihal'))
 
-                                    <p class="field-error">
+                                    <p class="sm-field-error">
                                         {{ $formErrors->first('perihal') }}
                                     </p>
 
@@ -1687,20 +1710,21 @@ textarea.control {
                      LAMPIRAN
                 ================================================== --}}
 
-                <section class="section">
+                <section class="sm-section">
 
-                    <div class="section-heading">
+                    <div class="sm-section-heading">
 
-                        <div class="section-marker section-marker-indigo"></div>
+                        <div class="sm-section-marker sm-section-marker-indigo"></div>
 
                         <div>
 
-                            <h2 class="section-title">
+                            <h2 class="sm-section-title">
                                 Lampiran Dokumen & Arsip Fisik
                             </h2>
 
-                            <p class="section-description">
-                                Upload dokumen atau scan menggunakan kamera, lalu isi lokasi arsip fisiknya.
+                            <p class="sm-section-description">
+                                Upload dokumen atau scan menggunakan kamera,
+                                lalu isi lokasi arsip fisiknya.
                             </p>
 
                         </div>
@@ -1708,19 +1732,19 @@ textarea.control {
                     </div>
 
 
-                    <div class="attachment-grid">
+                    <div class="sm-attachment-grid">
 
                         {{-- =================================================
                              BERKAS DIGITAL
                         ================================================== --}}
 
-                        <div class="attachment-card">
+                        <div class="sm-attachment-card">
 
-                            <div class="attachment-header">
+                            <div class="sm-attachment-header">
 
-                                <div class="attachment-header-left">
+                                <div class="sm-attachment-header-left">
 
-                                    <div class="attachment-icon">
+                                    <div class="sm-attachment-icon">
 
                                         <svg
                                             class="h-4 w-4"
@@ -1747,14 +1771,13 @@ textarea.control {
 
                                     </div>
 
-
                                     <div class="min-w-0">
 
-                                        <h3 class="attachment-title">
+                                        <h3 class="sm-attachment-title">
                                             Berkas Digital
                                         </h3>
 
-                                        <p class="attachment-description">
+                                        <p class="sm-attachment-description">
                                             PDF, JPG, JPEG, PNG · Maksimal 10 MB
                                         </p>
 
@@ -1762,9 +1785,8 @@ textarea.control {
 
                                 </div>
 
-
                                 <span
-                                    class="attachment-badge"
+                                    class="sm-attachment-badge"
                                     style="color:#dc2626;border-color:#fecaca;background:#fff1f2;"
                                 >
                                     Wajib
@@ -1773,11 +1795,11 @@ textarea.control {
                             </div>
 
 
-                            <div class="attachment-body">
+                            <div class="sm-attachment-body">
 
-                                {{-- INFO --}}
+                                {{-- INFO KOMPRESI --}}
 
-                                <div class="info-box">
+                                <div class="sm-info-box">
 
                                     <svg
                                         fill="none"
@@ -1793,13 +1815,14 @@ textarea.control {
                                         />
                                     </svg>
 
-                                    <p class="info-box-text">
+                                    <p class="sm-info-text">
 
                                         <strong>Maksimal 10 MB.</strong>
 
                                         PDF tetap PDF.
-                                        JPG/JPEG/PNG dikompres otomatis
-                                        menjadi JPG sebelum dikirim.
+                                        JPG/JPEG/PNG otomatis diproses,
+                                        di-resize bila diperlukan,
+                                        lalu dikompres menjadi JPG.
 
                                     </p>
 
@@ -1808,13 +1831,13 @@ textarea.control {
 
                                 {{-- MODE --}}
 
-                                <div class="mode-grid">
+                                <div class="sm-mode-grid">
 
                                     <button
                                         type="button"
-                                        id="btn-upload"
+                                        id="sm-btn-upload"
                                         aria-selected="true"
-                                        class="mode-btn active"
+                                        class="sm-mode-btn active"
                                     >
 
                                         <svg
@@ -1822,7 +1845,6 @@ textarea.control {
                                             fill="none"
                                             stroke="currentColor"
                                             viewBox="0 0 24 24"
-                                            aria-hidden="true"
                                         >
                                             <path
                                                 stroke-linecap="round"
@@ -1839,9 +1861,9 @@ textarea.control {
 
                                     <button
                                         type="button"
-                                        id="btn-camera"
+                                        id="sm-btn-camera"
                                         aria-selected="false"
-                                        class="mode-btn"
+                                        class="sm-mode-btn"
                                     >
 
                                         <svg
@@ -1849,7 +1871,6 @@ textarea.control {
                                             fill="none"
                                             stroke="currentColor"
                                             viewBox="0 0 24 24"
-                                            aria-hidden="true"
                                         >
                                             <path
                                                 stroke-linecap="round"
@@ -1866,60 +1887,57 @@ textarea.control {
                                 </div>
 
 
-                                {{-- UPLOAD PANEL --}}
+                                {{-- =================================================
+                                     UPLOAD PANEL
+                                ================================================== --}}
 
-                                <div id="upload-panel">
+                                <div id="sm-upload-panel">
 
                                     <label
-                                        id="upload-box"
                                         for="lampiran_file"
-                                        class="upload-box"
+                                        id="sm-upload-box"
+                                        class="sm-upload-box"
                                     >
 
-                                        <span class="upload-icon">
+                                        <span class="sm-upload-icon">
 
                                             <svg
                                                 class="h-4 w-4"
                                                 fill="none"
                                                 stroke="currentColor"
                                                 viewBox="0 0 24 24"
-                                                aria-hidden="true"
                                             >
                                                 <path
                                                     stroke-linecap="round"
                                                     stroke-linejoin="round"
                                                     stroke-width="1.8"
-                                                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 0115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l3 3m-3-3v12"
+                                                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 0115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
                                                 />
                                             </svg>
 
                                         </span>
 
-
                                         <span
-                                            id="upload-title"
-                                            class="upload-title"
+                                            id="sm-upload-title"
+                                            class="sm-upload-title"
                                         >
                                             Klik untuk memilih file
                                         </span>
 
-
-                                        <span class="upload-format">
+                                        <span class="sm-upload-format">
                                             PDF, JPG, JPEG, PNG
                                         </span>
 
-
-                                        <span class="upload-limit">
+                                        <span class="sm-upload-limit">
                                             Maksimal 10 MB
                                         </span>
-
 
                                         <input
                                             id="lampiran_file"
                                             name="lampiran_file"
                                             type="file"
                                             accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
-                                            class="sr-only"
+                                            class="sm-upload-input"
                                         >
 
                                     </label>
@@ -1928,18 +1946,17 @@ textarea.control {
                                     {{-- FILE TERPILIH --}}
 
                                     <div
-                                        id="selected-file"
-                                        class="selected-file hidden"
+                                        id="sm-selected-file"
+                                        class="sm-selected-file sm-hidden"
                                     >
 
-                                        <div class="selected-file-icon">
+                                        <div class="sm-selected-file-icon">
 
                                             <svg
                                                 class="h-3.5 w-3.5"
                                                 fill="none"
                                                 stroke="currentColor"
                                                 viewBox="0 0 24 24"
-                                                aria-hidden="true"
                                             >
                                                 <path
                                                     stroke-linecap="round"
@@ -1951,30 +1968,28 @@ textarea.control {
 
                                         </div>
 
+                                        <div class="sm-selected-file-content">
 
-                                        <div class="selected-file-content">
-
-                                            <p class="selected-file-title">
+                                            <p class="sm-selected-file-title">
                                                 File siap diproses
                                             </p>
 
                                             <p
-                                                id="selected-file-name"
-                                                class="selected-file-name"
+                                                id="sm-selected-file-name"
+                                                class="sm-selected-file-name"
                                             ></p>
 
                                             <p
-                                                id="selected-file-size"
-                                                class="selected-file-size"
+                                                id="sm-selected-file-size"
+                                                class="sm-selected-file-size"
                                             ></p>
 
                                         </div>
 
-
                                         <button
                                             type="button"
-                                            id="clear-file-btn"
-                                            class="clear-file-btn"
+                                            id="sm-clear-file-btn"
+                                            class="sm-clear-file-btn"
                                             aria-label="Hapus file"
                                             title="Hapus file"
                                         >
@@ -1984,7 +1999,6 @@ textarea.control {
                                                 fill="none"
                                                 stroke="currentColor"
                                                 viewBox="0 0 24 24"
-                                                aria-hidden="true"
                                             >
                                                 <path
                                                     stroke-linecap="round"
@@ -2000,56 +2014,55 @@ textarea.control {
 
 
                                     <div
-                                        id="file-compression-status"
-                                        class="compression-status hidden"
+                                        id="sm-compression-status"
+                                        class="sm-compression-status sm-hidden"
                                     ></div>
 
                                 </div>
 
 
-                                {{-- CAMERA PANEL --}}
+                                {{-- =================================================
+                                     CAMERA PANEL
+                                ================================================== --}}
 
                                 <div
-                                    id="camera-panel"
-                                    class="hidden"
+                                    id="sm-camera-panel"
+                                    class="sm-hidden"
                                 >
 
-                                    <div class="camera-box">
+                                    <div class="sm-camera-box">
 
-                                        <div class="camera-preview">
+                                        <div class="sm-camera-preview">
 
                                             <video
-                                                id="video"
+                                                id="sm-video"
                                                 autoplay
                                                 muted
                                                 playsinline
-                                                class="camera-video"
+                                                class="sm-camera-video"
                                             ></video>
 
-
                                             <img
-                                                id="image-preview"
+                                                id="sm-image-preview"
                                                 src=""
                                                 alt="Preview hasil scan"
-                                                class="camera-image-preview hidden"
+                                                class="sm-camera-image sm-hidden"
                                             >
 
-
                                             <div
-                                                id="camera-placeholder"
-                                                class="camera-placeholder"
+                                                id="sm-camera-placeholder"
+                                                class="sm-camera-placeholder"
                                             >
 
                                                 <div>
 
-                                                    <div class="camera-placeholder-icon">
+                                                    <div class="sm-camera-placeholder-icon">
 
                                                         <svg
                                                             class="h-5 w-5"
                                                             fill="none"
                                                             stroke="currentColor"
                                                             viewBox="0 0 24 24"
-                                                            aria-hidden="true"
                                                         >
                                                             <path
                                                                 stroke-linecap="round"
@@ -2068,15 +2081,13 @@ textarea.control {
 
                                                     </div>
 
-
-                                                    <p class="camera-placeholder-title">
+                                                    <p class="sm-camera-placeholder-title">
                                                         Kamera belum aktif
                                                     </p>
 
-
                                                     <p
-                                                        id="camera-placeholder-text"
-                                                        class="camera-placeholder-desc"
+                                                        id="sm-camera-placeholder-text"
+                                                        class="sm-camera-placeholder-desc"
                                                     >
                                                         Aktifkan kamera untuk scan dokumen.
                                                     </p>
@@ -2085,43 +2096,39 @@ textarea.control {
 
                                             </div>
 
-
                                             <div
-                                                id="camera-error"
-                                                class="camera-error hidden"
+                                                id="sm-camera-error"
+                                                class="sm-camera-error sm-hidden"
                                                 role="alert"
                                             ></div>
 
-
-                                            <div class="camera-frame"></div>
+                                            <div class="sm-camera-frame"></div>
 
                                         </div>
 
 
-                                        <div class="camera-actions">
+                                        <div class="sm-camera-actions">
 
                                             <button
                                                 type="button"
-                                                id="start-cam-btn"
-                                                class="camera-btn camera-btn-primary"
+                                                id="sm-start-camera"
+                                                class="sm-camera-btn sm-camera-btn-primary"
                                             >
                                                 Nyalakan Kamera
                                             </button>
 
-
                                             <button
                                                 type="button"
-                                                id="capture-btn"
-                                                class="camera-btn camera-btn-success hidden"
+                                                id="sm-capture"
+                                                class="sm-camera-btn sm-camera-btn-success sm-hidden"
                                             >
                                                 Ambil Foto
                                             </button>
 
-
                                             <button
                                                 type="button"
-                                                id="stop-cam-btn"
-                                                class="camera-btn camera-btn-secondary hidden"
+                                                id="sm-stop-camera"
+                                                class="sm-camera-btn sm-camera-btn-secondary sm-hidden"
                                             >
                                                 Tutup Kamera
                                             </button>
@@ -2134,26 +2141,25 @@ textarea.control {
                                     <input
                                         type="hidden"
                                         name="captured_image"
-                                        id="captured_image"
+                                        id="sm-captured-image"
                                         value="{{ old('captured_image') }}"
                                     >
 
 
                                     <div
-                                        id="snapshot-preview"
-                                        class="snapshot-preview hidden"
+                                        id="sm-snapshot-preview"
+                                        class="sm-snapshot-preview sm-hidden"
                                     >
 
                                         <div
-                                            id="snapshot-preview-text"
-                                            class="snapshot-preview-text"
+                                            id="sm-snapshot-text"
+                                            class="sm-snapshot-text"
                                         ></div>
-
 
                                         <button
                                             type="button"
-                                            id="retake-btn"
-                                            class="retake-btn"
+                                            id="sm-retake"
+                                            class="sm-retake-btn"
                                         >
 
                                             <svg
@@ -2161,7 +2167,6 @@ textarea.control {
                                                 fill="none"
                                                 stroke="currentColor"
                                                 viewBox="0 0 24 24"
-                                                aria-hidden="true"
                                             >
                                                 <path
                                                     stroke-linecap="round"
@@ -2171,7 +2176,7 @@ textarea.control {
                                                 />
                                             </svg>
 
-                                            Foto Ulang
+                                            Scan Ulang
 
                                         </button>
 
@@ -2182,7 +2187,7 @@ textarea.control {
 
                                 @if($formErrors->has('lampiran_file'))
 
-                                    <p class="field-error">
+                                    <p class="sm-field-error">
                                         {{ $formErrors->first('lampiran_file') }}
                                     </p>
 
@@ -2191,7 +2196,7 @@ textarea.control {
 
                                 @if($formErrors->has('captured_image'))
 
-                                    <p class="field-error">
+                                    <p class="sm-field-error">
                                         {{ $formErrors->first('captured_image') }}
                                     </p>
 
@@ -2206,20 +2211,19 @@ textarea.control {
                              ARSIP FISIK
                         ================================================== --}}
 
-                        <div class="attachment-card">
+                        <div class="sm-attachment-card">
 
-                            <div class="attachment-header">
+                            <div class="sm-attachment-header">
 
-                                <div class="attachment-header-left">
+                                <div class="sm-attachment-header-left">
 
-                                    <div class="attachment-icon physical">
+                                    <div class="sm-attachment-icon physical">
 
                                         <svg
                                             class="h-4 w-4"
                                             fill="none"
                                             stroke="currentColor"
                                             viewBox="0 0 24 24"
-                                            aria-hidden="true"
                                         >
                                             <path
                                                 stroke-linecap="round"
@@ -2227,19 +2231,17 @@ textarea.control {
                                                 stroke-width="1.8"
                                                 d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
                                             />
-
                                         </svg>
 
                                     </div>
 
-
                                     <div class="min-w-0">
 
-                                        <h3 class="attachment-title">
+                                        <h3 class="sm-attachment-title">
                                             Lokasi Arsip Fisik
                                         </h3>
 
-                                        <p class="attachment-description">
+                                        <p class="sm-attachment-description">
                                             Posisi penyimpanan dokumen fisik.
                                         </p>
 
@@ -2247,19 +2249,18 @@ textarea.control {
 
                                 </div>
 
-
-                                <span class="attachment-badge">
+                                <span class="sm-attachment-badge">
                                     Opsional
                                 </span>
 
                             </div>
 
 
-                            <div class="attachment-body">
+                            <div class="sm-attachment-body">
 
-                                <div class="physical-box">
+                                <div class="sm-physical-box">
 
-                                    <div class="physical-icon">
+                                    <div class="sm-physical-icon">
 
                                         <svg
                                             class="h-4 w-4"
@@ -2273,32 +2274,27 @@ textarea.control {
                                                 stroke-width="1.8"
                                                 d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
                                             />
-
                                         </svg>
 
                                     </div>
 
-
-                                    <h4 class="physical-title">
+                                    <h4 class="sm-physical-title">
                                         Detail Lokasi Penyimpanan
                                     </h4>
 
-
-                                    <p class="physical-description">
+                                    <p class="sm-physical-description">
                                         Masukkan posisi rak, lemari, box,
                                         atau map tempat arsip fisik disimpan.
                                     </p>
 
-
-                                    <div class="physical-field">
+                                    <div class="sm-physical-field">
 
                                         <label
                                             for="lokasi_arsip_fisik"
-                                            class="physical-label"
+                                            class="sm-physical-label"
                                         >
                                             Posisi Rak / Lemari / Box
                                         </label>
-
 
                                         <input
                                             id="lokasi_arsip_fisik"
@@ -2307,13 +2303,12 @@ textarea.control {
                                             maxlength="255"
                                             value="{{ old('lokasi_arsip_fisik') }}"
                                             placeholder="Contoh: Rak A-3 Box 12"
-                                            class="control {{ $formErrors->has('lokasi_arsip_fisik') ? 'control-error' : '' }}"
+                                            class="sm-control {{ $formErrors->has('lokasi_arsip_fisik') ? 'sm-control-error' : '' }}"
                                         >
-
 
                                         @if($formErrors->has('lokasi_arsip_fisik'))
 
-                                            <p class="field-error">
+                                            <p class="sm-field-error">
                                                 {{ $formErrors->first('lokasi_arsip_fisik') }}
                                             </p>
 
@@ -2321,8 +2316,7 @@ textarea.control {
 
                                     </div>
 
-
-                                    <div class="physical-example">
+                                    <div class="sm-physical-example">
 
                                         <p>
                                             <strong>Contoh:</strong>
@@ -2332,8 +2326,7 @@ textarea.control {
 
                                     </div>
 
-
-                                    <div class="physical-note">
+                                    <div class="sm-physical-note">
 
                                         <p>
                                             Lokasi fisik hanya mencatat posisi
@@ -2360,11 +2353,11 @@ textarea.control {
                  FOOTER
             ================================================== --}}
 
-            <div class="form-footer">
+            <div class="sm-form-footer">
 
                 <a
                     href="{{ route('surat-masuk.index') }}"
-                    class="footer-btn footer-cancel"
+                    class="sm-footer-btn sm-footer-cancel"
                 >
 
                     <svg
@@ -2372,7 +2365,6 @@ textarea.control {
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
-                        aria-hidden="true"
                     >
                         <path
                             stroke-linecap="round"
@@ -2388,18 +2380,17 @@ textarea.control {
 
 
                 <button
-                    id="submit-btn"
+                    id="sm-submit-btn"
                     type="submit"
-                    class="footer-btn footer-submit"
+                    class="sm-footer-btn sm-footer-submit"
                 >
 
                     <svg
-                        id="submit-icon"
+                        id="sm-submit-icon"
                         class="h-3.5 w-3.5"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
-                        aria-hidden="true"
                     >
                         <path
                             stroke-linecap="round"
@@ -2409,13 +2400,11 @@ textarea.control {
                         />
                     </svg>
 
-
                     <svg
-                        id="submit-loading"
-                        class="hidden h-3.5 w-3.5"
+                        id="sm-submit-loading"
+                        class="sm-hidden h-3.5 w-3.5"
                         fill="none"
                         viewBox="0 0 24 24"
-                        aria-hidden="true"
                     >
                         <circle
                             class="opacity-25"
@@ -2433,8 +2422,7 @@ textarea.control {
                         />
                     </svg>
 
-
-                    <span id="submit-text">
+                    <span id="sm-submit-text">
                         Simpan Surat Masuk
                     </span>
 
@@ -2454,105 +2442,100 @@ document.addEventListener('DOMContentLoaded', function () {
 
     'use strict';
 
-
     /* =========================================================
        ELEMENT
     ========================================================= */
 
     const form =
-        document.getElementById('form-surat');
+        document.getElementById('form-surat-masuk');
 
     const btnUpload =
-        document.getElementById('btn-upload');
+        document.getElementById('sm-btn-upload');
 
     const btnCamera =
-        document.getElementById('btn-camera');
+        document.getElementById('sm-btn-camera');
 
     const uploadPanel =
-        document.getElementById('upload-panel');
+        document.getElementById('sm-upload-panel');
 
     const cameraPanel =
-        document.getElementById('camera-panel');
+        document.getElementById('sm-camera-panel');
 
     const fileInput =
         document.getElementById('lampiran_file');
 
     const uploadBox =
-        document.getElementById('upload-box');
+        document.getElementById('sm-upload-box');
 
     const uploadTitle =
-        document.getElementById('upload-title');
+        document.getElementById('sm-upload-title');
 
     const selectedFile =
-        document.getElementById('selected-file');
+        document.getElementById('sm-selected-file');
 
     const selectedFileName =
-        document.getElementById('selected-file-name');
+        document.getElementById('sm-selected-file-name');
 
     const selectedFileSize =
-        document.getElementById('selected-file-size');
+        document.getElementById('sm-selected-file-size');
 
     const clearFileBtn =
-        document.getElementById('clear-file-btn');
+        document.getElementById('sm-clear-file-btn');
 
     const compressionStatus =
-        document.getElementById(
-            'file-compression-status'
-        );
+        document.getElementById('sm-compression-status');
 
     const video =
-        document.getElementById('video');
+        document.getElementById('sm-video');
 
     const imagePreview =
-        document.getElementById('image-preview');
+        document.getElementById('sm-image-preview');
 
     const capturedImage =
-        document.getElementById('captured_image');
+        document.getElementById('sm-captured-image');
 
-    const startCamBtn =
-        document.getElementById('start-cam-btn');
+    const startCameraBtn =
+        document.getElementById('sm-start-camera');
 
     const captureBtn =
-        document.getElementById('capture-btn');
+        document.getElementById('sm-capture');
 
-    const stopCamBtn =
-        document.getElementById('stop-cam-btn');
+    const stopCameraBtn =
+        document.getElementById('sm-stop-camera');
 
     const retakeBtn =
-        document.getElementById('retake-btn');
+        document.getElementById('sm-retake');
 
     const cameraPlaceholder =
         document.getElementById(
-            'camera-placeholder'
+            'sm-camera-placeholder'
         );
 
     const cameraPlaceholderText =
         document.getElementById(
-            'camera-placeholder-text'
+            'sm-camera-placeholder-text'
         );
 
     const cameraError =
-        document.getElementById('camera-error');
+        document.getElementById('sm-camera-error');
 
     const snapshotPreview =
-        document.getElementById('snapshot-preview');
+        document.getElementById('sm-snapshot-preview');
 
-    const snapshotPreviewText =
-        document.getElementById(
-            'snapshot-preview-text'
-        );
+    const snapshotText =
+        document.getElementById('sm-snapshot-text');
 
     const submitBtn =
-        document.getElementById('submit-btn');
+        document.getElementById('sm-submit-btn');
 
     const submitIcon =
-        document.getElementById('submit-icon');
+        document.getElementById('sm-submit-icon');
 
     const submitLoading =
-        document.getElementById('submit-loading');
+        document.getElementById('sm-submit-loading');
 
     const submitText =
-        document.getElementById('submit-text');
+        document.getElementById('sm-submit-text');
 
 
     if (
@@ -2670,8 +2653,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     1 -
                     compressedSize /
                     originalSize
-                ) *
-                100
+                ) * 100
             )
         );
     }
@@ -2685,6 +2667,32 @@ document.addEventListener('DOMContentLoaded', function () {
             .split('.')
             .pop()
             .toLowerCase();
+    }
+
+
+    function showAlert(
+        icon,
+        title,
+        text
+    ) {
+
+        if (
+            typeof window.Swal !==
+            'undefined'
+        ) {
+
+            window.Swal.fire({
+                icon,
+                title,
+                text,
+                confirmButtonText: 'Mengerti',
+                confirmButtonColor: '#2563eb'
+            });
+
+            return;
+        }
+
+        window.alert(text);
     }
 
 
@@ -2704,7 +2712,7 @@ document.addEventListener('DOMContentLoaded', function () {
             message;
 
         cameraError.classList.remove(
-            'hidden'
+            'sm-hidden'
         );
     }
 
@@ -2719,7 +2727,7 @@ document.addEventListener('DOMContentLoaded', function () {
             '';
 
         cameraError.classList.add(
-            'hidden'
+            'sm-hidden'
         );
     }
 
@@ -2758,11 +2766,11 @@ document.addEventListener('DOMContentLoaded', function () {
         clearCapturedPreview();
 
         uploadPanel.classList.remove(
-            'hidden'
+            'sm-hidden'
         );
 
         cameraPanel.classList.add(
-            'hidden'
+            'sm-hidden'
         );
 
         setModeButton(
@@ -2782,11 +2790,11 @@ document.addEventListener('DOMContentLoaded', function () {
     function setCameraMode() {
 
         uploadPanel.classList.add(
-            'hidden'
+            'sm-hidden'
         );
 
         cameraPanel.classList.remove(
-            'hidden'
+            'sm-hidden'
         );
 
         setModeButton(
@@ -2800,6 +2808,7 @@ document.addEventListener('DOMContentLoaded', function () {
         );
 
         clearSelectedFile();
+
         hideCameraError();
     }
 
@@ -2817,7 +2826,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     /* =========================================================
-       FILE DISPLAY
+       SELECTED FILE
     ========================================================= */
 
     function showSelectedFile(
@@ -2825,21 +2834,15 @@ document.addEventListener('DOMContentLoaded', function () {
         note
     ) {
 
-        if (!selectedFile) {
-            return;
-        }
-
         selectedFile.classList.remove(
-            'hidden'
+            'sm-hidden'
         );
 
         selectedFileName.textContent =
             file.name;
 
         selectedFileSize.textContent =
-            formatFileSize(
-                file.size
-            ) +
+            formatFileSize(file.size) +
             (
                 note
                     ? ' • ' + note
@@ -2851,7 +2854,7 @@ document.addEventListener('DOMContentLoaded', function () {
         );
 
         uploadTitle.textContent =
-            'File berhasil dipilih';
+            'File berhasil diproses';
     }
 
 
@@ -2861,7 +2864,7 @@ document.addEventListener('DOMContentLoaded', function () {
             '';
 
         selectedFile.classList.add(
-            'hidden'
+            'sm-hidden'
         );
 
         selectedFileName.textContent =
@@ -2871,11 +2874,17 @@ document.addEventListener('DOMContentLoaded', function () {
             '';
 
         compressionStatus.classList.add(
-            'hidden'
+            'sm-hidden'
         );
 
         compressionStatus.textContent =
             '';
+
+        compressionStatus.classList.remove(
+            'success',
+            'warning',
+            'error'
+        );
 
         uploadBox.classList.remove(
             'has-file'
@@ -3004,7 +3013,6 @@ document.addEventListener('DOMContentLoaded', function () {
         ];
 
         const result = [];
-
 
         maxDimensions.forEach(
             function (
@@ -3135,7 +3143,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                             reject(
                                 new Error(
-                                    'Browser gagal membuat file hasil kompresi.'
+                                    'Browser gagal membuat hasil kompresi.'
                                 )
                             );
 
@@ -3170,7 +3178,6 @@ document.addEventListener('DOMContentLoaded', function () {
                                 {
                                     type:
                                         'image/jpeg',
-
                                     lastModified:
                                         Date.now()
                                 }
@@ -3211,13 +3218,12 @@ document.addEventListener('DOMContentLoaded', function () {
             width <= 0 ||
             height <= 0
         ) {
-
             throw new Error(
                 'Dimensi gambar tidak valid.'
             );
         }
 
-        const dimensionList =
+        const dimensions =
             buildDimensionList(
                 width,
                 height
@@ -3228,7 +3234,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         for (
             const dimension
-            of dimensionList
+            of dimensions
         ) {
 
             for (
@@ -3248,7 +3254,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (
                     !smallest ||
                     compressed.size <
-                    smallest.size
+                        smallest.size
                 ) {
                     smallest =
                         compressed;
@@ -3292,8 +3298,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
-            hideCameraError();
-
             const extension =
                 getExtension(file);
 
@@ -3310,13 +3314,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 clearSelectedFile();
 
-                alert(
-                    'Format file tidak didukung.\n\n' +
+                showAlert(
+                    'warning',
+                    'Format file tidak didukung',
                     'Gunakan PDF, JPG, JPEG, atau PNG.'
                 );
 
                 return;
             }
+
 
             if (
                 file.size <= 0
@@ -3324,12 +3330,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 clearSelectedFile();
 
-                alert(
-                    'File kosong atau tidak valid.'
+                showAlert(
+                    'warning',
+                    'File tidak valid',
+                    'File kosong atau tidak dapat digunakan.'
                 );
 
                 return;
             }
+
 
             if (
                 file.size >
@@ -3338,16 +3347,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 clearSelectedFile();
 
-                alert(
-                    'Ukuran file terlalu besar.\n\n' +
-                    'Maksimal 10 MB.'
+                showAlert(
+                    'warning',
+                    'File terlalu besar',
+                    'Ukuran file maksimal 10 MB.'
                 );
 
                 return;
             }
 
 
-            /* PDF */
+            /* =================================================
+               PDF
+            ================================================== */
 
             if (
                 extension === 'pdf'
@@ -3364,23 +3376,37 @@ document.addEventListener('DOMContentLoaded', function () {
                 );
 
                 compressionStatus.textContent =
-                    '✓ PDF tetap PDF dan tidak dikompres.';
+                    '✓ PDF tetap PDF dan tidak dikompres. Ukuran file: ' +
+                    formatFileSize(file.size) +
+                    '.';
 
                 compressionStatus.classList.remove(
-                    'hidden'
+                    'sm-hidden'
+                );
+
+                compressionStatus.classList.add(
+                    'success'
                 );
 
                 return;
             }
 
 
-            /* IMAGE */
+            /* =================================================
+               IMAGE
+            ================================================== */
 
             compressionStatus.textContent =
-                'Memproses gambar dan melakukan kompresi...';
+                'Memproses gambar dan mencari ukuran hasil kompresi terbaik...';
 
             compressionStatus.classList.remove(
-                'hidden'
+                'sm-hidden'
+            );
+
+            compressionStatus.classList.remove(
+                'success',
+                'warning',
+                'error'
             );
 
             try {
@@ -3400,6 +3426,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     compressed.size >=
                     originalSize
                 ) {
+
                     finalFile =
                         file;
                 }
@@ -3411,27 +3438,32 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     clearSelectedFile();
 
-                    alert(
-                        'Gambar masih melebihi batas 10 MB setelah kompresi.'
+                    showAlert(
+                        'error',
+                        'Kompresi gagal',
+                        'Hasil gambar masih melebihi batas maksimal 10 MB.'
                     );
 
                     return;
                 }
 
-                const dataTransfer =
+
+                const transfer =
                     new DataTransfer();
 
-                dataTransfer.items.add(
+                transfer.items.add(
                     finalFile
                 );
 
                 fileInput.files =
-                    dataTransfer.files;
+                    transfer.files;
+
 
                 capturedImage.value =
                     '';
 
                 clearCapturedPreview();
+
 
                 const reduction =
                     getReductionPercent(
@@ -3439,57 +3471,79 @@ document.addEventListener('DOMContentLoaded', function () {
                         finalFile.size
                     );
 
+
                 if (
                     finalFile === file
                 ) {
 
                     showSelectedFile(
                         finalFile,
-                        'Gambar asli digunakan • ' +
+                        'File asli digunakan • ' +
                         formatFileSize(
                             finalFile.size
                         )
                     );
 
                     compressionStatus.textContent =
-                        '✓ File asli digunakan karena hasil kompresi tidak lebih kecil.';
+                        '⚠ Hasil kompresi tidak lebih kecil. File asli digunakan. Ukuran: ' +
+                        formatFileSize(
+                            originalSize
+                        ) +
+                        '.';
+
+                    compressionStatus.classList.add(
+                        'warning'
+                    );
 
                 } else {
 
                     showSelectedFile(
                         finalFile,
-                        'Dikompres ' +
+                        'Hasil kompresi: ' +
+                        formatFileSize(
+                            finalFile.size
+                        ) +
+                        ' • Hemat ' +
                         reduction +
-                        '% • ' +
+                        '%'
+                    );
+
+                    compressionStatus.innerHTML =
+                        '✓ Kompresi berhasil.<br>' +
+                        'Ukuran asli: <strong>' +
                         formatFileSize(
                             originalSize
                         ) +
-                        ' → ' +
+                        '</strong> → ' +
+                        'hasil kompresi: <strong>' +
                         formatFileSize(
                             finalFile.size
-                        )
+                        ) +
+                        '</strong> ' +
+                        '(' +
+                        reduction +
+                        '% lebih kecil).<br>' +
+                        'Format akhir: <strong>JPG</strong>.';
+
+                    compressionStatus.classList.add(
+                        'success'
                     );
-
-                    compressionStatus.textContent =
-                        '✓ Gambar berhasil dikompres menjadi JPG.';
                 }
-
-                compressionStatus.classList.remove(
-                    'hidden'
-                );
 
             } catch (error) {
 
                 console.error(
-                    'Image compression error:',
+                    'Compression error:',
                     error
                 );
 
                 clearSelectedFile();
 
-                alert(
+                showAlert(
+                    'error',
+                    'Gagal memproses gambar',
                     error?.message ||
-                    'Gagal memproses gambar.'
+                    'Browser gagal mengompres gambar.'
                 );
             }
         }
@@ -3500,7 +3554,7 @@ document.addEventListener('DOMContentLoaded', function () {
        CAMERA
     ========================================================= */
 
-    startCamBtn?.addEventListener(
+    startCameraBtn?.addEventListener(
         'click',
         startCamera
     );
@@ -3514,23 +3568,9 @@ document.addEventListener('DOMContentLoaded', function () {
             !window.isSecureContext
         ) {
 
-            const message =
-                'Kamera membutuhkan HTTPS.';
-
             showCameraError(
-                message
+                'Kamera membutuhkan HTTPS.'
             );
-
-            cameraPlaceholder.classList.remove(
-                'hidden'
-            );
-
-            if (
-                cameraPlaceholderText
-            ) {
-                cameraPlaceholderText.textContent =
-                    message;
-            }
 
             return;
         }
@@ -3547,9 +3587,7 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-
         stopCameraTracks();
-
 
         try {
 
@@ -3573,47 +3611,42 @@ document.addEventListener('DOMContentLoaded', function () {
                     },
 
                     audio: false
+
                 });
 
 
             video.srcObject =
                 cameraStream;
 
-
             await video.play();
 
 
             video.classList.remove(
-                'hidden'
+                'sm-hidden'
             );
 
             imagePreview.classList.add(
-                'hidden'
+                'sm-hidden'
             );
 
             imagePreview.src =
                 '';
 
-
             cameraPlaceholder.classList.add(
-                'hidden'
+                'sm-hidden'
             );
 
-
-            startCamBtn.classList.add(
-                'hidden'
+            startCameraBtn.classList.add(
+                'sm-hidden'
             );
-
 
             captureBtn.classList.remove(
-                'hidden'
+                'sm-hidden'
             );
 
-
-            stopCamBtn.classList.remove(
-                'hidden'
+            stopCameraBtn.classList.remove(
+                'sm-hidden'
             );
-
 
         } catch (error) {
 
@@ -3637,9 +3670,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             } else if (
                 error.name ===
-                    'NotFoundError' ||
-                error.name ===
-                    'DevicesNotFoundError'
+                    'NotFoundError'
             ) {
 
                 message =
@@ -3652,14 +3683,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 message =
                     'Kamera sedang digunakan aplikasi lain.';
-
-            } else if (
-                error.name ===
-                    'SecurityError'
-            ) {
-
-                message =
-                    'Akses kamera diblokir oleh browser.';
             }
 
             showCameraError(
@@ -3679,7 +3702,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
             hideCameraError();
 
-
             if (
                 !cameraStream ||
                 !video.videoWidth ||
@@ -3693,15 +3715,18 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
-
             try {
 
                 const imageData =
                     buildCameraImage();
 
+                const binarySize =
+                    estimateBinarySize(
+                        imageData
+                    );
 
                 if (
-                    imageData.length >
+                    binarySize >
                     CAMERA_MAX_DATA_SIZE
                 ) {
 
@@ -3710,81 +3735,78 @@ document.addEventListener('DOMContentLoaded', function () {
                     );
                 }
 
-
                 capturedImage.value =
                     imageData;
-
 
                 imagePreview.src =
                     imageData;
 
-
                 imagePreview.classList.remove(
-                    'hidden'
+                    'sm-hidden'
                 );
-
 
                 video.classList.add(
-                    'hidden'
+                    'sm-hidden'
                 );
-
 
                 cameraPlaceholder.classList.add(
-                    'hidden'
+                    'sm-hidden'
                 );
 
 
-                const size =
-                    estimateBinarySize(
-                        imageData
-                    );
-
-
-                snapshotPreviewText.textContent =
-                    '✓ Hasil scan siap disimpan (' +
-                    formatFileSize(size) +
-                    ').';
-
+                snapshotText.textContent =
+                    '✓ Hasil scan siap disimpan • ukuran sekitar ' +
+                    formatFileSize(
+                        binarySize
+                    ) +
+                    '.';
 
                 snapshotPreview.classList.remove(
-                    'hidden'
+                    'sm-hidden'
                 );
 
 
-                compressionStatus.textContent =
-                    '✓ Hasil scan sudah dikompres menjadi JPG.';
-
+                compressionStatus.innerHTML =
+                    '✓ Scan kamera berhasil diproses.<br>' +
+                    'Format: <strong>JPG</strong> • Ukuran hasil: <strong>' +
+                    formatFileSize(
+                        binarySize
+                    ) +
+                    '</strong>.';
 
                 compressionStatus.classList.remove(
-                    'hidden'
+                    'sm-hidden'
+                );
+
+                compressionStatus.classList.remove(
+                    'warning',
+                    'error'
+                );
+
+                compressionStatus.classList.add(
+                    'success'
                 );
 
 
                 clearSelectedFile();
 
-
                 stopCamera();
 
-
                 cameraPlaceholder.classList.add(
-                    'hidden'
+                    'sm-hidden'
                 );
 
-
-                startCamBtn.classList.add(
-                    'hidden'
+                startCameraBtn.classList.add(
+                    'sm-hidden'
                 );
-
 
                 captureBtn.classList.add(
-                    'hidden'
+                    'sm-hidden'
                 );
 
-
-                stopCamBtn.classList.add(
-                    'hidden'
+                stopCameraBtn.classList.add(
+                    'sm-hidden'
                 );
-
 
             } catch (error) {
 
@@ -3813,7 +3835,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 'canvas'
             );
 
-
         const dimensions =
             calculateDimensions(
                 video.videoWidth,
@@ -3821,13 +3842,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 CAMERA_MAX_WIDTH
             );
 
-
         canvas.width =
             dimensions.width;
 
         canvas.height =
             dimensions.height;
-
 
         const context =
             canvas.getContext(
@@ -3837,18 +3856,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             );
 
-
         if (!context) {
-
             throw new Error(
-                'Browser tidak mendukung canvas.'
+                'Canvas tidak didukung browser.'
             );
         }
 
-
         context.fillStyle =
             '#ffffff';
-
 
         context.fillRect(
             0,
@@ -3857,14 +3872,11 @@ document.addEventListener('DOMContentLoaded', function () {
             canvas.height
         );
 
-
         context.imageSmoothingEnabled =
             true;
 
-
         context.imageSmoothingQuality =
             'high';
-
 
         context.drawImage(
             video,
@@ -3878,13 +3890,8 @@ document.addEventListener('DOMContentLoaded', function () {
         let quality =
             0.82;
 
-
-        let currentCanvas =
-            canvas;
-
-
         let dataUrl =
-            currentCanvas.toDataURL(
+            canvas.toDataURL(
                 'image/jpeg',
                 quality
             );
@@ -3902,14 +3909,16 @@ document.addEventListener('DOMContentLoaded', function () {
             quality -=
                 0.06;
 
-
             dataUrl =
-                currentCanvas.toDataURL(
+                canvas.toDataURL(
                     'image/jpeg',
                     quality
                 );
         }
 
+
+        let currentCanvas =
+            canvas;
 
         let attempt =
             0;
@@ -3926,12 +3935,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
             attempt++;
 
-
             const smaller =
                 document.createElement(
                     'canvas'
                 );
-
 
             smaller.width =
                 Math.max(
@@ -3942,7 +3949,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     )
                 );
 
-
             smaller.height =
                 Math.max(
                     1,
@@ -3952,7 +3958,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     )
                 );
 
-
             const smallerContext =
                 smaller.getContext(
                     '2d',
@@ -3961,7 +3966,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 );
 
-
             if (!smallerContext) {
 
                 throw new Error(
@@ -3969,10 +3973,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 );
             }
 
-
             smallerContext.fillStyle =
                 '#ffffff';
-
 
             smallerContext.fillRect(
                 0,
@@ -3981,14 +3983,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 smaller.height
             );
 
-
             smallerContext.imageSmoothingEnabled =
                 true;
 
-
             smallerContext.imageSmoothingQuality =
                 'high';
-
 
             smallerContext.drawImage(
                 currentCanvas,
@@ -3998,10 +3997,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 smaller.height
             );
 
-
             currentCanvas =
                 smaller;
-
 
             dataUrl =
                 currentCanvas.toDataURL(
@@ -4026,19 +4023,16 @@ document.addEventListener('DOMContentLoaded', function () {
         const comma =
             dataUrl.indexOf(',');
 
-
         if (
             comma === -1
         ) {
             return 0;
         }
 
-
         const base64 =
             dataUrl.substring(
                 comma + 1
             );
-
 
         const padding =
             base64.endsWith('==')
@@ -4046,7 +4040,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 : base64.endsWith('=')
                     ? 1
                     : 0;
-
 
         return Math.floor(
             (
@@ -4059,7 +4052,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     /* =========================================================
-       CLEAR CAMERA RESULT
+       CLEAR CAMERA
     ========================================================= */
 
     function clearCapturedPreview() {
@@ -4071,29 +4064,20 @@ document.addEventListener('DOMContentLoaded', function () {
             '';
 
         imagePreview.classList.add(
-            'hidden'
+            'sm-hidden'
         );
 
         snapshotPreview.classList.add(
-            'hidden'
+            'sm-hidden'
         );
 
-        snapshotPreviewText.textContent =
+        snapshotText.textContent =
             '';
-
-        if (
-            !cameraStream
-        ) {
-
-            video.classList.remove(
-                'hidden'
-            );
-        }
     }
 
 
     /* =========================================================
-       FOTO ULANG / SCAN ULANG
+       RETAKE
     ========================================================= */
 
     retakeBtn?.addEventListener(
@@ -4102,12 +4086,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
             clearCapturedPreview();
 
-            compressionStatus.classList.add(
-                'hidden'
-            );
-
             compressionStatus.textContent =
                 '';
+
+            compressionStatus.classList.add(
+                'sm-hidden'
+            );
+
+            compressionStatus.classList.remove(
+                'success',
+                'warning',
+                'error'
+            );
 
             hideCameraError();
 
@@ -4118,11 +4108,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 await startCamera();
 
             } catch (error) {
-
-                console.error(
-                    'Retake error:',
-                    error
-                );
 
                 showCameraError(
                     'Kamera gagal diaktifkan kembali.'
@@ -4148,7 +4133,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 function (
                     track
                 ) {
-
                     track.stop();
                 }
             );
@@ -4162,7 +4146,7 @@ document.addEventListener('DOMContentLoaded', function () {
        STOP CAMERA
     ========================================================= */
 
-    stopCamBtn?.addEventListener(
+    stopCameraBtn?.addEventListener(
         'click',
         function () {
 
@@ -4173,23 +4157,22 @@ document.addEventListener('DOMContentLoaded', function () {
             ) {
 
                 imagePreview.classList.remove(
-                    'hidden'
+                    'sm-hidden'
                 );
 
                 cameraPlaceholder.classList.add(
-                    'hidden'
+                    'sm-hidden'
                 );
 
             } else {
 
                 cameraPlaceholder.classList.remove(
-                    'hidden'
+                    'sm-hidden'
                 );
 
                 if (
                     cameraPlaceholderText
                 ) {
-
                     cameraPlaceholderText.textContent =
                         'Kamera belum aktif';
                 }
@@ -4204,42 +4187,38 @@ document.addEventListener('DOMContentLoaded', function () {
 
         stopCameraTracks();
 
-
         if (video) {
-
             video.srcObject =
                 null;
         }
-
 
         if (
             !capturedImage.value
         ) {
 
             video.classList.remove(
-                'hidden'
+                'sm-hidden'
             );
 
             cameraPlaceholder.classList.remove(
-                'hidden'
+                'sm-hidden'
             );
-
         }
     }
 
 
     function resetCameraButtons() {
 
-        startCamBtn.classList.remove(
-            'hidden'
+        startCameraBtn.classList.remove(
+            'sm-hidden'
         );
 
         captureBtn.classList.add(
-            'hidden'
+            'sm-hidden'
         );
 
-        stopCamBtn.classList.add(
-            'hidden'
+        stopCameraBtn.classList.add(
+            'sm-hidden'
         );
     }
 
@@ -4268,10 +4247,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 fileInput.files?.[0] ||
                 null;
 
-
             const hasFile =
                 !!file;
-
 
             const hasCamera =
                 capturedImage.value.trim() !== '';
@@ -4284,8 +4261,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 event.preventDefault();
 
-                alert(
-                    'Berkas digital wajib diupload atau discan menggunakan kamera.'
+                showAlert(
+                    'warning',
+                    'Berkas belum dipilih',
+                    'Upload berkas atau gunakan Scan Kamera.'
                 );
 
                 return;
@@ -4299,8 +4278,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 event.preventDefault();
 
-                alert(
-                    'Gunakan salah satu metode saja: Upload File atau Scan Kamera.'
+                showAlert(
+                    'warning',
+                    'Pilih satu metode',
+                    'Gunakan Upload File atau Scan Kamera saja.'
                 );
 
                 return;
@@ -4315,8 +4296,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 event.preventDefault();
 
-                alert(
-                    'Ukuran file terlalu besar. Maksimal 10 MB.'
+                showAlert(
+                    'warning',
+                    'File terlalu besar',
+                    'Ukuran file maksimal 10 MB.'
                 );
 
                 return;
@@ -4324,18 +4307,29 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
             if (
-                hasCamera &&
-                capturedImage.value.length >
-                    CAMERA_MAX_DATA_SIZE
+                hasCamera
             ) {
 
-                event.preventDefault();
+                const cameraSize =
+                    estimateBinarySize(
+                        capturedImage.value
+                    );
 
-                alert(
-                    'Hasil scan terlalu besar. Silakan scan ulang.'
-                );
+                if (
+                    cameraSize >
+                    CAMERA_MAX_DATA_SIZE
+                ) {
 
-                return;
+                    event.preventDefault();
+
+                    showAlert(
+                        'warning',
+                        'Hasil scan terlalu besar',
+                        'Silakan scan ulang agar ukuran lebih kecil.'
+                    );
+
+                    return;
+                }
             }
 
 
@@ -4349,19 +4343,19 @@ document.addEventListener('DOMContentLoaded', function () {
             submitBtn.disabled =
                 true;
 
-
             submitIcon.classList.add(
-                'hidden'
+                'sm-hidden'
             );
-
 
             submitLoading.classList.remove(
-                'hidden'
+                'sm-hidden'
             );
 
-
             submitText.textContent =
-                'Menyimpan...';
+                hasCamera
+                    ? 'Menyimpan hasil scan...'
+                    : 'Menyimpan...';
+
         }
     );
 
@@ -4376,47 +4370,38 @@ document.addEventListener('DOMContentLoaded', function () {
 
         setCameraMode();
 
-
         imagePreview.src =
             capturedImage.value;
 
-
         imagePreview.classList.remove(
-            'hidden'
+            'sm-hidden'
         );
-
 
         video.classList.add(
-            'hidden'
+            'sm-hidden'
         );
-
 
         cameraPlaceholder.classList.add(
-            'hidden'
+            'sm-hidden'
         );
-
 
         snapshotPreview.classList.remove(
-            'hidden'
+            'sm-hidden'
         );
 
-
-        snapshotPreviewText.textContent =
+        snapshotText.textContent =
             '✓ Hasil scan sebelumnya masih tersedia.';
 
-
-        startCamBtn.classList.add(
-            'hidden'
+        startCameraBtn.classList.add(
+            'sm-hidden'
         );
-
 
         captureBtn.classList.add(
-            'hidden'
+            'sm-hidden'
         );
 
-
-        stopCamBtn.classList.add(
-            'hidden'
+        stopCameraBtn.classList.add(
+            'sm-hidden'
         );
     }
 
@@ -4428,12 +4413,14 @@ document.addEventListener('DOMContentLoaded', function () {
     window.addEventListener(
         'beforeunload',
         function () {
-
             stopCameraTracks();
         }
     );
 
 });
 </script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 @endsection
