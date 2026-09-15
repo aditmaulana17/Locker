@@ -124,16 +124,15 @@
 
 
 <style>
-
 /* ==========================================================================
-   PAGE
-========================================================================== */
+   EDIT SURAT MASUK — CLEAN / COMPACT / RESPONSIVE
+   ========================================================================== */
 
 .sme-page {
     width: 100%;
-    max-width: 1040px;
+    max-width: 1120px;
     margin: 0 auto;
-    padding: 12px 18px 32px;
+    padding: 14px 18px 34px;
     color: #334155;
 }
 
@@ -143,10 +142,9 @@
     box-sizing: border-box;
 }
 
-
 /* ==========================================================================
    TOP ACTION
-========================================================================== */
+   ========================================================================== */
 
 .sme-top-action {
     display: flex;
@@ -163,16 +161,12 @@
     padding: 0 13px;
     border: 1.5px solid #cbd5e1;
     border-radius: 8px;
-    background: #ffffff;
+    background: #fff;
     color: #475569;
     text-decoration: none;
     font-size: 10px;
-    font-weight: 700;
-    white-space: nowrap;
-    transition:
-        border-color .15s ease,
-        background-color .15s ease,
-        color .15s ease;
+    font-weight: 800;
+    transition: .15s ease;
 }
 
 .sme-back-btn:hover {
@@ -181,16 +175,15 @@
     color: #4338ca;
 }
 
-
 /* ==========================================================================
-   ERROR BOX
-========================================================================== */
+   ERROR
+   ========================================================================== */
 
 .sme-error-box {
     margin-bottom: 12px;
     padding: 11px 13px;
     border: 1.5px solid #fecaca;
-    border-radius: 9px;
+    border-radius: 10px;
     background: #fff7f7;
 }
 
@@ -222,48 +215,46 @@
 }
 
 .sme-error-list {
-    margin: 3px 0 0;
+    margin: 4px 0 0;
     padding-left: 16px;
     font-size: 9px;
-    line-height: 1.5;
+    line-height: 1.55;
     color: #e11d48;
 }
 
-
 /* ==========================================================================
-   CARD
-========================================================================== */
+   MAIN CARD
+   ========================================================================== */
 
 .sme-main-card {
     width: 100%;
     overflow: hidden;
     border: 1.5px solid #cbd5e1;
-    border-radius: 12px;
-    background: #ffffff;
+    border-radius: 14px;
+    background: #fff;
     box-shadow:
-        0 8px 22px rgba(15, 23, 42, .06),
-        0 2px 6px rgba(15, 23, 42, .04);
+        0 12px 30px rgba(15, 23, 42, .07),
+        0 2px 7px rgba(15, 23, 42, .04);
 }
-
 
 /* ==========================================================================
    HEADER
-========================================================================== */
+   ========================================================================== */
 
 .sme-system-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
-    padding: 15px 18px;
-    border-bottom: 1.5px solid #c7d2fe;
-    background:
-        linear-gradient(
-            135deg,
-            #f8fbff 0%,
-            #eef2ff 52%,
-            #ecfdf5 100%
-        );
+    gap: 18px;
+    padding: 16px 18px;
+    border-bottom: 0;
+    background: linear-gradient(
+        135deg,
+        #1d4ed8 0%,
+        #4338ca 58%,
+        #4f46e5 100%
+    );
+    color: #fff;
 }
 
 .sme-header-left {
@@ -274,16 +265,16 @@
 }
 
 .sme-header-icon {
-    width: 40px;
-    height: 40px;
-    flex: 0 0 40px;
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1.5px solid #c7d2fe;
-    border-radius: 9px;
-    background: #ffffff;
-    color: #4f46e5;
+    border: 1px solid rgba(255,255,255,.35);
+    border-radius: 10px;
+    background: rgba(255,255,255,.12);
+    color: #fff;
 }
 
 .sme-header-label {
@@ -292,23 +283,23 @@
     line-height: 1.2;
     font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: .08em;
-    color: #4f46e5;
+    letter-spacing: .1em;
+    color: #dbeafe;
 }
 
 .sme-header-title {
     margin: 2px 0 0;
-    font-size: 17px;
+    font-size: 18px;
     line-height: 1.3;
-    font-weight: 800;
-    color: #1e293b;
+    font-weight: 850;
+    color: #fff;
 }
 
 .sme-header-subtitle {
     margin: 3px 0 0;
     font-size: 9px;
-    line-height: 1.4;
-    color: #64748b;
+    line-height: 1.45;
+    color: #dbeafe;
 }
 
 .sme-header-badge {
@@ -316,36 +307,34 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 28px;
+    min-height: 29px;
     padding: 0 10px;
-    border: 1px solid #c7d2fe;
+    border: 1px solid rgba(255,255,255,.30);
     border-radius: 999px;
-    background: #ffffff;
-    color: #475569;
+    background: rgba(255,255,255,.12);
+    color: #fff;
     font-size: 8px;
     font-weight: 800;
     white-space: nowrap;
 }
 
-
 /* ==========================================================================
    BODY
-========================================================================== */
+   ========================================================================== */
 
 .sme-body {
     padding: 16px;
 }
-
-
-/* ==========================================================================
-   SECTION
-========================================================================== */
 
 .sme-section + .sme-section {
     margin-top: 17px;
     padding-top: 17px;
     border-top: 1.5px solid #e2e8f0;
 }
+
+/* ==========================================================================
+   SECTION HEADER
+   ========================================================================== */
 
 .sme-section-head {
     display: flex;
@@ -356,7 +345,7 @@
 
 .sme-section-marker {
     width: 4px;
-    height: 27px;
+    height: 28px;
     flex: 0 0 4px;
     margin-top: 1px;
     border-radius: 999px;
@@ -371,27 +360,26 @@
     margin: 0;
     font-size: 13px;
     line-height: 1.3;
-    font-weight: 800;
+    font-weight: 850;
     color: #1e293b;
 }
 
 .sme-section-description {
     margin: 3px 0 0;
     font-size: 8.5px;
-    line-height: 1.4;
+    line-height: 1.45;
     color: #64748b;
 }
 
-
 /* ==========================================================================
-   FIELD
-========================================================================== */
+   INFORMATION TABLE
+   ========================================================================== */
 
 .sme-field-table {
     overflow: hidden;
     border: 1.5px solid #94a3b8;
-    border-radius: 9px;
-    background: #ffffff;
+    border-radius: 10px;
+    background: #fff;
 }
 
 .sme-field-grid {
@@ -404,7 +392,7 @@
     padding: 11px 12px;
     border-right: 1.5px solid #cbd5e1;
     border-bottom: 1.5px solid #cbd5e1;
-    background: #ffffff;
+    background: #fff;
 }
 
 .sme-field:nth-child(2n) {
@@ -414,6 +402,11 @@
 .sme-field-full {
     grid-column: 1 / -1;
     border-right: 0;
+    border-bottom: 0;
+}
+
+.sme-field:nth-last-child(2) {
+    border-bottom: 0;
 }
 
 .sme-field-label {
@@ -421,7 +414,7 @@
     margin-bottom: 5px;
     font-size: 9px;
     line-height: 1.3;
-    font-weight: 800;
+    font-weight: 850;
     text-transform: uppercase;
     letter-spacing: .025em;
     color: #475569;
@@ -431,26 +424,22 @@
     color: #dc2626;
 }
 
-
 /* ==========================================================================
-   CONTROL
-========================================================================== */
+   CONTROLS
+   ========================================================================== */
 
 .sme-control {
     width: 100%;
     min-height: 40px;
     padding: 8px 10px;
     border: 1.5px solid #94a3b8;
-    border-radius: 7px;
-    background: #ffffff;
+    border-radius: 8px;
+    background: #fff;
     color: #1e293b;
     outline: none;
     font-size: 12px;
     line-height: 1.35;
-    transition:
-        border-color .15s ease,
-        box-shadow .15s ease,
-        background-color .15s ease;
+    transition: .15s ease;
 }
 
 input.sme-control,
@@ -476,8 +465,7 @@ textarea.sme-control {
 
 .sme-control:focus {
     border-color: #2563eb;
-    box-shadow:
-        0 0 0 3px rgba(37,99,235,.08);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, .09);
 }
 
 .sme-control-error {
@@ -488,19 +476,18 @@ textarea.sme-control {
 .sme-field-error {
     margin: 4px 0 0;
     font-size: 8px;
-    line-height: 1.4;
+    line-height: 1.45;
     font-weight: 700;
     color: #dc2626;
 }
 
-
 /* ==========================================================================
-   ATTACHMENT
-========================================================================== */
+   ATTACHMENT COLUMNS
+   ========================================================================== */
 
 .sme-attachment-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1.08fr) minmax(0, .92fr);
     gap: 12px;
     align-items: stretch;
 }
@@ -511,8 +498,8 @@ textarea.sme-control {
     flex-direction: column;
     overflow: hidden;
     border: 1.5px solid #94a3b8;
-    border-radius: 9px;
-    background: #ffffff;
+    border-radius: 10px;
+    background: #fff;
 }
 
 .sme-attachment-header {
@@ -542,12 +529,13 @@ textarea.sme-control {
     justify-content: center;
     border: 1px solid #bfdbfe;
     border-radius: 7px;
-    background: #ffffff;
+    background: #eff6ff;
     color: #2563eb;
 }
 
 .sme-attachment-icon.physical {
     border-color: #c7d2fe;
+    background: #eef2ff;
     color: #4f46e5;
 }
 
@@ -555,7 +543,7 @@ textarea.sme-control {
     margin: 0;
     font-size: 10px;
     line-height: 1.3;
-    font-weight: 800;
+    font-weight: 850;
     color: #1e293b;
 }
 
@@ -571,7 +559,7 @@ textarea.sme-control {
     padding: 4px 7px;
     border: 1px solid #cbd5e1;
     border-radius: 999px;
-    background: #ffffff;
+    background: #fff;
     color: #64748b;
     font-size: 7px;
     font-weight: 800;
@@ -586,18 +574,17 @@ textarea.sme-control {
     padding: 10px;
 }
 
-
 /* ==========================================================================
-   INFO
-========================================================================== */
+   INFO / COMPRESSION
+   ========================================================================== */
 
 .sme-info {
     display: flex;
     align-items: flex-start;
-    gap: 6px;
+    gap: 7px;
     padding: 8px;
     border: 1px solid #bfdbfe;
-    border-radius: 7px;
+    border-radius: 8px;
     background: #eff6ff;
 }
 
@@ -612,36 +599,60 @@ textarea.sme-control {
 .sme-info p {
     margin: 0;
     font-size: 7.5px;
-    line-height: 1.55;
+    line-height: 1.6;
     color: #1d4ed8;
 }
 
+.sme-compression {
+    padding: 8px 9px;
+    border: 1px solid #c7d2fe;
+    border-radius: 8px;
+    background: #eef2ff;
+    color: #4338ca;
+    font-size: 7px;
+    line-height: 1.6;
+}
+
+.sme-compression.success {
+    border-color: #a7f3d0;
+    background: #ecfdf5;
+    color: #047857;
+}
+
+.sme-compression.warning {
+    border-color: #fde68a;
+    background: #fffbeb;
+    color: #a16207;
+}
+
+.sme-compression.error {
+    border-color: #fecaca;
+    background: #fff1f2;
+    color: #be123c;
+}
 
 /* ==========================================================================
    MODE
-========================================================================== */
+   ========================================================================== */
 
 .sme-mode-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 6px;
+    gap: 7px;
 }
 
 .sme-mode-btn {
-    min-height: 42px;
+    min-height: 44px;
     display: flex;
     align-items: center;
     gap: 7px;
     padding: 7px;
     border: 1.5px solid #cbd5e1;
-    border-radius: 7px;
-    background: #ffffff;
+    border-radius: 8px;
+    background: #fff;
     color: #475569;
     cursor: pointer;
-    transition:
-        border-color .15s ease,
-        background-color .15s ease,
-        color .15s ease;
+    transition: .15s ease;
 }
 
 .sme-mode-btn:hover {
@@ -676,7 +687,7 @@ textarea.sme-control {
     display: block;
     font-size: 8px;
     line-height: 1.3;
-    font-weight: 800;
+    font-weight: 850;
     color: #334155;
 }
 
@@ -684,30 +695,29 @@ textarea.sme-control {
     display: block;
     margin-top: 1px;
     font-size: 7px;
-    line-height: 1.3;
+    line-height: 1.35;
     color: #64748b;
 }
 
-
 /* ==========================================================================
    CURRENT FILE
-========================================================================== */
+   ========================================================================== */
 
 .sme-current-file {
     display: flex;
     align-items: center;
     gap: 7px;
-    min-height: 46px;
+    min-height: 48px;
     padding: 7px;
     border: 1.5px solid #dbe2ea;
-    border-radius: 7px;
+    border-radius: 8px;
     background: #f8fafc;
 }
 
 .sme-current-file-icon {
-    width: 27px;
-    height: 27px;
-    flex: 0 0 27px;
+    width: 28px;
+    height: 28px;
+    flex: 0 0 28px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -725,7 +735,7 @@ textarea.sme-control {
     margin: 0;
     font-size: 7px;
     line-height: 1.2;
-    font-weight: 800;
+    font-weight: 850;
     color: #64748b;
 }
 
@@ -736,8 +746,8 @@ textarea.sme-control {
     text-overflow: ellipsis;
     white-space: nowrap;
     font-size: 8px;
-    line-height: 1.3;
-    font-weight: 700;
+    line-height: 1.35;
+    font-weight: 750;
     color: #334155;
 }
 
@@ -747,10 +757,10 @@ textarea.sme-control {
     padding: 2px 5px;
     border: 1px solid #cbd5e1;
     border-radius: 999px;
-    background: #ffffff;
+    background: #fff;
     color: #64748b;
     font-size: 6px;
-    font-weight: 800;
+    font-weight: 850;
     text-transform: uppercase;
 }
 
@@ -758,7 +768,7 @@ textarea.sme-control {
     margin: 0;
     font-size: 8px;
     line-height: 1.3;
-    font-weight: 800;
+    font-weight: 850;
     color: #b45309;
 }
 
@@ -769,32 +779,33 @@ textarea.sme-control {
 }
 
 .sme-view-btn {
-    min-height: 27px;
+    min-height: 28px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 4px;
     padding: 0 8px;
+    border: 1px solid #c7d2fe;
     border-radius: 6px;
-    background: #e0e7ff;
+    background: #eef2ff;
     color: #4338ca;
     text-decoration: none;
     font-size: 7.5px;
-    font-weight: 800;
+    font-weight: 850;
     white-space: nowrap;
 }
 
 .sme-view-btn:hover {
-    background: #c7d2fe;
+    background: #e0e7ff;
 }
-
 
 /* ==========================================================================
    UPLOAD
-========================================================================== */
+   ========================================================================== */
 
 .sme-upload-box {
     position: relative;
-    min-height: 110px;
+    min-height: 108px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -805,9 +816,7 @@ textarea.sme-control {
     background: #f8fafc;
     text-align: center;
     cursor: pointer;
-    transition:
-        border-color .15s ease,
-        background-color .15s ease;
+    transition: .15s ease;
 }
 
 .sme-upload-box:hover {
@@ -840,7 +849,7 @@ textarea.sme-control {
 .sme-upload-title {
     font-size: 8.5px;
     line-height: 1.3;
-    font-weight: 800;
+    font-weight: 850;
     color: #334155;
 }
 
@@ -857,7 +866,7 @@ textarea.sme-control {
     background: #dbeafe;
     color: #2563eb;
     font-size: 6.5px;
-    font-weight: 700;
+    font-weight: 750;
 }
 
 .sme-upload-input {
@@ -869,10 +878,9 @@ textarea.sme-control {
     opacity: 0;
 }
 
-
 /* ==========================================================================
    SELECTED FILE
-========================================================================== */
+   ========================================================================== */
 
 .sme-selected-file {
     display: flex;
@@ -880,7 +888,7 @@ textarea.sme-control {
     gap: 7px;
     padding: 7px;
     border: 1.5px solid #a7f3d0;
-    border-radius: 7px;
+    border-radius: 8px;
     background: #ecfdf5;
 }
 
@@ -905,7 +913,7 @@ textarea.sme-control {
     margin: 0;
     font-size: 7px;
     line-height: 1.2;
-    font-weight: 800;
+    font-weight: 850;
     color: #047857;
 }
 
@@ -916,7 +924,7 @@ textarea.sme-control {
     white-space: nowrap;
     font-size: 7.5px;
     line-height: 1.3;
-    font-weight: 700;
+    font-weight: 750;
     color: #334155;
 }
 
@@ -934,59 +942,24 @@ textarea.sme-control {
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 0;
+    border: 1px solid #a7f3d0;
     border-radius: 6px;
-    background: transparent;
-    color: #94a3b8;
+    background: #fff;
+    color: #059669;
     cursor: pointer;
 }
 
 .sme-clear-btn:hover {
-    background: #fee2e2;
-    color: #dc2626;
+    background: #dcfce7;
 }
-
-
-/* ==========================================================================
-   COMPRESSION
-========================================================================== */
-
-.sme-compression {
-    padding: 8px 9px;
-    border: 1px solid #c7d2fe;
-    border-radius: 7px;
-    background: #eef2ff;
-    color: #4338ca;
-    font-size: 7px;
-    line-height: 1.6;
-}
-
-.sme-compression.success {
-    border-color: #a7f3d0;
-    background: #ecfdf5;
-    color: #047857;
-}
-
-.sme-compression.warning {
-    border-color: #fde68a;
-    background: #fffbeb;
-    color: #a16207;
-}
-
-.sme-compression.error {
-    border-color: #fecaca;
-    background: #fff1f2;
-    color: #be123c;
-}
-
 
 /* ==========================================================================
    CAMERA
-========================================================================== */
+   ========================================================================== */
 
 .sme-camera-box {
     overflow: hidden;
-    border: 1.5px solid #475569;
+    border: 1.5px solid #334155;
     border-radius: 8px;
     background: #0f172a;
 }
@@ -1041,14 +1014,14 @@ textarea.sme-control {
 .sme-camera-placeholder-title {
     margin: 0;
     font-size: 8px;
-    font-weight: 800;
+    font-weight: 850;
     color: #cbd5e1;
 }
 
 .sme-camera-placeholder-desc {
     margin: 2px 0 0;
     font-size: 6.5px;
-    line-height: 1.35;
+    line-height: 1.4;
     color: #64748b;
 }
 
@@ -1060,7 +1033,7 @@ textarea.sme-control {
     z-index: 5;
     padding: 6px;
     border-radius: 6px;
-    background: rgba(127,29,29,.94);
+    background: rgba(127, 29, 29, .94);
     color: #fecaca;
     font-size: 7px;
     font-weight: 700;
@@ -1084,14 +1057,15 @@ textarea.sme-control {
 }
 
 .sme-camera-btn {
-    min-height: 31px;
+    min-height: 32px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 4px;
     padding: 0 5px;
     border-radius: 6px;
     font-size: 7px;
-    font-weight: 800;
+    font-weight: 850;
     cursor: pointer;
 }
 
@@ -1103,7 +1077,7 @@ textarea.sme-control {
 .sme-camera-primary {
     border: 1px solid #4338ca;
     background: #4f46e5;
-    color: #ffffff;
+    color: #fff;
 }
 
 .sme-camera-primary:hover:not(:disabled) {
@@ -1113,7 +1087,7 @@ textarea.sme-control {
 .sme-camera-success {
     border: 1px solid #059669;
     background: #10b981;
-    color: #ffffff;
+    color: #fff;
 }
 
 .sme-camera-success:hover:not(:disabled) {
@@ -1122,7 +1096,7 @@ textarea.sme-control {
 
 .sme-camera-secondary {
     border: 1px solid #64748b;
-    background: #ffffff;
+    background: #fff;
     color: #334155;
 }
 
@@ -1130,10 +1104,9 @@ textarea.sme-control {
     background: #f1f5f9;
 }
 
-
 /* ==========================================================================
    SCAN RESULT
-========================================================================== */
+   ========================================================================== */
 
 .sme-scan-result {
     padding: 8px;
@@ -1152,7 +1125,7 @@ textarea.sme-control {
     margin: 0;
     font-size: 8px;
     line-height: 1.3;
-    font-weight: 800;
+    font-weight: 850;
     color: #065f46;
 }
 
@@ -1171,7 +1144,7 @@ textarea.sme-control {
     object-fit: contain;
     border: 1px solid #a7f3d0;
     border-radius: 6px;
-    background: #ffffff;
+    background: #fff;
 }
 
 .sme-scan-info {
@@ -1179,22 +1152,22 @@ textarea.sme-control {
     text-align: center;
     font-size: 7px;
     line-height: 1.45;
-    font-weight: 800;
+    font-weight: 850;
     color: #047857;
 }
 
 .sme-retake {
-    min-height: 25px;
+    min-height: 26px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     padding: 0 8px;
     border: 1px solid #6ee7b7;
     border-radius: 6px;
-    background: #ffffff;
+    background: #fff;
     color: #047857;
     font-size: 7px;
-    font-weight: 800;
+    font-weight: 850;
     cursor: pointer;
 }
 
@@ -1202,16 +1175,14 @@ textarea.sme-control {
     background: #f0fdf4;
 }
 
-
 /* ==========================================================================
-   PHYSICAL
-========================================================================== */
+   PHYSICAL ARCHIVE
+   ========================================================================== */
 
 .sme-physical-box {
     display: flex;
     flex: 1;
     flex-direction: column;
-    justify-content: center;
     padding: 13px;
     border: 1.5px dashed #94a3b8;
     border-radius: 8px;
@@ -1233,7 +1204,7 @@ textarea.sme-control {
     margin: 7px 0 0;
     font-size: 10px;
     line-height: 1.3;
-    font-weight: 800;
+    font-weight: 850;
     color: #334155;
 }
 
@@ -1253,7 +1224,7 @@ textarea.sme-control {
     padding: 7px;
     border: 1px solid #cbd5e1;
     border-radius: 6px;
-    background: #ffffff;
+    background: #fff;
 }
 
 .sme-example p {
@@ -1272,7 +1243,7 @@ textarea.sme-control {
     padding: 7px;
     border: 1px solid #cbd5e1;
     border-radius: 6px;
-    background: #ffffff;
+    background: #fff;
 }
 
 .sme-note p {
@@ -1282,10 +1253,9 @@ textarea.sme-control {
     color: #64748b;
 }
 
-
 /* ==========================================================================
    FOOTER
-========================================================================== */
+   ========================================================================== */
 
 .sme-footer {
     display: flex;
@@ -1298,37 +1268,41 @@ textarea.sme-control {
 }
 
 .sme-footer-btn {
-    min-height: 35px;
+    min-height: 36px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 6px;
-    padding: 0 13px;
-    border-radius: 7px;
+    padding: 0 14px;
+    border-radius: 8px;
     font-size: 8.5px;
-    font-weight: 800;
+    font-weight: 850;
     text-decoration: none;
     cursor: pointer;
+    transition: .15s ease;
 }
 
 .sme-footer-cancel {
     border: 1.5px solid #cbd5e1;
-    background: #ffffff;
+    background: #fff;
     color: #475569;
 }
 
 .sme-footer-cancel:hover {
     background: #f1f5f9;
+    border-color: #94a3b8;
 }
 
 .sme-footer-submit {
     border: 1.5px solid #2563eb;
     background: #2563eb;
-    color: #ffffff;
+    color: #fff;
+    box-shadow: 0 3px 8px rgba(37, 99, 235, .14);
 }
 
 .sme-footer-submit:hover:not(:disabled) {
     background: #1d4ed8;
+    border-color: #1d4ed8;
 }
 
 .sme-footer-submit:disabled {
@@ -1336,35 +1310,25 @@ textarea.sme-control {
     cursor: not-allowed;
 }
 
-
 /* ==========================================================================
-   UTILITY
-========================================================================== */
+   UTIL
+   ========================================================================== */
 
 .sme-hidden {
     display: none !important;
 }
 
-
 /* ==========================================================================
    RESPONSIVE
-========================================================================== */
+   ========================================================================== */
 
-@media (max-width: 820px) {
-
-    .sme-page {
-        max-width: 760px;
-        padding-left: 12px;
-        padding-right: 12px;
-    }
-
+@media (max-width: 900px) {
     .sme-attachment-grid {
         grid-template-columns: 1fr;
     }
 }
 
 @media (max-width: 640px) {
-
     .sme-page {
         padding: 6px 9px 20px;
     }
@@ -1400,14 +1364,19 @@ textarea.sme-control {
         border-right: 0;
     }
 
+    .sme-field {
+        border-bottom: 1.5px solid #cbd5e1;
+    }
+
+    .sme-field:last-child {
+        border-bottom: 0;
+    }
+
     .sme-field-full {
         grid-column: auto;
     }
 
-    .sme-mode-grid {
-        grid-template-columns: 1fr;
-    }
-
+    .sme-mode-grid,
     .sme-camera-actions {
         grid-template-columns: 1fr;
     }
@@ -1431,7 +1400,6 @@ textarea.sme-control {
 }
 
 @media (max-width: 420px) {
-
     .sme-page {
         padding-left: 8px;
         padding-right: 8px;
@@ -2080,7 +2048,7 @@ textarea.sme-control {
                                         JPG/JPEG/PNG otomatis diproses,
                                         di-resize bila diperlukan, lalu
                                         dikompres menjadi JPG.
-                                        Hasil kompresi ditampilkan sebelum update.
+                                        PDF akan dikompres otomatis saat data diperbarui.
                                     </p>
 
                                 </div>

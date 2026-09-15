@@ -1,4 +1,3 @@
-
 # =========================================================
 # STAGE 1
 # BUILD FRONTEND
@@ -56,12 +55,15 @@ WORKDIR /var/www/html
 # ---------------------------------------------------------
 # System dependencies
 # ---------------------------------------------------------
+# Ghostscript digunakan untuk kompresi PDF.
+# ---------------------------------------------------------
 
 RUN apt-get update && apt-get install -y \
     git \
     curl \
     unzip \
     zip \
+    ghostscript \
     libpng-dev \
     libjpeg62-turbo-dev \
     libfreetype6-dev \

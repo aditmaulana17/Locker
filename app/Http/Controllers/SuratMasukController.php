@@ -46,6 +46,18 @@ class SuratMasukController extends Controller
     private const MAX_FILE_SIZE =
         10 * 1024 * 1024;
 
+    /*
+    |--------------------------------------------------------------------------
+    | PDF COMPRESSION
+    |--------------------------------------------------------------------------
+    |
+    | Ghostscript harus tersedia di container PHP.
+    | Preset /ebook memberikan kompresi yang cukup baik untuk arsip surat.
+    |
+    */
+    private const PDF_COMPRESSION_PRESET = '/ebook';
+    private const PDF_COMPRESSION_TIMEOUT = 300;
+
     private const MAX_COMPRESSED_IMAGE_SIZE =
         9 * 1024 * 1024;
 
@@ -1809,25 +1821,8 @@ class SuratMasukController extends Controller
                 );
             }
 
-            $contents =
-                file_get_contents(
-                    $realPath
-                );
-
-            if (
-                $contents === false ||
-                $contents === ''
-            ) {
-                throw new RuntimeException(
-                    'Gagal membaca file PDF.'
-                );
-            }
-
-            return $this->storeBinaryFile(
-                $contents,
-                'pdf',
-                'application/pdf',
-                'surat-masuk',
+            return $this->storeCompressedPdf(
+                $realPath,
                 $diskName
             );
         }
@@ -1898,6 +1893,447 @@ class SuratMasukController extends Controller
             $diskName,
             'surat-masuk'
         );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | COMPRESS PDF
+    |--------------------------------------------------------------------------
+    |
+    | PDF dikompresi menggunakan Ghostscript sebelum dikirim ke Supabase.
+    | Jika hasil kompresi justru lebih besar dari file asli, file asli
+    | digunakan agar kualitas/ukuran tidak menjadi lebih buruk.
+    |
+    */
+    private function storeCompressedPdf(
+        string $inputPath,
+        string $diskName
+    ): string {
+        if (
+            $diskName !==
+            'supabase'
+        ) {
+            throw new RuntimeException(
+                'Penyimpanan file E-Arsip wajib menggunakan Supabase.'
+            );
+        }
+
+        if (
+            !$inputPath ||
+            !is_readable($inputPath)
+        ) {
+            throw new RuntimeException(
+                'File PDF temporary tidak dapat dibaca.'
+            );
+        }
+
+        $originalSize =
+            filesize($inputPath);
+
+        if (
+            $originalSize === false ||
+            $originalSize <= 0
+        ) {
+            throw new RuntimeException(
+                'Ukuran file PDF tidak dapat dibaca.'
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | GHOSTSCRIPT
+        |--------------------------------------------------------------------------
+        */
+        $executable =
+            PHP_OS_FAMILY === 'Windows'
+                ? 'gswin64c'
+                : 'gs';
+
+        $commandCheck =
+            $executable .
+            ' --version';
+
+        $versionOutput = [];
+        $versionCode = 0;
+
+        @exec(
+            $commandCheck . ' 2>&1',
+            $versionOutput,
+            $versionCode
+        );
+
+        if (
+            $versionCode !== 0
+        ) {
+            throw new RuntimeException(
+                'Ghostscript tidak tersedia pada server/container. Pastikan package ghostscript sudah terpasang.'
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | TEMP DIRECTORY
+        |--------------------------------------------------------------------------
+        */
+        $tempDirectory =
+            storage_path(
+                'app/pdf-compression'
+            );
+
+        if (
+            !is_dir($tempDirectory) &&
+            !mkdir(
+                $tempDirectory,
+                0775,
+                true
+            ) &&
+            !is_dir($tempDirectory)
+        ) {
+            throw new RuntimeException(
+                'Folder temporary compression PDF tidak dapat dibuat.'
+            );
+        }
+
+        $temporaryOutput =
+            $tempDirectory .
+            DIRECTORY_SEPARATOR .
+            'compressed_' .
+            Str::uuid() .
+            '.pdf';
+
+        $command =
+            escapeshellcmd(
+                $executable
+            ) .
+            ' -sDEVICE=pdfwrite' .
+            ' -dCompatibilityLevel=1.4' .
+            ' -dPDFSETTINGS=' .
+            escapeshellarg(
+                self::PDF_COMPRESSION_PRESET
+            ) .
+            ' -dDetectDuplicateImages=true' .
+            ' -dCompressFonts=true' .
+            ' -dNOPAUSE' .
+            ' -dQUIET' .
+            ' -dBATCH' .
+            ' -dSAFER' .
+            ' -sOutputFile=' .
+            escapeshellarg(
+                $temporaryOutput
+            ) .
+            ' ' .
+            escapeshellarg(
+                $inputPath
+            );
+
+        /*
+        |--------------------------------------------------------------------------
+        | JALANKAN GHOSTSCRIPT
+        |--------------------------------------------------------------------------
+        */
+        $process = null;
+
+        try {
+            $process =
+                proc_open(
+                    $command,
+                    [
+                        0 => [
+                            'file',
+                            '/dev/null',
+                            'r',
+                        ],
+                        1 => [
+                            'pipe',
+                            'w',
+                        ],
+                        2 => [
+                            'pipe',
+                            'w',
+                        ],
+                    ],
+                    $pipes
+                );
+
+            if (
+                !is_resource($process)
+            ) {
+                throw new RuntimeException(
+                    'Gagal menjalankan proses Ghostscript.'
+                );
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | BACA OUTPUT
+            |--------------------------------------------------------------------------
+            */
+            $stdout = '';
+            $stderr = '';
+
+            if (
+                isset($pipes[1]) &&
+                is_resource($pipes[1])
+            ) {
+                stream_set_blocking(
+                    $pipes[1],
+                    false
+                );
+
+                $stdout =
+                    stream_get_contents(
+                        $pipes[1]
+                    ) ?: '';
+
+                fclose(
+                    $pipes[1]
+                );
+            }
+
+            if (
+                isset($pipes[2]) &&
+                is_resource($pipes[2])
+            ) {
+                stream_set_blocking(
+                    $pipes[2],
+                    false
+                );
+
+                $stderr =
+                    stream_get_contents(
+                        $pipes[2]
+                    ) ?: '';
+
+                fclose(
+                    $pipes[2]
+                );
+            }
+
+            $exitCode =
+                proc_close(
+                    $process
+                );
+
+            if (
+                $exitCode !== 0
+            ) {
+                throw new RuntimeException(
+                    'Ghostscript gagal melakukan compression PDF.' .
+                    (
+                        trim($stderr) !== ''
+                            ? ' Detail: ' . trim($stderr)
+                            : ''
+                    )
+                );
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | VALIDASI HASIL
+            |--------------------------------------------------------------------------
+            */
+            if (
+                !is_file(
+                    $temporaryOutput
+                ) ||
+                !is_readable(
+                    $temporaryOutput
+                )
+            ) {
+                throw new RuntimeException(
+                    'Ghostscript tidak menghasilkan file PDF.'
+                );
+            }
+
+            $compressedSize =
+                filesize(
+                    $temporaryOutput
+                );
+
+            if (
+                $compressedSize === false ||
+                $compressedSize <= 0
+            ) {
+                throw new RuntimeException(
+                    'Hasil compression PDF kosong.'
+                );
+            }
+
+            $pdfHeader =
+                file_get_contents(
+                    $temporaryOutput,
+                    false,
+                    null,
+                    0,
+                    5
+                );
+
+            if (
+                $pdfHeader !==
+                '%PDF-'
+            ) {
+                throw new RuntimeException(
+                    'Hasil compression bukan PDF yang valid.'
+                );
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | FALLBACK
+            |--------------------------------------------------------------------------
+            |
+            | Jika hasil Ghostscript lebih besar atau sama dengan file asli,
+            | gunakan file asli. Ini mencegah PDF menjadi lebih besar.
+            |
+            */
+            if (
+                $compressedSize >=
+                $originalSize
+            ) {
+                @unlink(
+                    $temporaryOutput
+                );
+
+                $contents =
+                    file_get_contents(
+                        $inputPath
+                    );
+
+                if (
+                    $contents === false ||
+                    $contents === ''
+                ) {
+                    throw new RuntimeException(
+                        'Gagal membaca file PDF asli.'
+                    );
+                }
+
+                return $this->storeBinaryFile(
+                    $contents,
+                    'pdf',
+                    'application/pdf',
+                    'surat-masuk',
+                    $diskName
+                );
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | BATAS HASIL AKHIR
+            |--------------------------------------------------------------------------
+            */
+            if (
+                $compressedSize >
+                self::MAX_FILE_SIZE
+            ) {
+                @unlink(
+                    $temporaryOutput
+                );
+
+                throw new RuntimeException(
+                    'PDF masih melebihi batas 10 MB setelah compression. Silakan gunakan PDF dengan ukuran atau resolusi lebih kecil.'
+                );
+            }
+
+            $compressedData =
+                file_get_contents(
+                    $temporaryOutput
+                );
+
+            if (
+                $compressedData === false ||
+                $compressedData === ''
+            ) {
+                throw new RuntimeException(
+                    'Gagal membaca hasil compression PDF.'
+                );
+            }
+
+            $savingPercent =
+                $originalSize > 0
+                    ? round(
+                        (
+                            1 -
+                            (
+                                $compressedSize /
+                                $originalSize
+                            )
+                        ) *
+                        100,
+                        2
+                    )
+                    : 0;
+
+            Log::info(
+                'PDF Surat Masuk berhasil dikompresi.',
+                [
+                    'original_size' =>
+                        $originalSize,
+
+                    'compressed_size' =>
+                        $compressedSize,
+
+                    'saving_percent' =>
+                        $savingPercent,
+
+                    'preset' =>
+                        self::PDF_COMPRESSION_PRESET,
+
+                    'disk' =>
+                        $diskName,
+                ]
+            );
+
+            return $this->storeBinaryFile(
+                $compressedData,
+                'pdf',
+                'application/pdf',
+                'surat-masuk',
+                $diskName
+            );
+        } catch (
+            Throwable $e
+        ) {
+            Log::error(
+                'Gagal melakukan compression PDF Surat Masuk.',
+                [
+                    'message' =>
+                        $e->getMessage(),
+
+                    'input' =>
+                        $inputPath,
+
+                    'disk' =>
+                        $diskName,
+                ]
+            );
+
+            throw new RuntimeException(
+                $e->getMessage(),
+                previous: $e
+            );
+        } finally {
+            if (
+                is_resource($process)
+            ) {
+                @proc_terminate(
+                    $process
+                );
+
+                @proc_close(
+                    $process
+                );
+            }
+
+            if (
+                isset($temporaryOutput) &&
+                is_file($temporaryOutput)
+            ) {
+                @unlink(
+                    $temporaryOutput
+                );
+            }
+        }
     }
 
     /*
