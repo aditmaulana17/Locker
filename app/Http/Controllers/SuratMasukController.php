@@ -43,6 +43,12 @@ class SuratMasukController extends Controller
         'image/png',
     ];
 
+    /*
+    |--------------------------------------------------------------------------
+    | BATAS FILE
+    |--------------------------------------------------------------------------
+    */
+
     private const MAX_FILE_SIZE =
         10 * 1024 * 1024;
 
@@ -51,32 +57,107 @@ class SuratMasukController extends Controller
     | PDF COMPRESSION
     |--------------------------------------------------------------------------
     |
-    | Ghostscript harus tersedia di container PHP.
-    | Preset /ebook memberikan kompresi yang cukup baik untuk arsip surat.
+    | Ghostscript harus tersedia di container locker-app:
+    |
+    | /usr/bin/gs
+    |
+    | PDF tetap maksimal 10 MB.
+    | Ghostscript digunakan untuk membuat ukuran file lebih kecil.
     |
     */
-    private const PDF_COMPRESSION_PRESET = '/ebook';
-    private const PDF_COMPRESSION_TIMEOUT = 300;
+
+    private const PDF_COMPRESSION_TIMEOUT =
+        300;
+
+    private const PDF_COMPRESSION_PROFILES = [
+        [
+            'name' =>
+                'ebook-150',
+
+            'preset' =>
+                '/ebook',
+
+            'color_dpi' =>
+                150,
+
+            'gray_dpi' =>
+                150,
+
+            'mono_dpi' =>
+                300,
+
+            'jpeg_quality' =>
+                70,
+        ],
+
+        [
+            'name' =>
+                'ebook-120',
+
+            'preset' =>
+                '/ebook',
+
+            'color_dpi' =>
+                120,
+
+            'gray_dpi' =>
+                120,
+
+            'mono_dpi' =>
+                240,
+
+            'jpeg_quality' =>
+                60,
+        ],
+
+        [
+            'name' =>
+                'screen-96',
+
+            'preset' =>
+                '/screen',
+
+            'color_dpi' =>
+                96,
+
+            'gray_dpi' =>
+                96,
+
+            'mono_dpi' =>
+                200,
+
+            'jpeg_quality' =>
+                50,
+        ],
+    ];
+
+    /*
+    |--------------------------------------------------------------------------
+    | IMAGE COMPRESSION
+    |--------------------------------------------------------------------------
+    */
 
     private const MAX_COMPRESSED_IMAGE_SIZE =
         9 * 1024 * 1024;
 
-    private const MAX_IMAGE_WIDTH = 2500;
-    private const MAX_IMAGE_HEIGHT = 2500;
+    private const MAX_IMAGE_WIDTH =
+        2500;
 
-    private const JPEG_QUALITY = 82;
+    private const MAX_IMAGE_HEIGHT =
+        2500;
+
+    private const JPEG_QUALITY =
+        82;
 
     /*
     |--------------------------------------------------------------------------
     | INDEX
     |--------------------------------------------------------------------------
-    |
-    | Halaman Surat Masuk menggunakan query yang sama dengan export.
-    |
     */
 
-    public function index(Request $request)
-    {
+    public function index(
+        Request $request
+    ) {
         $this->ensureUserAuthenticated();
 
         $query =
@@ -115,26 +196,6 @@ class SuratMasukController extends Controller
     |--------------------------------------------------------------------------
     | BUILD QUERY SURAT MASUK
     |--------------------------------------------------------------------------
-    |
-    | Ini adalah query utama Surat Masuk.
-    |
-    | Query ini dapat digunakan oleh:
-    |
-    | - index
-    | - export Excel
-    | - export PDF
-    |
-    | Hak akses:
-    |
-    | Admin:
-    |   semua surat
-    |
-    | Pimpinan:
-    |   semua surat
-    |
-    | Staff:
-    |   hanya surat yang didisposisikan kepada user tersebut
-    |
     */
 
     public function buildSuratMasukQuery(
@@ -163,7 +224,9 @@ class SuratMasukController extends Controller
                 )
             );
 
-        if ($search !== '') {
+        if (
+            $search !== ''
+        ) {
             $keyword =
                 '%' .
                 $search .
@@ -359,7 +422,7 @@ class SuratMasukController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | TANGGAL DARI
+        | TANGGAL
         |--------------------------------------------------------------------------
         */
 
@@ -370,12 +433,6 @@ class SuratMasukController extends Controller
                     ''
                 )
             );
-
-        /*
-        |--------------------------------------------------------------------------
-        | TANGGAL SAMPAI
-        |--------------------------------------------------------------------------
-        */
 
         $sampaiTanggal =
             trim(
@@ -394,12 +451,6 @@ class SuratMasukController extends Controller
             $this->isValidDate(
                 $sampaiTanggal
             );
-
-        /*
-        |--------------------------------------------------------------------------
-        | Jika tanggal terbalik, tukarkan
-        |--------------------------------------------------------------------------
-        */
 
         if (
             $validDariTanggal &&
@@ -437,16 +488,8 @@ class SuratMasukController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | HAK AKSES
+        | STAFF
         |--------------------------------------------------------------------------
-        |
-        | Admin dan Pimpinan:
-        |   tidak diberikan filter tambahan.
-        |
-        | Staff:
-        |   hanya surat yang memiliki disposisi
-        |   kepada staff yang sedang login.
-        |
         */
 
         if (
@@ -520,12 +563,6 @@ class SuratMasukController extends Controller
         DB::beginTransaction();
 
         try {
-            /*
-            |--------------------------------------------------------------------------
-            | NOMOR AGENDA
-            |--------------------------------------------------------------------------
-            */
-
             $nomorInput =
                 trim(
                     (string) $request->input(
@@ -548,20 +585,8 @@ class SuratMasukController extends Controller
                     $nomorInput;
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | PENERIMA
-            |--------------------------------------------------------------------------
-            */
-
             $data['diterima_oleh'] =
                 (int) Auth::id();
-
-            /*
-            |--------------------------------------------------------------------------
-            | STATUS
-            |--------------------------------------------------------------------------
-            */
 
             $status =
                 strtolower(
@@ -620,32 +645,14 @@ class SuratMasukController extends Controller
                     $uploadedPath;
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | BASE64 JANGAN MASUK DATABASE
-            |--------------------------------------------------------------------------
-            */
-
             unset(
                 $data['captured_image']
             );
-
-            /*
-            |--------------------------------------------------------------------------
-            | SIMPAN
-            |--------------------------------------------------------------------------
-            */
 
             $surat =
                 SuratMasuk::create(
                     $data
                 );
-
-            /*
-            |--------------------------------------------------------------------------
-            | ACTIVITY LOG
-            |--------------------------------------------------------------------------
-            */
 
             $this->logActivity(
                 'create',
@@ -1028,12 +1035,6 @@ class SuratMasukController extends Controller
         DB::beginTransaction();
 
         try {
-            /*
-            |--------------------------------------------------------------------------
-            | STATUS
-            |--------------------------------------------------------------------------
-            */
-
             if (
                 array_key_exists(
                     'status',
@@ -1101,21 +1102,9 @@ class SuratMasukController extends Controller
                 );
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | BASE64
-            |--------------------------------------------------------------------------
-            */
-
             unset(
                 $data['captured_image']
             );
-
-            /*
-            |--------------------------------------------------------------------------
-            | UPDATE
-            |--------------------------------------------------------------------------
-            */
 
             $suratMasuk->update(
                 $data
@@ -1129,12 +1118,6 @@ class SuratMasukController extends Controller
             );
 
             DB::commit();
-
-            /*
-            |--------------------------------------------------------------------------
-            | HAPUS FILE LAMA
-            |--------------------------------------------------------------------------
-            */
 
             if (
                 $newFile &&
@@ -1539,35 +1522,17 @@ class SuratMasukController extends Controller
         $role =
             $this->resolveSuratUserRole();
 
-        /*
-        |--------------------------------------------------------------------------
-        | ADMIN
-        |--------------------------------------------------------------------------
-        */
-
         if (
             $role === 'admin'
         ) {
             return;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | PIMPINAN
-        |--------------------------------------------------------------------------
-        */
-
         if (
             $role === 'pimpinan'
         ) {
             return;
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | STAFF
-        |--------------------------------------------------------------------------
-        */
 
         if (
             $role === 'staff'
@@ -1613,12 +1578,6 @@ class SuratMasukController extends Controller
                 )
             );
 
-        /*
-        |--------------------------------------------------------------------------
-        | Fallback jabatan
-        |--------------------------------------------------------------------------
-        */
-
         if (
             $role === '' &&
             isset(
@@ -1632,12 +1591,6 @@ class SuratMasukController extends Controller
                     )
                 );
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Normalisasi staf -> staff
-        |--------------------------------------------------------------------------
-        */
 
         return $role === 'staf'
             ? 'staff'
@@ -1663,7 +1616,8 @@ class SuratMasukController extends Controller
             );
 
         if (
-            $disk !== 'supabase'
+            $disk !==
+            'supabase'
         ) {
             throw new RuntimeException(
                 'FILESYSTEM_DISK harus diset ke "supabase". File surat tidak boleh disimpan permanen di server.'
@@ -1748,6 +1702,12 @@ class SuratMasukController extends Controller
             );
         }
 
+        /*
+        |--------------------------------------------------------------------------
+        | BATAS MAKSIMAL 10 MB
+        |--------------------------------------------------------------------------
+        */
+
         if (
             $fileSize >
             self::MAX_FILE_SIZE
@@ -1766,7 +1726,8 @@ class SuratMasukController extends Controller
             );
 
         if (
-            $extension === 'jpeg'
+            $extension ===
+            'jpeg'
         ) {
             $extension =
                 'jpg';
@@ -1805,7 +1766,8 @@ class SuratMasukController extends Controller
         */
 
         if (
-            $extension === 'pdf'
+            $extension ===
+            'pdf'
         ) {
             $mime =
                 strtolower(
@@ -1900,11 +1862,17 @@ class SuratMasukController extends Controller
     | COMPRESS PDF
     |--------------------------------------------------------------------------
     |
-    | PDF dikompresi menggunakan Ghostscript sebelum dikirim ke Supabase.
-    | Jika hasil kompresi justru lebih besar dari file asli, file asli
-    | digunakan agar kualitas/ukuran tidak menjadi lebih buruk.
+    | Proses:
+    |
+    | 1. PDF maksimal 10 MB.
+    | 2. Ghostscript menjalankan beberapa profile.
+    | 3. Semua hasil dibandingkan.
+    | 4. Hasil terkecil yang valid dipilih.
+    | 5. Hasil akhir harus <= 10 MB.
+    | 6. Jika hasil lebih besar dari original, original digunakan.
     |
     */
+
     private function storeCompressedPdf(
         string $inputPath,
         string $diskName
@@ -1919,7 +1887,7 @@ class SuratMasukController extends Controller
         }
 
         if (
-            !$inputPath ||
+            !is_file($inputPath) ||
             !is_readable($inputPath)
         ) {
             throw new RuntimeException(
@@ -1928,7 +1896,9 @@ class SuratMasukController extends Controller
         }
 
         $originalSize =
-            filesize($inputPath);
+            filesize(
+                $inputPath
+            );
 
         if (
             $originalSize === false ||
@@ -1944,29 +1914,20 @@ class SuratMasukController extends Controller
         | GHOSTSCRIPT
         |--------------------------------------------------------------------------
         */
-        $executable =
+
+        $ghostscript =
             PHP_OS_FAMILY === 'Windows'
                 ? 'gswin64c'
-                : 'gs';
-
-        $commandCheck =
-            $executable .
-            ' --version';
-
-        $versionOutput = [];
-        $versionCode = 0;
-
-        @exec(
-            $commandCheck . ' 2>&1',
-            $versionOutput,
-            $versionCode
-        );
+                : '/usr/bin/gs';
 
         if (
-            $versionCode !== 0
+            PHP_OS_FAMILY !== 'Windows' &&
+            !is_executable(
+                $ghostscript
+            )
         ) {
             throw new RuntimeException(
-                'Ghostscript tidak tersedia pada server/container. Pastikan package ghostscript sudah terpasang.'
+                'Ghostscript tidak ditemukan atau tidak dapat dijalankan.'
             );
         }
 
@@ -1975,193 +1936,197 @@ class SuratMasukController extends Controller
         | TEMP DIRECTORY
         |--------------------------------------------------------------------------
         */
+
         $tempDirectory =
             storage_path(
                 'app/pdf-compression'
             );
 
         if (
-            !is_dir($tempDirectory) &&
+            !is_dir(
+                $tempDirectory
+            ) &&
             !mkdir(
                 $tempDirectory,
                 0775,
                 true
             ) &&
-            !is_dir($tempDirectory)
+            !is_dir(
+                $tempDirectory
+            )
         ) {
             throw new RuntimeException(
                 'Folder temporary compression PDF tidak dapat dibuat.'
             );
         }
 
-        $temporaryOutput =
-            $tempDirectory .
-            DIRECTORY_SEPARATOR .
-            'compressed_' .
-            Str::uuid() .
-            '.pdf';
+        $bestOutput =
+            null;
 
-        $command =
-            escapeshellcmd(
-                $executable
-            ) .
-            ' -sDEVICE=pdfwrite' .
-            ' -dCompatibilityLevel=1.4' .
-            ' -dPDFSETTINGS=' .
-            escapeshellarg(
-                self::PDF_COMPRESSION_PRESET
-            ) .
-            ' -dDetectDuplicateImages=true' .
-            ' -dCompressFonts=true' .
-            ' -dNOPAUSE' .
-            ' -dQUIET' .
-            ' -dBATCH' .
-            ' -dSAFER' .
-            ' -sOutputFile=' .
-            escapeshellarg(
-                $temporaryOutput
-            ) .
-            ' ' .
-            escapeshellarg(
-                $inputPath
-            );
+        $bestSize =
+            null;
+
+        $bestProfile =
+            null;
 
         /*
         |--------------------------------------------------------------------------
-        | JALANKAN GHOSTSCRIPT
+        | MULTI PROFILE COMPRESSION
         |--------------------------------------------------------------------------
         */
-        $process = null;
 
-        try {
-            $process =
-                proc_open(
-                    $command,
-                    [
-                        0 => [
-                            'file',
-                            '/dev/null',
-                            'r',
-                        ],
-                        1 => [
-                            'pipe',
-                            'w',
-                        ],
-                        2 => [
-                            'pipe',
-                            'w',
-                        ],
-                    ],
-                    $pipes
-                );
-
-            if (
-                !is_resource($process)
-            ) {
-                throw new RuntimeException(
-                    'Gagal menjalankan proses Ghostscript.'
-                );
-            }
+        foreach (
+            self::PDF_COMPRESSION_PROFILES
+            as $profile
+        ) {
+            $outputPath =
+                $tempDirectory .
+                DIRECTORY_SEPARATOR .
+                'compressed_' .
+                Str::uuid() .
+                '.pdf';
 
             /*
             |--------------------------------------------------------------------------
-            | BACA OUTPUT
+            | COMMAND
             |--------------------------------------------------------------------------
             */
-            $stdout = '';
-            $stderr = '';
 
-            if (
-                isset($pipes[1]) &&
-                is_resource($pipes[1])
-            ) {
-                stream_set_blocking(
-                    $pipes[1],
-                    false
+            $command =
+                escapeshellarg(
+                    $ghostscript
+                ) .
+                ' -sDEVICE=pdfwrite' .
+                ' -dCompatibilityLevel=1.4' .
+                ' -dPDFSETTINGS=' .
+                escapeshellarg(
+                    $profile['preset']
+                ) .
+                ' -dDetectDuplicateImages=true' .
+                ' -dCompressFonts=true' .
+                ' -dCompressStreams=true' .
+                ' -dDownsampleColorImages=true' .
+                ' -dColorImageResolution=' .
+                (int) $profile['color_dpi'] .
+                ' -dColorImageDownsampleType=/Bicubic' .
+                ' -dAutoFilterColorImages=false' .
+                ' -dColorImageFilter=/DCTEncode' .
+                ' -dDownsampleGrayImages=true' .
+                ' -dGrayImageResolution=' .
+                (int) $profile['gray_dpi'] .
+                ' -dGrayImageDownsampleType=/Bicubic' .
+                ' -dAutoFilterGrayImages=false' .
+                ' -dGrayImageFilter=/DCTEncode' .
+                ' -dDownsampleMonoImages=true' .
+                ' -dMonoImageResolution=' .
+                (int) $profile['mono_dpi'] .
+                ' -dMonoImageDownsampleType=/Bicubic' .
+                ' -dJPEGQ=' .
+                (int) $profile['jpeg_quality'] .
+                ' -dNOPAUSE' .
+                ' -dBATCH' .
+                ' -dQUIET' .
+                ' -dSAFER' .
+                ' -sOutputFile=' .
+                escapeshellarg(
+                    $outputPath
+                ) .
+                ' ' .
+                escapeshellarg(
+                    $inputPath
                 );
 
-                $stdout =
-                    stream_get_contents(
-                        $pipes[1]
-                    ) ?: '';
-
-                fclose(
-                    $pipes[1]
-                );
-            }
-
-            if (
-                isset($pipes[2]) &&
-                is_resource($pipes[2])
-            ) {
-                stream_set_blocking(
-                    $pipes[2],
-                    false
-                );
-
-                $stderr =
-                    stream_get_contents(
-                        $pipes[2]
-                    ) ?: '';
-
-                fclose(
-                    $pipes[2]
-                );
-            }
+            /*
+            |--------------------------------------------------------------------------
+            | RUN
+            |--------------------------------------------------------------------------
+            */
 
             $exitCode =
-                proc_close(
-                    $process
-                );
+                0;
+
+            $commandOutput =
+                [];
+
+            @exec(
+                $command . ' 2>&1',
+                $commandOutput,
+                $exitCode
+            );
+
+            /*
+            |--------------------------------------------------------------------------
+            | GAGAL
+            |--------------------------------------------------------------------------
+            */
 
             if (
-                $exitCode !== 0
+                $exitCode !== 0 ||
+                !is_file(
+                    $outputPath
+                )
             ) {
-                throw new RuntimeException(
-                    'Ghostscript gagal melakukan compression PDF.' .
-                    (
-                        trim($stderr) !== ''
-                            ? ' Detail: ' . trim($stderr)
-                            : ''
-                    )
+                Log::warning(
+                    'Profile Ghostscript gagal.',
+                    [
+                        'profile' =>
+                            $profile['name'],
+
+                        'exit_code' =>
+                            $exitCode,
+
+                        'output' =>
+                            implode(
+                                PHP_EOL,
+                                $commandOutput
+                            ),
+                    ]
                 );
+
+                if (
+                    is_file(
+                        $outputPath
+                    )
+                ) {
+                    @unlink(
+                        $outputPath
+                    );
+                }
+
+                continue;
             }
 
             /*
             |--------------------------------------------------------------------------
-            | VALIDASI HASIL
+            | UKURAN
             |--------------------------------------------------------------------------
             */
-            if (
-                !is_file(
-                    $temporaryOutput
-                ) ||
-                !is_readable(
-                    $temporaryOutput
-                )
-            ) {
-                throw new RuntimeException(
-                    'Ghostscript tidak menghasilkan file PDF.'
-                );
-            }
 
-            $compressedSize =
+            $outputSize =
                 filesize(
-                    $temporaryOutput
+                    $outputPath
                 );
 
             if (
-                $compressedSize === false ||
-                $compressedSize <= 0
+                $outputSize === false ||
+                $outputSize <= 0
             ) {
-                throw new RuntimeException(
-                    'Hasil compression PDF kosong.'
+                @unlink(
+                    $outputPath
                 );
+
+                continue;
             }
+
+            /*
+            |--------------------------------------------------------------------------
+            | VALIDASI PDF
+            |--------------------------------------------------------------------------
+            */
 
             $pdfHeader =
-                file_get_contents(
-                    $temporaryOutput,
+                @file_get_contents(
+                    $outputPath,
                     false,
                     null,
                     0,
@@ -2172,168 +2137,258 @@ class SuratMasukController extends Controller
                 $pdfHeader !==
                 '%PDF-'
             ) {
-                throw new RuntimeException(
-                    'Hasil compression bukan PDF yang valid.'
+                @unlink(
+                    $outputPath
                 );
+
+                Log::warning(
+                    'Ghostscript menghasilkan file yang bukan PDF valid.',
+                    [
+                        'profile' =>
+                            $profile['name'],
+                    ]
+                );
+
+                continue;
             }
 
             /*
             |--------------------------------------------------------------------------
-            | FALLBACK
+            | PILIH FILE TERKECIL
             |--------------------------------------------------------------------------
-            |
-            | Jika hasil Ghostscript lebih besar atau sama dengan file asli,
-            | gunakan file asli. Ini mencegah PDF menjadi lebih besar.
-            |
             */
+
             if (
-                $compressedSize >=
-                $originalSize
+                $bestSize === null ||
+                $outputSize <
+                $bestSize
             ) {
-                @unlink(
-                    $temporaryOutput
-                );
-
-                $contents =
-                    file_get_contents(
-                        $inputPath
-                    );
-
                 if (
-                    $contents === false ||
-                    $contents === ''
+                    $bestOutput &&
+                    is_file(
+                        $bestOutput
+                    )
                 ) {
-                    throw new RuntimeException(
-                        'Gagal membaca file PDF asli.'
+                    @unlink(
+                        $bestOutput
                     );
                 }
 
-                return $this->storeBinaryFile(
-                    $contents,
-                    'pdf',
-                    'application/pdf',
-                    'surat-masuk',
-                    $diskName
-                );
-            }
+                $bestOutput =
+                    $outputPath;
 
-            /*
-            |--------------------------------------------------------------------------
-            | BATAS HASIL AKHIR
-            |--------------------------------------------------------------------------
-            */
-            if (
-                $compressedSize >
-                self::MAX_FILE_SIZE
-            ) {
+                $bestSize =
+                    $outputSize;
+
+                $bestProfile =
+                    $profile['name'];
+            } else {
                 @unlink(
-                    $temporaryOutput
-                );
-
-                throw new RuntimeException(
-                    'PDF masih melebihi batas 10 MB setelah compression. Silakan gunakan PDF dengan ukuran atau resolusi lebih kecil.'
+                    $outputPath
                 );
             }
+        }
 
-            $compressedData =
-                file_get_contents(
-                    $temporaryOutput
-                );
+        /*
+        |--------------------------------------------------------------------------
+        | SEMUA PROFILE GAGAL
+        |--------------------------------------------------------------------------
+        */
 
-            if (
-                $compressedData === false ||
-                $compressedData === ''
-            ) {
-                throw new RuntimeException(
-                    'Gagal membaca hasil compression PDF.'
-                );
-            }
+        if (
+            !$bestOutput ||
+            $bestSize === null
+        ) {
+            throw new RuntimeException(
+                'Ghostscript gagal menghasilkan PDF terkompresi.'
+            );
+        }
 
-            $savingPercent =
-                $originalSize > 0
-                    ? round(
-                        (
-                            1 -
-                            (
-                                $compressedSize /
-                                $originalSize
-                            )
-                        ) *
-                        100,
-                        2
-                    )
-                    : 0;
+        /*
+        |--------------------------------------------------------------------------
+        | HASIL MASIH DI ATAS 10 MB
+        |--------------------------------------------------------------------------
+        */
 
-            Log::info(
-                'PDF Surat Masuk berhasil dikompresi.',
+        if (
+            $bestSize >
+            self::MAX_FILE_SIZE
+        ) {
+            @unlink(
+                $bestOutput
+            );
+
+            Log::warning(
+                'PDF hasil compression masih melebihi 10 MB.',
                 [
                     'original_size' =>
                         $originalSize,
 
                     'compressed_size' =>
-                        $compressedSize,
+                        $bestSize,
 
-                    'saving_percent' =>
-                        $savingPercent,
+                    'profile' =>
+                        $bestProfile,
+                ]
+            );
 
-                    'preset' =>
-                        self::PDF_COMPRESSION_PRESET,
+            throw new RuntimeException(
+                'PDF masih lebih dari 10 MB setelah compression. Gunakan PDF dengan resolusi scan lebih rendah.'
+            );
+        }
 
-                    'disk' =>
-                        $diskName,
+        /*
+        |--------------------------------------------------------------------------
+        | HASIL LEBIH BESAR/SAMA DENGAN ORIGINAL
+        |--------------------------------------------------------------------------
+        |
+        | File original tetap digunakan supaya tidak terjadi pembesaran.
+        |
+        */
+
+        if (
+            $bestSize >=
+            $originalSize
+        ) {
+            @unlink(
+                $bestOutput
+            );
+
+            $originalContents =
+                file_get_contents(
+                    $inputPath
+                );
+
+            if (
+                $originalContents === false ||
+                $originalContents === ''
+            ) {
+                throw new RuntimeException(
+                    'Gagal membaca file PDF asli.'
+                );
+            }
+
+            Log::info(
+                'PDF tidak menjadi lebih kecil setelah compression; file asli digunakan.',
+                [
+                    'original_size' =>
+                        $originalSize,
+
+                    'best_compressed_size' =>
+                        $bestSize,
+
+                    'profile' =>
+                        $bestProfile,
                 ]
             );
 
             return $this->storeBinaryFile(
-                $compressedData,
+                $originalContents,
                 'pdf',
                 'application/pdf',
                 'surat-masuk',
                 $diskName
             );
-        } catch (
-            Throwable $e
-        ) {
-            Log::error(
-                'Gagal melakukan compression PDF Surat Masuk.',
-                [
-                    'message' =>
-                        $e->getMessage(),
-
-                    'input' =>
-                        $inputPath,
-
-                    'disk' =>
-                        $diskName,
-                ]
-            );
-
-            throw new RuntimeException(
-                $e->getMessage(),
-                previous: $e
-            );
-        } finally {
-            if (
-                is_resource($process)
-            ) {
-                @proc_terminate(
-                    $process
-                );
-
-                @proc_close(
-                    $process
-                );
-            }
-
-            if (
-                isset($temporaryOutput) &&
-                is_file($temporaryOutput)
-            ) {
-                @unlink(
-                    $temporaryOutput
-                );
-            }
         }
+
+        /*
+        |--------------------------------------------------------------------------
+        | BACA FILE HASIL
+        |--------------------------------------------------------------------------
+        */
+
+        $compressedData =
+            file_get_contents(
+                $bestOutput
+            );
+
+        @unlink(
+            $bestOutput
+        );
+
+        if (
+            $compressedData === false ||
+            $compressedData === ''
+        ) {
+            throw new RuntimeException(
+                'Gagal membaca PDF hasil compression.'
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | FINAL SIZE
+        |--------------------------------------------------------------------------
+        */
+
+        $finalSize =
+            strlen(
+                $compressedData
+            );
+
+        if (
+            $finalSize >
+            self::MAX_FILE_SIZE
+        ) {
+            throw new RuntimeException(
+                'PDF hasil compression masih melebihi batas 10 MB.'
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | PENGHEMATAN
+        |--------------------------------------------------------------------------
+        */
+
+        $savingPercent =
+            $originalSize > 0
+                ? round(
+                    (
+                        1 -
+                        (
+                            $finalSize /
+                            $originalSize
+                        )
+                    ) *
+                    100,
+                    2
+                )
+                : 0;
+
+        Log::info(
+            'PDF Surat Masuk berhasil dikompresi.',
+            [
+                'original_size' =>
+                    $originalSize,
+
+                'compressed_size' =>
+                    $finalSize,
+
+                'saving_percent' =>
+                    $savingPercent,
+
+                'profile' =>
+                    $bestProfile,
+
+                'disk' =>
+                    $diskName,
+            ]
+        );
+
+        /*
+        |--------------------------------------------------------------------------
+        | SIMPAN SUPABASE
+        |--------------------------------------------------------------------------
+        */
+
+        return $this->storeBinaryFile(
+            $compressedData,
+            'pdf',
+            'application/pdf',
+            'surat-masuk',
+            $diskName
+        );
     }
 
     /*
@@ -2552,7 +2607,7 @@ class SuratMasukController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | PROTEKSI MEMORY
+        | MEMORY PROTECTION
         |--------------------------------------------------------------------------
         */
 
@@ -2569,12 +2624,6 @@ class SuratMasukController extends Controller
             );
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | LOAD IMAGE
-        |--------------------------------------------------------------------------
-        */
-
         $source =
             @imagecreatefromstring(
                 $contents
@@ -2590,7 +2639,7 @@ class SuratMasukController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | HITUNG DIMENSI
+        | DIMENSI
         |--------------------------------------------------------------------------
         */
 
@@ -2623,12 +2672,6 @@ class SuratMasukController extends Controller
                 )
             );
 
-        /*
-        |--------------------------------------------------------------------------
-        | CANVAS
-        |--------------------------------------------------------------------------
-        */
-
         $canvas =
             @imagecreatetruecolor(
                 $newWidth,
@@ -2649,7 +2692,7 @@ class SuratMasukController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | BACKGROUND PUTIH
+        | BACKGROUND
         |--------------------------------------------------------------------------
         */
 
@@ -2707,7 +2750,7 @@ class SuratMasukController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | COMPRESSION
+        | QUALITY
         |--------------------------------------------------------------------------
         */
 
@@ -2904,21 +2947,9 @@ class SuratMasukController extends Controller
                 $output;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | DESTROY
-        |--------------------------------------------------------------------------
-        */
-
         imagedestroy(
             $canvas
         );
-
-        /*
-        |--------------------------------------------------------------------------
-        | FINAL CHECK
-        |--------------------------------------------------------------------------
-        */
 
         if (
             $compressedData === null ||
@@ -2939,12 +2970,6 @@ class SuratMasukController extends Controller
                 'Gambar masih melebihi batas 10 MB setelah compression.'
             );
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | SIMPAN JPEG
-        |--------------------------------------------------------------------------
-        */
 
         return $this->storeBinaryFile(
             $compressedData,
