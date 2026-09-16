@@ -23,12 +23,23 @@
         )
     );
 
-    // Normalisasi role staff/staf
-    $role = $role === 'staff' ? 'staf' : $role;
+    /*
+     * Normalisasi:
+     * staff -> staf
+     */
+    $role =
+        $role === 'staff'
+            ? 'staf'
+            : $role;
 
-    $isStaf = $role === 'staf';
-    $isAdmin = $role === 'admin';
-    $isPimpinan = $role === 'pimpinan';
+    $isStaf =
+        $role === 'staf';
+
+    $isAdmin =
+        $role === 'admin';
+
+    $isPimpinan =
+        $role === 'pimpinan';
 
     $roleLabel = match ($role) {
         'admin' => 'Admin',
@@ -37,7 +48,10 @@
         default => 'Pengguna',
     };
 
-    $today = now()->translatedFormat('l, d F Y');
+    $today =
+        now()->translatedFormat(
+            'l, d F Y'
+        );
 
 
     /*
@@ -121,9 +135,9 @@
     {{-- =====================================================================
         HERO
     ====================================================================== --}}
+
     <section class="hero-dashboard relative overflow-hidden rounded-[28px] bg-slate-950 shadow-2xl">
 
-        {{-- Background Decoration --}}
         <div class="pointer-events-none absolute inset-0 overflow-hidden">
 
             <div class="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-blue-600/30 blur-3xl"></div>
@@ -142,9 +156,9 @@
             <div class="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
 
                 {{-- HERO CONTENT --}}
+
                 <div class="min-w-0">
 
-                    {{-- Status & Role --}}
                     <div class="mb-4 flex flex-wrap items-center gap-2">
 
                         <span class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-blue-100 backdrop-blur-md sm:text-xs">
@@ -171,7 +185,6 @@
                     </div>
 
 
-                    {{-- Greeting --}}
                     <h1 class="max-w-3xl text-2xl font-extrabold leading-tight tracking-tight text-white sm:text-3xl lg:text-4xl">
 
                         Selamat Datang,
@@ -183,7 +196,6 @@
                     </h1>
 
 
-                    {{-- Description --}}
                     <p class="mt-3 max-w-2xl text-xs leading-relaxed text-slate-300 sm:text-sm">
 
                         @if($isStaf)
@@ -199,7 +211,6 @@
                     </p>
 
 
-                    {{-- Date --}}
                     <div class="mt-5 flex items-center gap-2 text-[11px] font-medium text-slate-400 sm:text-xs">
 
                         <svg
@@ -231,11 +242,13 @@
 
 
                 {{-- HERO ACTION --}}
+
                 <div class="flex flex-col gap-3 sm:flex-row lg:flex-col">
 
                     @if(!$isStaf)
 
-                        {{-- Tambah Surat Masuk --}}
+                        {{-- SURAT MASUK --}}
+
                         <a
                             href="{{ route('surat-masuk.create') }}"
                             class="dashboard-action group"
@@ -290,7 +303,8 @@
                         </a>
 
 
-                        {{-- Tambah Surat Keluar --}}
+                        {{-- SURAT KELUAR --}}
+
                         <a
                             href="{{ route('surat-keluar.create') }}"
                             class="dashboard-action group"
@@ -352,7 +366,8 @@
 
                     @else
 
-                        {{-- Disposisi Staff --}}
+                        {{-- DISPOSISI STAFF --}}
+
                         <a
                             href="{{ route('disposisi.index') }}"
                             class="dashboard-action group"
@@ -426,17 +441,16 @@
 
     {{-- =====================================================================
         ADMIN / PIMPINAN
-        SCORECARD
     ====================================================================== --}}
+
     @if(!$isStaf)
 
         <section>
 
             <div class="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
 
-                {{-- =========================================================
-                    SURAT MASUK
-                ========================================================== --}}
+                {{-- SURAT MASUK --}}
+
                 <a
                     href="{{ route('surat-masuk.index') }}"
                     class="stat-card stat-card-blue group"
@@ -511,9 +525,8 @@
                 </a>
 
 
-                {{-- =========================================================
-                    SURAT KELUAR
-                ========================================================== --}}
+                {{-- SURAT KELUAR --}}
+
                 <a
                     href="{{ route('surat-keluar.index') }}"
                     class="stat-card stat-card-emerald group"
@@ -586,9 +599,8 @@
                 </a>
 
 
-                {{-- =========================================================
-                    BELUM DIPROSES
-                ========================================================== --}}
+                {{-- BELUM DIPROSES --}}
+
                 <a
                     href="{{ route('surat-masuk.index', ['status' => ['baru']]) }}"
                     class="stat-card stat-card-amber group"
@@ -660,9 +672,8 @@
                 </a>
 
 
-                {{-- =========================================================
-                    SELESAI
-                ========================================================== --}}
+                {{-- SELESAI --}}
+
                 <a
                     href="{{ route('surat-masuk.index', ['status' => ['selesai']]) }}"
                     class="stat-card stat-card-teal group"
@@ -742,9 +753,9 @@
         {{-- =================================================================
             GRAFIK AKTIVITAS SURAT
         ================================================================== --}}
+
         <section class="dashboard-panel overflow-hidden">
 
-            {{-- Chart Header --}}
             <div class="border-b border-slate-100 px-4 py-4 sm:px-6 sm:py-5">
 
                 <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -792,7 +803,6 @@
                     </div>
 
 
-                    {{-- Chart Legend --}}
                     <div class="flex items-center gap-4 pl-10 sm:pl-0">
 
                         <span class="flex items-center gap-2 text-[10px] font-semibold text-slate-500 sm:text-xs">
@@ -819,7 +829,6 @@
             </div>
 
 
-            {{-- Chart --}}
             <div class="p-4 sm:p-6">
 
                 <div class="relative h-64 w-full sm:h-72 lg:h-80">
@@ -836,9 +845,9 @@
         {{-- =================================================================
             SURAT MASUK TERBARU
         ================================================================== --}}
+
         <section class="dashboard-panel overflow-hidden">
 
-            {{-- Header --}}
             <div class="flex flex-col gap-4 border-b border-slate-100 px-4 py-4 sm:px-6 sm:py-5 lg:flex-row lg:items-center lg:justify-between">
 
                 <div>
@@ -884,9 +893,8 @@
             </div>
 
 
-            {{-- =============================================================
-                DESKTOP TABLE
-            ============================================================= --}}
+            {{-- DESKTOP TABLE --}}
+
             <div class="hidden overflow-x-auto md:block">
 
                 <table class="w-full text-left">
@@ -929,23 +937,38 @@
                         @forelse($suratMasukTerbaru ?? [] as $sm)
 
                             @php
-                                $currentStatus = strtolower(
-                                    trim(
-                                        (string) ($sm->status ?? 'baru')
-                                    )
-                                );
 
-                                $currentStatusConfig = $statusConfig[$currentStatus] ?? [
-                                    'label' => ucfirst($currentStatus),
-                                    'class' => 'bg-slate-50 text-slate-600 border-slate-200',
-                                    'dot' => 'bg-slate-400',
-                                ];
+                                $currentStatus =
+                                    strtolower(
+                                        trim(
+                                            (string) (
+                                                $sm->status ??
+                                                'baru'
+                                            )
+                                        )
+                                    );
+
+                                $currentStatusConfig =
+                                    $statusConfig[
+                                        $currentStatus
+                                    ] ?? [
+                                        'label' =>
+                                            ucfirst(
+                                                $currentStatus
+                                            ),
+
+                                        'class' =>
+                                            'bg-slate-50 text-slate-600 border-slate-200',
+
+                                        'dot' =>
+                                            'bg-slate-400',
+                                    ];
+
                             @endphp
 
 
                             <tr class="group transition hover:bg-slate-50/70">
 
-                                {{-- Nomor Agenda --}}
                                 <td class="table-cell">
 
                                     <span class="inline-flex items-center rounded-lg bg-blue-50 px-2.5 py-1.5 font-mono text-[10px] font-bold text-blue-700">
@@ -957,7 +980,6 @@
                                 </td>
 
 
-                                {{-- Perihal --}}
                                 <td class="table-cell">
 
                                     <div class="max-w-[260px]">
@@ -973,7 +995,6 @@
                                 </td>
 
 
-                                {{-- Pengirim --}}
                                 <td class="table-cell">
 
                                     <div class="flex items-center gap-2">
@@ -996,7 +1017,6 @@
                                 </td>
 
 
-                                {{-- Kategori --}}
                                 <td class="table-cell">
 
                                     <span class="text-xs text-slate-600">
@@ -1008,7 +1028,6 @@
                                 </td>
 
 
-                                {{-- Status --}}
                                 <td class="table-cell">
 
                                     <span class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-bold {{ $currentStatusConfig['class'] }}">
@@ -1022,7 +1041,6 @@
                                 </td>
 
 
-                                {{-- Action --}}
                                 <td class="table-cell text-right">
 
                                     <a
@@ -1113,25 +1131,40 @@
             </div>
 
 
-            {{-- =============================================================
-                MOBILE LIST
-            ============================================================= --}}
+            {{-- MOBILE LIST --}}
+
             <div class="divide-y divide-slate-100 md:hidden">
 
                 @forelse($suratMasukTerbaru ?? [] as $sm)
 
                     @php
-                        $currentStatus = strtolower(
-                            trim(
-                                (string) ($sm->status ?? 'baru')
-                            )
-                        );
 
-                        $currentStatusConfig = $statusConfig[$currentStatus] ?? [
-                            'label' => ucfirst($currentStatus),
-                            'class' => 'bg-slate-50 text-slate-600 border-slate-200',
-                            'dot' => 'bg-slate-400',
-                        ];
+                        $currentStatus =
+                            strtolower(
+                                trim(
+                                    (string) (
+                                        $sm->status ??
+                                        'baru'
+                                    )
+                                )
+                            );
+
+                        $currentStatusConfig =
+                            $statusConfig[
+                                $currentStatus
+                            ] ?? [
+                                'label' =>
+                                    ucfirst(
+                                        $currentStatus
+                                    ),
+
+                                'class' =>
+                                    'bg-slate-50 text-slate-600 border-slate-200',
+
+                                'dot' =>
+                                    'bg-slate-400',
+                            ];
+
                     @endphp
 
 
@@ -1246,18 +1279,19 @@
     {{-- =====================================================================
         STAFF DASHBOARD
     ====================================================================== --}}
+
     @else
 
         {{-- ================================================================
             STAFF SCORECARD
         ================================================================= --}}
+
         <section>
 
             <div class="grid grid-cols-2 gap-3 sm:gap-4">
 
-                {{-- =========================================================
-                    DISPOSISI MENUNGGU
-                ========================================================== --}}
+                {{-- DISPOSISI MENUNGGU --}}
+
                 <a
                     href="{{ route('disposisi.index', ['status' => ['menunggu']]) }}"
                     class="stat-card stat-card-amber group"
@@ -1329,9 +1363,8 @@
                 </a>
 
 
-                {{-- =========================================================
-                    DISPOSISI SELESAI
-                ========================================================== --}}
+                {{-- DISPOSISI SELESAI --}}
+
                 <a
                     href="{{ route('disposisi.index', ['status' => ['selesai']]) }}"
                     class="stat-card stat-card-teal group"
@@ -1411,9 +1444,9 @@
         {{-- ================================================================
             STAFF TASK LIST
         ================================================================= --}}
+
         <section class="dashboard-panel overflow-hidden">
 
-            {{-- Header --}}
             <div class="border-b border-slate-100 px-4 py-4 sm:px-6 sm:py-5">
 
                 <div class="flex items-center gap-3">
@@ -1461,7 +1494,8 @@
             </div>
 
 
-            {{-- Task Content --}}
+            {{-- TASK CONTENT --}}
+
             <div class="p-4 sm:p-6">
 
                 <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
@@ -1469,18 +1503,76 @@
                     @forelse($listDisposisi ?? [] as $d)
 
                         @php
-                            $status = strtolower(
-                                trim(
-                                    (string) ($d->status ?? 'menunggu')
-                                )
-                            );
 
-                            $currentDisposisiConfig = $disposisiConfig[$status] ?? [
-                                'label' => ucfirst($status),
-                                'class' => 'bg-slate-50 text-slate-700 border-slate-200',
-                                'border' => 'border-l-slate-400',
-                                'icon' => 'bg-slate-50 text-slate-500',
-                            ];
+                            $status =
+                                strtolower(
+                                    trim(
+                                        (string) (
+                                            $d->status ??
+                                            'menunggu'
+                                        )
+                                    )
+                                );
+
+                            $currentDisposisiConfig =
+                                $disposisiConfig[
+                                    $status
+                                ] ?? [
+                                    'label' =>
+                                        ucfirst(
+                                            $status
+                                        ),
+
+                                    'class' =>
+                                        'bg-slate-50 text-slate-700 border-slate-200',
+
+                                    'border' =>
+                                        'border-l-slate-400',
+
+                                    'icon' =>
+                                        'bg-slate-50 text-slate-500',
+                                ];
+
+
+                            /*
+                             * ==================================================
+                             * TANGGAL SURAT
+                             * ==================================================
+                             *
+                             * Nomor Agenda tidak lagi ditampilkan
+                             * pada kartu tugas Staff.
+                             *
+                             * Data diambil dari:
+                             * $d->suratMasuk->tanggal_surat
+                             */
+
+                            $tanggalSurat =
+                                '-';
+
+                            if (
+                                $d->suratMasuk?->tanggal_surat
+                            ) {
+
+                                try {
+
+                                    $tanggalSurat =
+                                        \Illuminate\Support\Carbon::parse(
+                                            $d->suratMasuk->tanggal_surat
+                                        )->format(
+                                            'd/m/Y'
+                                        );
+
+                                } catch (
+                                    \Throwable $e
+                                ) {
+
+                                    $tanggalSurat =
+                                        (string) (
+                                            $d->suratMasuk->tanggal_surat
+                                        );
+                                }
+                            }
+
                         @endphp
 
 
@@ -1489,7 +1581,8 @@
                             class="task-card group {{ $currentDisposisiConfig['border'] }}"
                         >
 
-                            {{-- Task Header --}}
+                            {{-- TASK HEADER --}}
+
                             <div class="flex items-start gap-3">
 
                                 <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl {{ $currentDisposisiConfig['icon'] }}">
@@ -1522,7 +1615,7 @@
 
                                     <h3 class="line-clamp-2 text-xs font-bold leading-relaxed text-slate-800 transition group-hover:text-blue-600 sm:text-sm">
 
-                                        {{ $d->suratMasuk->perihal ?? 'Surat Disposisi' }}
+                                        {{ $d->suratMasuk?->perihal ?? 'Surat Disposisi' }}
 
                                     </h3>
 
@@ -1538,10 +1631,12 @@
                             </div>
 
 
-                            {{-- Task Information --}}
+                            {{-- TASK INFORMATION --}}
+
                             <div class="mt-4 space-y-2.5">
 
                                 {{-- DARI --}}
+
                                 <div class="flex items-center gap-2">
 
                                     <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-slate-50 text-slate-400">
@@ -1576,7 +1671,7 @@
 
                                         <span class="block truncate text-[11px] font-semibold text-slate-700">
 
-                                            {{ $d->dari->name ?? $d->dari->nama ?? '-' }}
+                                            {{ $d->dari?->name ?? $d->dari?->nama ?? '-' }}
 
                                         </span>
 
@@ -1585,7 +1680,10 @@
                                 </div>
 
 
-                                {{-- NOMOR AGENDA --}}
+                                {{-- ==================================================
+                                     TANGGAL SURAT
+                                =================================================== --}}
+
                                 <div class="flex items-center gap-2">
 
                                     <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-slate-50 text-slate-400">
@@ -1598,31 +1696,32 @@
                                             viewBox="0 0 24 24"
                                         >
                                             <rect
-                                                x="5"
-                                                y="3"
-                                                width="14"
-                                                height="18"
+                                                x="3"
+                                                y="5"
+                                                width="18"
+                                                height="15"
                                                 rx="2"
                                             />
 
                                             <path
                                                 stroke-linecap="round"
-                                                d="M9 8h6M9 12h6M9 16h4"
+                                                d="M8 3v4M16 3v4M3 10h18"
                                             />
+
                                         </svg>
 
                                     </span>
 
 
-                                    <div>
+                                    <div class="min-w-0">
 
                                         <span class="block text-[9px] font-semibold uppercase tracking-wide text-slate-400">
-                                            Nomor Agenda
+                                            Tanggal Surat
                                         </span>
 
-                                        <span class="block font-mono text-[11px] font-bold text-slate-700">
+                                        <span class="block truncate text-[11px] font-bold text-slate-700">
 
-                                            {{ $d->suratMasuk->nomor_agenda ?? '-' }}
+                                            {{ $tanggalSurat }}
 
                                         </span>
 
@@ -1632,7 +1731,33 @@
 
 
                                 {{-- BATAS WAKTU --}}
+
                                 @if($d->batas_waktu)
+
+                                    @php
+
+                                        $batasWaktu =
+                                            '-';
+
+                                        try {
+
+                                            $batasWaktu =
+                                                \Illuminate\Support\Carbon::parse(
+                                                    $d->batas_waktu
+                                                )->format(
+                                                    'd M Y'
+                                                );
+
+                                        } catch (
+                                            \Throwable $e
+                                        ) {
+
+                                            $batasWaktu =
+                                                (string) $d->batas_waktu;
+                                        }
+
+                                    @endphp
+
 
                                     <div class="flex items-center gap-2">
 
@@ -1668,7 +1793,7 @@
 
                                             <span class="block text-[11px] font-bold text-slate-700">
 
-                                                {{ optional($d->batas_waktu)->format('d M Y') }}
+                                                {{ $batasWaktu }}
 
                                             </span>
 
@@ -1681,7 +1806,8 @@
                             </div>
 
 
-                            {{-- Detail --}}
+                            {{-- DETAIL --}}
+
                             <div class="mt-4 flex items-center justify-between border-t border-slate-100 pt-3">
 
                                 <span class="text-[10px] font-medium text-slate-400">
@@ -1752,7 +1878,8 @@
             </div>
 
 
-            {{-- Footer --}}
+            {{-- FOOTER --}}
+
             <div class="border-t border-slate-100 bg-slate-50/50 p-4 sm:p-5">
 
                 <a
@@ -1790,11 +1917,8 @@
 {{-- ========================================================================
     DASHBOARD STYLE
 ============================================================================ --}}
-<style>
 
-    /* =====================================================================
-       PAGE
-    ====================================================================== */
+<style>
 
     .dashboard-page {
         animation: dashboardFade .45s ease-out;
@@ -1815,10 +1939,6 @@
 
     }
 
-
-    /* =====================================================================
-       HERO
-    ====================================================================== */
 
     .hero-dashboard {
         isolation: isolate;
@@ -1881,10 +2001,6 @@
     }
 
 
-    /* =====================================================================
-       SCORECARD
-    ====================================================================== */
-
     .stat-card {
 
         position: relative;
@@ -1923,8 +2039,6 @@
 
     }
 
-
-    /* Color Marker */
 
     .stat-color-bar {
 
@@ -2009,10 +2123,6 @@
     }
 
 
-    /* =====================================================================
-       BLUE
-    ====================================================================== */
-
     .stat-icon-blue {
 
         background: #eff6ff;
@@ -2036,10 +2146,6 @@
 
     }
 
-
-    /* =====================================================================
-       EMERALD
-    ====================================================================== */
 
     .stat-icon-emerald {
 
@@ -2065,10 +2171,6 @@
     }
 
 
-    /* =====================================================================
-       AMBER
-    ====================================================================== */
-
     .stat-icon-amber {
 
         background: #fffbeb;
@@ -2093,10 +2195,6 @@
     }
 
 
-    /* =====================================================================
-       TEAL
-    ====================================================================== */
-
     .stat-icon-teal {
 
         background: #f0fdfa;
@@ -2120,10 +2218,6 @@
 
     }
 
-
-    /* =====================================================================
-       SCORECARD FOOTER
-    ====================================================================== */
 
     .stat-pill {
 
@@ -2161,10 +2255,6 @@
     }
 
 
-    /* =====================================================================
-       PANEL
-    ====================================================================== */
-
     .dashboard-panel {
 
         border: 1px solid rgba(226, 232, 240, .85);
@@ -2178,10 +2268,6 @@
 
     }
 
-
-    /* =====================================================================
-       SECTION
-    ====================================================================== */
 
     .section-eyebrow {
 
@@ -2199,10 +2285,6 @@
 
     }
 
-
-    /* =====================================================================
-       TABLE
-    ====================================================================== */
 
     .table-heading {
 
@@ -2231,10 +2313,6 @@
 
     }
 
-
-    /* =====================================================================
-       STAFF TASK
-    ====================================================================== */
 
     .task-card {
 
@@ -2275,10 +2353,6 @@
     }
 
 
-    /* =====================================================================
-       EMPTY STATE
-    ====================================================================== */
-
     .empty-state {
 
         display: flex;
@@ -2301,10 +2375,6 @@
 
     }
 
-
-    /* =====================================================================
-       RESPONSIVE
-    ====================================================================== */
 
     @media (min-width: 640px) {
 
@@ -2368,10 +2438,6 @@
     }
 
 
-    /* =====================================================================
-       REDUCED MOTION
-    ====================================================================== */
-
     @media (prefers-reduced-motion: reduce) {
 
         .dashboard-page,
@@ -2395,325 +2461,378 @@
 {{-- ========================================================================
     CHART JS
 ============================================================================ --}}
+
 @if(!$isStaf)
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
 
-        document.addEventListener('DOMContentLoaded', function () {
-
-            const canvas = document.getElementById('suratChart');
-
-            if (!canvas) {
-                return;
-            }
-
-
-            const ctx = canvas.getContext('2d');
-
-            if (!ctx) {
-                return;
-            }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | DATA
-            |--------------------------------------------------------------------------
-            */
-
-            const chartLabels = @json($chartLabels ?? []);
-
-            const dataMasuk = @json($chartDataMasuk ?? []);
-
-            const dataKeluar = @json($chartDataKeluar ?? []);
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | GRADIENT SURAT MASUK
-            |--------------------------------------------------------------------------
-            */
-
-            const gradientMasuk = ctx.createLinearGradient(
-                0,
-                0,
-                0,
-                320
-            );
-
-            gradientMasuk.addColorStop(
-                0,
-                'rgba(37, 99, 235, .18)'
-            );
-
-            gradientMasuk.addColorStop(
-                1,
-                'rgba(37, 99, 235, 0)'
-            );
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | GRADIENT SURAT KELUAR
-            |--------------------------------------------------------------------------
-            */
-
-            const gradientKeluar = ctx.createLinearGradient(
-                0,
-                0,
-                0,
-                320
-            );
-
-            gradientKeluar.addColorStop(
-                0,
-                'rgba(16, 185, 129, .18)'
-            );
-
-            gradientKeluar.addColorStop(
-                1,
-                'rgba(16, 185, 129, 0)'
-            );
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | HAPUS CHART LAMA
-            |--------------------------------------------------------------------------
-            */
-
-            if (window.suratChartInstance) {
-
-                window.suratChartInstance.destroy();
-
-            }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | CHART
-            |--------------------------------------------------------------------------
-            */
-
-            window.suratChartInstance = new Chart(ctx, {
-
-                type: 'line',
-
-                data: {
-
-                    labels: chartLabels,
-
-                    datasets: [
-
-                        {
-                            label: 'Surat Masuk',
-
-                            data: dataMasuk,
-
-                            borderColor: '#2563eb',
-
-                            backgroundColor: gradientMasuk,
-
-                            borderWidth: 2.5,
-
-                            fill: true,
-
-                            tension: .4,
-
-                            pointRadius: 3,
-
-                            pointHoverRadius: 6,
-
-                            pointBackgroundColor: '#2563eb',
-
-                            pointBorderColor: '#ffffff',
-
-                            pointBorderWidth: 2,
-                        },
-
-
-                        {
-                            label: 'Surat Keluar',
-
-                            data: dataKeluar,
-
-                            borderColor: '#10b981',
-
-                            backgroundColor: gradientKeluar,
-
-                            borderWidth: 2.5,
-
-                            fill: true,
-
-                            tension: .4,
-
-                            pointRadius: 3,
-
-                            pointHoverRadius: 6,
-
-                            pointBackgroundColor: '#10b981',
-
-                            pointBorderColor: '#ffffff',
-
-                            pointBorderWidth: 2,
-                        }
-
-                    ]
-
-                },
-
-
-                options: {
-
-                    responsive: true,
-
-                    maintainAspectRatio: false,
-
-
-                    interaction: {
-
-                        intersect: false,
-
-                        mode: 'index',
-
-                    },
-
-
-                    animation: {
-
-                        duration: 900,
-
-                        easing: 'easeOutQuart',
-
-                    },
-
-
-                    plugins: {
-
-                        legend: {
-
-                            display: false,
-
-                        },
-
-
-                        tooltip: {
-
-                            backgroundColor: '#0f172a',
-
-                            titleColor: '#ffffff',
-
-                            bodyColor: '#cbd5e1',
-
-                            borderColor: '#1e293b',
-
-                            borderWidth: 1,
-
-                            titleFont: {
-
-                                size: 11,
-
-                                weight: 'bold',
-
-                            },
-
-                            bodyFont: {
-
-                                size: 11,
-
-                            },
-
-                            padding: 11,
-
-                            cornerRadius: 10,
-
-                            displayColors: true,
-
-                        }
-
-                    },
-
-
-                    scales: {
-
-                        x: {
-
-                            grid: {
-
-                                display: false,
-
-                            },
-
-                            border: {
-
-                                display: false,
-
-                            },
-
-                            ticks: {
-
-                                color: '#94a3b8',
-
-                                font: {
-
-                                    size: 10,
-
-                                },
-
-                                maxRotation: 0,
-
-                                autoSkip: true,
-
-                                maxTicksLimit: 12,
-
-                            }
-
-                        },
-
-
-                        y: {
-
-                            beginAtZero: true,
-
-                            border: {
-
-                                display: false,
-
-                            },
-
-                            ticks: {
-
-                                precision: 0,
-
-                                stepSize: 1,
-
-                                color: '#94a3b8',
-
-                                font: {
-
-                                    size: 10,
-
-                                }
-
-                            },
-
-                            grid: {
-
-                                color: '#f1f5f9',
-
-                            }
-
-                        }
-
-                    }
+        document.addEventListener(
+            'DOMContentLoaded',
+            function () {
+
+                const canvas =
+                    document.getElementById(
+                        'suratChart'
+                    );
+
+                if (!canvas) {
+                    return;
+                }
+
+
+                const ctx =
+                    canvas.getContext(
+                        '2d'
+                    );
+
+                if (!ctx) {
+                    return;
+                }
+
+
+                const chartLabels =
+                    @json(
+                        $chartLabels ?? []
+                    );
+
+                const dataMasuk =
+                    @json(
+                        $chartDataMasuk ?? []
+                    );
+
+                const dataKeluar =
+                    @json(
+                        $chartDataKeluar ?? []
+                    );
+
+
+                const gradientMasuk =
+                    ctx.createLinearGradient(
+                        0,
+                        0,
+                        0,
+                        320
+                    );
+
+                gradientMasuk.addColorStop(
+                    0,
+                    'rgba(37, 99, 235, .18)'
+                );
+
+                gradientMasuk.addColorStop(
+                    1,
+                    'rgba(37, 99, 235, 0)'
+                );
+
+
+                const gradientKeluar =
+                    ctx.createLinearGradient(
+                        0,
+                        0,
+                        0,
+                        320
+                    );
+
+                gradientKeluar.addColorStop(
+                    0,
+                    'rgba(16, 185, 129, .18)'
+                );
+
+                gradientKeluar.addColorStop(
+                    1,
+                    'rgba(16, 185, 129, 0)'
+                );
+
+
+                if (
+                    window.suratChartInstance
+                ) {
+
+                    window.suratChartInstance.destroy();
 
                 }
 
-            });
 
-        });
+                window.suratChartInstance =
+                    new Chart(
+                        ctx,
+                        {
+
+                            type: 'line',
+
+                            data: {
+
+                                labels:
+                                    chartLabels,
+
+                                datasets: [
+
+                                    {
+                                        label:
+                                            'Surat Masuk',
+
+                                        data:
+                                            dataMasuk,
+
+                                        borderColor:
+                                            '#2563eb',
+
+                                        backgroundColor:
+                                            gradientMasuk,
+
+                                        borderWidth:
+                                            2.5,
+
+                                        fill:
+                                            true,
+
+                                        tension:
+                                            .4,
+
+                                        pointRadius:
+                                            3,
+
+                                        pointHoverRadius:
+                                            6,
+
+                                        pointBackgroundColor:
+                                            '#2563eb',
+
+                                        pointBorderColor:
+                                            '#ffffff',
+
+                                        pointBorderWidth:
+                                            2,
+                                    },
+
+
+                                    {
+                                        label:
+                                            'Surat Keluar',
+
+                                        data:
+                                            dataKeluar,
+
+                                        borderColor:
+                                            '#10b981',
+
+                                        backgroundColor:
+                                            gradientKeluar,
+
+                                        borderWidth:
+                                            2.5,
+
+                                        fill:
+                                            true,
+
+                                        tension:
+                                            .4,
+
+                                        pointRadius:
+                                            3,
+
+                                        pointHoverRadius:
+                                            6,
+
+                                        pointBackgroundColor:
+                                            '#10b981',
+
+                                        pointBorderColor:
+                                            '#ffffff',
+
+                                        pointBorderWidth:
+                                            2,
+                                    }
+
+                                ]
+
+                            },
+
+
+                            options: {
+
+                                responsive:
+                                    true,
+
+                                maintainAspectRatio:
+                                    false,
+
+                                interaction: {
+
+                                    intersect:
+                                        false,
+
+                                    mode:
+                                        'index',
+
+                                },
+
+
+                                animation: {
+
+                                    duration:
+                                        900,
+
+                                    easing:
+                                        'easeOutQuart',
+
+                                },
+
+
+                                plugins: {
+
+                                    legend: {
+
+                                        display:
+                                            false,
+
+                                    },
+
+
+                                    tooltip: {
+
+                                        backgroundColor:
+                                            '#0f172a',
+
+                                        titleColor:
+                                            '#ffffff',
+
+                                        bodyColor:
+                                            '#cbd5e1',
+
+                                        borderColor:
+                                            '#1e293b',
+
+                                        borderWidth:
+                                            1,
+
+                                        titleFont: {
+
+                                            size:
+                                                11,
+
+                                            weight:
+                                                'bold',
+
+                                        },
+
+                                        bodyFont: {
+
+                                            size:
+                                                11,
+
+                                        },
+
+                                        padding:
+                                            11,
+
+                                        cornerRadius:
+                                            10,
+
+                                        displayColors:
+                                            true,
+
+                                    }
+
+                                },
+
+
+                                scales: {
+
+                                    x: {
+
+                                        grid: {
+
+                                            display:
+                                                false,
+
+                                        },
+
+                                        border: {
+
+                                            display:
+                                                false,
+
+                                        },
+
+                                        ticks: {
+
+                                            color:
+                                                '#94a3b8',
+
+                                            font: {
+
+                                                size:
+                                                    10,
+
+                                            },
+
+                                            maxRotation:
+                                                0,
+
+                                            autoSkip:
+                                                true,
+
+                                            maxTicksLimit:
+                                                12,
+
+                                        }
+
+                                    },
+
+
+                                    y: {
+
+                                        beginAtZero:
+                                            true,
+
+                                        border: {
+
+                                            display:
+                                                false,
+
+                                        },
+
+                                        ticks: {
+
+                                            precision:
+                                                0,
+
+                                            stepSize:
+                                                1,
+
+                                            color:
+                                                '#94a3b8',
+
+                                            font: {
+
+                                                size:
+                                                    10,
+
+                                            }
+
+                                        },
+
+                                        grid: {
+
+                                            color:
+                                                '#f1f5f9',
+
+                                        }
+
+                                    }
+
+                                }
+
+                            }
+
+                        }
+                    );
+
+            }
+        );
 
     </script>
 

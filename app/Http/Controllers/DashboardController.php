@@ -38,6 +38,11 @@ class DashboardController extends Controller
             )
         );
 
+        /*
+         * Normalisasi:
+         * staf  -> staf
+         * staff -> staf
+         */
         if ($role === 'staff') {
             $role = 'staf';
         }
@@ -69,10 +74,16 @@ class DashboardController extends Controller
          * DASHBOARD STAF
          * ==========================================================
          *
-         * Staf hanya membutuhkan data disposisi
-         * yang diberikan kepada dirinya sendiri.
+         * Staf hanya melihat disposisi yang ditujukan
+         * kepada akun staf yang sedang login.
          */
         if ($isStaf) {
+
+            /*
+             * ======================================================
+             * QUERY DASAR DISPOSISI
+             * ======================================================
+             */
             $disposisiDasar = Disposisi::query()
                 ->where(
                     'kepada_user_id',
@@ -80,47 +91,73 @@ class DashboardController extends Controller
                 );
 
             /*
-             * Disposisi menunggu.
+             * ======================================================
+             * DISPOSISI MENUNGGU
+             * ======================================================
              */
-            $disposisiMenunggu = (clone $disposisiDasar)
-                ->whereRaw(
-                    'LOWER(TRIM(status)) = ?',
-                    ['menunggu']
-                )
-                ->count();
+            $disposisiMenunggu =
+                (clone $disposisiDasar)
+                    ->whereRaw(
+                        'LOWER(TRIM(status)) = ?',
+                        ['menunggu']
+                    )
+                    ->count();
 
             /*
-             * Disposisi selesai.
+             * ======================================================
+             * DISPOSISI SELESAI
+             * ======================================================
              */
-            $disposisiSelesai = (clone $disposisiDasar)
-                ->whereRaw(
-                    'LOWER(TRIM(status)) = ?',
-                    ['selesai']
-                )
-                ->count();
+            $disposisiSelesai =
+                (clone $disposisiDasar)
+                    ->whereRaw(
+                        'LOWER(TRIM(status)) = ?',
+                        ['selesai']
+                    )
+                    ->count();
 
             /*
-             * Daftar 5 disposisi terbaru
-             * yang masih menunggu tindak lanjut.
+             * ======================================================
+             * DAFTAR DISPOSISI UNTUK STAFF
+             * ======================================================
+             *
+             * Relasi suratMasuk WAJIB dimuat karena Blade
+             * dashboard akan mengambil:
+             *
+             * $disposisi->suratMasuk->tanggal_surat
+             *
+             * Jadi dashboard dapat menampilkan TANGGAL SURAT
+             * sebagai pengganti NOMOR AGENDA.
              */
-            $listDisposisi = Disposisi::query()
-                ->with([
-                    'suratMasuk',
-                    'dari',
-                ])
-                ->where(
-                    'kepada_user_id',
-                    $userId
-                )
-                ->whereRaw(
-                    'LOWER(TRIM(status)) = ?',
-                    ['menunggu']
-                )
-                ->orderByDesc('created_at')
-                ->orderByDesc('id')
-                ->limit(5)
-                ->get();
+            $listDisposisi =
+                Disposisi::query()
+                    ->with([
+                        'suratMasuk',
+                        'dari',
+                        'kepada',
+                    ])
+                    ->where(
+                        'kepada_user_id',
+                        $userId
+                    )
+                    ->whereRaw(
+                        'LOWER(TRIM(status)) = ?',
+                        ['menunggu']
+                    )
+                    ->orderByDesc(
+                        'created_at'
+                    )
+                    ->orderByDesc(
+                        'id'
+                    )
+                    ->limit(5)
+                    ->get();
 
+            /*
+             * ======================================================
+             * RETURN DASHBOARD STAFF
+             * ======================================================
+             */
             return view(
                 'dashboard.index',
                 compact(
@@ -145,8 +182,7 @@ class DashboardController extends Controller
          * DASHBOARD ADMIN / PIMPINAN
          * ==========================================================
          *
-         * Admin dan pimpinan tidak membutuhkan listDisposisi
-         * pada dashboard.
+         * Admin dan pimpinan menampilkan statistik surat.
          */
 
         /*
@@ -155,7 +191,8 @@ class DashboardController extends Controller
          * ==========================================================
          */
         $totalSuratMasuk =
-            SuratMasuk::query()->count();
+            SuratMasuk::query()
+                ->count();
 
         /*
          * ==========================================================
@@ -163,7 +200,8 @@ class DashboardController extends Controller
          * ==========================================================
          */
         $totalSuratKeluar =
-            SuratKeluar::query()->count();
+            SuratKeluar::query()
+                ->count();
 
         /*
          * ==========================================================
@@ -196,17 +234,21 @@ class DashboardController extends Controller
          * SURAT MASUK TERBARU
          * ==========================================================
          *
-         * Relasi yang digunakan hanya kategori.
-         * Tidak menggunakan relasi instansi.
+         * Pengurutan:
+         * 1. tanggal_terima terbaru
+         * 2. created_at terbaru
          *
-         * Pengirim berasal dari:
-         * surat_masuks.pengirim
+         * Relasi kategori digunakan oleh dashboard.
          */
         $suratMasukTerbaru =
             SuratMasuk::query()
                 ->with('kategori')
-                ->orderByDesc('tanggal_terima')
-                ->orderByDesc('created_at')
+                ->orderByDesc(
+                    'tanggal_terima'
+                )
+                ->orderByDesc(
+                    'created_at'
+                )
                 ->limit(5)
                 ->get();
 
@@ -215,12 +257,14 @@ class DashboardController extends Controller
          * GRAFIK 12 BULAN TERAKHIR
          * ==========================================================
          */
-        $startMonth = Carbon::now()
-            ->startOfMonth()
-            ->subMonths(11);
+        $startMonth =
+            Carbon::now()
+                ->startOfMonth()
+                ->subMonths(11);
 
-        $endMonth = Carbon::now()
-            ->endOfMonth();
+        $endMonth =
+            Carbon::now()
+                ->endOfMonth();
 
         /*
          * ==========================================================
@@ -348,13 +392,16 @@ class DashboardController extends Controller
             $i < 12;
             $i++
         ) {
+
             $currentMonth =
                 $startMonth
                     ->copy()
                     ->addMonths($i);
 
             $key =
-                $currentMonth->format('Y-m');
+                $currentMonth->format(
+                    'Y-m'
+                );
 
             $chartLabels[] =
                 $namaBulan[
