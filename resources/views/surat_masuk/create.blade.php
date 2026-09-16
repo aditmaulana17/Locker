@@ -503,6 +503,7 @@ textarea.sm-control {
     font-size: 8px;
     font-weight: 800;
     cursor: pointer;
+    transition: .15s ease;
 }
 
 .sm-mode-btn:hover {
@@ -530,6 +531,7 @@ textarea.sm-control {
     background: #f8fafc;
     text-align: center;
     cursor: pointer;
+    transition: .15s ease;
 }
 
 .sm-upload-box:hover {
@@ -554,8 +556,7 @@ textarea.sm-control {
     color: #4f46e5;
 }
 
-.sm-upload-box.has-file
-.sm-upload-icon {
+.sm-upload-box.has-file .sm-upload-icon {
     background: #d1fae5;
     color: #059669;
 }
@@ -689,6 +690,23 @@ textarea.sm-control {
     color: #1d4ed8;
 }
 
+.sm-compression-progress {
+    position: relative;
+    height: 7px;
+    overflow: hidden;
+    margin-top: 8px;
+    border-radius: 999px;
+    background: #dbeafe;
+}
+
+.sm-compression-progress-bar {
+    width: 0%;
+    height: 100%;
+    border-radius: inherit;
+    background: #2563eb;
+    transition: width .2s ease;
+}
+
 .sm-compression-table {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -725,6 +743,10 @@ textarea.sm-control {
 }
 
 .sm-file-preview-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
     padding: 8px 10px;
     border-bottom: 1px solid #cbd5e1;
     background: #f8fafc;
@@ -753,6 +775,19 @@ textarea.sm-control {
     height: 460px;
     border: 0;
     background: #fff;
+}
+
+.sm-preview-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 7px;
+    border: 1px solid #bfdbfe;
+    border-radius: 999px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-size: 6.5px;
+    font-weight: 800;
 }
 
 .sm-camera-box {
@@ -1201,10 +1236,6 @@ textarea.sm-control {
 
     @endif
 
-    {{-- ================================================================
-         HASIL COMPRESSION SERVER
-    ================================================================ --}}
-
     @if(is_array($compressionResult))
 
         <div class="sm-server-result">
@@ -1216,7 +1247,6 @@ textarea.sm-control {
             <div class="sm-server-result-grid">
 
                 <div class="sm-server-result-item">
-
                     <span class="sm-server-result-label">
                         Jenis
                     </span>
@@ -1224,11 +1254,9 @@ textarea.sm-control {
                     <span class="sm-server-result-value">
                         {{ strtoupper($compressionResult['type'] ?? 'PDF') }}
                     </span>
-
                 </div>
 
                 <div class="sm-server-result-item">
-
                     <span class="sm-server-result-label">
                         Ukuran Asli
                     </span>
@@ -1237,11 +1265,9 @@ textarea.sm-control {
                         {{ number_format(($compressionResult['original_size'] ?? 0) / 1048576, 2) }}
                         MB
                     </span>
-
                 </div>
 
                 <div class="sm-server-result-item">
-
                     <span class="sm-server-result-label">
                         Ukuran Akhir
                     </span>
@@ -1250,11 +1276,9 @@ textarea.sm-control {
                         {{ number_format(($compressionResult['compressed_size'] ?? 0) / 1048576, 2) }}
                         MB
                     </span>
-
                 </div>
 
                 <div class="sm-server-result-item">
-
                     <span class="sm-server-result-label">
                         Penghematan
                     </span>
@@ -1262,7 +1286,6 @@ textarea.sm-control {
                     <span class="sm-server-result-value">
                         {{ number_format((float) ($compressionResult['saving_percent'] ?? 0), 2) }}%
                     </span>
-
                 </div>
 
             </div>
@@ -1324,10 +1347,6 @@ textarea.sm-control {
 
         <div class="sm-shell">
 
-            {{-- =============================================================
-                 HEADER
-            ============================================================= --}}
-
             <header class="sm-header">
 
                 <div class="sm-header-inner">
@@ -1370,8 +1389,8 @@ textarea.sm-control {
                             </h1>
 
                             <p class="sm-header-desc">
-                                Lengkapi data surat, lihat hasil optimasi
-                                lampiran, dan catat lokasi arsip fisik.
+                                Lengkapi data surat, lihat preview file,
+                                proses compression, dan catat lokasi arsip fisik.
                             </p>
 
                         </div>
@@ -1404,10 +1423,6 @@ textarea.sm-control {
             </header>
 
             <div class="sm-body">
-
-                {{-- =============================================================
-                     INFORMASI
-                ============================================================= --}}
 
                 <section class="sm-section">
 
@@ -1454,11 +1469,9 @@ textarea.sm-control {
                             >
 
                             @if($formErrors->has('nomor_surat'))
-
                                 <p class="sm-field-error">
                                     {{ $formErrors->first('nomor_surat') }}
                                 </p>
-
                             @endif
 
                         </div>
@@ -1486,11 +1499,9 @@ textarea.sm-control {
                             >
 
                             @if($formErrors->has('pengirim'))
-
                                 <p class="sm-field-error">
                                     {{ $formErrors->first('pengirim') }}
                                 </p>
-
                             @endif
 
                         </div>
@@ -1515,11 +1526,9 @@ textarea.sm-control {
                             >
 
                             @if($formErrors->has('tanggal_surat'))
-
                                 <p class="sm-field-error">
                                     {{ $formErrors->first('tanggal_surat') }}
                                 </p>
-
                             @endif
 
                         </div>
@@ -1544,11 +1553,9 @@ textarea.sm-control {
                             >
 
                             @if($formErrors->has('tanggal_terima'))
-
                                 <p class="sm-field-error">
                                     {{ $formErrors->first('tanggal_terima') }}
                                 </p>
-
                             @endif
 
                         </div>
@@ -1586,11 +1593,8 @@ textarea.sm-control {
                                         {{ $kategori->nama_kategori }}
 
                                         @if(!empty($kategori->sifat))
-
                                             ({{ ucfirst($kategori->sifat) }})
-
                                         @endif
-
                                     </option>
 
                                 @endforeach
@@ -1598,11 +1602,9 @@ textarea.sm-control {
                             </select>
 
                             @if($formErrors->has('kategori_surat_id'))
-
                                 <p class="sm-field-error">
                                     {{ $formErrors->first('kategori_surat_id') }}
                                 </p>
-
                             @endif
 
                         </div>
@@ -1638,8 +1640,7 @@ textarea.sm-control {
                                             old(
                                                 'status',
                                                 'baru'
-                                            ) ===
-                                            $value
+                                            ) === $value
                                         )
                                     >
                                         {{ $label }}
@@ -1650,11 +1651,9 @@ textarea.sm-control {
                             </select>
 
                             @if($formErrors->has('status'))
-
                                 <p class="sm-field-error">
                                     {{ $formErrors->first('status') }}
                                 </p>
-
                             @endif
 
                         </div>
@@ -1680,11 +1679,9 @@ textarea.sm-control {
                             >{{ old('perihal') }}</textarea>
 
                             @if($formErrors->has('perihal'))
-
                                 <p class="sm-field-error">
                                     {{ $formErrors->first('perihal') }}
                                 </p>
-
                             @endif
 
                         </div>
@@ -1692,10 +1689,6 @@ textarea.sm-control {
                     </div>
 
                 </section>
-
-                {{-- =============================================================
-                     LAMPIRAN
-                ============================================================= --}}
 
                 <section class="sm-section">
 
@@ -1710,8 +1703,8 @@ textarea.sm-control {
                             </h2>
 
                             <p class="sm-section-desc">
-                                Pilih PDF, JPG, JPEG, PNG atau gunakan kamera.
-                                Hasil optimasi ditampilkan sebelum disimpan.
+                                Upload file, lihat preview, dan proses compression
+                                sebelum surat disimpan.
                             </p>
 
                         </div>
@@ -1720,9 +1713,7 @@ textarea.sm-control {
 
                     <div class="sm-attachment-grid">
 
-                        {{-- =====================================================
-                             DIGITAL
-                        ====================================================== --}}
+                        {{-- DIGITAL --}}
 
                         <div class="sm-card">
 
@@ -1797,21 +1788,20 @@ textarea.sm-control {
                                             stroke-linecap="round"
                                             d="M12 10v6M12 7h.01"
                                         />
-
                                     </svg>
 
                                     <div>
 
                                         <strong>PDF:</strong>
-                                        preview langsung tersedia.
-                                        Compression sebenarnya tetap
-                                        diproses server oleh Ghostscript.
+                                        preview langsung ditampilkan,
+                                        kemudian compression diproses
+                                        server dengan Ghostscript.
 
                                         <br>
 
                                         <strong>JPG/JPEG/PNG:</strong>
-                                        langsung di-resize dan dikompresi
-                                        menjadi JPG sebelum dikirim.
+                                        dikompresi menjadi JPG di browser
+                                        sebelum dikirim ke server.
 
                                     </div>
 
@@ -1879,9 +1869,7 @@ textarea.sm-control {
 
                                 </div>
 
-                                {{-- =================================================
-                                     UPLOAD PANEL
-                                ================================================== --}}
+                                {{-- UPLOAD PANEL --}}
 
                                 <div id="sm-upload-panel">
 
@@ -1929,15 +1917,7 @@ textarea.sm-control {
                                             id="lampiran_file"
                                             name="lampiran_file"
                                             type="file"
-                                            accept="
-                                                .pdf,
-                                                .jpg,
-                                                .jpeg,
-                                                .png,
-                                                application/pdf,
-                                                image/jpeg,
-                                                image/png
-                                            "
+                                            accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
                                             class="sm-upload-input"
                                         >
 
@@ -2027,9 +2007,7 @@ textarea.sm-control {
 
                                 </div>
 
-                                {{-- =================================================
-                                     CAMERA
-                                ================================================== --}}
+                                {{-- CAMERA PANEL --}}
 
                                 <div
                                     id="sm-camera-panel"
@@ -2209,9 +2187,7 @@ textarea.sm-control {
 
                         </div>
 
-                        {{-- =====================================================
-                             ARSIP FISIK
-                        ====================================================== --}}
+                        {{-- ARSIP FISIK --}}
 
                         <div class="sm-card">
 
@@ -2323,7 +2299,6 @@ textarea.sm-control {
                                     <div class="sm-example">
 
                                         <strong>Contoh:</strong>
-
                                         Rak A-3 Box 12,
                                         Lemari B-2 Map 07,
                                         atau Box Arsip 2026-03.
@@ -2664,6 +2639,9 @@ document.addEventListener(
             1024 *
             1024;
 
+        const PREVIEW_COMPRESSION_URL =
+            @json(route('surat-masuk.preview-compression'));
+
         let cameraStream =
             null;
 
@@ -2675,6 +2653,12 @@ document.addEventListener(
 
         let previewUrl =
             null;
+
+        /*
+        |--------------------------------------------------------------------------
+        | UTILITIES
+        |--------------------------------------------------------------------------
+        */
 
         function formatFileSize(
             bytes
@@ -2688,13 +2672,11 @@ document.addEventListener(
             }
 
             if (
-                bytes <
-                1024 * 1024
+                bytes < 1024 * 1024
             ) {
                 return (
                     (
-                        bytes /
-                        1024
+                        bytes / 1024
                     ).toFixed(1) +
                     ' KB'
                 );
@@ -2704,7 +2686,8 @@ document.addEventListener(
                 (
                     bytes /
                     (
-                        1024 * 1024
+                        1024 *
+                        1024
                     )
                 ).toFixed(2) +
                 ' MB'
@@ -2743,8 +2726,7 @@ document.addEventListener(
         ) {
 
             return String(
-                file?.name ||
-                ''
+                file?.name || ''
             )
                 .split('.')
                 .pop()
@@ -2794,8 +2776,7 @@ document.addEventListener(
                     title,
                     text:
                         String(
-                            message ??
-                            ''
+                            message ?? ''
                         ),
                     confirmButtonText:
                         'Mengerti',
@@ -2808,15 +2789,15 @@ document.addEventListener(
 
             window.alert(
                 String(
-                    message ??
-                    ''
+                    message ?? ''
                 )
             );
         }
 
         function setCompressionStatus(
             html,
-            type = ''
+            type = 'processing',
+            progress = null
         ) {
 
             compressionStatus.classList.remove(
@@ -2828,17 +2809,64 @@ document.addEventListener(
             );
 
             if (type) {
-
                 compressionStatus.classList.add(
                     type
                 );
             }
 
+            let progressHtml =
+                '';
+
+            if (
+                progress !== null
+            ) {
+
+                progressHtml =
+                    `
+                    <div class="sm-compression-progress">
+                        <div
+                            class="sm-compression-progress-bar"
+                            style="width:${Math.max(
+                                0,
+                                Math.min(
+                                    100,
+                                    Number(progress)
+                                )
+                            )}%"
+                        ></div>
+                    </div>
+                    `;
+            }
+
             compressionStatus.innerHTML =
                 String(
-                    html ??
-                    ''
+                    html ?? ''
+                ) +
+                progressHtml;
+        }
+
+        function updateCompressionProgress(
+            progress
+        ) {
+
+            const bar =
+                compressionStatus.querySelector(
+                    '.sm-compression-progress-bar'
                 );
+
+            if (!bar) {
+                return;
+            }
+
+            bar.style.width =
+                Math.max(
+                    0,
+                    Math.min(
+                        100,
+                        Number(progress)
+                    )
+                ) +
+                '%';
         }
 
         function clearCompressionStatus() {
@@ -2899,17 +2927,23 @@ document.addEventListener(
 
             filePreview.innerHTML =
                 `
-                    <div class="sm-file-preview-header">
-                        ${title}
-                    </div>
+                <div class="sm-file-preview-header">
+                    <span>${title}</span>
 
-                    <div class="sm-file-preview-content">
-                        <iframe
-                            class="sm-file-preview-pdf"
-                            src="${previewUrl}"
-                            title="${title}"
-                        ></iframe>
-                    </div>
+                    <span class="sm-preview-badge">
+                        PDF
+                    </span>
+                </div>
+
+                <div class="sm-file-preview-content">
+
+                    <iframe
+                        class="sm-file-preview-pdf"
+                        src="${previewUrl}"
+                        title="${title}"
+                    ></iframe>
+
+                </div>
                 `;
 
             filePreview.classList.remove(
@@ -2919,7 +2953,7 @@ document.addEventListener(
 
         function showImagePreview(
             file,
-            title = 'Preview gambar hasil kompresi'
+            title = 'Preview Gambar'
         ) {
 
             clearPreviewUrl();
@@ -2931,17 +2965,23 @@ document.addEventListener(
 
             filePreview.innerHTML =
                 `
-                    <div class="sm-file-preview-header">
-                        ${title}
-                    </div>
+                <div class="sm-file-preview-header">
+                    <span>${title}</span>
 
-                    <div class="sm-file-preview-content">
-                        <img
-                            class="sm-file-preview-image"
-                            src="${previewUrl}"
-                            alt="${title}"
-                        >
-                    </div>
+                    <span class="sm-preview-badge">
+                        JPG
+                    </span>
+                </div>
+
+                <div class="sm-file-preview-content">
+
+                    <img
+                        class="sm-file-preview-image"
+                        src="${previewUrl}"
+                        alt="${title}"
+                    >
+
+                </div>
                 `;
 
             filePreview.classList.remove(
@@ -3006,94 +3046,39 @@ document.addEventListener(
                 null;
         }
 
-        function setUploadMode() {
+        function showCameraError(
+            message
+        ) {
 
-            compressionToken++;
-
-            stopCameraTracks();
-
-            video.srcObject =
-                null;
-
-            uploadPanel.classList.remove(
-                'sm-hidden'
-            );
-
-            cameraPanel.classList.add(
-                'sm-hidden'
-            );
-
-            setModeButton(
-                btnUpload,
-                true
-            );
-
-            setModeButton(
-                btnCamera,
-                false
-            );
-
-            resetCameraButtons();
-        }
-
-        function setCameraMode() {
-
-            compressionToken++;
-
-            stopCameraTracks();
-
-            video.srcObject =
-                null;
-
-            uploadPanel.classList.add(
-                'sm-hidden'
-            );
-
-            cameraPanel.classList.remove(
-                'sm-hidden'
-            );
-
-            setModeButton(
-                btnUpload,
-                false
-            );
-
-            setModeButton(
-                btnCamera,
-                true
-            );
-
-            clearSelectedFile();
-
-            clearFilePreview();
-
-            clearCameraError();
-
-            resetCameraButtons();
-
-            if (
-                !capturedImage.value
-            ) {
-
-                cameraPlaceholder.classList.remove(
-                    'sm-hidden'
+            cameraError.textContent =
+                String(
+                    message ?? ''
                 );
 
-                video.classList.remove(
-                    'sm-hidden'
-                );
-            }
+            cameraError.classList.remove(
+                'sm-hidden'
+            );
         }
 
-        btnUpload?.addEventListener(
-            'click',
-            setUploadMode
-        );
+        function hideCameraError() {
 
-        btnCamera?.addEventListener(
-            'click',
-            setCameraMode
-        );
+            cameraError.textContent =
+                '';
+
+            cameraError.classList.add(
+                'sm-hidden'
+            );
+        }
+
+        function clearCameraError() {
+            hideCameraError();
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | FILE VISUAL
+        |--------------------------------------------------------------------------
+        */
 
         function showSelectedFile(
             file,
@@ -3116,8 +3101,7 @@ document.addEventListener(
                 ) +
                 (
                     note
-                        ? ' • ' +
-                          note
+                        ? ' • ' + note
                         : ''
                 );
 
@@ -3161,11 +3145,15 @@ document.addEventListener(
         clearFileBtn?.addEventListener(
             'click',
             function () {
-
                 clearSelectedFile();
-
             }
         );
+
+        /*
+        |--------------------------------------------------------------------------
+        | IMAGE COMPRESSION
+        |--------------------------------------------------------------------------
+        */
 
         function loadImage(
             file
@@ -3245,8 +3233,7 @@ document.addEventListener(
                     Math.max(
                         1,
                         Math.round(
-                            width *
-                            scale
+                            width * scale
                         )
                     ),
 
@@ -3254,8 +3241,7 @@ document.addEventListener(
                     Math.max(
                         1,
                         Math.round(
-                            height *
-                            scale
+                            height * scale
                         )
                     )
             };
@@ -3448,18 +3434,17 @@ document.addEventListener(
                                     }
                                 )
                             );
-
                         },
                         'image/jpeg',
                         quality
                     );
-
                 }
             );
         }
 
         async function compressImageFile(
-            file
+            file,
+            progressCallback = null
         ) {
 
             const image =
@@ -3484,6 +3469,16 @@ document.addEventListener(
             let smallest =
                 null;
 
+            const totalSteps =
+                Math.max(
+                    1,
+                    dimensionList.length *
+                    JPEG_QUALITIES.length
+                );
+
+            let currentStep =
+                0;
+
             for (
                 const dimension
                 of dimensionList
@@ -3503,6 +3498,24 @@ document.addEventListener(
                             file.name
                         );
 
+                    currentStep++;
+
+                    if (
+                        typeof progressCallback ===
+                        'function'
+                    ) {
+
+                        progressCallback(
+                            Math.round(
+                                (
+                                    currentStep /
+                                    totalSteps
+                                ) *
+                                100
+                            )
+                        );
+                    }
+
                     if (
                         !smallest ||
                         compressed.size <
@@ -3515,7 +3528,7 @@ document.addEventListener(
 
                     if (
                         compressed.size <=
-                        IMAGE_TARGET_SIZE
+                            IMAGE_TARGET_SIZE
                     ) {
 
                         return compressed;
@@ -3537,6 +3550,276 @@ document.addEventListener(
             );
         }
 
+        /*
+        |--------------------------------------------------------------------------
+        | PDF COMPRESSION
+        |--------------------------------------------------------------------------
+        */
+
+        async function previewPdfCompression(
+            file
+        ) {
+
+            const formData =
+                new FormData();
+
+            formData.append(
+                'lampiran_file',
+                file
+            );
+
+            const csrfToken =
+                document
+                    .querySelector(
+                        'input[name="_token"]'
+                    )
+                    ?.value || '';
+
+            setCompressionStatus(
+                '<strong>⏳ PDF sedang diproses server...</strong><br>' +
+                'File sedang dikirim ke server untuk diproses Ghostscript. ' +
+                'Jangan pilih file lain sampai proses selesai.',
+                'processing',
+                10
+            );
+
+            try {
+
+                const response =
+                    await fetch(
+                        PREVIEW_COMPRESSION_URL,
+                        {
+                            method:
+                                'POST',
+
+                            headers: {
+                                'X-CSRF-TOKEN':
+                                    csrfToken,
+
+                                'Accept':
+                                    'application/json'
+                            },
+
+                            body:
+                                formData
+                        }
+                    );
+
+                updateCompressionProgress(
+                    45
+                );
+
+                let payload =
+                    null;
+
+                try {
+                    payload =
+                        await response.json();
+                } catch (
+                    jsonError
+                ) {
+                    throw new Error(
+                        'Server mengembalikan respons yang tidak valid.'
+                    );
+                }
+
+                if (
+                    !response.ok ||
+                    !payload?.success
+                ) {
+
+                    throw new Error(
+                        payload?.message ||
+                        'Compression PDF gagal.'
+                    );
+                }
+
+                updateCompressionProgress(
+                    80
+                );
+
+                const originalSize =
+                    Number(
+                        payload.original_size ||
+                        file.size
+                    );
+
+                const compressedSize =
+                    Number(
+                        payload.compressed_size ||
+                        file.size
+                    );
+
+                const saving =
+                    Number(
+                        payload.saving_percent ||
+                        0
+                    );
+
+                const profile =
+                    payload.profile ||
+                    '-';
+
+                const compressed =
+                    !!payload.compressed;
+
+                setCompressionStatus(
+                    (
+                        compressed
+                            ? '<strong>✓ PDF berhasil dikompresi oleh server.</strong>'
+                            : '<strong>✓ PDF tidak menjadi lebih kecil.</strong>'
+                    ) +
+
+                    '<div class="sm-compression-table">' +
+
+                    '<div class="sm-compression-item">' +
+                    '<span class="sm-compression-label">Ukuran asli</span>' +
+                    '<span class="sm-compression-value">' +
+                    formatFileSize(
+                        originalSize
+                    ) +
+                    '</span>' +
+                    '</div>' +
+
+                    '<div class="sm-compression-item">' +
+                    '<span class="sm-compression-label">Ukuran hasil</span>' +
+                    '<span class="sm-compression-value">' +
+                    formatFileSize(
+                        compressedSize
+                    ) +
+                    '</span>' +
+                    '</div>' +
+
+                    '<div class="sm-compression-item">' +
+                    '<span class="sm-compression-label">Penghematan</span>' +
+                    '<span class="sm-compression-value">' +
+                    saving.toFixed(2) +
+                    '%</span>' +
+                    '</div>' +
+
+                    '<div class="sm-compression-item">' +
+                    '<span class="sm-compression-label">Profile</span>' +
+                    '<span class="sm-compression-value">' +
+                    escapeHtml(
+                        profile
+                    ) +
+                    '</span>' +
+                    '</div>' +
+
+                    '</div>',
+
+                    compressed
+                        ? 'success'
+                        : 'warning',
+
+                    100
+                );
+
+                if (
+                    payload.preview_url
+                ) {
+
+                    showRemotePdfPreview(
+                        payload.preview_url,
+                        compressed
+                            ? 'Preview PDF hasil compression server'
+                            : 'Preview PDF asli'
+                    );
+
+                }
+
+                return payload;
+
+            } catch (
+                error
+            ) {
+
+                console.error(
+                    'PDF compression error:',
+                    error
+                );
+
+                setCompressionStatus(
+                    '<strong>✕ Compression PDF gagal.</strong><br>' +
+                    escapeHtml(
+                        error?.message ||
+                        'Server gagal memproses PDF.'
+                    ),
+                    'error'
+                );
+
+                throw error;
+            }
+        }
+
+        function showRemotePdfPreview(
+            url,
+            title
+        ) {
+
+            clearPreviewUrl();
+
+            filePreview.innerHTML =
+                `
+                <div class="sm-file-preview-header">
+                    <span>${escapeHtml(title)}</span>
+
+                    <span class="sm-preview-badge">
+                        PDF SERVER
+                    </span>
+                </div>
+
+                <div class="sm-file-preview-content">
+
+                    <iframe
+                        class="sm-file-preview-pdf"
+                        src="${escapeHtml(url)}"
+                        title="${escapeHtml(title)}"
+                    ></iframe>
+
+                </div>
+                `;
+
+            filePreview.classList.remove(
+                'sm-hidden'
+            );
+        }
+
+        function escapeHtml(
+            value
+        ) {
+
+            return String(
+                value ?? ''
+            )
+                .replace(
+                    /&/g,
+                    '&amp;'
+                )
+                .replace(
+                    /</g,
+                    '&lt;'
+                )
+                .replace(
+                    />/g,
+                    '&gt;'
+                )
+                .replace(
+                    /"/g,
+                    '&quot;'
+                )
+                .replace(
+                    /'/g,
+                    '&#039;'
+                );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | FILE CHANGE
+        |--------------------------------------------------------------------------
+        */
+
         fileInput.addEventListener(
             'change',
             async function () {
@@ -3551,14 +3834,20 @@ document.addEventListener(
                 const currentToken =
                     ++compressionToken;
 
-                clearCameraError();
-
+                hideCameraError();
                 clearFilePreview();
+                clearCompressionStatus();
 
                 const extension =
                     getExtension(
                         file
                     );
+
+                /*
+                |--------------------------------------------------------------------------
+                | EXTENSION
+                |--------------------------------------------------------------------------
+                */
 
                 if (
                     !isAllowedExtension(
@@ -3577,6 +3866,12 @@ document.addEventListener(
                     return;
                 }
 
+                /*
+                |--------------------------------------------------------------------------
+                | EMPTY
+                |--------------------------------------------------------------------------
+                */
+
                 if (
                     file.size <= 0
                 ) {
@@ -3591,6 +3886,12 @@ document.addEventListener(
 
                     return;
                 }
+
+                /*
+                |--------------------------------------------------------------------------
+                | MAX
+                |--------------------------------------------------------------------------
+                */
 
                 if (
                     file.size >
@@ -3608,9 +3909,11 @@ document.addEventListener(
                     return;
                 }
 
-                /* =========================================================
-                   PDF
-                ========================================================= */
+                /*
+                |--------------------------------------------------------------------------
+                | PDF
+                |--------------------------------------------------------------------------
+                */
 
                 if (
                     extension === 'pdf'
@@ -3623,57 +3926,53 @@ document.addEventListener(
 
                     showSelectedFile(
                         file,
-                        'PDF • siap diproses server'
+                        'PDF • siap diproses'
                     );
 
-                    setCompressionStatus(
-                        '<strong>✓ PDF siap digunakan.</strong>' +
-
-                        '<div class="sm-compression-table">' +
-
-                        '<div class="sm-compression-item">' +
-                        '<span class="sm-compression-label">Format</span>' +
-                        '<span class="sm-compression-value">PDF</span>' +
-                        '</div>' +
-
-                        '<div class="sm-compression-item">' +
-                        '<span class="sm-compression-label">Ukuran asli</span>' +
-                        '<span class="sm-compression-value">' +
-                        formatFileSize(file.size) +
-                        '</span>' +
-                        '</div>' +
-
-                        '<div class="sm-compression-item">' +
-                        '<span class="sm-compression-label">Compression</span>' +
-                        '<span class="sm-compression-value">Server</span>' +
-                        '</div>' +
-
-                        '<div class="sm-compression-item">' +
-                        '<span class="sm-compression-label">Status</span>' +
-                        '<span class="sm-compression-value">Siap</span>' +
-                        '</div>' +
-
-                        '</div>' +
-
-                        '<br>' +
-
-                        'Preview PDF sudah ditampilkan. ' +
-                        'Ukuran hasil compression final akan diketahui ' +
-                        'setelah Ghostscript server memproses file.',
-                        'processing'
-                    );
+                    /*
+                    |--------------------------------------------------------------
+                    | PREVIEW ASLI SEGERA
+                    |--------------------------------------------------------------
+                    */
 
                     showPdfPreview(
                         file,
                         'Preview PDF yang dipilih'
                     );
 
+                    /*
+                    |--------------------------------------------------------------
+                    | COMPRESSION SERVER
+                    |--------------------------------------------------------------
+                    */
+
+                    try {
+
+                        await previewPdfCompression(
+                            file
+                        );
+
+                    } catch (
+                        error
+                    ) {
+
+                        if (
+                            currentToken !==
+                            compressionToken
+                        ) {
+                            return;
+                        }
+
+                    }
+
                     return;
                 }
 
-                /* =========================================================
-                   IMAGE
-                ========================================================= */
+                /*
+                |--------------------------------------------------------------------------
+                | IMAGE
+                |--------------------------------------------------------------------------
+                */
 
                 if (
                     !isImageExtension(
@@ -3692,16 +3991,25 @@ document.addEventListener(
                 );
 
                 setCompressionStatus(
-                    '⏳ <strong>Sedang mengompres gambar...</strong><br>' +
-                    'Browser sedang melakukan resize dan mencari hasil JPG terbaik.',
-                    'processing'
+                    '<strong>⏳ Sedang mengompres gambar...</strong><br>' +
+                    'Browser sedang melakukan resize dan mencari hasil JPG yang optimal.',
+                    'processing',
+                    0
                 );
 
                 try {
 
                     const compressed =
                         await compressImageFile(
-                            file
+                            file,
+                            function (
+                                progress
+                            ) {
+
+                                updateCompressionProgress(
+                                    progress
+                                );
+                            }
                         );
 
                     if (
@@ -3767,14 +4075,18 @@ document.addEventListener(
                         '<div class="sm-compression-item">' +
                         '<span class="sm-compression-label">Ukuran asli</span>' +
                         '<span class="sm-compression-value">' +
-                        formatFileSize(originalSize) +
+                        formatFileSize(
+                            originalSize
+                        ) +
                         '</span>' +
                         '</div>' +
 
                         '<div class="sm-compression-item">' +
                         '<span class="sm-compression-label">Ukuran hasil</span>' +
                         '<span class="sm-compression-value">' +
-                        formatFileSize(compressed.size) +
+                        formatFileSize(
+                            compressed.size
+                        ) +
                         '</span>' +
                         '</div>' +
 
@@ -3791,7 +4103,10 @@ document.addEventListener(
                         '</div>' +
 
                         '</div>',
-                        'success'
+
+                        'success',
+
+                        100
                     );
 
                     showImagePreview(
@@ -3799,10 +4114,12 @@ document.addEventListener(
                         'Preview JPG hasil kompresi'
                     );
 
-                } catch (error) {
+                } catch (
+                    error
+                ) {
 
                     console.error(
-                        'Compression error:',
+                        'Image compression error:',
                         error
                     );
 
@@ -3822,9 +4139,14 @@ document.addEventListener(
                         'Browser gagal mengompres gambar.'
                     );
                 }
-
             }
         );
+
+        /*
+        |--------------------------------------------------------------------------
+        | CAMERA
+        |--------------------------------------------------------------------------
+        */
 
         function clearCapturedPreview() {
 
@@ -3853,10 +4175,8 @@ document.addEventListener(
 
             const scale =
                 Math.min(
-                    CAMERA_MAX_WIDTH /
-                        width,
-                    CAMERA_MAX_HEIGHT /
-                        height,
+                    CAMERA_MAX_WIDTH / width,
+                    CAMERA_MAX_HEIGHT / height,
                     1
                 );
 
@@ -3915,7 +4235,8 @@ document.addEventListener(
                     base64.length *
                     3
                 ) / 4
-            ) - padding;
+            ) -
+            padding;
         }
 
         function buildCameraImage() {
@@ -4013,8 +4334,7 @@ document.addEventListener(
                     dataUrl
                 ) >
                     CAMERA_TARGET_SIZE &&
-                attempt <
-                    5
+                attempt < 5
             ) {
 
                 attempt++;
@@ -4095,6 +4415,95 @@ document.addEventListener(
             return dataUrl;
         }
 
+        function setUploadMode() {
+
+            compressionToken++;
+
+            stopCameraTracks();
+
+            video.srcObject =
+                null;
+
+            uploadPanel.classList.remove(
+                'sm-hidden'
+            );
+
+            cameraPanel.classList.add(
+                'sm-hidden'
+            );
+
+            setModeButton(
+                btnUpload,
+                true
+            );
+
+            setModeButton(
+                btnCamera,
+                false
+            );
+
+            resetCameraButtons();
+        }
+
+        function setCameraMode() {
+
+            compressionToken++;
+
+            stopCameraTracks();
+
+            video.srcObject =
+                null;
+
+            uploadPanel.classList.add(
+                'sm-hidden'
+            );
+
+            cameraPanel.classList.remove(
+                'sm-hidden'
+            );
+
+            setModeButton(
+                btnUpload,
+                false
+            );
+
+            setModeButton(
+                btnCamera,
+                true
+            );
+
+            clearSelectedFile();
+
+            clearFilePreview();
+
+            clearCameraError();
+
+            resetCameraButtons();
+
+            if (
+                !capturedImage.value
+            ) {
+
+                cameraPlaceholder.classList.remove(
+                    'sm-hidden'
+                );
+
+                video.classList.remove(
+                    'sm-hidden'
+                );
+            }
+        }
+
+        btnUpload?.addEventListener(
+            'click',
+            setUploadMode
+        );
+
+        btnCamera?.addEventListener(
+            'click',
+            setCameraMode
+        );
+
         startCameraBtn?.addEventListener(
             'click',
             async function () {
@@ -4118,7 +4527,7 @@ document.addEventListener(
                 ) {
 
                     showCameraError(
-                        'Browser tidak mendukung kamera.'
+                        'Browser tidak mendukung akses kamera.'
                     );
 
                     return;
@@ -4185,9 +4594,12 @@ document.addEventListener(
                         'sm-hidden'
                     );
 
-                } catch (error) {
+                } catch (
+                    error
+                ) {
 
                     console.error(
+                        'Camera error:',
                         error
                     );
 
@@ -4206,7 +4618,7 @@ document.addEventListener(
 
                     } else if (
                         error?.name ===
-                            'NotFoundError'
+                        'NotFoundError'
                     ) {
 
                         message =
@@ -4214,11 +4626,19 @@ document.addEventListener(
 
                     } else if (
                         error?.name ===
-                            'NotReadableError'
+                        'NotReadableError'
                     ) {
 
                         message =
                             'Kamera sedang digunakan aplikasi lain.';
+
+                    } else if (
+                        error?.name ===
+                        'SecurityError'
+                    ) {
+
+                        message =
+                            'Akses kamera diblokir oleh browser.';
                     }
 
                     showCameraError(
@@ -4310,7 +4730,9 @@ document.addEventListener(
                         '<div class="sm-compression-item">' +
                         '<span class="sm-compression-label">Ukuran hasil</span>' +
                         '<span class="sm-compression-value">' +
-                        formatFileSize(binarySize) +
+                        formatFileSize(
+                            binarySize
+                        ) +
                         '</span>' +
                         '</div>' +
 
@@ -4325,7 +4747,9 @@ document.addEventListener(
                         '</div>' +
 
                         '</div>',
-                        'success'
+
+                        'success',
+                        100
                     );
 
                     clearSelectedFile();
@@ -4348,9 +4772,12 @@ document.addEventListener(
                         'sm-hidden'
                     );
 
-                } catch (error) {
+                } catch (
+                    error
+                ) {
 
                     console.error(
+                        'Capture error:',
                         error
                     );
 
@@ -4359,7 +4786,6 @@ document.addEventListener(
                         'Gagal mengambil scan.'
                     );
                 }
-
             }
         );
 
@@ -4457,30 +4883,11 @@ document.addEventListener(
             }
         );
 
-        function showCameraError(
-            message
-        ) {
-
-            cameraError.textContent =
-                String(
-                    message ??
-                    ''
-                );
-
-            cameraError.classList.remove(
-                'sm-hidden'
-            );
-        }
-
-        function hideCameraError() {
-
-            cameraError.textContent =
-                '';
-
-            cameraError.classList.add(
-                'sm-hidden'
-            );
-        }
+        /*
+        |--------------------------------------------------------------------------
+        | SUBMIT
+        |--------------------------------------------------------------------------
+        */
 
         form.addEventListener(
             'submit',
@@ -4493,7 +4900,6 @@ document.addEventListener(
                 ) {
 
                     event.preventDefault();
-
                     return;
                 }
 
@@ -4633,10 +5039,10 @@ document.addEventListener(
                     ) {
 
                         setCompressionStatus(
-                            '<strong>⏳ PDF sedang diproses server...</strong><br>' +
-                            'Ghostscript sedang memproses PDF. ' +
-                            'Jangan tutup halaman sampai proses selesai.',
-                            'processing'
+                            '<strong>⏳ PDF sedang diproses...</strong><br>' +
+                            'Ghostscript server akan memproses PDF sebelum file disimpan.',
+                            'processing',
+                            20
                         );
 
                         submitText.textContent =
@@ -4709,6 +5115,12 @@ document.addEventListener(
                 }
             }
         );
+
+        /*
+        |--------------------------------------------------------------------------
+        | OLD CAMERA VALUE
+        |--------------------------------------------------------------------------
+        */
 
         if (
             capturedImage.value

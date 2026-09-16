@@ -104,9 +104,7 @@ Route::middleware('auth')->group(function () {
     |--------------------------------------------------------------------------
     */
 
-    Route::middleware(
-        'role:admin'
-    )->group(function () {
+    Route::middleware('role:admin')->group(function () {
 
         /*
         |--------------------------------------------------------------------------
@@ -183,25 +181,6 @@ Route::middleware('auth')->group(function () {
     |--------------------------------------------------------------------------
     | SURAT MASUK - ADMIN / PIMPINAN
     |--------------------------------------------------------------------------
-    |
-    | Hak akses:
-    |
-    | Admin:
-    | - create
-    | - store
-    | - edit
-    | - update
-    | - delete
-    | - disposisi
-    |
-    | Pimpinan:
-    | - create
-    | - store
-    | - edit
-    | - update
-    | - delete
-    | - disposisi
-    |
     */
 
     Route::middleware(
@@ -236,23 +215,22 @@ Route::middleware('auth')->group(function () {
 
         /*
         |--------------------------------------------------------------------------
-        | PREVIEW COMPRESSION PDF
+        | PREVIEW COMPRESSION
         |--------------------------------------------------------------------------
         |
-        | Dipanggil AJAX dari halaman create/edit
-        | ketika user memilih file PDF.
+        | Browser mengirim file PDF ke server.
         |
         | Browser
         |     ↓
-        | POST PDF
+        | POST /surat-masuk/preview-compression
         |     ↓
-        | previewCompression()
+        | SuratMasukController@previewCompression
         |     ↓
         | Ghostscript
         |     ↓
-        | hasil compression temporary
+        | temporary PDF
         |     ↓
-        | response JSON
+        | JSON
         |
         */
 
@@ -333,16 +311,6 @@ Route::middleware('auth')->group(function () {
     |--------------------------------------------------------------------------
     | SURAT MASUK - SEMUA ROLE
     |--------------------------------------------------------------------------
-    |
-    | Admin:
-    |   semua surat
-    |
-    | Pimpinan:
-    |   semua surat
-    |
-    | Staff:
-    |   hanya surat yang diberikan melalui disposisi
-    |
     */
 
     Route::middleware(
@@ -366,13 +334,6 @@ Route::middleware('auth')->group(function () {
         |--------------------------------------------------------------------------
         | PREVIEW LAMPIRAN
         |--------------------------------------------------------------------------
-        |
-        | PDF:
-        | browser akan membuka PDF langsung.
-        |
-        | JPG / PNG:
-        | browser akan menampilkan gambar.
-        |
         */
 
         Route::get(
@@ -384,7 +345,7 @@ Route::middleware('auth')->group(function () {
 
         /*
         |--------------------------------------------------------------------------
-        | DOWNLOAD LAMPIRAN
+        | DOWNLOAD
         |--------------------------------------------------------------------------
         */
 
@@ -524,17 +485,6 @@ Route::middleware('auth')->group(function () {
     |--------------------------------------------------------------------------
     | SURAT KELUAR - ADMIN / PIMPINAN
     |--------------------------------------------------------------------------
-    |
-    | Admin dan Pimpinan dapat:
-    |
-    | - create
-    | - store
-    | - edit
-    | - update
-    | - delete
-    | - activity log
-    | - preview compression
-    |
     */
 
     Route::middleware(
@@ -572,15 +522,33 @@ Route::middleware('auth')->group(function () {
         | PREVIEW COMPRESSION
         |--------------------------------------------------------------------------
         |
-        | Digunakan oleh halaman Create/Edit.
+        | Digunakan oleh halaman CREATE dan EDIT.
+        |
+        | Untuk PDF:
         |
         | Browser
         |     ↓
-        | POST file
+        | POST PDF
         |     ↓
         | previewCompression()
         |     ↓
-        | Ghostscript / GD
+        | Ghostscript
+        |     ↓
+        | temporary PDF
+        |     ↓
+        | session
+        |     ↓
+        | JSON + preview_url
+        |
+        | Untuk gambar:
+        |
+        | Browser
+        |     ↓
+        | POST JPG/JPEG/PNG
+        |     ↓
+        | previewCompression()
+        |     ↓
+        | GD
         |     ↓
         | JSON hasil compression
         |
@@ -591,6 +559,35 @@ Route::middleware('auth')->group(function () {
             [SuratKeluarController::class, 'previewCompression']
         )->name(
             'surat-keluar.preview-compression'
+        );
+
+        /*
+        |--------------------------------------------------------------------------
+        | COMPRESSION PREVIEW PDF
+        |--------------------------------------------------------------------------
+        |
+        | Endpoint ini digunakan oleh iframe.
+        |
+        | Contoh:
+        |
+        | /surat-keluar/compression-preview/{token}
+        |
+        | Endpoint akan membaca:
+        |
+        | session('surat_keluar_pdf_preview')
+        |
+        | kemudian mengirim PDF temporary sebagai:
+        |
+        | Content-Type: application/pdf
+        | Content-Disposition: inline
+        |
+        */
+
+        Route::get(
+            'surat-keluar/compression-preview/{token}',
+            [SuratKeluarController::class, 'compressionPreview']
+        )->name(
+            'surat-keluar.compression-preview'
         );
 
         /*
@@ -648,7 +645,7 @@ Route::middleware('auth')->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | SURAT KELUAR - ADMIN / PIMPINAN / STAFF
+    | SURAT KELUAR - SEMUA ROLE
     |--------------------------------------------------------------------------
     */
 
@@ -671,7 +668,7 @@ Route::middleware('auth')->group(function () {
 
         /*
         |--------------------------------------------------------------------------
-        | PREVIEW LAMPIRAN
+        | PREVIEW LAMPIRAN TERSIMPAN
         |--------------------------------------------------------------------------
         */
 
@@ -729,12 +726,6 @@ Route::middleware('auth')->group(function () {
     |--------------------------------------------------------------------------
     | EXPORT
     |--------------------------------------------------------------------------
-    |
-    | Semua export membutuhkan:
-    |
-    | auth
-    | role admin / pimpinan / staff
-    |
     */
 
     Route::middleware(

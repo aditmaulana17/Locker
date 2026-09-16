@@ -67,63 +67,30 @@ class SuratKeluarController extends Controller
 
     private const PDF_COMPRESSION_PROFILES = [
         [
-            'name' =>
-                'ebook-150',
-
-            'preset' =>
-                '/ebook',
-
-            'color_dpi' =>
-                150,
-
-            'gray_dpi' =>
-                150,
-
-            'mono_dpi' =>
-                300,
-
-            'jpeg_quality' =>
-                70,
+            'name' => 'ebook-150',
+            'preset' => '/ebook',
+            'color_dpi' => 150,
+            'gray_dpi' => 150,
+            'mono_dpi' => 300,
+            'jpeg_quality' => 70,
         ],
 
         [
-            'name' =>
-                'ebook-120',
-
-            'preset' =>
-                '/ebook',
-
-            'color_dpi' =>
-                120,
-
-            'gray_dpi' =>
-                120,
-
-            'mono_dpi' =>
-                240,
-
-            'jpeg_quality' =>
-                60,
+            'name' => 'ebook-120',
+            'preset' => '/ebook',
+            'color_dpi' => 120,
+            'gray_dpi' => 120,
+            'mono_dpi' => 240,
+            'jpeg_quality' => 60,
         ],
 
         [
-            'name' =>
-                'screen-96',
-
-            'preset' =>
-                '/screen',
-
-            'color_dpi' =>
-                96,
-
-            'gray_dpi' =>
-                96,
-
-            'mono_dpi' =>
-                200,
-
-            'jpeg_quality' =>
-                50,
+            'name' => 'screen-96',
+            'preset' => '/screen',
+            'color_dpi' => 96,
+            'gray_dpi' => 96,
+            'mono_dpi' => 200,
+            'jpeg_quality' => 50,
         ],
     ];
 
@@ -153,34 +120,24 @@ class SuratKeluarController extends Controller
 
     private function userRole(): string
     {
-        $user =
-            Auth::user();
+        $user = Auth::user();
 
-        if (
-            !$user
-        ) {
+        if (!$user) {
             return '';
         }
 
-        if (
-            method_exists(
-                $user,
-                'normalizedRole'
-            )
-        ) {
-            $role =
-                $user->normalizedRole();
+        if (method_exists($user, 'normalizedRole')) {
+            $role = $user->normalizedRole();
         } else {
-            $role =
-                strtolower(
-                    trim(
-                        (string) (
-                            $user->role ??
-                            $user->jabatan ??
-                            ''
-                        )
+            $role = strtolower(
+                trim(
+                    (string) (
+                        $user->role ??
+                        $user->jabatan ??
+                        ''
                     )
-                );
+                )
+            );
         }
 
         return $role === 'staf'
@@ -190,9 +147,7 @@ class SuratKeluarController extends Controller
 
     private function ensureUserAuthenticated(): void
     {
-        if (
-            !Auth::check()
-        ) {
+        if (!Auth::check()) {
             abort(
                 401,
                 'Anda harus login terlebih dahulu.'
@@ -204,16 +159,14 @@ class SuratKeluarController extends Controller
     {
         $this->ensureUserAuthenticated();
 
-        if (
-            !in_array(
-                $this->userRole(),
-                [
-                    'admin',
-                    'pimpinan',
-                ],
-                true
-            )
-        ) {
+        if (!in_array(
+            $this->userRole(),
+            [
+                'admin',
+                'pimpinan',
+            ],
+            true
+        )) {
             abort(
                 403,
                 'Anda tidak memiliki hak akses untuk mengelola surat keluar.'
@@ -230,16 +183,13 @@ class SuratKeluarController extends Controller
     private function normalizeStatus(
         ?string $status
     ): string {
-        $status =
-            strtolower(
-                trim(
-                    (string) $status
-                )
-            );
+        $status = strtolower(
+            trim(
+                (string) $status
+            )
+        );
 
-        if (
-            $status === 'draf'
-        ) {
+        if ($status === 'draf') {
             return 'draft';
         }
 
@@ -249,10 +199,7 @@ class SuratKeluarController extends Controller
     private function getValidStatus(
         ?string $status
     ): string {
-        $status =
-            $this->normalizeStatus(
-                $status
-            );
+        $status = $this->normalizeStatus($status);
 
         return in_array(
             $status,
@@ -274,13 +221,12 @@ class SuratKeluarController extends Controller
     ): Builder {
         $this->ensureUserAuthenticated();
 
-        $query =
-            SuratKeluar::query()
-                ->with([
-                    'kategori',
-                    'pembuat',
-                    'penandatangan',
-                ]);
+        $query = SuratKeluar::query()
+            ->with([
+                'kategori',
+                'pembuat',
+                'penandatangan',
+            ]);
 
         /*
         |--------------------------------------------------------------------------
@@ -288,17 +234,14 @@ class SuratKeluarController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $search =
-            trim(
-                (string) $request->input(
-                    'search',
-                    ''
-                )
-            );
+        $search = trim(
+            (string) $request->input(
+                'search',
+                ''
+            )
+        );
 
-        if (
-            $search !== ''
-        ) {
+        if ($search !== '') {
             $keyword =
                 '%' .
                 $search .
@@ -317,25 +260,21 @@ class SuratKeluarController extends Controller
                             'like',
                             $keyword
                         )
-
                         ->orWhere(
                             'perihal',
                             'like',
                             $keyword
                         )
-
                         ->orWhere(
                             'pengirim',
                             'like',
                             $keyword
                         )
-
                         ->orWhere(
                             'ringkasan',
                             'like',
                             $keyword
                         )
-
                         ->orWhereHas(
                             'kategori',
                             function (
@@ -343,20 +282,17 @@ class SuratKeluarController extends Controller
                             ) use (
                                 $keyword
                             ): void {
-
                                 $kategori
                                     ->where(
                                         'nama_kategori',
                                         'like',
                                         $keyword
                                     )
-
                                     ->orWhere(
                                         'kode',
                                         'like',
                                         $keyword
                                     )
-
                                     ->orWhere(
                                         'sifat',
                                         'like',
@@ -364,7 +300,6 @@ class SuratKeluarController extends Controller
                                     );
                             }
                         )
-
                         ->orWhereHas(
                             'pembuat',
                             function (
@@ -372,20 +307,17 @@ class SuratKeluarController extends Controller
                             ) use (
                                 $keyword
                             ): void {
-
                                 $user
                                     ->where(
                                         'name',
                                         'like',
                                         $keyword
                                     )
-
                                     ->orWhere(
                                         'email',
                                         'like',
                                         $keyword
                                     )
-
                                     ->orWhere(
                                         'jabatan',
                                         'like',
@@ -393,7 +325,6 @@ class SuratKeluarController extends Controller
                                     );
                             }
                         )
-
                         ->orWhereHas(
                             'penandatangan',
                             function (
@@ -401,20 +332,17 @@ class SuratKeluarController extends Controller
                             ) use (
                                 $keyword
                             ): void {
-
                                 $user
                                     ->where(
                                         'name',
                                         'like',
                                         $keyword
                                     )
-
                                     ->orWhere(
                                         'email',
                                         'like',
                                         $keyword
                                     )
-
                                     ->orWhere(
                                         'jabatan',
                                         'like',
@@ -442,9 +370,7 @@ class SuratKeluarController extends Controller
             );
 
         if (
-            is_scalar(
-                $kategoriInput
-            ) &&
+            is_scalar($kategoriInput) &&
             trim(
                 (string) $kategoriInput
             ) !== ''
@@ -454,18 +380,12 @@ class SuratKeluarController extends Controller
             ];
         }
 
-        if (
-            !is_array(
-                $kategoriInput
-            )
-        ) {
+        if (!is_array($kategoriInput)) {
             $kategoriInput = [];
         }
 
         $kategoriIds =
-            collect(
-                $kategoriInput
-            )
+            collect($kategoriInput)
                 ->flatten()
                 ->filter(
                     fn ($id) =>
@@ -480,9 +400,7 @@ class SuratKeluarController extends Controller
                 ->unique()
                 ->values();
 
-        if (
-            $kategoriIds->isNotEmpty()
-        ) {
+        if ($kategoriIds->isNotEmpty()) {
             $query->whereIn(
                 'kategori_surat_id',
                 $kategoriIds->all()
@@ -502,9 +420,7 @@ class SuratKeluarController extends Controller
             );
 
         if (
-            is_scalar(
-                $statusInput
-            ) &&
+            is_scalar($statusInput) &&
             trim(
                 (string) $statusInput
             ) !== ''
@@ -514,18 +430,12 @@ class SuratKeluarController extends Controller
             ];
         }
 
-        if (
-            !is_array(
-                $statusInput
-            )
-        ) {
+        if (!is_array($statusInput)) {
             $statusInput = [];
         }
 
         $statuses =
-            collect(
-                $statusInput
-            )
+            collect($statusInput)
                 ->flatten()
                 ->filter(
                     fn ($status) =>
@@ -548,9 +458,7 @@ class SuratKeluarController extends Controller
                 ->unique()
                 ->values();
 
-        if (
-            $statuses->isNotEmpty()
-        ) {
+        if ($statuses->isNotEmpty()) {
             $query->whereIn(
                 'status',
                 $statuses->all()
@@ -563,21 +471,19 @@ class SuratKeluarController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $dariTanggal =
-            trim(
-                (string) $request->input(
-                    'dari_tanggal',
-                    ''
-                )
-            );
+        $dariTanggal = trim(
+            (string) $request->input(
+                'dari_tanggal',
+                ''
+            )
+        );
 
-        $sampaiTanggal =
-            trim(
-                (string) $request->input(
-                    'sampai_tanggal',
-                    ''
-                )
-            );
+        $sampaiTanggal = trim(
+            (string) $request->input(
+                'sampai_tanggal',
+                ''
+            )
+        );
 
         $validDariTanggal =
             $this->isValidDate(
@@ -603,9 +509,7 @@ class SuratKeluarController extends Controller
             ];
         }
 
-        if (
-            $validDariTanggal
-        ) {
+        if ($validDariTanggal) {
             $query->whereDate(
                 'tanggal_keluar',
                 '>=',
@@ -613,9 +517,7 @@ class SuratKeluarController extends Controller
             );
         }
 
-        if (
-            $validSampaiTanggal
-        ) {
+        if ($validSampaiTanggal) {
             $query->whereDate(
                 'tanggal_keluar',
                 '<=',
@@ -782,21 +684,15 @@ class SuratKeluarController extends Controller
                 )
             );
 
-        if (
-            $extension === 'jpeg'
-        ) {
-            $extension =
-                'jpg';
+        if ($extension === 'jpeg') {
+            $extension = 'jpg';
         }
 
         try {
-
             $originalSize =
                 (int) $file->getSize();
 
-            if (
-                $originalSize <= 0
-            ) {
+            if ($originalSize <= 0) {
                 throw new RuntimeException(
                     'Ukuran file tidak valid.'
                 );
@@ -808,23 +704,24 @@ class SuratKeluarController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            if (
-                $extension === 'pdf'
-            ) {
-
+            if ($extension === 'pdf') {
                 $inputPath =
                     $file->getRealPath();
 
                 if (
                     !$inputPath ||
-                    !is_readable(
-                        $inputPath
-                    )
+                    !is_readable($inputPath)
                 ) {
                     throw new RuntimeException(
                         'File PDF temporary tidak dapat dibaca.'
                     );
                 }
+
+                /*
+                |--------------------------------------------------------------------------
+                | HASH
+                |--------------------------------------------------------------------------
+                */
 
                 $fileHash =
                     hash_file(
@@ -832,9 +729,7 @@ class SuratKeluarController extends Controller
                         $inputPath
                     );
 
-                if (
-                    !$fileHash
-                ) {
+                if (!$fileHash) {
                     throw new RuntimeException(
                         'Hash file PDF tidak dapat dibuat.'
                     );
@@ -860,14 +755,17 @@ class SuratKeluarController extends Controller
                     );
 
                 $compressedSize =
-                    $result['size'];
+                    (int) $result['size'];
 
                 $profile =
-                    $result['profile'];
+                    (string) $result['profile'];
+
+                $temporaryCompressedPath =
+                    (string) $result['path'];
 
                 /*
                 |--------------------------------------------------------------------------
-                | TIDAK LEBIH KECIL
+                | HASIL TIDAK LEBIH KECIL
                 |--------------------------------------------------------------------------
                 */
 
@@ -875,25 +773,83 @@ class SuratKeluarController extends Controller
                     $compressedSize >=
                     $originalSize
                 ) {
+                    /*
+                    |------------------------------------------------------------------
+                    | Hasil Ghostscript tidak lebih kecil.
+                    | Tetap buat file preview dari PDF asli.
+                    |------------------------------------------------------------------
+                    */
 
                     if (
                         is_file(
-                            $result['path']
+                            $temporaryCompressedPath
                         )
                     ) {
                         @unlink(
-                            $result['path']
+                            $temporaryCompressedPath
                         );
                     }
 
                     $token =
                         Str::random(64);
 
+                    $directory =
+                        storage_path(
+                            'app/pdf-compression'
+                        );
+
+                    if (
+                        !is_dir($directory) &&
+                        !mkdir(
+                            $directory,
+                            0775,
+                            true
+                        ) &&
+                        !is_dir($directory)
+                    ) {
+                        throw new RuntimeException(
+                            'Folder preview PDF tidak dapat dibuat.'
+                        );
+                    }
+
+                    $previewPath =
+                        $directory .
+                        DIRECTORY_SEPARATOR .
+                        'preview_' .
+                        $token .
+                        '.pdf';
+
+                    /*
+                    |------------------------------------------------------------------
+                    | SALIN FILE ASLI UNTUK PREVIEW
+                    |------------------------------------------------------------------
+                    */
+
+                    if (
+                        !copy(
+                            $inputPath,
+                            $previewPath
+                        )
+                    ) {
+                        throw new RuntimeException(
+                            'Gagal membuat preview PDF asli.'
+                        );
+                    }
+
+                    /*
+                    |------------------------------------------------------------------
+                    | SESSION
+                    |------------------------------------------------------------------
+                    */
+
                     session()->put(
                         'surat_keluar_pdf_preview',
                         [
                             'token' =>
                                 $token,
+
+                            'path' =>
+                                $previewPath,
 
                             'file_hash' =>
                                 $fileHash,
@@ -932,6 +888,15 @@ class SuratKeluarController extends Controller
                             'token' =>
                                 $token,
 
+                            'preview_url' =>
+                                route(
+                                    'surat-keluar.compression-preview',
+                                    [
+                                        'token' =>
+                                            $token,
+                                    ]
+                                ),
+
                             'original_size' =>
                                 $originalSize,
 
@@ -955,14 +920,14 @@ class SuratKeluarController extends Controller
                                 $profile,
 
                             'message' =>
-                                'PDF sudah cukup optimal. File asli akan digunakan.',
+                                'PDF sudah cukup optimal. File asli digunakan sebagai hasil preview dan akan dipertahankan saat disimpan.',
                         ]
                     );
                 }
 
                 /*
                 |--------------------------------------------------------------------------
-                | PREVIEW PATH
+                | HASIL COMPRESSED
                 |--------------------------------------------------------------------------
                 */
 
@@ -975,22 +940,23 @@ class SuratKeluarController extends Controller
                     );
 
                 if (
-                    !is_dir(
-                        $directory
-                    ) &&
+                    !is_dir($directory) &&
                     !mkdir(
                         $directory,
                         0775,
                         true
                     ) &&
-                    !is_dir(
-                        $directory
-                    )
+                    !is_dir($directory)
                 ) {
-
-                    @unlink(
-                        $result['path']
-                    );
+                    if (
+                        is_file(
+                            $temporaryCompressedPath
+                        )
+                    ) {
+                        @unlink(
+                            $temporaryCompressedPath
+                        );
+                    }
 
                     throw new RuntimeException(
                         'Folder preview PDF tidak dapat dibuat.'
@@ -1004,25 +970,30 @@ class SuratKeluarController extends Controller
                     $token .
                     '.pdf';
 
+                /*
+                |--------------------------------------------------------------------------
+                | PINDAHKAN HASIL COMPRESSION KE PREVIEW
+                |--------------------------------------------------------------------------
+                */
+
                 if (
                     !rename(
-                        $result['path'],
+                        $temporaryCompressedPath,
                         $previewPath
                     )
                 ) {
-
                     if (
                         is_file(
-                            $result['path']
+                            $temporaryCompressedPath
                         )
                     ) {
                         @unlink(
-                            $result['path']
+                            $temporaryCompressedPath
                         );
                     }
 
                     throw new RuntimeException(
-                        'Gagal menyimpan preview PDF temporary.'
+                        'Gagal menyimpan preview PDF hasil compression.'
                     );
                 }
 
@@ -1076,6 +1047,29 @@ class SuratKeluarController extends Controller
                         $compressedSize
                     );
 
+                Log::info(
+                    'Preview compression PDF Surat Keluar berhasil.',
+                    [
+                        'user_id' =>
+                            Auth::id(),
+
+                        'original_size' =>
+                            $originalSize,
+
+                        'compressed_size' =>
+                            $compressedSize,
+
+                        'saving_percent' =>
+                            $savingPercent,
+
+                        'profile' =>
+                            $profile,
+
+                        'token' =>
+                            $token,
+                    ]
+                );
+
                 return response()->json(
                     [
                         'success' =>
@@ -1089,6 +1083,15 @@ class SuratKeluarController extends Controller
 
                         'token' =>
                             $token,
+
+                        'preview_url' =>
+                            route(
+                                'surat-keluar.compression-preview',
+                                [
+                                    'token' =>
+                                        $token,
+                                ]
+                            ),
 
                         'original_size' =>
                             $originalSize,
@@ -1113,7 +1116,7 @@ class SuratKeluarController extends Controller
                             $profile,
 
                         'message' =>
-                            'PDF berhasil dikompresi dan siap disimpan.',
+                            'PDF berhasil dikompresi. Hasil compression tersedia untuk preview.',
                     ]
                 );
             }
@@ -1130,7 +1133,7 @@ class SuratKeluarController extends Controller
                 );
 
             $compressedSize =
-                $result['size'];
+                (int) $result['size'];
 
             if (
                 is_file(
@@ -1149,6 +1152,10 @@ class SuratKeluarController extends Controller
 
                     'type' =>
                         'image',
+
+                    'compressed' =>
+                        $compressedSize <
+                        $originalSize,
 
                     'original_size' =>
                         $originalSize,
@@ -1172,10 +1179,6 @@ class SuratKeluarController extends Controller
                             $compressedSize
                         ),
 
-                    'compressed' =>
-                        $compressedSize <
-                        $originalSize,
-
                     'profile' =>
                         'GD JPEG',
 
@@ -1187,10 +1190,7 @@ class SuratKeluarController extends Controller
                 ]
             );
 
-        } catch (
-            Throwable $e
-        ) {
-
+        } catch (Throwable $e) {
             Log::error(
                 'Gagal preview compression Surat Keluar.',
                 [
@@ -1225,6 +1225,197 @@ class SuratKeluarController extends Controller
 
     /*
     |--------------------------------------------------------------------------
+    | COMPRESSION PREVIEW
+    |--------------------------------------------------------------------------
+    |
+    | Endpoint ini dipanggil oleh iframe pada halaman create.blade.php.
+    |
+    | Token harus cocok dengan session user yang melakukan compression.
+    |
+    */
+
+    public function compressionPreview(
+        string $token
+    ) {
+        $this->authorizeManageSurat();
+
+        $token = trim($token);
+
+        if ($token === '') {
+            abort(
+                404,
+                'Token preview tidak valid.'
+            );
+        }
+
+        $preview =
+            session(
+                'surat_keluar_pdf_preview'
+            );
+
+        if (
+            !is_array($preview)
+        ) {
+            abort(
+                404,
+                'Preview PDF tidak ditemukan.'
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | VALIDASI TOKEN
+        |--------------------------------------------------------------------------
+        */
+
+        $previewToken =
+            (string) (
+                $preview['token'] ??
+                ''
+            );
+
+        if (
+            $previewToken === '' ||
+            !hash_equals(
+                $previewToken,
+                $token
+            )
+        ) {
+            abort(
+                404,
+                'Token preview PDF tidak valid.'
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | VALIDASI USER
+        |--------------------------------------------------------------------------
+        */
+
+        $previewUserId =
+            (int) (
+                $preview['user_id'] ??
+                0
+            );
+
+        if (
+            $previewUserId !==
+            (int) Auth::id()
+        ) {
+            abort(
+                403,
+                'Preview PDF bukan milik pengguna ini.'
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | VALIDASI WAKTU
+        |--------------------------------------------------------------------------
+        */
+
+        $createdAt =
+            (int) (
+                $preview['created_at'] ??
+                0
+            );
+
+        $age =
+            now()->timestamp -
+            $createdAt;
+
+        if (
+            $createdAt <= 0 ||
+            $age < 0 ||
+            $age > self::PDF_PREVIEW_TTL
+        ) {
+            $this->cleanupPdfPreview();
+
+            abort(
+                410,
+                'Preview PDF telah kedaluwarsa.'
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | PATH
+        |--------------------------------------------------------------------------
+        */
+
+        $path =
+            (string) (
+                $preview['path'] ??
+                ''
+            );
+
+        if (
+            $path === '' ||
+            !is_file($path) ||
+            !is_readable($path)
+        ) {
+            $this->cleanupPdfPreview();
+
+            abort(
+                404,
+                'File preview PDF tidak ditemukan.'
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | VALIDASI PDF
+        |--------------------------------------------------------------------------
+        */
+
+        $header =
+            @file_get_contents(
+                $path,
+                false,
+                null,
+                0,
+                5
+            );
+
+        if (
+            $header !==
+            '%PDF-'
+        ) {
+            $this->cleanupPdfPreview();
+
+            abort(
+                415,
+                'File preview bukan PDF yang valid.'
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | RESPONSE INLINE
+        |--------------------------------------------------------------------------
+        */
+
+        return response()->file(
+            $path,
+            [
+                'Content-Type' =>
+                    'application/pdf',
+
+                'Content-Disposition' =>
+                    'inline; filename="preview-compression.pdf"',
+
+                'Cache-Control' =>
+                    'private, max-age=300',
+
+                'X-Content-Type-Options' =>
+                    'nosniff',
+            ]
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
     | STORE
     |--------------------------------------------------------------------------
     */
@@ -1252,7 +1443,6 @@ class SuratKeluarController extends Controller
         DB::beginTransaction();
 
         try {
-
             /*
             |--------------------------------------------------------------------------
             | FILE
@@ -1264,7 +1454,6 @@ class SuratKeluarController extends Controller
                     'lampiran_file'
                 )
             ) {
-
                 $storedAttachment =
                     $this->storeUploadedFile(
                         $request->file(
@@ -1280,7 +1469,6 @@ class SuratKeluarController extends Controller
                     'captured_image'
                 )
             ) {
-
                 $storedAttachment =
                     $this->storeBase64Image(
                         (string) $request->input(
@@ -1339,15 +1527,10 @@ class SuratKeluarController extends Controller
                     'Surat keluar berhasil ditambahkan.'
                 );
 
-        } catch (
-            Throwable $e
-        ) {
-
+        } catch (Throwable $e) {
             DB::rollBack();
 
-            if (
-                $storedAttachment
-            ) {
+            if ($storedAttachment) {
                 $this->deleteAttachment(
                     $storedAttachment
                 );
@@ -1480,7 +1663,6 @@ class SuratKeluarController extends Controller
         DB::beginTransaction();
 
         try {
-
             /*
             |--------------------------------------------------------------------------
             | FILE BARU
@@ -1492,7 +1674,6 @@ class SuratKeluarController extends Controller
                     'lampiran_file'
                 )
             ) {
-
                 $newAttachment =
                     $this->storeUploadedFile(
                         $request->file(
@@ -1508,7 +1689,6 @@ class SuratKeluarController extends Controller
                     'captured_image'
                 )
             ) {
-
                 $newAttachment =
                     $this->storeBase64Image(
                         (string) $request->input(
@@ -1520,7 +1700,6 @@ class SuratKeluarController extends Controller
                     $newAttachment;
 
             } else {
-
                 unset(
                     $data['lampiran_file']
                 );
@@ -1567,7 +1746,6 @@ class SuratKeluarController extends Controller
                 $newAttachment !==
                     $oldAttachment
             ) {
-
                 $this->deleteAttachment(
                     $oldAttachment
                 );
@@ -1584,24 +1762,14 @@ class SuratKeluarController extends Controller
                     'Surat keluar berhasil diperbarui.'
                 );
 
-        } catch (
-            Throwable $e
-        ) {
-
+        } catch (Throwable $e) {
             DB::rollBack();
-
-            /*
-            |--------------------------------------------------------------------------
-            | HAPUS FILE BARU
-            |--------------------------------------------------------------------------
-            */
 
             if (
                 $newAttachment &&
                 $newAttachment !==
                     $oldAttachment
             ) {
-
                 $this->deleteAttachment(
                     $newAttachment
                 );
@@ -1657,7 +1825,6 @@ class SuratKeluarController extends Controller
             $suratKeluar->lampiran_file;
 
         try {
-
             DB::transaction(
                 function () use (
                     $suratKeluar,
@@ -1675,19 +1842,7 @@ class SuratKeluarController extends Controller
                 }
             );
 
-            /*
-            |--------------------------------------------------------------------------
-            | FILE
-            |--------------------------------------------------------------------------
-            |
-            | Karena model dihapus, file fisik dapat
-            | langsung dihapus dari storage.
-            |
-            */
-
-            if (
-                $attachment
-            ) {
+            if ($attachment) {
                 $this->deleteAttachment(
                     $attachment
                 );
@@ -1702,10 +1857,7 @@ class SuratKeluarController extends Controller
                     'Surat keluar berhasil dipindahkan ke sampah.'
                 );
 
-        } catch (
-            Throwable $e
-        ) {
-
+        } catch (Throwable $e) {
             Log::error(
                 'Gagal menghapus surat keluar.',
                 [
@@ -1743,20 +1895,12 @@ class SuratKeluarController extends Controller
         $path =
             $suratKeluar->lampiran_file;
 
-        if (
-            !$path
-        ) {
+        if (!$path) {
             abort(
                 404,
                 'Lampiran tidak tersedia.'
             );
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | URL LANGSUNG
-        |--------------------------------------------------------------------------
-        */
 
         if (
             filter_var(
@@ -1777,21 +1921,13 @@ class SuratKeluarController extends Controller
                 $path
             );
 
-        /*
-        |--------------------------------------------------------------------------
-        | TEMPORARY URL
-        |--------------------------------------------------------------------------
-        */
-
         try {
-
             if (
                 method_exists(
                     $disk,
                     'temporaryUrl'
                 )
             ) {
-
                 $temporaryUrl =
                     $disk->temporaryUrl(
                         $path,
@@ -1807,19 +1943,14 @@ class SuratKeluarController extends Controller
                         ]
                     );
 
-                if (
-                    $temporaryUrl
-                ) {
+                if ($temporaryUrl) {
                     return redirect()->away(
                         $temporaryUrl
                     );
                 }
             }
 
-        } catch (
-            Throwable $e
-        ) {
-
+        } catch (Throwable $e) {
             Log::warning(
                 'Gagal membuat temporary URL preview surat keluar.',
                 [
@@ -1832,22 +1963,13 @@ class SuratKeluarController extends Controller
             );
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | FALLBACK STREAM
-        |--------------------------------------------------------------------------
-        */
-
         try {
-
             $stream =
                 $disk->readStream(
                     $path
                 );
 
-            if (
-                $stream === false
-            ) {
+            if ($stream === false) {
                 throw new RuntimeException(
                     'File lampiran tidak dapat dibaca dari storage.'
                 );
@@ -1892,10 +2014,7 @@ class SuratKeluarController extends Controller
                 $headers
             );
 
-        } catch (
-            Throwable $e
-        ) {
-
+        } catch (Throwable $e) {
             Log::error(
                 'Gagal preview lampiran surat keluar.',
                 [
@@ -2007,18 +2126,13 @@ class SuratKeluarController extends Controller
     private function storeUploadedFile(
         ?UploadedFile $file
     ): string {
-
-        if (
-            !$file
-        ) {
+        if (!$file) {
             throw new RuntimeException(
                 'File lampiran tidak ditemukan.'
             );
         }
 
-        if (
-            !$file->isValid()
-        ) {
+        if (!$file->isValid()) {
             throw new RuntimeException(
                 $this->getUploadErrorMessage(
                     $file->getError()
@@ -2055,11 +2169,8 @@ class SuratKeluarController extends Controller
                 )
             );
 
-        if (
-            $extension === 'jpeg'
-        ) {
-            $extension =
-                'jpg';
+        if ($extension === 'jpeg') {
+            $extension = 'jpg';
         }
 
         if (
@@ -2079,9 +2190,7 @@ class SuratKeluarController extends Controller
 
         if (
             !$realPath ||
-            !is_readable(
-                $realPath
-            )
+            !is_readable($realPath)
         ) {
             throw new RuntimeException(
                 'File upload tidak dapat dibaca oleh server.'
@@ -2100,9 +2209,7 @@ class SuratKeluarController extends Controller
                 'rb'
             );
 
-        if (
-            $handle === false
-        ) {
+        if ($handle === false) {
             throw new RuntimeException(
                 'File upload tidak dapat dibuka oleh server.'
             );
@@ -2147,7 +2254,7 @@ class SuratKeluarController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | SIGNATURE VALIDATION
+        | VALIDASI SIGNATURE
         |--------------------------------------------------------------------------
         */
 
@@ -2191,9 +2298,7 @@ class SuratKeluarController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        if (
-            $isPdf
-        ) {
+        if ($isPdf) {
             return $this->storePdfUsingPreview(
                 $file
             );
@@ -2219,9 +2324,7 @@ class SuratKeluarController extends Controller
                 $realPath
             );
 
-        if (
-            $imageInfo === false
-        ) {
+        if ($imageInfo === false) {
             throw new RuntimeException(
                 'File gambar tidak valid.'
             );
@@ -2270,10 +2373,7 @@ class SuratKeluarController extends Controller
     private function storePdfUsingPreview(
         UploadedFile $file
     ): string {
-
-        if (
-            !$file->isValid()
-        ) {
+        if (!$file->isValid()) {
             throw new RuntimeException(
                 $this->getUploadErrorMessage(
                     $file->getError()
@@ -2286,9 +2386,7 @@ class SuratKeluarController extends Controller
 
         if (
             !$inputPath ||
-            !is_readable(
-                $inputPath
-            )
+            !is_readable($inputPath)
         ) {
             throw new RuntimeException(
                 'File PDF temporary tidak dapat dibaca.'
@@ -2320,7 +2418,7 @@ class SuratKeluarController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | HASH
+        | HASH FILE
         |--------------------------------------------------------------------------
         */
 
@@ -2330,9 +2428,7 @@ class SuratKeluarController extends Controller
                 $inputPath
             );
 
-        if (
-            !$currentHash
-        ) {
+        if (!$currentHash) {
             throw new RuntimeException(
                 'Hash PDF tidak dapat dibuat.'
             );
@@ -2349,10 +2445,7 @@ class SuratKeluarController extends Controller
                 'surat_keluar_pdf_preview'
             );
 
-        if (
-            is_array($preview)
-        ) {
-
+        if (is_array($preview)) {
             $previewUserId =
                 (int) (
                     $preview['user_id'] ??
@@ -2410,14 +2503,9 @@ class SuratKeluarController extends Controller
                     $preview['use_compressed']
                 ) &&
                 $previewPath !== '' &&
-                is_file(
-                    $previewPath
-                ) &&
-                is_readable(
-                    $previewPath
-                )
+                is_file($previewPath) &&
+                is_readable($previewPath)
             ) {
-
                 $compressedContents =
                     file_get_contents(
                         $previewPath
@@ -2466,7 +2554,7 @@ class SuratKeluarController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | PREVIEW TIDAK LEBIH KECIL
+            | PREVIEW ASLI
             |--------------------------------------------------------------------------
             */
 
@@ -2478,12 +2566,16 @@ class SuratKeluarController extends Controller
                     $preview['use_compressed']
                 )
             ) {
+                /*
+                |------------------------------------------------------------------
+                | Preview hanya dipakai untuk menampilkan file.
+                | File asli dari request tetap digunakan untuk penyimpanan.
+                |------------------------------------------------------------------
+                */
 
                 if (
                     $previewPath !== '' &&
-                    is_file(
-                        $previewPath
-                    )
+                    is_file($previewPath)
                 ) {
                     @unlink(
                         $previewPath
@@ -2523,9 +2615,7 @@ class SuratKeluarController extends Controller
 
             if (
                 $previewPath !== '' &&
-                is_file(
-                    $previewPath
-                )
+                is_file($previewPath)
             ) {
                 @unlink(
                     $previewPath
@@ -2557,14 +2647,9 @@ class SuratKeluarController extends Controller
     private function storeCompressedPdf(
         string $inputPath
     ): string {
-
         if (
-            !is_file(
-                $inputPath
-            ) ||
-            !is_readable(
-                $inputPath
-            )
+            !is_file($inputPath) ||
+            !is_readable($inputPath)
         ) {
             throw new RuntimeException(
                 'File PDF tidak dapat dibaca.'
@@ -2606,7 +2691,6 @@ class SuratKeluarController extends Controller
             $result['size'];
 
         try {
-
             /*
             |--------------------------------------------------------------------------
             | ASLI LEBIH KECIL
@@ -2617,7 +2701,6 @@ class SuratKeluarController extends Controller
                 $compressedSize >=
                 $originalSize
             ) {
-
                 $contents =
                     file_get_contents(
                         $inputPath
@@ -2717,7 +2800,6 @@ class SuratKeluarController extends Controller
             );
 
         } finally {
-
             if (
                 is_file(
                     $temporaryPath
@@ -2739,6 +2821,14 @@ class SuratKeluarController extends Controller
     private function compressPdfToTemporaryFile(
         string $inputPath
     ): array {
+        if (
+            !is_file($inputPath) ||
+            !is_readable($inputPath)
+        ) {
+            throw new RuntimeException(
+                'File PDF tidak dapat dibaca.'
+            );
+        }
 
         $ghostscript =
             PHP_OS_FAMILY === 'Windows'
@@ -2777,9 +2867,7 @@ class SuratKeluarController extends Controller
             $versionCode
         );
 
-        if (
-            $versionCode !== 0
-        ) {
+        if ($versionCode !== 0) {
             throw new RuntimeException(
                 'Ghostscript gagal dijalankan.'
             );
@@ -2797,17 +2885,13 @@ class SuratKeluarController extends Controller
             );
 
         if (
-            !is_dir(
-                $directory
-            ) &&
+            !is_dir($directory) &&
             !mkdir(
                 $directory,
                 0775,
                 true
             ) &&
-            !is_dir(
-                $directory
-            )
+            !is_dir($directory)
         ) {
             throw new RuntimeException(
                 'Folder temporary compression PDF tidak dapat dibuat.'
@@ -2833,7 +2917,6 @@ class SuratKeluarController extends Controller
             self::PDF_COMPRESSION_PROFILES
             as $profile
         ) {
-
             $outputPath =
                 $directory .
                 DIRECTORY_SEPARATOR .
@@ -2871,7 +2954,6 @@ class SuratKeluarController extends Controller
                 ' -dDownsampleMonoImages=true' .
                 ' -dMonoImageResolution=' .
                 (int) $profile['mono_dpi'] .
-                ' -dMonoImageDownsampleType=/Bicubic' .
                 ' -dNOPAUSE' .
                 ' -dBATCH' .
                 ' -dQUIET' .
@@ -2899,11 +2981,8 @@ class SuratKeluarController extends Controller
 
             if (
                 $exitCode !== 0 ||
-                !is_file(
-                    $outputPath
-                )
+                !is_file($outputPath)
             ) {
-
                 Log::warning(
                     'Profile Ghostscript surat keluar gagal.',
                     [
@@ -2922,9 +3001,7 @@ class SuratKeluarController extends Controller
                 );
 
                 if (
-                    is_file(
-                        $outputPath
-                    )
+                    is_file($outputPath)
                 ) {
                     @unlink(
                         $outputPath
@@ -2952,7 +3029,7 @@ class SuratKeluarController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | PDF VALID
+            | VALIDATE PDF
             |--------------------------------------------------------------------------
             */
 
@@ -2965,11 +3042,7 @@ class SuratKeluarController extends Controller
                     5
                 );
 
-            if (
-                $header !==
-                '%PDF-'
-            ) {
-
+            if ($header !== '%PDF-') {
                 @unlink(
                     $outputPath
                 );
@@ -2993,15 +3066,11 @@ class SuratKeluarController extends Controller
 
             if (
                 $bestSize === null ||
-                $size <
-                $bestSize
+                $size < $bestSize
             ) {
-
                 if (
                     $bestOutput &&
-                    is_file(
-                        $bestOutput
-                    )
+                    is_file($bestOutput)
                 ) {
                     @unlink(
                         $bestOutput
@@ -3018,7 +3087,6 @@ class SuratKeluarController extends Controller
                     $profile['name'];
 
             } else {
-
                 @unlink(
                     $outputPath
                 );
@@ -3038,7 +3106,6 @@ class SuratKeluarController extends Controller
             $bestSize >
             self::MAX_FILE_SIZE
         ) {
-
             @unlink(
                 $bestOutput
             );
@@ -3070,7 +3137,6 @@ class SuratKeluarController extends Controller
         UploadedFile $file,
         string $realPath
     ): string {
-
         $result =
             $this->compressImageToTemporaryFile(
                 $file
@@ -3080,7 +3146,6 @@ class SuratKeluarController extends Controller
             $result['path'];
 
         try {
-
             $contents =
                 file_get_contents(
                     $temporaryPath
@@ -3096,9 +3161,7 @@ class SuratKeluarController extends Controller
             }
 
             if (
-                strlen(
-                    $contents
-                ) >
+                strlen($contents) >
                 self::MAX_FILE_SIZE
             ) {
                 throw new RuntimeException(
@@ -3113,7 +3176,6 @@ class SuratKeluarController extends Controller
             );
 
         } finally {
-
             if (
                 is_file(
                     $temporaryPath
@@ -3129,11 +3191,8 @@ class SuratKeluarController extends Controller
     private function compressImageToTemporaryFile(
         UploadedFile $file
     ): array {
-
         if (
-            !extension_loaded(
-                'gd'
-            )
+            !extension_loaded('gd')
         ) {
             throw new RuntimeException(
                 'PHP GD belum aktif. Aktifkan ekstensi GD.'
@@ -3145,9 +3204,7 @@ class SuratKeluarController extends Controller
 
         if (
             !$realPath ||
-            !is_readable(
-                $realPath
-            )
+            !is_readable($realPath)
         ) {
             throw new RuntimeException(
                 'File gambar tidak dapat dibaca.'
@@ -3162,18 +3219,12 @@ class SuratKeluarController extends Controller
                 )
             );
 
-        if (
-            $extension === 'jpeg'
-        ) {
-            $extension =
-                'jpg';
+        if ($extension === 'jpeg') {
+            $extension = 'jpg';
         }
 
         $source =
-            match (
-                $extension
-            ) {
-
+            match ($extension) {
                 'png' =>
                     @imagecreatefrompng(
                         $realPath
@@ -3188,9 +3239,7 @@ class SuratKeluarController extends Controller
                     false,
             };
 
-        if (
-            $source === false
-        ) {
+        if ($source === false) {
             throw new RuntimeException(
                 'Gambar tidak dapat diproses oleh GD.'
             );
@@ -3200,7 +3249,6 @@ class SuratKeluarController extends Controller
             null;
 
         try {
-
             $sourceWidth =
                 imagesx(
                     $source
@@ -3280,9 +3328,7 @@ class SuratKeluarController extends Controller
                     $targetHeight
                 );
 
-            if (
-                $destination === false
-            ) {
+            if ($destination === false) {
                 throw new RuntimeException(
                     'Canvas gambar gagal dibuat.'
                 );
@@ -3360,16 +3406,13 @@ class SuratKeluarController extends Controller
             foreach (
                 $qualities as $quality
             ) {
-
                 $candidate =
                     tempnam(
                         sys_get_temp_dir(),
                         'e_arsip_sk_img_'
                     );
 
-                if (
-                    !$candidate
-                ) {
+                if (!$candidate) {
                     continue;
                 }
 
@@ -3380,9 +3423,7 @@ class SuratKeluarController extends Controller
                         $quality
                     );
 
-                if (
-                    !$success
-                ) {
+                if (!$success) {
                     @unlink(
                         $candidate
                     );
@@ -3408,10 +3449,8 @@ class SuratKeluarController extends Controller
 
                 if (
                     $bestSize === null ||
-                    $size <
-                    $bestSize
+                    $size < $bestSize
                 ) {
-
                     if (
                         $bestTemporaryPath &&
                         is_file(
@@ -3430,7 +3469,6 @@ class SuratKeluarController extends Controller
                         $size;
 
                 } else {
-
                     @unlink(
                         $candidate
                     );
@@ -3457,7 +3495,6 @@ class SuratKeluarController extends Controller
                 $bestSize >
                 self::MAX_FILE_SIZE
             ) {
-
                 @unlink(
                     $bestTemporaryPath
                 );
@@ -3476,7 +3513,6 @@ class SuratKeluarController extends Controller
             ];
 
         } finally {
-
             if (
                 $source instanceof \GdImage
             ) {
@@ -3504,15 +3540,12 @@ class SuratKeluarController extends Controller
     private function storeBase64Image(
         string $base64
     ): string {
-
         $base64 =
             trim(
                 $base64
             );
 
-        if (
-            $base64 === ''
-        ) {
+        if ($base64 === '') {
             throw new RuntimeException(
                 'Data scan kamera kosong.'
             );
@@ -3535,9 +3568,7 @@ class SuratKeluarController extends Controller
                 ','
             );
 
-        if (
-            $comma === false
-        ) {
+        if ($comma === false) {
             throw new RuntimeException(
                 'Data scan kamera tidak valid.'
             );
@@ -3565,9 +3596,7 @@ class SuratKeluarController extends Controller
         }
 
         if (
-            strlen(
-                $decoded
-            ) >
+            strlen($decoded) >
             self::MAX_FILE_SIZE
         ) {
             throw new RuntimeException(
@@ -3580,9 +3609,7 @@ class SuratKeluarController extends Controller
                 $decoded
             );
 
-        if (
-            $imageInfo === false
-        ) {
+        if ($imageInfo === false) {
             throw new RuntimeException(
                 'Data scan bukan gambar yang valid.'
             );
@@ -3596,9 +3623,7 @@ class SuratKeluarController extends Controller
                 )
             );
 
-        if (
-            $mime === 'image/jpg'
-        ) {
+        if ($mime === 'image/jpg') {
             $mime =
                 'image/jpeg';
         }
@@ -3621,16 +3646,13 @@ class SuratKeluarController extends Controller
                 'e_arsip_scan_'
             );
 
-        if (
-            !$temporaryPath
-        ) {
+        if (!$temporaryPath) {
             throw new RuntimeException(
                 'File temporary scan gagal dibuat.'
             );
         }
 
         try {
-
             if (
                 file_put_contents(
                     $temporaryPath,
@@ -3641,12 +3663,6 @@ class SuratKeluarController extends Controller
                     'Gagal membuat file temporary scan.'
                 );
             }
-
-            /*
-            |--------------------------------------------------------------------------
-            | BUAT UPLOADED FILE
-            |--------------------------------------------------------------------------
-            */
 
             $uploadedFile =
                 new UploadedFile(
@@ -3663,7 +3679,6 @@ class SuratKeluarController extends Controller
             );
 
         } finally {
-
             if (
                 is_file(
                     $temporaryPath
@@ -3687,10 +3702,7 @@ class SuratKeluarController extends Controller
         string $extension,
         string $mimeType
     ): string {
-
-        if (
-            $contents === ''
-        ) {
+        if ($contents === '') {
             throw new RuntimeException(
                 'Data file kosong.'
             );
@@ -3734,7 +3746,6 @@ class SuratKeluarController extends Controller
             $fileName;
 
         try {
-
             $disk =
                 $this->storage();
 
@@ -3751,9 +3762,7 @@ class SuratKeluarController extends Controller
                     ]
                 );
 
-            if (
-                !$saved
-            ) {
+            if (!$saved) {
                 throw new RuntimeException(
                     'File gagal disimpan ke Supabase.'
                 );
@@ -3761,10 +3770,7 @@ class SuratKeluarController extends Controller
 
             return $path;
 
-        } catch (
-            Throwable $e
-        ) {
-
+        } catch (Throwable $e) {
             Log::error(
                 'Gagal menyimpan binary surat keluar.',
                 [
@@ -3805,12 +3811,9 @@ class SuratKeluarController extends Controller
     private function deleteAttachment(
         ?string $path
     ): void {
-
         if (
             !$path ||
-            trim(
-                $path
-            ) === ''
+            trim($path) === ''
         ) {
             return;
         }
@@ -3825,7 +3828,6 @@ class SuratKeluarController extends Controller
         }
 
         try {
-
             $disk =
                 $this->storage();
 
@@ -3839,10 +3841,7 @@ class SuratKeluarController extends Controller
                 );
             }
 
-        } catch (
-            Throwable $e
-        ) {
-
+        } catch (Throwable $e) {
             Log::warning(
                 'Gagal menghapus lampiran surat keluar.',
                 [
@@ -3873,26 +3872,17 @@ class SuratKeluarController extends Controller
             );
 
         if (
-            is_array(
-                $preview
-            ) &&
-            !empty(
-                $preview['path']
-            )
+            is_array($preview) &&
+            !empty($preview['path'])
         ) {
-
             $path =
                 (string) $preview['path'];
 
             if (
                 $path !== '' &&
-                is_file(
-                    $path
-                )
+                is_file($path)
             ) {
-                @unlink(
-                    $path
-                );
+                @unlink($path);
             }
         }
 
@@ -3919,16 +3909,11 @@ class SuratKeluarController extends Controller
                 )
             );
 
-        if (
-            $disk === ''
-        ) {
+        if ($disk === '') {
             return 'supabase';
         }
 
-        if (
-            $disk !==
-            'supabase'
-        ) {
+        if ($disk !== 'supabase') {
             throw new RuntimeException(
                 'FILESYSTEM_DISK harus diset ke "supabase".'
             );
@@ -3953,11 +3938,7 @@ class SuratKeluarController extends Controller
     private function getUploadErrorMessage(
         int $error
     ): string {
-
-        return match (
-            $error
-        ) {
-
+        return match ($error) {
             UPLOAD_ERR_INI_SIZE =>
                 'Ukuran file melebihi batas upload server.',
 
@@ -3994,7 +3975,6 @@ class SuratKeluarController extends Controller
     private function getMimeTypeFromPath(
         string $path
     ): string {
-
         return match (
             strtolower(
                 pathinfo(
@@ -4003,7 +3983,6 @@ class SuratKeluarController extends Controller
                 )
             )
         ) {
-
             'pdf' =>
                 'application/pdf',
 
@@ -4028,10 +4007,7 @@ class SuratKeluarController extends Controller
     private function isValidDate(
         ?string $date
     ): bool {
-
-        if (
-            $date === null
-        ) {
+        if ($date === null) {
             return false;
         }
 
@@ -4056,9 +4032,7 @@ class SuratKeluarController extends Controller
             );
 
         if (
-            count(
-                $parts
-            ) !== 3
+            count($parts) !== 3
         ) {
             return false;
         }
@@ -4079,10 +4053,7 @@ class SuratKeluarController extends Controller
     private function formatBytes(
         int $bytes
     ): string {
-
-        if (
-            $bytes <= 0
-        ) {
+        if ($bytes <= 0) {
             return '0 KB';
         }
 
@@ -4121,11 +4092,9 @@ class SuratKeluarController extends Controller
         int $originalSize,
         int $compressedSize
     ): float {
-
         if (
             $originalSize <= 0 ||
-            $compressedSize >=
-            $originalSize
+            $compressedSize >= $originalSize
         ) {
             return 0;
         }
@@ -4154,9 +4123,7 @@ class SuratKeluarController extends Controller
         string $module,
         string $description
     ): void {
-
         try {
-
             if (
                 class_exists(
                     ActivityLog::class
@@ -4166,18 +4133,13 @@ class SuratKeluarController extends Controller
                     'catat'
                 )
             ) {
-
                 ActivityLog::catat(
                     $action,
                     $module,
                     $description
                 );
             }
-
-        } catch (
-            Throwable $e
-        ) {
-
+        } catch (Throwable $e) {
             Log::warning(
                 'Gagal mencatat Activity Log surat keluar.',
                 [

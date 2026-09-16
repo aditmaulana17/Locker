@@ -631,65 +631,6 @@
         background: #dbeafe;
     }
 
-    .ske-preview {
-        overflow: hidden;
-        margin-top: 8px;
-        border: 1px solid #cbd5e1;
-        border-radius: 8px;
-        background: #0f172a;
-    }
-
-    .ske-preview-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 6px;
-        padding: 7px 8px;
-        border-bottom: 1px solid #334155;
-        background: #111827;
-        color: #fff;
-    }
-
-    .ske-preview-title {
-        margin: 0;
-        font-size: 7.5px;
-        font-weight: 800;
-    }
-
-    .ske-preview-badge {
-        padding: 3px 6px;
-        border-radius: 999px;
-        background: rgba(255,255,255,.10);
-        color: #cbd5e1;
-        font-size: 5.5px;
-        font-weight: 800;
-        text-transform: uppercase;
-    }
-
-    .ske-preview-image {
-        display: block;
-        width: 100%;
-        max-height: 340px;
-        object-fit: contain;
-        background: #fff;
-    }
-
-    .ske-preview-pdf {
-        display: block;
-        width: 100%;
-        height: 340px;
-        border: 0;
-        background: #fff;
-    }
-
-    .ske-preview-caption {
-        padding: 6px 8px;
-        background: #111827;
-        color: #94a3b8;
-        font-size: 6.5px;
-        line-height: 1.45;
-    }
-
     .ske-upload-box {
         position: relative;
         min-height: 130px;
@@ -828,6 +769,18 @@
         color: #a16207;
     }
 
+    .ske-compression.error {
+        border-color: #fecaca;
+        background: #fff1f2;
+        color: #be123c;
+    }
+
+    .ske-compression.processing {
+        border-color: #bfdbfe;
+        background: #eff6ff;
+        color: #1d4ed8;
+    }
+
     .ske-compression-title {
         margin: 0 0 6px;
         font-size: 7.5px;
@@ -894,6 +847,115 @@
         color: #a16207;
     }
 
+    .ske-preview {
+        display: none;
+        overflow: hidden;
+        margin-top: 8px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        background: #0f172a;
+    }
+
+    .ske-preview.show {
+        display: block;
+    }
+
+    .ske-preview-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 6px;
+        padding: 7px 8px;
+        border-bottom: 1px solid #334155;
+        background: #111827;
+        color: #fff;
+    }
+
+    .ske-preview-title {
+        margin: 0;
+        font-size: 7.5px;
+        font-weight: 800;
+    }
+
+    .ske-preview-badge {
+        padding: 3px 6px;
+        border-radius: 999px;
+        background: rgba(255,255,255,.10);
+        color: #cbd5e1;
+        font-size: 5.5px;
+        font-weight: 800;
+        text-transform: uppercase;
+    }
+
+    .ske-preview-image {
+        display: block;
+        width: 100%;
+        max-height: 340px;
+        object-fit: contain;
+        background: #fff;
+    }
+
+    .ske-preview-pdf {
+        display: block;
+        width: 100%;
+        height: 340px;
+        border: 0;
+        background: #fff;
+    }
+
+    .ske-preview-caption {
+        padding: 6px 8px;
+        background: #111827;
+        color: #94a3b8;
+        font-size: 6.5px;
+        line-height: 1.45;
+    }
+
+    .ske-preview-divider {
+        margin: 8px 0;
+        height: 1px;
+        background: #334155;
+    }
+
+    .ske-preview-secondary {
+        padding: 7px 8px;
+        background: #0f172a;
+        color: #cbd5e1;
+        font-size: 6.5px;
+        line-height: 1.45;
+    }
+
+    .ske-submit-progress {
+        display: none;
+        margin-top: 7px;
+        height: 4px;
+        overflow: hidden;
+        border-radius: 99px;
+        background: #dbeafe;
+    }
+
+    .ske-submit-progress.show {
+        display: block;
+    }
+
+    .ske-submit-progress-bar {
+        width: 35%;
+        height: 100%;
+        border-radius: inherit;
+        background: #2563eb;
+        animation: skeProgress 1.2s ease-in-out infinite;
+    }
+
+    @keyframes skeProgress {
+        0% {
+            transform: translateX(-120%);
+        }
+
+        100% {
+            transform: translateX(320%);
+        }
+    }
+
     .ske-footer {
         display: flex;
         justify-content: flex-end;
@@ -938,6 +1000,10 @@
     .ske-submit:disabled {
         opacity: .6;
         cursor: not-allowed;
+    }
+
+    .ske-hidden {
+        display: none !important;
     }
 
     @media (max-width: 900px) {
@@ -1104,10 +1170,6 @@
 
         <div class="ske-shell">
 
-            {{-- ================================================================
-                 HEADER
-            ================================================================ --}}
-
             <header class="ske-header">
 
                 <div class="ske-header-inner">
@@ -1151,8 +1213,8 @@
 
                             <p class="ske-header-desc">
                                 Perbarui data surat dan lampiran digital.
-                                PDF tetap PDF dan dapat langsung terlihat,
-                                sedangkan gambar dapat dioptimalkan menjadi JPG.
+                                PDF tetap PDF dan dapat dikompresi di server,
+                                sedangkan JPG/JPEG/PNG dioptimalkan menjadi JPG.
                             </p>
 
                         </div>
@@ -1168,10 +1230,6 @@
             </header>
 
             <div class="ske-body">
-
-                {{-- ============================================================
-                     INFORMASI UTAMA
-                ============================================================= --}}
 
                 <section class="ske-section">
 
@@ -1196,8 +1254,6 @@
                     <div class="ske-field-table">
 
                         <div class="ske-field-grid">
-
-                            {{-- NOMOR SURAT --}}
 
                             <div class="ske-field">
 
@@ -1229,8 +1285,6 @@
 
                             </div>
 
-                            {{-- TUJUAN --}}
-
                             <div class="ske-field">
 
                                 <label
@@ -1261,8 +1315,6 @@
 
                             </div>
 
-                            {{-- TANGGAL SURAT --}}
-
                             <div class="ske-field">
 
                                 <label
@@ -1290,8 +1342,6 @@
 
                             </div>
 
-                            {{-- TANGGAL KELUAR --}}
-
                             <div class="ske-field">
 
                                 <label
@@ -1318,8 +1368,6 @@
                                 @enderror
 
                             </div>
-
-                            {{-- KATEGORI --}}
 
                             <div class="ske-field">
 
@@ -1388,8 +1436,6 @@
 
                             </div>
 
-                            {{-- STATUS --}}
-
                             <div class="ske-field">
 
                                 <label
@@ -1452,8 +1498,6 @@
 
                             </div>
 
-                            {{-- PERIHAL --}}
-
                             <div class="ske-field ske-field-full">
 
                                 <label
@@ -1482,8 +1526,6 @@
 
                             </div>
 
-                            {{-- RINGKASAN --}}
-
                             <div class="ske-field ske-field-full">
 
                                 <label
@@ -1502,7 +1544,10 @@
                                     class="ske-control @error('ringkasan') ske-control-error @enderror"
                                 >{{ old('ringkasan', $suratKeluar->ringkasan) }}</textarea>
 
-                                <p class="ske-field-error" style="color:#94a3b8;">
+                                <p
+                                    class="ske-field-error"
+                                    style="color:#94a3b8;"
+                                >
                                     Maksimal 5.000 karakter.
                                 </p>
 
@@ -1520,10 +1565,6 @@
 
                 </section>
 
-                {{-- ============================================================
-                     LAMPIRAN
-                ============================================================= --}}
-
                 <section class="ske-section">
 
                     <div class="ske-section-head">
@@ -1537,7 +1578,8 @@
                             </h2>
 
                             <p class="ske-section-desc">
-                                Periksa lampiran saat ini atau upload file pengganti.
+                                Lihat lampiran saat ini atau upload file pengganti.
+                                Hasil compression akan ditampilkan sebelum update.
                             </p>
 
                         </div>
@@ -1546,9 +1588,9 @@
 
                     <div class="ske-attachment-grid">
 
-                        {{-- ====================================================
-                             FILE LAMA
-                        ===================================================== --}}
+                        {{-- =====================================================
+                             LAMPIRAN SAAT INI
+                        ====================================================== --}}
 
                         <div class="ske-card">
 
@@ -1703,9 +1745,9 @@
 
                         </div>
 
-                        {{-- ====================================================
+                        {{-- =====================================================
                              FILE BARU
-                        ===================================================== --}}
+                        ====================================================== --}}
 
                         <div class="ske-card">
 
@@ -1775,12 +1817,13 @@
 
                                     <p>
                                         <strong>PDF:</strong>
-                                        tetap PDF dan dapat dipreview langsung.
+                                        tetap PDF dan dikompresi oleh server
+                                        menggunakan Ghostscript.
                                         <br>
                                         <strong>JPG/JPEG/PNG:</strong>
-                                        diproses menjadi JPG di browser.
+                                        dikompresi di browser dan dikonversi menjadi JPG.
                                         <br>
-                                        Maksimal file yang dipilih: <strong>10 MB</strong>.
+                                        Maksimal file: <strong>10 MB</strong>.
                                     </p>
 
                                 </div>
@@ -1874,7 +1917,7 @@
                                         id="ske-compression-title"
                                         class="ske-compression-title"
                                     >
-                                        Informasi File
+                                        Informasi Compression
                                     </p>
 
                                     <div class="ske-compression-grid">
@@ -1953,14 +1996,20 @@
                                     class="ske-status"
                                 ></div>
 
+                                <div
+                                    id="ske-submit-progress"
+                                    class="ske-submit-progress"
+                                >
+                                    <div class="ske-submit-progress-bar"></div>
+                                </div>
+
                                 {{-- =================================================
-                                     PREVIEW FILE BARU
+                                     PREVIEW
                                 ================================================== --}}
 
                                 <div
                                     id="ske-preview"
                                     class="ske-preview"
-                                    style="display:none;"
                                 >
 
                                     <div class="ske-preview-header">
@@ -2003,6 +2052,11 @@
                                         Preview akan tampil setelah memilih file.
                                     </div>
 
+                                    <div
+                                        id="ske-preview-secondary"
+                                        class="ske-preview-secondary ske-hidden"
+                                    ></div>
+
                                 </div>
 
                                 @error('lampiran_file')
@@ -2022,10 +2076,6 @@
                 </section>
 
             </div>
-
-            {{-- ================================================================
-                 FOOTER
-            ================================================================ --}}
 
             <div class="ske-footer">
 
@@ -2077,11 +2127,11 @@
 
                     <svg
                         id="ske-submit-loading"
+                        class="ske-hidden"
                         width="14"
                         height="14"
                         viewBox="0 0 24 24"
                         fill="none"
-                        style="display:none;"
                     >
                         <circle
                             cx="12"
@@ -2119,1207 +2169,1593 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener(
+    'DOMContentLoaded',
+    function () {
 
-    'use strict';
+        'use strict';
 
-    /*
-    |--------------------------------------------------------------------------
-    | ELEMENT
-    |--------------------------------------------------------------------------
-    */
+        /*
+        |--------------------------------------------------------------------------
+        | ELEMENT
+        |--------------------------------------------------------------------------
+        */
 
-    const form =
-        document.getElementById(
-            'form-surat-keluar-edit'
-        );
+        const form =
+            document.getElementById(
+                'form-surat-keluar-edit'
+            );
 
-    const fileInput =
-        document.getElementById(
-            'lampiran_file'
-        );
+        const fileInput =
+            document.getElementById(
+                'lampiran_file'
+            );
 
-    const uploadBox =
-        document.getElementById(
-            'ske-upload-box'
-        );
+        const uploadBox =
+            document.getElementById(
+                'ske-upload-box'
+            );
 
-    const uploadIcon =
-        document.getElementById(
-            'ske-upload-icon'
-        );
+        const uploadTitle =
+            document.getElementById(
+                'ske-upload-title'
+            );
 
-    const uploadTitle =
-        document.getElementById(
-            'ske-upload-title'
-        );
+        const uploadSubtitle =
+            document.getElementById(
+                'ske-upload-subtitle'
+            );
 
-    const uploadSubtitle =
-        document.getElementById(
-            'ske-upload-subtitle'
-        );
+        const fileInfo =
+            document.getElementById(
+                'ske-file-info'
+            );
 
-    const fileInfo =
-        document.getElementById(
-            'ske-file-info'
-        );
+        const fileInfoTitle =
+            document.getElementById(
+                'ske-file-info-title'
+            );
 
-    const fileInfoTitle =
-        document.getElementById(
-            'ske-file-info-title'
-        );
+        const fileInfoName =
+            document.getElementById(
+                'ske-file-info-name'
+            );
 
-    const fileInfoName =
-        document.getElementById(
-            'ske-file-info-name'
-        );
+        const fileInfoSize =
+            document.getElementById(
+                'ske-file-info-size'
+            );
 
-    const fileInfoSize =
-        document.getElementById(
-            'ske-file-info-size'
-        );
+        const compression =
+            document.getElementById(
+                'ske-compression'
+            );
 
-    const compression =
-        document.getElementById(
-            'ske-compression'
-        );
+        const compressionTitle =
+            document.getElementById(
+                'ske-compression-title'
+            );
 
-    const compressionTitle =
-        document.getElementById(
-            'ske-compression-title'
-        );
+        const compressionMessage =
+            document.getElementById(
+                'ske-compression-message'
+            );
 
-    const compressionMessage =
-        document.getElementById(
-            'ske-compression-message'
-        );
+        const originalFormat =
+            document.getElementById(
+                'ske-original-format'
+            );
 
-    const originalFormat =
-        document.getElementById(
-            'ske-original-format'
-        );
+        const finalFormat =
+            document.getElementById(
+                'ske-final-format'
+            );
 
-    const finalFormat =
-        document.getElementById(
-            'ske-final-format'
-        );
+        const originalSize =
+            document.getElementById(
+                'ske-original-size'
+            );
 
-    const originalSize =
-        document.getElementById(
-            'ske-original-size'
-        );
+        const finalSize =
+            document.getElementById(
+                'ske-final-size'
+            );
 
-    const finalSize =
-        document.getElementById(
-            'ske-final-size'
-        );
+        const statusBox =
+            document.getElementById(
+                'ske-status'
+            );
 
-    const statusBox =
-        document.getElementById(
-            'ske-status'
-        );
+        const submitProgress =
+            document.getElementById(
+                'ske-submit-progress'
+            );
 
-    const preview =
-        document.getElementById(
-            'ske-preview'
-        );
+        const preview =
+            document.getElementById(
+                'ske-preview'
+            );
 
-    const previewTitle =
-        document.getElementById(
-            'ske-preview-title'
-        );
+        const previewTitle =
+            document.getElementById(
+                'ske-preview-title'
+            );
 
-    const previewBadge =
-        document.getElementById(
-            'ske-preview-badge'
-        );
+        const previewBadge =
+            document.getElementById(
+                'ske-preview-badge'
+            );
 
-    const previewImage =
-        document.getElementById(
-            'ske-preview-image'
-        );
+        const previewImage =
+            document.getElementById(
+                'ske-preview-image'
+            );
 
-    const previewPdf =
-        document.getElementById(
-            'ske-preview-pdf'
-        );
+        const previewPdf =
+            document.getElementById(
+                'ske-preview-pdf'
+            );
 
-    const previewCaption =
-        document.getElementById(
-            'ske-preview-caption'
-        );
+        const previewCaption =
+            document.getElementById(
+                'ske-preview-caption'
+            );
 
-    const tanggalSurat =
-        document.getElementById(
-            'tanggal_surat'
-        );
+        const previewSecondary =
+            document.getElementById(
+                'ske-preview-secondary'
+            );
 
-    const tanggalKeluar =
-        document.getElementById(
-            'tanggal_keluar'
-        );
+        const tanggalSurat =
+            document.getElementById(
+                'tanggal_surat'
+            );
 
-    const submitButton =
-        document.getElementById(
-            'ske-submit'
-        );
+        const tanggalKeluar =
+            document.getElementById(
+                'tanggal_keluar'
+            );
 
-    const submitIcon =
-        document.getElementById(
-            'ske-submit-icon'
-        );
+        const submitButton =
+            document.getElementById(
+                'ske-submit'
+            );
 
-    const submitLoading =
-        document.getElementById(
-            'ske-submit-loading'
-        );
+        const submitIcon =
+            document.getElementById(
+                'ske-submit-icon'
+            );
 
-    const submitText =
-        document.getElementById(
-            'ske-submit-text'
-        );
+        const submitLoading =
+            document.getElementById(
+                'ske-submit-loading'
+            );
 
-    if (
-        !form ||
-        !fileInput
-    ) {
-        return;
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | KONFIGURASI
-    |--------------------------------------------------------------------------
-    */
-
-    const MAX_FILE_SIZE =
-        10 *
-        1024 *
-        1024;
-
-    const IMAGE_TARGET_SIZE =
-        2.5 *
-        1024 *
-        1024;
-
-    const IMAGE_HARD_LIMIT =
-        9.5 *
-        1024 *
-        1024;
-
-    const IMAGE_MAX_DIMENSION =
-        2500;
-
-    const IMAGE_MIN_DIMENSION =
-        1000;
-
-    const JPEG_QUALITIES = [
-        0.90,
-        0.86,
-        0.82,
-        0.78,
-        0.74,
-        0.70,
-        0.66,
-        0.62,
-        0.58,
-        0.54,
-        0.50,
-        0.46,
-        0.42,
-        0.38
-    ];
-
-    const ALLOWED_EXTENSIONS = [
-        'pdf',
-        'jpg',
-        'jpeg',
-        'png'
-    ];
-
-    const IMAGE_EXTENSIONS = [
-        'jpg',
-        'jpeg',
-        'png'
-    ];
-
-    let submitting =
-        false;
-
-    let processingToken =
-        0;
-
-    let previewObjectUrl =
-        null;
-
-    /*
-    |--------------------------------------------------------------------------
-    | UTIL
-    |--------------------------------------------------------------------------
-    */
-
-    function formatFileSize(
-        bytes
-    ) {
+        const submitText =
+            document.getElementById(
+                'ske-submit-text'
+            );
 
         if (
-            !Number.isFinite(bytes) ||
-            bytes <= 0
+            !form ||
+            !fileInput
         ) {
-            return '0 KB';
+            return;
         }
 
-        if (
-            bytes < 1024
-        ) {
-            return bytes + ' B';
-        }
+        /*
+        |--------------------------------------------------------------------------
+        | KONFIGURASI
+        |--------------------------------------------------------------------------
+        */
 
-        if (
-            bytes < 1024 * 1024
+        const MAX_FILE_SIZE =
+            10 *
+            1024 *
+            1024;
+
+        const IMAGE_TARGET_SIZE =
+            2.5 *
+            1024 *
+            1024;
+
+        const IMAGE_HARD_LIMIT =
+            9.5 *
+            1024 *
+            1024;
+
+        const IMAGE_MAX_DIMENSION =
+            2500;
+
+        const IMAGE_MIN_DIMENSION =
+            1000;
+
+        const JPEG_QUALITIES = [
+            0.90,
+            0.86,
+            0.82,
+            0.78,
+            0.74,
+            0.70,
+            0.66,
+            0.62,
+            0.58,
+            0.54,
+            0.50,
+            0.46,
+            0.42,
+            0.38
+        ];
+
+        const ALLOWED_EXTENSIONS = [
+            'pdf',
+            'jpg',
+            'jpeg',
+            'png'
+        ];
+
+        const IMAGE_EXTENSIONS = [
+            'jpg',
+            'jpeg',
+            'png'
+        ];
+
+        /*
+        |--------------------------------------------------------------------------
+        | STATE
+        |--------------------------------------------------------------------------
+        */
+
+        let submitting =
+            false;
+
+        let processingToken =
+            0;
+
+        let previewObjectUrl =
+            null;
+
+        let pdfCompressionReady =
+            false;
+
+        let pdfCompressionToken =
+            null;
+
+        let pdfOriginalHashToken =
+            null;
+
+        /*
+        |--------------------------------------------------------------------------
+        | UTIL
+        |--------------------------------------------------------------------------
+        */
+
+        function formatFileSize(
+            bytes
         ) {
+
+            if (
+                !Number.isFinite(bytes) ||
+                bytes <= 0
+            ) {
+                return '0 KB';
+            }
+
+            if (
+                bytes < 1024
+            ) {
+                return bytes + ' B';
+            }
+
+            if (
+                bytes < 1024 * 1024
+            ) {
+                return (
+                    (
+                        bytes /
+                        1024
+                    ).toFixed(1) +
+                    ' KB'
+                );
+            }
+
             return (
                 (
                     bytes /
+                    1024 /
                     1024
-                ).toFixed(1) +
-                ' KB'
+                ).toFixed(2) +
+                ' MB'
             );
         }
 
-        return (
-            (
-                bytes /
-                1024 /
-                1024
-            ).toFixed(2) +
-            ' MB'
-        );
-    }
-
-    function getExtension(
-        file
-    ) {
-
-        return String(
-            file?.name || ''
-        )
-            .split('.')
-            .pop()
-            .toLowerCase();
-    }
-
-    function isAllowedExtension(
-        extension
-    ) {
-
-        return ALLOWED_EXTENSIONS.includes(
-            extension
-        );
-    }
-
-    function isImageExtension(
-        extension
-    ) {
-
-        return IMAGE_EXTENSIONS.includes(
-            extension
-        );
-    }
-
-    function getReductionPercent(
-        original,
-        final
-    ) {
-
-        if (
-            !original ||
-            original <= 0
+        function getExtension(
+            file
         ) {
-            return 0;
-        }
 
-        return Math.max(
-            0,
-            Math.round(
-                (
-                    1 -
-                    (
-                        final /
-                        original
-                    )
-                ) *
-                100
+            return String(
+                file?.name || ''
             )
-        );
-    }
-
-    function showAlert(
-        icon,
-        title,
-        text
-    ) {
-
-        if (
-            typeof window.Swal !==
-            'undefined'
-        ) {
-
-            window.Swal.fire({
-                icon,
-                title,
-                text,
-                confirmButtonText:
-                    'Mengerti',
-                confirmButtonColor:
-                    '#059669'
-            });
-
-            return;
+                .split('.')
+                .pop()
+                .toLowerCase();
         }
 
-        window.alert(
-            text
-        );
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | PREVIEW
-    |--------------------------------------------------------------------------
-    */
-
-    function resetPreview() {
-
-        if (!preview) {
-            return;
-        }
-
-        preview.style.display =
-            'none';
-
-        previewTitle.textContent =
-            'Preview Dokumen';
-
-        previewBadge.textContent =
-            'Preview';
-
-        previewCaption.textContent =
-            'Preview akan tampil setelah memilih file.';
-
-        previewImage.style.display =
-            'none';
-
-        previewPdf.style.display =
-            'none';
-
-        previewImage.removeAttribute(
-            'src'
-        );
-
-        previewPdf.removeAttribute(
-            'src'
-        );
-
-        if (
-            previewObjectUrl
+        function isAllowedExtension(
+            extension
         ) {
 
-            URL.revokeObjectURL(
-                previewObjectUrl
+            return ALLOWED_EXTENSIONS.includes(
+                extension
             );
+        }
+
+        function isImageExtension(
+            extension
+        ) {
+
+            return IMAGE_EXTENSIONS.includes(
+                extension
+            );
+        }
+
+        function getReductionPercent(
+            original,
+            final
+        ) {
+
+            if (
+                !original ||
+                original <= 0
+            ) {
+                return 0;
+            }
+
+            return Math.max(
+                0,
+                Math.round(
+                    (
+                        1 -
+                        (
+                            final /
+                            original
+                        )
+                    ) *
+                    100
+                )
+            );
+        }
+
+        function escapeHtml(
+            value
+        ) {
+
+            return String(
+                value ?? ''
+            )
+                .replace(
+                    /&/g,
+                    '&amp;'
+                )
+                .replace(
+                    /</g,
+                    '&lt;'
+                )
+                .replace(
+                    />/g,
+                    '&gt;'
+                )
+                .replace(
+                    /"/g,
+                    '&quot;'
+                )
+                .replace(
+                    /'/g,
+                    '&#039;'
+                );
+        }
+
+        function showAlert(
+            icon,
+            title,
+            text
+        ) {
+
+            if (
+                typeof window.Swal !==
+                'undefined'
+            ) {
+
+                window.Swal.fire({
+                    icon,
+                    title,
+                    text:
+                        String(
+                            text ?? ''
+                        ),
+                    confirmButtonText:
+                        'Mengerti',
+                    confirmButtonColor:
+                        '#059669'
+                });
+
+                return;
+            }
+
+            window.alert(
+                String(
+                    text ?? ''
+                )
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | PDF COMPRESSION URL
+        |--------------------------------------------------------------------------
+        */
+
+        function getPdfCompressionUrl() {
+
+            return @json(
+                route(
+                    'surat-keluar.preview-compression'
+                )
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | PREVIEW URL
+        |--------------------------------------------------------------------------
+        */
+
+        function getPdfTemporaryPreviewUrl(
+            token
+        ) {
+
+            const baseUrl =
+                @json(
+                    url(
+                        'surat-keluar/pdf-preview'
+                    )
+                );
+
+            return (
+                baseUrl +
+                '/' +
+                encodeURIComponent(
+                    token
+                )
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | PREVIEW
+        |--------------------------------------------------------------------------
+        */
+
+        function revokePreviewUrl() {
+
+            if (
+                previewObjectUrl
+            ) {
+
+                URL.revokeObjectURL(
+                    previewObjectUrl
+                );
+
+                previewObjectUrl =
+                    null;
+            }
+        }
+
+        function resetPreview() {
+
+            if (!preview) {
+                return;
+            }
+
+            preview.classList.remove(
+                'show'
+            );
+
+            previewTitle.textContent =
+                'Preview Dokumen';
+
+            previewBadge.textContent =
+                'Preview';
+
+            previewCaption.textContent =
+                'Preview akan tampil setelah memilih file.';
+
+            previewImage.style.display =
+                'none';
+
+            previewPdf.style.display =
+                'none';
+
+            previewImage.removeAttribute(
+                'src'
+            );
+
+            previewPdf.removeAttribute(
+                'src'
+            );
+
+            previewSecondary.classList.add(
+                'ske-hidden'
+            );
+
+            previewSecondary.innerHTML =
+                '';
+
+            revokePreviewUrl();
+        }
+
+        function showImagePreview(
+            file,
+            title = 'Preview Gambar'
+        ) {
+
+            resetPreview();
+
+            preview.classList.add(
+                'show'
+            );
+
+            previewTitle.textContent =
+                title;
+
+            previewBadge.textContent =
+                'IMAGE';
+
+            previewImage.style.display =
+                'block';
 
             previewObjectUrl =
-                null;
-        }
-    }
+                URL.createObjectURL(
+                    file
+                );
 
-    function showImagePreview(
-        file
-    ) {
+            previewImage.src =
+                previewObjectUrl;
 
-        resetPreview();
-
-        preview.style.display =
-            'block';
-
-        previewTitle.textContent =
-            'Preview Gambar';
-
-        previewBadge.textContent =
-            'IMAGE';
-
-        previewImage.style.display =
-            'block';
-
-        previewObjectUrl =
-            URL.createObjectURL(
-                file
-            );
-
-        previewImage.src =
-            previewObjectUrl;
-
-        previewCaption.textContent =
-            'Preview file gambar yang akan digunakan saat update.';
-    }
-
-    function showPdfPreview(
-        file
-    ) {
-
-        resetPreview();
-
-        preview.style.display =
-            'block';
-
-        previewTitle.textContent =
-            'Preview PDF';
-
-        previewBadge.textContent =
-            'PDF';
-
-        previewPdf.style.display =
-            'block';
-
-        previewObjectUrl =
-            URL.createObjectURL(
-                file
-            );
-
-        previewPdf.src =
-            previewObjectUrl;
-
-        previewCaption.textContent =
-            'PDF tetap PDF. Preview ditampilkan langsung dari file yang dipilih.';
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | COMPRESSION UI
-    |--------------------------------------------------------------------------
-    */
-
-    function resetCompression() {
-
-        if (!compression) {
-            return;
+            previewCaption.textContent =
+                'Preview file gambar yang telah diproses browser.';
         }
 
-        compression.style.display =
-            'none';
-
-        compression.classList.remove(
-            'success',
-            'warning'
-        );
-
-        compressionTitle.textContent =
-            'Informasi File';
-
-        compressionMessage.innerHTML =
-            '';
-
-        originalFormat.textContent =
-            '-';
-
-        finalFormat.textContent =
-            '-';
-
-        originalSize.textContent =
-            '-';
-
-        finalSize.textContent =
-            '-';
-    }
-
-    function showCompression(
-        data,
-        type = ''
-    ) {
-
-        compression.style.display =
-            'block';
-
-        compression.classList.remove(
-            'success',
-            'warning'
-        );
-
-        if (
-            type
+        function showOriginalPdfPreview(
+            file
         ) {
 
-            compression.classList.add(
+            resetPreview();
+
+            preview.classList.add(
+                'show'
+            );
+
+            previewTitle.textContent =
+                'Preview PDF Asli';
+
+            previewBadge.textContent =
+                'PDF ASLI';
+
+            previewPdf.style.display =
+                'block';
+
+            previewObjectUrl =
+                URL.createObjectURL(
+                    file
+                );
+
+            previewPdf.src =
+                previewObjectUrl;
+
+            previewCaption.textContent =
+                'Ini adalah preview PDF asli yang dipilih. Server sedang menyiapkan hasil compression.';
+
+            previewSecondary.classList.remove(
+                'ske-hidden'
+            );
+
+            previewSecondary.innerHTML =
+                '<strong>Proses berikutnya:</strong> ' +
+                'PDF akan diproses Ghostscript di server dan preview hasil compression akan ditampilkan di sini.';
+        }
+
+        function showCompressedPdfPreview(
+            token,
+            profile
+        ) {
+
+            if (
+                !token
+            ) {
+                return;
+            }
+
+            resetPreview();
+
+            preview.classList.add(
+                'show'
+            );
+
+            previewTitle.textContent =
+                'Preview PDF Hasil Compression';
+
+            previewBadge.textContent =
+                'PDF COMPRESSED';
+
+            previewPdf.style.display =
+                'block';
+
+            const previewUrl =
+                getPdfTemporaryPreviewUrl(
+                    token
+                );
+
+            previewPdf.src =
+                previewUrl;
+
+            previewCaption.textContent =
+                'Ini adalah hasil PDF setelah diproses Ghostscript oleh server.';
+
+            if (
+                profile
+            ) {
+
+                previewSecondary.classList.remove(
+                    'ske-hidden'
+                );
+
+                previewSecondary.innerHTML =
+                    'Profile Ghostscript: <strong>' +
+                    escapeHtml(
+                        profile
+                    ) +
+                    '</strong>';
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | COMPRESSION UI
+        |--------------------------------------------------------------------------
+        */
+
+        function resetCompression() {
+
+            if (!compression) {
+                return;
+            }
+
+            compression.style.display =
+                'none';
+
+            compression.classList.remove(
+                'success',
+                'warning',
+                'error',
+                'processing'
+            );
+
+            compressionTitle.textContent =
+                'Informasi Compression';
+
+            compressionMessage.innerHTML =
+                '';
+
+            originalFormat.textContent =
+                '-';
+
+            finalFormat.textContent =
+                '-';
+
+            originalSize.textContent =
+                '-';
+
+            finalSize.textContent =
+                '-';
+        }
+
+        function showCompression(
+            data,
+            type = ''
+        ) {
+
+            compression.style.display =
+                'block';
+
+            compression.classList.remove(
+                'success',
+                'warning',
+                'error',
+                'processing'
+            );
+
+            if (
+                type
+            ) {
+
+                compression.classList.add(
+                    type
+                );
+            }
+
+            compressionTitle.textContent =
+                data.title ||
+                'Informasi Compression';
+
+            originalFormat.textContent =
+                data.originalFormat ||
+                '-';
+
+            finalFormat.textContent =
+                data.finalFormat ||
+                '-';
+
+            originalSize.textContent =
+                data.originalSize ||
+                '-';
+
+            finalSize.textContent =
+                data.finalSize ||
+                '-';
+
+            compressionMessage.innerHTML =
+                data.message ||
+                '';
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | STATUS
+        |--------------------------------------------------------------------------
+        */
+
+        function resetStatus() {
+
+            if (!statusBox) {
+                return;
+            }
+
+            statusBox.textContent =
+                '';
+
+            statusBox.classList.remove(
+                'show',
+                'blue',
+                'green',
+                'amber'
+            );
+        }
+
+        function showStatus(
+            message,
+            type = 'blue'
+        ) {
+
+            if (!statusBox) {
+                return;
+            }
+
+            statusBox.textContent =
+                message;
+
+            statusBox.classList.remove(
+                'show',
+                'blue',
+                'green',
+                'amber'
+            );
+
+            statusBox.classList.add(
+                'show',
                 type
             );
         }
 
-        compressionTitle.textContent =
-            data.title ||
-            'Informasi File';
+        /*
+        |--------------------------------------------------------------------------
+        | VISUAL FILE
+        |--------------------------------------------------------------------------
+        */
 
-        originalFormat.textContent =
-            data.originalFormat ||
-            '-';
+        function resetFileVisual() {
 
-        finalFormat.textContent =
-            data.finalFormat ||
-            '-';
-
-        originalSize.textContent =
-            data.originalSize ||
-            '-';
-
-        finalSize.textContent =
-            data.finalSize ||
-            '-';
-
-        compressionMessage.innerHTML =
-            data.message ||
-            '';
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | STATUS
-    |--------------------------------------------------------------------------
-    */
-
-    function resetStatus() {
-
-        if (!statusBox) {
-            return;
-        }
-
-        statusBox.textContent =
-            '';
-
-        statusBox.classList.remove(
-            'show',
-            'blue',
-            'green',
-            'amber'
-        );
-    }
-
-    function showStatus(
-        message,
-        type = 'blue'
-    ) {
-
-        if (!statusBox) {
-            return;
-        }
-
-        statusBox.textContent =
-            message;
-
-        statusBox.classList.remove(
-            'show',
-            'blue',
-            'green',
-            'amber'
-        );
-
-        statusBox.classList.add(
-            'show',
-            type
-        );
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | VISUAL FILE
-    |--------------------------------------------------------------------------
-    */
-
-    function resetFileVisual() {
-
-        uploadBox?.classList.remove(
-            'has-file'
-        );
-
-        uploadTitle.textContent =
-            'Klik untuk memilih file baru';
-
-        uploadSubtitle.textContent =
-            'PDF, JPG, JPEG, PNG';
-
-        fileInfo.classList.remove(
-            'show'
-        );
-
-        fileInfoTitle.textContent =
-            'File siap digunakan';
-
-        fileInfoName.textContent =
-            '';
-
-        fileInfoSize.textContent =
-            '';
-
-        resetCompression();
-        resetStatus();
-        resetPreview();
-    }
-
-    function showFileVisual(
-        file
-    ) {
-
-        uploadBox.classList.add(
-            'has-file'
-        );
-
-        uploadTitle.textContent =
-            'File siap digunakan';
-
-        fileInfo.classList.add(
-            'show'
-        );
-
-        fileInfoName.textContent =
-            file.name;
-
-        fileInfoSize.textContent =
-            formatFileSize(
-                file.size
-            );
-    }
-
-    function clearFileSelection() {
-
-        processingToken++;
-
-        fileInput.value =
-            '';
-
-        resetFileVisual();
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | LOAD IMAGE
-    |--------------------------------------------------------------------------
-    */
-
-    function loadImage(
-        file
-    ) {
-
-        return new Promise(
-            function (
-                resolve,
-                reject
-            ) {
-
-                const objectUrl =
-                    URL.createObjectURL(
-                        file
-                    );
-
-                const image =
-                    new Image();
-
-                image.onload =
-                    function () {
-
-                        URL.revokeObjectURL(
-                            objectUrl
-                        );
-
-                        resolve(
-                            image
-                        );
-                    };
-
-                image.onerror =
-                    function () {
-
-                        URL.revokeObjectURL(
-                            objectUrl
-                        );
-
-                        reject(
-                            new Error(
-                                'Gambar tidak dapat dibaca oleh browser.'
-                            )
-                        );
-                    };
-
-                image.src =
-                    objectUrl;
-            }
-        );
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | DIMENSION
-    |--------------------------------------------------------------------------
-    */
-
-    function calculateDimensions(
-        width,
-        height,
-        maxDimension
-    ) {
-
-        if (
-            width <= maxDimension &&
-            height <= maxDimension
-        ) {
-
-            return {
-                width,
-                height
-            };
-        }
-
-        const scale =
-            Math.min(
-                maxDimension /
-                    width,
-
-                maxDimension /
-                    height
+            uploadBox?.classList.remove(
+                'has-file'
             );
 
-        return {
-            width:
-                Math.max(
-                    1,
-                    Math.round(
-                        width *
-                        scale
-                    )
-                ),
+            uploadTitle.textContent =
+                'Klik untuk memilih file baru';
 
-            height:
-                Math.max(
-                    1,
-                    Math.round(
-                        height *
-                        scale
-                    )
-                )
-        };
-    }
+            uploadSubtitle.textContent =
+                'PDF, JPG, JPEG, PNG';
 
-    function buildDimensionList(
-        width,
-        height
-    ) {
-
-        const maxDimensions = [
-            IMAGE_MAX_DIMENSION,
-            2200,
-            2000,
-            1800,
-            1600,
-            1400,
-            1200,
-            IMAGE_MIN_DIMENSION
-        ];
-
-        const result =
-            [];
-
-        maxDimensions.forEach(
-            function (
-                maxDimension
-            ) {
-
-                const dimensions =
-                    calculateDimensions(
-                        width,
-                        height,
-                        maxDimension
-                    );
-
-                if (
-                    dimensions.width <
-                        IMAGE_MIN_DIMENSION &&
-                    dimensions.height <
-                        IMAGE_MIN_DIMENSION
-                ) {
-                    return;
-                }
-
-                const duplicate =
-                    result.some(
-                        function (
-                            item
-                        ) {
-
-                            return (
-                                item.width ===
-                                    dimensions.width &&
-                                item.height ===
-                                    dimensions.height
-                            );
-                        }
-                    );
-
-                if (!duplicate) {
-                    result.push(
-                        dimensions
-                    );
-                }
-            }
-        );
-
-        return result;
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | CANVAS TO FILE
-    |--------------------------------------------------------------------------
-    */
-
-    function canvasToFile(
-        image,
-        width,
-        height,
-        quality,
-        originalName
-    ) {
-
-        return new Promise(
-            function (
-                resolve,
-                reject
-            ) {
-
-                const canvas =
-                    document.createElement(
-                        'canvas'
-                    );
-
-                canvas.width =
-                    width;
-
-                canvas.height =
-                    height;
-
-                const context =
-                    canvas.getContext(
-                        '2d',
-                        {
-                            alpha: false
-                        }
-                    );
-
-                if (!context) {
-
-                    reject(
-                        new Error(
-                            'Browser tidak mendukung pemrosesan gambar.'
-                        )
-                    );
-
-                    return;
-                }
-
-                context.fillStyle =
-                    '#ffffff';
-
-                context.fillRect(
-                    0,
-                    0,
-                    width,
-                    height
-                );
-
-                context.imageSmoothingEnabled =
-                    true;
-
-                context.imageSmoothingQuality =
-                    'high';
-
-                context.drawImage(
-                    image,
-                    0,
-                    0,
-                    width,
-                    height
-                );
-
-                canvas.toBlob(
-                    function (
-                        blob
-                    ) {
-
-                        if (!blob) {
-
-                            reject(
-                                new Error(
-                                    'Browser gagal membuat JPG.'
-                                )
-                            );
-
-                            return;
-                        }
-
-                        const baseName =
-                            String(
-                                originalName ||
-                                'surat_keluar'
-                            )
-                                .replace(
-                                    /\.[^/.]+$/,
-                                    ''
-                                )
-                                .replace(
-                                    /[^a-zA-Z0-9_-]/g,
-                                    '_'
-                                );
-
-                        const fileName =
-                            (
-                                baseName ||
-                                'surat_keluar'
-                            ) +
-                            '_compressed.jpg';
-
-                        resolve(
-                            new File(
-                                [blob],
-                                fileName,
-                                {
-                                    type:
-                                        'image/jpeg',
-
-                                    lastModified:
-                                        Date.now()
-                                }
-                            )
-                        );
-                    },
-                    'image/jpeg',
-                    quality
-                );
-            }
-        );
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | COMPRESS IMAGE
-    |--------------------------------------------------------------------------
-    */
-
-    async function compressImageFile(
-        file
-    ) {
-
-        const image =
-            await loadImage(
-                file
+            fileInfo.classList.remove(
+                'show'
             );
 
-        const width =
-            image.naturalWidth ||
-            image.width;
+            fileInfoTitle.textContent =
+                'File siap digunakan';
 
-        const height =
-            image.naturalHeight ||
-            image.height;
+            fileInfoName.textContent =
+                '';
 
-        if (
-            width <= 0 ||
-            height <= 0
-        ) {
-
-            throw new Error(
-                'Dimensi gambar tidak valid.'
-            );
-        }
-
-        const dimensionList =
-            buildDimensionList(
-                width,
-                height
-            );
-
-        let bestFile =
-            null;
-
-        for (
-            const dimensions
-            of dimensionList
-        ) {
-
-            for (
-                const quality
-                of JPEG_QUALITIES
-            ) {
-
-                const result =
-                    await canvasToFile(
-                        image,
-                        dimensions.width,
-                        dimensions.height,
-                        quality,
-                        file.name
-                    );
-
-                if (
-                    !bestFile ||
-                    result.size <
-                        bestFile.size
-                ) {
-
-                    bestFile =
-                        result;
-                }
-
-                if (
-                    result.size <=
-                    IMAGE_TARGET_SIZE
-                ) {
-
-                    return result;
-                }
-            }
-        }
-
-        if (
-            bestFile &&
-            bestFile.size <=
-                IMAGE_HARD_LIMIT
-        ) {
-
-            return bestFile;
-        }
-
-        throw new Error(
-            'Hasil kompresi gambar masih terlalu besar.'
-        );
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | FILE CHANGE
-    |--------------------------------------------------------------------------
-    */
-
-    fileInput.addEventListener(
-        'change',
-        async function () {
-
-            const file =
-                fileInput.files?.[0];
-
-            if (!file) {
-                return;
-            }
-
-            const token =
-                ++processingToken;
+            fileInfoSize.textContent =
+                '';
 
             resetCompression();
             resetStatus();
             resetPreview();
 
-            const extension =
-                getExtension(
+            pdfCompressionReady =
+                false;
+
+            pdfCompressionToken =
+                null;
+
+            pdfOriginalHashToken =
+                null;
+        }
+
+        function showFileVisual(
+            file,
+            title = 'File siap digunakan'
+        ) {
+
+            uploadBox.classList.add(
+                'has-file'
+            );
+
+            uploadTitle.textContent =
+                'File siap digunakan';
+
+            fileInfo.classList.add(
+                'show'
+            );
+
+            fileInfoName.textContent =
+                file.name;
+
+            fileInfoSize.textContent =
+                formatFileSize(
+                    file.size
+                );
+
+            fileInfoTitle.textContent =
+                title;
+        }
+
+        function clearFileSelection() {
+
+            processingToken++;
+
+            fileInput.value =
+                '';
+
+            resetFileVisual();
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | LOAD IMAGE
+        |--------------------------------------------------------------------------
+        */
+
+        function loadImage(
+            file
+        ) {
+
+            return new Promise(
+                function (
+                    resolve,
+                    reject
+                ) {
+
+                    const objectUrl =
+                        URL.createObjectURL(
+                            file
+                        );
+
+                    const image =
+                        new Image();
+
+                    image.onload =
+                        function () {
+
+                            URL.revokeObjectURL(
+                                objectUrl
+                            );
+
+                            resolve(
+                                image
+                            );
+                        };
+
+                    image.onerror =
+                        function () {
+
+                            URL.revokeObjectURL(
+                                objectUrl
+                            );
+
+                            reject(
+                                new Error(
+                                    'Gambar tidak dapat dibaca oleh browser.'
+                                )
+                            );
+                        };
+
+                    image.src =
+                        objectUrl;
+                }
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | IMAGE DIMENSION
+        |--------------------------------------------------------------------------
+        */
+
+        function calculateDimensions(
+            width,
+            height,
+            maxDimension
+        ) {
+
+            if (
+                width <= maxDimension &&
+                height <= maxDimension
+            ) {
+
+                return {
+                    width,
+                    height
+                };
+            }
+
+            const scale =
+                Math.min(
+                    maxDimension /
+                        width,
+
+                    maxDimension /
+                        height
+                );
+
+            return {
+                width:
+                    Math.max(
+                        1,
+                        Math.round(
+                            width *
+                            scale
+                        )
+                    ),
+
+                height:
+                    Math.max(
+                        1,
+                        Math.round(
+                            height *
+                            scale
+                        )
+                    )
+            };
+        }
+
+        function buildDimensionList(
+            width,
+            height
+        ) {
+
+            const maxDimensions = [
+                IMAGE_MAX_DIMENSION,
+                2200,
+                2000,
+                1800,
+                1600,
+                1400,
+                1200,
+                IMAGE_MIN_DIMENSION
+            ];
+
+            const result =
+                [];
+
+            maxDimensions.forEach(
+                function (
+                    maxDimension
+                ) {
+
+                    const dimensions =
+                        calculateDimensions(
+                            width,
+                            height,
+                            maxDimension
+                        );
+
+                    if (
+                        dimensions.width <
+                            IMAGE_MIN_DIMENSION &&
+                        dimensions.height <
+                            IMAGE_MIN_DIMENSION
+                    ) {
+
+                        return;
+                    }
+
+                    const duplicate =
+                        result.some(
+                            function (
+                                item
+                            ) {
+
+                                return (
+                                    item.width ===
+                                        dimensions.width &&
+                                    item.height ===
+                                        dimensions.height
+                                );
+                            }
+                        );
+
+                    if (
+                        !duplicate
+                    ) {
+
+                        result.push(
+                            dimensions
+                        );
+                    }
+                }
+            );
+
+            return result;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | CANVAS TO FILE
+        |--------------------------------------------------------------------------
+        */
+
+        function canvasToFile(
+            image,
+            width,
+            height,
+            quality,
+            originalName
+        ) {
+
+            return new Promise(
+                function (
+                    resolve,
+                    reject
+                ) {
+
+                    const canvas =
+                        document.createElement(
+                            'canvas'
+                        );
+
+                    canvas.width =
+                        width;
+
+                    canvas.height =
+                        height;
+
+                    const context =
+                        canvas.getContext(
+                            '2d',
+                            {
+                                alpha:
+                                    false
+                            }
+                        );
+
+                    if (
+                        !context
+                    ) {
+
+                        reject(
+                            new Error(
+                                'Browser tidak mendukung pemrosesan gambar.'
+                            )
+                        );
+
+                        return;
+                    }
+
+                    context.fillStyle =
+                        '#ffffff';
+
+                    context.fillRect(
+                        0,
+                        0,
+                        width,
+                        height
+                    );
+
+                    context.imageSmoothingEnabled =
+                        true;
+
+                    context.imageSmoothingQuality =
+                        'high';
+
+                    context.drawImage(
+                        image,
+                        0,
+                        0,
+                        width,
+                        height
+                    );
+
+                    canvas.toBlob(
+                        function (
+                            blob
+                        ) {
+
+                            if (
+                                !blob
+                            ) {
+
+                                reject(
+                                    new Error(
+                                        'Browser gagal membuat JPG.'
+                                    )
+                                );
+
+                                return;
+                            }
+
+                            const baseName =
+                                String(
+                                    originalName ||
+                                    'surat_keluar'
+                                )
+                                    .replace(
+                                        /\.[^/.]+$/,
+                                        ''
+                                    )
+                                    .replace(
+                                        /[^a-zA-Z0-9_-]/g,
+                                        '_'
+                                    );
+
+                            const fileName =
+                                (
+                                    baseName ||
+                                    'surat_keluar'
+                                ) +
+                                '_compressed.jpg';
+
+                            resolve(
+                                new File(
+                                    [blob],
+                                    fileName,
+                                    {
+                                        type:
+                                            'image/jpeg',
+
+                                        lastModified:
+                                            Date.now()
+                                    }
+                                )
+                            );
+
+                        },
+                        'image/jpeg',
+                        quality
+                    );
+
+                }
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | COMPRESS IMAGE
+        |--------------------------------------------------------------------------
+        */
+
+        async function compressImageFile(
+            file
+        ) {
+
+            const image =
+                await loadImage(
                     file
                 );
 
-            /*
-            |------------------------------------------------------------------
-            | FORMAT
-            |------------------------------------------------------------------
-            */
+            const width =
+                image.naturalWidth ||
+                image.width;
+
+            const height =
+                image.naturalHeight ||
+                image.height;
 
             if (
-                !isAllowedExtension(
-                    extension
-                )
+                width <= 0 ||
+                height <= 0
             ) {
 
-                clearFileSelection();
-
-                showAlert(
-                    'warning',
-                    'Format tidak didukung',
-                    'Gunakan PDF, JPG, JPEG, atau PNG.'
+                throw new Error(
+                    'Dimensi gambar tidak valid.'
                 );
-
-                return;
             }
 
-            /*
-            |------------------------------------------------------------------
-            | FILE KOSONG
-            |------------------------------------------------------------------
-            */
+            const dimensions =
+                buildDimensionList(
+                    width,
+                    height
+                );
+
+            let bestFile =
+                null;
+
+            for (
+                const dimension
+                of dimensions
+            ) {
+
+                for (
+                    const quality
+                    of JPEG_QUALITIES
+                ) {
+
+                    const result =
+                        await canvasToFile(
+                            image,
+                            dimension.width,
+                            dimension.height,
+                            quality,
+                            file.name
+                        );
+
+                    if (
+                        !bestFile ||
+                        result.size <
+                            bestFile.size
+                    ) {
+
+                        bestFile =
+                            result;
+                    }
+
+                    if (
+                        result.size <=
+                        IMAGE_TARGET_SIZE
+                    ) {
+
+                        return result;
+                    }
+                }
+            }
 
             if (
-                file.size <= 0
+                bestFile &&
+                bestFile.size <=
+                    IMAGE_HARD_LIMIT
             ) {
 
-                clearFileSelection();
-
-                showAlert(
-                    'warning',
-                    'File tidak valid',
-                    'File yang dipilih kosong.'
-                );
-
-                return;
+                return bestFile;
             }
 
-            /*
-            |------------------------------------------------------------------
-            | MAKSIMAL 10 MB
-            |------------------------------------------------------------------
-            */
+            throw new Error(
+                'Hasil kompresi gambar masih terlalu besar.'
+            );
+        }
 
-            if (
-                file.size >
-                MAX_FILE_SIZE
+        /*
+        |--------------------------------------------------------------------------
+        | FILE SIGNATURE
+        |--------------------------------------------------------------------------
+        */
+
+        async function detectPdfSignature(
+            file
+        ) {
+
+            try {
+
+                const buffer =
+                    await file
+                        .slice(
+                            0,
+                            5
+                        )
+                        .arrayBuffer();
+
+                const bytes =
+                    new Uint8Array(
+                        buffer
+                    );
+
+                const header =
+                    new TextDecoder()
+                        .decode(
+                            bytes
+                        );
+
+                return header ===
+                    '%PDF-';
+
+            } catch (
+                error
             ) {
 
-                clearFileSelection();
-
-                showAlert(
-                    'warning',
-                    'File terlalu besar',
-                    'Ukuran file asli maksimal 10 MB.'
-                );
-
-                return;
+                return false;
             }
+        }
 
-            showFileVisual(
+        /*
+        |--------------------------------------------------------------------------
+        | COMPRESS PDF SERVER
+        |--------------------------------------------------------------------------
+        */
+
+        async function compressPdfOnServer(
+            file,
+            token
+        ) {
+
+            const formData =
+                new FormData();
+
+            formData.append(
+                'lampiran_file',
                 file
             );
 
-            /*
-            |------------------------------------------------------------------
-            | PDF
-            |------------------------------------------------------------------
-            */
+            formData.append(
+                '_token',
+                @json(csrf_token())
+            );
 
-            if (
-                extension === 'pdf'
-            ) {
+            showCompression(
+                {
+                    title:
+                        '⏳ Memproses PDF di server',
 
-                uploadSubtitle.textContent =
-                    'PDF • tetap PDF • preview langsung';
+                    originalFormat:
+                        'PDF',
 
-                showPdfPreview(
-                    file
-                );
+                    finalFormat:
+                        'PDF',
+
+                    originalSize:
+                        formatFileSize(
+                            file.size
+                        ),
+
+                    finalSize:
+                        'Memproses...',
+
+                    message:
+                        '<strong>Ghostscript sedang memproses PDF.</strong><br>' +
+                        'Server sedang membuat beberapa profile compression ' +
+                        'dan memilih hasil PDF dengan ukuran paling kecil.'
+                },
+                'processing'
+            );
+
+            showStatus(
+                'Sedang mengompres PDF di server. Jangan tutup halaman.',
+                'blue'
+            );
+
+            try {
+
+                const response =
+                    await fetch(
+                        getPdfCompressionUrl(),
+                        {
+                            method:
+                                'POST',
+
+                            body:
+                                formData,
+
+                            headers: {
+                                'Accept':
+                                    'application/json',
+
+                                'X-Requested-With':
+                                    'XMLHttpRequest'
+                            },
+
+                            credentials:
+                                'same-origin'
+                        }
+                    );
+
+                let data =
+                    null;
+
+                try {
+
+                    data =
+                        await response.json();
+
+                } catch (
+                    error
+                ) {
+
+                    throw new Error(
+                        'Server mengembalikan response yang tidak valid.'
+                    );
+                }
+
+                if (
+                    token !==
+                    processingToken
+                ) {
+                    return;
+                }
+
+                if (
+                    !response.ok ||
+                    !data?.success
+                ) {
+
+                    throw new Error(
+                        data?.message ||
+                        'Compression PDF gagal diproses server.'
+                    );
+                }
+
+                pdfCompressionReady =
+                    true;
+
+                pdfCompressionToken =
+                    data.token ||
+                    null;
+
+                /*
+                |--------------------------------------------------------------------------
+                | PDF TIDAK LEBIH KECIL
+                |--------------------------------------------------------------------------
+                */
+
+                if (
+                    data.compressed === false
+                ) {
+
+                    pdfOriginalHashToken =
+                        data.token ||
+                        null;
+
+                    showCompression(
+                        {
+                            title:
+                                '✓ PDF sudah optimal',
+
+                            originalFormat:
+                                'PDF',
+
+                            finalFormat:
+                                'PDF',
+
+                            originalSize:
+                                data.original_size_text ||
+                                formatFileSize(
+                                    file.size
+                                ),
+
+                            finalSize:
+                                data.compressed_size_text ||
+                                formatFileSize(
+                                    file.size
+                                ),
+
+                            message:
+                                'Hasil compression server tidak lebih kecil daripada file asli. ' +
+                                '<strong>File asli akan dipertahankan</strong> saat update.',
+                        },
+                        'warning'
+                    );
+
+                    showStatus(
+                        'PDF tidak menjadi lebih kecil. File asli akan digunakan.',
+                        'amber'
+                    );
+
+                    showOriginalPdfPreview(
+                        file
+                    );
+
+                    return data;
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | PDF BERHASIL
+                |--------------------------------------------------------------------------
+                */
 
                 showCompression(
                     {
                         title:
-                            'PDF siap digunakan',
+                            '✓ PDF berhasil dikompresi',
+
+                        originalFormat:
+                            'PDF',
+
+                        finalFormat:
+                            'PDF',
+
+                        originalSize:
+                            data.original_size_text ||
+                            formatFileSize(
+                                file.size
+                            ),
+
+                        finalSize:
+                            data.compressed_size_text ||
+                            '-',
+
+                        message:
+                            'Penghematan sekitar <strong>' +
+                            (
+                                Number(
+                                    data.saving_percent ||
+                                    0
+                                )
+                            ).toFixed(2) +
+                            '%</strong>.' +
+                            (
+                                data.profile
+                                    ? '<br>Profile: <strong>' +
+                                      escapeHtml(
+                                          data.profile
+                                      ) +
+                                      '</strong>'
+                                    : ''
+                            ),
+                    },
+                    'success'
+                );
+
+                showStatus(
+                    'PDF hasil compression siap digunakan. Preview hasil compression ditampilkan di bawah.',
+                    'green'
+                );
+
+                showCompressedPdfPreview(
+                    data.token,
+                    data.profile
+                );
+
+                return data;
+
+            } catch (
+                error
+            ) {
+
+                if (
+                    token !==
+                    processingToken
+                ) {
+                    return null;
+                }
+
+                pdfCompressionReady =
+                    false;
+
+                pdfCompressionToken =
+                    null;
+
+                showCompression(
+                    {
+                        title:
+                            '✕ Compression PDF gagal',
 
                         originalFormat:
                             'PDF',
@@ -3333,33 +3769,243 @@ document.addEventListener('DOMContentLoaded', function () {
                             ),
 
                         finalSize:
-                            'Diproses server',
+                            '-',
 
                         message:
-                            'PDF tidak dikonversi menjadi gambar. File tetap PDF. Saat update dikirim, server dapat melakukan proses compression PDF sesuai mekanisme aplikasi.'
+                            escapeHtml(
+                                error?.message ||
+                                'Compression PDF gagal.'
+                            )
                     },
-                    'warning'
+                    'error'
                 );
 
                 showStatus(
-                    'PDF siap dikirim. Preview dapat dilihat langsung di halaman ini.',
-                    'blue'
+                    'PDF belum siap disimpan karena proses compression server gagal.',
+                    'amber'
                 );
 
-                return;
+                showAlert(
+                    'error',
+                    'Compression PDF gagal',
+                    error?.message ||
+                    'Server gagal memproses PDF.'
+                );
+
+                return null;
             }
+        }
 
-            /*
-            |------------------------------------------------------------------
-            | IMAGE
-            |------------------------------------------------------------------
-            */
+        /*
+        |--------------------------------------------------------------------------
+        | FILE CHANGE
+        |--------------------------------------------------------------------------
+        */
 
-            if (
-                isImageExtension(
-                    extension
-                )
-            ) {
+        fileInput.addEventListener(
+            'change',
+            async function () {
+
+                const file =
+                    fileInput.files?.[0];
+
+                if (
+                    !file
+                ) {
+
+                    resetFileVisual();
+
+                    return;
+                }
+
+                const token =
+                    ++processingToken;
+
+                pdfCompressionReady =
+                    false;
+
+                pdfCompressionToken =
+                    null;
+
+                pdfOriginalHashToken =
+                    null;
+
+                resetCompression();
+                resetStatus();
+                resetPreview();
+
+                /*
+                |--------------------------------------------------------------------------
+                | FORMAT
+                |--------------------------------------------------------------------------
+                */
+
+                const extension =
+                    getExtension(
+                        file
+                    );
+
+                if (
+                    !isAllowedExtension(
+                        extension
+                    )
+                ) {
+
+                    clearFileSelection();
+
+                    showAlert(
+                        'warning',
+                        'Format tidak didukung',
+                        'Gunakan PDF, JPG, JPEG, atau PNG.'
+                    );
+
+                    return;
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | UKURAN
+                |--------------------------------------------------------------------------
+                */
+
+                if (
+                    file.size <= 0
+                ) {
+
+                    clearFileSelection();
+
+                    showAlert(
+                        'warning',
+                        'File tidak valid',
+                        'File yang dipilih kosong.'
+                    );
+
+                    return;
+                }
+
+                if (
+                    file.size >
+                    MAX_FILE_SIZE
+                ) {
+
+                    clearFileSelection();
+
+                    showAlert(
+                        'warning',
+                        'File terlalu besar',
+                        'Ukuran file asli maksimal 10 MB.'
+                    );
+
+                    return;
+                }
+
+                showFileVisual(
+                    file
+                );
+
+                /*
+                |--------------------------------------------------------------------------
+                | PDF
+                |--------------------------------------------------------------------------
+                */
+
+                if (
+                    extension === 'pdf'
+                ) {
+
+                    uploadSubtitle.textContent =
+                        'PDF • akan dikompresi oleh server';
+
+                    showOriginalPdfPreview(
+                        file
+                    );
+
+                    showCompression(
+                        {
+                            title:
+                                '⏳ Menyiapkan PDF',
+
+                            originalFormat:
+                                'PDF',
+
+                            finalFormat:
+                                'PDF',
+
+                            originalSize:
+                                formatFileSize(
+                                    file.size
+                                ),
+
+                            finalSize:
+                                'Menunggu server...',
+
+                            message:
+                                'PDF asli sudah terdeteksi. Sistem sedang mengirim PDF ke server untuk proses Ghostscript.'
+                        },
+                        'processing'
+                    );
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | SIGNATURE CLIENT
+                    |--------------------------------------------------------------------------
+                    */
+
+                    const validPdf =
+                        await detectPdfSignature(
+                            file
+                        );
+
+                    if (
+                        token !==
+                        processingToken
+                    ) {
+                        return;
+                    }
+
+                    if (
+                        !validPdf
+                    ) {
+
+                        clearFileSelection();
+
+                        showAlert(
+                            'error',
+                            'PDF tidak valid',
+                            'File berekstensi PDF tetapi isi file tidak terdeteksi sebagai PDF.'
+                        );
+
+                        return;
+                    }
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | SERVER COMPRESSION
+                    |--------------------------------------------------------------------------
+                    */
+
+                    await compressPdfOnServer(
+                        file,
+                        token
+                    );
+
+                    return;
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | IMAGE
+                |--------------------------------------------------------------------------
+                */
+
+                if (
+                    !isImageExtension(
+                        extension
+                    )
+                ) {
+
+                    return;
+                }
 
                 uploadSubtitle.textContent =
                     'Gambar • dikonversi menjadi JPG';
@@ -3371,7 +4017,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 showCompression(
                     {
                         title:
-                            'Memproses gambar...',
+                            '⏳ Memproses gambar',
 
                         originalFormat:
                             extension.toUpperCase(),
@@ -3389,7 +4035,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
                         message:
                             'Browser sedang melakukan resize dan kompresi gambar.'
-                    }
+                    },
+                    'processing'
                 );
 
                 showStatus(
@@ -3416,15 +4063,9 @@ document.addEventListener('DOMContentLoaded', function () {
                         MAX_FILE_SIZE
                     ) {
 
-                        clearFileSelection();
-
-                        showAlert(
-                            'error',
-                            'Kompresi gagal',
+                        throw new Error(
                             'Ukuran hasil gambar masih melebihi 10 MB.'
                         );
-
-                        return;
                     }
 
                     const transfer =
@@ -3444,11 +4085,9 @@ document.addEventListener('DOMContentLoaded', function () {
                         );
 
                     showFileVisual(
-                        compressed
+                        compressed,
+                        'Hasil kompresi siap'
                     );
-
-                    fileInfoTitle.textContent =
-                        'Hasil kompresi siap';
 
                     fileInfoName.textContent =
                         compressed.name;
@@ -3462,13 +4101,14 @@ document.addEventListener('DOMContentLoaded', function () {
                         'JPG • hasil kompresi browser';
 
                     showImagePreview(
-                        compressed
+                        compressed,
+                        'Preview JPG Hasil Compression'
                     );
 
                     showCompression(
                         {
                             title:
-                                '✓ Kompresi berhasil',
+                                '✓ Kompresi gambar berhasil',
 
                             originalFormat:
                                 extension.toUpperCase(),
@@ -3489,7 +4129,8 @@ document.addEventListener('DOMContentLoaded', function () {
                             message:
                                 'Penghematan sekitar <strong>' +
                                 reduction +
-                                '%</strong>. File final yang akan dikirim adalah JPG.'
+                                '%</strong>.' +
+                                '<br>File final yang akan dikirim adalah JPG.'
                         },
                         'success'
                     );
@@ -3524,203 +4165,256 @@ document.addEventListener('DOMContentLoaded', function () {
                         'Browser gagal mengompres gambar.'
                     );
                 }
+
             }
+        );
 
-        }
-    );
+        /*
+        |--------------------------------------------------------------------------
+        | SUBMIT
+        |--------------------------------------------------------------------------
+        */
 
-    /*
-    |--------------------------------------------------------------------------
-    | SUBMIT
-    |--------------------------------------------------------------------------
-    */
-
-    form.addEventListener(
-        'submit',
-        function (
-            event
-        ) {
-
-            if (
-                submitting
+        form.addEventListener(
+            'submit',
+            function (
+                event
             ) {
 
-                event.preventDefault();
+                if (
+                    submitting
+                ) {
 
-                return;
-            }
+                    event.preventDefault();
 
-            /*
-            |------------------------------------------------------------------
-            | VALIDASI TANGGAL
-            |------------------------------------------------------------------
-            */
+                    return;
+                }
 
-            const suratDate =
-                tanggalSurat?.value ||
-                '';
+                /*
+                |--------------------------------------------------------------------------
+                | TANGGAL
+                |--------------------------------------------------------------------------
+                */
 
-            const keluarDate =
-                tanggalKeluar?.value ||
-                '';
+                const suratDate =
+                    tanggalSurat?.value ||
+                    '';
 
-            if (
-                suratDate &&
-                keluarDate &&
-                keluarDate <
-                    suratDate
-            ) {
+                const keluarDate =
+                    tanggalKeluar?.value ||
+                    '';
 
-                event.preventDefault();
+                if (
+                    suratDate &&
+                    keluarDate &&
+                    keluarDate <
+                        suratDate
+                ) {
 
-                showAlert(
-                    'warning',
-                    'Tanggal tidak valid',
-                    'Tanggal keluar tidak boleh lebih awal dari tanggal surat.'
+                    event.preventDefault();
+
+                    showAlert(
+                        'warning',
+                        'Tanggal tidak valid',
+                        'Tanggal keluar tidak boleh lebih awal dari tanggal surat.'
+                    );
+
+                    return;
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | FILE
+                |--------------------------------------------------------------------------
+                */
+
+                const file =
+                    fileInput.files?.[0] ||
+                    null;
+
+                if (
+                    file
+                ) {
+
+                    const extension =
+                        getExtension(
+                            file
+                        );
+
+                    if (
+                        !isAllowedExtension(
+                            extension
+                        )
+                    ) {
+
+                        event.preventDefault();
+
+                        showAlert(
+                            'warning',
+                            'Format file tidak valid',
+                            'Gunakan PDF, JPG, JPEG, atau PNG.'
+                        );
+
+                        return;
+                    }
+
+                    if (
+                        file.size <= 0
+                    ) {
+
+                        event.preventDefault();
+
+                        showAlert(
+                            'warning',
+                            'File tidak valid',
+                            'File yang dipilih kosong.'
+                        );
+
+                        return;
+                    }
+
+                    if (
+                        file.size >
+                        MAX_FILE_SIZE
+                    ) {
+
+                        event.preventDefault();
+
+                        showAlert(
+                            'warning',
+                            'File terlalu besar',
+                            'Ukuran file maksimal 10 MB.'
+                        );
+
+                        return;
+                    }
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | PDF HARUS SUDAH DI-COMPRESS / DIPROSES
+                    |--------------------------------------------------------------------------
+                    */
+
+                    if (
+                        extension ===
+                        'pdf'
+                    ) {
+
+                        if (
+                            !pdfCompressionReady
+                        ) {
+
+                            event.preventDefault();
+
+                            showAlert(
+                                'warning',
+                                'PDF belum siap',
+                                'Tunggu sampai proses compression PDF selesai.'
+                            );
+
+                            showStatus(
+                                'PDF masih diproses oleh server.',
+                                'blue'
+                            );
+
+                            return;
+                        }
+
+                        showStatus(
+                            pdfOriginalHashToken
+                                ? 'PDF tidak lebih kecil. File asli akan digunakan saat update.'
+                                : 'PDF hasil compression siap dikirim ke server.',
+                            pdfOriginalHashToken
+                                ? 'amber'
+                                : 'green'
+                        );
+                    }
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | IMAGE
+                    |--------------------------------------------------------------------------
+                    */
+
+                    if (
+                        isImageExtension(
+                            extension
+                        )
+                    ) {
+
+                        showStatus(
+                            'File gambar hasil compression siap dikirim. Lampiran lama akan diganti setelah update berhasil.',
+                            'amber'
+                        );
+                    }
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | LOCK SUBMIT
+                |--------------------------------------------------------------------------
+                */
+
+                submitting =
+                    true;
+
+                submitButton.disabled =
+                    true;
+
+                submitIcon.classList.add(
+                    'ske-hidden'
                 );
 
-                return;
-            }
+                submitLoading.classList.remove(
+                    'ske-hidden'
+                );
 
-            /*
-            |------------------------------------------------------------------
-            | VALIDASI FILE BARU
-            |------------------------------------------------------------------
-            */
-
-            const file =
-                fileInput.files?.[0] ||
-                null;
-
-            if (
-                file
-            ) {
-
-                const extension =
-                    getExtension(
-                        file
-                    );
+                submitProgress.classList.add(
+                    'show'
+                );
 
                 if (
-                    !isAllowedExtension(
-                        extension
-                    )
+                    file &&
+                    getExtension(file) ===
+                        'pdf'
                 ) {
 
-                    event.preventDefault();
+                    submitText.textContent =
+                        'Memperbarui dengan PDF...';
 
-                    showAlert(
-                        'warning',
-                        'Format file tidak valid',
-                        'Gunakan PDF, JPG, JPEG, atau PNG.'
-                    );
-
-                    return;
-                }
-
-                if (
-                    file.size <= 0
+                } else if (
+                    file
                 ) {
 
-                    event.preventDefault();
-
-                    showAlert(
-                        'warning',
-                        'File tidak valid',
-                        'File yang dipilih kosong.'
-                    );
-
-                    return;
-                }
-
-                if (
-                    file.size >
-                    MAX_FILE_SIZE
-                ) {
-
-                    event.preventDefault();
-
-                    showAlert(
-                        'warning',
-                        'File terlalu besar',
-                        'Ukuran file maksimal 10 MB.'
-                    );
-
-                    return;
-                }
-
-                if (
-                    extension === 'pdf'
-                ) {
-
-                    showStatus(
-                        'PDF sedang dikirim ke server. Lampiran lama akan diganti setelah update berhasil.',
-                        'amber'
-                    );
+                    submitText.textContent =
+                        'Menyimpan lampiran...';
 
                 } else {
 
-                    showStatus(
-                        'File gambar hasil kompresi sedang dikirim. Lampiran lama akan diganti setelah update berhasil.',
-                        'amber'
-                    );
+                    submitText.textContent =
+                        'Memperbarui...';
                 }
+
             }
+        );
 
-            /*
-            |------------------------------------------------------------------
-            | LOCK SUBMIT
-            |------------------------------------------------------------------
-            */
+        /*
+        |--------------------------------------------------------------------------
+        | BEFORE UNLOAD
+        |--------------------------------------------------------------------------
+        */
 
-            submitting =
-                true;
+        window.addEventListener(
+            'beforeunload',
+            function () {
 
-            submitButton.disabled =
-                true;
+                revokePreviewUrl();
 
-            submitIcon.style.display =
-                'none';
-
-            submitLoading.style.display =
-                'block';
-
-            submitText.textContent =
-                file &&
-                getExtension(file) ===
-                    'pdf'
-                    ? 'Memproses PDF...'
-                    : file
-                        ? 'Menyimpan lampiran...'
-                        : 'Memperbarui...';
-        }
-    );
-
-    /*
-    |--------------------------------------------------------------------------
-    | CLEANUP
-    |--------------------------------------------------------------------------
-    */
-
-    window.addEventListener(
-        'beforeunload',
-        function () {
-
-            if (
-                previewObjectUrl
-            ) {
-
-                URL.revokeObjectURL(
-                    previewObjectUrl
-                );
-
-                previewObjectUrl =
-                    null;
             }
-        }
-    );
+        );
 
-});
+    }
+);
 </script>
 
 @endpush
