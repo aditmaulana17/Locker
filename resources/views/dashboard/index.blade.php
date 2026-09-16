@@ -893,7 +893,9 @@
             </div>
 
 
-            {{-- DESKTOP TABLE --}}
+            {{-- =================================================================
+                DESKTOP TABLE
+            ================================================================== --}}
 
             <div class="hidden overflow-x-auto md:block">
 
@@ -903,26 +905,32 @@
 
                         <tr class="border-b border-slate-100 bg-slate-50/70">
 
+                            {{-- NOMOR SURAT --}}
                             <th class="table-heading">
-                                Nomor Agenda
+                                Nomor Surat
                             </th>
 
+                            {{-- PERIHAL --}}
                             <th class="table-heading">
                                 Perihal
                             </th>
 
+                            {{-- PENGIRIM --}}
                             <th class="table-heading">
                                 Pengirim
                             </th>
 
+                            {{-- KATEGORI --}}
                             <th class="table-heading">
                                 Kategori
                             </th>
 
+                            {{-- STATUS --}}
                             <th class="table-heading">
                                 Status
                             </th>
 
+                            {{-- AKSI --}}
                             <th class="table-heading text-right">
                                 Aksi
                             </th>
@@ -964,27 +972,62 @@
                                             'bg-slate-400',
                                     ];
 
+                                /*
+                                 * Nomor surat.
+                                 *
+                                 * Tidak lagi menggunakan nomor_agenda.
+                                 */
+                                $nomorSurat =
+                                    trim(
+                                        (string) (
+                                            $sm->nomor_surat ??
+                                            ''
+                                        )
+                                    );
+
+                                if (
+                                    $nomorSurat === ''
+                                ) {
+                                    $nomorSurat = '-';
+                                }
+
                             @endphp
 
 
                             <tr class="group transition hover:bg-slate-50/70">
 
+                                {{-- =================================================
+                                    NOMOR SURAT
+                                ================================================== --}}
+
                                 <td class="table-cell">
 
-                                    <span class="inline-flex items-center rounded-lg bg-blue-50 px-2.5 py-1.5 font-mono text-[10px] font-bold text-blue-700">
+                                    <span
+                                        class="inline-flex max-w-[240px] items-center rounded-lg bg-blue-50 px-2.5 py-1.5 font-mono text-[10px] font-bold text-blue-700"
+                                        title="{{ $nomorSurat }}"
+                                    >
 
-                                        {{ $sm->nomor_agenda ?? '-' }}
+                                        <span class="truncate">
+                                            {{ $nomorSurat }}
+                                        </span>
 
                                     </span>
 
                                 </td>
 
 
+                                {{-- =================================================
+                                    PERIHAL
+                                ================================================== --}}
+
                                 <td class="table-cell">
 
                                     <div class="max-w-[260px]">
 
-                                        <p class="truncate text-xs font-bold text-slate-800">
+                                        <p
+                                            class="truncate text-xs font-bold text-slate-800"
+                                            title="{{ $sm->perihal ?? '-' }}"
+                                        >
 
                                             {{ $sm->perihal ?? '-' }}
 
@@ -995,18 +1038,33 @@
                                 </td>
 
 
+                                {{-- =================================================
+                                    PENGIRIM
+                                ================================================== --}}
+
                                 <td class="table-cell">
 
                                     <div class="flex items-center gap-2">
 
                                         <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-[10px] font-bold uppercase text-slate-500">
 
-                                            {{ strtoupper(substr($sm->pengirim ?? 'P', 0, 1)) }}
+                                            {{
+                                                strtoupper(
+                                                    substr(
+                                                        $sm->pengirim ?? 'P',
+                                                        0,
+                                                        1
+                                                    )
+                                                )
+                                            }}
 
                                         </span>
 
 
-                                        <span class="max-w-[150px] truncate text-xs text-slate-600">
+                                        <span
+                                            class="max-w-[150px] truncate text-xs text-slate-600"
+                                            title="{{ $sm->pengirim ?? '-' }}"
+                                        >
 
                                             {{ $sm->pengirim ?? '-' }}
 
@@ -1016,6 +1074,10 @@
 
                                 </td>
 
+
+                                {{-- =================================================
+                                    KATEGORI
+                                ================================================== --}}
 
                                 <td class="table-cell">
 
@@ -1027,6 +1089,10 @@
 
                                 </td>
 
+
+                                {{-- =================================================
+                                    STATUS
+                                ================================================== --}}
 
                                 <td class="table-cell">
 
@@ -1040,6 +1106,10 @@
 
                                 </td>
 
+
+                                {{-- =================================================
+                                    AKSI
+                                ================================================== --}}
 
                                 <td class="table-cell text-right">
 
@@ -1131,7 +1201,9 @@
             </div>
 
 
-            {{-- MOBILE LIST --}}
+            {{-- =================================================================
+                MOBILE LIST
+            ================================================================== --}}
 
             <div class="divide-y divide-slate-100 md:hidden">
 
@@ -1164,6 +1236,23 @@
                                 'dot' =>
                                     'bg-slate-400',
                             ];
+
+                        /*
+                         * Nomor surat untuk tampilan mobile.
+                         */
+                        $nomorSurat =
+                            trim(
+                                (string) (
+                                    $sm->nomor_surat ??
+                                    ''
+                                )
+                            );
+
+                        if (
+                            $nomorSurat === ''
+                        ) {
+                            $nomorSurat = '-';
+                        }
 
                     @endphp
 
@@ -1208,16 +1297,24 @@
 
                                     <div class="min-w-0">
 
-                                        <p class="truncate text-xs font-bold text-slate-800">
+                                        <p
+                                            class="truncate text-xs font-bold text-slate-800"
+                                            title="{{ $sm->perihal ?? '-' }}"
+                                        >
 
                                             {{ $sm->perihal ?? '-' }}
 
                                         </p>
 
 
-                                        <p class="mt-1 font-mono text-[10px] font-semibold text-blue-600">
+                                        {{-- NOMOR SURAT --}}
 
-                                            {{ $sm->nomor_agenda ?? '-' }}
+                                        <p
+                                            class="mt-1 truncate font-mono text-[10px] font-semibold text-blue-600"
+                                            title="{{ $nomorSurat }}"
+                                        >
+
+                                            {{ $nomorSurat }}
 
                                         </p>
 
@@ -1235,7 +1332,10 @@
 
                                 <div class="mt-2 flex items-center gap-2 text-[10px] text-slate-400">
 
-                                    <span class="truncate">
+                                    <span
+                                        class="truncate"
+                                        title="{{ $sm->pengirim ?? '-' }}"
+                                    >
                                         {{ $sm->pengirim ?? '-' }}
                                     </span>
 
@@ -1243,7 +1343,10 @@
                                         •
                                     </span>
 
-                                    <span class="truncate">
+                                    <span
+                                        class="truncate"
+                                        title="{{ $sm->kategori->nama_kategori ?? '-' }}"
+                                    >
                                         {{ $sm->kategori->nama_kategori ?? '-' }}
                                     </span>
 
@@ -1535,17 +1638,10 @@
 
 
                             /*
-                             * ==================================================
                              * TANGGAL SURAT
-                             * ==================================================
                              *
-                             * Nomor Agenda tidak lagi ditampilkan
-                             * pada kartu tugas Staff.
-                             *
-                             * Data diambil dari:
-                             * $d->suratMasuk->tanggal_surat
+                             * Nomor agenda tidak digunakan.
                              */
-
                             $tanggalSurat =
                                 '-';
 
@@ -1680,9 +1776,7 @@
                                 </div>
 
 
-                                {{-- ==================================================
-                                     TANGGAL SURAT
-                                =================================================== --}}
+                                {{-- TANGGAL SURAT --}}
 
                                 <div class="flex items-center gap-2">
 
@@ -1707,7 +1801,6 @@
                                                 stroke-linecap="round"
                                                 d="M8 3v4M16 3v4M3 10h18"
                                             />
-
                                         </svg>
 
                                     </span>
@@ -2492,6 +2585,12 @@
                 }
 
 
+                /*
+                |--------------------------------------------------------------------------
+                | DATA
+                |--------------------------------------------------------------------------
+                */
+
                 const chartLabels =
                     @json(
                         $chartLabels ?? []
@@ -2507,6 +2606,12 @@
                         $chartDataKeluar ?? []
                     );
 
+
+                /*
+                |--------------------------------------------------------------------------
+                | GRADIENT MASUK
+                |--------------------------------------------------------------------------
+                */
 
                 const gradientMasuk =
                     ctx.createLinearGradient(
@@ -2527,6 +2632,12 @@
                 );
 
 
+                /*
+                |--------------------------------------------------------------------------
+                | GRADIENT KELUAR
+                |--------------------------------------------------------------------------
+                */
+
                 const gradientKeluar =
                     ctx.createLinearGradient(
                         0,
@@ -2546,6 +2657,12 @@
                 );
 
 
+                /*
+                |--------------------------------------------------------------------------
+                | HAPUS CHART LAMA
+                |--------------------------------------------------------------------------
+                */
+
                 if (
                     window.suratChartInstance
                 ) {
@@ -2554,6 +2671,12 @@
 
                 }
 
+
+                /*
+                |--------------------------------------------------------------------------
+                | CHART
+                |--------------------------------------------------------------------------
+                */
 
                 window.suratChartInstance =
                     new Chart(
