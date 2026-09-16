@@ -18,82 +18,235 @@ class UserController extends Controller
      * - Pencarian nama
      * - Pencarian email
      * - Pencarian jabatan
-     * - Filter role
+     * - Filter beberapa role sekaligus
+     * - Alias staf -> staff
      * - Pagination
      * - Query string
      */
-    public function index(Request $request)
-    {
-        $search = trim(
-            (string) $request->input('search', '')
-        );
+    public function index(
+        Request $request
+    ) {
+        /*
+         * =====================================================
+         * SEARCH
+         * =====================================================
+         */
 
-        $role = strtolower(
+        $search =
             trim(
-                (string) $request->input('role', '')
-            )
-        );
+                (string) $request->input(
+                    'search',
+                    ''
+                )
+            );
 
         /*
-         * Aplikasi menerima "staf" sebagai alias,
-         * tetapi database menggunakan "staff".
+         * =====================================================
+         * ROLE FILTER
+         * =====================================================
+         *
+         * Form sekarang menggunakan:
+         *
+         * role[]=admin
+         * role[]=pimpinan
+         * role[]=staff
+         *
+         * Tetapi controller juga tetap menerima:
+         *
+         * role=admin
+         *
+         * untuk menjaga kompatibilitas.
          */
-        if ($role === 'staf') {
-            $role = 'staff';
+
+        $rawRoles =
+            $request->input(
+                'role',
+                []
+            );
+
+        if (
+            is_scalar($rawRoles) &&
+            trim(
+                (string) $rawRoles
+            ) !== ''
+        ) {
+            $rawRoles = [
+                $rawRoles,
+            ];
         }
 
-        $users = User::query()
-            ->when(
-                $search !== '',
-                function ($query) use ($search) {
-                    $keyword = "%{$search}%";
+        if (
+            !is_array($rawRoles)
+        ) {
+            $rawRoles = [];
+        }
 
-                    $query->where(
-                        function ($q) use ($keyword) {
-                            $q->where(
-                                'name',
-                                'like',
-                                $keyword
-                            )
-                            ->orWhere(
-                                'email',
-                                'like',
-                                $keyword
-                            )
-                            ->orWhere(
-                                'jabatan',
-                                'like',
-                                $keyword
-                            );
-                        }
-                    );
-                }
+        /*
+         * Flatten + normalize + validasi role.
+         */
+
+        $roles =
+            collect(
+                $rawRoles
             )
-            ->when(
-                in_array(
-                    $role,
-                    [
-                        'admin',
-                        'pimpinan',
-                        'staff',
-                    ],
-                    true
-                ),
-                function ($query) use ($role) {
-                    $query->where(
-                        'role',
-                        $role
-                    );
-                }
-            )
-            ->orderByDesc('created_at')
-            ->orderByDesc('id')
-            ->paginate(10)
-            ->withQueryString();
+                ->flatten()
+                ->filter(
+                    fn ($role) =>
+                        is_scalar($role)
+                )
+                ->map(
+                    fn ($role) =>
+                        strtolower(
+                            trim(
+                                (string) $role
+                            )
+                        )
+                )
+                ->map(
+                    fn ($role) =>
+                        $role === 'staf'
+                            ? 'staff'
+                            : $role
+                )
+                ->filter(
+                    fn ($role) =>
+                        in_array(
+                            $role,
+                            [
+                                'admin',
+                                'pimpinan',
+                                'staff',
+                            ],
+                            true
+                        )
+                )
+                ->unique()
+                ->values();
+
+        /*
+         * =====================================================
+         * QUERY
+         * =====================================================
+         */
+
+        $users =
+            User::query()
+
+                /*
+                 * SEARCH
+                 */
+
+                ->when(
+                    $search !== '',
+                    function (
+                        $query
+                    ) use (
+                        $search
+                    ) {
+
+                        $keyword =
+                            '%' .
+                            $search .
+                            '%';
+
+                        $query->where(
+                            function (
+                                $q
+                            ) use (
+                                $keyword
+                            ) {
+
+                                $q
+                                    ->where(
+                                        'name',
+                                        'like',
+                                        $keyword
+                                    )
+                                    ->orWhere(
+                                        'email',
+                                        'like',
+                                        $keyword
+                                    )
+                                    ->orWhere(
+                                        'jabatan',
+                                        'like',
+                                        $keyword
+                                    );
+                            }
+                        );
+                    }
+                )
+
+                /*
+                 * ROLE
+                 *
+                 * Jika kosong:
+                 * semua role ditampilkan.
+                 *
+                 * Jika satu:
+                 * whereIn tetap aman.
+                 *
+                 * Jika beberapa:
+                 * ditampilkan semuanya.
+                 */
+
+                ->when(
+                    $roles->isNotEmpty(),
+                    function (
+                        $query
+                    ) use (
+                        $roles
+                    ) {
+
+                        $query->whereIn(
+                            'role',
+                            $roles->all()
+                        );
+                    }
+                )
+
+                /*
+                 * URUTAN
+                 */
+
+                ->orderBy(
+                    'created_at',
+                    'desc'
+                )
+                ->orderBy(
+                    'id',
+                    'desc'
+                )
+
+                /*
+                 * PAGINATION
+                 */
+
+                ->paginate(
+                    10
+                )
+
+                /*
+                 * PERTAHANKAN FILTER
+                 */
+
+                ->withQueryString();
 
         return view(
             'users.index',
-            compact('users')
+            [
+                'users' =>
+                    $users,
+
+                /*
+                 * Dikirim ke Blade agar
+                 * checkbox tetap tercentang
+                 * setelah submit/filter.
+                 */
+
+                'selectedRoles' =>
+                    $roles->all(),
+            ]
         );
     }
 
@@ -110,120 +263,147 @@ class UserController extends Controller
     /**
      * Menyimpan pengguna baru.
      */
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'name' => [
-                'required',
-                'string',
-                'max:255',
-            ],
+    public function store(
+        Request $request
+    ) {
+        $validated =
+            $request->validate(
+                [
+                    'name' => [
+                        'required',
+                        'string',
+                        'max:255',
+                    ],
 
-            'email' => [
-                'required',
-                'string',
-                'email',
-                'max:255',
-                'unique:users,email',
-            ],
+                    'email' => [
+                        'required',
+                        'string',
+                        'email',
+                        'max:255',
+                        'unique:users,email',
+                    ],
 
-            'password' => [
-                'required',
-                'string',
-                'min:6',
-                'confirmed',
-            ],
+                    'password' => [
+                        'required',
+                        'string',
+                        'min:6',
+                        'confirmed',
+                    ],
 
-            /*
-             * Database:
-             * admin
-             * pimpinan
-             * staff
-             *
-             * "staf" diterima sebagai alias
-             * lalu diubah menjadi "staff".
-             */
-            'role' => [
-                'required',
-                'string',
-                'in:admin,pimpinan,staf,staff',
-            ],
+                    /*
+                     * Database:
+                     * admin
+                     * pimpinan
+                     * staff
+                     *
+                     * Form boleh mengirim staf.
+                     */
 
-            'jabatan' => [
-                'nullable',
-                'string',
-                'max:255',
-            ],
+                    'role' => [
+                        'required',
+                        'string',
+                        'in:admin,pimpinan,staf,staff',
+                    ],
 
-            /*
-             * Status aplikasi:
-             * aktif / nonaktif
-             */
-            'status' => [
-                'nullable',
-                'string',
-                'in:aktif,nonaktif',
-            ],
-        ]);
+                    'jabatan' => [
+                        'nullable',
+                        'string',
+                        'max:255',
+                    ],
+
+                    /*
+                     * Status:
+                     * aktif / nonaktif
+                     */
+
+                    'status' => [
+                        'nullable',
+                        'string',
+                        'in:aktif,nonaktif',
+                    ],
+                ]
+            );
 
         /*
-         * Normalisasi role sebelum disimpan.
-         *
-         * staf -> staff
+         * =====================================================
+         * NORMALISASI ROLE
+         * =====================================================
          */
+
         $validated['role'] =
             $this->normalizeRoleForDatabase(
                 $validated['role']
             );
 
         /*
-         * Hash password.
+         * =====================================================
+         * PASSWORD
+         * =====================================================
          */
+
         $validated['password'] =
             Hash::make(
                 $validated['password']
             );
 
         /*
-         * Default status.
+         * =====================================================
+         * DEFAULT STATUS
+         * =====================================================
          */
+
         $validated['status'] =
             $validated['status']
-            ?? 'aktif';
+            ??
+            'aktif';
 
         /*
-         * Jika aplikasi Anda juga menggunakan
-         * is_active pada tabel users, sinkronkan
-         * nilainya berdasarkan status.
+         * =====================================================
+         * IS ACTIVE
+         * =====================================================
          *
-         * Bagian ini hanya dijalankan jika
-         * field is_active memang dikirim dari form.
+         * Hanya disinkronkan jika field
+         * is_active ada pada request.
          */
+
         if (
-            $request->has('is_active')
+            $request->has(
+                'is_active'
+            )
         ) {
             $validated['is_active'] =
-                $validated['status'] === 'aktif';
+                $validated['status'] ===
+                'aktif';
         }
 
         /*
-         * Buat user baru.
+         * =====================================================
+         * CREATE
+         * =====================================================
          */
-        $user = User::create(
-            $validated
-        );
+
+        $user =
+            User::create(
+                $validated
+            );
 
         /*
-         * Activity log.
+         * =====================================================
+         * ACTIVITY LOG
+         * =====================================================
          */
+
         $this->logActivity(
             'create',
             'user',
-            "Menambah pengguna {$user->name}"
+            'Menambah pengguna ' .
+            $user->name
         );
 
         return redirect()
-            ->route('users.index')
+            ->route(
+                'users.index'
+            )
             ->with(
                 'success',
                 'Pengguna berhasil ditambahkan!'
@@ -238,7 +418,9 @@ class UserController extends Controller
     ) {
         return view(
             'users.show',
-            compact('user')
+            compact(
+                'user'
+            )
         );
     }
 
@@ -250,7 +432,9 @@ class UserController extends Controller
     ) {
         return view(
             'users.edit',
-            compact('user')
+            compact(
+                'user'
+            )
         );
     }
 
@@ -261,73 +445,74 @@ class UserController extends Controller
         Request $request,
         User $user
     ) {
-        $validated = $request->validate([
-            'name' => [
-                'required',
-                'string',
-                'max:255',
-            ],
+        $validated =
+            $request->validate(
+                [
+                    'name' => [
+                        'required',
+                        'string',
+                        'max:255',
+                    ],
 
-            /*
-             * Email user yang sedang diedit
-             * tidak dianggap sebagai duplikat.
-             */
-            'email' => [
-                'required',
-                'string',
-                'email',
-                'max:255',
-                Rule::unique(
-                    'users',
-                    'email'
-                )->ignore($user->id),
-            ],
+                    /*
+                     * Email user sendiri tidak
+                     * dianggap duplikat.
+                     */
 
-            /*
-             * Password boleh kosong saat edit.
-             * Jika kosong, password lama dipertahankan.
-             */
-            'password' => [
-                'nullable',
-                'string',
-                'min:6',
-                'confirmed',
-            ],
+                    'email' => [
+                        'required',
+                        'string',
+                        'email',
+                        'max:255',
+                        Rule::unique(
+                            'users',
+                            'email'
+                        )->ignore(
+                            $user->id
+                        ),
+                    ],
 
-            /*
-             * Role database.
-             */
-            'role' => [
-                'required',
-                'string',
-                'in:admin,pimpinan,staf,staff',
-            ],
+                    /*
+                     * Password boleh kosong.
+                     */
 
-            'jabatan' => [
-                'nullable',
-                'string',
-                'max:255',
-            ],
+                    'password' => [
+                        'nullable',
+                        'string',
+                        'min:6',
+                        'confirmed',
+                    ],
 
-            'status' => [
-                'required',
-                'string',
-                'in:aktif,nonaktif',
-            ],
-        ]);
+                    /*
+                     * Role database.
+                     */
+
+                    'role' => [
+                        'required',
+                        'string',
+                        'in:admin,pimpinan,staf,staff',
+                    ],
+
+                    'jabatan' => [
+                        'nullable',
+                        'string',
+                        'max:255',
+                    ],
+
+                    'status' => [
+                        'required',
+                        'string',
+                        'in:aktif,nonaktif',
+                    ],
+                ]
+            );
 
         /*
          * =====================================================
          * ROLE
          * =====================================================
-         *
-         * Form boleh mengirim:
-         * staf
-         * staff
-         *
-         * Database selalu menerima:
-         * staff
          */
+
         $validated['role'] =
             $this->normalizeRoleForDatabase(
                 $validated['role']
@@ -337,20 +522,24 @@ class UserController extends Controller
          * =====================================================
          * PASSWORD
          * =====================================================
-         *
-         * Password hanya diubah jika diisi.
          */
+
         if (
-            isset($validated['password']) &&
+            isset(
+                $validated['password']
+            ) &&
             trim(
                 (string) $validated['password']
             ) !== ''
         ) {
+
             $validated['password'] =
                 Hash::make(
                     $validated['password']
                 );
+
         } else {
+
             unset(
                 $validated['password']
             );
@@ -358,17 +547,18 @@ class UserController extends Controller
 
         /*
          * =====================================================
-         * STATUS
+         * IS ACTIVE
          * =====================================================
-         *
-         * Jika form Anda juga memiliki
-         * is_active, sinkronkan nilainya.
          */
+
         if (
-            $request->has('is_active')
+            $request->has(
+                'is_active'
+            )
         ) {
             $validated['is_active'] =
-                $validated['status'] === 'aktif';
+                $validated['status'] ===
+                'aktif';
         }
 
         /*
@@ -376,21 +566,28 @@ class UserController extends Controller
          * UPDATE
          * =====================================================
          */
+
         $user->update(
             $validated
         );
 
         /*
-         * Activity log.
+         * =====================================================
+         * ACTIVITY LOG
+         * =====================================================
          */
+
         $this->logActivity(
             'update',
             'user',
-            "Mengubah data pengguna {$user->name}"
+            'Mengubah data pengguna ' .
+            $user->name
         );
 
         return redirect()
-            ->route('users.index')
+            ->route(
+                'users.index'
+            )
             ->with(
                 'success',
                 'Data pengguna berhasil diperbarui!'
@@ -404,17 +601,19 @@ class UserController extends Controller
         User $user
     ) {
         /*
-         * User tidak boleh menghapus
-         * akun sendiri.
+         * Tidak boleh menghapus akun sendiri.
          */
+
         if (
             (int) Auth::id() ===
             (int) $user->id
         ) {
-            return back()->with(
-                'error',
-                'Anda tidak dapat menghapus akun Anda sendiri.'
-            );
+
+            return back()
+                ->with(
+                    'error',
+                    'Anda tidak dapat menghapus akun Anda sendiri.'
+                );
         }
 
         $nama =
@@ -425,14 +624,18 @@ class UserController extends Controller
         /*
          * Activity log.
          */
+
         $this->logActivity(
             'delete',
             'user',
-            "Menghapus pengguna {$nama}"
+            'Menghapus pengguna ' .
+            $nama
         );
 
         return redirect()
-            ->route('users.index')
+            ->route(
+                'users.index'
+            )
             ->with(
                 'success',
                 'Pengguna berhasil dihapus!'
@@ -440,7 +643,7 @@ class UserController extends Controller
     }
 
     /**
-     * Normalisasi role sebelum disimpan ke database.
+     * Normalisasi role sebelum disimpan.
      *
      * Database menggunakan:
      * admin
@@ -450,11 +653,18 @@ class UserController extends Controller
     private function normalizeRoleForDatabase(
         string $role
     ): string {
-        $role = strtolower(
-            trim($role)
-        );
 
-        if ($role === 'staf') {
+        $role =
+            strtolower(
+                trim(
+                    $role
+                )
+            );
+
+        if (
+            $role ===
+            'staf'
+        ) {
             return 'staff';
         }
 
@@ -472,19 +682,27 @@ class UserController extends Controller
         string $module,
         string $description
     ): void {
-        if (!class_exists(
-            ActivityLog::class
-        )) {
+
+        if (
+            !class_exists(
+                ActivityLog::class
+            )
+        ) {
             return;
         }
 
         try {
+
             ActivityLog::catat(
                 $action,
                 $module,
                 $description
             );
-        } catch (\Throwable) {
+
+        } catch (
+            \Throwable
+        ) {
+
             /*
              * Abaikan error activity log.
              */
