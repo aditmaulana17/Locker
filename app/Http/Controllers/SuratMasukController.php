@@ -168,11 +168,13 @@ class SuratMasukController extends Controller
 
         $suratMasuks =
             $query
-                ->orderByDesc(
-                    'tanggal_terima'
+                ->orderBy(
+                    'tanggal_terima',
+                    'asc'
                 )
-                ->orderByDesc(
-                    'id'
+                ->orderBy(
+                    'id',
+                    'asc'
                 )
                 ->paginate(10)
                 ->withQueryString();

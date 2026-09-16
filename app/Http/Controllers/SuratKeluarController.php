@@ -549,14 +549,17 @@ class SuratKeluarController extends Controller
                 ->orderByRaw(
                     'tanggal_keluar IS NULL ASC'
                 )
-                ->orderByDesc(
-                    'tanggal_keluar'
+                ->orderBy(
+                    'tanggal_keluar',
+                    'asc'
                 )
-                ->orderByDesc(
-                    'created_at'
+                ->orderBy(
+                    'created_at',
+                    'asc'
                 )
-                ->orderByDesc(
-                    'id'
+                ->orderBy(
+                    'id',
+                    'asc'
                 )
                 ->paginate(10)
                 ->withQueryString();
@@ -773,13 +776,6 @@ class SuratKeluarController extends Controller
                     $compressedSize >=
                     $originalSize
                 ) {
-                    /*
-                    |------------------------------------------------------------------
-                    | Hasil Ghostscript tidak lebih kecil.
-                    | Tetap buat file preview dari PDF asli.
-                    |------------------------------------------------------------------
-                    */
-
                     if (
                         is_file(
                             $temporaryCompressedPath
@@ -819,12 +815,6 @@ class SuratKeluarController extends Controller
                         $token .
                         '.pdf';
 
-                    /*
-                    |------------------------------------------------------------------
-                    | SALIN FILE ASLI UNTUK PREVIEW
-                    |------------------------------------------------------------------
-                    */
-
                     if (
                         !copy(
                             $inputPath,
@@ -835,12 +825,6 @@ class SuratKeluarController extends Controller
                             'Gagal membuat preview PDF asli.'
                         );
                     }
-
-                    /*
-                    |------------------------------------------------------------------
-                    | SESSION
-                    |------------------------------------------------------------------
-                    */
 
                     session()->put(
                         'surat_keluar_pdf_preview',
@@ -970,12 +954,6 @@ class SuratKeluarController extends Controller
                     $token .
                     '.pdf';
 
-                /*
-                |--------------------------------------------------------------------------
-                | PINDAHKAN HASIL COMPRESSION KE PREVIEW
-                |--------------------------------------------------------------------------
-                */
-
                 if (
                     !rename(
                         $temporaryCompressedPath,
@@ -996,12 +974,6 @@ class SuratKeluarController extends Controller
                         'Gagal menyimpan preview PDF hasil compression.'
                     );
                 }
-
-                /*
-                |--------------------------------------------------------------------------
-                | SESSION
-                |--------------------------------------------------------------------------
-                */
 
                 session()->put(
                     'surat_keluar_pdf_preview',
@@ -1034,12 +1006,6 @@ class SuratKeluarController extends Controller
                             now()->timestamp,
                     ]
                 );
-
-                /*
-                |--------------------------------------------------------------------------
-                | SAVING
-                |--------------------------------------------------------------------------
-                */
 
                 $savingPercent =
                     $this->calculateSavingPercent(
@@ -1227,11 +1193,6 @@ class SuratKeluarController extends Controller
     |--------------------------------------------------------------------------
     | COMPRESSION PREVIEW
     |--------------------------------------------------------------------------
-    |
-    | Endpoint ini dipanggil oleh iframe pada halaman create.blade.php.
-    |
-    | Token harus cocok dengan session user yang melakukan compression.
-    |
     */
 
     public function compressionPreview(
@@ -1239,7 +1200,10 @@ class SuratKeluarController extends Controller
     ) {
         $this->authorizeManageSurat();
 
-        $token = trim($token);
+        $token =
+            trim(
+                $token
+            );
 
         if ($token === '') {
             abort(
@@ -2566,13 +2530,6 @@ class SuratKeluarController extends Controller
                     $preview['use_compressed']
                 )
             ) {
-                /*
-                |------------------------------------------------------------------
-                | Preview hanya dipakai untuk menampilkan file.
-                | File asli dari request tetap digunakan untuk penyimpanan.
-                |------------------------------------------------------------------
-                */
-
                 if (
                     $previewPath !== '' &&
                     is_file($previewPath)
@@ -2954,6 +2911,7 @@ class SuratKeluarController extends Controller
                 ' -dDownsampleMonoImages=true' .
                 ' -dMonoImageResolution=' .
                 (int) $profile['mono_dpi'] .
+                ' -dMonoImageDownsampleType=/Subsample' .
                 ' -dNOPAUSE' .
                 ' -dBATCH' .
                 ' -dQUIET' .
