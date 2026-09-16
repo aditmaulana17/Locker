@@ -1687,11 +1687,6 @@ textarea.sme-control {
                             <div class="sme-attachment-body">
 
                                 <div class="sme-info">
-
-                                    <span>
-                                        ℹ
-                                    </span>
-
                                     <p>
                                         <strong>PDF:</strong>
                                         dikompresi langsung di browser dan
