@@ -885,6 +885,33 @@ textarea.sme-control {
     background: #fff;
 }
 
+.sme-image-preview {
+    overflow: hidden;
+    margin-top: 8px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #f8fafc;
+}
+
+.sme-image-preview-header {
+    padding: 7px 9px;
+    border-bottom: 1px solid #cbd5e1;
+    background: #f8fafc;
+    color: #475569;
+    font-size: 7px;
+    font-weight: 850;
+}
+
+.sme-image-preview-frame {
+    display: block;
+    width: 100%;
+    max-height: 430px;
+    min-height: 180px;
+    object-fit: contain;
+    border: 0;
+    background: #fff;
+}
+
 .sme-camera-box {
     overflow: hidden;
     border: 1.5px solid #334155;
@@ -1876,6 +1903,11 @@ textarea.sme-control {
                                         class="sme-pdf-preview sme-hidden"
                                     ></div>
 
+                                    <div
+                                        id="sme-image-preview"
+                                        class="sme-image-preview sme-hidden"
+                                    ></div>
+
                                 </div>
 
                                 {{-- =================================================
@@ -2202,13 +2234,11 @@ textarea.sme-control {
 import initGhostscript
     from 'https://cdn.jsdelivr.net/npm/@jspawn/ghostscript-wasm@0.0.2/gs.mjs';
 
-
 document.addEventListener(
     'DOMContentLoaded',
     function () {
 
         'use strict';
-
 
         /* ================================================================
            ELEMENT
@@ -2287,6 +2317,11 @@ document.addEventListener(
         const pdfPreview =
             document.getElementById(
                 'sme-pdf-preview'
+            );
+
+        const imagePreview =
+            document.getElementById(
+                'sme-image-preview'
             );
 
         const cameraVideo =
@@ -2369,7 +2404,6 @@ document.addEventListener(
                 'sme-submit-text'
             );
 
-
         if (
             !form ||
             !fileInput ||
@@ -2377,7 +2411,6 @@ document.addEventListener(
         ) {
             return;
         }
-
 
         /* ================================================================
            CONFIG
@@ -2437,7 +2470,6 @@ document.addEventListener(
             1024 *
             1024;
 
-
         /* ================================================================
            STATE
         ================================================================ */
@@ -2456,7 +2488,6 @@ document.addEventListener(
 
         let pdfPreviewUrl =
             null;
-
 
         /* ================================================================
            UTILITY
@@ -2497,7 +2528,6 @@ document.addEventListener(
             );
         }
 
-
         function reductionPercent(
             original,
             finalSize
@@ -2525,7 +2555,6 @@ document.addEventListener(
             );
         }
 
-
         function getExtension(
             file
         ) {
@@ -2538,7 +2567,6 @@ document.addEventListener(
                 .pop()
                 .toLowerCase();
         }
-
 
         function isAllowedExtension(
             extension
@@ -2554,7 +2582,6 @@ document.addEventListener(
             );
         }
 
-
         function isImageExtension(
             extension
         ) {
@@ -2567,7 +2594,6 @@ document.addEventListener(
                 extension
             );
         }
-
 
         function revokePdfPreview() {
 
@@ -2583,7 +2609,6 @@ document.addEventListener(
                     null;
             }
         }
-
 
         /* ================================================================
            ALERT
@@ -2618,7 +2643,6 @@ document.addEventListener(
             );
         }
 
-
         /* ================================================================
            COMPRESSION STATUS
         ================================================================ */
@@ -2648,7 +2672,6 @@ document.addEventListener(
                 html;
         }
 
-
         function clearCompressionStatus() {
 
             compression.innerHTML =
@@ -2665,7 +2688,6 @@ document.addEventListener(
             );
         }
 
-
         /* ================================================================
            PDF PREVIEW
         ================================================================ */
@@ -2676,12 +2698,10 @@ document.addEventListener(
 
             revokePdfPreview();
 
-
             pdfPreviewUrl =
                 URL.createObjectURL(
                     file
                 );
-
 
             pdfPreview.innerHTML =
                 `
@@ -2696,12 +2716,10 @@ document.addEventListener(
                     ></iframe>
                 `;
 
-
             pdfPreview.classList.remove(
                 'sme-hidden'
             );
         }
-
 
         function clearPdfPreview() {
 
@@ -2715,6 +2733,79 @@ document.addEventListener(
             );
         }
 
+        /* ================================================================
+           IMAGE PREVIEW
+        ================================================================ */
+
+        let imagePreviewUrl =
+            null;
+
+        function revokeImagePreview() {
+
+            if (
+                imagePreviewUrl
+            ) {
+
+                URL.revokeObjectURL(
+                    imagePreviewUrl
+                );
+
+                imagePreviewUrl =
+                    null;
+            }
+        }
+
+        function showImagePreview(
+            file
+        ) {
+
+            if (
+                !imagePreview ||
+                !file
+            ) {
+                return;
+            }
+
+            revokeImagePreview();
+
+            imagePreviewUrl =
+                URL.createObjectURL(
+                    file
+                );
+
+            imagePreview.innerHTML =
+                `
+                    <div class="sme-image-preview-header">
+                        Preview gambar hasil kompresi
+                    </div>
+
+                    <img
+                        class="sme-image-preview-frame"
+                        src="${imagePreviewUrl}"
+                        alt="Preview gambar hasil kompresi"
+                    >
+                `;
+
+            imagePreview.classList.remove(
+                'sme-hidden'
+            );
+        }
+
+        function clearImagePreview() {
+
+            revokeImagePreview();
+
+            if (!imagePreview) {
+                return;
+            }
+
+            imagePreview.innerHTML =
+                '';
+
+            imagePreview.classList.add(
+                'sme-hidden'
+            );
+        }
 
         /* ================================================================
            MODE
@@ -2742,7 +2833,6 @@ document.addEventListener(
             );
         }
 
-
         function activateUploadMode() {
 
             compressionToken++;
@@ -2769,7 +2859,6 @@ document.addEventListener(
 
             clearCameraError();
         }
-
 
         function activateCameraMode() {
 
@@ -2804,18 +2893,15 @@ document.addEventListener(
             clearCameraError();
         }
 
-
         modeUpload?.addEventListener(
             'click',
             activateUploadMode
         );
 
-
         modeCamera?.addEventListener(
             'click',
             activateCameraMode
         );
-
 
         /* ================================================================
            FILE UI
@@ -2854,7 +2940,6 @@ document.addEventListener(
                 'File siap digunakan';
         }
 
-
         function clearFileSelection() {
 
             compressionToken++;
@@ -2885,8 +2970,9 @@ document.addEventListener(
             clearCompressionStatus();
 
             clearPdfPreview();
-        }
 
+            clearImagePreview();
+        }
 
         clearFileBtn?.addEventListener(
             'click',
@@ -2896,7 +2982,6 @@ document.addEventListener(
 
             }
         );
-
 
         /* ================================================================
            IMAGE
@@ -2952,7 +3037,6 @@ document.addEventListener(
             );
         }
 
-
         function calculateDimensions(
             width,
             height,
@@ -2997,7 +3081,6 @@ document.addEventListener(
             };
         }
 
-
         function buildDimensionList(
             width,
             height
@@ -3017,7 +3100,6 @@ document.addEventListener(
             const result =
                 [];
 
-
             dimensions.forEach(
                 function (
                     dimension
@@ -3030,7 +3112,6 @@ document.addEventListener(
                             dimension
                         );
 
-
                     if (
                         value.width <
                             IMAGE_MIN_DIMENSION &&
@@ -3040,7 +3121,6 @@ document.addEventListener(
 
                         return;
                     }
-
 
                     const duplicate =
                         result.some(
@@ -3057,7 +3137,6 @@ document.addEventListener(
                             }
                         );
 
-
                     if (
                         !duplicate
                     ) {
@@ -3069,10 +3148,8 @@ document.addEventListener(
                 }
             );
 
-
             return result;
         }
-
 
         function canvasToFile(
             image,
@@ -3099,7 +3176,6 @@ document.addEventListener(
                     canvas.height =
                         height;
 
-
                     const context =
                         canvas.getContext(
                             '2d',
@@ -3108,7 +3184,6 @@ document.addEventListener(
                                     false
                             }
                         );
-
 
                     if (!context) {
 
@@ -3121,7 +3196,6 @@ document.addEventListener(
                         return;
                     }
 
-
                     context.fillStyle =
                         '#ffffff';
 
@@ -3132,13 +3206,11 @@ document.addEventListener(
                         height
                     );
 
-
                     context.imageSmoothingEnabled =
                         true;
 
                     context.imageSmoothingQuality =
                         'high';
-
 
                     context.drawImage(
                         image,
@@ -3147,7 +3219,6 @@ document.addEventListener(
                         width,
                         height
                     );
-
 
                     canvas.toBlob(
                         function (
@@ -3165,7 +3236,6 @@ document.addEventListener(
                                 return;
                             }
 
-
                             const baseName =
                                 String(
                                     originalName ||
@@ -3180,14 +3250,12 @@ document.addEventListener(
                                         '_'
                                     );
 
-
                             const name =
                                 (
                                     baseName ||
                                     'lampiran'
                                 ) +
                                 '_compressed.jpg';
-
 
                             resolve(
                                 new File(
@@ -3208,7 +3276,6 @@ document.addEventListener(
             );
         }
 
-
         async function compressImageFile(
             file
         ) {
@@ -3218,16 +3285,13 @@ document.addEventListener(
                     file
                 );
 
-
             const width =
                 image.naturalWidth ||
                 image.width;
 
-
             const height =
                 image.naturalHeight ||
                 image.height;
-
 
             if (
                 width <= 0 ||
@@ -3239,17 +3303,14 @@ document.addEventListener(
                 );
             }
 
-
             const list =
                 buildDimensionList(
                     width,
                     height
                 );
 
-
             let smallest =
                 null;
-
 
             for (
                 const dimension
@@ -3270,7 +3331,6 @@ document.addEventListener(
                             file.name
                         );
 
-
                     if (
                         !smallest ||
                         result.size <
@@ -3280,7 +3340,6 @@ document.addEventListener(
                         smallest =
                             result;
                     }
-
 
                     if (
                         result.size <=
@@ -3292,7 +3351,6 @@ document.addEventListener(
                 }
             }
 
-
             if (
                 smallest &&
                 smallest.size <=
@@ -3302,12 +3360,10 @@ document.addEventListener(
                 return smallest;
             }
 
-
             throw new Error(
                 'Gambar masih terlalu besar setelah kompresi.'
             );
         }
-
 
         /* ================================================================
            GHOSTSCRIPT
@@ -3321,7 +3377,6 @@ document.addEventListener(
 
                 return ghostscriptPromise;
             }
-
 
             ghostscriptPromise =
                 initGhostscript(
@@ -3340,10 +3395,8 @@ document.addEventListener(
                     }
                 );
 
-
             return ghostscriptPromise;
         }
-
 
         /* ================================================================
            PDF VALIDATION
@@ -3361,7 +3414,6 @@ document.addEventListener(
             );
         }
 
-
         function isPdf(
             bytes
         ) {
@@ -3375,7 +3427,6 @@ document.addEventListener(
                 bytes[4] === 0x2D
             );
         }
-
 
         /* ================================================================
            PDF COMPRESSION
@@ -3391,7 +3442,6 @@ document.addEventListener(
                     file
                 );
 
-
             if (
                 !isPdf(
                     originalBytes
@@ -3403,17 +3453,14 @@ document.addEventListener(
                 );
             }
 
-
             setCompressionStatus(
                 '⏳ <strong>Menyiapkan PDF...</strong><br>' +
                 'Ghostscript WebAssembly sedang dimuat.',
                 ''
             );
 
-
             const gs =
                 await getGhostscript();
-
 
             if (
                 token !==
@@ -3424,7 +3471,6 @@ document.addEventListener(
                     'Proses dibatalkan.'
                 );
             }
-
 
             const profiles =
                 [
@@ -3453,7 +3499,6 @@ document.addEventListener(
                     }
                 ];
 
-
             let bestBytes =
                 null;
 
@@ -3462,7 +3507,6 @@ document.addEventListener(
 
             let bestProfile =
                 null;
-
 
             for (
                 const profile
@@ -3479,7 +3523,6 @@ document.addEventListener(
                     );
                 }
 
-
                 setCompressionStatus(
                     '⏳ <strong>Mengompres PDF...</strong><br>' +
                     'Profile: <strong>' +
@@ -3493,7 +3536,6 @@ document.addEventListener(
                     ''
                 );
 
-
                 await new Promise(
                     function (
                         resolve
@@ -3506,7 +3548,6 @@ document.addEventListener(
                     }
                 );
 
-
                 const inputName =
                     'input_' +
                     Date.now() +
@@ -3515,7 +3556,6 @@ document.addEventListener(
                         .toString(36)
                         .slice(2) +
                     '.pdf';
-
 
                 const outputName =
                     'output_' +
@@ -3526,7 +3566,6 @@ document.addEventListener(
                         .slice(2) +
                     '.pdf';
 
-
                 try {
 
                     try {
@@ -3535,19 +3574,16 @@ document.addEventListener(
                         );
                     } catch (e) {}
 
-
                     try {
                         gs.FS.unlink(
                             outputName
                         );
                     } catch (e) {}
 
-
                     gs.FS.writeFile(
                         inputName,
                         originalBytes
                     );
-
 
                     gs.callMain(
                         [
@@ -3586,12 +3622,10 @@ document.addEventListener(
                         ]
                     );
 
-
                     const outputBytes =
                         gs.FS.readFile(
                             outputName
                         );
-
 
                     if (
                         outputBytes &&
@@ -3636,7 +3670,6 @@ document.addEventListener(
                 }
             }
 
-
             if (
                 !bestBytes
             ) {
@@ -3645,7 +3678,6 @@ document.addEventListener(
                     'Ghostscript gagal menghasilkan PDF.'
                 );
             }
-
 
             /*
              * Jangan menggunakan hasil yang
@@ -3672,7 +3704,6 @@ document.addEventListener(
                 };
             }
 
-
             if (
                 bestSize >
                 MAX_FILE_SIZE
@@ -3682,7 +3713,6 @@ document.addEventListener(
                     'PDF hasil kompresi masih melebihi 10 MB.'
                 );
             }
-
 
             const baseName =
                 String(
@@ -3696,7 +3726,6 @@ document.addEventListener(
                         /[^a-zA-Z0-9_-]/g,
                         '_'
                     );
-
 
             const finalFile =
                 new File(
@@ -3713,7 +3742,6 @@ document.addEventListener(
                             'application/pdf'
                     }
                 );
-
 
             return {
                 file:
@@ -3739,7 +3767,6 @@ document.addEventListener(
             };
         }
 
-
         /* ================================================================
            FILE CHANGE
         ================================================================ */
@@ -3751,26 +3778,23 @@ document.addEventListener(
                 const file =
                     fileInput.files?.[0];
 
-
                 if (!file) {
                     return;
                 }
 
-
                 const token =
                     ++compressionToken;
-
 
                 clearCameraError();
 
                 clearPdfPreview();
 
+                clearImagePreview();
 
                 const extension =
                     getExtension(
                         file
                     );
-
 
                 if (
                     !isAllowedExtension(
@@ -3789,7 +3813,6 @@ document.addEventListener(
                     return;
                 }
 
-
                 if (
                     file.size <= 0
                 ) {
@@ -3804,7 +3827,6 @@ document.addEventListener(
 
                     return;
                 }
-
 
                 if (
                     file.size >
@@ -3822,7 +3844,6 @@ document.addEventListener(
                     return;
                 }
 
-
                 /* ==========================================================
                    PDF
                 ========================================================== */
@@ -3837,12 +3858,10 @@ document.addEventListener(
 
                     clearScanResult();
 
-
                     showSelectedFile(
                         file,
                         'PDF • sedang diproses'
                     );
-
 
                     try {
 
@@ -3852,7 +3871,6 @@ document.addEventListener(
                                 token
                             );
 
-
                         if (
                             token !==
                             compressionToken
@@ -3861,23 +3879,18 @@ document.addEventListener(
                             return;
                         }
 
-
                         const finalFile =
                             result.file;
 
-
                         const transfer =
                             new DataTransfer();
-
 
                         transfer.items.add(
                             finalFile
                         );
 
-
                         fileInput.files =
                             transfer.files;
-
 
                         showSelectedFile(
                             finalFile,
@@ -3885,7 +3898,6 @@ document.addEventListener(
                                 ? 'PDF hasil kompresi'
                                 : 'PDF asli dipertahankan'
                         );
-
 
                         setCompressionStatus(
                             (
@@ -3916,7 +3928,6 @@ document.addEventListener(
                                 : 'warning'
                         );
 
-
                         showPdfPreview(
                             finalFile
                         );
@@ -3930,7 +3941,6 @@ document.addEventListener(
                             error
                         );
 
-
                         if (
                             token !==
                             compressionToken
@@ -3939,11 +3949,9 @@ document.addEventListener(
                             return;
                         }
 
-
                         clearFileSelection();
 
                         clearPdfPreview();
-
 
                         setCompressionStatus(
                             '✕ <strong>Kompresi PDF gagal.</strong><br>' +
@@ -3954,7 +3962,6 @@ document.addEventListener(
                             'error'
                         );
 
-
                         showAlert(
                             'error',
                             'Gagal memproses PDF',
@@ -3963,10 +3970,8 @@ document.addEventListener(
                         );
                     }
 
-
                     return;
                 }
-
 
                 /* ==========================================================
                    IMAGE
@@ -3981,23 +3986,19 @@ document.addEventListener(
                     return;
                 }
 
-
                 const originalSize =
                     file.size;
-
 
                 showSelectedFile(
                     file,
                     'Sedang mengompres...'
                 );
 
-
                 setCompressionStatus(
                     '⏳ <strong>Sedang mengompres gambar...</strong><br>' +
                     'Gambar akan di-resize dan dikonversi menjadi JPG.',
                     ''
                 );
-
 
                 try {
 
@@ -4006,7 +4007,6 @@ document.addEventListener(
                             file
                         );
 
-
                     if (
                         token !==
                         compressionToken
@@ -4014,7 +4014,6 @@ document.addEventListener(
 
                         return;
                     }
-
 
                     if (
                         compressed.size >
@@ -4026,25 +4025,20 @@ document.addEventListener(
                         );
                     }
 
-
                     const transfer =
                         new DataTransfer();
-
 
                     transfer.items.add(
                         compressed
                     );
 
-
                     fileInput.files =
                         transfer.files;
-
 
                     capturedInput.value =
                         '';
 
                     clearScanResult();
-
 
                     const reduction =
                         reductionPercent(
@@ -4052,12 +4046,14 @@ document.addEventListener(
                             compressed.size
                         );
 
-
                     showSelectedFile(
                         compressed,
                         'JPG hasil kompresi'
                     );
 
+                    showImagePreview(
+                        compressed
+                    );
 
                     setCompressionStatus(
                         '✓ <strong>Kompresi gambar berhasil.</strong><br>' +
@@ -4090,7 +4086,6 @@ document.addEventListener(
                         error
                     );
 
-
                     if (
                         token !==
                         compressionToken
@@ -4099,9 +4094,7 @@ document.addEventListener(
                         return;
                     }
 
-
                     clearFileSelection();
-
 
                     setCompressionStatus(
                         '✕ <strong>Kompresi gambar gagal.</strong><br>' +
@@ -4111,7 +4104,6 @@ document.addEventListener(
                         ),
                         'error'
                     );
-
 
                     showAlert(
                         'error',
@@ -4124,7 +4116,6 @@ document.addEventListener(
             }
         );
 
-
         /* ================================================================
            CAMERA
         ================================================================ */
@@ -4134,11 +4125,9 @@ document.addEventListener(
             startCamera
         );
 
-
         async function startCamera() {
 
             clearCameraError();
-
 
             if (
                 !window.isSecureContext
@@ -4150,7 +4139,6 @@ document.addEventListener(
 
                 return;
             }
-
 
             if (
                 !navigator.mediaDevices ||
@@ -4164,9 +4152,7 @@ document.addEventListener(
                 return;
             }
 
-
             stopCameraTracks();
-
 
             try {
 
@@ -4197,23 +4183,18 @@ document.addEventListener(
                             }
                         );
 
-
                 cameraVideo.srcObject =
                     cameraStream;
 
-
                 await cameraVideo.play();
-
 
                 cameraPlaceholder.classList.add(
                     'sme-hidden'
                 );
 
-
                 cameraVideo.classList.remove(
                     'sme-hidden'
                 );
-
 
                 startCameraBtn.disabled =
                     true;
@@ -4233,10 +4214,8 @@ document.addEventListener(
                     error
                 );
 
-
                 let message =
                     'Kamera tidak dapat digunakan.';
-
 
                 if (
                     error?.name ===
@@ -4265,13 +4244,11 @@ document.addEventListener(
                         'Kamera sedang digunakan aplikasi lain.';
                 }
 
-
                 showCameraError(
                     message
                 );
             }
         }
-
 
         function showCameraError(
             message
@@ -4288,7 +4265,6 @@ document.addEventListener(
             );
         }
 
-
         function clearCameraError() {
 
             cameraError.textContent =
@@ -4299,7 +4275,6 @@ document.addEventListener(
             );
         }
 
-
         /* ================================================================
            CAPTURE
         ================================================================ */
@@ -4309,7 +4284,6 @@ document.addEventListener(
             async function () {
 
                 clearCameraError();
-
 
                 if (
                     !cameraVideo.videoWidth ||
@@ -4323,7 +4297,6 @@ document.addEventListener(
                     return;
                 }
 
-
                 try {
 
                     const dimensions =
@@ -4333,19 +4306,16 @@ document.addEventListener(
                             CAMERA_MAX_WIDTH
                         );
 
-
                     const canvas =
                         document.createElement(
                             'canvas'
                         );
-
 
                     canvas.width =
                         dimensions.width;
 
                     canvas.height =
                         dimensions.height;
-
 
                     const context =
                         canvas.getContext(
@@ -4356,14 +4326,12 @@ document.addEventListener(
                             }
                         );
 
-
                     if (!context) {
 
                         throw new Error(
                             'Canvas tidak tersedia.'
                         );
                     }
-
 
                     context.fillStyle =
                         '#ffffff';
@@ -4375,13 +4343,11 @@ document.addEventListener(
                         canvas.height
                     );
 
-
                     context.imageSmoothingEnabled =
                         true;
 
                     context.imageSmoothingQuality =
                         'high';
-
 
                     context.drawImage(
                         cameraVideo,
@@ -4391,17 +4357,14 @@ document.addEventListener(
                         canvas.height
                     );
 
-
                     let dataUrl =
                         canvas.toDataURL(
                             'image/jpeg',
                             .82
                         );
 
-
                     let quality =
                         .82;
-
 
                     while (
                         getDataUrlBinarySize(
@@ -4422,7 +4385,6 @@ document.addEventListener(
                             );
                     }
 
-
                     if (
                         dataUrl.length >
                         CAMERA_MAX_DATA_URL_LENGTH
@@ -4433,39 +4395,31 @@ document.addEventListener(
                         );
                     }
 
-
                     capturedInput.value =
                         dataUrl;
 
-
                     cameraImage.src =
                         dataUrl;
-
 
                     cameraImage.classList.remove(
                         'sme-hidden'
                     );
 
-
                     cameraVideo.classList.add(
                         'sme-hidden'
                     );
 
-
                     cameraPlaceholder.classList.add(
                         'sme-hidden'
                     );
-
 
                     const size =
                         getDataUrlBinarySize(
                             dataUrl
                         );
 
-
                     scanPreview.src =
                         dataUrl;
-
 
                     scanInfo.textContent =
                         'Format JPG • ' +
@@ -4474,14 +4428,11 @@ document.addEventListener(
                         ) +
                         ' • Sudah dikompres';
 
-
                     scanResult.classList.remove(
                         'sme-hidden'
                     );
 
-
                     clearFileSelection();
-
 
                     setCompressionStatus(
                         '✓ <strong>Scan berhasil.</strong><br>' +
@@ -4494,17 +4445,13 @@ document.addEventListener(
                         'success'
                     );
 
-
                     stopCamera();
-
 
                     startCameraBtn.disabled =
                         true;
 
-
                     captureBtn.disabled =
                         true;
-
 
                     stopCameraBtn.disabled =
                         true;
@@ -4518,7 +4465,6 @@ document.addEventListener(
                         error
                     );
 
-
                     showCameraError(
                         error?.message ||
                         'Gagal mengambil scan.'
@@ -4527,7 +4473,6 @@ document.addEventListener(
 
             }
         );
-
 
         /* ================================================================
            DATA URL SIZE
@@ -4540,19 +4485,16 @@ document.addEventListener(
             const comma =
                 dataUrl.indexOf(',');
 
-
             if (
                 comma === -1
             ) {
                 return 0;
             }
 
-
             const base64 =
                 dataUrl.substring(
                     comma + 1
                 );
-
 
             const padding =
                 base64.endsWith(
@@ -4565,7 +4507,6 @@ document.addEventListener(
                         ? 1
                         : 0;
 
-
             return (
                 Math.floor(
                     (
@@ -4576,7 +4517,6 @@ document.addEventListener(
                 padding
             );
         }
-
 
         /* ================================================================
            CLEAR SCAN
@@ -4605,7 +4545,6 @@ document.addEventListener(
             );
         }
 
-
         /* ================================================================
            CAMERA STOP
         ================================================================ */
@@ -4618,7 +4557,6 @@ document.addEventListener(
                 return;
             }
 
-
             cameraStream
                 .getTracks()
                 .forEach(
@@ -4630,32 +4568,25 @@ document.addEventListener(
                     }
                 );
 
-
             cameraStream =
                 null;
         }
-
 
         function stopCamera() {
 
             stopCameraTracks();
 
-
             cameraVideo.srcObject =
                 null;
-
 
             startCameraBtn.disabled =
                 false;
 
-
             captureBtn.disabled =
                 true;
 
-
             stopCameraBtn.disabled =
                 true;
-
 
             if (
                 !capturedInput.value
@@ -4671,7 +4602,6 @@ document.addEventListener(
             }
         }
 
-
         stopCameraBtn?.addEventListener(
             'click',
             function () {
@@ -4679,7 +4609,6 @@ document.addEventListener(
                 stopCamera();
             }
         );
-
 
         /* ================================================================
            RETAKE
@@ -4725,11 +4654,9 @@ document.addEventListener(
                     'sme-hidden'
                 );
 
-
                 await startCamera();
             }
         );
-
 
         /* ================================================================
            SUBMIT
@@ -4750,20 +4677,17 @@ document.addEventListener(
                     return;
                 }
 
-
                 const tanggalSurat =
                     document.getElementById(
                         'tanggal_surat'
                     )?.value ||
                     '';
 
-
                 const tanggalTerima =
                     document.getElementById(
                         'tanggal_terima'
                     )?.value ||
                     '';
-
 
                 if (
                     tanggalSurat &&
@@ -4774,7 +4698,6 @@ document.addEventListener(
 
                     event.preventDefault();
 
-
                     showAlert(
                         'warning',
                         'Tanggal tidak valid',
@@ -4784,20 +4707,16 @@ document.addEventListener(
                     return;
                 }
 
-
                 const file =
                     fileInput.files?.[0] ||
                     null;
 
-
                 const hasFile =
                     !!file;
-
 
                 const hasCamera =
                     capturedInput.value.trim() !==
                     '';
-
 
                 if (
                     hasFile &&
@@ -4805,7 +4724,6 @@ document.addEventListener(
                 ) {
 
                     event.preventDefault();
-
 
                     showAlert(
                         'warning',
@@ -4815,7 +4733,6 @@ document.addEventListener(
 
                     return;
                 }
-
 
                 if (
                     hasFile
@@ -4836,7 +4753,6 @@ document.addEventListener(
                         return;
                     }
 
-
                     if (
                         file.size >
                         MAX_FILE_SIZE
@@ -4853,7 +4769,6 @@ document.addEventListener(
                         return;
                     }
                 }
-
 
                 if (
                     hasCamera &&
@@ -4872,27 +4787,21 @@ document.addEventListener(
                     return;
                 }
 
-
                 submitting =
                     true;
 
-
                 stopCamera();
-
 
                 submitBtn.disabled =
                     true;
-
 
                 submitIcon.classList.add(
                     'sme-hidden'
                 );
 
-
                 submitLoading.classList.remove(
                     'sme-hidden'
                 );
-
 
                 submitText.textContent =
                     hasCamera
@@ -4902,7 +4811,6 @@ document.addEventListener(
                             : 'Memperbarui...';
             }
         );
-
 
         /* ================================================================
            OLD CAMERA DATA
@@ -4976,7 +4884,6 @@ document.addEventListener(
             );
         }
 
-
         /* ================================================================
            CLEANUP
         ================================================================ */
@@ -4988,6 +4895,8 @@ document.addEventListener(
                 stopCameraTracks();
 
                 revokePdfPreview();
+
+                revokeImagePreview();
             }
         );
 
