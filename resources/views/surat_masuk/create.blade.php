@@ -1177,17 +1177,6 @@ textarea.sm-control {
 </style>
 
 <div class="sm-page">
-
-    <div class="sm-topbar">
-
-        <div class="sm-breadcrumb">
-            <span>Arsip</span>
-            <span>/</span>
-            <strong>Surat Masuk</strong>
-            <span>/</span>
-            <strong>Catat</strong>
-        </div>
-
         <a
             href="{{ route('surat-masuk.index') }}"
             class="sm-back"
