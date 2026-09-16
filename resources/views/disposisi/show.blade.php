@@ -83,45 +83,69 @@
         ?? $disposisi->isi_disposisi
         ?? '';
 
-    if (trim((string) $instruksi) === '') {
+    if (
+        trim(
+            (string) $instruksi
+        ) === ''
+    ) {
         $instruksi =
             'Tidak ada instruksi atau catatan khusus.';
     }
 
 
     /* =========================================================
-       TANGGAL
+       TANGGAL DISPOSISI
     ========================================================== */
 
     $batasWaktu = '-';
     $tanggalDibuat = '-';
 
     try {
-        if ($disposisi->batas_waktu) {
+
+        if (
+            !empty(
+                $disposisi->batas_waktu
+            )
+        ) {
+
             $batasWaktu =
                 \Illuminate\Support\Carbon::parse(
                     $disposisi->batas_waktu
-                )->translatedFormat(
-                    'd F Y'
+                )->format(
+                    'd/m/Y'
                 );
         }
-    } catch (\Throwable $e) {
+
+    } catch (
+        \Throwable $e
+    ) {
+
         $batasWaktu =
-            (string) $disposisi->batas_waktu;
+            '-';
     }
 
     try {
-        if ($disposisi->created_at) {
+
+        if (
+            !empty(
+                $disposisi->created_at
+            )
+        ) {
+
             $tanggalDibuat =
                 \Illuminate\Support\Carbon::parse(
                     $disposisi->created_at
-                )->translatedFormat(
-                    'd F Y H:i'
+                )->format(
+                    'd/m/Y H:i'
                 );
         }
-    } catch (\Throwable $e) {
+
+    } catch (
+        \Throwable $e
+    ) {
+
         $tanggalDibuat =
-            (string) $disposisi->created_at;
+            '-';
     }
 
 
@@ -133,9 +157,60 @@
         $disposisi->suratMasuk
         ?? null;
 
+
+    /* =========================================================
+       NOMOR SURAT
+    ========================================================== */
+
     $nomorSurat =
-        $suratMasuk?->nomor_surat
-        ?? '-';
+        '-';
+
+    if (
+        $suratMasuk &&
+        !empty(
+            $suratMasuk->nomor_surat
+        )
+    ) {
+
+        $nomorSurat =
+            trim(
+                (string) $suratMasuk->nomor_surat
+            );
+
+    }
+
+
+    /* =========================================================
+       TANGGAL SURAT
+    ========================================================== */
+
+    $tanggalSurat =
+        '-';
+
+    if (
+        $suratMasuk &&
+        !empty(
+            $suratMasuk->tanggal_surat
+        )
+    ) {
+
+        try {
+
+            $tanggalSurat =
+                \Illuminate\Support\Carbon::parse(
+                    $suratMasuk->tanggal_surat
+                )->format(
+                    'd/m/Y'
+                );
+
+        } catch (
+            \Throwable $e
+        ) {
+
+            $tanggalSurat =
+                '-';
+        }
+    }
 @endphp
 
 
@@ -1193,7 +1268,7 @@
                             stroke-linecap="round"
                             stroke-linejoin="round"
                             stroke-width="2"
-                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2.121 2.121 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
                         />
                     </svg>
 
@@ -1217,7 +1292,6 @@
 
         {{-- =================================================
              KIRI
-             INFORMASI + INSTRUKSI + STATUS
         ================================================== --}}
 
         <div class="dd-left-column">
@@ -1603,7 +1677,6 @@
 
         {{-- =================================================
              KANAN
-             SURAT MASUK TERKAIT
         ================================================== --}}
 
         <div class="dd-right-column">
@@ -1688,7 +1761,7 @@
                                 </span>
 
                                 <p class="dd-related-value">
-                                    {{ $suratMasuk->nomor_surat ?? '-' }}
+                                    {{ $nomorSurat }}
                                 </p>
 
                             </div>
@@ -1722,31 +1795,7 @@
                                 </span>
 
                                 <p class="dd-related-value">
-
-                                    @if($suratMasuk->tanggal_surat)
-
-                                        @try
-
-                                            {{
-                                                \Illuminate\Support\Carbon::parse(
-                                                    $suratMasuk->tanggal_surat
-                                                )->translatedFormat(
-                                                    'd F Y'
-                                                )
-                                            }}
-
-                                        @catch(\Throwable $e)
-
-                                            {{ $suratMasuk->tanggal_surat }}
-
-                                        @endtry
-
-                                    @else
-
-                                        -
-
-                                    @endif
-
+                                    {{ $tanggalSurat }}
                                 </p>
 
                             </div>
