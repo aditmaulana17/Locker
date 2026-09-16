@@ -133,25 +133,9 @@
         $disposisi->suratMasuk
         ?? null;
 
-    $nomorAgendaSurat =
-        '-';
-
-    if ($suratMasuk) {
-
-        if (
-            !empty(
-                $suratMasuk->nomor_agenda
-            )
-        ) {
-            $nomorAgendaSurat =
-                'AG/' .
-                $suratMasuk->nomor_agenda;
-        } else {
-            $nomorAgendaSurat =
-                '#' .
-                $suratMasuk->id;
-        }
-    }
+    $nomorSurat =
+        $suratMasuk?->nomor_surat
+        ?? '-';
 @endphp
 
 
@@ -567,7 +551,7 @@
     }
 
     .dd-meta-table tr:nth-child(odd) td:first-child,
-    .dd-meta-table tr:nth-child(even) td:last-child) {
+    .dd-meta-table tr:nth-child(even) td:last-child {
         background: #f8fafc;
     }
 
@@ -761,6 +745,7 @@
         align-items: center;
         align-self: flex-start;
         min-height: 25px;
+        max-width: 100%;
         padding: 0 9px;
         margin-bottom: 12px;
         border-radius: 7px;
@@ -775,6 +760,7 @@
             monospace;
         font-size: 8px;
         font-weight: 800;
+        overflow-wrap: anywhere;
     }
 
     .dd-related-items {
@@ -1669,17 +1655,16 @@
 
                     @if($suratMasuk)
 
+                        {{-- NOMOR SURAT --}}
+
                         <span class="dd-related-agenda">
-                            {{ $nomorAgendaSurat }}
+                            {{ $nomorSurat }}
                         </span>
 
 
                         <div class="dd-related-items">
 
-
-                            {{-- =====================================
-                                 PERIHAL
-                            ====================================== --}}
+                            {{-- PERIHAL --}}
 
                             <div class="dd-related-item">
 
@@ -1688,16 +1673,13 @@
                                 </span>
 
                                 <p class="dd-related-value">
-                                    {{ $suratMasuk->perihal
-                                        ?? 'Tanpa Perihal' }}
+                                    {{ $suratMasuk->perihal ?? 'Tanpa Perihal' }}
                                 </p>
 
                             </div>
 
 
-                            {{-- =====================================
-                                 NOMOR SURAT
-                            ====================================== --}}
+                            {{-- NOMOR SURAT --}}
 
                             <div class="dd-related-item">
 
@@ -1712,9 +1694,7 @@
                             </div>
 
 
-                            {{-- =====================================
-                                 PENGIRIM
-                            ====================================== --}}
+                            {{-- PENGIRIM --}}
 
                             <div class="dd-related-item">
 
@@ -1723,17 +1703,17 @@
                                 </span>
 
                                 <p class="dd-related-value">
-                                    {{ $suratMasuk->pengirim
+                                    {{
+                                        $suratMasuk->pengirim
                                         ?? $suratMasuk->instansi?->nama_instansi
-                                        ?? '-' }}
+                                        ?? '-'
+                                    }}
                                 </p>
 
                             </div>
 
 
-                            {{-- =====================================
-                                 TANGGAL SURAT
-                            ====================================== --}}
+                            {{-- TANGGAL SURAT --}}
 
                             <div class="dd-related-item">
 
@@ -1774,9 +1754,7 @@
                         </div>
 
 
-                        {{-- =========================================
-                             DETAIL SURAT
-                        ========================================== --}}
+                        {{-- DETAIL SURAT --}}
 
                         <a
                             href="{{ route(
@@ -1820,7 +1798,7 @@
                                         stroke-linecap="round"
                                         stroke-linejoin="round"
                                         stroke-width="1.5"
-                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586A1.5 1.5 0 0118 8.5V19a2 2 0 01-2 2z"
+                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586A1.5 1.5 0 0118 8.5V19a2 2 0 01-2 2H7a2 2 0 01-2-2v-5"
                                     />
                                 </svg>
 
