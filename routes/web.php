@@ -18,9 +18,12 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-Route::get('/', function () {
-    return redirect()->route('login');
-});
+Route::get(
+    '/',
+    function () {
+        return redirect()->route('login');
+    }
+);
 
 /*
 |--------------------------------------------------------------------------
@@ -101,7 +104,9 @@ Route::middleware('auth')->group(function () {
     |--------------------------------------------------------------------------
     */
 
-    Route::middleware('role:admin')->group(function () {
+    Route::middleware(
+        'role:admin'
+    )->group(function () {
 
         /*
         |--------------------------------------------------------------------------
@@ -112,11 +117,17 @@ Route::middleware('auth')->group(function () {
         Route::get(
             'clear-cache',
             function () {
-                Artisan::call('optimize:clear');
+
+                Artisan::call(
+                    'optimize:clear'
+                );
 
                 return response()->json([
-                    'status' => 'success',
-                    'message' => 'Cache aplikasi berhasil dibersihkan.',
+                    'status' =>
+                        'success',
+
+                    'message' =>
+                        'Cache aplikasi berhasil dibersihkan.',
                 ]);
             }
         )->name('clear-cache');
@@ -130,18 +141,29 @@ Route::middleware('auth')->group(function () {
         Route::get(
             'link-storage',
             function () {
+
                 try {
-                    Artisan::call('storage:link');
+
+                    Artisan::call(
+                        'storage:link'
+                    );
 
                     return response()->json([
-                        'status' => 'success',
-                        'message' => 'Storage link berhasil dibuat.',
+                        'status' =>
+                            'success',
+
+                        'message' =>
+                            'Storage link berhasil dibuat.',
                     ]);
+
                 } catch (\Throwable $e) {
+
                     report($e);
 
                     return response()->json([
-                        'status' => 'error',
+                        'status' =>
+                            'error',
+
                         'message' =>
                             'Gagal membuat storage link: ' .
                             $e->getMessage(),
@@ -162,15 +184,29 @@ Route::middleware('auth')->group(function () {
     | SURAT MASUK - ADMIN / PIMPINAN
     |--------------------------------------------------------------------------
     |
-    | Admin dan Pimpinan:
-    | - dapat membuat surat
-    | - dapat mengubah surat
-    | - dapat menghapus surat
-    | - dapat mengirim disposisi
+    | Hak akses:
+    |
+    | Admin:
+    | - create
+    | - store
+    | - edit
+    | - update
+    | - delete
+    | - disposisi
+    |
+    | Pimpinan:
+    | - create
+    | - store
+    | - edit
+    | - update
+    | - delete
+    | - disposisi
     |
     */
 
-    Route::middleware('role:admin,pimpinan')->group(function () {
+    Route::middleware(
+        'role:admin,pimpinan'
+    )->group(function () {
 
         /*
         |--------------------------------------------------------------------------
@@ -181,7 +217,9 @@ Route::middleware('auth')->group(function () {
         Route::get(
             'surat-masuk/create',
             [SuratMasukController::class, 'create']
-        )->name('surat-masuk.create');
+        )->name(
+            'surat-masuk.create'
+        );
 
         /*
         |--------------------------------------------------------------------------
@@ -192,7 +230,38 @@ Route::middleware('auth')->group(function () {
         Route::post(
             'surat-masuk',
             [SuratMasukController::class, 'store']
-        )->name('surat-masuk.store');
+        )->name(
+            'surat-masuk.store'
+        );
+
+        /*
+        |--------------------------------------------------------------------------
+        | PREVIEW COMPRESSION PDF
+        |--------------------------------------------------------------------------
+        |
+        | Dipanggil AJAX dari halaman create/edit
+        | ketika user memilih file PDF.
+        |
+        | Browser
+        |     ↓
+        | POST PDF
+        |     ↓
+        | previewCompression()
+        |     ↓
+        | Ghostscript
+        |     ↓
+        | hasil compression temporary
+        |     ↓
+        | response JSON
+        |
+        */
+
+        Route::post(
+            'surat-masuk/preview-compression',
+            [SuratMasukController::class, 'previewCompression']
+        )->name(
+            'surat-masuk.preview-compression'
+        );
 
         /*
         |--------------------------------------------------------------------------
@@ -203,7 +272,9 @@ Route::middleware('auth')->group(function () {
         Route::get(
             'surat-masuk/{suratMasuk}/edit',
             [SuratMasukController::class, 'edit']
-        )->name('surat-masuk.edit');
+        )->name(
+            'surat-masuk.edit'
+        );
 
         /*
         |--------------------------------------------------------------------------
@@ -214,7 +285,9 @@ Route::middleware('auth')->group(function () {
         Route::put(
             'surat-masuk/{suratMasuk}',
             [SuratMasukController::class, 'update']
-        )->name('surat-masuk.update');
+        )->name(
+            'surat-masuk.update'
+        );
 
         /*
         |--------------------------------------------------------------------------
@@ -225,7 +298,9 @@ Route::middleware('auth')->group(function () {
         Route::delete(
             'surat-masuk/{suratMasuk}',
             [SuratMasukController::class, 'destroy']
-        )->name('surat-masuk.destroy');
+        )->name(
+            'surat-masuk.destroy'
+        );
 
         /*
         |--------------------------------------------------------------------------
@@ -236,7 +311,9 @@ Route::middleware('auth')->group(function () {
         Route::post(
             'surat-masuk/{suratMasuk}/disposisi',
             [SuratMasukController::class, 'storeDisposisi']
-        )->name('surat-masuk.disposisi.store');
+        )->name(
+            'surat-masuk.disposisi.store'
+        );
 
         /*
         |--------------------------------------------------------------------------
@@ -247,26 +324,30 @@ Route::middleware('auth')->group(function () {
         Route::get(
             'surat-masuk/{suratMasuk}/disposisi/create',
             [DisposisiController::class, 'create']
-        )->name('disposisi.create');
+        )->name(
+            'disposisi.create'
+        );
     });
 
     /*
     |--------------------------------------------------------------------------
-    | SURAT MASUK - ADMIN / PIMPINAN / STAFF
+    | SURAT MASUK - SEMUA ROLE
     |--------------------------------------------------------------------------
     |
-    | Semua role dapat membuka route.
+    | Admin:
+    |   semua surat
     |
-    | Pembatasan data dilakukan di:
-    | SuratMasukController@index
-    | SuratMasukController@show
+    | Pimpinan:
+    |   semua surat
     |
-    | Staff hanya mendapatkan:
-    | surat yang memiliki disposisi kepadanya.
+    | Staff:
+    |   hanya surat yang diberikan melalui disposisi
     |
     */
 
-    Route::middleware('role:admin,pimpinan,staff')->group(function () {
+    Route::middleware(
+        'role:admin,pimpinan,staff'
+    )->group(function () {
 
         /*
         |--------------------------------------------------------------------------
@@ -277,18 +358,29 @@ Route::middleware('auth')->group(function () {
         Route::get(
             'surat-masuk',
             [SuratMasukController::class, 'index']
-        )->name('surat-masuk.index');
+        )->name(
+            'surat-masuk.index'
+        );
 
         /*
         |--------------------------------------------------------------------------
         | PREVIEW LAMPIRAN
         |--------------------------------------------------------------------------
+        |
+        | PDF:
+        | browser akan membuka PDF langsung.
+        |
+        | JPG / PNG:
+        | browser akan menampilkan gambar.
+        |
         */
 
         Route::get(
             'surat-masuk/{suratMasuk}/preview-lampiran',
             [SuratMasukController::class, 'previewLampiran']
-        )->name('surat-masuk.preview-lampiran');
+        )->name(
+            'surat-masuk.preview-lampiran'
+        );
 
         /*
         |--------------------------------------------------------------------------
@@ -299,7 +391,9 @@ Route::middleware('auth')->group(function () {
         Route::get(
             'surat-masuk/{suratMasuk}/download-lampiran',
             [SuratMasukController::class, 'downloadLampiran']
-        )->name('surat-masuk.download-lampiran');
+        )->name(
+            'surat-masuk.download-lampiran'
+        );
 
         /*
         |--------------------------------------------------------------------------
@@ -310,7 +404,9 @@ Route::middleware('auth')->group(function () {
         Route::get(
             'surat-masuk/{suratMasuk}/label',
             [SuratMasukController::class, 'cetakLabel']
-        )->name('surat-masuk.label');
+        )->name(
+            'surat-masuk.label'
+        );
 
         /*
         |--------------------------------------------------------------------------
@@ -321,21 +417,25 @@ Route::middleware('auth')->group(function () {
         Route::get(
             'surat-masuk/{suratMasuk}/cetak-disposisi',
             [SuratMasukController::class, 'cetakDisposisi']
-        )->name('surat-masuk.cetak-disposisi');
+        )->name(
+            'surat-masuk.cetak-disposisi'
+        );
 
         /*
         |--------------------------------------------------------------------------
         | DETAIL
         |--------------------------------------------------------------------------
         |
-        | Route dinamis diletakkan paling bawah.
+        | HARUS PALING BAWAH
         |
         */
 
         Route::get(
             'surat-masuk/{suratMasuk}',
             [SuratMasukController::class, 'show']
-        )->name('surat-masuk.show');
+        )->name(
+            'surat-masuk.show'
+        );
     });
 
     /*
@@ -350,7 +450,9 @@ Route::middleware('auth')->group(function () {
     |--------------------------------------------------------------------------
     */
 
-    Route::middleware('role:admin,pimpinan')->group(function () {
+    Route::middleware(
+        'role:admin,pimpinan'
+    )->group(function () {
 
         Route::resource(
             'disposisi',
@@ -368,7 +470,9 @@ Route::middleware('auth')->group(function () {
     |--------------------------------------------------------------------------
     */
 
-    Route::middleware('role:admin,pimpinan,staff')->group(function () {
+    Route::middleware(
+        'role:admin,pimpinan,staff'
+    )->group(function () {
 
         /*
         |--------------------------------------------------------------------------
@@ -379,7 +483,9 @@ Route::middleware('auth')->group(function () {
         Route::get(
             'disposisi',
             [DisposisiController::class, 'index']
-        )->name('disposisi.index');
+        )->name(
+            'disposisi.index'
+        );
 
         /*
         |--------------------------------------------------------------------------
@@ -390,7 +496,9 @@ Route::middleware('auth')->group(function () {
         Route::get(
             'disposisi/{disposisi}',
             [DisposisiController::class, 'show']
-        )->name('disposisi.show');
+        )->name(
+            'disposisi.show'
+        );
 
         /*
         |--------------------------------------------------------------------------
@@ -401,7 +509,9 @@ Route::middleware('auth')->group(function () {
         Route::patch(
             'disposisi/{disposisi}/status',
             [DisposisiController::class, 'updateStatus']
-        )->name('disposisi.status');
+        )->name(
+            'disposisi.status'
+        );
     });
 
     /*
@@ -414,9 +524,22 @@ Route::middleware('auth')->group(function () {
     |--------------------------------------------------------------------------
     | SURAT KELUAR - ADMIN / PIMPINAN
     |--------------------------------------------------------------------------
+    |
+    | Admin dan Pimpinan dapat:
+    |
+    | - create
+    | - store
+    | - edit
+    | - update
+    | - delete
+    | - activity log
+    | - preview compression
+    |
     */
 
-    Route::middleware('role:admin,pimpinan')->group(function () {
+    Route::middleware(
+        'role:admin,pimpinan'
+    )->group(function () {
 
         /*
         |--------------------------------------------------------------------------
@@ -427,7 +550,9 @@ Route::middleware('auth')->group(function () {
         Route::get(
             'surat-keluar/create',
             [SuratKeluarController::class, 'create']
-        )->name('surat-keluar.create');
+        )->name(
+            'surat-keluar.create'
+        );
 
         /*
         |--------------------------------------------------------------------------
@@ -438,7 +563,35 @@ Route::middleware('auth')->group(function () {
         Route::post(
             'surat-keluar',
             [SuratKeluarController::class, 'store']
-        )->name('surat-keluar.store');
+        )->name(
+            'surat-keluar.store'
+        );
+
+        /*
+        |--------------------------------------------------------------------------
+        | PREVIEW COMPRESSION
+        |--------------------------------------------------------------------------
+        |
+        | Digunakan oleh halaman Create/Edit.
+        |
+        | Browser
+        |     ↓
+        | POST file
+        |     ↓
+        | previewCompression()
+        |     ↓
+        | Ghostscript / GD
+        |     ↓
+        | JSON hasil compression
+        |
+        */
+
+        Route::post(
+            'surat-keluar/preview-compression',
+            [SuratKeluarController::class, 'previewCompression']
+        )->name(
+            'surat-keluar.preview-compression'
+        );
 
         /*
         |--------------------------------------------------------------------------
@@ -449,7 +602,9 @@ Route::middleware('auth')->group(function () {
         Route::get(
             'surat-keluar/{suratKeluar}/edit',
             [SuratKeluarController::class, 'edit']
-        )->name('surat-keluar.edit');
+        )->name(
+            'surat-keluar.edit'
+        );
 
         /*
         |--------------------------------------------------------------------------
@@ -460,7 +615,9 @@ Route::middleware('auth')->group(function () {
         Route::put(
             'surat-keluar/{suratKeluar}',
             [SuratKeluarController::class, 'update']
-        )->name('surat-keluar.update');
+        )->name(
+            'surat-keluar.update'
+        );
 
         /*
         |--------------------------------------------------------------------------
@@ -471,7 +628,9 @@ Route::middleware('auth')->group(function () {
         Route::delete(
             'surat-keluar/{suratKeluar}',
             [SuratKeluarController::class, 'destroy']
-        )->name('surat-keluar.destroy');
+        )->name(
+            'surat-keluar.destroy'
+        );
 
         /*
         |--------------------------------------------------------------------------
@@ -482,7 +641,9 @@ Route::middleware('auth')->group(function () {
         Route::post(
             'surat-keluar/{suratKeluar}/log',
             [SuratKeluarController::class, 'storeLog']
-        )->name('surat-keluar.log.store');
+        )->name(
+            'surat-keluar.log.store'
+        );
     });
 
     /*
@@ -491,7 +652,9 @@ Route::middleware('auth')->group(function () {
     |--------------------------------------------------------------------------
     */
 
-    Route::middleware('role:admin,pimpinan,staff')->group(function () {
+    Route::middleware(
+        'role:admin,pimpinan,staff'
+    )->group(function () {
 
         /*
         |--------------------------------------------------------------------------
@@ -502,7 +665,9 @@ Route::middleware('auth')->group(function () {
         Route::get(
             'surat-keluar',
             [SuratKeluarController::class, 'index']
-        )->name('surat-keluar.index');
+        )->name(
+            'surat-keluar.index'
+        );
 
         /*
         |--------------------------------------------------------------------------
@@ -513,7 +678,9 @@ Route::middleware('auth')->group(function () {
         Route::get(
             'surat-keluar/{suratKeluar}/preview-lampiran',
             [SuratKeluarController::class, 'previewLampiran']
-        )->name('surat-keluar.preview-lampiran');
+        )->name(
+            'surat-keluar.preview-lampiran'
+        );
 
         /*
         |--------------------------------------------------------------------------
@@ -524,7 +691,9 @@ Route::middleware('auth')->group(function () {
         Route::get(
             'surat-keluar/{suratKeluar}/cetak',
             [SuratKeluarController::class, 'cetak']
-        )->name('surat-keluar.cetak');
+        )->name(
+            'surat-keluar.cetak'
+        );
 
         /*
         |--------------------------------------------------------------------------
@@ -535,18 +704,25 @@ Route::middleware('auth')->group(function () {
         Route::get(
             'surat-keluar/{suratKeluar}/label',
             [SuratKeluarController::class, 'label']
-        )->name('surat-keluar.label');
+        )->name(
+            'surat-keluar.label'
+        );
 
         /*
         |--------------------------------------------------------------------------
         | DETAIL
         |--------------------------------------------------------------------------
+        |
+        | HARUS PALING BAWAH
+        |
         */
 
         Route::get(
             'surat-keluar/{suratKeluar}',
             [SuratKeluarController::class, 'show']
-        )->name('surat-keluar.show');
+        )->name(
+            'surat-keluar.show'
+        );
     });
 
     /*
@@ -554,28 +730,10 @@ Route::middleware('auth')->group(function () {
     | EXPORT
     |--------------------------------------------------------------------------
     |
-    | PENTING:
+    | Semua export membutuhkan:
     |
-    | Semua export wajib melewati auth + role.
-    |
-    | SURAT MASUK:
-    |
-    | Admin    -> semua surat masuk
-    | Pimpinan -> semua surat masuk
-    | Staff    -> hanya surat yang didisposisikan kepadanya
-    |
-    | SURAT KELUAR:
-    |
-    | Admin    -> semua surat keluar
-    | Pimpinan -> semua surat keluar
-    | Staff    -> mengikuti data yang memang terlihat pada halaman surat keluar
-    |
-    | Filter:
-    | - search
-    | - kategori_id / kategori_surat_id
-    | - status
-    | - dari_tanggal
-    | - sampai_tanggal
+    | auth
+    | role admin / pimpinan / staff
     |
     */
 
@@ -657,7 +815,9 @@ Route::middleware('auth')->group(function () {
     |--------------------------------------------------------------------------
     */
 
-    Route::middleware('role:admin')->group(function () {
+    Route::middleware(
+        'role:admin'
+    )->group(function () {
 
         /*
         |--------------------------------------------------------------------------
@@ -693,15 +853,21 @@ Route::middleware('auth')->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::fallback(function () {
+Route::fallback(
+    function () {
 
-    if (view()->exists('errors.404')) {
-        return response()->view(
-            'errors.404',
-            [],
-            404
-        );
+        if (
+            view()->exists(
+                'errors.404'
+            )
+        ) {
+            return response()->view(
+                'errors.404',
+                [],
+                404
+            );
+        }
+
+        abort(404);
     }
-
-    abort(404);
-});
+);

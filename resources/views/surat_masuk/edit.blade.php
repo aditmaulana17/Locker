@@ -108,7 +108,9 @@
 
     $currentAttachmentName =
         $hasCurrentAttachment
-            ? basename($currentAttachmentPath)
+            ? basename(
+                $currentAttachmentPath
+            )
             : null;
 
     $currentAttachmentExtension =
@@ -122,11 +124,11 @@
             : null;
 @endphp
 
-
 <style>
-/* ==========================================================================
-   EDIT SURAT MASUK — CLEAN / COMPACT / RESPONSIVE
-   ========================================================================== */
+.sme-page,
+.sme-page * {
+    box-sizing: border-box;
+}
 
 .sme-page {
     width: 100%;
@@ -135,16 +137,6 @@
     padding: 14px 18px 34px;
     color: #334155;
 }
-
-.sme-page *,
-.sme-page *::before,
-.sme-page *::after {
-    box-sizing: border-box;
-}
-
-/* ==========================================================================
-   TOP ACTION
-   ========================================================================== */
 
 .sme-top-action {
     display: flex;
@@ -174,10 +166,6 @@
     background: #eef2ff;
     color: #4338ca;
 }
-
-/* ==========================================================================
-   ERROR
-   ========================================================================== */
 
 .sme-error-box {
     margin-bottom: 12px;
@@ -222,10 +210,6 @@
     color: #e11d48;
 }
 
-/* ==========================================================================
-   MAIN CARD
-   ========================================================================== */
-
 .sme-main-card {
     width: 100%;
     overflow: hidden;
@@ -237,23 +221,19 @@
         0 2px 7px rgba(15, 23, 42, .04);
 }
 
-/* ==========================================================================
-   HEADER
-   ========================================================================== */
-
 .sme-system-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 18px;
     padding: 16px 18px;
-    border-bottom: 0;
-    background: linear-gradient(
-        135deg,
-        #1d4ed8 0%,
-        #4338ca 58%,
-        #4f46e5 100%
-    );
+    background:
+        linear-gradient(
+            135deg,
+            #1d4ed8 0%,
+            #4338ca 58%,
+            #4f46e5 100%
+        );
     color: #fff;
 }
 
@@ -274,13 +254,11 @@
     border: 1px solid rgba(255,255,255,.35);
     border-radius: 10px;
     background: rgba(255,255,255,.12);
-    color: #fff;
 }
 
 .sme-header-label {
     margin: 0;
     font-size: 8px;
-    line-height: 1.2;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: .1em;
@@ -303,13 +281,12 @@
 }
 
 .sme-header-badge {
-    flex-shrink: 0;
+    min-height: 29px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 29px;
     padding: 0 10px;
-    border: 1px solid rgba(255,255,255,.30);
+    border: 1px solid rgba(255,255,255,.3);
     border-radius: 999px;
     background: rgba(255,255,255,.12);
     color: #fff;
@@ -317,10 +294,6 @@
     font-weight: 800;
     white-space: nowrap;
 }
-
-/* ==========================================================================
-   BODY
-   ========================================================================== */
 
 .sme-body {
     padding: 16px;
@@ -331,10 +304,6 @@
     padding-top: 17px;
     border-top: 1.5px solid #e2e8f0;
 }
-
-/* ==========================================================================
-   SECTION HEADER
-   ========================================================================== */
 
 .sme-section-head {
     display: flex;
@@ -347,7 +316,6 @@
     width: 4px;
     height: 28px;
     flex: 0 0 4px;
-    margin-top: 1px;
     border-radius: 999px;
     background: #2563eb;
 }
@@ -371,20 +339,19 @@
     color: #64748b;
 }
 
-/* ==========================================================================
-   INFORMATION TABLE
-   ========================================================================== */
-
 .sme-field-table {
     overflow: hidden;
     border: 1.5px solid #94a3b8;
     border-radius: 10px;
-    background: #fff;
 }
 
 .sme-field-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns:
+        repeat(
+            2,
+            minmax(0, 1fr)
+        );
 }
 
 .sme-field {
@@ -405,28 +372,18 @@
     border-bottom: 0;
 }
 
-.sme-field:nth-last-child(2) {
-    border-bottom: 0;
-}
-
 .sme-field-label {
     display: block;
     margin-bottom: 5px;
     font-size: 9px;
-    line-height: 1.3;
     font-weight: 850;
     text-transform: uppercase;
-    letter-spacing: .025em;
     color: #475569;
 }
 
 .sme-required {
     color: #dc2626;
 }
-
-/* ==========================================================================
-   CONTROLS
-   ========================================================================== */
 
 .sme-control {
     width: 100%;
@@ -438,25 +395,17 @@
     color: #1e293b;
     outline: none;
     font-size: 12px;
-    line-height: 1.35;
     transition: .15s ease;
 }
 
 input.sme-control,
 select.sme-control {
     height: 40px;
-    padding: 0 10px;
 }
 
 textarea.sme-control {
     min-height: 82px;
-    padding: 9px 10px;
     resize: vertical;
-    line-height: 1.5;
-}
-
-.sme-control::placeholder {
-    color: #94a3b8;
 }
 
 .sme-control:hover {
@@ -465,7 +414,9 @@ textarea.sme-control {
 
 .sme-control:focus {
     border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, .09);
+    box-shadow:
+        0 0 0 3px
+        rgba(37,99,235,.09);
 }
 
 .sme-control-error {
@@ -481,13 +432,11 @@ textarea.sme-control {
     color: #dc2626;
 }
 
-/* ==========================================================================
-   ATTACHMENT COLUMNS
-   ========================================================================== */
-
 .sme-attachment-grid {
     display: grid;
-    grid-template-columns: minmax(0, 1.08fr) minmax(0, .92fr);
+    grid-template-columns:
+        minmax(0, 1.08fr)
+        minmax(0, .92fr);
     gap: 12px;
     align-items: stretch;
 }
@@ -542,7 +491,6 @@ textarea.sme-control {
 .sme-attachment-title {
     margin: 0;
     font-size: 10px;
-    line-height: 1.3;
     font-weight: 850;
     color: #1e293b;
 }
@@ -550,12 +498,10 @@ textarea.sme-control {
 .sme-attachment-description {
     margin: 2px 0 0;
     font-size: 7.5px;
-    line-height: 1.4;
     color: #64748b;
 }
 
 .sme-attachment-badge {
-    flex-shrink: 0;
     padding: 4px 7px;
     border: 1px solid #cbd5e1;
     border-radius: 999px;
@@ -573,10 +519,6 @@ textarea.sme-control {
     gap: 8px;
     padding: 10px;
 }
-
-/* ==========================================================================
-   INFO / COMPRESSION
-   ========================================================================== */
 
 .sme-info {
     display: flex;
@@ -603,41 +545,13 @@ textarea.sme-control {
     color: #1d4ed8;
 }
 
-.sme-compression {
-    padding: 8px 9px;
-    border: 1px solid #c7d2fe;
-    border-radius: 8px;
-    background: #eef2ff;
-    color: #4338ca;
-    font-size: 7px;
-    line-height: 1.6;
-}
-
-.sme-compression.success {
-    border-color: #a7f3d0;
-    background: #ecfdf5;
-    color: #047857;
-}
-
-.sme-compression.warning {
-    border-color: #fde68a;
-    background: #fffbeb;
-    color: #a16207;
-}
-
-.sme-compression.error {
-    border-color: #fecaca;
-    background: #fff1f2;
-    color: #be123c;
-}
-
-/* ==========================================================================
-   MODE
-   ========================================================================== */
-
 .sme-mode-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns:
+        repeat(
+            2,
+            minmax(0,1fr)
+        );
     gap: 7px;
 }
 
@@ -652,7 +566,6 @@ textarea.sme-control {
     background: #fff;
     color: #475569;
     cursor: pointer;
-    transition: .15s ease;
 }
 
 .sme-mode-btn:hover {
@@ -678,7 +591,8 @@ textarea.sme-control {
     color: #64748b;
 }
 
-.sme-mode-btn.active .sme-mode-icon {
+.sme-mode-btn.active
+.sme-mode-icon {
     background: #e0e7ff;
     color: #4f46e5;
 }
@@ -686,22 +600,15 @@ textarea.sme-control {
 .sme-mode-name {
     display: block;
     font-size: 8px;
-    line-height: 1.3;
     font-weight: 850;
-    color: #334155;
 }
 
 .sme-mode-desc {
     display: block;
     margin-top: 1px;
     font-size: 7px;
-    line-height: 1.35;
     color: #64748b;
 }
-
-/* ==========================================================================
-   CURRENT FILE
-   ========================================================================== */
 
 .sme-current-file {
     display: flex;
@@ -734,7 +641,6 @@ textarea.sme-control {
 .sme-current-file-label {
     margin: 0;
     font-size: 7px;
-    line-height: 1.2;
     font-weight: 850;
     color: #64748b;
 }
@@ -746,7 +652,6 @@ textarea.sme-control {
     text-overflow: ellipsis;
     white-space: nowrap;
     font-size: 8px;
-    line-height: 1.35;
     font-weight: 750;
     color: #334155;
 }
@@ -758,16 +663,14 @@ textarea.sme-control {
     border: 1px solid #cbd5e1;
     border-radius: 999px;
     background: #fff;
-    color: #64748b;
     font-size: 6px;
     font-weight: 850;
-    text-transform: uppercase;
+    color: #64748b;
 }
 
 .sme-current-file-empty {
     margin: 0;
     font-size: 8px;
-    line-height: 1.3;
     font-weight: 850;
     color: #b45309;
 }
@@ -792,16 +695,7 @@ textarea.sme-control {
     text-decoration: none;
     font-size: 7.5px;
     font-weight: 850;
-    white-space: nowrap;
 }
-
-.sme-view-btn:hover {
-    background: #e0e7ff;
-}
-
-/* ==========================================================================
-   UPLOAD
-   ========================================================================== */
 
 .sme-upload-box {
     position: relative;
@@ -816,7 +710,6 @@ textarea.sme-control {
     background: #f8fafc;
     text-align: center;
     cursor: pointer;
-    transition: .15s ease;
 }
 
 .sme-upload-box:hover {
@@ -841,14 +734,14 @@ textarea.sme-control {
     color: #4f46e5;
 }
 
-.sme-upload-box.has-file .sme-upload-icon {
+.sme-upload-box.has-file
+.sme-upload-icon {
     background: #d1fae5;
     color: #059669;
 }
 
 .sme-upload-title {
     font-size: 8.5px;
-    line-height: 1.3;
     font-weight: 850;
     color: #334155;
 }
@@ -877,10 +770,6 @@ textarea.sme-control {
     cursor: pointer;
     opacity: 0;
 }
-
-/* ==========================================================================
-   SELECTED FILE
-   ========================================================================== */
 
 .sme-selected-file {
     display: flex;
@@ -912,7 +801,6 @@ textarea.sme-control {
 .sme-selected-title {
     margin: 0;
     font-size: 7px;
-    line-height: 1.2;
     font-weight: 850;
     color: #047857;
 }
@@ -923,22 +811,18 @@ textarea.sme-control {
     text-overflow: ellipsis;
     white-space: nowrap;
     font-size: 7.5px;
-    line-height: 1.3;
     font-weight: 750;
-    color: #334155;
 }
 
 .sme-selected-size {
     margin: 2px 0 0;
     font-size: 6.5px;
-    line-height: 1.4;
     color: #64748b;
 }
 
 .sme-clear-btn {
     width: 26px;
     height: 26px;
-    flex: 0 0 26px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -949,13 +833,57 @@ textarea.sme-control {
     cursor: pointer;
 }
 
-.sme-clear-btn:hover {
-    background: #dcfce7;
+.sme-compression {
+    padding: 9px;
+    border: 1px solid #c7d2fe;
+    border-radius: 8px;
+    background: #eef2ff;
+    color: #4338ca;
+    font-size: 7px;
+    line-height: 1.6;
 }
 
-/* ==========================================================================
-   CAMERA
-   ========================================================================== */
+.sme-compression.success {
+    border-color: #a7f3d0;
+    background: #ecfdf5;
+    color: #047857;
+}
+
+.sme-compression.warning {
+    border-color: #fde68a;
+    background: #fffbeb;
+    color: #a16207;
+}
+
+.sme-compression.error {
+    border-color: #fecaca;
+    background: #fff1f2;
+    color: #be123c;
+}
+
+.sme-pdf-preview {
+    overflow: hidden;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #f8fafc;
+}
+
+.sme-pdf-preview-header {
+    padding: 7px 9px;
+    border-bottom: 1px solid #cbd5e1;
+    background: #f8fafc;
+    color: #475569;
+    font-size: 7px;
+    font-weight: 850;
+}
+
+.sme-pdf-preview-frame {
+    display: block;
+    width: 100%;
+    height: 430px;
+    border: 0;
+    background: #fff;
+}
 
 .sme-camera-box {
     overflow: hidden;
@@ -970,7 +898,8 @@ textarea.sme-control {
     background: #0f172a;
 }
 
-.sme-camera-video {
+.sme-camera-video,
+.sme-camera-image {
     width: 100%;
     height: 220px;
     display: block;
@@ -981,11 +910,6 @@ textarea.sme-control {
 .sme-camera-image {
     position: absolute;
     inset: 0;
-    width: 100%;
-    height: 100%;
-    display: block;
-    object-fit: contain;
-    background: #0f172a;
 }
 
 .sme-camera-placeholder {
@@ -1021,7 +945,6 @@ textarea.sme-control {
 .sme-camera-placeholder-desc {
     margin: 2px 0 0;
     font-size: 6.5px;
-    line-height: 1.4;
     color: #64748b;
 }
 
@@ -1033,11 +956,10 @@ textarea.sme-control {
     z-index: 5;
     padding: 6px;
     border-radius: 6px;
-    background: rgba(127, 29, 29, .94);
+    background: rgba(127,29,29,.94);
     color: #fecaca;
     font-size: 7px;
     font-weight: 700;
-    line-height: 1.4;
 }
 
 .sme-camera-frame {
@@ -1050,7 +972,11 @@ textarea.sme-control {
 
 .sme-camera-actions {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns:
+        repeat(
+            3,
+            minmax(0,1fr)
+        );
     gap: 5px;
     padding: 6px;
     background: #111827;
@@ -1058,11 +984,6 @@ textarea.sme-control {
 
 .sme-camera-btn {
     min-height: 32px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    padding: 0 5px;
     border-radius: 6px;
     font-size: 7px;
     font-weight: 850;
@@ -1080,18 +1001,10 @@ textarea.sme-control {
     color: #fff;
 }
 
-.sme-camera-primary:hover:not(:disabled) {
-    background: #4338ca;
-}
-
 .sme-camera-success {
     border: 1px solid #059669;
     background: #10b981;
     color: #fff;
-}
-
-.sme-camera-success:hover:not(:disabled) {
-    background: #059669;
 }
 
 .sme-camera-secondary {
@@ -1099,14 +1012,6 @@ textarea.sme-control {
     background: #fff;
     color: #334155;
 }
-
-.sme-camera-secondary:hover:not(:disabled) {
-    background: #f1f5f9;
-}
-
-/* ==========================================================================
-   SCAN RESULT
-   ========================================================================== */
 
 .sme-scan-result {
     padding: 8px;
@@ -1124,7 +1029,6 @@ textarea.sme-control {
 .sme-scan-title {
     margin: 0;
     font-size: 8px;
-    line-height: 1.3;
     font-weight: 850;
     color: #065f46;
 }
@@ -1132,7 +1036,6 @@ textarea.sme-control {
 .sme-scan-desc {
     margin: 2px 0 0;
     font-size: 6.8px;
-    line-height: 1.4;
     color: #047857;
 }
 
@@ -1151,16 +1054,12 @@ textarea.sme-control {
     margin-top: 4px;
     text-align: center;
     font-size: 7px;
-    line-height: 1.45;
     font-weight: 850;
     color: #047857;
 }
 
 .sme-retake {
     min-height: 26px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
     padding: 0 8px;
     border: 1px solid #6ee7b7;
     border-radius: 6px;
@@ -1170,14 +1069,6 @@ textarea.sme-control {
     font-weight: 850;
     cursor: pointer;
 }
-
-.sme-retake:hover {
-    background: #f0fdf4;
-}
-
-/* ==========================================================================
-   PHYSICAL ARCHIVE
-   ========================================================================== */
 
 .sme-physical-box {
     display: flex;
@@ -1203,9 +1094,7 @@ textarea.sme-control {
 .sme-physical-title {
     margin: 7px 0 0;
     font-size: 10px;
-    line-height: 1.3;
     font-weight: 850;
-    color: #334155;
 }
 
 .sme-physical-desc {
@@ -1219,7 +1108,8 @@ textarea.sme-control {
     margin-top: 11px;
 }
 
-.sme-example {
+.sme-example,
+.sme-note {
     margin-top: 6px;
     padding: 7px;
     border: 1px solid #cbd5e1;
@@ -1227,35 +1117,13 @@ textarea.sme-control {
     background: #fff;
 }
 
-.sme-example p {
-    margin: 0;
-    font-size: 7px;
-    line-height: 1.45;
-    color: #64748b;
-}
-
-.sme-example strong {
-    color: #334155;
-}
-
-.sme-note {
-    margin-top: auto;
-    padding: 7px;
-    border: 1px solid #cbd5e1;
-    border-radius: 6px;
-    background: #fff;
-}
-
+.sme-example p,
 .sme-note p {
     margin: 0;
     font-size: 7px;
     line-height: 1.45;
     color: #64748b;
 }
-
-/* ==========================================================================
-   FOOTER
-   ========================================================================== */
 
 .sme-footer {
     display: flex;
@@ -1279,7 +1147,6 @@ textarea.sme-control {
     font-weight: 850;
     text-decoration: none;
     cursor: pointer;
-    transition: .15s ease;
 }
 
 .sme-footer-cancel {
@@ -1288,21 +1155,10 @@ textarea.sme-control {
     color: #475569;
 }
 
-.sme-footer-cancel:hover {
-    background: #f1f5f9;
-    border-color: #94a3b8;
-}
-
 .sme-footer-submit {
     border: 1.5px solid #2563eb;
     background: #2563eb;
     color: #fff;
-    box-shadow: 0 3px 8px rgba(37, 99, 235, .14);
-}
-
-.sme-footer-submit:hover:not(:disabled) {
-    background: #1d4ed8;
-    border-color: #1d4ed8;
 }
 
 .sme-footer-submit:disabled {
@@ -1310,17 +1166,9 @@ textarea.sme-control {
     cursor: not-allowed;
 }
 
-/* ==========================================================================
-   UTIL
-   ========================================================================== */
-
 .sme-hidden {
     display: none !important;
 }
-
-/* ==========================================================================
-   RESPONSIVE
-   ========================================================================== */
 
 @media (max-width: 900px) {
     .sme-attachment-grid {
@@ -1346,10 +1194,6 @@ textarea.sme-control {
         flex-direction: column;
     }
 
-    .sme-header-badge {
-        align-self: flex-start;
-    }
-
     .sme-body {
         padding: 11px;
     }
@@ -1364,14 +1208,6 @@ textarea.sme-control {
         border-right: 0;
     }
 
-    .sme-field {
-        border-bottom: 1.5px solid #cbd5e1;
-    }
-
-    .sme-field:last-child {
-        border-bottom: 0;
-    }
-
     .sme-field-full {
         grid-column: auto;
     }
@@ -1379,14 +1215,6 @@ textarea.sme-control {
     .sme-mode-grid,
     .sme-camera-actions {
         grid-template-columns: 1fr;
-    }
-
-    .sme-scan-top {
-        flex-direction: column;
-    }
-
-    .sme-retake {
-        width: 100%;
     }
 
     .sme-footer {
@@ -1417,120 +1245,53 @@ textarea.sme-control {
         padding: 9px;
     }
 
-    .sme-field {
-        padding: 9px;
-    }
-
-    .sme-attachment-body {
-        padding: 8px;
-    }
-
-    .sme-control {
-        font-size: 11px;
+    .sme-camera-video,
+    .sme-camera-image {
+        height: 200px;
     }
 
     .sme-camera-preview {
         min-height: 200px;
     }
-
-    .sme-camera-video {
-        height: 200px;
-    }
 }
 </style>
 
-
 <div class="sme-page">
 
-    {{-- =========================================================================
-         KEMBALI
-    ========================================================================= --}}
-
     <div class="sme-top-action">
-
         <a
             href="{{ route('surat-masuk.index') }}"
             class="sme-back-btn"
         >
-            <svg
-                class="h-3.5 w-3.5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-            >
-                <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                />
-            </svg>
-
-            Kembali
+            ← Kembali
         </a>
-
     </div>
 
-
-    {{-- =========================================================================
-         ERROR
-    ========================================================================= --}}
-
     @if($errors->any())
-
         <div class="sme-error-box">
-
             <div class="sme-error-inner">
 
                 <div class="sme-error-icon">
-
-                    <svg
-                        class="h-4 w-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M12 9v4m0 4h.01M10.29 3.86l-8.82 15A2 2 0 003.2 21.86h17.6a2 2 0 001.73-3l-8.82-15a2 2 0 013.42 0z"
-                        />
-                    </svg>
-
+                    !
                 </div>
 
                 <div>
-
                     <p class="sme-error-title">
                         Data belum dapat diperbarui.
                     </p>
 
                     <ul class="sme-error-list">
-
                         @foreach($errors->all() as $error)
-
                             <li>
                                 {{ $error }}
                             </li>
-
                         @endforeach
-
                     </ul>
-
                 </div>
 
             </div>
-
         </div>
-
     @endif
-
-
-    {{-- =========================================================================
-         FORM
-    ========================================================================= --}}
 
     <form
         id="sme-form"
@@ -1542,53 +1303,23 @@ textarea.sme-control {
         @csrf
         @method('PUT')
 
-
         <input
             type="hidden"
             name="nomor_agenda"
             value="{{ old('nomor_agenda', $suratMasuk->nomor_agenda) }}"
         >
 
-
         <div class="sme-main-card">
-
-            {{-- =========================================================================
-                 HEADER
-            ========================================================================= --}}
 
             <div class="sme-system-header">
 
                 <div class="sme-header-left">
 
                     <div class="sme-header-icon">
-
-                        <svg
-                            class="h-5 w-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                            aria-hidden="true"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="1.8"
-                                d="M4 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V6z"
-                            />
-
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="1.8"
-                                d="M8 11h8M8 15h5"
-                            />
-                        </svg>
-
+                        ✎
                     </div>
 
-
-                    <div class="min-w-0">
-
+                    <div>
                         <p class="sme-header-label">
                             Sistem Arsip Masuk
                         </p>
@@ -1598,14 +1329,11 @@ textarea.sme-control {
                         </h1>
 
                         <p class="sme-header-subtitle">
-                            Perbarui data surat masuk yang tersimpan
-                            dalam arsip digital.
+                            Perbarui data dan lampiran surat masuk.
                         </p>
-
                     </div>
 
                 </div>
-
 
                 <span class="sme-header-badge">
                     Arsip Digital
@@ -1613,16 +1341,11 @@ textarea.sme-control {
 
             </div>
 
-
-            {{-- =========================================================================
-                 BODY
-            ========================================================================= --}}
-
             <div class="sme-body">
 
-                {{-- =========================================================================
-                     INFORMASI UTAMA
-                ========================================================================= --}}
+                {{-- =============================================================
+                     INFORMASI
+                ============================================================= --}}
 
                 <section class="sme-section">
 
@@ -1631,25 +1354,20 @@ textarea.sme-control {
                         <div class="sme-section-marker"></div>
 
                         <div>
-
                             <h2 class="sme-section-title">
                                 Informasi Utama Surat
                             </h2>
 
                             <p class="sme-section-description">
-                                Perbarui identitas dan informasi utama surat masuk.
+                                Perbarui informasi utama surat.
                             </p>
-
                         </div>
 
                     </div>
 
-
                     <div class="sme-field-table">
 
                         <div class="sme-field-grid">
-
-                            {{-- NOMOR SURAT --}}
 
                             <div class="sme-field">
 
@@ -1667,24 +1385,17 @@ textarea.sme-control {
                                     type="text"
                                     maxlength="255"
                                     required
-                                    autocomplete="off"
                                     value="{{ old('nomor_surat', $suratMasuk->nomor_surat) }}"
-                                    placeholder="Contoh: 005/B/I/2026"
                                     class="sme-control {{ $errors->has('nomor_surat') ? 'sme-control-error' : '' }}"
                                 >
 
                                 @error('nomor_surat')
-
                                     <p class="sme-field-error">
                                         {{ $message }}
                                     </p>
-
                                 @enderror
 
                             </div>
-
-
-                            {{-- PENGIRIM --}}
 
                             <div class="sme-field">
 
@@ -1702,24 +1413,17 @@ textarea.sme-control {
                                     type="text"
                                     maxlength="255"
                                     required
-                                    autocomplete="organization"
                                     value="{{ old('pengirim', $suratMasuk->pengirim) }}"
-                                    placeholder="Nama instansi pengirim"
                                     class="sme-control {{ $errors->has('pengirim') ? 'sme-control-error' : '' }}"
                                 >
 
                                 @error('pengirim')
-
                                     <p class="sme-field-error">
                                         {{ $message }}
                                     </p>
-
                                 @enderror
 
                             </div>
-
-
-                            {{-- TANGGAL SURAT --}}
 
                             <div class="sme-field">
 
@@ -1741,17 +1445,12 @@ textarea.sme-control {
                                 >
 
                                 @error('tanggal_surat')
-
                                     <p class="sme-field-error">
                                         {{ $message }}
                                     </p>
-
                                 @enderror
 
                             </div>
-
-
-                            {{-- TANGGAL TERIMA --}}
 
                             <div class="sme-field">
 
@@ -1773,17 +1472,12 @@ textarea.sme-control {
                                 >
 
                                 @error('tanggal_terima')
-
                                     <p class="sme-field-error">
                                         {{ $message }}
                                     </p>
-
                                 @enderror
 
                             </div>
-
-
-                            {{-- KATEGORI --}}
 
                             <div class="sme-field">
 
@@ -1802,11 +1496,7 @@ textarea.sme-control {
                                     class="sme-control {{ $errors->has('kategori_surat_id') ? 'sme-control-error' : '' }}"
                                 >
 
-                                    <option
-                                        value=""
-                                        disabled
-                                        @selected(!$selectedKategori)
-                                    >
+                                    <option value="">
                                         Pilih kategori
                                     </option>
 
@@ -1830,29 +1520,13 @@ textarea.sme-control {
 
                                 </select>
 
-                                @if(
-                                    !isset($kategoris) ||
-                                    $kategoris->isEmpty()
-                                )
-
-                                    <p class="sme-field-error">
-                                        Belum ada kategori surat yang tersedia.
-                                    </p>
-
-                                @endif
-
                                 @error('kategori_surat_id')
-
                                     <p class="sme-field-error">
                                         {{ $message }}
                                     </p>
-
                                 @enderror
 
                             </div>
-
-
-                            {{-- STATUS --}}
 
                             <div class="sme-field">
 
@@ -1887,17 +1561,12 @@ textarea.sme-control {
                                 </select>
 
                                 @error('status')
-
                                     <p class="sme-field-error">
                                         {{ $message }}
                                     </p>
-
                                 @enderror
 
                             </div>
-
-
-                            {{-- PERIHAL --}}
 
                             <div class="sme-field sme-field-full">
 
@@ -1915,16 +1584,13 @@ textarea.sme-control {
                                     rows="3"
                                     maxlength="1000"
                                     required
-                                    placeholder="Tuliskan perihal surat"
                                     class="sme-control {{ $errors->has('perihal') ? 'sme-control-error' : '' }}"
                                 >{{ old('perihal', $suratMasuk->perihal) }}</textarea>
 
                                 @error('perihal')
-
                                     <p class="sme-field-error">
                                         {{ $message }}
                                     </p>
-
                                 @enderror
 
                             </div>
@@ -1935,10 +1601,9 @@ textarea.sme-control {
 
                 </section>
 
-
-                {{-- =========================================================================
+                {{-- =============================================================
                      LAMPIRAN
-                ========================================================================= --}}
+                ============================================================= --}}
 
                 <section class="sme-section">
 
@@ -1947,26 +1612,22 @@ textarea.sme-control {
                         <div class="sme-section-marker sme-section-marker-indigo"></div>
 
                         <div>
-
                             <h2 class="sme-section-title">
                                 Lampiran Dokumen & Arsip Fisik
                             </h2>
 
                             <p class="sme-section-description">
-                                Periksa lampiran lama atau upload/scan
-                                dokumen pengganti.
+                                PDF, JPG, JPEG, dan PNG dapat dikompres sebelum disimpan.
                             </p>
-
                         </div>
 
                     </div>
 
-
                     <div class="sme-attachment-grid">
 
-                        {{-- =========================================================================
+                        {{-- =====================================================
                              DIGITAL
-                        ========================================================================= --}}
+                        ====================================================== --}}
 
                         <div class="sme-attachment-card">
 
@@ -1975,33 +1636,10 @@ textarea.sme-control {
                                 <div class="sme-attachment-header-left">
 
                                     <div class="sme-attachment-icon">
-
-                                        <svg
-                                            class="h-4 w-4"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="1.8"
-                                                d="M7 3h7l4 4v14H7a2 2 0 01-2-2V5a2 2 0 012-2z"
-                                            />
-
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="1.8"
-                                                d="M14 3v5h5"
-                                            />
-                                        </svg>
-
+                                        📄
                                     </div>
 
-
-                                    <div class="min-w-0">
-
+                                    <div>
                                         <h3 class="sme-attachment-title">
                                             Berkas Digital
                                         </h3>
@@ -2009,11 +1647,9 @@ textarea.sme-control {
                                         <p class="sme-attachment-description">
                                             PDF, JPG, JPEG, PNG · Maksimal 10 MB
                                         </p>
-
                                     </div>
 
                                 </div>
-
 
                                 <span class="sme-attachment-badge">
                                     Opsional
@@ -2021,40 +1657,23 @@ textarea.sme-control {
 
                             </div>
 
-
                             <div class="sme-attachment-body">
-
-                                {{-- INFO KOMPRESI --}}
 
                                 <div class="sme-info">
 
-                                    <svg
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                        aria-hidden="true"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M13 16h-1v-4h-1m1-4h.01M12 21a9 9 0 100-18 9 9 0 000-18z"
-                                        />
-                                    </svg>
+                                    <span>
+                                        ℹ
+                                    </span>
 
                                     <p>
-                                        <strong>Maksimal 10 MB.</strong>
-                                        PDF tetap PDF.
-                                        JPG/JPEG/PNG otomatis diproses,
-                                        di-resize bila diperlukan, lalu
-                                        dikompres menjadi JPG.
-                                        PDF akan dikompres otomatis saat data diperbarui.
+                                        <strong>PDF:</strong>
+                                        dikompresi langsung di browser dan
+                                        hasil PDF dapat dilihat sebelum update.
+                                        <strong>JPG/JPEG/PNG:</strong>
+                                        di-resize dan dikompresi menjadi JPG.
                                     </p>
 
                                 </div>
-
-
-                                {{-- MODE --}}
 
                                 <div class="sme-mode-grid">
 
@@ -2066,25 +1685,10 @@ textarea.sme-control {
                                     >
 
                                         <span class="sme-mode-icon">
-
-                                            <svg
-                                                class="h-3.5 w-3.5"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2"
-                                                    d="M12 16V4m0 0L7 9m5-5l5 5M5 20h14"
-                                                />
-                                            </svg>
-
+                                            ↑
                                         </span>
 
                                         <span>
-
                                             <span class="sme-mode-name">
                                                 Upload File
                                             </span>
@@ -2092,11 +1696,9 @@ textarea.sme-control {
                                             <span class="sme-mode-desc">
                                                 Pilih dari perangkat
                                             </span>
-
                                         </span>
 
                                     </button>
-
 
                                     <button
                                         type="button"
@@ -2106,25 +1708,10 @@ textarea.sme-control {
                                     >
 
                                         <span class="sme-mode-icon">
-
-                                            <svg
-                                                class="h-3.5 w-3.5"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2"
-                                                    d="M3 8h2l2-3h10l2 3h2a2 2 0 012 2v9a2 2 0 01-2 2H3a2 2 0 01-2-2v-9a2 2 0 012-2zm9 3a3 3 0 100 6 3 3 0 000-6z"
-                                                />
-                                            </svg>
-
+                                            ◉
                                         </span>
 
                                         <span>
-
                                             <span class="sme-mode-name">
                                                 Scan Kamera
                                             </span>
@@ -2132,36 +1719,19 @@ textarea.sme-control {
                                             <span class="sme-mode-desc">
                                                 Scan dokumen baru
                                             </span>
-
                                         </span>
 
                                     </button>
 
                                 </div>
 
-
                                 {{-- FILE LAMA --}}
 
                                 <div class="sme-current-file">
 
                                     <div class="sme-current-file-icon">
-
-                                        <svg
-                                            class="h-3.5 w-3.5"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2"
-                                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 011.414.414l4.414 4.414A2 2 0 0118 8.414V19a2 2 0 01-2 2z"
-                                            />
-                                        </svg>
-
+                                        □
                                     </div>
-
 
                                     <div class="sme-current-file-content">
 
@@ -2200,7 +1770,6 @@ textarea.sme-control {
 
                                     </div>
 
-
                                     @if($hasCurrentAttachment)
 
                                         <a
@@ -2216,10 +1785,9 @@ textarea.sme-control {
 
                                 </div>
 
-
-                                {{-- =========================================================
+                                {{-- =================================================
                                      UPLOAD PANEL
-                                ========================================================== --}}
+                                ================================================== --}}
 
                                 <div id="sme-upload-panel">
 
@@ -2230,23 +1798,8 @@ textarea.sme-control {
                                     >
 
                                         <span class="sme-upload-icon">
-
-                                            <svg
-                                                class="h-4 w-4"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="1.8"
-                                                    d="M12 16V4m0 0L7 9m5-5l5 5M5 20h14"
-                                                />
-                                            </svg>
-
+                                            ↑
                                         </span>
-
 
                                         <span
                                             id="sme-upload-title"
@@ -2255,16 +1808,13 @@ textarea.sme-control {
                                             Pilih file baru
                                         </span>
 
-
                                         <span class="sme-upload-format">
                                             PDF, JPG, JPEG, PNG
                                         </span>
 
-
                                         <span class="sme-upload-limit">
                                             Maksimal 10 MB
                                         </span>
-
 
                                         <input
                                             type="file"
@@ -2276,32 +1826,14 @@ textarea.sme-control {
 
                                     </label>
 
-
-                                    {{-- FILE TERPILIH --}}
-
                                     <div
                                         id="sme-selected-file"
                                         class="sme-selected-file sme-hidden"
                                     >
 
                                         <div class="sme-selected-icon">
-
-                                            <svg
-                                                class="h-3.5 w-3.5"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2"
-                                                    d="M5 13l4 4L19 7"
-                                                />
-                                            </svg>
-
+                                            ✓
                                         </div>
-
 
                                         <div class="sme-selected-content">
 
@@ -2312,12 +1844,10 @@ textarea.sme-control {
                                                 File siap digunakan
                                             </p>
 
-
                                             <p
                                                 id="sme-selected-name"
                                                 class="sme-selected-name"
                                             ></p>
-
 
                                             <p
                                                 id="sme-selected-size"
@@ -2326,47 +1856,31 @@ textarea.sme-control {
 
                                         </div>
 
-
                                         <button
                                             type="button"
                                             id="sme-clear-file"
                                             class="sme-clear-btn"
-                                            title="Hapus file baru"
-                                            aria-label="Hapus file baru"
                                         >
-
-                                            <svg
-                                                class="h-3.5 w-3.5"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2"
-                                                    d="M6 18L18 6M6 6l12 12"
-                                                />
-                                            </svg>
-
+                                            ×
                                         </button>
 
                                     </div>
-
-
-                                    {{-- STATUS KOMPRESI --}}
 
                                     <div
                                         id="sme-compression"
                                         class="sme-compression sme-hidden"
                                     ></div>
 
+                                    <div
+                                        id="sme-pdf-preview"
+                                        class="sme-pdf-preview sme-hidden"
+                                    ></div>
+
                                 </div>
 
-
-                                {{-- =========================================================
+                                {{-- =================================================
                                      CAMERA PANEL
-                                ========================================================== --}}
+                                ================================================== --}}
 
                                 <div
                                     id="sme-camera-panel"
@@ -2385,14 +1899,12 @@ textarea.sme-control {
                                                 playsinline
                                             ></video>
 
-
                                             <img
                                                 id="sme-camera-image"
                                                 src=""
-                                                alt="Hasil scan dokumen"
+                                                alt="Hasil scan"
                                                 class="sme-camera-image sme-hidden"
                                             >
-
 
                                             <div
                                                 id="sme-camera-placeholder"
@@ -2402,56 +1914,29 @@ textarea.sme-control {
                                                 <div>
 
                                                     <div class="sme-camera-placeholder-icon">
-
-                                                        <svg
-                                                            class="h-5 w-5"
-                                                            fill="none"
-                                                            stroke="currentColor"
-                                                            viewBox="0 0 24 24"
-                                                        >
-                                                            <path
-                                                                stroke-linecap="round"
-                                                                stroke-linejoin="round"
-                                                                stroke-width="1.8"
-                                                                d="M3 7h4l2-3h6l2 3h4a2 2 0 012 2v10a2 2 0 01-2 2H3a2 2 0 01-2-2V9a2 2 0 012-2z"
-                                                            />
-
-                                                            <circle
-                                                                cx="12"
-                                                                cy="13"
-                                                                r="3"
-                                                            />
-
-                                                        </svg>
-
+                                                        ◉
                                                     </div>
-
 
                                                     <p class="sme-camera-placeholder-title">
                                                         Kamera belum aktif
                                                     </p>
 
-
                                                     <p class="sme-camera-placeholder-desc">
-                                                        Aktifkan kamera untuk scan dokumen.
+                                                        Aktifkan kamera untuk scan.
                                                     </p>
 
                                                 </div>
 
                                             </div>
 
-
                                             <div
                                                 id="sme-camera-error"
                                                 class="sme-camera-error sme-hidden"
-                                                role="alert"
                                             ></div>
-
 
                                             <div class="sme-camera-frame"></div>
 
                                         </div>
-
 
                                         <div class="sme-camera-actions">
 
@@ -2463,7 +1948,6 @@ textarea.sme-control {
                                                 Aktifkan Kamera
                                             </button>
 
-
                                             <button
                                                 type="button"
                                                 id="sme-capture"
@@ -2472,7 +1956,6 @@ textarea.sme-control {
                                             >
                                                 Ambil Gambar
                                             </button>
-
 
                                             <button
                                                 type="button"
@@ -2485,7 +1968,6 @@ textarea.sme-control {
 
                                         </div>
 
-
                                         <div
                                             id="sme-scan-result"
                                             class="sme-scan-result sme-hidden"
@@ -2493,19 +1975,16 @@ textarea.sme-control {
 
                                             <div class="sme-scan-top">
 
-                                                <div class="min-w-0">
-
+                                                <div>
                                                     <p class="sme-scan-title">
                                                         Hasil scan siap
                                                     </p>
 
                                                     <p class="sme-scan-desc">
-                                                        Hasil ini akan menggantikan
-                                                        lampiran lama setelah update berhasil.
+                                                        Hasil scan akan menggantikan
+                                                        lampiran lama setelah update.
                                                     </p>
-
                                                 </div>
-
 
                                                 <button
                                                     type="button"
@@ -2517,14 +1996,12 @@ textarea.sme-control {
 
                                             </div>
 
-
                                             <img
                                                 id="sme-scan-preview"
                                                 src=""
-                                                alt="Preview hasil scan"
+                                                alt="Preview scan"
                                                 class="sme-scan-preview"
                                             >
-
 
                                             <div
                                                 id="sme-scan-info"
@@ -2535,7 +2012,6 @@ textarea.sme-control {
 
                                     </div>
 
-
                                     <input
                                         type="hidden"
                                         id="sme-captured-image"
@@ -2544,9 +2020,6 @@ textarea.sme-control {
                                     >
 
                                 </div>
-
-
-                                {{-- CATATAN --}}
 
                                 <div class="sme-note">
 
@@ -2557,32 +2030,25 @@ textarea.sme-control {
 
                                 </div>
 
-
                                 @error('lampiran_file')
-
                                     <p class="sme-field-error">
                                         {{ $message }}
                                     </p>
-
                                 @enderror
 
-
                                 @error('captured_image')
-
                                     <p class="sme-field-error">
                                         {{ $message }}
                                     </p>
-
                                 @enderror
 
                             </div>
 
                         </div>
 
-
-                        {{-- =========================================================================
-                             ARSIP FISIK
-                        ========================================================================= --}}
+                        {{-- =====================================================
+                             FISIK
+                        ====================================================== --}}
 
                         <div class="sme-attachment-card">
 
@@ -2591,38 +2057,20 @@ textarea.sme-control {
                                 <div class="sme-attachment-header-left">
 
                                     <div class="sme-attachment-icon physical">
-
-                                        <svg
-                                            class="h-4 w-4"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="1.8"
-                                                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0-2V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                                            />
-                                        </svg>
-
+                                        ▣
                                     </div>
 
-
-                                    <div class="min-w-0">
-
+                                    <div>
                                         <h3 class="sme-attachment-title">
                                             Lokasi Arsip Fisik
                                         </h3>
 
                                         <p class="sme-attachment-description">
-                                            Posisi penyimpanan dokumen fisik.
+                                            Posisi dokumen fisik.
                                         </p>
-
                                     </div>
 
                                 </div>
-
 
                                 <span class="sme-attachment-badge">
                                     Opsional
@@ -2630,40 +2078,22 @@ textarea.sme-control {
 
                             </div>
 
-
                             <div class="sme-attachment-body">
 
                                 <div class="sme-physical-box">
 
                                     <div class="sme-physical-icon">
-
-                                        <svg
-                                            class="h-4 w-4"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="1.8"
-                                                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0-2V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                                            />
-                                        </svg>
-
+                                        ▣
                                     </div>
-
 
                                     <h4 class="sme-physical-title">
                                         Detail Lokasi Penyimpanan
                                     </h4>
 
-
                                     <p class="sme-physical-desc">
                                         Perbarui posisi rak, lemari, box,
-                                        atau map tempat dokumen fisik disimpan.
+                                        atau map dokumen fisik.
                                     </p>
-
 
                                     <div class="sme-physical-field">
 
@@ -2673,7 +2103,6 @@ textarea.sme-control {
                                         >
                                             Posisi Lemari / Rak / Box
                                         </label>
-
 
                                         <input
                                             id="lokasi_arsip_fisik"
@@ -2688,37 +2117,26 @@ textarea.sme-control {
                                             class="sme-control {{ $errors->has('lokasi_arsip_fisik') ? 'sme-control-error' : '' }}"
                                         >
 
-
                                         @error('lokasi_arsip_fisik')
-
                                             <p class="sme-field-error">
                                                 {{ $message }}
                                             </p>
-
                                         @enderror
 
                                     </div>
 
-
                                     <div class="sme-example">
-
                                         <p>
                                             <strong>Contoh:</strong>
-                                            Rak A-3 Box 12 atau
-                                            Lemari B-2 Map 07.
+                                            Rak A-3 Box 12 atau Lemari B-2 Map 07.
                                         </p>
-
                                     </div>
 
-
                                     <div class="sme-note">
-
                                         <p>
-                                            Lokasi fisik hanya menyimpan informasi
-                                            posisi arsip dan tidak memengaruhi
-                                            dokumen digital.
+                                            Lokasi fisik hanya mencatat lokasi dokumen
+                                            asli dan tidak memengaruhi file digital.
                                         </p>
-
                                     </div>
 
                                 </div>
@@ -2733,36 +2151,14 @@ textarea.sme-control {
 
             </div>
 
-
-            {{-- =========================================================================
-                 FOOTER
-            ========================================================================= --}}
-
             <div class="sme-footer">
 
                 <a
                     href="{{ route('surat-masuk.index') }}"
                     class="sme-footer-btn sme-footer-cancel"
                 >
-
-                    <svg
-                        class="h-3.5 w-3.5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M6 18L18 6M6 6l12 12"
-                        />
-                    </svg>
-
                     Batal
-
                 </a>
-
 
                 <button
                     type="submit"
@@ -2770,44 +2166,18 @@ textarea.sme-control {
                     class="sme-footer-btn sme-footer-submit"
                 >
 
-                    <svg
+                    <span
                         id="sme-submit-icon"
-                        class="h-3.5 w-3.5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
                     >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M5 13l4 4L19 7"
-                        />
-                    </svg>
+                        ✓
+                    </span>
 
-
-                    <svg
+                    <span
                         id="sme-submit-loading"
-                        class="sme-hidden h-3.5 w-3.5 animate-spin"
-                        fill="none"
-                        viewBox="0 0 24 24"
+                        class="sme-hidden"
                     >
-                        <circle
-                            class="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            stroke-width="4"
-                        />
-
-                        <path
-                            class="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                        />
-                    </svg>
-
+                        ...
+                    </span>
 
                     <span id="sme-submit-text">
                         Perbarui Surat Masuk
@@ -2823,2014 +2193,597 @@ textarea.sme-control {
 
 </div>
 
-
 @push('scripts')
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<script>
-document.addEventListener('DOMContentLoaded', function () {
+<script type="module">
 
-    'use strict';
-
-
-    /* =========================================================================
-       ELEMENT
-    ========================================================================= */
-
-    const form =
-        document.getElementById('sme-form');
-
-    const modeUpload =
-        document.getElementById('sme-mode-upload');
-
-    const modeCamera =
-        document.getElementById('sme-mode-camera');
-
-    const uploadPanel =
-        document.getElementById('sme-upload-panel');
-
-    const cameraPanel =
-        document.getElementById('sme-camera-panel');
-
-    const fileInput =
-        document.getElementById('lampiran_file');
-
-    const uploadBox =
-        document.getElementById('sme-upload-box');
-
-    const uploadTitle =
-        document.getElementById('sme-upload-title');
-
-    const selectedFile =
-        document.getElementById('sme-selected-file');
-
-    const selectedTitle =
-        document.getElementById('sme-selected-title');
-
-    const selectedName =
-        document.getElementById('sme-selected-name');
-
-    const selectedSize =
-        document.getElementById('sme-selected-size');
-
-    const clearFileBtn =
-        document.getElementById('sme-clear-file');
-
-    const compression =
-        document.getElementById('sme-compression');
-
-    const cameraVideo =
-        document.getElementById('sme-camera-video');
-
-    const cameraImage =
-        document.getElementById('sme-camera-image');
-
-    const cameraPlaceholder =
-        document.getElementById('sme-camera-placeholder');
-
-    const cameraError =
-        document.getElementById('sme-camera-error');
-
-    const startCameraBtn =
-        document.getElementById('sme-start-camera');
-
-    const captureBtn =
-        document.getElementById('sme-capture');
-
-    const stopCameraBtn =
-        document.getElementById('sme-stop-camera');
-
-    const scanResult =
-        document.getElementById('sme-scan-result');
-
-    const scanPreview =
-        document.getElementById('sme-scan-preview');
-
-    const scanInfo =
-        document.getElementById('sme-scan-info');
-
-    const retakeBtn =
-        document.getElementById('sme-retake');
-
-    const capturedInput =
-        document.getElementById('sme-captured-image');
-
-    const submitBtn =
-        document.getElementById('sme-submit');
-
-    const submitIcon =
-        document.getElementById('sme-submit-icon');
-
-    const submitLoading =
-        document.getElementById('sme-submit-loading');
-
-    const submitText =
-        document.getElementById('sme-submit-text');
+import initGhostscript
+    from 'https://cdn.jsdelivr.net/npm/@jspawn/ghostscript-wasm@0.0.2/gs.mjs';
 
 
-    if (
-        !form ||
-        !fileInput ||
-        !capturedInput
-    ) {
-        return;
-    }
+document.addEventListener(
+    'DOMContentLoaded',
+    function () {
+
+        'use strict';
 
 
-    /* =========================================================================
-       CONFIG
-    ========================================================================= */
+        /* ================================================================
+           ELEMENT
+        ================================================================ */
 
-    const MAX_FILE_SIZE =
-        10 * 1024 * 1024;
+        const form =
+            document.getElementById(
+                'sme-form'
+            );
 
-    /*
-     * Target hasil gambar.
-     *
-     * Bukan berarti selalu tepat 2.5 MB.
-     * Sistem mencari hasil <= target bila memungkinkan.
-     */
+        const modeUpload =
+            document.getElementById(
+                'sme-mode-upload'
+            );
 
-    const IMAGE_TARGET_SIZE =
-        2.5 * 1024 * 1024;
+        const modeCamera =
+            document.getElementById(
+                'sme-mode-camera'
+            );
 
-    /*
-     * Hard limit internal.
-     */
+        const uploadPanel =
+            document.getElementById(
+                'sme-upload-panel'
+            );
 
-    const IMAGE_HARD_LIMIT =
-        9.5 * 1024 * 1024;
+        const cameraPanel =
+            document.getElementById(
+                'sme-camera-panel'
+            );
 
-    const IMAGE_MAX_DIMENSION =
-        2200;
+        const fileInput =
+            document.getElementById(
+                'lampiran_file'
+            );
 
-    const IMAGE_MIN_DIMENSION =
-        1000;
+        const uploadBox =
+            document.getElementById(
+                'sme-upload-box'
+            );
 
-    const JPEG_QUALITIES = [
-        0.90,
-        0.86,
-        0.82,
-        0.78,
-        0.74,
-        0.70,
-        0.66,
-        0.62,
-        0.58,
-        0.54,
-        0.50,
-        0.46,
-        0.42,
-        0.38
-    ];
+        const uploadTitle =
+            document.getElementById(
+                'sme-upload-title'
+            );
 
-    const CAMERA_MAX_WIDTH =
-        1600;
+        const selectedFile =
+            document.getElementById(
+                'sme-selected-file'
+            );
 
-    const CAMERA_MAX_HEIGHT =
-        1600;
+        const selectedTitle =
+            document.getElementById(
+                'sme-selected-title'
+            );
 
-    const CAMERA_TARGET_SIZE =
-        2.5 * 1024 * 1024;
+        const selectedName =
+            document.getElementById(
+                'sme-selected-name'
+            );
 
-    const CAMERA_MAX_DATA_URL_LENGTH =
-        7 * 1024 * 1024;
+        const selectedSize =
+            document.getElementById(
+                'sme-selected-size'
+            );
 
+        const clearFileBtn =
+            document.getElementById(
+                'sme-clear-file'
+            );
 
-    let cameraStream =
-        null;
+        const compression =
+            document.getElementById(
+                'sme-compression'
+            );
 
-    let cameraPreviewObjectUrl =
-        null;
+        const pdfPreview =
+            document.getElementById(
+                'sme-pdf-preview'
+            );
 
-    let submitting =
-        false;
+        const cameraVideo =
+            document.getElementById(
+                'sme-camera-video'
+            );
 
-    /*
-     * Digunakan untuk mencegah hasil kompresi
-     * lama menimpa pilihan file baru.
-     */
+        const cameraImage =
+            document.getElementById(
+                'sme-camera-image'
+            );
 
-    let compressionToken =
-        0;
+        const cameraPlaceholder =
+            document.getElementById(
+                'sme-camera-placeholder'
+            );
 
+        const cameraError =
+            document.getElementById(
+                'sme-camera-error'
+            );
 
-    /* =========================================================================
-       UTILITY
-    ========================================================================= */
+        const startCameraBtn =
+            document.getElementById(
+                'sme-start-camera'
+            );
 
-    function formatFileSize(bytes) {
+        const captureBtn =
+            document.getElementById(
+                'sme-capture'
+            );
+
+        const stopCameraBtn =
+            document.getElementById(
+                'sme-stop-camera'
+            );
+
+        const scanResult =
+            document.getElementById(
+                'sme-scan-result'
+            );
+
+        const scanPreview =
+            document.getElementById(
+                'sme-scan-preview'
+            );
+
+        const scanInfo =
+            document.getElementById(
+                'sme-scan-info'
+            );
+
+        const retakeBtn =
+            document.getElementById(
+                'sme-retake'
+            );
+
+        const capturedInput =
+            document.getElementById(
+                'sme-captured-image'
+            );
+
+        const submitBtn =
+            document.getElementById(
+                'sme-submit'
+            );
+
+        const submitIcon =
+            document.getElementById(
+                'sme-submit-icon'
+            );
+
+        const submitLoading =
+            document.getElementById(
+                'sme-submit-loading'
+            );
+
+        const submitText =
+            document.getElementById(
+                'sme-submit-text'
+            );
+
 
         if (
-            !Number.isFinite(bytes) ||
-            bytes <= 0
+            !form ||
+            !fileInput ||
+            !capturedInput
         ) {
-            return '0 KB';
+            return;
         }
 
-        if (
-            bytes < 1024 * 1024
+
+        /* ================================================================
+           CONFIG
+        ================================================================ */
+
+        const MAX_FILE_SIZE =
+            10 *
+            1024 *
+            1024;
+
+        const IMAGE_TARGET_SIZE =
+            2.5 *
+            1024 *
+            1024;
+
+        const IMAGE_HARD_LIMIT =
+            9.5 *
+            1024 *
+            1024;
+
+        const IMAGE_MAX_DIMENSION =
+            2200;
+
+        const IMAGE_MIN_DIMENSION =
+            1000;
+
+        const JPEG_QUALITIES = [
+            0.90,
+            0.86,
+            0.82,
+            0.78,
+            0.74,
+            0.70,
+            0.66,
+            0.62,
+            0.58,
+            0.54,
+            0.50,
+            0.46,
+            0.42,
+            0.38
+        ];
+
+        const CAMERA_MAX_WIDTH =
+            1600;
+
+        const CAMERA_MAX_HEIGHT =
+            1600;
+
+        const CAMERA_TARGET_SIZE =
+            2.5 *
+            1024 *
+            1024;
+
+        const CAMERA_MAX_DATA_URL_LENGTH =
+            7 *
+            1024 *
+            1024;
+
+
+        /* ================================================================
+           STATE
+        ================================================================ */
+
+        let cameraStream =
+            null;
+
+        let submitting =
+            false;
+
+        let compressionToken =
+            0;
+
+        let ghostscriptPromise =
+            null;
+
+        let pdfPreviewUrl =
+            null;
+
+
+        /* ================================================================
+           UTILITY
+        ================================================================ */
+
+        function formatFileSize(
+            bytes
         ) {
+
+            if (
+                !Number.isFinite(bytes) ||
+                bytes <= 0
+            ) {
+                return '0 KB';
+            }
+
+            if (
+                bytes < 1024 * 1024
+            ) {
+                return (
+                    (
+                        bytes /
+                        1024
+                    ).toFixed(1) +
+                    ' KB'
+                );
+            }
+
             return (
-                (bytes / 1024).toFixed(1) +
-                ' KB'
-            );
-        }
-
-        return (
-            (
-                bytes /
-                (1024 * 1024)
-            ).toFixed(2) +
-            ' MB'
-        );
-    }
-
-
-    function getReductionPercent(
-        originalSize,
-        compressedSize
-    ) {
-
-        if (
-            !originalSize ||
-            originalSize <= 0
-        ) {
-            return 0;
-        }
-
-        return Math.max(
-            0,
-            Math.round(
                 (
-                    1 -
-                    compressedSize /
-                    originalSize
-                ) * 100
-            )
-        );
-    }
+                    bytes /
+                    (
+                        1024 *
+                        1024
+                    )
+                ).toFixed(2) +
+                ' MB'
+            );
+        }
 
 
-    function getExtension(file) {
-
-        return String(
-            file?.name || ''
-        )
-            .split('.')
-            .pop()
-            .toLowerCase();
-    }
-
-
-    function isAllowedExtension(
-        extension
-    ) {
-
-        return [
-            'pdf',
-            'jpg',
-            'jpeg',
-            'png'
-        ].includes(
-            extension
-        );
-    }
-
-
-    function isImageExtension(
-        extension
-    ) {
-
-        return [
-            'jpg',
-            'jpeg',
-            'png'
-        ].includes(
-            extension
-        );
-    }
-
-
-    /* =========================================================================
-       ALERT
-    ========================================================================= */
-
-    function showAlert(
-        icon,
-        title,
-        text
-    ) {
-
-        if (
-            typeof window.Swal !==
-            'undefined'
+        function reductionPercent(
+            original,
+            finalSize
         ) {
 
-            window.Swal.fire({
-                icon,
-                title,
-                text,
-                confirmButtonText:
-                    'Mengerti',
-                confirmButtonColor:
-                    '#2563eb'
-            });
+            if (
+                !original ||
+                original <= 0
+            ) {
+                return 0;
+            }
 
-            return;
+            return Math.max(
+                0,
+                Math.round(
+                    (
+                        1 -
+                        (
+                            finalSize /
+                            original
+                        )
+                    ) *
+                    100
+                )
+            );
         }
 
-        window.alert(
+
+        function getExtension(
+            file
+        ) {
+
+            return String(
+                file?.name ||
+                ''
+            )
+                .split('.')
+                .pop()
+                .toLowerCase();
+        }
+
+
+        function isAllowedExtension(
+            extension
+        ) {
+
+            return [
+                'pdf',
+                'jpg',
+                'jpeg',
+                'png'
+            ].includes(
+                extension
+            );
+        }
+
+
+        function isImageExtension(
+            extension
+        ) {
+
+            return [
+                'jpg',
+                'jpeg',
+                'png'
+            ].includes(
+                extension
+            );
+        }
+
+
+        function revokePdfPreview() {
+
+            if (
+                pdfPreviewUrl
+            ) {
+
+                URL.revokeObjectURL(
+                    pdfPreviewUrl
+                );
+
+                pdfPreviewUrl =
+                    null;
+            }
+        }
+
+
+        /* ================================================================
+           ALERT
+        ================================================================ */
+
+        function showAlert(
+            icon,
+            title,
             text
-        );
-    }
+        ) {
 
+            if (
+                typeof window.Swal !==
+                'undefined'
+            ) {
 
-    /* =========================================================================
-       COMPRESSION UI
-    ========================================================================= */
+                window.Swal.fire({
+                    icon,
+                    title,
+                    text,
+                    confirmButtonText:
+                        'Mengerti',
+                    confirmButtonColor:
+                        '#2563eb'
+                });
 
-    function setCompressionStatus(
-        html,
-        type = ''
-    ) {
+                return;
+            }
 
-        if (!compression) {
-            return;
+            window.alert(
+                text
+            );
         }
 
-        compression.classList.remove(
-            'sme-hidden',
-            'success',
-            'warning',
-            'error'
-        );
 
-        if (type) {
-            compression.classList.add(
+        /* ================================================================
+           COMPRESSION STATUS
+        ================================================================ */
+
+        function setCompressionStatus(
+            html,
+            type = ''
+        ) {
+
+            compression.classList.remove(
+                'sme-hidden',
+                'success',
+                'warning',
+                'error'
+            );
+
+            if (
                 type
-            );
+            ) {
+
+                compression.classList.add(
+                    type
+                );
+            }
+
+            compression.innerHTML =
+                html;
         }
 
-        compression.innerHTML =
-            html;
-    }
 
+        function clearCompressionStatus() {
 
-    function clearCompressionStatus() {
-
-        if (!compression) {
-            return;
-        }
-
-        compression.innerHTML =
-            '';
-
-        compression.classList.remove(
-            'success',
-            'warning',
-            'error'
-        );
-
-        compression.classList.add(
-            'sme-hidden'
-        );
-    }
-
-
-    /* =========================================================================
-       CAMERA ERROR
-    ========================================================================= */
-
-    function showCameraError(
-        message
-    ) {
-
-        if (!cameraError) {
-            return;
-        }
-
-        cameraError.textContent =
-            message;
-
-        cameraError.classList.remove(
-            'sme-hidden'
-        );
-    }
-
-
-    function clearCameraError() {
-
-        if (!cameraError) {
-            return;
-        }
-
-        cameraError.textContent =
-            '';
-
-        cameraError.classList.add(
-            'sme-hidden'
-        );
-    }
-
-
-    /* =========================================================================
-       MODE
-    ========================================================================= */
-
-    function setModeButton(
-        button,
-        active
-    ) {
-
-        if (!button) {
-            return;
-        }
-
-        button.classList.toggle(
-            'active',
-            active
-        );
-
-        button.setAttribute(
-            'aria-selected',
-            active
-                ? 'true'
-                : 'false'
-        );
-    }
-
-
-    function activateUploadMode() {
-
-        compressionToken++;
-
-        stopCamera();
-
-        clearScanResult();
-
-        uploadPanel.classList.remove(
-            'sme-hidden'
-        );
-
-        cameraPanel.classList.add(
-            'sme-hidden'
-        );
-
-        setModeButton(
-            modeUpload,
-            true
-        );
-
-        setModeButton(
-            modeCamera,
-            false
-        );
-
-        clearCameraError();
-    }
-
-
-    function activateCameraMode() {
-
-        compressionToken++;
-
-        stopCamera();
-
-        uploadPanel.classList.add(
-            'sme-hidden'
-        );
-
-        cameraPanel.classList.remove(
-            'sme-hidden'
-        );
-
-        setModeButton(
-            modeUpload,
-            false
-        );
-
-        setModeButton(
-            modeCamera,
-            true
-        );
-
-        clearFileSelection();
-        clearCameraError();
-        clearCompressionStatus();
-    }
-
-
-    modeUpload?.addEventListener(
-        'click',
-        activateUploadMode
-    );
-
-
-    modeCamera?.addEventListener(
-        'click',
-        activateCameraMode
-    );
-
-
-    /* =========================================================================
-       FILE DISPLAY
-    ========================================================================= */
-
-    function showSelectedFile(
-        file,
-        note = ''
-    ) {
-
-        if (!selectedFile) {
-            return;
-        }
-
-        selectedFile.classList.remove(
-            'sme-hidden'
-        );
-
-        selectedTitle.textContent =
-            'File siap digunakan';
-
-        selectedName.textContent =
-            file.name;
-
-        selectedSize.textContent =
-            formatFileSize(
-                file.size
-            ) +
-            (
-                note
-                    ? ' • ' + note
-                    : ''
-            );
-
-        uploadBox.classList.add(
-            'has-file'
-        );
-
-        uploadTitle.textContent =
-            'File siap digunakan';
-    }
-
-
-    function clearFileSelection() {
-
-        compressionToken++;
-
-        if (fileInput) {
-            fileInput.value =
+            compression.innerHTML =
                 '';
-        }
 
-        if (selectedFile) {
-            selectedFile.classList.add(
+            compression.classList.remove(
+                'success',
+                'warning',
+                'error'
+            );
+
+            compression.classList.add(
                 'sme-hidden'
             );
         }
 
-        if (selectedTitle) {
-            selectedTitle.textContent =
-                'File siap digunakan';
-        }
 
-        if (selectedName) {
-            selectedName.textContent =
-                '';
-        }
+        /* ================================================================
+           PDF PREVIEW
+        ================================================================ */
 
-        if (selectedSize) {
-            selectedSize.textContent =
-                '';
-        }
-
-        if (uploadBox) {
-            uploadBox.classList.remove(
-                'has-file'
-            );
-        }
-
-        if (uploadTitle) {
-            uploadTitle.textContent =
-                'Pilih file baru';
-        }
-
-        clearCompressionStatus();
-    }
-
-
-    clearFileBtn?.addEventListener(
-        'click',
-        function () {
-
-            clearFileSelection();
-        }
-    );
-
-
-    /* =========================================================================
-       IMAGE LOADER
-    ========================================================================= */
-
-    function loadImage(file) {
-
-        return new Promise(
-            function (
-                resolve,
-                reject
-            ) {
-
-                const objectUrl =
-                    URL.createObjectURL(
-                        file
-                    );
-
-                const image =
-                    new Image();
-
-                image.onload =
-                    function () {
-
-                        URL.revokeObjectURL(
-                            objectUrl
-                        );
-
-                        resolve(
-                            image
-                        );
-                    };
-
-                image.onerror =
-                    function () {
-
-                        URL.revokeObjectURL(
-                            objectUrl
-                        );
-
-                        reject(
-                            new Error(
-                                'Gambar tidak dapat dibaca oleh browser.'
-                            )
-                        );
-                    };
-
-                image.src =
-                    objectUrl;
-            }
-        );
-    }
-
-
-    /* =========================================================================
-       DIMENSION
-    ========================================================================= */
-
-    function calculateDimensions(
-        width,
-        height,
-        maxDimension
-    ) {
-
-        if (
-            width <= maxDimension &&
-            height <= maxDimension
+        function showPdfPreview(
+            file
         ) {
 
-            return {
-                width,
-                height
-            };
-        }
+            revokePdfPreview();
 
-        const scale =
-            Math.min(
-                maxDimension / width,
-                maxDimension / height
-            );
 
-        return {
-            width:
-                Math.max(
-                    1,
-                    Math.round(
-                        width * scale
-                    )
-                ),
-
-            height:
-                Math.max(
-                    1,
-                    Math.round(
-                        height * scale
-                    )
-                )
-        };
-    }
-
-
-    function buildDimensionList(
-        width,
-        height
-    ) {
-
-        const maxDimensions = [
-            IMAGE_MAX_DIMENSION,
-            2000,
-            1800,
-            1600,
-            1400,
-            1200,
-            IMAGE_MIN_DIMENSION
-        ];
-
-        const result = [];
-
-        maxDimensions.forEach(
-            function (
-                maxDimension
-            ) {
-
-                const dimensions =
-                    calculateDimensions(
-                        width,
-                        height,
-                        maxDimension
-                    );
-
-                if (
-                    dimensions.width <
-                        IMAGE_MIN_DIMENSION &&
-                    dimensions.height <
-                        IMAGE_MIN_DIMENSION
-                ) {
-                    return;
-                }
-
-                const duplicate =
-                    result.some(
-                        function (
-                            item
-                        ) {
-
-                            return (
-                                item.width ===
-                                    dimensions.width &&
-                                item.height ===
-                                    dimensions.height
-                            );
-                        }
-                    );
-
-                if (!duplicate) {
-                    result.push(
-                        dimensions
-                    );
-                }
-            }
-        );
-
-        return result;
-    }
-
-
-    /* =========================================================================
-       CANVAS TO FILE
-    ========================================================================= */
-
-    function canvasToFile(
-        image,
-        width,
-        height,
-        quality,
-        originalName
-    ) {
-
-        return new Promise(
-            function (
-                resolve,
-                reject
-            ) {
-
-                const canvas =
-                    document.createElement(
-                        'canvas'
-                    );
-
-                canvas.width =
-                    width;
-
-                canvas.height =
-                    height;
-
-                const context =
-                    canvas.getContext(
-                        '2d',
-                        {
-                            alpha: false
-                        }
-                    );
-
-                if (!context) {
-
-                    reject(
-                        new Error(
-                            'Browser tidak mendukung pemrosesan gambar.'
-                        )
-                    );
-
-                    return;
-                }
-
-                /*
-                 * Latar putih dipakai agar PNG transparan
-                 * tidak menghasilkan latar hitam ketika
-                 * dikonversi menjadi JPG.
-                 */
-
-                context.fillStyle =
-                    '#ffffff';
-
-                context.fillRect(
-                    0,
-                    0,
-                    width,
-                    height
-                );
-
-                context.imageSmoothingEnabled =
-                    true;
-
-                context.imageSmoothingQuality =
-                    'high';
-
-                context.drawImage(
-                    image,
-                    0,
-                    0,
-                    width,
-                    height
-                );
-
-                canvas.toBlob(
-                    function (
-                        blob
-                    ) {
-
-                        if (!blob) {
-
-                            reject(
-                                new Error(
-                                    'Browser gagal membuat hasil JPG.'
-                                )
-                            );
-
-                            return;
-                        }
-
-                        const baseName =
-                            String(
-                                originalName ||
-                                'lampiran'
-                            )
-                                .replace(
-                                    /\.[^/.]+$/,
-                                    ''
-                                )
-                                .replace(
-                                    /[^a-zA-Z0-9_-]/g,
-                                    '_'
-                                );
-
-                        const fileName =
-                            (
-                                baseName ||
-                                'lampiran'
-                            ) +
-                            '_compressed.jpg';
-
-                        resolve(
-                            new File(
-                                [blob],
-                                fileName,
-                                {
-                                    type:
-                                        'image/jpeg',
-
-                                    lastModified:
-                                        Date.now()
-                                }
-                            )
-                        );
-
-                    },
-                    'image/jpeg',
-                    quality
-                );
-            }
-        );
-    }
-
-
-    /* =========================================================================
-       COMPRESS IMAGE
-    ========================================================================= */
-
-    async function compressImageFile(
-        file
-    ) {
-
-        const image =
-            await loadImage(
-                file
-            );
-
-        const width =
-            image.naturalWidth ||
-            image.width;
-
-        const height =
-            image.naturalHeight ||
-            image.height;
-
-        if (
-            width <= 0 ||
-            height <= 0
-        ) {
-
-            throw new Error(
-                'Dimensi gambar tidak valid.'
-            );
-        }
-
-
-        const dimensionList =
-            buildDimensionList(
-                width,
-                height
-            );
-
-
-        let bestFile =
-            null;
-
-
-        for (
-            const dimensions
-            of dimensionList
-        ) {
-
-            for (
-                const quality
-                of JPEG_QUALITIES
-            ) {
-
-                const result =
-                    await canvasToFile(
-                        image,
-                        dimensions.width,
-                        dimensions.height,
-                        quality,
-                        file.name
-                    );
-
-
-                if (
-                    !bestFile ||
-                    result.size <
-                        bestFile.size
-                ) {
-
-                    bestFile =
-                        result;
-                }
-
-
-                if (
-                    result.size <=
-                    IMAGE_TARGET_SIZE
-                ) {
-
-                    return result;
-                }
-            }
-        }
-
-
-        if (
-            bestFile &&
-            bestFile.size <=
-                IMAGE_HARD_LIMIT
-        ) {
-
-            return bestFile;
-        }
-
-
-        throw new Error(
-            'Gambar masih terlalu besar setelah proses kompresi.'
-        );
-    }
-
-
-    /* =========================================================================
-       FILE CHANGE
-    ========================================================================= */
-
-    fileInput.addEventListener(
-        'change',
-        async function () {
-
-            const file =
-                fileInput.files?.[0];
-
-            if (!file) {
-                return;
-            }
-
-
-            const token =
-                ++compressionToken;
-
-
-            clearCameraError();
-
-
-            const extension =
-                getExtension(
+            pdfPreviewUrl =
+                URL.createObjectURL(
                     file
                 );
 
 
-            /*
-             * VALIDASI FORMAT
-             */
-
-            if (
-                !isAllowedExtension(
-                    extension
-                )
-            ) {
-
-                clearFileSelection();
-
-                showAlert(
-                    'warning',
-                    'Format tidak didukung',
-                    'Gunakan PDF, JPG, JPEG, atau PNG.'
-                );
-
-                return;
-            }
-
-
-            /*
-             * VALIDASI FILE KOSONG
-             */
-
-            if (
-                file.size <= 0
-            ) {
-
-                clearFileSelection();
-
-                showAlert(
-                    'warning',
-                    'File tidak valid',
-                    'File yang dipilih kosong.'
-                );
-
-                return;
-            }
-
-
-            /*
-             * FILE ASLI MAKSIMAL 10 MB
-             */
-
-            if (
-                file.size >
-                MAX_FILE_SIZE
-            ) {
-
-                clearFileSelection();
-
-                showAlert(
-                    'warning',
-                    'File terlalu besar',
-                    'Ukuran file asli maksimal 10 MB.'
-                );
-
-                return;
-            }
-
-
-            /*
-             * PDF
-             */
-
-            if (
-                extension === 'pdf'
-            ) {
-
-                capturedInput.value =
-                    '';
-
-                clearScanResult();
-
-                showSelectedFile(
-                    file,
-                    'PDF • tanpa kompresi'
-                );
-
-                setCompressionStatus(
-                    '✓ <strong>PDF tetap PDF.</strong><br>' +
-                    'Ukuran file yang akan dikirim: <strong>' +
-                    formatFileSize(
-                        file.size
-                    ) +
-                    '</strong>.<br>' +
-                    'PDF tidak dilakukan kompresi gambar.',
-                    'success'
-                );
-
-                return;
-            }
-
-
-            /*
-             * GAMBAR
-             */
-
-            if (
-                !isImageExtension(
-                    extension
-                )
-            ) {
-                return;
-            }
-
-
-            const originalSize =
-                file.size;
-
-
-            showSelectedFile(
-                file,
-                'Sedang memproses...'
-            );
-
-
-            setCompressionStatus(
-                '⏳ <strong>Sedang mengompres gambar...</strong><br>' +
-                'Gambar sedang di-resize dan dikonversi menjadi JPG.'
-            );
-
-
-            try {
-
-                const compressed =
-                    await compressImageFile(
-                        file
-                    );
-
-
-                /*
-                 * Abaikan hasil jika user
-                 * sudah memilih file lain.
-                 */
-
-                if (
-                    token !==
-                    compressionToken
-                ) {
-                    return;
-                }
-
-
-                /*
-                 * HASIL KOMPRESI SELALU DIGUNAKAN.
-                 */
-
-                const finalFile =
-                    compressed;
-
-
-                /*
-                 * Pastikan hasil tidak > 10 MB.
-                 */
-
-                if (
-                    finalFile.size >
-                    MAX_FILE_SIZE
-                ) {
-
-                    clearFileSelection();
-
-                    showAlert(
-                        'error',
-                        'Kompresi tidak berhasil',
-                        'Ukuran hasil kompresi masih lebih dari 10 MB.'
-                    );
-
-                    return;
-                }
-
-
-                /*
-                 * GANTI FILE INPUT DENGAN FILE HASIL KOMPRESI.
-                 */
-
-                const transfer =
-                    new DataTransfer();
-
-                transfer.items.add(
-                    finalFile
-                );
-
-                fileInput.files =
-                    transfer.files;
-
-
-                /*
-                 * HAPUS HASIL CAMERA
-                 */
-
-                capturedInput.value =
-                    '';
-
-                clearScanResult();
-
-
-                /*
-                 * HITUNG HASIL
-                 */
-
-                const reduction =
-                    getReductionPercent(
-                        originalSize,
-                        finalFile.size
-                    );
-
-
-                /*
-                 * TAMPILKAN FILE FINAL
-                 */
-
-                showSelectedFile(
-                    finalFile,
-                    'JPG hasil kompresi'
-                );
-
-
-                /*
-                 * INFO KOMPRESI
-                 */
-
-                setCompressionStatus(
-                    '✓ <strong>Kompresi berhasil.</strong><br>' +
-                    'Format asli: <strong>' +
-                    extension.toUpperCase() +
-                    '</strong><br>' +
-                    'Ukuran asli: <strong>' +
-                    formatFileSize(
-                        originalSize
-                    ) +
-                    '</strong><br>' +
-                    'Ukuran hasil: <strong>' +
-                    formatFileSize(
-                        finalFile.size
-                    ) +
-                    '</strong><br>' +
-                    'Penghematan: <strong>' +
-                    reduction +
-                    '%</strong><br>' +
-                    'Format akhir: <strong>JPG</strong>.',
-                    'success'
-                );
-
-
-            } catch (error) {
-
-                console.error(
-                    'Compression error:',
-                    error
-                );
-
-
-                if (
-                    token !==
-                    compressionToken
-                ) {
-                    return;
-                }
-
-
-                clearFileSelection();
-
-
-                setCompressionStatus(
-                    '✕ <strong>Kompresi gagal.</strong><br>' +
-                    (
-                        error?.message ||
-                        'Gambar gagal diproses.'
-                    ),
-                    'error'
-                );
-
-
-                showAlert(
-                    'error',
-                    'Gagal memproses gambar',
-                    error?.message ||
-                    'Gambar gagal dikompres.'
-                );
-            }
-
-        }
-    );
-
-
-    /* =========================================================================
-       CAMERA
-    ========================================================================= */
-
-    startCameraBtn?.addEventListener(
-        'click',
-        startCamera
-    );
-
-
-    async function startCamera() {
-
-        clearCameraError();
-
-
-        if (
-            !window.isSecureContext
-        ) {
-
-            showCameraError(
-                'Kamera membutuhkan HTTPS.'
-            );
-
-            return;
-        }
-
-
-        if (
-            !navigator.mediaDevices ||
-            !navigator.mediaDevices.getUserMedia
-        ) {
-
-            showCameraError(
-                'Browser tidak mendukung akses kamera.'
-            );
-
-            return;
-        }
-
-
-        stopCameraTracks();
-
-
-        try {
-
-            cameraStream =
-                await navigator.mediaDevices.getUserMedia({
-
-                    video: {
-
-                        facingMode: {
-                            ideal:
-                                'environment'
-                        },
-
-                        width: {
-                            ideal:
-                                CAMERA_MAX_WIDTH
-                        },
-
-                        height: {
-                            ideal:
-                                CAMERA_MAX_HEIGHT
-                        }
-                    },
-
-                    audio: false
-                });
-
-
-            cameraVideo.srcObject =
-                cameraStream;
-
-
-            await cameraVideo.play();
-
-
-            cameraPlaceholder.classList.add(
-                'sme-hidden'
-            );
-
-
-            startCameraBtn.disabled =
-                true;
-
-            captureBtn.disabled =
-                false;
-
-            stopCameraBtn.disabled =
-                false;
-
-
-        } catch (error) {
-
-            console.error(
-                'Camera error:',
-                error
-            );
-
-
-            let message =
-                'Kamera tidak dapat digunakan.';
-
-
-            if (
-                error.name ===
-                    'NotAllowedError' ||
-                error.name ===
-                    'PermissionDeniedError'
-            ) {
-
-                message =
-                    'Izin kamera ditolak. Izinkan kamera pada browser.';
-
-            } else if (
-                error.name ===
-                    'NotFoundError'
-            ) {
-
-                message =
-                    'Kamera tidak ditemukan.';
-
-            } else if (
-                error.name ===
-                    'NotReadableError'
-            ) {
-
-                message =
-                    'Kamera sedang digunakan aplikasi lain.';
-
-            } else if (
-                error.name ===
-                    'SecurityError'
-            ) {
-
-                message =
-                    'Akses kamera diblokir oleh browser.';
-            }
-
-
-            showCameraError(
-                message
-            );
-        }
-    }
-
-
-    /* =========================================================================
-       CAPTURE CAMERA
-    ========================================================================= */
-
-    captureBtn?.addEventListener(
-        'click',
-        async function () {
-
-            clearCameraError();
-
-
-            if (
-                !cameraVideo.videoWidth ||
-                !cameraVideo.videoHeight
-            ) {
-
-                showCameraError(
-                    'Kamera belum siap. Tunggu beberapa saat.'
-                );
-
-                return;
-            }
-
-
-            try {
-
-                const dimensions =
-                    calculateDimensions(
-                        cameraVideo.videoWidth,
-                        cameraVideo.videoHeight,
-                        CAMERA_MAX_WIDTH
-                    );
-
-
-                const canvas =
-                    document.createElement(
-                        'canvas'
-                    );
-
-
-                canvas.width =
-                    dimensions.width;
-
-                canvas.height =
-                    dimensions.height;
-
-
-                const context =
-                    canvas.getContext(
-                        '2d',
-                        {
-                            alpha: false
-                        }
-                    );
-
-
-                if (!context) {
-
-                    throw new Error(
-                        'Browser tidak mendukung canvas.'
-                    );
-                }
-
-
-                context.fillStyle =
-                    '#ffffff';
-
-                context.fillRect(
-                    0,
-                    0,
-                    canvas.width,
-                    canvas.height
-                );
-
-
-                context.imageSmoothingEnabled =
-                    true;
-
-                context.imageSmoothingQuality =
-                    'high';
-
-
-                context.drawImage(
-                    cameraVideo,
-                    0,
-                    0,
-                    canvas.width,
-                    canvas.height
-                );
-
-
-                /*
-                 * Kompres hasil kamera.
-                 */
-
-                const imageData =
-                    await compressCameraCanvas(
-                        canvas
-                    );
-
-
-                if (
-                    imageData.length >
-                    CAMERA_MAX_DATA_URL_LENGTH
-                ) {
-
-                    throw new Error(
-                        'Hasil scan terlalu besar. Silakan scan ulang.'
-                    );
-                }
-
-
-                /*
-                 * Simpan hasil scan ke hidden input.
-                 */
-
-                capturedInput.value =
-                    imageData;
-
-
-                /*
-                 * Preview internal.
-                 */
-
-                cameraImage.src =
-                    imageData;
-
-
-                cameraImage.classList.remove(
-                    'sme-hidden'
-                );
-
-
-                cameraVideo.classList.add(
-                    'sme-hidden'
-                );
-
-
-                cameraPlaceholder.classList.add(
-                    'sme-hidden'
-                );
-
-
-                /*
-                 * Ukuran hasil scan.
-                 */
-
-                const size =
-                    getDataUrlBinarySize(
-                        imageData
-                    );
-
-
-                /*
-                 * Preview hasil scan.
-                 */
-
-                scanPreview.src =
-                    imageData;
-
-
-                scanInfo.textContent =
-                    'Format JPG • Ukuran hasil: ' +
-                    formatFileSize(
-                        size
-                    ) +
-                    ' • Sudah dikompres';
-
-
-                scanResult.classList.remove(
-                    'sme-hidden'
-                );
-
-
-                /*
-                 * Hapus file upload.
-                 */
-
-                clearFileSelection();
-
-
-                /*
-                 * Matikan kamera.
-                 */
-
-                stopCamera();
-
-
-                startCameraBtn.classList.add(
-                    'sme-hidden'
-                );
-
-                captureBtn.classList.add(
-                    'sme-hidden'
-                );
-
-                stopCameraBtn.classList.add(
-                    'sme-hidden'
-                );
-
-
-            } catch (error) {
-
-                console.error(
-                    'Capture error:',
-                    error
-                );
-
-
-                showCameraError(
-                    error?.message ||
-                    'Gagal mengambil hasil scan.'
-                );
-            }
-        }
-    );
-
-
-    /* =========================================================================
-       COMPRESS CAMERA
-    ========================================================================= */
-
-    async function compressCameraCanvas(
-        canvas
-    ) {
-
-        let currentCanvas =
-            canvas;
-
-        let quality =
-            0.82;
-
-
-        let dataUrl =
-            currentCanvas.toDataURL(
-                'image/jpeg',
-                quality
-            );
-
-
-        while (
-            getDataUrlBinarySize(
-                dataUrl
-            ) >
-                CAMERA_TARGET_SIZE &&
-            quality >
-                0.38
-        ) {
-
-            quality -=
-                0.05;
-
-
-            dataUrl =
-                currentCanvas.toDataURL(
-                    'image/jpeg',
-                    quality
-                );
-        }
-
-
-        let attempt =
-            0;
-
-
-        while (
-            getDataUrlBinarySize(
-                dataUrl
-            ) >
-                CAMERA_TARGET_SIZE &&
-            attempt <
-                5
-        ) {
-
-            attempt++;
-
-
-            const smallerCanvas =
-                document.createElement(
-                    'canvas'
-                );
-
-
-            smallerCanvas.width =
-                Math.max(
-                    1,
-                    Math.round(
-                        currentCanvas.width *
-                        0.75
-                    )
-                );
-
-
-            smallerCanvas.height =
-                Math.max(
-                    1,
-                    Math.round(
-                        currentCanvas.height *
-                        0.75
-                    )
-                );
-
-
-            const context =
-                smallerCanvas.getContext(
-                    '2d',
-                    {
-                        alpha: false
-                    }
-                );
-
-
-            if (!context) {
-
-                throw new Error(
-                    'Resize kamera tidak tersedia.'
-                );
-            }
-
-
-            context.fillStyle =
-                '#ffffff';
-
-            context.fillRect(
-                0,
-                0,
-                smallerCanvas.width,
-                smallerCanvas.height
-            );
-
-
-            context.imageSmoothingEnabled =
-                true;
-
-            context.imageSmoothingQuality =
-                'high';
-
-
-            context.drawImage(
-                currentCanvas,
-                0,
-                0,
-                smallerCanvas.width,
-                smallerCanvas.height
-            );
-
-
-            currentCanvas =
-                smallerCanvas;
-
-
-            dataUrl =
-                currentCanvas.toDataURL(
-                    'image/jpeg',
-                    0.58
-                );
-        }
-
-
-        return dataUrl;
-    }
-
-
-    /* =========================================================================
-       DATA URL SIZE
-    ========================================================================= */
-
-    function getDataUrlBinarySize(
-        dataUrl
-    ) {
-
-        const comma =
-            dataUrl.indexOf(',');
-
-
-        if (
-            comma === -1
-        ) {
-            return 0;
-        }
-
-
-        const base64 =
-            dataUrl.substring(
-                comma + 1
-            );
-
-
-        const padding =
-            base64.endsWith('==')
-                ? 2
-                : base64.endsWith('=')
-                    ? 1
-                    : 0;
-
-
-        return Math.floor(
-            (
-                base64.length *
-                3
-            ) / 4
-        ) -
-        padding;
-    }
-
-
-    /* =========================================================================
-       CLEAR SCAN
-    ========================================================================= */
-
-    function clearScanResult() {
-
-        capturedInput.value =
-            '';
-
-        scanResult.classList.add(
-            'sme-hidden'
-        );
-
-        scanPreview.src =
-            '';
-
-        scanInfo.textContent =
-            '';
-
-        cameraImage.src =
-            '';
-
-        cameraImage.classList.add(
-            'sme-hidden'
-        );
-    }
-
-
-    /* =========================================================================
-       CAMERA TRACKS
-    ========================================================================= */
-
-    function stopCameraTracks() {
-
-        if (!cameraStream) {
-            return;
-        }
-
-        cameraStream
-            .getTracks()
-            .forEach(
-                function (
-                    track
-                ) {
-
-                    track.stop();
-                }
-            );
-
-        cameraStream =
-            null;
-    }
-
-
-    /* =========================================================================
-       STOP CAMERA
-    ========================================================================= */
-
-    function stopCamera() {
-
-        stopCameraTracks();
-
-
-        if (cameraVideo) {
-
-            cameraVideo.srcObject =
-                null;
-        }
-
-
-        cameraPlaceholder.classList.remove(
-            'sme-hidden'
-        );
-
-
-        if (
-            !capturedInput.value
-        ) {
-
-            cameraVideo.classList.remove(
+            pdfPreview.innerHTML =
+                `
+                    <div class="sme-pdf-preview-header">
+                        Preview PDF hasil kompresi
+                    </div>
+
+                    <iframe
+                        class="sme-pdf-preview-frame"
+                        src="${pdfPreviewUrl}"
+                        title="Preview PDF hasil kompresi"
+                    ></iframe>
+                `;
+
+
+            pdfPreview.classList.remove(
                 'sme-hidden'
             );
         }
 
 
-        startCameraBtn.disabled =
-            false;
+        function clearPdfPreview() {
 
-        captureBtn.disabled =
-            true;
+            revokePdfPreview();
 
-        stopCameraBtn.disabled =
-            true;
-    }
+            pdfPreview.innerHTML =
+                '';
+
+            pdfPreview.classList.add(
+                'sme-hidden'
+            );
+        }
 
 
-    stopCameraBtn?.addEventListener(
-        'click',
-        function () {
+        /* ================================================================
+           MODE
+        ================================================================ */
+
+        function setModeButton(
+            button,
+            active
+        ) {
+
+            if (!button) {
+                return;
+            }
+
+            button.classList.toggle(
+                'active',
+                active
+            );
+
+            button.setAttribute(
+                'aria-selected',
+                active
+                    ? 'true'
+                    : 'false'
+            );
+        }
+
+
+        function activateUploadMode() {
+
+            compressionToken++;
 
             stopCamera();
 
+            uploadPanel.classList.remove(
+                'sme-hidden'
+            );
 
-            if (
-                capturedInput.value
-            ) {
+            cameraPanel.classList.add(
+                'sme-hidden'
+            );
 
-                cameraPlaceholder.classList.add(
-                    'sme-hidden'
-                );
-            }
-        }
-    );
+            setModeButton(
+                modeUpload,
+                true
+            );
 
-
-    /* =========================================================================
-       RETAKE
-    ========================================================================= */
-
-    retakeBtn?.addEventListener(
-        'click',
-        async function () {
-
-            clearScanResult();
+            setModeButton(
+                modeCamera,
+                false
+            );
 
             clearCameraError();
+        }
+
+
+        function activateCameraMode() {
+
+            compressionToken++;
+
+            stopCamera();
+
+            uploadPanel.classList.add(
+                'sme-hidden'
+            );
+
+            cameraPanel.classList.remove(
+                'sme-hidden'
+            );
 
             setModeButton(
                 modeUpload,
@@ -4842,131 +2795,976 @@ document.addEventListener('DOMContentLoaded', function () {
                 true
             );
 
-            uploadPanel.classList.add(
-                'sme-hidden'
-            );
+            clearFileSelection();
 
-            cameraPanel.classList.remove(
-                'sme-hidden'
-            );
+            clearPdfPreview();
 
-            startCameraBtn.classList.remove(
-                'sme-hidden'
-            );
+            clearCompressionStatus();
 
-            captureBtn.classList.remove(
-                'sme-hidden'
-            );
-
-            stopCameraBtn.classList.remove(
-                'sme-hidden'
-            );
-
-            await startCamera();
+            clearCameraError();
         }
-    );
 
 
-    /* =========================================================================
-       SUBMIT
-    ========================================================================= */
+        modeUpload?.addEventListener(
+            'click',
+            activateUploadMode
+        );
 
-    form.addEventListener(
-        'submit',
-        function (
-            event
+
+        modeCamera?.addEventListener(
+            'click',
+            activateCameraMode
+        );
+
+
+        /* ================================================================
+           FILE UI
+        ================================================================ */
+
+        function showSelectedFile(
+            file,
+            note = ''
+        ) {
+
+            selectedFile.classList.remove(
+                'sme-hidden'
+            );
+
+            selectedTitle.textContent =
+                'File siap digunakan';
+
+            selectedName.textContent =
+                file.name;
+
+            selectedSize.textContent =
+                formatFileSize(
+                    file.size
+                ) +
+                (
+                    note
+                        ? ' • ' + note
+                        : ''
+                );
+
+            uploadBox.classList.add(
+                'has-file'
+            );
+
+            uploadTitle.textContent =
+                'File siap digunakan';
+        }
+
+
+        function clearFileSelection() {
+
+            compressionToken++;
+
+            fileInput.value =
+                '';
+
+            selectedFile.classList.add(
+                'sme-hidden'
+            );
+
+            selectedTitle.textContent =
+                'File siap digunakan';
+
+            selectedName.textContent =
+                '';
+
+            selectedSize.textContent =
+                '';
+
+            uploadBox.classList.remove(
+                'has-file'
+            );
+
+            uploadTitle.textContent =
+                'Pilih file baru';
+
+            clearCompressionStatus();
+
+            clearPdfPreview();
+        }
+
+
+        clearFileBtn?.addEventListener(
+            'click',
+            function () {
+
+                clearFileSelection();
+
+            }
+        );
+
+
+        /* ================================================================
+           IMAGE
+        ================================================================ */
+
+        function loadImage(
+            file
+        ) {
+
+            return new Promise(
+                function (
+                    resolve,
+                    reject
+                ) {
+
+                    const url =
+                        URL.createObjectURL(
+                            file
+                        );
+
+                    const image =
+                        new Image();
+
+                    image.onload =
+                        function () {
+
+                            URL.revokeObjectURL(
+                                url
+                            );
+
+                            resolve(
+                                image
+                            );
+                        };
+
+                    image.onerror =
+                        function () {
+
+                            URL.revokeObjectURL(
+                                url
+                            );
+
+                            reject(
+                                new Error(
+                                    'Gambar tidak dapat dibaca browser.'
+                                )
+                            );
+                        };
+
+                    image.src =
+                        url;
+                }
+            );
+        }
+
+
+        function calculateDimensions(
+            width,
+            height,
+            maxDimension
         ) {
 
             if (
-                submitting
+                width <= maxDimension &&
+                height <= maxDimension
             ) {
 
-                event.preventDefault();
-
-                return;
+                return {
+                    width,
+                    height
+                };
             }
 
+            const scale =
+                Math.min(
+                    maxDimension /
+                        width,
+                    maxDimension /
+                        height
+                );
 
-            /*
-             * Tanggal surat tidak boleh setelah
-             * tanggal diterima.
-             */
+            return {
+                width:
+                    Math.max(
+                        1,
+                        Math.round(
+                            width * scale
+                        )
+                    ),
 
-            const tanggalSurat =
-                document.getElementById(
-                    'tanggal_surat'
-                )?.value || '';
-
-            const tanggalTerima =
-                document.getElementById(
-                    'tanggal_terima'
-                )?.value || '';
-
-
-            if (
-                tanggalSurat &&
-                tanggalTerima &&
-                tanggalTerima <
-                    tanggalSurat
-            ) {
-
-                event.preventDefault();
+                height:
+                    Math.max(
+                        1,
+                        Math.round(
+                            height * scale
+                        )
+                    )
+            };
+        }
 
 
-                showAlert(
-                    'warning',
-                    'Tanggal tidak valid',
-                    'Tanggal diterima tidak boleh lebih awal dari tanggal surat.'
+        function buildDimensionList(
+            width,
+            height
+        ) {
+
+            const dimensions =
+                [
+                    IMAGE_MAX_DIMENSION,
+                    2000,
+                    1800,
+                    1600,
+                    1400,
+                    1200,
+                    IMAGE_MIN_DIMENSION
+                ];
+
+            const result =
+                [];
+
+
+            dimensions.forEach(
+                function (
+                    dimension
+                ) {
+
+                    const value =
+                        calculateDimensions(
+                            width,
+                            height,
+                            dimension
+                        );
+
+
+                    if (
+                        value.width <
+                            IMAGE_MIN_DIMENSION &&
+                        value.height <
+                            IMAGE_MIN_DIMENSION
+                    ) {
+
+                        return;
+                    }
+
+
+                    const duplicate =
+                        result.some(
+                            function (
+                                item
+                            ) {
+
+                                return (
+                                    item.width ===
+                                        value.width &&
+                                    item.height ===
+                                        value.height
+                                );
+                            }
+                        );
+
+
+                    if (
+                        !duplicate
+                    ) {
+
+                        result.push(
+                            value
+                        );
+                    }
+                }
+            );
+
+
+            return result;
+        }
+
+
+        function canvasToFile(
+            image,
+            width,
+            height,
+            quality,
+            originalName
+        ) {
+
+            return new Promise(
+                function (
+                    resolve,
+                    reject
+                ) {
+
+                    const canvas =
+                        document.createElement(
+                            'canvas'
+                        );
+
+                    canvas.width =
+                        width;
+
+                    canvas.height =
+                        height;
+
+
+                    const context =
+                        canvas.getContext(
+                            '2d',
+                            {
+                                alpha:
+                                    false
+                            }
+                        );
+
+
+                    if (!context) {
+
+                        reject(
+                            new Error(
+                                'Browser tidak mendukung canvas.'
+                            )
+                        );
+
+                        return;
+                    }
+
+
+                    context.fillStyle =
+                        '#ffffff';
+
+                    context.fillRect(
+                        0,
+                        0,
+                        width,
+                        height
+                    );
+
+
+                    context.imageSmoothingEnabled =
+                        true;
+
+                    context.imageSmoothingQuality =
+                        'high';
+
+
+                    context.drawImage(
+                        image,
+                        0,
+                        0,
+                        width,
+                        height
+                    );
+
+
+                    canvas.toBlob(
+                        function (
+                            blob
+                        ) {
+
+                            if (!blob) {
+
+                                reject(
+                                    new Error(
+                                        'Browser gagal membuat JPG.'
+                                    )
+                                );
+
+                                return;
+                            }
+
+
+                            const baseName =
+                                String(
+                                    originalName ||
+                                    'lampiran'
+                                )
+                                    .replace(
+                                        /\.[^/.]+$/,
+                                        ''
+                                    )
+                                    .replace(
+                                        /[^a-zA-Z0-9_-]/g,
+                                        '_'
+                                    );
+
+
+                            const name =
+                                (
+                                    baseName ||
+                                    'lampiran'
+                                ) +
+                                '_compressed.jpg';
+
+
+                            resolve(
+                                new File(
+                                    [blob],
+                                    name,
+                                    {
+                                        type:
+                                            'image/jpeg'
+                                    }
+                                )
+                            );
+
+                        },
+                        'image/jpeg',
+                        quality
+                    );
+                }
+            );
+        }
+
+
+        async function compressImageFile(
+            file
+        ) {
+
+            const image =
+                await loadImage(
+                    file
                 );
 
 
-                return;
+            const width =
+                image.naturalWidth ||
+                image.width;
+
+
+            const height =
+                image.naturalHeight ||
+                image.height;
+
+
+            if (
+                width <= 0 ||
+                height <= 0
+            ) {
+
+                throw new Error(
+                    'Dimensi gambar tidak valid.'
+                );
             }
 
 
-            const file =
-                fileInput.files?.[0] ||
+            const list =
+                buildDimensionList(
+                    width,
+                    height
+                );
+
+
+            let smallest =
                 null;
 
 
-            const hasFile =
-                !!file;
-
-
-            const hasCamera =
-                capturedInput.value.trim() !== '';
-
-
-            /*
-             * FILE DAN KAMERA TIDAK BOLEH BERSAMAAN
-             */
-
-            if (
-                hasFile &&
-                hasCamera
+            for (
+                const dimension
+                of list
             ) {
 
-                event.preventDefault();
+                for (
+                    const quality
+                    of JPEG_QUALITIES
+                ) {
+
+                    const result =
+                        await canvasToFile(
+                            image,
+                            dimension.width,
+                            dimension.height,
+                            quality,
+                            file.name
+                        );
 
 
-                showAlert(
-                    'warning',
-                    'Metode lampiran',
-                    'Gunakan salah satu metode saja: Upload File atau Scan Kamera.'
+                    if (
+                        !smallest ||
+                        result.size <
+                            smallest.size
+                    ) {
+
+                        smallest =
+                            result;
+                    }
+
+
+                    if (
+                        result.size <=
+                        IMAGE_TARGET_SIZE
+                    ) {
+
+                        return result;
+                    }
+                }
+            }
+
+
+            if (
+                smallest &&
+                smallest.size <=
+                    IMAGE_HARD_LIMIT
+            ) {
+
+                return smallest;
+            }
+
+
+            throw new Error(
+                'Gambar masih terlalu besar setelah kompresi.'
+            );
+        }
+
+
+        /* ================================================================
+           GHOSTSCRIPT
+        ================================================================ */
+
+        async function getGhostscript() {
+
+            if (
+                ghostscriptPromise
+            ) {
+
+                return ghostscriptPromise;
+            }
+
+
+            ghostscriptPromise =
+                initGhostscript(
+                    {
+                        locateFile:
+                            function (
+                                file
+                            ) {
+
+                                return (
+                                    'https://cdn.jsdelivr.net/npm/' +
+                                    '@jspawn/ghostscript-wasm@0.0.2/' +
+                                    file
+                                );
+                            }
+                    }
                 );
 
 
-                return;
+            return ghostscriptPromise;
+        }
+
+
+        /* ================================================================
+           PDF VALIDATION
+        ================================================================ */
+
+        async function readPdfBytes(
+            file
+        ) {
+
+            const buffer =
+                await file.arrayBuffer();
+
+            return new Uint8Array(
+                buffer
+            );
+        }
+
+
+        function isPdf(
+            bytes
+        ) {
+
+            return (
+                bytes.length >= 5 &&
+                bytes[0] === 0x25 &&
+                bytes[1] === 0x50 &&
+                bytes[2] === 0x44 &&
+                bytes[3] === 0x46 &&
+                bytes[4] === 0x2D
+            );
+        }
+
+
+        /* ================================================================
+           PDF COMPRESSION
+        ================================================================ */
+
+        async function compressPdfFile(
+            file,
+            token
+        ) {
+
+            const originalBytes =
+                await readPdfBytes(
+                    file
+                );
+
+
+            if (
+                !isPdf(
+                    originalBytes
+                )
+            ) {
+
+                throw new Error(
+                    'File PDF tidak valid.'
+                );
+            }
+
+
+            setCompressionStatus(
+                '⏳ <strong>Menyiapkan PDF...</strong><br>' +
+                'Ghostscript WebAssembly sedang dimuat.',
+                ''
+            );
+
+
+            const gs =
+                await getGhostscript();
+
+
+            if (
+                token !==
+                compressionToken
+            ) {
+
+                throw new Error(
+                    'Proses dibatalkan.'
+                );
+            }
+
+
+            const profiles =
+                [
+                    {
+                        name:
+                            'ebook',
+
+                        dpi:
+                            150
+                    },
+
+                    {
+                        name:
+                            'ebook-low',
+
+                        dpi:
+                            120
+                    },
+
+                    {
+                        name:
+                            'screen',
+
+                        dpi:
+                            96
+                    }
+                ];
+
+
+            let bestBytes =
+                null;
+
+            let bestSize =
+                null;
+
+            let bestProfile =
+                null;
+
+
+            for (
+                const profile
+                of profiles
+            ) {
+
+                if (
+                    token !==
+                    compressionToken
+                ) {
+
+                    throw new Error(
+                        'Proses dibatalkan.'
+                    );
+                }
+
+
+                setCompressionStatus(
+                    '⏳ <strong>Mengompres PDF...</strong><br>' +
+                    'Profile: <strong>' +
+                    profile.name +
+                    '</strong><br>' +
+                    'Ukuran asli: <strong>' +
+                    formatFileSize(
+                        file.size
+                    ) +
+                    '</strong>',
+                    ''
+                );
+
+
+                await new Promise(
+                    function (
+                        resolve
+                    ) {
+
+                        setTimeout(
+                            resolve,
+                            40
+                        );
+                    }
+                );
+
+
+                const inputName =
+                    'input_' +
+                    Date.now() +
+                    '_' +
+                    Math.random()
+                        .toString(36)
+                        .slice(2) +
+                    '.pdf';
+
+
+                const outputName =
+                    'output_' +
+                    Date.now() +
+                    '_' +
+                    Math.random()
+                        .toString(36)
+                        .slice(2) +
+                    '.pdf';
+
+
+                try {
+
+                    try {
+                        gs.FS.unlink(
+                            inputName
+                        );
+                    } catch (e) {}
+
+
+                    try {
+                        gs.FS.unlink(
+                            outputName
+                        );
+                    } catch (e) {}
+
+
+                    gs.FS.writeFile(
+                        inputName,
+                        originalBytes
+                    );
+
+
+                    gs.callMain(
+                        [
+                            '-sDEVICE=pdfwrite',
+                            '-dCompatibilityLevel=1.4',
+                            '-dPDFSETTINGS=/' +
+                                profile.name.replace(
+                                    '-low',
+                                    ''
+                                ),
+                            '-dNOPAUSE',
+                            '-dBATCH',
+                            '-dSAFER',
+                            '-dQUIET',
+                            '-dDetectDuplicateImages=true',
+                            '-dCompressFonts=true',
+                            '-dDownsampleColorImages=true',
+                            '-dColorImageResolution=' +
+                                profile.dpi,
+                            '-dColorImageDownsampleType=/Bicubic',
+                            '-dAutoFilterColorImages=false',
+                            '-dColorImageFilter=/DCTEncode',
+                            '-dDownsampleGrayImages=true',
+                            '-dGrayImageResolution=' +
+                                profile.dpi,
+                            '-dGrayImageDownsampleType=/Bicubic',
+                            '-dAutoFilterGrayImages=false',
+                            '-dGrayImageFilter=/DCTEncode',
+                            '-dDownsampleMonoImages=true',
+                            '-dMonoImageResolution=' +
+                                profile.dpi,
+                            '-dMonoImageDownsampleType=/Subsample',
+                            '-sOutputFile=' +
+                                outputName,
+                            inputName
+                        ]
+                    );
+
+
+                    const outputBytes =
+                        gs.FS.readFile(
+                            outputName
+                        );
+
+
+                    if (
+                        outputBytes &&
+                        outputBytes.length > 0 &&
+                        isPdf(
+                            outputBytes
+                        )
+                    ) {
+
+                        if (
+                            bestSize === null ||
+                            outputBytes.length <
+                                bestSize
+                        ) {
+
+                            bestBytes =
+                                new Uint8Array(
+                                    outputBytes
+                                );
+
+                            bestSize =
+                                outputBytes.length;
+
+                            bestProfile =
+                                profile.name;
+                        }
+                    }
+
+                } finally {
+
+                    try {
+                        gs.FS.unlink(
+                            inputName
+                        );
+                    } catch (e) {}
+
+                    try {
+                        gs.FS.unlink(
+                            outputName
+                        );
+                    } catch (e) {}
+                }
+            }
+
+
+            if (
+                !bestBytes
+            ) {
+
+                throw new Error(
+                    'Ghostscript gagal menghasilkan PDF.'
+                );
             }
 
 
             /*
-             * VALIDASI FILE
+             * Jangan menggunakan hasil yang
+             * justru lebih besar dari asli.
              */
 
             if (
-                hasFile
+                bestSize >=
+                file.size
             ) {
+
+                return {
+                    file,
+                    originalSize:
+                        file.size,
+                    finalSize:
+                        file.size,
+                    reduction:
+                        0,
+                    profile:
+                        'Asli dipertahankan',
+                    compressed:
+                        false
+                };
+            }
+
+
+            if (
+                bestSize >
+                MAX_FILE_SIZE
+            ) {
+
+                throw new Error(
+                    'PDF hasil kompresi masih melebihi 10 MB.'
+                );
+            }
+
+
+            const baseName =
+                String(
+                    file.name
+                )
+                    .replace(
+                        /\.pdf$/i,
+                        ''
+                    )
+                    .replace(
+                        /[^a-zA-Z0-9_-]/g,
+                        '_'
+                    );
+
+
+            const finalFile =
+                new File(
+                    [
+                        bestBytes
+                    ],
+                    (
+                        baseName ||
+                        'lampiran'
+                    ) +
+                    '_compressed.pdf',
+                    {
+                        type:
+                            'application/pdf'
+                    }
+                );
+
+
+            return {
+                file:
+                    finalFile,
+
+                originalSize:
+                    file.size,
+
+                finalSize:
+                    finalFile.size,
+
+                reduction:
+                    reductionPercent(
+                        file.size,
+                        finalFile.size
+                    ),
+
+                profile:
+                    bestProfile,
+
+                compressed:
+                    true
+            };
+        }
+
+
+        /* ================================================================
+           FILE CHANGE
+        ================================================================ */
+
+        fileInput.addEventListener(
+            'change',
+            async function () {
+
+                const file =
+                    fileInput.files?.[0];
+
+
+                if (!file) {
+                    return;
+                }
+
+
+                const token =
+                    ++compressionToken;
+
+
+                clearCameraError();
+
+                clearPdfPreview();
+
 
                 const extension =
                     getExtension(
@@ -4980,15 +3778,13 @@ document.addEventListener('DOMContentLoaded', function () {
                     )
                 ) {
 
-                    event.preventDefault();
-
+                    clearFileSelection();
 
                     showAlert(
                         'warning',
                         'Format tidak didukung',
                         'Gunakan PDF, JPG, JPEG, atau PNG.'
                     );
-
 
                     return;
                 }
@@ -4998,15 +3794,13 @@ document.addEventListener('DOMContentLoaded', function () {
                     file.size <= 0
                 ) {
 
-                    event.preventDefault();
-
+                    clearFileSelection();
 
                     showAlert(
                         'warning',
                         'File tidak valid',
                         'File yang dipilih kosong.'
                     );
-
 
                     return;
                 }
@@ -5017,188 +3811,1189 @@ document.addEventListener('DOMContentLoaded', function () {
                     MAX_FILE_SIZE
                 ) {
 
-                    event.preventDefault();
-
+                    clearFileSelection();
 
                     showAlert(
                         'warning',
                         'File terlalu besar',
-                        'Ukuran file maksimal 10 MB.'
+                        'Ukuran file asli maksimal 10 MB.'
                     );
+
+                    return;
+                }
+
+
+                /* ==========================================================
+                   PDF
+                ========================================================== */
+
+                if (
+                    extension ===
+                    'pdf'
+                ) {
+
+                    capturedInput.value =
+                        '';
+
+                    clearScanResult();
+
+
+                    showSelectedFile(
+                        file,
+                        'PDF • sedang diproses'
+                    );
+
+
+                    try {
+
+                        const result =
+                            await compressPdfFile(
+                                file,
+                                token
+                            );
+
+
+                        if (
+                            token !==
+                            compressionToken
+                        ) {
+
+                            return;
+                        }
+
+
+                        const finalFile =
+                            result.file;
+
+
+                        const transfer =
+                            new DataTransfer();
+
+
+                        transfer.items.add(
+                            finalFile
+                        );
+
+
+                        fileInput.files =
+                            transfer.files;
+
+
+                        showSelectedFile(
+                            finalFile,
+                            result.compressed
+                                ? 'PDF hasil kompresi'
+                                : 'PDF asli dipertahankan'
+                        );
+
+
+                        setCompressionStatus(
+                            (
+                                result.compressed
+                                    ? '✓ <strong>Kompresi PDF berhasil.</strong><br>'
+                                    : '✓ <strong>PDF siap digunakan.</strong><br>'
+                            ) +
+                            'Format asli: <strong>PDF</strong><br>' +
+                            'Ukuran asli: <strong>' +
+                            formatFileSize(
+                                result.originalSize
+                            ) +
+                            '</strong><br>' +
+                            'Ukuran hasil: <strong>' +
+                            formatFileSize(
+                                result.finalSize
+                            ) +
+                            '</strong><br>' +
+                            'Penghematan: <strong>' +
+                            result.reduction +
+                            '%</strong><br>' +
+                            'Format akhir: <strong>PDF</strong><br>' +
+                            'Profile: <strong>' +
+                            result.profile +
+                            '</strong>',
+                            result.compressed
+                                ? 'success'
+                                : 'warning'
+                        );
+
+
+                        showPdfPreview(
+                            finalFile
+                        );
+
+                    } catch (
+                        error
+                    ) {
+
+                        console.error(
+                            'PDF compression error',
+                            error
+                        );
+
+
+                        if (
+                            token !==
+                            compressionToken
+                        ) {
+
+                            return;
+                        }
+
+
+                        clearFileSelection();
+
+                        clearPdfPreview();
+
+
+                        setCompressionStatus(
+                            '✕ <strong>Kompresi PDF gagal.</strong><br>' +
+                            (
+                                error?.message ||
+                                'PDF gagal diproses.'
+                            ),
+                            'error'
+                        );
+
+
+                        showAlert(
+                            'error',
+                            'Gagal memproses PDF',
+                            error?.message ||
+                            'PDF gagal dikompres.'
+                        );
+                    }
 
 
                     return;
                 }
-            }
 
 
-            /*
-             * VALIDASI CAMERA
-             */
+                /* ==========================================================
+                   IMAGE
+                ========================================================== */
 
-            if (
-                hasCamera &&
-                capturedInput.value.length >
-                    CAMERA_MAX_DATA_URL_LENGTH
-            ) {
+                if (
+                    !isImageExtension(
+                        extension
+                    )
+                ) {
 
-                event.preventDefault();
+                    return;
+                }
 
 
-                showAlert(
-                    'warning',
-                    'Hasil scan terlalu besar',
-                    'Silakan scan ulang.'
+                const originalSize =
+                    file.size;
+
+
+                showSelectedFile(
+                    file,
+                    'Sedang mengompres...'
                 );
 
+
+                setCompressionStatus(
+                    '⏳ <strong>Sedang mengompres gambar...</strong><br>' +
+                    'Gambar akan di-resize dan dikonversi menjadi JPG.',
+                    ''
+                );
+
+
+                try {
+
+                    const compressed =
+                        await compressImageFile(
+                            file
+                        );
+
+
+                    if (
+                        token !==
+                        compressionToken
+                    ) {
+
+                        return;
+                    }
+
+
+                    if (
+                        compressed.size >
+                        MAX_FILE_SIZE
+                    ) {
+
+                        throw new Error(
+                            'Ukuran hasil masih lebih dari 10 MB.'
+                        );
+                    }
+
+
+                    const transfer =
+                        new DataTransfer();
+
+
+                    transfer.items.add(
+                        compressed
+                    );
+
+
+                    fileInput.files =
+                        transfer.files;
+
+
+                    capturedInput.value =
+                        '';
+
+                    clearScanResult();
+
+
+                    const reduction =
+                        reductionPercent(
+                            originalSize,
+                            compressed.size
+                        );
+
+
+                    showSelectedFile(
+                        compressed,
+                        'JPG hasil kompresi'
+                    );
+
+
+                    setCompressionStatus(
+                        '✓ <strong>Kompresi gambar berhasil.</strong><br>' +
+                        'Format asli: <strong>' +
+                        extension.toUpperCase() +
+                        '</strong><br>' +
+                        'Ukuran asli: <strong>' +
+                        formatFileSize(
+                            originalSize
+                        ) +
+                        '</strong><br>' +
+                        'Ukuran hasil: <strong>' +
+                        formatFileSize(
+                            compressed.size
+                        ) +
+                        '</strong><br>' +
+                        'Penghematan: <strong>' +
+                        reduction +
+                        '%</strong><br>' +
+                        'Format akhir: <strong>JPG</strong>.',
+                        'success'
+                    );
+
+                } catch (
+                    error
+                ) {
+
+                    console.error(
+                        'Image compression error',
+                        error
+                    );
+
+
+                    if (
+                        token !==
+                        compressionToken
+                    ) {
+
+                        return;
+                    }
+
+
+                    clearFileSelection();
+
+
+                    setCompressionStatus(
+                        '✕ <strong>Kompresi gambar gagal.</strong><br>' +
+                        (
+                            error?.message ||
+                            'Gambar gagal diproses.'
+                        ),
+                        'error'
+                    );
+
+
+                    showAlert(
+                        'error',
+                        'Gagal memproses gambar',
+                        error?.message ||
+                        'Gambar gagal dikompres.'
+                    );
+                }
+
+            }
+        );
+
+
+        /* ================================================================
+           CAMERA
+        ================================================================ */
+
+        startCameraBtn?.addEventListener(
+            'click',
+            startCamera
+        );
+
+
+        async function startCamera() {
+
+            clearCameraError();
+
+
+            if (
+                !window.isSecureContext
+            ) {
+
+                showCameraError(
+                    'Kamera membutuhkan HTTPS.'
+                );
 
                 return;
             }
 
 
-            /*
-             * LOCK SUBMIT
-             */
+            if (
+                !navigator.mediaDevices ||
+                !navigator.mediaDevices.getUserMedia
+            ) {
 
-            submitting =
-                true;
+                showCameraError(
+                    'Browser tidak mendukung kamera.'
+                );
 
+                return;
+            }
 
-            stopCamera();
-
-
-            submitBtn.disabled =
-                true;
-
-
-            submitIcon.classList.add(
-                'sme-hidden'
-            );
-
-
-            submitLoading.classList.remove(
-                'sme-hidden'
-            );
-
-
-            submitText.textContent =
-                hasCamera
-                    ? 'Menyimpan hasil scan...'
-                    : hasFile
-                        ? 'Memperbarui dengan lampiran...'
-                        : 'Memperbarui...';
-        }
-    );
-
-
-    /* =========================================================================
-       OLD CAMERA DATA
-    ========================================================================= */
-
-    if (
-        capturedInput.value
-    ) {
-
-        uploadPanel.classList.add(
-            'sme-hidden'
-        );
-
-        cameraPanel.classList.remove(
-            'sme-hidden'
-        );
-
-        setModeButton(
-            modeUpload,
-            false
-        );
-
-        setModeButton(
-            modeCamera,
-            true
-        );
-
-
-        cameraImage.src =
-            capturedInput.value;
-
-
-        cameraImage.classList.remove(
-            'sme-hidden'
-        );
-
-
-        cameraVideo.classList.add(
-            'sme-hidden'
-        );
-
-
-        cameraPlaceholder.classList.add(
-            'sme-hidden'
-        );
-
-
-        scanPreview.src =
-            capturedInput.value;
-
-
-        const size =
-            getDataUrlBinarySize(
-                capturedInput.value
-            );
-
-
-        scanInfo.textContent =
-            'Hasil scan sebelumnya • JPG • ' +
-            formatFileSize(
-                size
-            );
-
-
-        scanResult.classList.remove(
-            'sme-hidden'
-        );
-
-
-        startCameraBtn.classList.add(
-            'sme-hidden'
-        );
-
-        captureBtn.classList.add(
-            'sme-hidden'
-        );
-
-        stopCameraBtn.classList.add(
-            'sme-hidden'
-        );
-    }
-
-
-    /* =========================================================================
-       CLEANUP
-    ========================================================================= */
-
-    window.addEventListener(
-        'beforeunload',
-        function () {
 
             stopCameraTracks();
 
 
-            if (
-                cameraPreviewObjectUrl
-            ) {
+            try {
 
-                URL.revokeObjectURL(
-                    cameraPreviewObjectUrl
+                cameraStream =
+                    await navigator
+                        .mediaDevices
+                        .getUserMedia(
+                            {
+                                video: {
+                                    facingMode: {
+                                        ideal:
+                                            'environment'
+                                    },
+
+                                    width: {
+                                        ideal:
+                                            CAMERA_MAX_WIDTH
+                                    },
+
+                                    height: {
+                                        ideal:
+                                            CAMERA_MAX_HEIGHT
+                                    }
+                                },
+
+                                audio:
+                                    false
+                            }
+                        );
+
+
+                cameraVideo.srcObject =
+                    cameraStream;
+
+
+                await cameraVideo.play();
+
+
+                cameraPlaceholder.classList.add(
+                    'sme-hidden'
                 );
 
-                cameraPreviewObjectUrl =
-                    null;
+
+                cameraVideo.classList.remove(
+                    'sme-hidden'
+                );
+
+
+                startCameraBtn.disabled =
+                    true;
+
+                captureBtn.disabled =
+                    false;
+
+                stopCameraBtn.disabled =
+                    false;
+
+            } catch (
+                error
+            ) {
+
+                console.error(
+                    'Camera error:',
+                    error
+                );
+
+
+                let message =
+                    'Kamera tidak dapat digunakan.';
+
+
+                if (
+                    error?.name ===
+                        'NotAllowedError' ||
+                    error?.name ===
+                        'PermissionDeniedError'
+                ) {
+
+                    message =
+                        'Izin kamera ditolak. Izinkan kamera pada browser.';
+
+                } else if (
+                    error?.name ===
+                    'NotFoundError'
+                ) {
+
+                    message =
+                        'Kamera tidak ditemukan.';
+
+                } else if (
+                    error?.name ===
+                    'NotReadableError'
+                ) {
+
+                    message =
+                        'Kamera sedang digunakan aplikasi lain.';
+                }
+
+
+                showCameraError(
+                    message
+                );
             }
         }
-    );
 
-});
+
+        function showCameraError(
+            message
+        ) {
+
+            cameraError.textContent =
+                String(
+                    message ??
+                    ''
+                );
+
+            cameraError.classList.remove(
+                'sme-hidden'
+            );
+        }
+
+
+        function clearCameraError() {
+
+            cameraError.textContent =
+                '';
+
+            cameraError.classList.add(
+                'sme-hidden'
+            );
+        }
+
+
+        /* ================================================================
+           CAPTURE
+        ================================================================ */
+
+        captureBtn?.addEventListener(
+            'click',
+            async function () {
+
+                clearCameraError();
+
+
+                if (
+                    !cameraVideo.videoWidth ||
+                    !cameraVideo.videoHeight
+                ) {
+
+                    showCameraError(
+                        'Kamera belum siap.'
+                    );
+
+                    return;
+                }
+
+
+                try {
+
+                    const dimensions =
+                        calculateDimensions(
+                            cameraVideo.videoWidth,
+                            cameraVideo.videoHeight,
+                            CAMERA_MAX_WIDTH
+                        );
+
+
+                    const canvas =
+                        document.createElement(
+                            'canvas'
+                        );
+
+
+                    canvas.width =
+                        dimensions.width;
+
+                    canvas.height =
+                        dimensions.height;
+
+
+                    const context =
+                        canvas.getContext(
+                            '2d',
+                            {
+                                alpha:
+                                    false
+                            }
+                        );
+
+
+                    if (!context) {
+
+                        throw new Error(
+                            'Canvas tidak tersedia.'
+                        );
+                    }
+
+
+                    context.fillStyle =
+                        '#ffffff';
+
+                    context.fillRect(
+                        0,
+                        0,
+                        canvas.width,
+                        canvas.height
+                    );
+
+
+                    context.imageSmoothingEnabled =
+                        true;
+
+                    context.imageSmoothingQuality =
+                        'high';
+
+
+                    context.drawImage(
+                        cameraVideo,
+                        0,
+                        0,
+                        canvas.width,
+                        canvas.height
+                    );
+
+
+                    let dataUrl =
+                        canvas.toDataURL(
+                            'image/jpeg',
+                            .82
+                        );
+
+
+                    let quality =
+                        .82;
+
+
+                    while (
+                        getDataUrlBinarySize(
+                            dataUrl
+                        ) >
+                            CAMERA_TARGET_SIZE &&
+                        quality >
+                            .38
+                    ) {
+
+                        quality -=
+                            .05;
+
+                        dataUrl =
+                            canvas.toDataURL(
+                                'image/jpeg',
+                                quality
+                            );
+                    }
+
+
+                    if (
+                        dataUrl.length >
+                        CAMERA_MAX_DATA_URL_LENGTH
+                    ) {
+
+                        throw new Error(
+                            'Hasil scan terlalu besar. Silakan scan ulang.'
+                        );
+                    }
+
+
+                    capturedInput.value =
+                        dataUrl;
+
+
+                    cameraImage.src =
+                        dataUrl;
+
+
+                    cameraImage.classList.remove(
+                        'sme-hidden'
+                    );
+
+
+                    cameraVideo.classList.add(
+                        'sme-hidden'
+                    );
+
+
+                    cameraPlaceholder.classList.add(
+                        'sme-hidden'
+                    );
+
+
+                    const size =
+                        getDataUrlBinarySize(
+                            dataUrl
+                        );
+
+
+                    scanPreview.src =
+                        dataUrl;
+
+
+                    scanInfo.textContent =
+                        'Format JPG • ' +
+                        formatFileSize(
+                            size
+                        ) +
+                        ' • Sudah dikompres';
+
+
+                    scanResult.classList.remove(
+                        'sme-hidden'
+                    );
+
+
+                    clearFileSelection();
+
+
+                    setCompressionStatus(
+                        '✓ <strong>Scan berhasil.</strong><br>' +
+                        'Format akhir: <strong>JPG</strong><br>' +
+                        'Ukuran hasil: <strong>' +
+                        formatFileSize(
+                            size
+                        ) +
+                        '</strong>.',
+                        'success'
+                    );
+
+
+                    stopCamera();
+
+
+                    startCameraBtn.disabled =
+                        true;
+
+
+                    captureBtn.disabled =
+                        true;
+
+
+                    stopCameraBtn.disabled =
+                        true;
+
+                } catch (
+                    error
+                ) {
+
+                    console.error(
+                        'Capture error:',
+                        error
+                    );
+
+
+                    showCameraError(
+                        error?.message ||
+                        'Gagal mengambil scan.'
+                    );
+                }
+
+            }
+        );
+
+
+        /* ================================================================
+           DATA URL SIZE
+        ================================================================ */
+
+        function getDataUrlBinarySize(
+            dataUrl
+        ) {
+
+            const comma =
+                dataUrl.indexOf(',');
+
+
+            if (
+                comma === -1
+            ) {
+                return 0;
+            }
+
+
+            const base64 =
+                dataUrl.substring(
+                    comma + 1
+                );
+
+
+            const padding =
+                base64.endsWith(
+                    '=='
+                )
+                    ? 2
+                    : base64.endsWith(
+                        '='
+                    )
+                        ? 1
+                        : 0;
+
+
+            return (
+                Math.floor(
+                    (
+                        base64.length *
+                        3
+                    ) / 4
+                ) -
+                padding
+            );
+        }
+
+
+        /* ================================================================
+           CLEAR SCAN
+        ================================================================ */
+
+        function clearScanResult() {
+
+            capturedInput.value =
+                '';
+
+            scanResult.classList.add(
+                'sme-hidden'
+            );
+
+            scanPreview.src =
+                '';
+
+            scanInfo.textContent =
+                '';
+
+            cameraImage.src =
+                '';
+
+            cameraImage.classList.add(
+                'sme-hidden'
+            );
+        }
+
+
+        /* ================================================================
+           CAMERA STOP
+        ================================================================ */
+
+        function stopCameraTracks() {
+
+            if (
+                !cameraStream
+            ) {
+                return;
+            }
+
+
+            cameraStream
+                .getTracks()
+                .forEach(
+                    function (
+                        track
+                    ) {
+
+                        track.stop();
+                    }
+                );
+
+
+            cameraStream =
+                null;
+        }
+
+
+        function stopCamera() {
+
+            stopCameraTracks();
+
+
+            cameraVideo.srcObject =
+                null;
+
+
+            startCameraBtn.disabled =
+                false;
+
+
+            captureBtn.disabled =
+                true;
+
+
+            stopCameraBtn.disabled =
+                true;
+
+
+            if (
+                !capturedInput.value
+            ) {
+
+                cameraPlaceholder.classList.remove(
+                    'sme-hidden'
+                );
+
+                cameraVideo.classList.remove(
+                    'sme-hidden'
+                );
+            }
+        }
+
+
+        stopCameraBtn?.addEventListener(
+            'click',
+            function () {
+
+                stopCamera();
+            }
+        );
+
+
+        /* ================================================================
+           RETAKE
+        ================================================================ */
+
+        retakeBtn?.addEventListener(
+            'click',
+            async function () {
+
+                clearScanResult();
+
+                clearCompressionStatus();
+
+                clearCameraError();
+
+                setModeButton(
+                    modeUpload,
+                    false
+                );
+
+                setModeButton(
+                    modeCamera,
+                    true
+                );
+
+                uploadPanel.classList.add(
+                    'sme-hidden'
+                );
+
+                cameraPanel.classList.remove(
+                    'sme-hidden'
+                );
+
+                startCameraBtn.classList.remove(
+                    'sme-hidden'
+                );
+
+                captureBtn.classList.remove(
+                    'sme-hidden'
+                );
+
+                stopCameraBtn.classList.remove(
+                    'sme-hidden'
+                );
+
+
+                await startCamera();
+            }
+        );
+
+
+        /* ================================================================
+           SUBMIT
+        ================================================================ */
+
+        form.addEventListener(
+            'submit',
+            function (
+                event
+            ) {
+
+                if (
+                    submitting
+                ) {
+
+                    event.preventDefault();
+
+                    return;
+                }
+
+
+                const tanggalSurat =
+                    document.getElementById(
+                        'tanggal_surat'
+                    )?.value ||
+                    '';
+
+
+                const tanggalTerima =
+                    document.getElementById(
+                        'tanggal_terima'
+                    )?.value ||
+                    '';
+
+
+                if (
+                    tanggalSurat &&
+                    tanggalTerima &&
+                    tanggalTerima <
+                        tanggalSurat
+                ) {
+
+                    event.preventDefault();
+
+
+                    showAlert(
+                        'warning',
+                        'Tanggal tidak valid',
+                        'Tanggal diterima tidak boleh lebih awal dari tanggal surat.'
+                    );
+
+                    return;
+                }
+
+
+                const file =
+                    fileInput.files?.[0] ||
+                    null;
+
+
+                const hasFile =
+                    !!file;
+
+
+                const hasCamera =
+                    capturedInput.value.trim() !==
+                    '';
+
+
+                if (
+                    hasFile &&
+                    hasCamera
+                ) {
+
+                    event.preventDefault();
+
+
+                    showAlert(
+                        'warning',
+                        'Metode lampiran',
+                        'Gunakan Upload File atau Scan Kamera saja.'
+                    );
+
+                    return;
+                }
+
+
+                if (
+                    hasFile
+                ) {
+
+                    if (
+                        file.size <= 0
+                    ) {
+
+                        event.preventDefault();
+
+                        showAlert(
+                            'warning',
+                            'File tidak valid',
+                            'File yang dipilih kosong.'
+                        );
+
+                        return;
+                    }
+
+
+                    if (
+                        file.size >
+                        MAX_FILE_SIZE
+                    ) {
+
+                        event.preventDefault();
+
+                        showAlert(
+                            'warning',
+                            'File terlalu besar',
+                            'Ukuran file maksimal 10 MB.'
+                        );
+
+                        return;
+                    }
+                }
+
+
+                if (
+                    hasCamera &&
+                    capturedInput.value.length >
+                        CAMERA_MAX_DATA_URL_LENGTH
+                ) {
+
+                    event.preventDefault();
+
+                    showAlert(
+                        'warning',
+                        'Hasil scan terlalu besar',
+                        'Silakan scan ulang.'
+                    );
+
+                    return;
+                }
+
+
+                submitting =
+                    true;
+
+
+                stopCamera();
+
+
+                submitBtn.disabled =
+                    true;
+
+
+                submitIcon.classList.add(
+                    'sme-hidden'
+                );
+
+
+                submitLoading.classList.remove(
+                    'sme-hidden'
+                );
+
+
+                submitText.textContent =
+                    hasCamera
+                        ? 'Menyimpan hasil scan...'
+                        : hasFile
+                            ? 'Menyimpan lampiran...'
+                            : 'Memperbarui...';
+            }
+        );
+
+
+        /* ================================================================
+           OLD CAMERA DATA
+        ================================================================ */
+
+        if (
+            capturedInput.value
+        ) {
+
+            uploadPanel.classList.add(
+                'sme-hidden'
+            );
+
+            cameraPanel.classList.remove(
+                'sme-hidden'
+            );
+
+            setModeButton(
+                modeUpload,
+                false
+            );
+
+            setModeButton(
+                modeCamera,
+                true
+            );
+
+            cameraImage.src =
+                capturedInput.value;
+
+            cameraImage.classList.remove(
+                'sme-hidden'
+            );
+
+            cameraVideo.classList.add(
+                'sme-hidden'
+            );
+
+            cameraPlaceholder.classList.add(
+                'sme-hidden'
+            );
+
+            scanPreview.src =
+                capturedInput.value;
+
+            const size =
+                getDataUrlBinarySize(
+                    capturedInput.value
+                );
+
+            scanInfo.textContent =
+                'Hasil scan sebelumnya • JPG • ' +
+                formatFileSize(
+                    size
+                );
+
+            scanResult.classList.remove(
+                'sme-hidden'
+            );
+
+            startCameraBtn.classList.add(
+                'sme-hidden'
+            );
+
+            captureBtn.classList.add(
+                'sme-hidden'
+            );
+
+            stopCameraBtn.classList.add(
+                'sme-hidden'
+            );
+        }
+
+
+        /* ================================================================
+           CLEANUP
+        ================================================================ */
+
+        window.addEventListener(
+            'beforeunload',
+            function () {
+
+                stopCameraTracks();
+
+                revokePdfPreview();
+            }
+        );
+
+    }
+);
+
 </script>
 
 @endpush

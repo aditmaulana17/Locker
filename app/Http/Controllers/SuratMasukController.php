@@ -23,6 +23,12 @@ use Throwable;
 
 class SuratMasukController extends Controller
 {
+    /*
+    |--------------------------------------------------------------------------
+    | STATUS
+    |--------------------------------------------------------------------------
+    */
+
     private const STATUS_OPTIONS = [
         'baru',
         'diproses',
@@ -30,6 +36,12 @@ class SuratMasukController extends Controller
         'selesai',
         'diarsipkan',
     ];
+
+    /*
+    |--------------------------------------------------------------------------
+    | FILE
+    |--------------------------------------------------------------------------
+    */
 
     private const ALLOWED_FILE_EXTENSIONS = [
         'pdf',
@@ -43,12 +55,6 @@ class SuratMasukController extends Controller
         'image/png',
     ];
 
-    /*
-    |--------------------------------------------------------------------------
-    | BATAS FILE
-    |--------------------------------------------------------------------------
-    */
-
     private const MAX_FILE_SIZE =
         10 * 1024 * 1024;
 
@@ -56,18 +62,13 @@ class SuratMasukController extends Controller
     |--------------------------------------------------------------------------
     | PDF COMPRESSION
     |--------------------------------------------------------------------------
-    |
-    | Ghostscript harus tersedia di container locker-app:
-    |
-    | /usr/bin/gs
-    |
-    | PDF tetap maksimal 10 MB.
-    | Ghostscript digunakan untuk membuat ukuran file lebih kecil.
-    |
     */
 
     private const PDF_COMPRESSION_TIMEOUT =
         300;
+
+    private const PDF_PREVIEW_TTL =
+        1800;
 
     private const PDF_COMPRESSION_PROFILES = [
         [
@@ -194,7 +195,7 @@ class SuratMasukController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | BUILD QUERY SURAT MASUK
+    | BUILD QUERY
     |--------------------------------------------------------------------------
     */
 
@@ -238,32 +239,38 @@ class SuratMasukController extends Controller
                 ) use (
                     $keyword
                 ): void {
+
                     $q
                         ->where(
                             'nomor_agenda',
                             'like',
                             $keyword
                         )
+
                         ->orWhere(
                             'nomor_surat',
                             'like',
                             $keyword
                         )
+
                         ->orWhere(
                             'pengirim',
                             'like',
                             $keyword
                         )
+
                         ->orWhere(
                             'perihal',
                             'like',
                             $keyword
                         )
+
                         ->orWhere(
                             'ringkasan',
                             'like',
                             $keyword
                         )
+
                         ->orWhereHas(
                             'kategori',
                             function (
@@ -271,17 +278,20 @@ class SuratMasukController extends Controller
                             ) use (
                                 $keyword
                             ): void {
+
                                 $kategori
                                     ->where(
                                         'nama_kategori',
                                         'like',
                                         $keyword
                                     )
+
                                     ->orWhere(
                                         'kode',
                                         'like',
                                         $keyword
                                     )
+
                                     ->orWhere(
                                         'sifat',
                                         'like',
@@ -500,6 +510,7 @@ class SuratMasukController extends Controller
                 function (
                     Builder $disposisi
                 ): void {
+
                     $disposisi->where(
                         'kepada_user_id',
                         (int) Auth::id()
@@ -521,6 +532,8 @@ class SuratMasukController extends Controller
     {
         $this->ensureUserCanManageSurat();
 
+        $this->cleanupPdfPreview();
+
         $kategoris =
             KategoriSurat::query()
                 ->orderBy(
@@ -538,6 +551,532 @@ class SuratMasukController extends Controller
                 'nomorAgenda'
             )
         );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | PREVIEW COMPRESSION PDF
+    |--------------------------------------------------------------------------
+    */
+
+    public function previewCompression(
+        Request $request
+    ) {
+        $this->ensureUserCanManageSurat();
+
+        $request->validate(
+            [
+                'lampiran_file' => [
+                    'required',
+                    'file',
+                    'mimes:pdf',
+                    'max:10240',
+                ],
+            ],
+            [
+                'lampiran_file.required' =>
+                    'File PDF wajib dipilih.',
+
+                'lampiran_file.file' =>
+                    'File PDF tidak valid.',
+
+                'lampiran_file.mimes' =>
+                    'File harus berformat PDF.',
+
+                'lampiran_file.max' =>
+                    'Ukuran PDF maksimal 10 MB.',
+            ]
+        );
+
+        $file =
+            $request->file(
+                'lampiran_file'
+            );
+
+        if (
+            !$file ||
+            !$file->isValid()
+        ) {
+            return response()->json(
+                [
+                    'success' =>
+                        false,
+
+                    'message' =>
+                        $file
+                            ? $this->getUploadErrorMessage(
+                                $file
+                            )
+                            : 'File PDF tidak ditemukan.',
+                ],
+                422
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | EXTENSION
+        |--------------------------------------------------------------------------
+        */
+
+        $extension =
+            strtolower(
+                trim(
+                    (string) $file
+                        ->getClientOriginalExtension()
+                )
+            );
+
+        if (
+            $extension !== 'pdf'
+        ) {
+            return response()->json(
+                [
+                    'success' =>
+                        false,
+
+                    'message' =>
+                        'File harus berformat PDF.',
+                ],
+                422
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | MIME
+        |--------------------------------------------------------------------------
+        */
+
+        $mime =
+            strtolower(
+                (string) $file->getMimeType()
+            );
+
+        if (
+            $mime !==
+            'application/pdf'
+        ) {
+            return response()->json(
+                [
+                    'success' =>
+                        false,
+
+                    'message' =>
+                        'File PDF tidak valid.',
+                ],
+                422
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | TEMP FILE
+        |--------------------------------------------------------------------------
+        */
+
+        $inputPath =
+            $file->getRealPath();
+
+        if (
+            !$inputPath ||
+            !is_readable(
+                $inputPath
+            )
+        ) {
+            return response()->json(
+                [
+                    'success' =>
+                        false,
+
+                    'message' =>
+                        'File PDF temporary tidak dapat dibaca.',
+                ],
+                422
+            );
+        }
+
+        $originalSize =
+            filesize(
+                $inputPath
+            );
+
+        if (
+            $originalSize === false ||
+            $originalSize <= 0
+        ) {
+            return response()->json(
+                [
+                    'success' =>
+                        false,
+
+                    'message' =>
+                        'Ukuran file PDF tidak dapat dibaca.',
+                ],
+                422
+            );
+        }
+
+        if (
+            $originalSize >
+            self::MAX_FILE_SIZE
+        ) {
+            return response()->json(
+                [
+                    'success' =>
+                        false,
+
+                    'message' =>
+                        'Ukuran PDF maksimal 10 MB.',
+                ],
+                422
+            );
+        }
+
+        try {
+
+            /*
+            |--------------------------------------------------------------------------
+            | HASH
+            |--------------------------------------------------------------------------
+            */
+
+            $fileHash =
+                hash_file(
+                    'sha256',
+                    $inputPath
+                );
+
+            if (
+                !$fileHash
+            ) {
+                throw new RuntimeException(
+                    'Hash file PDF tidak dapat dibuat.'
+                );
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | HAPUS PREVIEW LAMA
+            |--------------------------------------------------------------------------
+            */
+
+            $this->cleanupPdfPreview();
+
+            /*
+            |--------------------------------------------------------------------------
+            | COMPRESS
+            |--------------------------------------------------------------------------
+            */
+
+            $result =
+                $this->compressPdfToTemporaryFile(
+                    $inputPath
+                );
+
+            $temporaryPath =
+                $result['path'];
+
+            $compressedSize =
+                $result['size'];
+
+            $profile =
+                $result['profile'];
+
+            /*
+            |--------------------------------------------------------------------------
+            | HASIL TIDAK LEBIH KECIL
+            |--------------------------------------------------------------------------
+            */
+
+            if (
+                $compressedSize >=
+                $originalSize
+            ) {
+
+                @unlink(
+                    $temporaryPath
+                );
+
+                $token =
+                    Str::random(64);
+
+                session()->put(
+                    'surat_masuk_pdf_preview',
+                    [
+                        'token' =>
+                            $token,
+
+                        'file_hash' =>
+                            $fileHash,
+
+                        'original_size' =>
+                            $originalSize,
+
+                        'compressed_size' =>
+                            $originalSize,
+
+                        'profile' =>
+                            $profile,
+
+                        'use_compressed' =>
+                            false,
+
+                        'user_id' =>
+                            (int) Auth::id(),
+
+                        'created_at' =>
+                            now()->timestamp,
+                    ]
+                );
+
+                return response()->json(
+                    [
+                        'success' =>
+                            true,
+
+                        'compressed' =>
+                            false,
+
+                        'token' =>
+                            $token,
+
+                        'original_size' =>
+                            $originalSize,
+
+                        'compressed_size' =>
+                            $originalSize,
+
+                        'saving_percent' =>
+                            0,
+
+                        'profile' =>
+                            $profile,
+
+                        'original_size_text' =>
+                            $this->formatBytes(
+                                $originalSize
+                            ),
+
+                        'compressed_size_text' =>
+                            $this->formatBytes(
+                                $originalSize
+                            ),
+
+                        'message' =>
+                            'PDF sudah cukup optimal. File asli akan digunakan.',
+                    ]
+                );
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | TOKEN
+            |--------------------------------------------------------------------------
+            */
+
+            $token =
+                Str::random(64);
+
+            $directory =
+                storage_path(
+                    'app/pdf-compression'
+                );
+
+            if (
+                !is_dir(
+                    $directory
+                ) &&
+                !mkdir(
+                    $directory,
+                    0775,
+                    true
+                ) &&
+                !is_dir(
+                    $directory
+                )
+            ) {
+                @unlink(
+                    $temporaryPath
+                );
+
+                throw new RuntimeException(
+                    'Folder preview PDF tidak dapat dibuat.'
+                );
+            }
+
+            $finalPreviewPath =
+                $directory .
+                DIRECTORY_SEPARATOR .
+                'preview_' .
+                $token .
+                '.pdf';
+
+            if (
+                !rename(
+                    $temporaryPath,
+                    $finalPreviewPath
+                )
+            ) {
+                @unlink(
+                    $temporaryPath
+                );
+
+                throw new RuntimeException(
+                    'Gagal menyimpan hasil compression temporary.'
+                );
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | SESSION
+            |--------------------------------------------------------------------------
+            */
+
+            session()->put(
+                'surat_masuk_pdf_preview',
+                [
+                    'token' =>
+                        $token,
+
+                    'path' =>
+                        $finalPreviewPath,
+
+                    'file_hash' =>
+                        $fileHash,
+
+                    'original_size' =>
+                        $originalSize,
+
+                    'compressed_size' =>
+                        $compressedSize,
+
+                    'profile' =>
+                        $profile,
+
+                    'use_compressed' =>
+                        true,
+
+                    'user_id' =>
+                        (int) Auth::id(),
+
+                    'created_at' =>
+                        now()->timestamp,
+                ]
+            );
+
+            /*
+            |--------------------------------------------------------------------------
+            | SAVING
+            |--------------------------------------------------------------------------
+            */
+
+            $savingPercent =
+                round(
+                    (
+                        1 -
+                        (
+                            $compressedSize /
+                            $originalSize
+                        )
+                    ) *
+                    100,
+                    2
+                );
+
+            Log::info(
+                'Preview PDF berhasil dikompresi.',
+                [
+                    'original_size' =>
+                        $originalSize,
+
+                    'compressed_size' =>
+                        $compressedSize,
+
+                    'saving_percent' =>
+                        $savingPercent,
+
+                    'profile' =>
+                        $profile,
+
+                    'user_id' =>
+                        Auth::id(),
+
+                    'file_name' =>
+                        $file->getClientOriginalName(),
+                ]
+            );
+
+            return response()->json(
+                [
+                    'success' =>
+                        true,
+
+                    'compressed' =>
+                        true,
+
+                    'token' =>
+                        $token,
+
+                    'original_size' =>
+                        $originalSize,
+
+                    'compressed_size' =>
+                        $compressedSize,
+
+                    'saving_percent' =>
+                        $savingPercent,
+
+                    'profile' =>
+                        $profile,
+
+                    'original_size_text' =>
+                        $this->formatBytes(
+                            $originalSize
+                        ),
+
+                    'compressed_size_text' =>
+                        $this->formatBytes(
+                            $compressedSize
+                        ),
+
+                    'message' =>
+                        'PDF berhasil dikompresi dan siap disimpan.',
+                ]
+            );
+
+        } catch (
+            Throwable $e
+        ) {
+
+            Log::error(
+                'Gagal preview compression PDF Surat Masuk.',
+                [
+                    'message' =>
+                        $e->getMessage(),
+
+                    'user_id' =>
+                        Auth::id(),
+
+                    'file_name' =>
+                        $file->getClientOriginalName(),
+
+                    'trace' =>
+                        $e->getTraceAsString(),
+                ]
+            );
+
+            return response()->json(
+                [
+                    'success' =>
+                        false,
+
+                    'message' =>
+                        $e->getMessage(),
+                ],
+                500
+            );
+        }
     }
 
     /*
@@ -563,6 +1102,13 @@ class SuratMasukController extends Controller
         DB::beginTransaction();
 
         try {
+
+            /*
+            |--------------------------------------------------------------------------
+            | NOMOR AGENDA
+            |--------------------------------------------------------------------------
+            */
+
             $nomorInput =
                 trim(
                     (string) $request->input(
@@ -585,8 +1131,20 @@ class SuratMasukController extends Controller
                     $nomorInput;
             }
 
+            /*
+            |--------------------------------------------------------------------------
+            | DITERIMA OLEH
+            |--------------------------------------------------------------------------
+            */
+
             $data['diterima_oleh'] =
                 (int) Auth::id();
+
+            /*
+            |--------------------------------------------------------------------------
+            | STATUS
+            |--------------------------------------------------------------------------
+            */
 
             $status =
                 strtolower(
@@ -609,7 +1167,7 @@ class SuratMasukController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | FILE
+            | FILE UPLOAD
             |--------------------------------------------------------------------------
             */
 
@@ -618,21 +1176,76 @@ class SuratMasukController extends Controller
                     'lampiran_file'
                 )
             ) {
-                $uploadedPath =
-                    $this->storeUploadedFile(
-                        $request->file(
-                            'lampiran_file'
-                        ),
-                        $diskName
+
+                $file =
+                    $request->file(
+                        'lampiran_file'
                     );
+
+                $extension =
+                    strtolower(
+                        trim(
+                            (string) $file
+                                ->getClientOriginalExtension()
+                        )
+                    );
+
+                if (
+                    $extension === 'jpeg'
+                ) {
+                    $extension =
+                        'jpg';
+                }
+
+                /*
+                |----------------------------------------------------------------------
+                | PDF
+                |----------------------------------------------------------------------
+                */
+
+                if (
+                    $extension === 'pdf'
+                ) {
+
+                    $uploadedPath =
+                        $this->storePdfUsingPreview(
+                            $file,
+                            $diskName
+                        );
+
+                }
+
+                /*
+                |----------------------------------------------------------------------
+                | IMAGE
+                |----------------------------------------------------------------------
+                */
+
+                else {
+
+                    $uploadedPath =
+                        $this->storeUploadedFile(
+                            $file,
+                            $diskName
+                        );
+                }
 
                 $data['lampiran_file'] =
                     $uploadedPath;
-            } elseif (
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | CAMERA
+            |--------------------------------------------------------------------------
+            */
+
+            elseif (
                 $request->filled(
                     'captured_image'
                 )
             ) {
+
                 $uploadedPath =
                     $this->uploadBase64Image(
                         (string) $request->input(
@@ -645,14 +1258,32 @@ class SuratMasukController extends Controller
                     $uploadedPath;
             }
 
+            /*
+            |--------------------------------------------------------------------------
+            | JANGAN SIMPAN BASE64
+            |--------------------------------------------------------------------------
+            */
+
             unset(
                 $data['captured_image']
             );
+
+            /*
+            |--------------------------------------------------------------------------
+            | CREATE
+            |--------------------------------------------------------------------------
+            */
 
             $surat =
                 SuratMasuk::create(
                     $data
                 );
+
+            /*
+            |--------------------------------------------------------------------------
+            | ACTIVITY LOG
+            |--------------------------------------------------------------------------
+            */
 
             $this->logActivity(
                 'create',
@@ -666,6 +1297,14 @@ class SuratMasukController extends Controller
 
             DB::commit();
 
+            /*
+            |--------------------------------------------------------------------------
+            | CLEANUP PREVIEW
+            |--------------------------------------------------------------------------
+            */
+
+            $this->cleanupPdfPreview();
+
             return redirect()
                 ->route(
                     'surat-masuk.index'
@@ -675,9 +1314,11 @@ class SuratMasukController extends Controller
                     'Surat masuk berhasil dicatat dengan nomor agenda ' .
                     $surat->nomor_agenda
                 );
+
         } catch (
             Throwable $e
         ) {
+
             DB::rollBack();
 
             if (
@@ -688,6 +1329,8 @@ class SuratMasukController extends Controller
                     $diskName
                 );
             }
+
+            $this->cleanupPdfPreview();
 
             Log::error(
                 'Gagal menyimpan Surat Masuk.',
@@ -718,971 +1361,17 @@ class SuratMasukController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | SHOW
+    | STORE PDF USING PREVIEW
     |--------------------------------------------------------------------------
     */
 
-    public function show(
-        SuratMasuk $suratMasuk
-    ) {
-        $this->ensureCanView(
-            $suratMasuk
-        );
-
-        $suratMasuk->load([
-            'kategori',
-            'penerima',
-            'disposisi.dari',
-            'disposisi.kepada',
-        ]);
-
-        $daftarStaf =
-            User::query()
-                ->where(
-                    'id',
-                    '!=',
-                    Auth::id()
-                )
-                ->where(
-                    'is_active',
-                    true
-                )
-                ->where(
-                    function (
-                        $query
-                    ): void {
-                        $query
-                            ->whereRaw(
-                                'LOWER(TRIM(role)) = ?',
-                                ['staff']
-                            )
-                            ->orWhereRaw(
-                                'LOWER(TRIM(role)) = ?',
-                                ['staf']
-                            );
-                    }
-                )
-                ->orderBy(
-                    'name'
-                )
-                ->get();
-
-        $fileUrl =
-            $this->getFileUrl(
-                $suratMasuk->lampiran_file
-            );
-
-        return view(
-            'surat_masuk.show',
-            compact(
-                'suratMasuk',
-                'fileUrl',
-                'daftarStaf'
-            )
-        );
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | STORE DISPOSISI
-    |--------------------------------------------------------------------------
-    */
-
-    public function storeDisposisi(
-        Request $request,
-        SuratMasuk $suratMasuk
-    ) {
-        $this->ensureUserCanManageSurat();
-
-        $validated =
-            $request->validate(
-                [
-                    'tujuan_user_id' => [
-                        'required',
-                        'integer',
-                        Rule::exists(
-                            'users',
-                            'id'
-                        )->where(
-                            function (
-                                $query
-                            ): void {
-                                $query
-                                    ->where(
-                                        'is_active',
-                                        true
-                                    )
-                                    ->where(
-                                        function (
-                                            $q
-                                        ): void {
-                                            $q
-                                                ->whereRaw(
-                                                    'LOWER(TRIM(role)) = ?',
-                                                    ['staff']
-                                                )
-                                                ->orWhereRaw(
-                                                    'LOWER(TRIM(role)) = ?',
-                                                    ['staf']
-                                                );
-                                        }
-                                    );
-                            }
-                        ),
-                    ],
-
-                    'instruksi' => [
-                        'required',
-                        'string',
-                        'max:5000',
-                    ],
-
-                    'batas_waktu' => [
-                        'nullable',
-                        'date',
-                    ],
-                ],
-                [
-                    'tujuan_user_id.required' =>
-                        'Staf tujuan wajib dipilih.',
-
-                    'tujuan_user_id.exists' =>
-                        'Staf tujuan tidak valid atau tidak aktif.',
-
-                    'instruksi.required' =>
-                        'Instruksi disposisi wajib diisi.',
-
-                    'instruksi.max' =>
-                        'Instruksi disposisi maksimal 5.000 karakter.',
-
-                    'batas_waktu.date' =>
-                        'Batas waktu disposisi tidak valid.',
-                ]
-            );
-
-        $tujuanUserId =
-            (int) $validated['tujuan_user_id'];
-
-        if (
-            $tujuanUserId ===
-            (int) Auth::id()
-        ) {
-            return back()
-                ->withInput()
-                ->withErrors(
-                    [
-                        'tujuan_user_id' =>
-                            'Anda tidak dapat mengirim disposisi kepada diri sendiri.',
-                    ]
-                );
-        }
-
-        DB::beginTransaction();
-
-        try {
-            $instruksi =
-                trim(
-                    (string) $validated['instruksi']
-                );
-
-            $disposisiData = [
-                'surat_masuk_id' =>
-                    $suratMasuk->id,
-
-                'dari_user_id' =>
-                    (int) Auth::id(),
-
-                'kepada_user_id' =>
-                    $tujuanUserId,
-
-                'instruksi' =>
-                    $instruksi,
-
-                'status' =>
-                    'menunggu',
-
-                'batas_waktu' =>
-                    $validated['batas_waktu'] ??
-                    null,
-            ];
-
-            if (
-                Schema::hasColumn(
-                    'disposisis',
-                    'isi_disposisi'
-                )
-            ) {
-                $disposisiData['isi_disposisi'] =
-                    $instruksi;
-            }
-
-            if (
-                Schema::hasColumn(
-                    'disposisis',
-                    'sifat'
-                )
-            ) {
-                $disposisiData['sifat'] =
-                    'biasa';
-            }
-
-            $suratMasuk
-                ->disposisi()
-                ->create(
-                    $disposisiData
-                );
-
-            $suratMasuk->update(
-                [
-                    'status' =>
-                        'didisposisikan',
-                ]
-            );
-
-            $this->logActivity(
-                'disposisi',
-                'surat_masuk',
-                'Mendisposisikan surat masuk ' .
-                $suratMasuk->nomor_agenda
-            );
-
-            DB::commit();
-
-            return back()->with(
-                'success',
-                'Disposisi surat berhasil dikirim ke staff yang dituju.'
-            );
-        } catch (
-            Throwable $e
-        ) {
-            DB::rollBack();
-
-            Log::error(
-                'Gagal melakukan disposisi Surat Masuk.',
-                [
-                    'message' =>
-                        $e->getMessage(),
-
-                    'surat_id' =>
-                        $suratMasuk->id,
-
-                    'user_id' =>
-                        Auth::id(),
-                ]
-            );
-
-            return back()
-                ->withInput()
-                ->with(
-                    'error',
-                    'Gagal memproses disposisi: ' .
-                    $e->getMessage()
-                );
-        }
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | EDIT
-    |--------------------------------------------------------------------------
-    */
-
-    public function edit(
-        SuratMasuk $suratMasuk
-    ) {
-        $this->ensureUserCanManageSurat();
-
-        $kategoris =
-            KategoriSurat::query()
-                ->orderBy(
-                    'nama_kategori'
-                )
-                ->get();
-
-        return view(
-            'surat_masuk.edit',
-            compact(
-                'suratMasuk',
-                'kategoris'
-            )
-        );
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | UPDATE
-    |--------------------------------------------------------------------------
-    */
-
-    public function update(
-        SuratMasukRequest $request,
-        SuratMasuk $suratMasuk
-    ) {
-        $this->ensureUserCanManageSurat();
-
-        $data =
-            $request->validated();
-
-        $diskName =
-            $this->getStorageDisk();
-
-        $oldFile =
-            $suratMasuk->lampiran_file;
-
-        $newFile =
-            null;
-
-        DB::beginTransaction();
-
-        try {
-            if (
-                array_key_exists(
-                    'status',
-                    $data
-                )
-            ) {
-                $status =
-                    strtolower(
-                        trim(
-                            (string) $data['status']
-                        )
-                    );
-
-                if (
-                    in_array(
-                        $status,
-                        self::STATUS_OPTIONS,
-                        true
-                    )
-                ) {
-                    $data['status'] =
-                        $status;
-                }
-            }
-
-            /*
-            |--------------------------------------------------------------------------
-            | FILE BARU
-            |--------------------------------------------------------------------------
-            */
-
-            if (
-                $request->hasFile(
-                    'lampiran_file'
-                )
-            ) {
-                $newFile =
-                    $this->storeUploadedFile(
-                        $request->file(
-                            'lampiran_file'
-                        ),
-                        $diskName
-                    );
-
-                $data['lampiran_file'] =
-                    $newFile;
-            } elseif (
-                $request->filled(
-                    'captured_image'
-                )
-            ) {
-                $newFile =
-                    $this->uploadBase64Image(
-                        (string) $request->input(
-                            'captured_image'
-                        ),
-                        $diskName
-                    );
-
-                $data['lampiran_file'] =
-                    $newFile;
-            } else {
-                unset(
-                    $data['lampiran_file']
-                );
-            }
-
-            unset(
-                $data['captured_image']
-            );
-
-            $suratMasuk->update(
-                $data
-            );
-
-            $this->logActivity(
-                'update',
-                'surat_masuk',
-                'Mengubah surat masuk ' .
-                $suratMasuk->nomor_agenda
-            );
-
-            DB::commit();
-
-            if (
-                $newFile &&
-                $oldFile &&
-                $oldFile !== $newFile
-            ) {
-                $this->deleteStorageFile(
-                    $oldFile,
-                    $diskName
-                );
-            }
-
-            return redirect()
-                ->route(
-                    'surat-masuk.index'
-                )
-                ->with(
-                    'success',
-                    'Surat masuk berhasil diperbarui.'
-                );
-        } catch (
-            Throwable $e
-        ) {
-            DB::rollBack();
-
-            if (
-                $newFile &&
-                $newFile !== $oldFile
-            ) {
-                $this->deleteStorageFile(
-                    $newFile,
-                    $diskName
-                );
-            }
-
-            Log::error(
-                'Gagal memperbarui Surat Masuk.',
-                [
-                    'message' =>
-                        $e->getMessage(),
-
-                    'surat_id' =>
-                        $suratMasuk->id,
-
-                    'user_id' =>
-                        Auth::id(),
-
-                    'disk' =>
-                        $diskName,
-
-                    'trace' =>
-                        $e->getTraceAsString(),
-                ]
-            );
-
-            return back()
-                ->withInput()
-                ->with(
-                    'error',
-                    'Gagal memperbarui surat masuk: ' .
-                    $e->getMessage()
-                );
-        }
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | DESTROY
-    |--------------------------------------------------------------------------
-    */
-
-    public function destroy(
-        SuratMasuk $suratMasuk
-    ) {
-        $this->ensureUserCanManageSurat();
-
-        $nomor =
-            $suratMasuk->nomor_agenda;
-
-        try {
-            DB::transaction(
-                function () use (
-                    $suratMasuk,
-                    $nomor
-                ): void {
-                    $suratMasuk->delete();
-
-                    $this->logActivity(
-                        'delete',
-                        'surat_masuk',
-                        'Menghapus surat masuk ' .
-                        $nomor
-                    );
-                }
-            );
-
-            return back()->with(
-                'success',
-                'Surat masuk berhasil dipindahkan ke arsip sampah.'
-            );
-        } catch (
-            Throwable $e
-        ) {
-            Log::error(
-                'Gagal menghapus Surat Masuk.',
-                [
-                    'message' =>
-                        $e->getMessage(),
-
-                    'surat_id' =>
-                        $suratMasuk->id,
-
-                    'user_id' =>
-                        Auth::id(),
-                ]
-            );
-
-            return back()->with(
-                'error',
-                'Gagal menghapus surat masuk: ' .
-                $e->getMessage()
-            );
-        }
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | CETAK LABEL
-    |--------------------------------------------------------------------------
-    */
-
-    public function cetakLabel(
-        SuratMasuk $suratMasuk
-    ) {
-        $this->ensureCanView(
-            $suratMasuk
-        );
-
-        $suratMasuk->load(
-            'kategori'
-        );
-
-        return view(
-            'surat_masuk.label',
-            compact(
-                'suratMasuk'
-            )
-        );
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | PREVIEW LAMPIRAN
-    |--------------------------------------------------------------------------
-    */
-
-    public function previewLampiran(
-        SuratMasuk $suratMasuk
-    ) {
-        $this->ensureCanView(
-            $suratMasuk
-        );
-
-        $file =
-            $suratMasuk->lampiran_file;
-
-        if (!$file) {
-            abort(
-                404,
-                'File lampiran tidak ditemukan.'
-            );
-        }
-
-        if (
-            filter_var(
-                $file,
-                FILTER_VALIDATE_URL
-            )
-        ) {
-            return redirect()->away(
-                $file
-            );
-        }
-
-        $diskName =
-            $this->getStorageDisk();
-
-        try {
-            $disk =
-                Storage::disk(
-                    $diskName
-                );
-
-            if (
-                !method_exists(
-                    $disk,
-                    'temporaryUrl'
-                )
-            ) {
-                throw new RuntimeException(
-                    'Storage Supabase tidak mendukung temporary URL.'
-                );
-            }
-
-            $url =
-                $disk->temporaryUrl(
-                    $file,
-                    now()->addMinutes(30)
-                );
-
-            if (!$url) {
-                throw new RuntimeException(
-                    'Supabase gagal membuat URL sementara.'
-                );
-            }
-
-            return redirect()->away(
-                $url
-            );
-        } catch (
-            HttpException $e
-        ) {
-            throw $e;
-        } catch (
-            Throwable $e
-        ) {
-            Log::error(
-                'Gagal preview lampiran Surat Masuk.',
-                [
-                    'message' =>
-                        $e->getMessage(),
-
-                    'file' =>
-                        $file,
-
-                    'disk' =>
-                        $diskName,
-
-                    'surat_id' =>
-                        $suratMasuk->id,
-                ]
-            );
-
-            return back()->with(
-                'error',
-                'Gagal membuka lampiran file: ' .
-                $e->getMessage()
-            );
-        }
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | DOWNLOAD LAMPIRAN
-    |--------------------------------------------------------------------------
-    */
-
-    public function downloadLampiran(
-        SuratMasuk $suratMasuk
-    ) {
-        $this->ensureCanView(
-            $suratMasuk
-        );
-
-        $file =
-            $suratMasuk->lampiran_file;
-
-        if (!$file) {
-            abort(
-                404,
-                'File lampiran tidak ditemukan.'
-            );
-        }
-
-        if (
-            filter_var(
-                $file,
-                FILTER_VALIDATE_URL
-            )
-        ) {
-            return redirect()->away(
-                $file
-            );
-        }
-
-        $diskName =
-            $this->getStorageDisk();
-
-        try {
-            $disk =
-                Storage::disk(
-                    $diskName
-                );
-
-            if (
-                !method_exists(
-                    $disk,
-                    'temporaryUrl'
-                )
-            ) {
-                throw new RuntimeException(
-                    'Storage Supabase tidak mendukung temporary URL.'
-                );
-            }
-
-            $url =
-                $disk->temporaryUrl(
-                    $file,
-                    now()->addMinutes(30),
-                    [
-                        'ResponseContentDisposition' =>
-                            'attachment; filename="' .
-                            basename($file) .
-                            '"',
-
-                        'ResponseContentType' =>
-                            $this->getMimeTypeFromPath(
-                                $file
-                            ),
-                    ]
-                );
-
-            if (!$url) {
-                throw new RuntimeException(
-                    'Supabase gagal membuat URL download.'
-                );
-            }
-
-            return redirect()->away(
-                $url
-            );
-        } catch (
-            HttpException $e
-        ) {
-            throw $e;
-        } catch (
-            Throwable $e
-        ) {
-            Log::error(
-                'Gagal download lampiran Surat Masuk.',
-                [
-                    'message' =>
-                        $e->getMessage(),
-
-                    'file' =>
-                        $file,
-
-                    'disk' =>
-                        $diskName,
-
-                    'surat_id' =>
-                        $suratMasuk->id,
-                ]
-            );
-
-            return back()->with(
-                'error',
-                'Gagal mengunduh lampiran file: ' .
-                $e->getMessage()
-            );
-        }
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | CETAK DISPOSISI
-    |--------------------------------------------------------------------------
-    */
-
-    public function cetakDisposisi(
-        SuratMasuk $suratMasuk
-    ) {
-        $this->ensureCanView(
-            $suratMasuk
-        );
-
-        $suratMasuk->load([
-            'kategori',
-            'disposisi.dari',
-            'disposisi.kepada',
-        ]);
-
-        return view(
-            'surat_masuk.disposisi_pdf',
-            compact(
-                'suratMasuk'
-            )
-        );
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | ACCESS CONTROL
-    |--------------------------------------------------------------------------
-    */
-
-    private function ensureCanView(
-        SuratMasuk $suratMasuk
-    ): void {
-        $this->ensureUserAuthenticated();
-
-        $role =
-            $this->resolveSuratUserRole();
-
-        if (
-            $role === 'admin'
-        ) {
-            return;
-        }
-
-        if (
-            $role === 'pimpinan'
-        ) {
-            return;
-        }
-
-        if (
-            $role === 'staff'
-        ) {
-            $hasDisposisi =
-                $suratMasuk
-                    ->disposisi()
-                    ->where(
-                        'kepada_user_id',
-                        (int) Auth::id()
-                    )
-                    ->exists();
-
-            if (
-                $hasDisposisi
-            ) {
-                return;
-            }
-        }
-
-        abort(
-            403,
-            'Anda tidak memiliki izin untuk melihat surat masuk ini.'
-        );
-    }
-
-    private function resolveSuratUserRole(): string
-    {
-        $user =
-            Auth::user();
-
-        if (!$user) {
-            return '';
-        }
-
-        $role =
-            strtolower(
-                trim(
-                    (string) (
-                        $user->role ??
-                        ''
-                    )
-                )
-            );
-
-        if (
-            $role === '' &&
-            isset(
-                $user->jabatan
-            )
-        ) {
-            $role =
-                strtolower(
-                    trim(
-                        (string) $user->jabatan
-                    )
-                );
-        }
-
-        return $role === 'staf'
-            ? 'staff'
-            : $role;
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | STORAGE DISK
-    |--------------------------------------------------------------------------
-    */
-
-    private function getStorageDisk(): string
-    {
-        $disk =
-            strtolower(
-                trim(
-                    (string) config(
-                        'filesystems.default',
-                        ''
-                    )
-                )
-            );
-
-        if (
-            $disk !==
-            'supabase'
-        ) {
-            throw new RuntimeException(
-                'FILESYSTEM_DISK harus diset ke "supabase". File surat tidak boleh disimpan permanen di server.'
-            );
-        }
-
-        return 'supabase';
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | UPLOAD ERROR
-    |--------------------------------------------------------------------------
-    */
-
-    private function getUploadErrorMessage(
-        UploadedFile $file
-    ): string {
-        return match (
-            $file->getError()
-        ) {
-            UPLOAD_ERR_INI_SIZE =>
-                'Ukuran file melebihi batas upload server.',
-
-            UPLOAD_ERR_FORM_SIZE =>
-                'Ukuran file melebihi batas form.',
-
-            UPLOAD_ERR_PARTIAL =>
-                'File hanya terupload sebagian. Silakan coba lagi.',
-
-            UPLOAD_ERR_NO_FILE =>
-                'Tidak ada file yang dipilih.',
-
-            UPLOAD_ERR_NO_TMP_DIR =>
-                'Folder temporary upload PHP tidak tersedia.',
-
-            UPLOAD_ERR_CANT_WRITE =>
-                'PHP gagal menulis file upload.',
-
-            UPLOAD_ERR_EXTENSION =>
-                'Upload file dihentikan oleh konfigurasi PHP.',
-
-            default =>
-                'File gagal diupload. Kode upload PHP: ' .
-                $file->getError(),
-        };
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | STORE UPLOADED FILE
-    |--------------------------------------------------------------------------
-    */
-
-    private function storeUploadedFile(
-        ?UploadedFile $file,
+    private function storePdfUsingPreview(
+        UploadedFile $file,
         string $diskName
     ): string {
-        if (!$file) {
-            throw new RuntimeException(
-                'File lampiran tidak ditemukan.'
-            );
-        }
-
-        if (!$file->isValid()) {
+        if (
+            !$file->isValid()
+        ) {
             throw new RuntimeException(
                 $this->getUploadErrorMessage(
                     $file
@@ -1690,205 +1379,14 @@ class SuratMasukController extends Controller
             );
         }
 
-        $fileSize =
-            $file->getSize();
-
-        if (
-            $fileSize === false ||
-            $fileSize <= 0
-        ) {
-            throw new RuntimeException(
-                'Ukuran file tidak dapat dibaca.'
-            );
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | BATAS MAKSIMAL 10 MB
-        |--------------------------------------------------------------------------
-        */
-
-        if (
-            $fileSize >
-            self::MAX_FILE_SIZE
-        ) {
-            throw new RuntimeException(
-                'Ukuran file lampiran maksimal 10 MB.'
-            );
-        }
-
-        $extension =
-            strtolower(
-                trim(
-                    (string) $file
-                        ->getClientOriginalExtension()
-                )
-            );
-
-        if (
-            $extension ===
-            'jpeg'
-        ) {
-            $extension =
-                'jpg';
-        }
-
-        if (
-            !in_array(
-                $extension,
-                self::ALLOWED_FILE_EXTENSIONS,
-                true
-            )
-        ) {
-            throw new RuntimeException(
-                'Format file tidak didukung. Gunakan PDF, JPG, JPEG, atau PNG.'
-            );
-        }
-
-        $realPath =
+        $inputPath =
             $file->getRealPath();
 
         if (
-            !$realPath ||
+            !$inputPath ||
             !is_readable(
-                $realPath
+                $inputPath
             )
-        ) {
-            throw new RuntimeException(
-                'File temporary upload tidak dapat dibaca.'
-            );
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | PDF
-        |--------------------------------------------------------------------------
-        */
-
-        if (
-            $extension ===
-            'pdf'
-        ) {
-            $mime =
-                strtolower(
-                    (string) $file->getMimeType()
-                );
-
-            if (
-                $mime !==
-                'application/pdf'
-            ) {
-                throw new RuntimeException(
-                    'File PDF tidak valid.'
-                );
-            }
-
-            return $this->storeCompressedPdf(
-                $realPath,
-                $diskName
-            );
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | IMAGE
-        |--------------------------------------------------------------------------
-        */
-
-        $contents =
-            file_get_contents(
-                $realPath
-            );
-
-        if (
-            $contents === false ||
-            $contents === ''
-        ) {
-            throw new RuntimeException(
-                'Gagal membaca file gambar.'
-            );
-        }
-
-        $imageInfo =
-            @getimagesizefromstring(
-                $contents
-            );
-
-        if (
-            $imageInfo === false
-        ) {
-            throw new RuntimeException(
-                'File bukan gambar yang valid.'
-            );
-        }
-
-        $actualMime =
-            strtolower(
-                (string) (
-                    $imageInfo['mime'] ??
-                    ''
-                )
-            );
-
-        if (
-            $actualMime ===
-            'image/jpg'
-        ) {
-            $actualMime =
-                'image/jpeg';
-        }
-
-        if (
-            !in_array(
-                $actualMime,
-                self::ALLOWED_IMAGE_MIMES,
-                true
-            )
-        ) {
-            throw new RuntimeException(
-                'Jenis file gambar tidak didukung.'
-            );
-        }
-
-        return $this->storeCompressedImage(
-            $contents,
-            $diskName,
-            'surat-masuk'
-        );
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | COMPRESS PDF
-    |--------------------------------------------------------------------------
-    |
-    | Proses:
-    |
-    | 1. PDF maksimal 10 MB.
-    | 2. Ghostscript menjalankan beberapa profile.
-    | 3. Semua hasil dibandingkan.
-    | 4. Hasil terkecil yang valid dipilih.
-    | 5. Hasil akhir harus <= 10 MB.
-    | 6. Jika hasil lebih besar dari original, original digunakan.
-    |
-    */
-
-    private function storeCompressedPdf(
-        string $inputPath,
-        string $diskName
-    ): string {
-        if (
-            $diskName !==
-            'supabase'
-        ) {
-            throw new RuntimeException(
-                'Penyimpanan file E-Arsip wajib menggunakan Supabase.'
-            );
-        }
-
-        if (
-            !is_file($inputPath) ||
-            !is_readable($inputPath)
         ) {
             throw new RuntimeException(
                 'File PDF temporary tidak dapat dibaca.'
@@ -1905,7 +1403,278 @@ class SuratMasukController extends Controller
             $originalSize <= 0
         ) {
             throw new RuntimeException(
-                'Ukuran file PDF tidak dapat dibaca.'
+                'Ukuran PDF tidak dapat dibaca.'
+            );
+        }
+
+        if (
+            $originalSize >
+            self::MAX_FILE_SIZE
+        ) {
+            throw new RuntimeException(
+                'Ukuran PDF maksimal 10 MB.'
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | HASH FILE SUBMIT
+        |--------------------------------------------------------------------------
+        */
+
+        $currentHash =
+            hash_file(
+                'sha256',
+                $inputPath
+            );
+
+        if (
+            !$currentHash
+        ) {
+            throw new RuntimeException(
+                'Hash PDF tidak dapat dibuat.'
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | SESSION PREVIEW
+        |--------------------------------------------------------------------------
+        */
+
+        $preview =
+            session(
+                'surat_masuk_pdf_preview'
+            );
+
+        if (
+            is_array($preview)
+        ) {
+
+            $previewUserId =
+                (int) (
+                    $preview['user_id'] ??
+                    0
+                );
+
+            $createdAt =
+                (int) (
+                    $preview['created_at'] ??
+                    0
+                );
+
+            $previewPath =
+                (string) (
+                    $preview['path'] ??
+                    ''
+                );
+
+            $previewHash =
+                (string) (
+                    $preview['file_hash'] ??
+                    ''
+                );
+
+            $sameUser =
+                $previewUserId ===
+                (int) Auth::id();
+
+            $notExpired =
+                $createdAt > 0 &&
+                (
+                    now()->timestamp -
+                    $createdAt
+                ) <=
+                self::PDF_PREVIEW_TTL;
+
+            $sameFile =
+                $previewHash !== '' &&
+                hash_equals(
+                    $previewHash,
+                    $currentHash
+                );
+
+            /*
+            |--------------------------------------------------------------------------
+            | PREVIEW COMPRESSED
+            |--------------------------------------------------------------------------
+            */
+
+            if (
+                $sameUser &&
+                $notExpired &&
+                $sameFile &&
+                !empty(
+                    $preview['use_compressed']
+                ) &&
+                $previewPath !== '' &&
+                is_file(
+                    $previewPath
+                ) &&
+                is_readable(
+                    $previewPath
+                )
+            ) {
+
+                $compressedContents =
+                    file_get_contents(
+                        $previewPath
+                    );
+
+                if (
+                    $compressedContents === false ||
+                    $compressedContents === ''
+                ) {
+                    throw new RuntimeException(
+                        'Hasil compression temporary tidak dapat dibaca.'
+                    );
+                }
+
+                $compressedSize =
+                    strlen(
+                        $compressedContents
+                    );
+
+                if (
+                    $compressedSize <= 0
+                ) {
+                    throw new RuntimeException(
+                        'Ukuran hasil compression tidak valid.'
+                    );
+                }
+
+                if (
+                    $compressedSize >
+                    self::MAX_FILE_SIZE
+                ) {
+                    throw new RuntimeException(
+                        'PDF hasil compression melebihi batas 10 MB.'
+                    );
+                }
+
+                $uploadedPath =
+                    $this->storeBinaryFile(
+                        $compressedContents,
+                        'pdf',
+                        'application/pdf',
+                        'surat-masuk',
+                        $diskName
+                    );
+
+                @unlink(
+                    $previewPath
+                );
+
+                session()->forget(
+                    'surat_masuk_pdf_preview'
+                );
+
+                return $uploadedPath;
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | PREVIEW TIDAK LEBIH KECIL
+            |--------------------------------------------------------------------------
+            */
+
+            if (
+                $sameUser &&
+                $notExpired &&
+                $sameFile &&
+                empty(
+                    $preview['use_compressed']
+                )
+            ) {
+
+                if (
+                    $previewPath !== '' &&
+                    is_file(
+                        $previewPath
+                    )
+                ) {
+                    @unlink(
+                        $previewPath
+                    );
+                }
+
+                session()->forget(
+                    'surat_masuk_pdf_preview'
+                );
+
+                $originalContents =
+                    file_get_contents(
+                        $inputPath
+                    );
+
+                if (
+                    $originalContents === false ||
+                    $originalContents === ''
+                ) {
+                    throw new RuntimeException(
+                        'Gagal membaca PDF asli.'
+                    );
+                }
+
+                return $this->storeBinaryFile(
+                    $originalContents,
+                    'pdf',
+                    'application/pdf',
+                    'surat-masuk',
+                    $diskName
+                );
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | PREVIEW INVALID
+            |--------------------------------------------------------------------------
+            */
+
+            if (
+                $previewPath !== '' &&
+                is_file(
+                    $previewPath
+                )
+            ) {
+                @unlink(
+                    $previewPath
+                );
+            }
+
+            session()->forget(
+                'surat_masuk_pdf_preview'
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | FALLBACK GHOSTSCRIPT
+        |--------------------------------------------------------------------------
+        */
+
+        return $this->storeCompressedPdf(
+            $inputPath,
+            $diskName
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | COMPRESS PDF TO TEMPORARY
+    |--------------------------------------------------------------------------
+    */
+
+    private function compressPdfToTemporaryFile(
+        string $inputPath
+    ): array {
+
+        if (
+            !is_file($inputPath) ||
+            !is_readable($inputPath)
+        ) {
+            throw new RuntimeException(
+                'File PDF tidak dapat dibaca.'
             );
         }
 
@@ -1927,7 +1696,36 @@ class SuratMasukController extends Controller
             )
         ) {
             throw new RuntimeException(
-                'Ghostscript tidak ditemukan atau tidak dapat dijalankan.'
+                'Ghostscript tidak ditemukan pada server.'
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | TEST GS
+        |--------------------------------------------------------------------------
+        */
+
+        $versionOutput =
+            [];
+
+        $versionCode =
+            0;
+
+        @exec(
+            escapeshellarg(
+                $ghostscript
+            ) .
+            ' --version 2>&1',
+            $versionOutput,
+            $versionCode
+        );
+
+        if (
+            $versionCode !== 0
+        ) {
+            throw new RuntimeException(
+                'Ghostscript tidak dapat dijalankan.'
             );
         }
 
@@ -1937,28 +1735,30 @@ class SuratMasukController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $tempDirectory =
+        $directory =
             storage_path(
                 'app/pdf-compression'
             );
 
         if (
-            !is_dir(
-                $tempDirectory
-            ) &&
+            !is_dir($directory) &&
             !mkdir(
-                $tempDirectory,
+                $directory,
                 0775,
                 true
             ) &&
-            !is_dir(
-                $tempDirectory
-            )
+            !is_dir($directory)
         ) {
             throw new RuntimeException(
                 'Folder temporary compression PDF tidak dapat dibuat.'
             );
         }
+
+        /*
+        |--------------------------------------------------------------------------
+        | BEST OUTPUT
+        |--------------------------------------------------------------------------
+        */
 
         $bestOutput =
             null;
@@ -1971,7 +1771,7 @@ class SuratMasukController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | MULTI PROFILE COMPRESSION
+        | MULTI PROFILE
         |--------------------------------------------------------------------------
         */
 
@@ -1979,8 +1779,9 @@ class SuratMasukController extends Controller
             self::PDF_COMPRESSION_PROFILES
             as $profile
         ) {
+
             $outputPath =
-                $tempDirectory .
+                $directory .
                 DIRECTORY_SEPARATOR .
                 'compressed_' .
                 Str::uuid() .
@@ -2011,6 +1812,8 @@ class SuratMasukController extends Controller
                 ' -dColorImageDownsampleType=/Bicubic' .
                 ' -dAutoFilterColorImages=false' .
                 ' -dColorImageFilter=/DCTEncode' .
+                ' -dJPEGQ=' .
+                (int) $profile['jpeg_quality'] .
                 ' -dDownsampleGrayImages=true' .
                 ' -dGrayImageResolution=' .
                 (int) $profile['gray_dpi'] .
@@ -2021,8 +1824,6 @@ class SuratMasukController extends Controller
                 ' -dMonoImageResolution=' .
                 (int) $profile['mono_dpi'] .
                 ' -dMonoImageDownsampleType=/Bicubic' .
-                ' -dJPEGQ=' .
-                (int) $profile['jpeg_quality'] .
                 ' -dNOPAUSE' .
                 ' -dBATCH' .
                 ' -dQUIET' .
@@ -2036,17 +1837,11 @@ class SuratMasukController extends Controller
                     $inputPath
                 );
 
-            /*
-            |--------------------------------------------------------------------------
-            | RUN
-            |--------------------------------------------------------------------------
-            */
+            $commandOutput =
+                [];
 
             $exitCode =
                 0;
-
-            $commandOutput =
-                [];
 
             @exec(
                 $command . ' 2>&1',
@@ -2056,7 +1851,7 @@ class SuratMasukController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | GAGAL
+            | PROFILE GAGAL
             |--------------------------------------------------------------------------
             */
 
@@ -2066,6 +1861,7 @@ class SuratMasukController extends Controller
                     $outputPath
                 )
             ) {
+
                 Log::warning(
                     'Profile Ghostscript gagal.',
                     [
@@ -2098,18 +1894,18 @@ class SuratMasukController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | UKURAN
+            | SIZE
             |--------------------------------------------------------------------------
             */
 
-            $outputSize =
+            $size =
                 filesize(
                     $outputPath
                 );
 
             if (
-                $outputSize === false ||
-                $outputSize <= 0
+                $size === false ||
+                $size <= 0
             ) {
                 @unlink(
                     $outputPath
@@ -2120,11 +1916,11 @@ class SuratMasukController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | VALIDASI PDF
+            | VALID PDF
             |--------------------------------------------------------------------------
             */
 
-            $pdfHeader =
+            $header =
                 @file_get_contents(
                     $outputPath,
                     false,
@@ -2134,15 +1930,15 @@ class SuratMasukController extends Controller
                 );
 
             if (
-                $pdfHeader !==
-                '%PDF-'
+                $header !== '%PDF-'
             ) {
+
                 @unlink(
                     $outputPath
                 );
 
                 Log::warning(
-                    'Ghostscript menghasilkan file yang bukan PDF valid.',
+                    'Ghostscript menghasilkan output bukan PDF valid.',
                     [
                         'profile' =>
                             $profile['name'],
@@ -2154,15 +1950,15 @@ class SuratMasukController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | PILIH FILE TERKECIL
+            | BEST
             |--------------------------------------------------------------------------
             */
 
             if (
                 $bestSize === null ||
-                $outputSize <
-                $bestSize
+                $size < $bestSize
             ) {
+
                 if (
                     $bestOutput &&
                     is_file(
@@ -2178,11 +1974,13 @@ class SuratMasukController extends Controller
                     $outputPath;
 
                 $bestSize =
-                    $outputSize;
+                    $size;
 
                 $bestProfile =
                     $profile['name'];
+
             } else {
+
                 @unlink(
                     $outputPath
                 );
@@ -2191,7 +1989,7 @@ class SuratMasukController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | SEMUA PROFILE GAGAL
+        | SEMUA GAGAL
         |--------------------------------------------------------------------------
         */
 
@@ -2206,7 +2004,7 @@ class SuratMasukController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | HASIL MASIH DI ATAS 10 MB
+        | MAX 10 MB
         |--------------------------------------------------------------------------
         */
 
@@ -2214,136 +2012,177 @@ class SuratMasukController extends Controller
             $bestSize >
             self::MAX_FILE_SIZE
         ) {
+
             @unlink(
                 $bestOutput
             );
 
-            Log::warning(
-                'PDF hasil compression masih melebihi 10 MB.',
-                [
-                    'original_size' =>
-                        $originalSize,
-
-                    'compressed_size' =>
-                        $bestSize,
-
-                    'profile' =>
-                        $bestProfile,
-                ]
-            );
-
-            throw new RuntimeException(
-                'PDF masih lebih dari 10 MB setelah compression. Gunakan PDF dengan resolusi scan lebih rendah.'
-            );
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | HASIL LEBIH BESAR/SAMA DENGAN ORIGINAL
-        |--------------------------------------------------------------------------
-        |
-        | File original tetap digunakan supaya tidak terjadi pembesaran.
-        |
-        */
-
-        if (
-            $bestSize >=
-            $originalSize
-        ) {
-            @unlink(
-                $bestOutput
-            );
-
-            $originalContents =
-                file_get_contents(
-                    $inputPath
-                );
-
-            if (
-                $originalContents === false ||
-                $originalContents === ''
-            ) {
-                throw new RuntimeException(
-                    'Gagal membaca file PDF asli.'
-                );
-            }
-
-            Log::info(
-                'PDF tidak menjadi lebih kecil setelah compression; file asli digunakan.',
-                [
-                    'original_size' =>
-                        $originalSize,
-
-                    'best_compressed_size' =>
-                        $bestSize,
-
-                    'profile' =>
-                        $bestProfile,
-                ]
-            );
-
-            return $this->storeBinaryFile(
-                $originalContents,
-                'pdf',
-                'application/pdf',
-                'surat-masuk',
-                $diskName
-            );
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | BACA FILE HASIL
-        |--------------------------------------------------------------------------
-        */
-
-        $compressedData =
-            file_get_contents(
-                $bestOutput
-            );
-
-        @unlink(
-            $bestOutput
-        );
-
-        if (
-            $compressedData === false ||
-            $compressedData === ''
-        ) {
-            throw new RuntimeException(
-                'Gagal membaca PDF hasil compression.'
-            );
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | FINAL SIZE
-        |--------------------------------------------------------------------------
-        */
-
-        $finalSize =
-            strlen(
-                $compressedData
-            );
-
-        if (
-            $finalSize >
-            self::MAX_FILE_SIZE
-        ) {
             throw new RuntimeException(
                 'PDF hasil compression masih melebihi batas 10 MB.'
             );
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | PENGHEMATAN
-        |--------------------------------------------------------------------------
-        */
+        return [
+            'path' =>
+                $bestOutput,
 
-        $savingPercent =
-            $originalSize > 0
-                ? round(
+            'size' =>
+                $bestSize,
+
+            'profile' =>
+                $bestProfile,
+        ];
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | STORE COMPRESSED PDF
+    |--------------------------------------------------------------------------
+    */
+
+    private function storeCompressedPdf(
+        string $inputPath,
+        string $diskName
+    ): string {
+
+        if (
+            $diskName !==
+            'supabase'
+        ) {
+            throw new RuntimeException(
+                'Penyimpanan file E-Arsip wajib menggunakan Supabase.'
+            );
+        }
+
+        $originalSize =
+            filesize(
+                $inputPath
+            );
+
+        if (
+            $originalSize === false ||
+            $originalSize <= 0
+        ) {
+            throw new RuntimeException(
+                'Ukuran PDF tidak dapat dibaca.'
+            );
+        }
+
+        if (
+            $originalSize >
+            self::MAX_FILE_SIZE
+        ) {
+            throw new RuntimeException(
+                'Ukuran PDF maksimal 10 MB.'
+            );
+        }
+
+        $result =
+            $this->compressPdfToTemporaryFile(
+                $inputPath
+            );
+
+        $temporaryPath =
+            $result['path'];
+
+        $compressedSize =
+            $result['size'];
+
+        $profile =
+            $result['profile'];
+
+        try {
+
+            /*
+            |--------------------------------------------------------------------------
+            | COMPRESSED LEBIH BESAR
+            |--------------------------------------------------------------------------
+            */
+
+            if (
+                $compressedSize >=
+                $originalSize
+            ) {
+
+                $originalContents =
+                    file_get_contents(
+                        $inputPath
+                    );
+
+                if (
+                    $originalContents === false ||
+                    $originalContents === ''
+                ) {
+                    throw new RuntimeException(
+                        'Gagal membaca PDF asli.'
+                    );
+                }
+
+                Log::info(
+                    'PDF tidak menjadi lebih kecil setelah compression; file asli digunakan.',
+                    [
+                        'original_size' =>
+                            $originalSize,
+
+                        'compressed_size' =>
+                            $compressedSize,
+
+                        'saving_percent' =>
+                            0,
+
+                        'profile' =>
+                            $profile,
+
+                        'disk' =>
+                            $diskName,
+                    ]
+                );
+
+                return $this->storeBinaryFile(
+                    $originalContents,
+                    'pdf',
+                    'application/pdf',
+                    'surat-masuk',
+                    $diskName
+                );
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | READ RESULT
+            |--------------------------------------------------------------------------
+            */
+
+            $compressedData =
+                file_get_contents(
+                    $temporaryPath
+                );
+
+            if (
+                $compressedData === false ||
+                $compressedData === ''
+            ) {
+                throw new RuntimeException(
+                    'Gagal membaca PDF hasil compression.'
+                );
+            }
+
+            $finalSize =
+                strlen(
+                    $compressedData
+                );
+
+            if (
+                $finalSize >
+                self::MAX_FILE_SIZE
+            ) {
+                throw new RuntimeException(
+                    'PDF hasil compression masih melebihi batas 10 MB.'
+                );
+            }
+
+            $savingPercent =
+                round(
                     (
                         1 -
                         (
@@ -2353,42 +2192,48 @@ class SuratMasukController extends Controller
                     ) *
                     100,
                     2
+                );
+
+            Log::info(
+                'PDF Surat Masuk berhasil dikompresi.',
+                [
+                    'original_size' =>
+                        $originalSize,
+
+                    'compressed_size' =>
+                        $finalSize,
+
+                    'saving_percent' =>
+                        $savingPercent,
+
+                    'profile' =>
+                        $profile,
+
+                    'disk' =>
+                        $diskName,
+                ]
+            );
+
+            return $this->storeBinaryFile(
+                $compressedData,
+                'pdf',
+                'application/pdf',
+                'surat-masuk',
+                $diskName
+            );
+
+        } finally {
+
+            if (
+                is_file(
+                    $temporaryPath
                 )
-                : 0;
-
-        Log::info(
-            'PDF Surat Masuk berhasil dikompresi.',
-            [
-                'original_size' =>
-                    $originalSize,
-
-                'compressed_size' =>
-                    $finalSize,
-
-                'saving_percent' =>
-                    $savingPercent,
-
-                'profile' =>
-                    $bestProfile,
-
-                'disk' =>
-                    $diskName,
-            ]
-        );
-
-        /*
-        |--------------------------------------------------------------------------
-        | SIMPAN SUPABASE
-        |--------------------------------------------------------------------------
-        */
-
-        return $this->storeBinaryFile(
-            $compressedData,
-            'pdf',
-            'application/pdf',
-            'surat-masuk',
-            $diskName
-        );
+            ) {
+                @unlink(
+                    $temporaryPath
+                );
+            }
+        }
     }
 
     /*
@@ -2401,6 +2246,7 @@ class SuratMasukController extends Controller
         string $base64String,
         string $diskName
     ): string {
+
         $base64String =
             trim(
                 $base64String
@@ -2530,6 +2376,7 @@ class SuratMasukController extends Controller
         string $diskName,
         string $prefix
     ): string {
+
         if (
             !function_exists(
                 'imagecreatefromstring'
@@ -2624,6 +2471,12 @@ class SuratMasukController extends Controller
             );
         }
 
+        /*
+        |--------------------------------------------------------------------------
+        | LOAD
+        |--------------------------------------------------------------------------
+        */
+
         $source =
             @imagecreatefromstring(
                 $contents
@@ -2639,7 +2492,7 @@ class SuratMasukController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | DIMENSI
+        | DIMENSION
         |--------------------------------------------------------------------------
         */
 
@@ -2672,6 +2525,12 @@ class SuratMasukController extends Controller
                 )
             );
 
+        /*
+        |--------------------------------------------------------------------------
+        | CANVAS
+        |--------------------------------------------------------------------------
+        */
+
         $canvas =
             @imagecreatetruecolor(
                 $newWidth,
@@ -2681,6 +2540,7 @@ class SuratMasukController extends Controller
         if (
             $canvas === false
         ) {
+
             imagedestroy(
                 $source
             );
@@ -2692,7 +2552,7 @@ class SuratMasukController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | BACKGROUND
+        | WHITE BACKGROUND
         |--------------------------------------------------------------------------
         */
 
@@ -2731,6 +2591,7 @@ class SuratMasukController extends Controller
                 $sourceHeight
             )
         ) {
+
             imagedestroy(
                 $source
             );
@@ -2770,6 +2631,7 @@ class SuratMasukController extends Controller
         foreach (
             $qualities as $quality
         ) {
+
             ob_start();
 
             $success =
@@ -2787,6 +2649,7 @@ class SuratMasukController extends Controller
                 $output === false ||
                 $output === ''
             ) {
+
                 imagedestroy(
                     $canvas
                 );
@@ -2826,6 +2689,7 @@ class SuratMasukController extends Controller
             self::MAX_COMPRESSED_IMAGE_SIZE &&
             $attempt < 5
         ) {
+
             $attempt++;
 
             $newWidth =
@@ -2859,6 +2723,7 @@ class SuratMasukController extends Controller
             if (
                 $smallerCanvas === false
             ) {
+
                 imagedestroy(
                     $canvas
                 );
@@ -2897,6 +2762,7 @@ class SuratMasukController extends Controller
                     imagesy($canvas)
                 )
             ) {
+
                 imagedestroy(
                     $canvas
                 );
@@ -2934,6 +2800,7 @@ class SuratMasukController extends Controller
                 $output === false ||
                 $output === ''
             ) {
+
                 imagedestroy(
                     $canvas
                 );
@@ -2950,6 +2817,12 @@ class SuratMasukController extends Controller
         imagedestroy(
             $canvas
         );
+
+        /*
+        |--------------------------------------------------------------------------
+        | VALIDASI
+        |--------------------------------------------------------------------------
+        */
 
         if (
             $compressedData === null ||
@@ -2971,6 +2844,12 @@ class SuratMasukController extends Controller
             );
         }
 
+        /*
+        |--------------------------------------------------------------------------
+        | STORE
+        |--------------------------------------------------------------------------
+        */
+
         return $this->storeBinaryFile(
             $compressedData,
             'jpg',
@@ -2982,7 +2861,7 @@ class SuratMasukController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | STORE BINARY
+    | STORE BINARY FILE
     |--------------------------------------------------------------------------
     */
 
@@ -2993,6 +2872,7 @@ class SuratMasukController extends Controller
         string $prefix,
         string $diskName
     ): string {
+
         if (
             $contents === ''
         ) {
@@ -3049,6 +2929,7 @@ class SuratMasukController extends Controller
             $fileName;
 
         try {
+
             $disk =
                 Storage::disk(
                     'supabase'
@@ -3067,16 +2948,20 @@ class SuratMasukController extends Controller
                     ]
                 );
 
-            if (!$saved) {
+            if (
+                !$saved
+            ) {
                 throw new RuntimeException(
                     'Supabase menolak penyimpanan file.'
                 );
             }
 
             return $path;
+
         } catch (
             Throwable $e
         ) {
+
             Log::error(
                 'Gagal menyimpan binary Surat Masuk ke Supabase.',
                 [
@@ -3119,7 +3004,10 @@ class SuratMasukController extends Controller
     private function getFileUrl(
         ?string $file
     ): ?string {
-        if (!$file) {
+
+        if (
+            !$file
+        ) {
             return null;
         }
 
@@ -3136,6 +3024,7 @@ class SuratMasukController extends Controller
             $this->getStorageDisk();
 
         try {
+
             $disk =
                 Storage::disk(
                     $diskName
@@ -3150,16 +3039,32 @@ class SuratMasukController extends Controller
                 return null;
             }
 
+            $mimeType =
+                $this->getMimeTypeFromPath(
+                    $file
+                );
+
             $url =
                 $disk->temporaryUrl(
                     $file,
-                    now()->addMinutes(30)
+                    now()->addMinutes(30),
+                    [
+                        'ResponseContentType' =>
+                            $mimeType,
+
+                        'ResponseContentDisposition' =>
+                            'inline; filename="' .
+                            basename($file) .
+                            '"',
+                    ]
                 );
 
             return $url ?: null;
+
         } catch (
             Throwable $e
         ) {
+
             Log::warning(
                 'Gagal membuat URL lampiran Surat Masuk.',
                 [
@@ -3188,6 +3093,7 @@ class SuratMasukController extends Controller
         ?string $file,
         ?string $diskName = null
     ): void {
+
         if (
             !$file ||
             filter_var(
@@ -3202,6 +3108,7 @@ class SuratMasukController extends Controller
             $this->getStorageDisk();
 
         try {
+
             $disk =
                 Storage::disk(
                     $diskName
@@ -3216,9 +3123,11 @@ class SuratMasukController extends Controller
                     $file
                 );
             }
+
         } catch (
             Throwable $e
         ) {
+
             Log::warning(
                 'Gagal menghapus file Surat Masuk.',
                 [
@@ -3237,6 +3146,86 @@ class SuratMasukController extends Controller
 
     /*
     |--------------------------------------------------------------------------
+    | CLEANUP PDF PREVIEW
+    |--------------------------------------------------------------------------
+    */
+
+    private function cleanupPdfPreview(): void
+    {
+        $preview =
+            session(
+                'surat_masuk_pdf_preview'
+            );
+
+        if (
+            is_array($preview) &&
+            !empty(
+                $preview['path']
+            )
+        ) {
+
+            $path =
+                (string) $preview['path'];
+
+            if (
+                $path !== '' &&
+                is_file(
+                    $path
+                )
+            ) {
+                @unlink(
+                    $path
+                );
+            }
+        }
+
+        session()->forget(
+            'surat_masuk_pdf_preview'
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | FORMAT BYTES
+    |--------------------------------------------------------------------------
+    */
+
+    private function formatBytes(
+        int $bytes
+    ): string {
+
+        if (
+            $bytes <= 0
+        ) {
+            return '0 KB';
+        }
+
+        if (
+            $bytes <
+            1024 * 1024
+        ) {
+            return number_format(
+                $bytes / 1024,
+                1,
+                ',',
+                '.'
+            ) .
+            ' KB';
+        }
+
+        return number_format(
+            $bytes / (
+                1024 * 1024
+            ),
+            2,
+            ',',
+            '.'
+        ) .
+        ' MB';
+    }
+
+    /*
+    |--------------------------------------------------------------------------
     | MIME TYPE
     |--------------------------------------------------------------------------
     */
@@ -3244,6 +3233,7 @@ class SuratMasukController extends Controller
     private function getMimeTypeFromPath(
         string $file
     ): string {
+
         return match (
             strtolower(
                 pathinfo(
@@ -3252,6 +3242,7 @@ class SuratMasukController extends Controller
                 )
             )
         ) {
+
             'pdf' =>
                 'application/pdf',
 
@@ -3269,6 +3260,1461 @@ class SuratMasukController extends Controller
 
     /*
     |--------------------------------------------------------------------------
+    | PREVIEW LAMPIRAN
+    |--------------------------------------------------------------------------
+    */
+
+    public function previewLampiran(
+        SuratMasuk $suratMasuk
+    ) {
+
+        $this->ensureCanView(
+            $suratMasuk
+        );
+
+        $file =
+            $suratMasuk->lampiran_file;
+
+        if (
+            !$file
+        ) {
+            abort(
+                404,
+                'File lampiran tidak ditemukan.'
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | URL LANGSUNG
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            filter_var(
+                $file,
+                FILTER_VALIDATE_URL
+            )
+        ) {
+            return redirect()->away(
+                $file
+            );
+        }
+
+        $diskName =
+            $this->getStorageDisk();
+
+        try {
+
+            $disk =
+                Storage::disk(
+                    $diskName
+                );
+
+            if (
+                !method_exists(
+                    $disk,
+                    'temporaryUrl'
+                )
+            ) {
+                throw new RuntimeException(
+                    'Storage Supabase tidak mendukung temporary URL.'
+                );
+            }
+
+            $mimeType =
+                $this->getMimeTypeFromPath(
+                    $file
+                );
+
+            $url =
+                $disk->temporaryUrl(
+                    $file,
+                    now()->addMinutes(30),
+                    [
+                        'ResponseContentType' =>
+                            $mimeType,
+
+                        'ResponseContentDisposition' =>
+                            'inline; filename="' .
+                            basename($file) .
+                            '"',
+                    ]
+                );
+
+            if (
+                !$url
+            ) {
+                throw new RuntimeException(
+                    'Supabase gagal membuat URL sementara.'
+                );
+            }
+
+            return redirect()->away(
+                $url
+            );
+
+        } catch (
+            HttpException $e
+        ) {
+
+            throw $e;
+
+        } catch (
+            Throwable $e
+        ) {
+
+            Log::error(
+                'Gagal preview lampiran Surat Masuk.',
+                [
+                    'message' =>
+                        $e->getMessage(),
+
+                    'file' =>
+                        $file,
+
+                    'disk' =>
+                        $diskName,
+
+                    'surat_id' =>
+                        $suratMasuk->id,
+                ]
+            );
+
+            return back()->with(
+                'error',
+                'Gagal membuka lampiran file: ' .
+                $e->getMessage()
+            );
+        }
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | DOWNLOAD LAMPIRAN
+    |--------------------------------------------------------------------------
+    */
+
+    public function downloadLampiran(
+        SuratMasuk $suratMasuk
+    ) {
+
+        $this->ensureCanView(
+            $suratMasuk
+        );
+
+        $file =
+            $suratMasuk->lampiran_file;
+
+        if (
+            !$file
+        ) {
+            abort(
+                404,
+                'File lampiran tidak ditemukan.'
+            );
+        }
+
+        if (
+            filter_var(
+                $file,
+                FILTER_VALIDATE_URL
+            )
+        ) {
+            return redirect()->away(
+                $file
+            );
+        }
+
+        $diskName =
+            $this->getStorageDisk();
+
+        try {
+
+            $disk =
+                Storage::disk(
+                    $diskName
+                );
+
+            if (
+                !method_exists(
+                    $disk,
+                    'temporaryUrl'
+                )
+            ) {
+                throw new RuntimeException(
+                    'Storage Supabase tidak mendukung temporary URL.'
+                );
+            }
+
+            $mimeType =
+                $this->getMimeTypeFromPath(
+                    $file
+                );
+
+            $url =
+                $disk->temporaryUrl(
+                    $file,
+                    now()->addMinutes(30),
+                    [
+                        'ResponseContentDisposition' =>
+                            'attachment; filename="' .
+                            basename($file) .
+                            '"',
+
+                        'ResponseContentType' =>
+                            $mimeType,
+                    ]
+                );
+
+            if (
+                !$url
+            ) {
+                throw new RuntimeException(
+                    'Supabase gagal membuat URL download.'
+                );
+            }
+
+            return redirect()->away(
+                $url
+            );
+
+        } catch (
+            HttpException $e
+        ) {
+
+            throw $e;
+
+        } catch (
+            Throwable $e
+        ) {
+
+            Log::error(
+                'Gagal download lampiran Surat Masuk.',
+                [
+                    'message' =>
+                        $e->getMessage(),
+
+                    'file' =>
+                        $file,
+
+                    'disk' =>
+                        $diskName,
+
+                    'surat_id' =>
+                        $suratMasuk->id,
+                ]
+            );
+
+            return back()->with(
+                'error',
+                'Gagal mengunduh lampiran file: ' .
+                $e->getMessage()
+            );
+        }
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | SHOW
+    |--------------------------------------------------------------------------
+    */
+
+    public function show(
+        SuratMasuk $suratMasuk
+    ) {
+
+        $this->ensureCanView(
+            $suratMasuk
+        );
+
+        $suratMasuk->load(
+            [
+                'kategori',
+                'penerima',
+                'disposisi.dari',
+                'disposisi.kepada',
+            ]
+        );
+
+        $daftarStaf =
+            User::query()
+                ->where(
+                    'id',
+                    '!=',
+                    Auth::id()
+                )
+                ->where(
+                    'is_active',
+                    true
+                )
+                ->where(
+                    function (
+                        $query
+                    ): void {
+
+                        $query
+                            ->whereRaw(
+                                'LOWER(TRIM(role)) = ?',
+                                ['staff']
+                            )
+                            ->orWhereRaw(
+                                'LOWER(TRIM(role)) = ?',
+                                ['staf']
+                            );
+                    }
+                )
+                ->orderBy(
+                    'name'
+                )
+                ->get();
+
+        $fileUrl =
+            $this->getFileUrl(
+                $suratMasuk->lampiran_file
+            );
+
+        return view(
+            'surat_masuk.show',
+            compact(
+                'suratMasuk',
+                'fileUrl',
+                'daftarStaf'
+            )
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | STORE DISPOSISI
+    |--------------------------------------------------------------------------
+    */
+
+    public function storeDisposisi(
+        Request $request,
+        SuratMasuk $suratMasuk
+    ) {
+
+        $this->ensureUserCanManageSurat();
+
+        $validated =
+            $request->validate(
+                [
+                    'tujuan_user_id' => [
+                        'required',
+                        'integer',
+                        Rule::exists(
+                            'users',
+                            'id'
+                        )->where(
+                            function (
+                                $query
+                            ): void {
+
+                                $query
+                                    ->where(
+                                        'is_active',
+                                        true
+                                    )
+                                    ->where(
+                                        function (
+                                            $q
+                                        ): void {
+
+                                            $q
+                                                ->whereRaw(
+                                                    'LOWER(TRIM(role)) = ?',
+                                                    ['staff']
+                                                )
+                                                ->orWhereRaw(
+                                                    'LOWER(TRIM(role)) = ?',
+                                                    ['staf']
+                                                );
+                                        }
+                                    );
+                            }
+                        ),
+                    ],
+
+                    'instruksi' => [
+                        'required',
+                        'string',
+                        'max:5000',
+                    ],
+
+                    'batas_waktu' => [
+                        'nullable',
+                        'date',
+                    ],
+                ],
+                [
+                    'tujuan_user_id.required' =>
+                        'Staf tujuan wajib dipilih.',
+
+                    'tujuan_user_id.exists' =>
+                        'Staf tujuan tidak valid atau tidak aktif.',
+
+                    'instruksi.required' =>
+                        'Instruksi disposisi wajib diisi.',
+
+                    'instruksi.max' =>
+                        'Instruksi disposisi maksimal 5.000 karakter.',
+
+                    'batas_waktu.date' =>
+                        'Batas waktu disposisi tidak valid.',
+                ]
+            );
+
+        $tujuanUserId =
+            (int) $validated['tujuan_user_id'];
+
+        if (
+            $tujuanUserId ===
+            (int) Auth::id()
+        ) {
+            return back()
+                ->withInput()
+                ->withErrors(
+                    [
+                        'tujuan_user_id' =>
+                            'Anda tidak dapat mengirim disposisi kepada diri sendiri.',
+                    ]
+                );
+        }
+
+        DB::beginTransaction();
+
+        try {
+
+            $instruksi =
+                trim(
+                    (string) $validated['instruksi']
+                );
+
+            $disposisiData = [
+                'surat_masuk_id' =>
+                    $suratMasuk->id,
+
+                'dari_user_id' =>
+                    (int) Auth::id(),
+
+                'kepada_user_id' =>
+                    $tujuanUserId,
+
+                'instruksi' =>
+                    $instruksi,
+
+                'status' =>
+                    'menunggu',
+
+                'batas_waktu' =>
+                    $validated['batas_waktu'] ??
+                    null,
+            ];
+
+            if (
+                Schema::hasColumn(
+                    'disposisis',
+                    'isi_disposisi'
+                )
+            ) {
+
+                $disposisiData['isi_disposisi'] =
+                    $instruksi;
+            }
+
+            if (
+                Schema::hasColumn(
+                    'disposisis',
+                    'sifat'
+                )
+            ) {
+
+                $disposisiData['sifat'] =
+                    'biasa';
+            }
+
+            $suratMasuk
+                ->disposisi()
+                ->create(
+                    $disposisiData
+                );
+
+            $suratMasuk->update(
+                [
+                    'status' =>
+                        'didisposisikan',
+                ]
+            );
+
+            $this->logActivity(
+                'disposisi',
+                'surat_masuk',
+                'Mendisposisikan surat masuk ' .
+                $suratMasuk->nomor_agenda
+            );
+
+            DB::commit();
+
+            return back()->with(
+                'success',
+                'Disposisi surat berhasil dikirim ke staff yang dituju.'
+            );
+
+        } catch (
+            Throwable $e
+        ) {
+
+            DB::rollBack();
+
+            Log::error(
+                'Gagal melakukan disposisi Surat Masuk.',
+                [
+                    'message' =>
+                        $e->getMessage(),
+
+                    'surat_id' =>
+                        $suratMasuk->id,
+
+                    'user_id' =>
+                        Auth::id(),
+                ]
+            );
+
+            return back()
+                ->withInput()
+                ->with(
+                    'error',
+                    'Gagal memproses disposisi: ' .
+                    $e->getMessage()
+                );
+        }
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | EDIT
+    |--------------------------------------------------------------------------
+    */
+
+    public function edit(
+        SuratMasuk $suratMasuk
+    ) {
+
+        $this->ensureUserCanManageSurat();
+
+        /*
+        |--------------------------------------------------------------------------
+        | PREVIEW PDF LAMA DIBERSIHKAN
+        |--------------------------------------------------------------------------
+        */
+
+        $this->cleanupPdfPreview();
+
+        $kategoris =
+            KategoriSurat::query()
+                ->orderBy(
+                    'nama_kategori'
+                )
+                ->get();
+
+        return view(
+            'surat_masuk.edit',
+            compact(
+                'suratMasuk',
+                'kategoris'
+            )
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | UPDATE
+    |--------------------------------------------------------------------------
+    */
+
+    public function update(
+        SuratMasukRequest $request,
+        SuratMasuk $suratMasuk
+    ) {
+
+        $this->ensureUserCanManageSurat();
+
+        $data =
+            $request->validated();
+
+        $diskName =
+            $this->getStorageDisk();
+
+        $oldFile =
+            $suratMasuk->lampiran_file;
+
+        $newFile =
+            null;
+
+        DB::beginTransaction();
+
+        try {
+
+            /*
+            |--------------------------------------------------------------------------
+            | STATUS
+            |--------------------------------------------------------------------------
+            */
+
+            if (
+                array_key_exists(
+                    'status',
+                    $data
+                )
+            ) {
+
+                $status =
+                    strtolower(
+                        trim(
+                            (string) $data['status']
+                        )
+                    );
+
+                if (
+                    in_array(
+                        $status,
+                        self::STATUS_OPTIONS,
+                        true
+                    )
+                ) {
+
+                    $data['status'] =
+                        $status;
+
+                } else {
+
+                    $data['status'] =
+                        'baru';
+                }
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | FILE BARU
+            |--------------------------------------------------------------------------
+            */
+
+            if (
+                $request->hasFile(
+                    'lampiran_file'
+                )
+            ) {
+
+                $file =
+                    $request->file(
+                        'lampiran_file'
+                    );
+
+                if (
+                    !$file ||
+                    !$file->isValid()
+                ) {
+
+                    throw new RuntimeException(
+                        $file
+                            ? $this->getUploadErrorMessage(
+                                $file
+                            )
+                            : 'File lampiran tidak ditemukan.'
+                    );
+                }
+
+                /*
+                |----------------------------------------------------------------------
+                | SIZE
+                |----------------------------------------------------------------------
+                */
+
+                $fileSize =
+                    $file->getSize();
+
+                if (
+                    $fileSize === false ||
+                    $fileSize <= 0
+                ) {
+                    throw new RuntimeException(
+                        'Ukuran file tidak dapat dibaca.'
+                    );
+                }
+
+                if (
+                    $fileSize >
+                    self::MAX_FILE_SIZE
+                ) {
+                    throw new RuntimeException(
+                        'Ukuran file lampiran maksimal 10 MB.'
+                    );
+                }
+
+                /*
+                |----------------------------------------------------------------------
+                | EXTENSION
+                |----------------------------------------------------------------------
+                */
+
+                $extension =
+                    strtolower(
+                        trim(
+                            (string) $file
+                                ->getClientOriginalExtension()
+                        )
+                    );
+
+                if (
+                    $extension === 'jpeg'
+                ) {
+                    $extension =
+                        'jpg';
+                }
+
+                if (
+                    !in_array(
+                        $extension,
+                        self::ALLOWED_FILE_EXTENSIONS,
+                        true
+                    )
+                ) {
+
+                    throw new RuntimeException(
+                        'Format file tidak didukung. Gunakan PDF, JPG, JPEG, atau PNG.'
+                    );
+                }
+
+                /*
+                |----------------------------------------------------------------------
+                | PDF
+                |----------------------------------------------------------------------
+                */
+
+                if (
+                    $extension === 'pdf'
+                ) {
+
+                    $newFile =
+                        $this->storePdfUsingPreview(
+                            $file,
+                            $diskName
+                        );
+
+                }
+
+                /*
+                |----------------------------------------------------------------------
+                | IMAGE
+                |----------------------------------------------------------------------
+                */
+
+                else {
+
+                    $newFile =
+                        $this->storeUploadedFile(
+                            $file,
+                            $diskName
+                        );
+                }
+
+                $data['lampiran_file'] =
+                    $newFile;
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | CAMERA
+            |--------------------------------------------------------------------------
+            */
+
+            elseif (
+                $request->filled(
+                    'captured_image'
+                )
+            ) {
+
+                $newFile =
+                    $this->uploadBase64Image(
+                        (string) $request->input(
+                            'captured_image'
+                        ),
+                        $diskName
+                    );
+
+                $data['lampiran_file'] =
+                    $newFile;
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | TIDAK ADA FILE BARU
+            |--------------------------------------------------------------------------
+            */
+
+            else {
+
+                unset(
+                    $data['lampiran_file']
+                );
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | JANGAN SIMPAN BASE64
+            |--------------------------------------------------------------------------
+            */
+
+            unset(
+                $data['captured_image']
+            );
+
+            /*
+            |--------------------------------------------------------------------------
+            | UPDATE DB
+            |--------------------------------------------------------------------------
+            */
+
+            $suratMasuk->update(
+                $data
+            );
+
+            /*
+            |--------------------------------------------------------------------------
+            | ACTIVITY LOG
+            |--------------------------------------------------------------------------
+            */
+
+            $this->logActivity(
+                'update',
+                'surat_masuk',
+                'Mengubah surat masuk ' .
+                $suratMasuk->nomor_agenda
+            );
+
+            DB::commit();
+
+            /*
+            |--------------------------------------------------------------------------
+            | HAPUS FILE LAMA
+            |--------------------------------------------------------------------------
+            |
+            | Hanya dilakukan setelah DB berhasil.
+            |
+            */
+
+            if (
+                $newFile &&
+                $oldFile &&
+                $oldFile !== $newFile
+            ) {
+
+                $this->deleteStorageFile(
+                    $oldFile,
+                    $diskName
+                );
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | CLEANUP PREVIEW
+            |--------------------------------------------------------------------------
+            */
+
+            $this->cleanupPdfPreview();
+
+            /*
+            |--------------------------------------------------------------------------
+            | REDIRECT
+            |--------------------------------------------------------------------------
+            */
+
+            return redirect()
+                ->route(
+                    'surat-masuk.index'
+                )
+                ->with(
+                    'success',
+                    'Surat masuk berhasil diperbarui.'
+                );
+
+        } catch (
+            Throwable $e
+        ) {
+
+            DB::rollBack();
+
+            /*
+            |--------------------------------------------------------------------------
+            | HAPUS FILE BARU JIKA GAGAL
+            |--------------------------------------------------------------------------
+            */
+
+            if (
+                $newFile &&
+                $newFile !== $oldFile
+            ) {
+
+                $this->deleteStorageFile(
+                    $newFile,
+                    $diskName
+                );
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | CLEANUP PREVIEW
+            |--------------------------------------------------------------------------
+            */
+
+            $this->cleanupPdfPreview();
+
+            /*
+            |--------------------------------------------------------------------------
+            | LOG
+            |--------------------------------------------------------------------------
+            */
+
+            Log::error(
+                'Gagal memperbarui Surat Masuk.',
+                [
+                    'message' =>
+                        $e->getMessage(),
+
+                    'surat_id' =>
+                        $suratMasuk->id,
+
+                    'user_id' =>
+                        Auth::id(),
+
+                    'disk' =>
+                        $diskName,
+
+                    'trace' =>
+                        $e->getTraceAsString(),
+                ]
+            );
+
+            return back()
+                ->withInput()
+                ->with(
+                    'error',
+                    'Gagal memperbarui surat masuk: ' .
+                    $e->getMessage()
+                );
+        }
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | DESTROY
+    |--------------------------------------------------------------------------
+    */
+
+    public function destroy(
+        SuratMasuk $suratMasuk
+    ) {
+
+        $this->ensureUserCanManageSurat();
+
+        $nomor =
+            $suratMasuk->nomor_agenda;
+
+        try {
+
+            DB::transaction(
+                function () use (
+                    $suratMasuk,
+                    $nomor
+                ): void {
+
+                    $suratMasuk->delete();
+
+                    $this->logActivity(
+                        'delete',
+                        'surat_masuk',
+                        'Menghapus surat masuk ' .
+                        $nomor
+                    );
+                }
+            );
+
+            return back()->with(
+                'success',
+                'Surat masuk berhasil dipindahkan ke arsip sampah.'
+            );
+
+        } catch (
+            Throwable $e
+        ) {
+
+            Log::error(
+                'Gagal menghapus Surat Masuk.',
+                [
+                    'message' =>
+                        $e->getMessage(),
+
+                    'surat_id' =>
+                        $suratMasuk->id,
+
+                    'user_id' =>
+                        Auth::id(),
+                ]
+            );
+
+            return back()->with(
+                'error',
+                'Gagal menghapus surat masuk: ' .
+                $e->getMessage()
+            );
+        }
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | CETAK LABEL
+    |--------------------------------------------------------------------------
+    */
+
+    public function cetakLabel(
+        SuratMasuk $suratMasuk
+    ) {
+
+        $this->ensureCanView(
+            $suratMasuk
+        );
+
+        $suratMasuk->load(
+            'kategori'
+        );
+
+        return view(
+            'surat_masuk.label',
+            compact(
+                'suratMasuk'
+            )
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | CETAK DISPOSISI
+    |--------------------------------------------------------------------------
+    */
+
+    public function cetakDisposisi(
+        SuratMasuk $suratMasuk
+    ) {
+
+        $this->ensureCanView(
+            $suratMasuk
+        );
+
+        $suratMasuk->load(
+            [
+                'kategori',
+                'disposisi.dari',
+                'disposisi.kepada',
+            ]
+        );
+
+        return view(
+            'surat_masuk.disposisi_pdf',
+            compact(
+                'suratMasuk'
+            )
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | ACCESS CONTROL
+    |--------------------------------------------------------------------------
+    */
+
+    private function ensureCanView(
+        SuratMasuk $suratMasuk
+    ): void {
+
+        $this->ensureUserAuthenticated();
+
+        $role =
+            $this->resolveSuratUserRole();
+
+        /*
+        |--------------------------------------------------------------------------
+        | ADMIN
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            $role === 'admin'
+        ) {
+            return;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | PIMPINAN
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            $role === 'pimpinan'
+        ) {
+            return;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | STAFF
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            $role === 'staff'
+        ) {
+
+            $hasDisposisi =
+                $suratMasuk
+                    ->disposisi()
+                    ->where(
+                        'kepada_user_id',
+                        (int) Auth::id()
+                    )
+                    ->exists();
+
+            if (
+                $hasDisposisi
+            ) {
+                return;
+            }
+        }
+
+        abort(
+            403,
+            'Anda tidak memiliki izin untuk melihat surat masuk ini.'
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | RESOLVE ROLE
+    |--------------------------------------------------------------------------
+    */
+
+    private function resolveSuratUserRole(): string
+    {
+        $user =
+            Auth::user();
+
+        if (
+            !$user
+        ) {
+            return '';
+        }
+
+        $role =
+            strtolower(
+                trim(
+                    (string) (
+                        $user->role ??
+                        ''
+                    )
+                )
+            );
+
+        /*
+        |--------------------------------------------------------------------------
+        | FALLBACK JABATAN
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            $role === '' &&
+            isset(
+                $user->jabatan
+            )
+        ) {
+
+            $role =
+                strtolower(
+                    trim(
+                        (string) $user->jabatan
+                    )
+                );
+        }
+
+        return $role === 'staf'
+            ? 'staff'
+            : $role;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | STORAGE DISK
+    |--------------------------------------------------------------------------
+    */
+
+    private function getStorageDisk(): string
+    {
+        $disk =
+            strtolower(
+                trim(
+                    (string) config(
+                        'filesystems.default',
+                        ''
+                    )
+                )
+            );
+
+        if (
+            $disk !==
+            'supabase'
+        ) {
+            throw new RuntimeException(
+                'FILESYSTEM_DISK harus diset ke "supabase". File surat tidak boleh disimpan permanen di server.'
+            );
+        }
+
+        return 'supabase';
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | UPLOAD ERROR MESSAGE
+    |--------------------------------------------------------------------------
+    */
+
+    private function getUploadErrorMessage(
+        UploadedFile $file
+    ): string {
+
+        return match (
+            $file->getError()
+        ) {
+
+            UPLOAD_ERR_INI_SIZE =>
+                'Ukuran file melebihi batas upload server.',
+
+            UPLOAD_ERR_FORM_SIZE =>
+                'Ukuran file melebihi batas form.',
+
+            UPLOAD_ERR_PARTIAL =>
+                'File hanya terupload sebagian. Silakan coba lagi.',
+
+            UPLOAD_ERR_NO_FILE =>
+                'Tidak ada file yang dipilih.',
+
+            UPLOAD_ERR_NO_TMP_DIR =>
+                'Folder temporary upload PHP tidak tersedia.',
+
+            UPLOAD_ERR_CANT_WRITE =>
+                'PHP gagal menulis file upload.',
+
+            UPLOAD_ERR_EXTENSION =>
+                'Upload file dihentikan oleh konfigurasi PHP.',
+
+            default =>
+                'File gagal diupload. Kode upload PHP: ' .
+                $file->getError(),
+        };
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | STORE UPLOADED FILE
+    |--------------------------------------------------------------------------
+    */
+
+    private function storeUploadedFile(
+        ?UploadedFile $file,
+        string $diskName
+    ): string {
+
+        if (
+            !$file
+        ) {
+            throw new RuntimeException(
+                'File lampiran tidak ditemukan.'
+            );
+        }
+
+        if (
+            !$file->isValid()
+        ) {
+            throw new RuntimeException(
+                $this->getUploadErrorMessage(
+                    $file
+                )
+            );
+        }
+
+        $fileSize =
+            $file->getSize();
+
+        if (
+            $fileSize === false ||
+            $fileSize <= 0
+        ) {
+            throw new RuntimeException(
+                'Ukuran file tidak dapat dibaca.'
+            );
+        }
+
+        if (
+            $fileSize >
+            self::MAX_FILE_SIZE
+        ) {
+            throw new RuntimeException(
+                'Ukuran file lampiran maksimal 10 MB.'
+            );
+        }
+
+        $extension =
+            strtolower(
+                trim(
+                    (string) $file
+                        ->getClientOriginalExtension()
+                )
+            );
+
+        if (
+            $extension ===
+            'jpeg'
+        ) {
+            $extension =
+                'jpg';
+        }
+
+        if (
+            !in_array(
+                $extension,
+                self::ALLOWED_FILE_EXTENSIONS,
+                true
+            )
+        ) {
+            throw new RuntimeException(
+                'Format file tidak didukung. Gunakan PDF, JPG, JPEG, atau PNG.'
+            );
+        }
+
+        $realPath =
+            $file->getRealPath();
+
+        if (
+            !$realPath ||
+            !is_readable(
+                $realPath
+            )
+        ) {
+            throw new RuntimeException(
+                'File temporary upload tidak dapat dibaca.'
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | PDF
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            $extension ===
+            'pdf'
+        ) {
+
+            $mime =
+                strtolower(
+                    (string) $file->getMimeType()
+                );
+
+            if (
+                $mime !==
+                'application/pdf'
+            ) {
+                throw new RuntimeException(
+                    'File PDF tidak valid.'
+                );
+            }
+
+            return $this->storePdfUsingPreview(
+                $file,
+                $diskName
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | IMAGE
+        |--------------------------------------------------------------------------
+        */
+
+        $contents =
+            file_get_contents(
+                $realPath
+            );
+
+        if (
+            $contents === false ||
+            $contents === ''
+        ) {
+            throw new RuntimeException(
+                'Gagal membaca file gambar.'
+            );
+        }
+
+        $imageInfo =
+            @getimagesizefromstring(
+                $contents
+            );
+
+        if (
+            $imageInfo === false
+        ) {
+            throw new RuntimeException(
+                'File bukan gambar yang valid.'
+            );
+        }
+
+        $actualMime =
+            strtolower(
+                (string) (
+                    $imageInfo['mime'] ??
+                    ''
+                )
+            );
+
+        if (
+            $actualMime ===
+            'image/jpg'
+        ) {
+            $actualMime =
+                'image/jpeg';
+        }
+
+        if (
+            !in_array(
+                $actualMime,
+                self::ALLOWED_IMAGE_MIMES,
+                true
+            )
+        ) {
+            throw new RuntimeException(
+                'Jenis file gambar tidak didukung.'
+            );
+        }
+
+        return $this->storeCompressedImage(
+            $contents,
+            $diskName,
+            'surat-masuk'
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
     | DATE VALIDATION
     |--------------------------------------------------------------------------
     */
@@ -3276,6 +4722,7 @@ class SuratMasukController extends Controller
     private function isValidDate(
         ?string $date
     ): bool {
+
         if (
             $date === null
         ) {
@@ -3328,7 +4775,9 @@ class SuratMasukController extends Controller
         string $module,
         string $description
     ): void {
+
         try {
+
             if (
                 class_exists(
                     ActivityLog::class
@@ -3338,15 +4787,18 @@ class SuratMasukController extends Controller
                     'catat'
                 )
             ) {
+
                 ActivityLog::catat(
                     $action,
                     $module,
                     $description
                 );
             }
+
         } catch (
             Throwable $e
         ) {
+
             Log::warning(
                 'Gagal mencatat Activity Log Surat Masuk.',
                 [

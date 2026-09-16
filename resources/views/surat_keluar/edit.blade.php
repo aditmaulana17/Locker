@@ -81,24 +81,14 @@
 
     /*
     |--------------------------------------------------------------------------
-    | INPUT CLASS
-    |--------------------------------------------------------------------------
-    */
-
-    $inputClass =
-        'block w-full rounded-md border-2 border-slate-400 bg-white px-3 py-2 text-sm text-slate-800 shadow-sm outline-none transition placeholder:text-slate-400 hover:border-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-100';
-
-    $errorInputClass =
-        'border-rose-400 bg-rose-50 focus:border-rose-500 focus:ring-rose-100';
-
-    /*
-    |--------------------------------------------------------------------------
-    | LAMPIRAN SAAT INI
+    | LAMPIRAN LAMA
     |--------------------------------------------------------------------------
     */
 
     $currentAttachmentPath = trim(
-        (string) ($suratKeluar->lampiran_file ?? '')
+        (string) (
+            $suratKeluar->lampiran_file ?? ''
+        )
     );
 
     $hasCurrentAttachment =
@@ -118,48 +108,991 @@
                 )
             )
             : '';
+
+    /*
+    |--------------------------------------------------------------------------
+    | INPUT CLASS
+    |--------------------------------------------------------------------------
+    */
+
+    $inputClass =
+        'block w-full rounded-md border-2 border-slate-400 bg-white px-3 py-2 text-sm text-slate-800 shadow-sm outline-none transition placeholder:text-slate-400 hover:border-slate-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100';
+
+    $errorInputClass =
+        'border-rose-400 bg-rose-50 focus:border-rose-500 focus:ring-rose-100';
 @endphp
 
-<div class="mx-auto w-full max-w-5xl px-3 pb-6 sm:px-4 lg:px-5">
+<style>
+    .ske-page,
+    .ske-page * {
+        box-sizing: border-box;
+    }
 
-    {{-- =====================================================
-         TOMBOL KEMBALI
-    ====================================================== --}}
+    .ske-page {
+        width: 100%;
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 14px 18px 30px;
+        color: #1e293b;
+    }
 
-    <div class="mb-4 flex justify-end">
+    .ske-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+
+    .ske-breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        font-size: 10px;
+        color: #64748b;
+    }
+
+    .ske-breadcrumb strong {
+        color: #1e293b;
+        font-weight: 800;
+    }
+
+    .ske-back {
+        min-height: 35px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 0 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        background: #fff;
+        color: #475569;
+        font-size: 10px;
+        font-weight: 800;
+        text-decoration: none;
+        transition: .15s ease;
+    }
+
+    .ske-back:hover {
+        border-color: #94a3b8;
+        background: #f8fafc;
+        color: #1e293b;
+    }
+
+    .ske-shell {
+        overflow: hidden;
+        border: 1.5px solid #94a3b8;
+        border-radius: 14px;
+        background: #fff;
+        box-shadow:
+            0 12px 30px rgba(15, 23, 42, .07),
+            0 2px 6px rgba(15, 23, 42, .04);
+    }
+
+    .ske-header {
+        position: relative;
+        overflow: hidden;
+        padding: 18px 20px;
+        background: linear-gradient(
+            135deg,
+            #047857 0%,
+            #059669 45%,
+            #2563eb 100%
+        );
+        color: #fff;
+    }
+
+    .ske-header::after {
+        content: "";
+        position: absolute;
+        width: 220px;
+        height: 220px;
+        right: -75px;
+        bottom: -90px;
+        border-radius: 50%;
+        background: rgba(255,255,255,.08);
+    }
+
+    .ske-header-inner {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+    }
+
+    .ske-header-main {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        min-width: 0;
+    }
+
+    .ske-header-icon {
+        width: 42px;
+        height: 42px;
+        flex: 0 0 42px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid rgba(255,255,255,.30);
+        border-radius: 10px;
+        background: rgba(255,255,255,.13);
+        backdrop-filter: blur(5px);
+    }
+
+    .ske-header-kicker {
+        margin: 0;
+        font-size: 8px;
+        font-weight: 800;
+        letter-spacing: .1em;
+        text-transform: uppercase;
+        color: rgba(255,255,255,.78);
+    }
+
+    .ske-header-title {
+        margin: 2px 0 0;
+        font-size: 19px;
+        line-height: 1.3;
+        font-weight: 850;
+    }
+
+    .ske-header-desc {
+        margin: 3px 0 0;
+        max-width: 700px;
+        font-size: 8.5px;
+        line-height: 1.5;
+        color: rgba(255,255,255,.83);
+    }
+
+    .ske-header-badge {
+        flex-shrink: 0;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        min-height: 28px;
+        padding: 0 9px;
+        border: 1px solid rgba(255,255,255,.25);
+        border-radius: 999px;
+        background: rgba(255,255,255,.11);
+        font-size: 8px;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .ske-body {
+        padding: 16px;
+    }
+
+    .ske-error {
+        margin-bottom: 12px;
+        padding: 11px 13px;
+        border: 1px solid #fecaca;
+        border-radius: 9px;
+        background: #fff7f7;
+        color: #be123c;
+    }
+
+    .ske-error-title {
+        margin: 0;
+        font-size: 10px;
+        font-weight: 800;
+    }
+
+    .ske-error-list {
+        margin: 4px 0 0;
+        padding-left: 16px;
+        font-size: 8px;
+        line-height: 1.55;
+    }
+
+    .ske-section + .ske-section {
+        margin-top: 17px;
+        padding-top: 17px;
+        border-top: 1.5px solid #e2e8f0;
+    }
+
+    .ske-section-head {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        margin-bottom: 10px;
+    }
+
+    .ske-section-marker {
+        width: 4px;
+        min-height: 28px;
+        flex: 0 0 4px;
+        border-radius: 999px;
+        background: #059669;
+    }
+
+    .ske-section-marker-blue {
+        background: #2563eb;
+    }
+
+    .ske-section-title {
+        margin: 0;
+        font-size: 13px;
+        line-height: 1.3;
+        font-weight: 850;
+        color: #1e293b;
+    }
+
+    .ske-section-desc {
+        margin: 3px 0 0;
+        font-size: 8px;
+        line-height: 1.45;
+        color: #64748b;
+    }
+
+    .ske-field-table {
+        overflow: hidden;
+        border: 1.5px solid #94a3b8;
+        border-radius: 10px;
+    }
+
+    .ske-field-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .ske-field {
+        min-width: 0;
+        padding: 11px;
+        border-right: 1.5px solid #cbd5e1;
+        border-bottom: 1.5px solid #cbd5e1;
+        background: #fff;
+    }
+
+    .ske-field:nth-child(2n) {
+        border-right: 0;
+    }
+
+    .ske-field-full {
+        grid-column: 1 / -1;
+        border-right: 0;
+    }
+
+    .ske-field-label {
+        display: block;
+        margin-bottom: 5px;
+        font-size: 9px;
+        line-height: 1.3;
+        font-weight: 850;
+        color: #475569;
+    }
+
+    .ske-required {
+        color: #dc2626;
+    }
+
+    .ske-control {
+        width: 100%;
+        min-height: 40px;
+        border: 1.5px solid #94a3b8;
+        border-radius: 8px;
+        background: #fff;
+        color: #1e293b;
+        padding: 8px 10px;
+        font-size: 11px;
+        line-height: 1.4;
+        outline: none;
+        transition: .15s ease;
+    }
+
+    input.ske-control,
+    select.ske-control {
+        height: 40px;
+        padding: 0 10px;
+    }
+
+    textarea.ske-control {
+        min-height: 82px;
+        resize: vertical;
+    }
+
+    .ske-control:focus {
+        border-color: #059669;
+        box-shadow: 0 0 0 3px rgba(5,150,105,.08);
+    }
+
+    .ske-control-error {
+        border-color: #ef4444 !important;
+        background: #fff7f7 !important;
+    }
+
+    .ske-field-error {
+        margin: 4px 0 0;
+        font-size: 7.5px;
+        line-height: 1.45;
+        color: #dc2626;
+        font-weight: 700;
+    }
+
+    .ske-attachment-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 12px;
+        align-items: stretch;
+    }
+
+    .ske-card {
+        min-width: 0;
+        overflow: hidden;
+        border: 1.5px solid #94a3b8;
+        border-radius: 10px;
+        background: #fff;
+    }
+
+    .ske-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 10px 11px;
+        border-bottom: 1.5px solid #cbd5e1;
+        background: #f8fafc;
+    }
+
+    .ske-card-header-left {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+    }
+
+    .ske-card-icon {
+        width: 32px;
+        height: 32px;
+        flex: 0 0 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #bfdbfe;
+        border-radius: 7px;
+        background: #eff6ff;
+        color: #2563eb;
+    }
+
+    .ske-card-icon.green {
+        border-color: #a7f3d0;
+        background: #ecfdf5;
+        color: #059669;
+    }
+
+    .ske-card-title {
+        margin: 0;
+        font-size: 10px;
+        font-weight: 850;
+        color: #1e293b;
+    }
+
+    .ske-card-desc {
+        margin: 2px 0 0;
+        font-size: 7px;
+        color: #64748b;
+    }
+
+    .ske-badge {
+        padding: 4px 7px;
+        border: 1px solid #cbd5e1;
+        border-radius: 999px;
+        background: #fff;
+        color: #64748b;
+        font-size: 6.5px;
+        font-weight: 800;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .ske-badge-green {
+        border-color: #a7f3d0;
+        background: #ecfdf5;
+        color: #047857;
+    }
+
+    .ske-card-body {
+        padding: 11px;
+    }
+
+    .ske-current-file {
+        margin-bottom: 9px;
+        padding: 8px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        background: #f8fafc;
+    }
+
+    .ske-current-file-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 7px;
+    }
+
+    .ske-current-file-icon {
+        width: 30px;
+        height: 30px;
+        flex: 0 0 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 7px;
+        background: #e2e8f0;
+        color: #64748b;
+    }
+
+    .ske-current-file-content {
+        min-width: 0;
+        flex: 1;
+    }
+
+    .ske-current-file-label {
+        margin: 0;
+        font-size: 7px;
+        font-weight: 800;
+        color: #64748b;
+    }
+
+    .ske-current-file-name {
+        margin: 2px 0 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 8px;
+        font-weight: 750;
+        color: #334155;
+    }
+
+    .ske-current-file-ext {
+        display: inline-flex;
+        margin-top: 2px;
+        padding: 2px 5px;
+        border: 1px solid #cbd5e1;
+        border-radius: 999px;
+        background: #fff;
+        color: #64748b;
+        font-size: 6px;
+        font-weight: 850;
+    }
+
+    .ske-empty {
+        margin: 0;
+        font-size: 7.5px;
+        color: #64748b;
+    }
+
+    .ske-info {
+        display: flex;
+        align-items: flex-start;
+        gap: 7px;
+        margin-bottom: 8px;
+        padding: 8px;
+        border: 1px solid #c7d2fe;
+        border-radius: 8px;
+        background: #eef2ff;
+        color: #4338ca;
+    }
+
+    .ske-info svg {
+        width: 13px;
+        height: 13px;
+        flex: 0 0 13px;
+        margin-top: 1px;
+    }
+
+    .ske-info p {
+        margin: 0;
+        font-size: 7px;
+        line-height: 1.55;
+    }
+
+    .ske-view-current {
+        width: 100%;
+        min-height: 34px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        margin-top: 6px;
+        padding: 0 8px;
+        border: 1px solid #bfdbfe;
+        border-radius: 7px;
+        background: #eff6ff;
+        color: #1d4ed8;
+        text-decoration: none;
+        font-size: 7.5px;
+        font-weight: 850;
+    }
+
+    .ske-view-current:hover {
+        background: #dbeafe;
+    }
+
+    .ske-preview {
+        overflow: hidden;
+        margin-top: 8px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        background: #0f172a;
+    }
+
+    .ske-preview-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 6px;
+        padding: 7px 8px;
+        border-bottom: 1px solid #334155;
+        background: #111827;
+        color: #fff;
+    }
+
+    .ske-preview-title {
+        margin: 0;
+        font-size: 7.5px;
+        font-weight: 800;
+    }
+
+    .ske-preview-badge {
+        padding: 3px 6px;
+        border-radius: 999px;
+        background: rgba(255,255,255,.10);
+        color: #cbd5e1;
+        font-size: 5.5px;
+        font-weight: 800;
+        text-transform: uppercase;
+    }
+
+    .ske-preview-image {
+        display: block;
+        width: 100%;
+        max-height: 340px;
+        object-fit: contain;
+        background: #fff;
+    }
+
+    .ske-preview-pdf {
+        display: block;
+        width: 100%;
+        height: 340px;
+        border: 0;
+        background: #fff;
+    }
+
+    .ske-preview-caption {
+        padding: 6px 8px;
+        background: #111827;
+        color: #94a3b8;
+        font-size: 6.5px;
+        line-height: 1.45;
+    }
+
+    .ske-upload-box {
+        position: relative;
+        min-height: 130px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        padding: 14px;
+        border: 1.5px dashed #94a3b8;
+        border-radius: 9px;
+        background: #f8fafc;
+        text-align: center;
+        cursor: pointer;
+        transition: .15s ease;
+    }
+
+    .ske-upload-box:hover {
+        border-color: #60a5fa;
+        background: #eff6ff;
+    }
+
+    .ske-upload-box.has-file {
+        border-color: #34d399;
+        background: #ecfdf5;
+    }
+
+    .ske-upload-icon {
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 4px;
+        border: 1px solid #bfdbfe;
+        border-radius: 8px;
+        background: #dbeafe;
+        color: #2563eb;
+    }
+
+    .ske-upload-box.has-file .ske-upload-icon {
+        border-color: #a7f3d0;
+        background: #d1fae5;
+        color: #059669;
+    }
+
+    .ske-upload-title {
+        font-size: 8.5px;
+        font-weight: 850;
+        color: #334155;
+    }
+
+    .ske-upload-subtitle {
+        font-size: 7px;
+        color: #64748b;
+    }
+
+    .ske-upload-limit {
+        margin-top: 2px;
+        padding: 3px 7px;
+        border-radius: 999px;
+        background: #dbeafe;
+        color: #2563eb;
+        font-size: 6px;
+        font-weight: 800;
+    }
+
+    .ske-upload-input {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+    .ske-file-info {
+        display: none;
+        margin-top: 8px;
+        padding: 8px;
+        border: 1px solid #a7f3d0;
+        border-radius: 8px;
+        background: #ecfdf5;
+    }
+
+    .ske-file-info.show {
+        display: block;
+    }
+
+    .ske-file-info-title {
+        margin: 0;
+        font-size: 7.5px;
+        font-weight: 850;
+        color: #047857;
+    }
+
+    .ske-file-info-name {
+        margin: 2px 0 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 7.5px;
+        font-weight: 750;
+        color: #334155;
+    }
+
+    .ske-file-info-size {
+        margin: 2px 0 0;
+        font-size: 6.8px;
+        color: #64748b;
+    }
+
+    .ske-compression {
+        display: none;
+        margin-top: 8px;
+        padding: 8px;
+        border: 1px solid #c7d2fe;
+        border-radius: 8px;
+        background: #eef2ff;
+        color: #4338ca;
+    }
+
+    .ske-compression.show {
+        display: block;
+    }
+
+    .ske-compression.success {
+        border-color: #a7f3d0;
+        background: #ecfdf5;
+        color: #047857;
+    }
+
+    .ske-compression.warning {
+        border-color: #fde68a;
+        background: #fffbeb;
+        color: #a16207;
+    }
+
+    .ske-compression-title {
+        margin: 0 0 6px;
+        font-size: 7.5px;
+        font-weight: 850;
+    }
+
+    .ske-compression-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 5px;
+    }
+
+    .ske-compression-item {
+        padding: 6px;
+        border: 1px solid rgba(148,163,184,.25);
+        border-radius: 6px;
+        background: rgba(255,255,255,.58);
+    }
+
+    .ske-compression-label {
+        display: block;
+        margin-bottom: 2px;
+        font-size: 5.8px;
+        color: #64748b;
+    }
+
+    .ske-compression-value {
+        font-size: 7px;
+        font-weight: 800;
+        color: #334155;
+    }
+
+    .ske-status {
+        display: none;
+        margin-top: 7px;
+        padding: 7px 8px;
+        border: 1px solid #cbd5e1;
+        border-radius: 7px;
+        background: #f8fafc;
+        color: #64748b;
+        font-size: 6.8px;
+        line-height: 1.5;
+    }
+
+    .ske-status.show {
+        display: block;
+    }
+
+    .ske-status.blue {
+        border-color: #bfdbfe;
+        background: #eff6ff;
+        color: #1d4ed8;
+    }
+
+    .ske-status.green {
+        border-color: #a7f3d0;
+        background: #ecfdf5;
+        color: #047857;
+    }
+
+    .ske-status.amber {
+        border-color: #fde68a;
+        background: #fffbeb;
+        color: #a16207;
+    }
+
+    .ske-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 7px;
+        padding: 10px 13px;
+        border-top: 1.5px solid #cbd5e1;
+        background: #f8fafc;
+    }
+
+    .ske-footer-btn {
+        min-height: 36px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 0 13px;
+        border-radius: 8px;
+        font-size: 8px;
+        font-weight: 850;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .ske-cancel {
+        border: 1.5px solid #cbd5e1;
+        background: #fff;
+        color: #475569;
+    }
+
+    .ske-submit {
+        border: 1.5px solid #059669;
+        background: #059669;
+        color: #fff;
+        box-shadow: 0 3px 8px rgba(5,150,105,.14);
+    }
+
+    .ske-submit:hover:not(:disabled) {
+        background: #047857;
+        border-color: #047857;
+    }
+
+    .ske-submit:disabled {
+        opacity: .6;
+        cursor: not-allowed;
+    }
+
+    @media (max-width: 900px) {
+        .ske-attachment-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .ske-preview-pdf {
+            height: 360px;
+        }
+
+        .ske-preview-image {
+            max-height: 360px;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .ske-page {
+            padding: 7px 9px 20px;
+        }
+
+        .ske-topbar {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .ske-back {
+            width: 100%;
+        }
+
+        .ske-header-inner {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .ske-header-badge {
+            align-self: flex-start;
+        }
+
+        .ske-body {
+            padding: 10px;
+        }
+
+        .ske-field-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .ske-field,
+        .ske-field:nth-child(2n) {
+            border-right: 0;
+        }
+
+        .ske-field-full {
+            grid-column: auto;
+        }
+
+        .ske-compression-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .ske-footer {
+            flex-direction: column-reverse;
+            align-items: stretch;
+        }
+
+        .ske-footer-btn {
+            width: 100%;
+        }
+
+        .ske-preview-pdf {
+            height: 320px;
+        }
+
+        .ske-preview-image {
+            max-height: 320px;
+        }
+    }
+
+    @media (max-width: 420px) {
+        .ske-header {
+            padding: 14px;
+        }
+
+        .ske-header-title {
+            font-size: 16px;
+        }
+
+        .ske-compression-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="ske-page">
+
+    <div class="ske-topbar">
+
+        <div class="ske-breadcrumb">
+            <span>Arsip</span>
+            <span>/</span>
+            <strong>Surat Keluar</strong>
+            <span>/</span>
+            <strong>Edit</strong>
+        </div>
 
         <a
             href="{{ route('surat-keluar.index') }}"
-            class="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3.5 py-2 text-[10px] font-semibold text-slate-600 shadow-sm transition hover:border-slate-400 hover:bg-slate-50 hover:text-slate-800"
+            class="ske-back"
         >
-
             <svg
-                class="h-3.5 w-3.5"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
+                stroke-width="2"
             >
                 <path
                     stroke-linecap="round"
                     stroke-linejoin="round"
-                    stroke-width="2"
                     d="M10 19l-7-7m0 0l7-7m-7 7h18"
                 />
             </svg>
 
             Kembali
-
         </a>
 
     </div>
 
-    {{-- =====================================================
-         FORM
-    ====================================================== --}}
+    @if($errors->any())
+
+        <div class="ske-error">
+
+            <p class="ske-error-title">
+                Data belum dapat diperbarui.
+            </p>
+
+            <ul class="ske-error-list">
+
+                @foreach($errors->all() as $error)
+
+                    <li>
+                        {{ $error }}
+                    </li>
+
+                @endforeach
+
+            </ul>
+
+        </div>
+
+    @endif
 
     <form
-        id="form-surat"
+        id="form-surat-keluar-edit"
         method="POST"
         action="{{ route('surat-keluar.update', $suratKeluar) }}"
         enctype="multipart/form-data"
@@ -169,48 +1102,38 @@
         @csrf
         @method('PUT')
 
-        {{-- =================================================
-             MAIN CARD
-        ================================================== --}}
+        <div class="ske-shell">
 
-        <div class="overflow-hidden rounded-lg border-2 border-slate-400 bg-white shadow-sm">
+            {{-- ================================================================
+                 HEADER
+            ================================================================ --}}
 
-            {{-- HEADER --}}
+            <header class="ske-header">
 
-            <div class="border-b-2 border-emerald-300 bg-gradient-to-r from-emerald-50 to-blue-50 px-4 py-3">
+                <div class="ske-header-inner">
 
-                <div class="flex items-center justify-between gap-3">
+                    <div class="ske-header-main">
 
-                    <div class="flex items-center gap-2.5">
-
-                        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border-2 border-emerald-300 bg-white text-emerald-600 shadow-sm">
+                        <div class="ske-header-icon">
 
                             <svg
-                                class="h-4 w-4"
+                                width="21"
+                                height="21"
+                                viewBox="0 0 24 24"
                                 fill="none"
                                 stroke="currentColor"
-                                viewBox="0 0 24 24"
-                                aria-hidden="true"
+                                stroke-width="1.8"
                             >
                                 <path
                                     stroke-linecap="round"
                                     stroke-linejoin="round"
-                                    stroke-width="1.8"
-                                    d="M6 2h9l5 5v15H6a2 2 0 01-2-2V4a2 2 0 012-2z"
+                                    d="M6 3h8l5 5v13H6a2 2 0 01-2-2V5a2 2 0 012-2z"
                                 />
 
                                 <path
                                     stroke-linecap="round"
                                     stroke-linejoin="round"
-                                    stroke-width="1.8"
-                                    d="M14 2v6h6"
-                                />
-
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="1.8"
-                                    d="M8 13h8M8 17h6"
+                                    d="M14 3v6h5M8 13h8M8 17h6"
                                 />
                             </svg>
 
@@ -218,55 +1141,51 @@
 
                         <div>
 
-                            <p class="text-[9px] font-bold uppercase tracking-wider text-emerald-600">
-                                Arsip Surat Keluar
+                            <p class="ske-header-kicker">
+                                Sistem E-Arsip
                             </p>
 
-                            <p class="text-sm font-bold text-emerald-900">
+                            <h1 class="ske-header-title">
                                 Edit Surat Keluar
+                            </h1>
+
+                            <p class="ske-header-desc">
+                                Perbarui data surat dan lampiran digital.
+                                PDF tetap PDF dan dapat langsung terlihat,
+                                sedangkan gambar dapat dioptimalkan menjadi JPG.
                             </p>
 
                         </div>
 
                     </div>
 
-                    <div class="hidden rounded-md border border-emerald-300 bg-white/80 px-3 py-1.5 text-right sm:block">
-
-                        <p class="text-[8px] font-semibold uppercase tracking-wide text-emerald-500">
-                            Sistem Arsip
-                        </p>
-
-                        <p class="text-[9px] font-medium text-emerald-700">
-                            Perbarui data surat
-                        </p>
-
-                    </div>
+                    <span class="ske-header-badge">
+                        Arsip Surat Keluar
+                    </span>
 
                 </div>
 
-            </div>
+            </header>
 
-            {{-- BODY --}}
+            <div class="ske-body">
 
-            <div class="p-4 sm:p-5">
-
-                {{-- =================================================
+                {{-- ============================================================
                      INFORMASI UTAMA
-                ================================================== --}}
+                ============================================================= --}}
 
-                <section>
+                <section class="ske-section">
 
-                    <div class="mb-3 flex items-start gap-2.5 border-b-2 border-slate-300 pb-2.5">
+                    <div class="ske-section-head">
 
-                        <div class="mt-0.5 h-7 w-1 shrink-0 rounded-full bg-emerald-600"></div>
+                        <div class="ske-section-marker"></div>
 
                         <div>
 
-                            <h2 class="text-sm font-bold text-slate-800">
+                            <h2 class="ske-section-title">
                                 Informasi Utama Surat
                             </h2>
 
-                            <p class="text-[10px] text-slate-500">
+                            <p class="ske-section-desc">
                                 Perbarui identitas dan informasi utama surat keluar.
                             </p>
 
@@ -274,20 +1193,20 @@
 
                     </div>
 
-                    <div class="overflow-hidden rounded-md border-2 border-slate-400">
+                    <div class="ske-field-table">
 
-                        <div class="grid grid-cols-1 md:grid-cols-2">
+                        <div class="ske-field-grid">
 
                             {{-- NOMOR SURAT --}}
 
-                            <div class="border-b-2 border-slate-300 p-3 md:border-r-2">
+                            <div class="ske-field">
 
                                 <label
                                     for="nomor_surat"
-                                    class="mb-1.5 block text-[11px] font-bold text-slate-700"
+                                    class="ske-field-label"
                                 >
                                     Nomor Surat
-                                    <span class="text-rose-500">*</span>
+                                    <span class="ske-required">*</span>
                                 </label>
 
                                 <input
@@ -295,15 +1214,15 @@
                                     id="nomor_surat"
                                     name="nomor_surat"
                                     value="{{ old('nomor_surat', $suratKeluar->nomor_surat) }}"
-                                    placeholder="Contoh: 005/SK/I/2026"
-                                    autocomplete="off"
                                     maxlength="255"
                                     required
-                                    class="{{ $inputClass }} @error('nomor_surat') {{ $errorInputClass }} @enderror"
+                                    autocomplete="off"
+                                    placeholder="Contoh: 005/SK/I/2026"
+                                    class="ske-control @error('nomor_surat') ske-control-error @enderror"
                                 >
 
                                 @error('nomor_surat')
-                                    <p class="mt-1 text-[10px] font-medium text-rose-600">
+                                    <p class="ske-field-error">
                                         {{ $message }}
                                     </p>
                                 @enderror
@@ -312,14 +1231,14 @@
 
                             {{-- TUJUAN --}}
 
-                            <div class="border-b-2 border-slate-300 p-3">
+                            <div class="ske-field">
 
                                 <label
                                     for="pengirim"
-                                    class="mb-1.5 block text-[11px] font-bold text-slate-700"
+                                    class="ske-field-label"
                                 >
                                     Tujuan Surat
-                                    <span class="text-rose-500">*</span>
+                                    <span class="ske-required">*</span>
                                 </label>
 
                                 <input
@@ -327,19 +1246,15 @@
                                     id="pengirim"
                                     name="pengirim"
                                     value="{{ old('pengirim', $suratKeluar->pengirim) }}"
-                                    placeholder="Contoh: PT Maju Takgentar"
-                                    autocomplete="organization"
                                     maxlength="150"
                                     required
-                                    class="{{ $inputClass }} @error('pengirim') {{ $errorInputClass }} @enderror"
+                                    autocomplete="organization"
+                                    placeholder="Contoh: PT Maju Takgentar"
+                                    class="ske-control @error('pengirim') ske-control-error @enderror"
                                 >
 
-                                <p class="mt-1 text-[9px] leading-relaxed text-slate-400">
-                                    Instansi, lembaga, organisasi, atau pihak tujuan surat.
-                                </p>
-
                                 @error('pengirim')
-                                    <p class="mt-1 text-[10px] font-medium text-rose-600">
+                                    <p class="ske-field-error">
                                         {{ $message }}
                                     </p>
                                 @enderror
@@ -348,14 +1263,14 @@
 
                             {{-- TANGGAL SURAT --}}
 
-                            <div class="border-b-2 border-slate-300 p-3 md:border-r-2">
+                            <div class="ske-field">
 
                                 <label
                                     for="tanggal_surat"
-                                    class="mb-1.5 block text-[11px] font-bold text-slate-700"
+                                    class="ske-field-label"
                                 >
                                     Tanggal Surat
-                                    <span class="text-rose-500">*</span>
+                                    <span class="ske-required">*</span>
                                 </label>
 
                                 <input
@@ -364,11 +1279,11 @@
                                     name="tanggal_surat"
                                     value="{{ $tanggalSurat }}"
                                     required
-                                    class="{{ $inputClass }} @error('tanggal_surat') {{ $errorInputClass }} @enderror"
+                                    class="ske-control @error('tanggal_surat') ske-control-error @enderror"
                                 >
 
                                 @error('tanggal_surat')
-                                    <p class="mt-1 text-[10px] font-medium text-rose-600">
+                                    <p class="ske-field-error">
                                         {{ $message }}
                                     </p>
                                 @enderror
@@ -377,14 +1292,14 @@
 
                             {{-- TANGGAL KELUAR --}}
 
-                            <div class="border-b-2 border-slate-300 p-3">
+                            <div class="ske-field">
 
                                 <label
                                     for="tanggal_keluar"
-                                    class="mb-1.5 block text-[11px] font-bold text-slate-700"
+                                    class="ske-field-label"
                                 >
                                     Tanggal Keluar
-                                    <span class="text-rose-500">*</span>
+                                    <span class="ske-required">*</span>
                                 </label>
 
                                 <input
@@ -393,15 +1308,11 @@
                                     name="tanggal_keluar"
                                     value="{{ $tanggalKeluar }}"
                                     required
-                                    class="{{ $inputClass }} @error('tanggal_keluar') {{ $errorInputClass }} @enderror"
+                                    class="ske-control @error('tanggal_keluar') ske-control-error @enderror"
                                 >
 
-                                <p class="mt-1 text-[9px] leading-relaxed text-slate-400">
-                                    Tanggal surat resmi keluar atau dikirim.
-                                </p>
-
                                 @error('tanggal_keluar')
-                                    <p class="mt-1 text-[10px] font-medium text-rose-600">
+                                    <p class="ske-field-error">
                                         {{ $message }}
                                     </p>
                                 @enderror
@@ -410,21 +1321,21 @@
 
                             {{-- KATEGORI --}}
 
-                            <div class="border-b-2 border-slate-300 p-3 md:border-r-2">
+                            <div class="ske-field">
 
                                 <label
                                     for="kategori_surat_id"
-                                    class="mb-1.5 block text-[11px] font-bold text-slate-700"
+                                    class="ske-field-label"
                                 >
                                     Kategori Surat
-                                    <span class="text-rose-500">*</span>
+                                    <span class="ske-required">*</span>
                                 </label>
 
                                 <select
                                     id="kategori_surat_id"
                                     name="kategori_surat_id"
                                     required
-                                    class="{{ $inputClass }} @error('kategori_surat_id') {{ $errorInputClass }} @enderror"
+                                    class="ske-control @error('kategori_surat_id') ske-control-error @enderror"
                                 >
 
                                     <option
@@ -435,7 +1346,7 @@
                                         Pilih kategori surat
                                     </option>
 
-                                    @foreach($kategoris ?? [] as $kategori)
+                                    @foreach(($kategoris ?? collect()) as $kategori)
 
                                         <option
                                             value="{{ $kategori->id }}"
@@ -460,14 +1371,17 @@
                                     $kategoris->isEmpty()
                                 )
 
-                                    <p class="mt-1 text-[9px] leading-relaxed text-amber-600">
+                                    <p
+                                        class="ske-field-error"
+                                        style="color:#a16207;"
+                                    >
                                         Belum ada kategori surat yang tersedia.
                                     </p>
 
                                 @endif
 
                                 @error('kategori_surat_id')
-                                    <p class="mt-1 text-[10px] font-medium text-rose-600">
+                                    <p class="ske-field-error">
                                         {{ $message }}
                                     </p>
                                 @enderror
@@ -476,21 +1390,21 @@
 
                             {{-- STATUS --}}
 
-                            <div class="border-b-2 border-slate-300 p-3">
+                            <div class="ske-field">
 
                                 <label
                                     for="status"
-                                    class="mb-1.5 block text-[11px] font-bold text-slate-700"
+                                    class="ske-field-label"
                                 >
                                     Status Surat
-                                    <span class="text-rose-500">*</span>
+                                    <span class="ske-required">*</span>
                                 </label>
 
                                 <select
                                     id="status"
                                     name="status"
                                     required
-                                    class="{{ $inputClass }} @error('status') {{ $errorInputClass }} @enderror"
+                                    class="ske-control @error('status') ske-control-error @enderror"
                                 >
 
                                     <option
@@ -531,7 +1445,7 @@
                                 </select>
 
                                 @error('status')
-                                    <p class="mt-1 text-[10px] font-medium text-rose-600">
+                                    <p class="ske-field-error">
                                         {{ $message }}
                                     </p>
                                 @enderror
@@ -540,28 +1454,28 @@
 
                             {{-- PERIHAL --}}
 
-                            <div class="border-b-2 border-slate-300 p-3 md:col-span-2">
+                            <div class="ske-field ske-field-full">
 
                                 <label
                                     for="perihal"
-                                    class="mb-1.5 block text-[11px] font-bold text-slate-700"
+                                    class="ske-field-label"
                                 >
                                     Perihal
-                                    <span class="text-rose-500">*</span>
+                                    <span class="ske-required">*</span>
                                 </label>
 
                                 <textarea
                                     id="perihal"
                                     name="perihal"
-                                    rows="2"
+                                    rows="3"
                                     maxlength="255"
                                     required
-                                    placeholder="Tuliskan perihal surat secara jelas..."
-                                    class="{{ $inputClass }} resize-y @error('perihal') {{ $errorInputClass }} @enderror"
+                                    placeholder="Tuliskan perihal surat..."
+                                    class="ske-control @error('perihal') ske-control-error @enderror"
                                 >{{ old('perihal', $suratKeluar->perihal) }}</textarea>
 
                                 @error('perihal')
-                                    <p class="mt-1 text-[10px] font-medium text-rose-600">
+                                    <p class="ske-field-error">
                                         {{ $message }}
                                     </p>
                                 @enderror
@@ -570,11 +1484,11 @@
 
                             {{-- RINGKASAN --}}
 
-                            <div class="p-3 md:col-span-2">
+                            <div class="ske-field ske-field-full">
 
                                 <label
                                     for="ringkasan"
-                                    class="mb-1.5 block text-[11px] font-bold text-slate-700"
+                                    class="ske-field-label"
                                 >
                                     Ringkasan Isi Surat
                                 </label>
@@ -585,15 +1499,15 @@
                                     rows="3"
                                     maxlength="5000"
                                     placeholder="Tuliskan ringkasan singkat isi surat..."
-                                    class="{{ $inputClass }} resize-y @error('ringkasan') {{ $errorInputClass }} @enderror"
+                                    class="ske-control @error('ringkasan') ske-control-error @enderror"
                                 >{{ old('ringkasan', $suratKeluar->ringkasan) }}</textarea>
 
-                                <p class="mt-1 text-[9px] leading-relaxed text-slate-400">
+                                <p class="ske-field-error" style="color:#94a3b8;">
                                     Maksimal 5.000 karakter.
                                 </p>
 
                                 @error('ringkasan')
-                                    <p class="mt-1 text-[10px] font-medium text-rose-600">
+                                    <p class="ske-field-error">
                                         {{ $message }}
                                     </p>
                                 @enderror
@@ -606,122 +1520,122 @@
 
                 </section>
 
-                <div class="my-4 border-t-2 border-slate-300"></div>
-
-                {{-- =================================================
+                {{-- ============================================================
                      LAMPIRAN
-                ================================================== --}}
+                ============================================================= --}}
 
-                <section>
+                <section class="ske-section">
 
-                    <div class="mb-3 flex items-start gap-2.5 border-b-2 border-slate-300 pb-2.5">
+                    <div class="ske-section-head">
 
-                        <div class="mt-0.5 h-7 w-1 shrink-0 rounded-full bg-indigo-600"></div>
+                        <div class="ske-section-marker ske-section-marker-blue"></div>
 
                         <div>
 
-                            <h2 class="text-sm font-bold text-slate-800">
+                            <h2 class="ske-section-title">
                                 Lampiran Dokumen Surat
                             </h2>
 
-                            <p class="text-[10px] text-slate-500">
-                                Pertahankan lampiran lama atau upload dokumen pengganti.
+                            <p class="ske-section-desc">
+                                Periksa lampiran saat ini atau upload file pengganti.
                             </p>
 
                         </div>
 
                     </div>
 
-                    <div class="grid grid-cols-1 gap-3.5 lg:grid-cols-2">
+                    <div class="ske-attachment-grid">
 
-                        {{-- =================================================
-                             LAMPIRAN LAMA
-                        ================================================== --}}
+                        {{-- ====================================================
+                             FILE LAMA
+                        ===================================================== --}}
 
-                        @if($hasCurrentAttachment)
+                        <div class="ske-card">
 
-                            <div class="overflow-hidden rounded-md border-2 border-slate-400 bg-white shadow-sm">
+                            <div class="ske-card-header">
 
-                                <div class="border-b-2 border-emerald-300 bg-emerald-50 px-3 py-2.5">
+                                <div class="ske-card-header-left">
 
-                                    <div class="flex items-center justify-between gap-2">
+                                    <div class="ske-card-icon green">
 
-                                        <div class="flex min-w-0 items-center gap-2">
+                                        <svg
+                                            width="16"
+                                            height="16"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            stroke-width="1.8"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                d="M7 3h7l4 4v14H7a2 2 0 01-2-2V5a2 2 0 012-2z"
+                                            />
 
-                                            <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-emerald-300 bg-white text-emerald-600">
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                d="M14 3v5h5"
+                                            />
+                                        </svg>
+
+                                    </div>
+
+                                    <div>
+
+                                        <h3 class="ske-card-title">
+                                            Lampiran Saat Ini
+                                        </h3>
+
+                                        <p class="ske-card-desc">
+                                            Dokumen yang sedang tersimpan.
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+                                <span class="ske-badge ske-badge-green">
+                                    Tersimpan
+                                </span>
+
+                            </div>
+
+                            <div class="ske-card-body">
+
+                                @if($hasCurrentAttachment)
+
+                                    <div class="ske-current-file">
+
+                                        <div class="ske-current-file-row">
+
+                                            <div class="ske-current-file-icon">
 
                                                 <svg
-                                                    class="h-3.5 w-3.5"
+                                                    width="15"
+                                                    height="15"
+                                                    viewBox="0 0 24 24"
                                                     fill="none"
                                                     stroke="currentColor"
-                                                    viewBox="0 0 24 24"
-                                                    aria-hidden="true"
+                                                    stroke-width="1.8"
                                                 >
                                                     <path
                                                         stroke-linecap="round"
                                                         stroke-linejoin="round"
-                                                        stroke-width="1.8"
                                                         d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586A1.5 1.5 0 0118 8.5V19a2 2 0 01-2 2z"
                                                     />
                                                 </svg>
 
                                             </div>
 
-                                            <div class="min-w-0">
+                                            <div class="ske-current-file-content">
 
-                                                <h3 class="text-[11px] font-bold text-slate-800">
-                                                    Lampiran Saat Ini
-                                                </h3>
-
-                                                <p class="text-[9px] text-slate-500">
-                                                    File yang sedang tersimpan.
-                                                </p>
-
-                                            </div>
-
-                                        </div>
-
-                                        <span class="shrink-0 rounded-full border border-emerald-200 bg-white px-1.5 py-0.5 text-[8px] font-bold uppercase text-emerald-600">
-                                            Tersimpan
-                                        </span>
-
-                                    </div>
-
-                                </div>
-
-                                <div class="flex min-h-[220px] flex-col justify-between p-3">
-
-                                    <div class="rounded-md border-2 border-slate-300 bg-slate-50 p-3">
-
-                                        <div class="flex items-start gap-2">
-
-                                            <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-emerald-200 bg-emerald-100 text-emerald-600">
-
-                                                <svg
-                                                    class="h-4 w-4"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    viewBox="0 0 24 24"
-                                                    aria-hidden="true"
-                                                >
-                                                    <path
-                                                        stroke-linecap="round"
-                                                        stroke-linejoin="round"
-                                                        stroke-width="1.8"
-                                                        d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
-                                                    />
-                                                </svg>
-
-                                            </div>
-
-                                            <div class="min-w-0 flex-1">
-
-                                                <p class="text-[10px] font-bold text-slate-700">
-                                                    Dokumen tersimpan
+                                                <p class="ske-current-file-label">
+                                                    File tersimpan
                                                 </p>
 
                                                 <p
-                                                    class="mt-1 break-all text-[9px] leading-relaxed text-slate-500"
+                                                    class="ske-current-file-name"
                                                     title="{{ $currentAttachmentName }}"
                                                 >
                                                     {{ $currentAttachmentName }}
@@ -729,7 +1643,7 @@
 
                                                 @if($currentAttachmentExtension)
 
-                                                    <span class="mt-2 inline-flex rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[8px] font-bold uppercase text-slate-500">
+                                                    <span class="ske-current-file-ext">
                                                         .{{ $currentAttachmentExtension }}
                                                     </span>
 
@@ -745,346 +1659,355 @@
                                         href="{{ route('surat-keluar.preview-lampiran', $suratKeluar) }}"
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        class="mt-3 inline-flex min-h-[35px] w-full items-center justify-center gap-1.5 rounded-md border-2 border-emerald-600 bg-emerald-600 px-3 py-2 text-[10px] font-bold text-white transition hover:bg-emerald-700"
+                                        class="ske-view-current"
                                     >
 
                                         <svg
-                                            class="h-3.5 w-3.5"
+                                            width="13"
+                                            height="13"
+                                            viewBox="0 0 24 24"
                                             fill="none"
                                             stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                            aria-hidden="true"
+                                            stroke-width="2"
                                         >
                                             <path
                                                 stroke-linecap="round"
                                                 stroke-linejoin="round"
-                                                stroke-width="2"
-                                                d="M15 10l4.55-2.27A1 1 0 0121 8.62v6.76a1 1 0 01-1.45.89L15 14m0-4v4M4 6h7a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2z"
+                                                d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6z"
+                                            />
+
+                                            <circle
+                                                cx="12"
+                                                cy="12"
+                                                r="2.8"
                                             />
                                         </svg>
 
-                                        Lihat Lampiran
+                                        Buka Preview Lampiran
 
                                     </a>
 
-                                </div>
+                                @else
 
-                            </div>
+                                    <div class="ske-current-file">
 
-                        @endif
-
-                        {{-- =================================================
-                             UPLOAD FILE BARU
-                        ================================================== --}}
-
-                        <div class="overflow-hidden rounded-md border-2 border-slate-400 bg-white shadow-sm {{ !$hasCurrentAttachment ? 'lg:col-span-2' : '' }}">
-
-                            <div class="border-b-2 border-blue-300 bg-blue-50 px-3 py-2.5">
-
-                                <div class="flex items-center justify-between gap-2">
-
-                                    <div class="flex min-w-0 items-center gap-2">
-
-                                        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-blue-300 bg-white text-blue-600">
-
-                                            <svg
-                                                class="h-3.5 w-3.5"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                                aria-hidden="true"
-                                            >
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="1.8"
-                                                    d="M7 3h7l4 4v14H7a2 2 0 01-2-2V5a2 2 0 012-2z"
-                                                />
-
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="1.8"
-                                                    d="M14 3v5h5"
-                                                />
-                                            </svg>
-
-                                        </div>
-
-                                        <div class="min-w-0">
-
-                                            <h3 class="text-[11px] font-bold text-slate-800">
-                                                Upload Lampiran Baru
-                                            </h3>
-
-                                            <p class="text-[9px] text-slate-500">
-                                                File baru akan menggantikan file lama.
-                                            </p>
-
-                                        </div>
+                                        <p class="ske-empty">
+                                            Belum ada lampiran tersimpan.
+                                        </p>
 
                                     </div>
 
-                                    <span class="shrink-0 rounded-full border border-slate-300 bg-white px-1.5 py-0.5 text-[8px] font-bold uppercase text-slate-500">
-                                        Opsional
-                                    </span>
-
-                                </div>
+                                @endif
 
                             </div>
 
-                            <div class="p-3">
+                        </div>
 
-                                {{-- =================================================
-                                     INFORMASI KOMPRESI
-                                ================================================== --}}
+                        {{-- ====================================================
+                             FILE BARU
+                        ===================================================== --}}
 
-                                <div class="mb-2.5 flex items-start gap-1.5 rounded-md border border-indigo-200 bg-indigo-50 px-2.5 py-2">
+                        <div class="ske-card">
+
+                            <div class="ske-card-header">
+
+                                <div class="ske-card-header-left">
+
+                                    <div class="ske-card-icon">
+
+                                        <svg
+                                            width="16"
+                                            height="16"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            stroke-width="1.8"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                d="M12 16V4m0 0L8 8m4-4l4 4M5 15v2a2 2 0 002 2h10a2 2 0 002-2v-2"
+                                            />
+                                        </svg>
+
+                                    </div>
+
+                                    <div>
+
+                                        <h3 class="ske-card-title">
+                                            Upload File Baru
+                                        </h3>
+
+                                        <p class="ske-card-desc">
+                                            File baru akan menggantikan lampiran lama.
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+                                <span class="ske-badge">
+                                    Opsional
+                                </span>
+
+                            </div>
+
+                            <div class="ske-card-body">
+
+                                <div class="ske-info">
 
                                     <svg
-                                        class="mt-0.5 h-3 w-3 shrink-0 text-indigo-600"
                                         fill="none"
                                         stroke="currentColor"
                                         viewBox="0 0 24 24"
-                                        aria-hidden="true"
                                     >
+                                        <circle
+                                            cx="12"
+                                            cy="12"
+                                            r="9"
+                                        />
+
                                         <path
                                             stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M13 16h-1v-4h-1m1-4h.01M12 21a9 9 0 100-18 9 9 0 000-18z"
+                                            d="M12 10v6M12 7h.01"
                                         />
                                     </svg>
 
-                                    <div class="text-[9px] leading-relaxed">
-
-                                        <p class="font-bold text-indigo-700">
-                                            Kompresi gambar otomatis
-                                        </p>
-
-                                        <p class="text-indigo-600">
-                                            JPG, JPEG, dan PNG akan diproses,
-                                            di-resize bila diperlukan, kemudian
-                                            dikompres menjadi JPG.
-                                            PDF tetap disimpan sebagai PDF.
-                                        </p>
-
-                                    </div>
-
-                                </div>
-
-                                {{-- =================================================
-                                     STATUS FILE LAMA
-                                ================================================== --}}
-
-                                <div
-                                    id="current-file-note"
-                                    class="mb-2.5 rounded-md border border-slate-200 bg-slate-50 px-2.5 py-2"
-                                >
-
-                                    <p class="text-[9px] leading-relaxed text-slate-500">
-
-                                        Tidak memilih file baru berarti
-                                        lampiran saat ini tetap dipertahankan.
-
+                                    <p>
+                                        <strong>PDF:</strong>
+                                        tetap PDF dan dapat dipreview langsung.
+                                        <br>
+                                        <strong>JPG/JPEG/PNG:</strong>
+                                        diproses menjadi JPG di browser.
+                                        <br>
+                                        Maksimal file yang dipilih: <strong>10 MB</strong>.
                                     </p>
 
                                 </div>
 
-                                {{-- =================================================
-                                     INFO BATAS
-                                ================================================== --}}
-
-                                <div class="mb-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
-
-                                    <div class="rounded-md border border-slate-200 bg-slate-50 px-2.5 py-2">
-
-                                        <p class="text-[8px] font-bold uppercase tracking-wide text-slate-400">
-                                            Batas Upload
-                                        </p>
-
-                                        <p class="mt-0.5 text-[10px] font-bold text-slate-700">
-                                            Maksimal 10 MB
-                                        </p>
-
-                                    </div>
-
-                                    <div class="rounded-md border border-slate-200 bg-slate-50 px-2.5 py-2">
-
-                                        <p class="text-[8px] font-bold uppercase tracking-wide text-slate-400">
-                                            PDF
-                                        </p>
-
-                                        <p class="mt-0.5 text-[10px] font-bold text-slate-700">
-                                            Tetap PDF
-                                        </p>
-
-                                    </div>
-
-                                    <div class="rounded-md border border-slate-200 bg-slate-50 px-2.5 py-2">
-
-                                        <p class="text-[8px] font-bold uppercase tracking-wide text-slate-400">
-                                            Gambar
-                                        </p>
-
-                                        <p class="mt-0.5 text-[10px] font-bold text-slate-700">
-                                            JPG / PNG → JPG
-                                        </p>
-
-                                    </div>
-
-                                </div>
-
-                                {{-- =================================================
-                                     UPLOAD BOX
-                                ================================================== --}}
-
                                 <label
+                                    id="ske-upload-box"
                                     for="lampiran_file"
-                                    id="uploadBox"
-                                    class="group relative flex min-h-[155px] cursor-pointer flex-col items-center justify-center rounded-md border-2 border-dashed border-slate-400 bg-slate-50 px-4 py-5 text-center transition hover:border-blue-400 hover:bg-blue-50"
+                                    class="ske-upload-box"
                                 >
 
                                     <div
-                                        id="uploadIcon"
-                                        class="mb-2.5 flex h-10 w-10 items-center justify-center rounded-md border-2 border-blue-200 bg-blue-100 text-blue-600 transition"
+                                        id="ske-upload-icon"
+                                        class="ske-upload-icon"
                                     >
 
                                         <svg
-                                            class="h-5 w-5"
+                                            width="18"
+                                            height="18"
+                                            viewBox="0 0 24 24"
                                             fill="none"
                                             stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                            aria-hidden="true"
+                                            stroke-width="1.8"
                                         >
                                             <path
                                                 stroke-linecap="round"
                                                 stroke-linejoin="round"
-                                                stroke-width="1.8"
-                                                d="M7 16a4 4 0 01-.88-7.903A5 5 0 0115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                                                d="M12 16V4m0 0L8 8m4-4l4 4M5 15v2a2 2 0 002 2h10a2 2 0 002-2v-2"
                                             />
                                         </svg>
 
                                     </div>
 
                                     <span
-                                        id="file-label-text"
-                                        class="text-[11px] font-bold text-slate-700"
+                                        id="ske-upload-title"
+                                        class="ske-upload-title"
                                     >
                                         Klik untuk memilih file baru
                                     </span>
 
                                     <span
-                                        id="file-sub-label"
-                                        class="mt-1 text-[9px] text-slate-500"
+                                        id="ske-upload-subtitle"
+                                        class="ske-upload-subtitle"
                                     >
                                         PDF, JPG, JPEG, PNG
                                     </span>
 
-                                    <span class="mt-1.5 rounded-full bg-blue-100 px-2 py-0.5 text-[8px] font-semibold text-blue-600">
+                                    <span class="ske-upload-limit">
                                         Maksimal 10 MB
                                     </span>
 
                                     <input
-                                        type="file"
                                         id="lampiran_file"
                                         name="lampiran_file"
+                                        type="file"
                                         accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
-                                        class="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                                        class="ske-upload-input"
                                     >
 
                                 </label>
 
-                                {{-- =================================================
-                                     FILE INFO
-                                ================================================== --}}
-
                                 <div
-                                    id="file-info"
-                                    class="mt-2 hidden rounded-md border border-emerald-200 bg-emerald-50 px-2.5 py-2 text-[9px] leading-relaxed text-emerald-700"
-                                ></div>
-
-                                {{-- =================================================
-                                     COMPRESSION INFO
-                                ================================================== --}}
-
-                                <div
-                                    id="compression-info"
-                                    class="mt-2 hidden rounded-md border border-indigo-200 bg-indigo-50 px-2.5 py-2 text-[9px] leading-relaxed text-indigo-700"
-                                ></div>
-
-                                {{-- =================================================
-                                     COMPRESSION DETAIL
-                                ================================================== --}}
-
-                                <div
-                                    id="compression-detail"
-                                    class="mt-2 hidden overflow-hidden rounded-md border border-slate-200 bg-slate-50"
+                                    id="ske-file-info"
+                                    class="ske-file-info"
                                 >
 
-                                    <div class="grid grid-cols-1 sm:grid-cols-3">
+                                    <p
+                                        id="ske-file-info-title"
+                                        class="ske-file-info-title"
+                                    >
+                                        File siap digunakan
+                                    </p>
 
-                                        <div class="border-b border-slate-200 px-3 py-2 sm:border-b-0 sm:border-r">
+                                    <p
+                                        id="ske-file-info-name"
+                                        class="ske-file-info-name"
+                                    ></p>
 
-                                            <p class="text-[8px] font-bold uppercase tracking-wide text-slate-400">
+                                    <p
+                                        id="ske-file-info-size"
+                                        class="ske-file-info-size"
+                                    ></p>
+
+                                </div>
+
+                                <div
+                                    id="ske-compression"
+                                    class="ske-compression"
+                                >
+
+                                    <p
+                                        id="ske-compression-title"
+                                        class="ske-compression-title"
+                                    >
+                                        Informasi File
+                                    </p>
+
+                                    <div class="ske-compression-grid">
+
+                                        <div class="ske-compression-item">
+
+                                            <span class="ske-compression-label">
+                                                Format Asli
+                                            </span>
+
+                                            <span
+                                                id="ske-original-format"
+                                                class="ske-compression-value"
+                                            >
+                                                -
+                                            </span>
+
+                                        </div>
+
+                                        <div class="ske-compression-item">
+
+                                            <span class="ske-compression-label">
+                                                Format Akhir
+                                            </span>
+
+                                            <span
+                                                id="ske-final-format"
+                                                class="ske-compression-value"
+                                            >
+                                                -
+                                            </span>
+
+                                        </div>
+
+                                        <div class="ske-compression-item">
+
+                                            <span class="ske-compression-label">
                                                 Ukuran Asli
-                                            </p>
+                                            </span>
 
-                                            <p
-                                                id="original-size"
-                                                class="mt-0.5 text-[10px] font-bold text-slate-700"
+                                            <span
+                                                id="ske-original-size"
+                                                class="ske-compression-value"
                                             >
                                                 -
-                                            </p>
+                                            </span>
 
                                         </div>
 
-                                        <div class="border-b border-slate-200 px-3 py-2 sm:border-b-0 sm:border-r">
+                                        <div class="ske-compression-item">
 
-                                            <p class="text-[8px] font-bold uppercase tracking-wide text-slate-400">
-                                                Estimasi Hasil
-                                            </p>
+                                            <span class="ske-compression-label">
+                                                Ukuran Hasil
+                                            </span>
 
-                                            <p
-                                                id="compressed-size"
-                                                class="mt-0.5 text-[10px] font-bold text-indigo-700"
+                                            <span
+                                                id="ske-final-size"
+                                                class="ske-compression-value"
                                             >
                                                 -
-                                            </p>
-
-                                        </div>
-
-                                        <div class="px-3 py-2">
-
-                                            <p class="text-[8px] font-bold uppercase tracking-wide text-slate-400">
-                                                Pengurangan
-                                            </p>
-
-                                            <p
-                                                id="compression-percent"
-                                                class="mt-0.5 text-[10px] font-bold text-emerald-700"
-                                            >
-                                                -
-                                            </p>
+                                            </span>
 
                                         </div>
 
                                     </div>
 
+                                    <div
+                                        id="ske-compression-message"
+                                        style="margin-top:6px;font-size:6.8px;line-height:1.5;"
+                                    ></div>
+
                                 </div>
 
+                                <div
+                                    id="ske-status"
+                                    class="ske-status"
+                                ></div>
+
                                 {{-- =================================================
-                                     STATUS KOMPRESI
+                                     PREVIEW FILE BARU
                                 ================================================== --}}
 
                                 <div
-                                    id="compression-status"
-                                    class="mt-2 hidden rounded-md border border-amber-200 bg-amber-50 px-2.5 py-2 text-[9px] leading-relaxed text-amber-700"
-                                ></div>
+                                    id="ske-preview"
+                                    class="ske-preview"
+                                    style="display:none;"
+                                >
+
+                                    <div class="ske-preview-header">
+
+                                        <p
+                                            id="ske-preview-title"
+                                            class="ske-preview-title"
+                                        >
+                                            Preview Dokumen
+                                        </p>
+
+                                        <span
+                                            id="ske-preview-badge"
+                                            class="ske-preview-badge"
+                                        >
+                                            Preview
+                                        </span>
+
+                                    </div>
+
+                                    <img
+                                        id="ske-preview-image"
+                                        src=""
+                                        alt="Preview dokumen"
+                                        class="ske-preview-image"
+                                        style="display:none;"
+                                    >
+
+                                    <iframe
+                                        id="ske-preview-pdf"
+                                        title="Preview PDF"
+                                        class="ske-preview-pdf"
+                                        style="display:none;"
+                                    ></iframe>
+
+                                    <div
+                                        id="ske-preview-caption"
+                                        class="ske-preview-caption"
+                                    >
+                                        Preview akan tampil setelah memilih file.
+                                    </div>
+
+                                </div>
 
                                 @error('lampiran_file')
 
-                                    <p class="mt-1.5 text-[10px] font-medium text-rose-600">
+                                    <p class="ske-field-error">
                                         {{ $message }}
                                     </p>
 
@@ -1098,84 +2021,30 @@
 
                 </section>
 
-                {{-- =================================================
-                     ERROR SUMMARY
-                ================================================== --}}
-
-                @if($errors->any())
-
-                    <div
-                        class="mt-4 rounded-lg border-2 border-rose-200 bg-rose-50 p-3 text-xs text-rose-700"
-                        role="alert"
-                    >
-
-                        <div class="flex items-start gap-2">
-
-                            <svg
-                                class="mt-0.5 h-4 w-4 shrink-0 text-rose-500"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                                aria-hidden="true"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M12 9v4m0 4h.01M10.29 3.86l-8.82 15A2 2 0 003.2 21.86h17.6a2 2 0 001.73-3l-8.82-15a2 2 0 00-3.42 0z"
-                                />
-                            </svg>
-
-                            <div>
-
-                                <p class="font-bold">
-                                    Terdapat kesalahan pada formulir.
-                                </p>
-
-                                <ul class="mt-1 list-inside list-disc space-y-0.5">
-
-                                    @foreach($errors->all() as $error)
-
-                                        <li>
-                                            {{ $error }}
-                                        </li>
-
-                                    @endforeach
-
-                                </ul>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                @endif
-
             </div>
 
-            {{-- =================================================
+            {{-- ================================================================
                  FOOTER
-            ================================================== --}}
+            ================================================================ --}}
 
-            <div class="flex flex-col gap-2 border-t-2 border-slate-400 bg-slate-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-end">
+            <div class="ske-footer">
 
                 <a
                     href="{{ route('surat-keluar.index') }}"
-                    class="inline-flex w-full items-center justify-center gap-1.5 rounded-md border-2 border-slate-400 bg-white px-4 py-2 text-[10px] font-bold text-slate-700 shadow-sm transition hover:border-slate-500 hover:bg-slate-100 sm:w-auto"
+                    class="ske-footer-btn ske-cancel"
                 >
 
                     <svg
-                        class="h-3.5 w-3.5"
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        aria-hidden="true"
+                        stroke-width="2"
                     >
                         <path
                             stroke-linecap="round"
                             stroke-linejoin="round"
-                            stroke-width="2"
                             d="M6 18L18 6M6 6l12 12"
                         />
                     </svg>
@@ -1186,50 +2055,52 @@
 
                 <button
                     type="submit"
-                    id="submit-btn"
-                    class="inline-flex w-full items-center justify-center gap-1.5 rounded-md border-2 border-emerald-600 bg-emerald-600 px-4 py-2 text-[10px] font-bold text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+                    id="ske-submit"
+                    class="ske-footer-btn ske-submit"
                 >
 
                     <svg
-                        id="submit-icon"
-                        class="h-3.5 w-3.5"
+                        id="ske-submit-icon"
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        aria-hidden="true"
+                        stroke-width="2"
                     >
                         <path
                             stroke-linecap="round"
                             stroke-linejoin="round"
-                            stroke-width="2"
                             d="M5 13l4 4L19 7"
                         />
                     </svg>
 
                     <svg
-                        id="submit-loading"
-                        class="hidden h-3.5 w-3.5 animate-spin"
-                        fill="none"
+                        id="ske-submit-loading"
+                        width="14"
+                        height="14"
                         viewBox="0 0 24 24"
-                        aria-hidden="true"
+                        fill="none"
+                        style="display:none;"
                     >
                         <circle
-                            class="opacity-25"
                             cx="12"
                             cy="12"
-                            r="10"
+                            r="9"
                             stroke="currentColor"
-                            stroke-width="4"
+                            stroke-width="3"
+                            opacity=".30"
                         />
 
                         <path
-                            class="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                            d="M21 12a9 9 0 00-9-9"
+                            stroke="currentColor"
+                            stroke-width="3"
+                            stroke-linecap="round"
                         />
                     </svg>
 
-                    <span id="submit-text">
+                    <span id="ske-submit-text">
                         Perbarui Surat Keluar
                     </span>
 
@@ -1245,6 +2116,8 @@
 
 @push('scripts')
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
@@ -1257,64 +2130,161 @@ document.addEventListener('DOMContentLoaded', function () {
     */
 
     const form =
-        document.getElementById('form-surat');
+        document.getElementById(
+            'form-surat-keluar-edit'
+        );
 
     const fileInput =
-        document.getElementById('lampiran_file');
-
-    const fileLabelText =
-        document.getElementById('file-label-text');
-
-    const fileSubLabel =
-        document.getElementById('file-sub-label');
-
-    const fileInfo =
-        document.getElementById('file-info');
-
-    const compressionInfo =
-        document.getElementById('compression-info');
-
-    const compressionDetail =
-        document.getElementById('compression-detail');
-
-    const compressionStatus =
-        document.getElementById('compression-status');
-
-    const originalSize =
-        document.getElementById('original-size');
-
-    const compressedSize =
-        document.getElementById('compressed-size');
-
-    const compressionPercent =
-        document.getElementById('compression-percent');
+        document.getElementById(
+            'lampiran_file'
+        );
 
     const uploadBox =
-        document.getElementById('uploadBox');
+        document.getElementById(
+            'ske-upload-box'
+        );
 
     const uploadIcon =
-        document.getElementById('uploadIcon');
+        document.getElementById(
+            'ske-upload-icon'
+        );
 
-    const currentFileNote =
-        document.getElementById('current-file-note');
+    const uploadTitle =
+        document.getElementById(
+            'ske-upload-title'
+        );
 
-    const submitButton =
-        document.getElementById('submit-btn');
+    const uploadSubtitle =
+        document.getElementById(
+            'ske-upload-subtitle'
+        );
 
-    const submitIcon =
-        document.getElementById('submit-icon');
+    const fileInfo =
+        document.getElementById(
+            'ske-file-info'
+        );
 
-    const submitLoading =
-        document.getElementById('submit-loading');
+    const fileInfoTitle =
+        document.getElementById(
+            'ske-file-info-title'
+        );
 
-    const submitText =
-        document.getElementById('submit-text');
+    const fileInfoName =
+        document.getElementById(
+            'ske-file-info-name'
+        );
+
+    const fileInfoSize =
+        document.getElementById(
+            'ske-file-info-size'
+        );
+
+    const compression =
+        document.getElementById(
+            'ske-compression'
+        );
+
+    const compressionTitle =
+        document.getElementById(
+            'ske-compression-title'
+        );
+
+    const compressionMessage =
+        document.getElementById(
+            'ske-compression-message'
+        );
+
+    const originalFormat =
+        document.getElementById(
+            'ske-original-format'
+        );
+
+    const finalFormat =
+        document.getElementById(
+            'ske-final-format'
+        );
+
+    const originalSize =
+        document.getElementById(
+            'ske-original-size'
+        );
+
+    const finalSize =
+        document.getElementById(
+            'ske-final-size'
+        );
+
+    const statusBox =
+        document.getElementById(
+            'ske-status'
+        );
+
+    const preview =
+        document.getElementById(
+            'ske-preview'
+        );
+
+    const previewTitle =
+        document.getElementById(
+            'ske-preview-title'
+        );
+
+    const previewBadge =
+        document.getElementById(
+            'ske-preview-badge'
+        );
+
+    const previewImage =
+        document.getElementById(
+            'ske-preview-image'
+        );
+
+    const previewPdf =
+        document.getElementById(
+            'ske-preview-pdf'
+        );
+
+    const previewCaption =
+        document.getElementById(
+            'ske-preview-caption'
+        );
 
     const tanggalSurat =
-        document.getElementById('tanggal_surat');
+        document.getElementById(
+            'tanggal_surat'
+        );
 
     const tanggalKeluar =
-        document.getElementById('tanggal_keluar');
+        document.getElementById(
+            'tanggal_keluar'
+        );
+
+    const submitButton =
+        document.getElementById(
+            'ske-submit'
+        );
+
+    const submitIcon =
+        document.getElementById(
+            'ske-submit-icon'
+        );
+
+    const submitLoading =
+        document.getElementById(
+            'ske-submit-loading'
+        );
+
+    const submitText =
+        document.getElementById(
+            'ske-submit-text'
+        );
+
+    if (
+        !form ||
+        !fileInput
+    ) {
+        return;
+    }
 
     /*
     |--------------------------------------------------------------------------
@@ -1323,7 +2293,42 @@ document.addEventListener('DOMContentLoaded', function () {
     */
 
     const MAX_FILE_SIZE =
-        10 * 1024 * 1024;
+        10 *
+        1024 *
+        1024;
+
+    const IMAGE_TARGET_SIZE =
+        2.5 *
+        1024 *
+        1024;
+
+    const IMAGE_HARD_LIMIT =
+        9.5 *
+        1024 *
+        1024;
+
+    const IMAGE_MAX_DIMENSION =
+        2500;
+
+    const IMAGE_MIN_DIMENSION =
+        1000;
+
+    const JPEG_QUALITIES = [
+        0.90,
+        0.86,
+        0.82,
+        0.78,
+        0.74,
+        0.70,
+        0.66,
+        0.62,
+        0.58,
+        0.54,
+        0.50,
+        0.46,
+        0.42,
+        0.38
+    ];
 
     const ALLOWED_EXTENSIONS = [
         'pdf',
@@ -1338,45 +2343,116 @@ document.addEventListener('DOMContentLoaded', function () {
         'png'
     ];
 
-    let isSubmitting = false;
+    let submitting =
+        false;
+
+    let processingToken =
+        0;
+
+    let previewObjectUrl =
+        null;
 
     /*
     |--------------------------------------------------------------------------
-    | FORMAT UKURAN
+    | UTIL
     |--------------------------------------------------------------------------
     */
 
-    function formatFileSize(bytes) {
+    function formatFileSize(
+        bytes
+    ) {
 
         if (
             !Number.isFinite(bytes) ||
-            bytes < 0
+            bytes <= 0
         ) {
-            return '0 B';
+            return '0 KB';
         }
 
-        if (bytes < 1024) {
+        if (
+            bytes < 1024
+        ) {
             return bytes + ' B';
         }
 
-        if (bytes < 1024 * 1024) {
+        if (
+            bytes < 1024 * 1024
+        ) {
             return (
-                (bytes / 1024).toFixed(1) +
+                (
+                    bytes /
+                    1024
+                ).toFixed(1) +
                 ' KB'
             );
         }
 
         return (
-            (bytes / 1024 / 1024).toFixed(2) +
+            (
+                bytes /
+                1024 /
+                1024
+            ).toFixed(2) +
             ' MB'
         );
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | ALERT
-    |--------------------------------------------------------------------------
-    */
+    function getExtension(
+        file
+    ) {
+
+        return String(
+            file?.name || ''
+        )
+            .split('.')
+            .pop()
+            .toLowerCase();
+    }
+
+    function isAllowedExtension(
+        extension
+    ) {
+
+        return ALLOWED_EXTENSIONS.includes(
+            extension
+        );
+    }
+
+    function isImageExtension(
+        extension
+    ) {
+
+        return IMAGE_EXTENSIONS.includes(
+            extension
+        );
+    }
+
+    function getReductionPercent(
+        original,
+        final
+    ) {
+
+        if (
+            !original ||
+            original <= 0
+        ) {
+            return 0;
+        }
+
+        return Math.max(
+            0,
+            Math.round(
+                (
+                    1 -
+                    (
+                        final /
+                        original
+                    )
+                ) *
+                100
+            )
+        );
+    }
 
     function showAlert(
         icon,
@@ -1390,497 +2466,738 @@ document.addEventListener('DOMContentLoaded', function () {
         ) {
 
             window.Swal.fire({
-                icon: icon,
-                title: title,
-                text: text,
-                confirmButtonText: 'Mengerti',
-                confirmButtonColor: '#059669'
+                icon,
+                title,
+                text,
+                confirmButtonText:
+                    'Mengerti',
+                confirmButtonColor:
+                    '#059669'
             });
 
             return;
         }
 
-        window.alert(text);
+        window.alert(
+            text
+        );
     }
 
     /*
     |--------------------------------------------------------------------------
-    | RESET VISUAL
+    | PREVIEW
     |--------------------------------------------------------------------------
     */
 
-    function resetVisual() {
+    function resetPreview() {
 
-        if (fileLabelText) {
-
-            fileLabelText.textContent =
-                'Klik untuk memilih file baru';
-
-            fileLabelText.classList.remove(
-                'text-blue-600',
-                'text-rose-600'
-            );
-
-            fileLabelText.classList.add(
-                'text-slate-700'
-            );
+        if (!preview) {
+            return;
         }
 
-        if (fileSubLabel) {
+        preview.style.display =
+            'none';
 
-            fileSubLabel.textContent =
-                'PDF, JPG, JPEG, PNG';
+        previewTitle.textContent =
+            'Preview Dokumen';
 
-            fileSubLabel.classList.remove(
-                'text-indigo-600',
-                'text-rose-600'
-            );
+        previewBadge.textContent =
+            'Preview';
 
-            fileSubLabel.classList.add(
-                'text-slate-500'
-            );
-        }
+        previewCaption.textContent =
+            'Preview akan tampil setelah memilih file.';
 
-        if (fileInfo) {
+        previewImage.style.display =
+            'none';
 
-            fileInfo.textContent = '';
+        previewPdf.style.display =
+            'none';
 
-            fileInfo.classList.add(
-                'hidden'
-            );
+        previewImage.removeAttribute(
+            'src'
+        );
 
-            fileInfo.classList.remove(
-                'border-rose-200',
-                'bg-rose-50',
-                'text-rose-700'
-            );
+        previewPdf.removeAttribute(
+            'src'
+        );
 
-            fileInfo.classList.add(
-                'border-emerald-200',
-                'bg-emerald-50',
-                'text-emerald-700'
-            );
-        }
-
-        if (compressionInfo) {
-
-            compressionInfo.textContent = '';
-
-            compressionInfo.classList.add(
-                'hidden'
-            );
-        }
-
-        if (compressionDetail) {
-
-            compressionDetail.classList.add(
-                'hidden'
-            );
-        }
-
-        if (compressionStatus) {
-
-            compressionStatus.textContent = '';
-
-            compressionStatus.classList.add(
-                'hidden'
-            );
-        }
-
-        if (originalSize) {
-            originalSize.textContent = '-';
-        }
-
-        if (compressedSize) {
-            compressedSize.textContent = '-';
-        }
-
-        if (compressionPercent) {
-            compressionPercent.textContent = '-';
-        }
-
-        if (currentFileNote) {
-
-            currentFileNote.innerHTML = `
-                <p class="text-[9px] leading-relaxed text-slate-500">
-                    Tidak memilih file baru berarti
-                    lampiran saat ini tetap dipertahankan.
-                </p>
-            `;
-        }
-
-        if (uploadBox) {
-
-            uploadBox.classList.remove(
-                'border-emerald-400',
-                'bg-emerald-50',
-                'border-rose-400',
-                'bg-rose-50'
-            );
-
-            uploadBox.classList.add(
-                'border-slate-400',
-                'bg-slate-50'
-            );
-        }
-
-        if (uploadIcon) {
-
-            uploadIcon.classList.remove(
-                'border-emerald-300',
-                'bg-emerald-100',
-                'text-emerald-600',
-                'border-rose-300',
-                'bg-rose-100',
-                'text-rose-600'
-            );
-
-            uploadIcon.classList.add(
-                'border-blue-200',
-                'bg-blue-100',
-                'text-blue-600'
-            );
-        }
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | ERROR FILE
-    |--------------------------------------------------------------------------
-    */
-
-    function showFileError(message) {
-
-        if (fileLabelText) {
-
-            fileLabelText.textContent =
-                'File tidak dapat digunakan';
-
-            fileLabelText.classList.remove(
-                'text-slate-700',
-                'text-blue-600'
-            );
-
-            fileLabelText.classList.add(
-                'text-rose-600'
-            );
-        }
-
-        if (fileInfo) {
-
-            fileInfo.textContent = message;
-
-            fileInfo.classList.remove(
-                'hidden',
-                'border-emerald-200',
-                'bg-emerald-50',
-                'text-emerald-700'
-            );
-
-            fileInfo.classList.add(
-                'border-rose-200',
-                'bg-rose-50',
-                'text-rose-700'
-            );
-        }
-
-        if (uploadBox) {
-
-            uploadBox.classList.remove(
-                'border-slate-400',
-                'bg-slate-50'
-            );
-
-            uploadBox.classList.add(
-                'border-rose-400',
-                'bg-rose-50'
-            );
-        }
-
-        if (uploadIcon) {
-
-            uploadIcon.classList.remove(
-                'border-blue-200',
-                'bg-blue-100',
-                'text-blue-600'
-            );
-
-            uploadIcon.classList.add(
-                'border-rose-300',
-                'bg-rose-100',
-                'text-rose-600'
-            );
-        }
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | ESTIMASI KOMPRESI GAMBAR
-    |--------------------------------------------------------------------------
-    */
-
-    function estimateImageCompression(file) {
-
-        return new Promise(function (
-            resolve,
-            reject
+        if (
+            previewObjectUrl
         ) {
 
-            const objectUrl =
-                URL.createObjectURL(file);
+            URL.revokeObjectURL(
+                previewObjectUrl
+            );
 
-            const image =
-                new Image();
+            previewObjectUrl =
+                null;
+        }
+    }
 
-            image.onload = function () {
+    function showImagePreview(
+        file
+    ) {
 
-                try {
+        resetPreview();
 
-                    const MAX_WIDTH =
-                        2500;
+        preview.style.display =
+            'block';
 
-                    const MAX_HEIGHT =
-                        2500;
+        previewTitle.textContent =
+            'Preview Gambar';
 
-                    const QUALITY =
-                        0.78;
+        previewBadge.textContent =
+            'IMAGE';
 
-                    const scale =
-                        Math.min(
-                            MAX_WIDTH /
-                                image.width,
-                            MAX_HEIGHT /
-                                image.height,
-                            1
-                        );
+        previewImage.style.display =
+            'block';
 
-                    const width =
-                        Math.max(
-                            1,
-                            Math.round(
-                                image.width *
-                                scale
-                            )
-                        );
+        previewObjectUrl =
+            URL.createObjectURL(
+                file
+            );
 
-                    const height =
-                        Math.max(
-                            1,
-                            Math.round(
-                                image.height *
-                                scale
-                            )
-                        );
+        previewImage.src =
+            previewObjectUrl;
 
-                    const canvas =
-                        document.createElement(
-                            'canvas'
-                        );
+        previewCaption.textContent =
+            'Preview file gambar yang akan digunakan saat update.';
+    }
 
-                    canvas.width = width;
-                    canvas.height = height;
+    function showPdfPreview(
+        file
+    ) {
 
-                    const context =
-                        canvas.getContext(
-                            '2d'
-                        );
+        resetPreview();
 
-                    if (!context) {
+        preview.style.display =
+            'block';
 
-                        throw new Error(
-                            'Canvas tidak tersedia.'
-                        );
-                    }
+        previewTitle.textContent =
+            'Preview PDF';
 
-                    /*
-                    |--------------------------------------------------------------
-                    | Background putih
-                    |--------------------------------------------------------------
-                    */
+        previewBadge.textContent =
+            'PDF';
 
-                    context.fillStyle =
-                        '#ffffff';
+        previewPdf.style.display =
+            'block';
 
-                    context.fillRect(
-                        0,
-                        0,
-                        width,
-                        height
-                    );
+        previewObjectUrl =
+            URL.createObjectURL(
+                file
+            );
 
-                    /*
-                    |--------------------------------------------------------------
-                    | Gambar
-                    |--------------------------------------------------------------
-                    */
+        previewPdf.src =
+            previewObjectUrl;
 
-                    context.drawImage(
-                        image,
-                        0,
-                        0,
-                        width,
-                        height
-                    );
-
-                    /*
-                    |--------------------------------------------------------------
-                    | JPEG
-                    |--------------------------------------------------------------
-                    */
-
-                    canvas.toBlob(
-                        function (blob) {
-
-                            URL.revokeObjectURL(
-                                objectUrl
-                            );
-
-                            if (!blob) {
-
-                                reject(
-                                    new Error(
-                                        'Estimasi kompresi gagal.'
-                                    )
-                                );
-
-                                return;
-                            }
-
-                            const reduction =
-                                file.size > 0
-                                    ? (
-                                        (
-                                            1 -
-                                            (
-                                                blob.size /
-                                                file.size
-                                            )
-                                        ) *
-                                        100
-                                    )
-                                    : 0;
-
-                            resolve({
-
-                                originalSize:
-                                    file.size,
-
-                                compressedSize:
-                                    blob.size,
-
-                                width:
-                                    width,
-
-                                height:
-                                    height,
-
-                                reduction:
-                                    Math.max(
-                                        0,
-                                        reduction
-                                    )
-                            });
-
-                        },
-                        'image/jpeg',
-                        QUALITY
-                    );
-
-                } catch (error) {
-
-                    URL.revokeObjectURL(
-                        objectUrl
-                    );
-
-                    reject(error);
-                }
-            };
-
-            image.onerror = function () {
-
-                URL.revokeObjectURL(
-                    objectUrl
-                );
-
-                reject(
-                    new Error(
-                        'Gambar tidak dapat dibaca.'
-                    )
-                );
-            };
-
-            image.src =
-                objectUrl;
-        });
+        previewCaption.textContent =
+            'PDF tetap PDF. Preview ditampilkan langsung dari file yang dipilih.';
     }
 
     /*
     |--------------------------------------------------------------------------
-    | TAMPILKAN HASIL ESTIMASI
+    | COMPRESSION UI
     |--------------------------------------------------------------------------
     */
 
-    function showCompressionResult(
-        result
+    function resetCompression() {
+
+        if (!compression) {
+            return;
+        }
+
+        compression.style.display =
+            'none';
+
+        compression.classList.remove(
+            'success',
+            'warning'
+        );
+
+        compressionTitle.textContent =
+            'Informasi File';
+
+        compressionMessage.innerHTML =
+            '';
+
+        originalFormat.textContent =
+            '-';
+
+        finalFormat.textContent =
+            '-';
+
+        originalSize.textContent =
+            '-';
+
+        finalSize.textContent =
+            '-';
+    }
+
+    function showCompression(
+        data,
+        type = ''
     ) {
 
-        if (compressionDetail) {
+        compression.style.display =
+            'block';
 
-            compressionDetail.classList.remove(
-                'hidden'
+        compression.classList.remove(
+            'success',
+            'warning'
+        );
+
+        if (
+            type
+        ) {
+
+            compression.classList.add(
+                type
             );
         }
 
-        if (originalSize) {
+        compressionTitle.textContent =
+            data.title ||
+            'Informasi File';
 
-            originalSize.textContent =
-                formatFileSize(
-                    result.originalSize
-                );
+        originalFormat.textContent =
+            data.originalFormat ||
+            '-';
+
+        finalFormat.textContent =
+            data.finalFormat ||
+            '-';
+
+        originalSize.textContent =
+            data.originalSize ||
+            '-';
+
+        finalSize.textContent =
+            data.finalSize ||
+            '-';
+
+        compressionMessage.innerHTML =
+            data.message ||
+            '';
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | STATUS
+    |--------------------------------------------------------------------------
+    */
+
+    function resetStatus() {
+
+        if (!statusBox) {
+            return;
         }
 
-        if (compressedSize) {
+        statusBox.textContent =
+            '';
 
-            compressedSize.textContent =
-                formatFileSize(
-                    result.compressedSize
-                );
+        statusBox.classList.remove(
+            'show',
+            'blue',
+            'green',
+            'amber'
+        );
+    }
+
+    function showStatus(
+        message,
+        type = 'blue'
+    ) {
+
+        if (!statusBox) {
+            return;
         }
 
-        if (compressionPercent) {
+        statusBox.textContent =
+            message;
 
-            if (result.reduction > 0) {
+        statusBox.classList.remove(
+            'show',
+            'blue',
+            'green',
+            'amber'
+        );
 
-                compressionPercent.textContent =
-                    result.reduction.toFixed(1) +
-                    '% lebih kecil';
+        statusBox.classList.add(
+            'show',
+            type
+        );
+    }
 
-            } else {
+    /*
+    |--------------------------------------------------------------------------
+    | VISUAL FILE
+    |--------------------------------------------------------------------------
+    */
 
-                compressionPercent.textContent =
-                    'Tidak berkurang';
+    function resetFileVisual() {
+
+        uploadBox?.classList.remove(
+            'has-file'
+        );
+
+        uploadTitle.textContent =
+            'Klik untuk memilih file baru';
+
+        uploadSubtitle.textContent =
+            'PDF, JPG, JPEG, PNG';
+
+        fileInfo.classList.remove(
+            'show'
+        );
+
+        fileInfoTitle.textContent =
+            'File siap digunakan';
+
+        fileInfoName.textContent =
+            '';
+
+        fileInfoSize.textContent =
+            '';
+
+        resetCompression();
+        resetStatus();
+        resetPreview();
+    }
+
+    function showFileVisual(
+        file
+    ) {
+
+        uploadBox.classList.add(
+            'has-file'
+        );
+
+        uploadTitle.textContent =
+            'File siap digunakan';
+
+        fileInfo.classList.add(
+            'show'
+        );
+
+        fileInfoName.textContent =
+            file.name;
+
+        fileInfoSize.textContent =
+            formatFileSize(
+                file.size
+            );
+    }
+
+    function clearFileSelection() {
+
+        processingToken++;
+
+        fileInput.value =
+            '';
+
+        resetFileVisual();
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | LOAD IMAGE
+    |--------------------------------------------------------------------------
+    */
+
+    function loadImage(
+        file
+    ) {
+
+        return new Promise(
+            function (
+                resolve,
+                reject
+            ) {
+
+                const objectUrl =
+                    URL.createObjectURL(
+                        file
+                    );
+
+                const image =
+                    new Image();
+
+                image.onload =
+                    function () {
+
+                        URL.revokeObjectURL(
+                            objectUrl
+                        );
+
+                        resolve(
+                            image
+                        );
+                    };
+
+                image.onerror =
+                    function () {
+
+                        URL.revokeObjectURL(
+                            objectUrl
+                        );
+
+                        reject(
+                            new Error(
+                                'Gambar tidak dapat dibaca oleh browser.'
+                            )
+                        );
+                    };
+
+                image.src =
+                    objectUrl;
+            }
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | DIMENSION
+    |--------------------------------------------------------------------------
+    */
+
+    function calculateDimensions(
+        width,
+        height,
+        maxDimension
+    ) {
+
+        if (
+            width <= maxDimension &&
+            height <= maxDimension
+        ) {
+
+            return {
+                width,
+                height
+            };
+        }
+
+        const scale =
+            Math.min(
+                maxDimension /
+                    width,
+
+                maxDimension /
+                    height
+            );
+
+        return {
+            width:
+                Math.max(
+                    1,
+                    Math.round(
+                        width *
+                        scale
+                    )
+                ),
+
+            height:
+                Math.max(
+                    1,
+                    Math.round(
+                        height *
+                        scale
+                    )
+                )
+        };
+    }
+
+    function buildDimensionList(
+        width,
+        height
+    ) {
+
+        const maxDimensions = [
+            IMAGE_MAX_DIMENSION,
+            2200,
+            2000,
+            1800,
+            1600,
+            1400,
+            1200,
+            IMAGE_MIN_DIMENSION
+        ];
+
+        const result =
+            [];
+
+        maxDimensions.forEach(
+            function (
+                maxDimension
+            ) {
+
+                const dimensions =
+                    calculateDimensions(
+                        width,
+                        height,
+                        maxDimension
+                    );
+
+                if (
+                    dimensions.width <
+                        IMAGE_MIN_DIMENSION &&
+                    dimensions.height <
+                        IMAGE_MIN_DIMENSION
+                ) {
+                    return;
+                }
+
+                const duplicate =
+                    result.some(
+                        function (
+                            item
+                        ) {
+
+                            return (
+                                item.width ===
+                                    dimensions.width &&
+                                item.height ===
+                                    dimensions.height
+                            );
+                        }
+                    );
+
+                if (!duplicate) {
+                    result.push(
+                        dimensions
+                    );
+                }
+            }
+        );
+
+        return result;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | CANVAS TO FILE
+    |--------------------------------------------------------------------------
+    */
+
+    function canvasToFile(
+        image,
+        width,
+        height,
+        quality,
+        originalName
+    ) {
+
+        return new Promise(
+            function (
+                resolve,
+                reject
+            ) {
+
+                const canvas =
+                    document.createElement(
+                        'canvas'
+                    );
+
+                canvas.width =
+                    width;
+
+                canvas.height =
+                    height;
+
+                const context =
+                    canvas.getContext(
+                        '2d',
+                        {
+                            alpha: false
+                        }
+                    );
+
+                if (!context) {
+
+                    reject(
+                        new Error(
+                            'Browser tidak mendukung pemrosesan gambar.'
+                        )
+                    );
+
+                    return;
+                }
+
+                context.fillStyle =
+                    '#ffffff';
+
+                context.fillRect(
+                    0,
+                    0,
+                    width,
+                    height
+                );
+
+                context.imageSmoothingEnabled =
+                    true;
+
+                context.imageSmoothingQuality =
+                    'high';
+
+                context.drawImage(
+                    image,
+                    0,
+                    0,
+                    width,
+                    height
+                );
+
+                canvas.toBlob(
+                    function (
+                        blob
+                    ) {
+
+                        if (!blob) {
+
+                            reject(
+                                new Error(
+                                    'Browser gagal membuat JPG.'
+                                )
+                            );
+
+                            return;
+                        }
+
+                        const baseName =
+                            String(
+                                originalName ||
+                                'surat_keluar'
+                            )
+                                .replace(
+                                    /\.[^/.]+$/,
+                                    ''
+                                )
+                                .replace(
+                                    /[^a-zA-Z0-9_-]/g,
+                                    '_'
+                                );
+
+                        const fileName =
+                            (
+                                baseName ||
+                                'surat_keluar'
+                            ) +
+                            '_compressed.jpg';
+
+                        resolve(
+                            new File(
+                                [blob],
+                                fileName,
+                                {
+                                    type:
+                                        'image/jpeg',
+
+                                    lastModified:
+                                        Date.now()
+                                }
+                            )
+                        );
+                    },
+                    'image/jpeg',
+                    quality
+                );
+            }
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | COMPRESS IMAGE
+    |--------------------------------------------------------------------------
+    */
+
+    async function compressImageFile(
+        file
+    ) {
+
+        const image =
+            await loadImage(
+                file
+            );
+
+        const width =
+            image.naturalWidth ||
+            image.width;
+
+        const height =
+            image.naturalHeight ||
+            image.height;
+
+        if (
+            width <= 0 ||
+            height <= 0
+        ) {
+
+            throw new Error(
+                'Dimensi gambar tidak valid.'
+            );
+        }
+
+        const dimensionList =
+            buildDimensionList(
+                width,
+                height
+            );
+
+        let bestFile =
+            null;
+
+        for (
+            const dimensions
+            of dimensionList
+        ) {
+
+            for (
+                const quality
+                of JPEG_QUALITIES
+            ) {
+
+                const result =
+                    await canvasToFile(
+                        image,
+                        dimensions.width,
+                        dimensions.height,
+                        quality,
+                        file.name
+                    );
+
+                if (
+                    !bestFile ||
+                    result.size <
+                        bestFile.size
+                ) {
+
+                    bestFile =
+                        result;
+                }
+
+                if (
+                    result.size <=
+                    IMAGE_TARGET_SIZE
+                ) {
+
+                    return result;
+                }
             }
         }
 
-        if (compressionInfo) {
+        if (
+            bestFile &&
+            bestFile.size <=
+                IMAGE_HARD_LIMIT
+        ) {
 
-            compressionInfo.textContent =
-                'Estimasi hasil kompresi: ' +
-                formatFileSize(
-                    result.originalSize
-                ) +
-                ' → ' +
-                formatFileSize(
-                    result.compressedSize
-                ) +
-                ' (' +
-                result.reduction.toFixed(1) +
-                '% lebih kecil).';
-
-            compressionInfo.classList.remove(
-                'hidden'
-            );
+            return bestFile;
         }
+
+        throw new Error(
+            'Hasil kompresi gambar masih terlalu besar.'
+        );
     }
 
     /*
@@ -1889,55 +3206,77 @@ document.addEventListener('DOMContentLoaded', function () {
     |--------------------------------------------------------------------------
     */
 
-    fileInput?.addEventListener(
+    fileInput.addEventListener(
         'change',
         async function () {
 
-            if (
-                !fileInput.files ||
-                fileInput.files.length === 0
-            ) {
+            const file =
+                fileInput.files?.[0];
 
-                resetVisual();
+            if (!file) {
                 return;
             }
 
-            resetVisual();
+            const token =
+                ++processingToken;
 
-            const file =
-                fileInput.files[0];
+            resetCompression();
+            resetStatus();
+            resetPreview();
 
             const extension =
-                file.name
-                    .split('.')
-                    .pop()
-                    ?.toLowerCase() || '';
+                getExtension(
+                    file
+                );
 
             /*
-            |--------------------------------------------------------------------------
-            | VALIDASI EXTENSION
-            |--------------------------------------------------------------------------
+            |------------------------------------------------------------------
+            | FORMAT
+            |------------------------------------------------------------------
             */
 
             if (
-                !ALLOWED_EXTENSIONS.includes(
+                !isAllowedExtension(
                     extension
                 )
             ) {
 
-                fileInput.value = '';
+                clearFileSelection();
 
-                showFileError(
-                    'Format file tidak didukung. Gunakan PDF, JPG, JPEG, atau PNG.'
+                showAlert(
+                    'warning',
+                    'Format tidak didukung',
+                    'Gunakan PDF, JPG, JPEG, atau PNG.'
                 );
 
                 return;
             }
 
             /*
-            |--------------------------------------------------------------------------
-            | VALIDASI SIZE
-            |--------------------------------------------------------------------------
+            |------------------------------------------------------------------
+            | FILE KOSONG
+            |------------------------------------------------------------------
+            */
+
+            if (
+                file.size <= 0
+            ) {
+
+                clearFileSelection();
+
+                showAlert(
+                    'warning',
+                    'File tidak valid',
+                    'File yang dipilih kosong.'
+                );
+
+                return;
+            }
+
+            /*
+            |------------------------------------------------------------------
+            | MAKSIMAL 10 MB
+            |------------------------------------------------------------------
             */
 
             if (
@@ -1945,255 +3284,248 @@ document.addEventListener('DOMContentLoaded', function () {
                 MAX_FILE_SIZE
             ) {
 
-                fileInput.value = '';
+                clearFileSelection();
 
-                showFileError(
-                    'Ukuran file melebihi batas 10 MB.'
+                showAlert(
+                    'warning',
+                    'File terlalu besar',
+                    'Ukuran file asli maksimal 10 MB.'
                 );
 
                 return;
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | FILE VALID
-            |--------------------------------------------------------------------------
-            */
-
-            if (fileLabelText) {
-
-                fileLabelText.textContent =
-                    'File baru: ' +
-                    file.name;
-
-                fileLabelText.classList.remove(
-                    'text-slate-700',
-                    'text-rose-600'
-                );
-
-                fileLabelText.classList.add(
-                    'text-blue-600'
-                );
-            }
-
-            if (fileInfo) {
-
-                fileInfo.classList.remove(
-                    'hidden'
-                );
-
-                fileInfo.textContent =
-                    'Ukuran file asli: ' +
-                    formatFileSize(
-                        file.size
-                    );
-            }
-
-            if (uploadBox) {
-
-                uploadBox.classList.remove(
-                    'border-slate-400',
-                    'bg-slate-50'
-                );
-
-                uploadBox.classList.add(
-                    'border-emerald-400',
-                    'bg-emerald-50'
-                );
-            }
-
-            if (uploadIcon) {
-
-                uploadIcon.classList.remove(
-                    'border-blue-200',
-                    'bg-blue-100',
-                    'text-blue-600'
-                );
-
-                uploadIcon.classList.add(
-                    'border-emerald-300',
-                    'bg-emerald-100',
-                    'text-emerald-600'
-                );
-            }
+            showFileVisual(
+                file
+            );
 
             /*
-            |--------------------------------------------------------------------------
-            | FILE BARU
-            |--------------------------------------------------------------------------
-            */
-
-            if (currentFileNote) {
-
-                currentFileNote.innerHTML = `
-                    <p class="text-[9px] leading-relaxed text-blue-600">
-                        File baru dipilih.
-                        Setelah update berhasil,
-                        file lama akan diganti dengan
-                        file baru yang telah diproses.
-                    </p>
-                `;
-            }
-
-            /*
-            |--------------------------------------------------------------------------
+            |------------------------------------------------------------------
             | PDF
-            |--------------------------------------------------------------------------
-            */
-
-            if (extension === 'pdf') {
-
-                if (fileSubLabel) {
-
-                    fileSubLabel.textContent =
-                        'PDF • Disimpan sebagai PDF';
-
-                    fileSubLabel.classList.remove(
-                        'text-slate-500'
-                    );
-
-                    fileSubLabel.classList.add(
-                        'text-indigo-600'
-                    );
-                }
-
-                if (compressionInfo) {
-
-                    compressionInfo.textContent =
-                        'PDF tidak diproses sebagai gambar. File akan tetap disimpan dalam format PDF.';
-
-                    compressionInfo.classList.remove(
-                        'hidden'
-                    );
-                }
-
-                if (compressionStatus) {
-
-                    compressionStatus.textContent =
-                        'Tidak ada kompresi gambar untuk file PDF.';
-
-                    compressionStatus.classList.remove(
-                        'hidden'
-                    );
-
-                    compressionStatus.classList.remove(
-                        'border-amber-200',
-                        'bg-amber-50',
-                        'text-amber-700'
-                    );
-
-                    compressionStatus.classList.add(
-                        'border-blue-200',
-                        'bg-blue-50',
-                        'text-blue-700'
-                    );
-                }
-
-                return;
-            }
-
-            /*
-            |--------------------------------------------------------------------------
-            | GAMBAR
-            |--------------------------------------------------------------------------
+            |------------------------------------------------------------------
             */
 
             if (
-                IMAGE_EXTENSIONS.includes(
+                extension === 'pdf'
+            ) {
+
+                uploadSubtitle.textContent =
+                    'PDF • tetap PDF • preview langsung';
+
+                showPdfPreview(
+                    file
+                );
+
+                showCompression(
+                    {
+                        title:
+                            'PDF siap digunakan',
+
+                        originalFormat:
+                            'PDF',
+
+                        finalFormat:
+                            'PDF',
+
+                        originalSize:
+                            formatFileSize(
+                                file.size
+                            ),
+
+                        finalSize:
+                            'Diproses server',
+
+                        message:
+                            'PDF tidak dikonversi menjadi gambar. File tetap PDF. Saat update dikirim, server dapat melakukan proses compression PDF sesuai mekanisme aplikasi.'
+                    },
+                    'warning'
+                );
+
+                showStatus(
+                    'PDF siap dikirim. Preview dapat dilihat langsung di halaman ini.',
+                    'blue'
+                );
+
+                return;
+            }
+
+            /*
+            |------------------------------------------------------------------
+            | IMAGE
+            |------------------------------------------------------------------
+            */
+
+            if (
+                isImageExtension(
                     extension
                 )
             ) {
 
-                if (fileSubLabel) {
+                uploadSubtitle.textContent =
+                    'Gambar • dikonversi menjadi JPG';
 
-                    fileSubLabel.textContent =
-                        'Gambar • Akan dikompres menjadi JPG';
+                showImagePreview(
+                    file
+                );
 
-                    fileSubLabel.classList.remove(
-                        'text-slate-500'
-                    );
+                showCompression(
+                    {
+                        title:
+                            'Memproses gambar...',
 
-                    fileSubLabel.classList.add(
-                        'text-indigo-600'
-                    );
-                }
+                        originalFormat:
+                            extension.toUpperCase(),
 
-                if (compressionStatus) {
+                        finalFormat:
+                            'JPG',
 
-                    compressionStatus.textContent =
-                        'Menghitung estimasi hasil kompresi...';
+                        originalSize:
+                            formatFileSize(
+                                file.size
+                            ),
 
-                    compressionStatus.classList.remove(
-                        'hidden'
-                    );
-                }
+                        finalSize:
+                            'Menghitung...',
+
+                        message:
+                            'Browser sedang melakukan resize dan kompresi gambar.'
+                    }
+                );
+
+                showStatus(
+                    'Sedang mengompres gambar sebelum file dikirim.',
+                    'blue'
+                );
 
                 try {
 
-                    const result =
-                        await estimateImageCompression(
+                    const compressed =
+                        await compressImageFile(
                             file
                         );
 
-                    /*
-                    |------------------------------------------------------------------
-                    | Pastikan user belum mengganti file
-                    |------------------------------------------------------------------
-                    */
-
                     if (
-                        !fileInput.files ||
-                        fileInput.files.length === 0 ||
-                        fileInput.files[0] !== file
+                        token !==
+                        processingToken
                     ) {
                         return;
                     }
 
-                    showCompressionResult(
-                        result
+                    if (
+                        compressed.size >
+                        MAX_FILE_SIZE
+                    ) {
+
+                        clearFileSelection();
+
+                        showAlert(
+                            'error',
+                            'Kompresi gagal',
+                            'Ukuran hasil gambar masih melebihi 10 MB.'
+                        );
+
+                        return;
+                    }
+
+                    const transfer =
+                        new DataTransfer();
+
+                    transfer.items.add(
+                        compressed
                     );
 
-                    if (compressionStatus) {
+                    fileInput.files =
+                        transfer.files;
 
-                        compressionStatus.textContent =
-                            'Estimasi selesai. Ukuran hasil aktual dapat sedikit berbeda karena kompresi final dilakukan oleh server.';
-
-                        compressionStatus.classList.remove(
-                            'border-amber-200',
-                            'bg-amber-50',
-                            'text-amber-700'
+                    const reduction =
+                        getReductionPercent(
+                            file.size,
+                            compressed.size
                         );
 
-                        compressionStatus.classList.add(
-                            'border-blue-200',
-                            'bg-blue-50',
-                            'text-blue-700'
+                    showFileVisual(
+                        compressed
+                    );
+
+                    fileInfoTitle.textContent =
+                        'Hasil kompresi siap';
+
+                    fileInfoName.textContent =
+                        compressed.name;
+
+                    fileInfoSize.textContent =
+                        formatFileSize(
+                            compressed.size
                         );
+
+                    uploadSubtitle.textContent =
+                        'JPG • hasil kompresi browser';
+
+                    showImagePreview(
+                        compressed
+                    );
+
+                    showCompression(
+                        {
+                            title:
+                                '✓ Kompresi berhasil',
+
+                            originalFormat:
+                                extension.toUpperCase(),
+
+                            finalFormat:
+                                'JPG',
+
+                            originalSize:
+                                formatFileSize(
+                                    file.size
+                                ),
+
+                            finalSize:
+                                formatFileSize(
+                                    compressed.size
+                                ),
+
+                            message:
+                                'Penghematan sekitar <strong>' +
+                                reduction +
+                                '%</strong>. File final yang akan dikirim adalah JPG.'
+                        },
+                        'success'
+                    );
+
+                    showStatus(
+                        'Gambar sudah dioptimalkan dan siap disimpan sebagai lampiran baru.',
+                        'green'
+                    );
+
+                } catch (
+                    error
+                ) {
+
+                    console.error(
+                        'Compression error:',
+                        error
+                    );
+
+                    if (
+                        token !==
+                        processingToken
+                    ) {
+                        return;
                     }
 
-                } catch (error) {
+                    clearFileSelection();
 
-                    if (compressionInfo) {
-
-                        compressionInfo.textContent =
-                            'Estimasi tidak dapat dihitung di browser. Kompresi final tetap akan dilakukan oleh server.';
-
-                        compressionInfo.classList.remove(
-                            'hidden'
-                        );
-                    }
-
-                    if (compressionStatus) {
-
-                        compressionStatus.textContent =
-                            'File gambar valid dan siap diproses oleh server.';
-
-                        compressionStatus.classList.remove(
-                            'hidden'
-                        );
-                    }
+                    showAlert(
+                        'error',
+                        'Gagal memproses gambar',
+                        error?.message ||
+                        'Browser gagal mengompres gambar.'
+                    );
                 }
             }
+
         }
     );
 
@@ -2203,32 +3535,40 @@ document.addEventListener('DOMContentLoaded', function () {
     |--------------------------------------------------------------------------
     */
 
-    form?.addEventListener(
+    form.addEventListener(
         'submit',
-        function (event) {
+        function (
+            event
+        ) {
 
-            if (isSubmitting) {
+            if (
+                submitting
+            ) {
 
                 event.preventDefault();
+
                 return;
             }
 
             /*
-            |--------------------------------------------------------------------------
-            | TANGGAL
-            |--------------------------------------------------------------------------
+            |------------------------------------------------------------------
+            | VALIDASI TANGGAL
+            |------------------------------------------------------------------
             */
 
             const suratDate =
-                tanggalSurat?.value || '';
+                tanggalSurat?.value ||
+                '';
 
             const keluarDate =
-                tanggalKeluar?.value || '';
+                tanggalKeluar?.value ||
+                '';
 
             if (
                 suratDate &&
                 keluarDate &&
-                keluarDate < suratDate
+                keluarDate <
+                    suratDate
             ) {
 
                 event.preventDefault();
@@ -2243,28 +3583,26 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             /*
-            |--------------------------------------------------------------------------
-            | FILE
-            |--------------------------------------------------------------------------
+            |------------------------------------------------------------------
+            | VALIDASI FILE BARU
+            |------------------------------------------------------------------
             */
 
+            const file =
+                fileInput.files?.[0] ||
+                null;
+
             if (
-                fileInput &&
-                fileInput.files &&
-                fileInput.files.length > 0
+                file
             ) {
 
-                const file =
-                    fileInput.files[0];
-
                 const extension =
-                    file.name
-                        .split('.')
-                        .pop()
-                        ?.toLowerCase() || '';
+                    getExtension(
+                        file
+                    );
 
                 if (
-                    !ALLOWED_EXTENSIONS.includes(
+                    !isAllowedExtension(
                         extension
                     )
                 ) {
@@ -2273,8 +3611,23 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     showAlert(
                         'warning',
-                        'Format file tidak didukung',
+                        'Format file tidak valid',
                         'Gunakan PDF, JPG, JPEG, atau PNG.'
+                    );
+
+                    return;
+                }
+
+                if (
+                    file.size <= 0
+                ) {
+
+                    event.preventDefault();
+
+                    showAlert(
+                        'warning',
+                        'File tidak valid',
+                        'File yang dipilih kosong.'
                     );
 
                     return;
@@ -2290,96 +3643,85 @@ document.addEventListener('DOMContentLoaded', function () {
                     showAlert(
                         'warning',
                         'File terlalu besar',
-                        'Ukuran lampiran maksimal 10 MB.'
+                        'Ukuran file maksimal 10 MB.'
                     );
 
                     return;
                 }
 
-                /*
-                |--------------------------------------------------------------------------
-                | STATUS PROSES
-                |--------------------------------------------------------------------------
-                */
+                if (
+                    extension === 'pdf'
+                ) {
 
-                if (compressionStatus) {
-
-                    compressionStatus.classList.remove(
-                        'hidden'
+                    showStatus(
+                        'PDF sedang dikirim ke server. Lampiran lama akan diganti setelah update berhasil.',
+                        'amber'
                     );
 
-                    compressionStatus.classList.remove(
-                        'border-blue-200',
-                        'bg-blue-50',
-                        'text-blue-700'
+                } else {
+
+                    showStatus(
+                        'File gambar hasil kompresi sedang dikirim. Lampiran lama akan diganti setelah update berhasil.',
+                        'amber'
                     );
-
-                    compressionStatus.classList.add(
-                        'border-amber-200',
-                        'bg-amber-50',
-                        'text-amber-700'
-                    );
-
-                    if (
-                        IMAGE_EXTENSIONS.includes(
-                            extension
-                        )
-                    ) {
-
-                        compressionStatus.textContent =
-                            'File sedang dikirim. Server akan melakukan resize dan kompresi final sebelum menyimpan file baru.';
-
-                    } else {
-
-                        compressionStatus.textContent =
-                            'File PDF sedang dikirim ke server untuk disimpan.';
-                    }
                 }
             }
 
             /*
-            |--------------------------------------------------------------------------
+            |------------------------------------------------------------------
             | LOCK SUBMIT
-            |--------------------------------------------------------------------------
+            |------------------------------------------------------------------
             */
 
-            isSubmitting = true;
+            submitting =
+                true;
 
-            if (submitButton) {
+            submitButton.disabled =
+                true;
 
-                submitButton.disabled = true;
+            submitIcon.style.display =
+                'none';
 
-                submitButton.classList.add(
-                    'opacity-70'
+            submitLoading.style.display =
+                'block';
+
+            submitText.textContent =
+                file &&
+                getExtension(file) ===
+                    'pdf'
+                    ? 'Memproses PDF...'
+                    : file
+                        ? 'Menyimpan lampiran...'
+                        : 'Memperbarui...';
+        }
+    );
+
+    /*
+    |--------------------------------------------------------------------------
+    | CLEANUP
+    |--------------------------------------------------------------------------
+    */
+
+    window.addEventListener(
+        'beforeunload',
+        function () {
+
+            if (
+                previewObjectUrl
+            ) {
+
+                URL.revokeObjectURL(
+                    previewObjectUrl
                 );
-            }
 
-            if (submitIcon) {
-
-                submitIcon.classList.add(
-                    'hidden'
-                );
-            }
-
-            if (submitLoading) {
-
-                submitLoading.classList.remove(
-                    'hidden'
-                );
-            }
-
-            if (submitText) {
-
-                submitText.textContent =
-                    'Memperbarui...';
+                previewObjectUrl =
+                    null;
             }
         }
     );
 
 });
 </script>
-
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 @endpush
 

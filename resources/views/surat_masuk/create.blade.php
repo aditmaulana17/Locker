@@ -23,993 +23,1122 @@
             );
         }
     }
+
+    $compressionResult =
+        session('compression_result');
 @endphp
 
 <style>
-    .sm-page,
-    .sm-page * {
-        box-sizing: border-box;
+.sm-page,
+.sm-page * {
+    box-sizing: border-box;
+}
+
+.sm-page {
+    width: 100%;
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 16px 18px 32px;
+    color: #1e293b;
+}
+
+.sm-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 14px;
+}
+
+.sm-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: #64748b;
+}
+
+.sm-breadcrumb strong {
+    color: #1e293b;
+    font-weight: 800;
+}
+
+.sm-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 36px;
+    padding: 0 13px;
+    border: 1px solid #cbd5e1;
+    border-radius: 9px;
+    background: #fff;
+    color: #475569;
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: 800;
+    transition: .15s ease;
+}
+
+.sm-back:hover {
+    border-color: #818cf8;
+    background: #eef2ff;
+    color: #4338ca;
+}
+
+.sm-shell {
+    overflow: hidden;
+    border: 1px solid #dbe3ef;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow:
+        0 14px 38px rgba(15, 23, 42, .07);
+}
+
+.sm-header {
+    position: relative;
+    overflow: hidden;
+    padding: 22px 24px;
+    background:
+        linear-gradient(
+            135deg,
+            #2563eb 0%,
+            #4f46e5 54%,
+            #0f766e 100%
+        );
+    color: #fff;
+}
+
+.sm-header::after {
+    content: "";
+    position: absolute;
+    right: -80px;
+    bottom: -90px;
+    width: 250px;
+    height: 250px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.09);
+}
+
+.sm-header-inner {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+}
+
+.sm-header-main {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    min-width: 0;
+}
+
+.sm-header-icon {
+    width: 44px;
+    height: 44px;
+    flex: 0 0 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255,255,255,.28);
+    border-radius: 12px;
+    background: rgba(255,255,255,.14);
+    backdrop-filter: blur(5px);
+}
+
+.sm-header-kicker {
+    margin: 0;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.78);
+}
+
+.sm-header-title {
+    margin: 3px 0 0;
+    font-size: 22px;
+    line-height: 1.25;
+    font-weight: 800;
+}
+
+.sm-header-desc {
+    margin: 5px 0 0;
+    max-width: 720px;
+    font-size: 10px;
+    line-height: 1.55;
+    color: rgba(255,255,255,.82);
+}
+
+.sm-header-badge {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 10px;
+    border: 1px solid rgba(255,255,255,.24);
+    border-radius: 999px;
+    background: rgba(255,255,255,.12);
+    font-size: 9px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.sm-body {
+    padding: 20px;
+}
+
+.sm-error {
+    margin-bottom: 16px;
+    padding: 12px 14px;
+    border: 1px solid #fecaca;
+    border-radius: 10px;
+    background: #fff7f7;
+    color: #be123c;
+}
+
+.sm-error-title {
+    margin: 0;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.sm-error-list {
+    margin: 5px 0 0;
+    padding-left: 18px;
+    font-size: 9px;
+    line-height: 1.55;
+}
+
+.sm-server-result {
+    margin-bottom: 16px;
+    padding: 13px 14px;
+    border: 1px solid #a7f3d0;
+    border-radius: 10px;
+    background: #ecfdf5;
+    color: #047857;
+}
+
+.sm-server-result-title {
+    margin: 0 0 7px;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.sm-server-result-grid {
+    display: grid;
+    grid-template-columns:
+        repeat(
+            4,
+            minmax(0,1fr)
+        );
+    gap: 7px;
+}
+
+.sm-server-result-item {
+    padding: 8px;
+    border: 1px solid #bbf7d0;
+    border-radius: 8px;
+    background: rgba(255,255,255,.65);
+}
+
+.sm-server-result-label {
+    display: block;
+    margin-bottom: 2px;
+    font-size: 7px;
+    color: #64748b;
+}
+
+.sm-server-result-value {
+    font-size: 9px;
+    font-weight: 800;
+    color: #047857;
+}
+
+.sm-section + .sm-section {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.sm-section-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.sm-section-accent {
+    width: 4px;
+    min-height: 30px;
+    flex: 0 0 4px;
+    border-radius: 99px;
+    background: #2563eb;
+}
+
+.sm-section-accent.green {
+    background: #0f766e;
+}
+
+.sm-section-title {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.sm-section-desc {
+    margin: 3px 0 0;
+    font-size: 9px;
+    line-height: 1.45;
+    color: #64748b;
+}
+
+.sm-data-grid {
+    display: grid;
+    grid-template-columns:
+        repeat(
+            2,
+            minmax(0,1fr)
+        );
+    overflow: hidden;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+}
+
+.sm-field {
+    min-width: 0;
+    padding: 13px;
+    background: #fff;
+    border-right: 1px solid #cbd5e1;
+    border-bottom: 1px solid #cbd5e1;
+}
+
+.sm-field:nth-child(2n) {
+    border-right: 0;
+}
+
+.sm-field.full {
+    grid-column: 1 / -1;
+    border-right: 0;
+}
+
+.sm-field-label,
+.sm-physical-label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 9px;
+    font-weight: 800;
+    color: #475569;
+}
+
+.sm-required {
+    color: #dc2626;
+}
+
+.sm-control {
+    width: 100%;
+    min-height: 40px;
+    border: 1px solid #94a3b8;
+    border-radius: 8px;
+    background: #fff;
+    color: #0f172a;
+    padding: 0 11px;
+    font-size: 11px;
+    outline: none;
+    transition: .15s ease;
+}
+
+textarea.sm-control {
+    min-height: 86px;
+    padding: 10px 11px;
+    line-height: 1.5;
+    resize: vertical;
+}
+
+.sm-control:hover {
+    border-color: #64748b;
+}
+
+.sm-control:focus {
+    border-color: #2563eb;
+    box-shadow:
+        0 0 0 3px
+        rgba(37,99,235,.08);
+}
+
+.sm-control-error {
+    border-color: #ef4444 !important;
+    background: #fff8f8 !important;
+}
+
+.sm-field-error {
+    margin: 5px 0 0;
+    font-size: 8px;
+    line-height: 1.4;
+    color: #dc2626;
+    font-weight: 700;
+}
+
+.sm-attachment-grid {
+    display: grid;
+    grid-template-columns:
+        minmax(0,1.35fr)
+        minmax(320px,.65fr);
+    gap: 14px;
+    align-items: stretch;
+}
+
+.sm-card {
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    background: #fff;
+}
+
+.sm-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 11px 13px;
+    background: #f8fafc;
+    border-bottom: 1px solid #cbd5e1;
+}
+
+.sm-card-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    min-width: 0;
+}
+
+.sm-card-icon {
+    width: 34px;
+    height: 34px;
+    flex: 0 0 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #bfdbfe;
+    border-radius: 8px;
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.sm-card-icon.green {
+    border-color: #99f6e4;
+    background: #f0fdfa;
+    color: #0f766e;
+}
+
+.sm-card-title {
+    margin: 0;
+    font-size: 10px;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.sm-card-desc {
+    margin: 2px 0 0;
+    font-size: 7.5px;
+    color: #64748b;
+}
+
+.sm-badge {
+    padding: 5px 8px;
+    border: 1px solid #bfdbfe;
+    border-radius: 999px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-size: 7px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.sm-badge.optional {
+    border-color: #cbd5e1;
+    background: #fff;
+    color: #64748b;
+}
+
+.sm-card-body {
+    padding: 13px;
+}
+
+.sm-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 10px;
+    padding: 9px;
+    border: 1px solid #bfdbfe;
+    border-radius: 8px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-size: 8px;
+    line-height: 1.5;
+}
+
+.sm-mode {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 7px;
+    margin-bottom: 10px;
+}
+
+.sm-mode-btn {
+    min-height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #fff;
+    color: #475569;
+    font-size: 8px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.sm-mode-btn:hover {
+    border-color: #818cf8;
+    background: #eef2ff;
+}
+
+.sm-mode-btn.active {
+    border-color: #4f46e5;
+    background: #eef2ff;
+    color: #4338ca;
+}
+
+.sm-upload-box {
+    position: relative;
+    min-height: 116px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 16px;
+    border: 1.5px dashed #94a3b8;
+    border-radius: 10px;
+    background: #f8fafc;
+    text-align: center;
+    cursor: pointer;
+}
+
+.sm-upload-box:hover {
+    border-color: #6366f1;
+    background: #eef2ff;
+}
+
+.sm-upload-box.has-file {
+    border-color: #34d399;
+    background: #ecfdf5;
+}
+
+.sm-upload-icon {
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 3px;
+    border-radius: 9px;
+    background: #e0e7ff;
+    color: #4f46e5;
+}
+
+.sm-upload-box.has-file
+.sm-upload-icon {
+    background: #d1fae5;
+    color: #059669;
+}
+
+.sm-upload-title {
+    font-size: 10px;
+    font-weight: 800;
+    color: #334155;
+}
+
+.sm-upload-format {
+    font-size: 8px;
+    color: #64748b;
+}
+
+.sm-upload-limit {
+    margin-top: 2px;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: #dbeafe;
+    color: #2563eb;
+    font-size: 7px;
+    font-weight: 800;
+}
+
+.sm-upload-input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.sm-selected-file {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 9px;
+    padding: 8px;
+    border: 1px solid #a7f3d0;
+    border-radius: 8px;
+    background: #ecfdf5;
+}
+
+.sm-selected-icon {
+    width: 28px;
+    height: 28px;
+    flex: 0 0 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 7px;
+    background: #d1fae5;
+    color: #059669;
+}
+
+.sm-selected-content {
+    min-width: 0;
+    flex: 1;
+}
+
+.sm-selected-title {
+    margin: 0;
+    font-size: 8px;
+    font-weight: 800;
+    color: #047857;
+}
+
+.sm-selected-name {
+    margin: 2px 0 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 8px;
+    font-weight: 700;
+    color: #334155;
+}
+
+.sm-selected-size {
+    margin: 2px 0 0;
+    font-size: 7px;
+    color: #64748b;
+}
+
+.sm-clear {
+    width: 27px;
+    height: 27px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #a7f3d0;
+    border-radius: 7px;
+    background: #fff;
+    color: #059669;
+    cursor: pointer;
+}
+
+.sm-compression-status {
+    margin-top: 9px;
+    padding: 10px;
+    border: 1px solid #c7d2fe;
+    border-radius: 8px;
+    background: #eef2ff;
+    color: #4338ca;
+    font-size: 7.5px;
+    line-height: 1.6;
+}
+
+.sm-compression-status.success {
+    border-color: #a7f3d0;
+    background: #ecfdf5;
+    color: #047857;
+}
+
+.sm-compression-status.warning {
+    border-color: #fde68a;
+    background: #fffbeb;
+    color: #a16207;
+}
+
+.sm-compression-status.error {
+    border-color: #fecaca;
+    background: #fff1f2;
+    color: #be123c;
+}
+
+.sm-compression-status.processing {
+    border-color: #bfdbfe;
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.sm-compression-table {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-top: 7px;
+}
+
+.sm-compression-item {
+    padding: 7px 8px;
+    border: 1px solid rgba(148,163,184,.28);
+    border-radius: 7px;
+    background: rgba(255,255,255,.55);
+}
+
+.sm-compression-label {
+    display: block;
+    margin-bottom: 2px;
+    font-size: 6.5px;
+    color: #64748b;
+}
+
+.sm-compression-value {
+    font-size: 8px;
+    font-weight: 800;
+    color: #334155;
+}
+
+.sm-file-preview {
+    margin-top: 10px;
+    overflow: hidden;
+    border: 1px solid #cbd5e1;
+    border-radius: 9px;
+    background: #f8fafc;
+}
+
+.sm-file-preview-header {
+    padding: 8px 10px;
+    border-bottom: 1px solid #cbd5e1;
+    background: #f8fafc;
+    font-size: 8px;
+    font-weight: 800;
+    color: #334155;
+}
+
+.sm-file-preview-content {
+    padding: 8px;
+    background: #fff;
+}
+
+.sm-file-preview-image {
+    display: block;
+    width: 100%;
+    max-height: 430px;
+    object-fit: contain;
+    border-radius: 6px;
+    background: #fff;
+}
+
+.sm-file-preview-pdf {
+    display: block;
+    width: 100%;
+    height: 460px;
+    border: 0;
+    background: #fff;
+}
+
+.sm-camera-box {
+    overflow: hidden;
+    border: 1px solid #475569;
+    border-radius: 10px;
+    background: #0f172a;
+}
+
+.sm-camera-preview {
+    position: relative;
+    min-height: 280px;
+    background: #0f172a;
+}
+
+.sm-camera-video,
+.sm-camera-image {
+    width: 100%;
+    height: 280px;
+    display: block;
+    object-fit: contain;
+    background: #0f172a;
+}
+
+.sm-camera-image {
+    position: absolute;
+    inset: 0;
+}
+
+.sm-camera-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    background: #0f172a;
+    text-align: center;
+}
+
+.sm-camera-placeholder-icon {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 7px;
+    border-radius: 10px;
+    background: rgba(255,255,255,.07);
+    color: #94a3b8;
+}
+
+.sm-camera-placeholder-title {
+    margin: 0;
+    font-size: 9px;
+    font-weight: 800;
+    color: #e2e8f0;
+}
+
+.sm-camera-placeholder-desc {
+    margin: 3px 0 0;
+    font-size: 7px;
+    line-height: 1.4;
+    color: #64748b;
+}
+
+.sm-camera-error {
+    position: absolute;
+    left: 9px;
+    right: 9px;
+    bottom: 9px;
+    z-index: 5;
+    padding: 8px;
+    border-radius: 8px;
+    background: rgba(127,29,29,.94);
+    color: #fecaca;
+    font-size: 7px;
+    line-height: 1.4;
+}
+
+.sm-camera-frame {
+    position: absolute;
+    inset: 22px;
+    border: 1px dashed rgba(255,255,255,.22);
+    border-radius: 8px;
+    pointer-events: none;
+}
+
+.sm-camera-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 7px;
+    padding: 9px;
+    background: #111827;
+}
+
+.sm-camera-btn {
+    min-height: 32px;
+    min-width: 120px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 7px;
+    padding: 0 11px;
+    font-size: 7.5px;
+    font-weight: 800;
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+.sm-camera-btn-primary {
+    border-color: #4338ca;
+    background: #4f46e5;
+    color: #fff;
+}
+
+.sm-camera-btn-success {
+    border-color: #059669;
+    background: #10b981;
+    color: #fff;
+}
+
+.sm-camera-btn-secondary {
+    border-color: #64748b;
+    background: #fff;
+    color: #334155;
+}
+
+.sm-camera-btn:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+}
+
+.sm-snapshot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 9px;
+    padding: 8px;
+    border: 1px solid #a7f3d0;
+    border-radius: 8px;
+    background: #ecfdf5;
+    color: #047857;
+    font-size: 8px;
+    font-weight: 800;
+}
+
+.sm-snapshot-text {
+    min-width: 0;
+    flex: 1;
+    line-height: 1.45;
+}
+
+.sm-retake {
+    min-height: 29px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 0 9px;
+    border: 1px solid #c7d2fe;
+    border-radius: 7px;
+    background: #fff;
+    color: #4338ca;
+    font-size: 7px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.sm-physical-box {
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+    border: 1.5px dashed #94a3b8;
+    border-radius: 10px;
+    background: #f8fafc;
+}
+
+.sm-physical-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9px;
+    background: #e0e7ff;
+    color: #4f46e5;
+}
+
+.sm-physical-title {
+    margin: 9px 0 0;
+    font-size: 12px;
+    font-weight: 800;
+    color: #334155;
+}
+
+.sm-physical-desc {
+    margin: 4px 0 0;
+    font-size: 8px;
+    line-height: 1.5;
+    color: #64748b;
+}
+
+.sm-physical-field {
+    margin-top: 15px;
+}
+
+.sm-example {
+    margin-top: 8px;
+    padding: 8px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #fff;
+    font-size: 7.5px;
+    line-height: 1.45;
+    color: #64748b;
+}
+
+.sm-note {
+    margin-top: auto;
+    padding-top: 14px;
+    font-size: 7px;
+    line-height: 1.5;
+    color: #64748b;
+}
+
+.sm-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 12px 20px;
+    border-top: 1px solid #dbe3ef;
+    background: #f8fafc;
+}
+
+.sm-footer-btn {
+    min-height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 0 14px;
+    border-radius: 8px;
+    font-size: 8.5px;
+    font-weight: 800;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.sm-cancel {
+    border: 1px solid #cbd5e1;
+    background: #fff;
+    color: #475569;
+}
+
+.sm-submit {
+    border: 1px solid #2563eb;
+    background: #2563eb;
+    color: #fff;
+}
+
+.sm-submit:hover:not(:disabled) {
+    background: #1d4ed8;
+    border-color: #1d4ed8;
+}
+
+.sm-submit:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+}
+
+.sm-hidden {
+    display: none !important;
+}
+
+@media (max-width: 900px) {
+    .sm-attachment-grid {
+        grid-template-columns: 1fr;
     }
 
+    .sm-server-result-grid {
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(0,1fr)
+            );
+    }
+}
+
+@media (max-width: 700px) {
     .sm-page {
-        width: 100%;
-        max-width: 1180px;
-        margin: 0 auto;
-        padding: 16px 18px 32px;
-        color: #1e293b;
+        padding: 10px 10px 24px;
     }
 
     .sm-topbar {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 14px;
-        margin-bottom: 14px;
-    }
-
-    .sm-breadcrumb {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-size: 11px;
-        color: #64748b;
-    }
-
-    .sm-breadcrumb strong {
-        color: #1e293b;
-        font-weight: 800;
+        align-items: stretch;
+        flex-direction: column;
     }
 
     .sm-back {
-        display: inline-flex;
-        align-items: center;
-        gap: 7px;
-        min-height: 36px;
-        padding: 0 13px;
-        border: 1px solid #cbd5e1;
-        border-radius: 9px;
-        background: #fff;
-        color: #475569;
-        text-decoration: none;
-        font-size: 11px;
-        font-weight: 800;
-        transition: .15s ease;
-    }
-
-    .sm-back:hover {
-        border-color: #818cf8;
-        background: #eef2ff;
-        color: #4338ca;
-    }
-
-    .sm-shell {
-        overflow: hidden;
-        border: 1px solid #dbe3ef;
-        border-radius: 16px;
-        background: #fff;
-        box-shadow: 0 14px 38px rgba(15, 23, 42, .07);
-    }
-
-    .sm-header {
-        position: relative;
-        overflow: hidden;
-        padding: 22px 24px;
-        background:
-            linear-gradient(
-                135deg,
-                #2563eb 0%,
-                #4f46e5 54%,
-                #0f766e 100%
-            );
-        color: #fff;
-    }
-
-    .sm-header::after {
-        content: "";
-        position: absolute;
-        inset: auto -80px -90px auto;
-        width: 250px;
-        height: 250px;
-        border-radius: 50%;
-        background: rgba(255,255,255,.09);
-    }
-
-    .sm-header-inner {
-        position: relative;
-        z-index: 1;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 18px;
-    }
-
-    .sm-header-main {
-        display: flex;
-        align-items: center;
-        gap: 13px;
-        min-width: 0;
-    }
-
-    .sm-header-icon {
-        width: 44px;
-        height: 44px;
-        flex: 0 0 44px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: 1px solid rgba(255,255,255,.28);
-        border-radius: 12px;
-        background: rgba(255,255,255,.14);
-        backdrop-filter: blur(5px);
-    }
-
-    .sm-header-kicker {
-        margin: 0;
-        font-size: 9px;
-        font-weight: 800;
-        letter-spacing: .1em;
-        text-transform: uppercase;
-        color: rgba(255,255,255,.78);
-    }
-
-    .sm-header-title {
-        margin: 3px 0 0;
-        font-size: 22px;
-        line-height: 1.25;
-        font-weight: 800;
-    }
-
-    .sm-header-desc {
-        margin: 5px 0 0;
-        max-width: 720px;
-        font-size: 10px;
-        line-height: 1.55;
-        color: rgba(255,255,255,.82);
-    }
-
-    .sm-header-badge {
-        flex: 0 0 auto;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 7px 10px;
-        border: 1px solid rgba(255,255,255,.24);
-        border-radius: 999px;
-        background: rgba(255,255,255,.12);
-        font-size: 9px;
-        font-weight: 800;
-        white-space: nowrap;
-    }
-
-    .sm-body {
-        padding: 20px;
-    }
-
-    .sm-error {
-        margin-bottom: 16px;
-        padding: 12px 14px;
-        border: 1px solid #fecaca;
-        border-radius: 10px;
-        background: #fff7f7;
-        color: #be123c;
-    }
-
-    .sm-error-title {
-        margin: 0;
-        font-size: 11px;
-        font-weight: 800;
-    }
-
-    .sm-error-list {
-        margin: 5px 0 0;
-        padding-left: 18px;
-        font-size: 9px;
-        line-height: 1.55;
-    }
-
-    .sm-section {
         width: 100%;
     }
 
-    .sm-section + .sm-section {
-        margin-top: 20px;
-        padding-top: 20px;
-        border-top: 1px solid #e2e8f0;
-    }
-
-    .sm-section-head {
-        display: flex;
+    .sm-header-inner {
         align-items: flex-start;
-        gap: 10px;
-        margin-bottom: 12px;
+        flex-direction: column;
     }
 
-    .sm-section-accent {
-        width: 4px;
-        min-height: 30px;
-        flex: 0 0 4px;
-        border-radius: 99px;
-        background: #2563eb;
+    .sm-header-badge {
+        align-self: flex-start;
     }
 
-    .sm-section-accent.green {
-        background: #0f766e;
-    }
-
-    .sm-section-title {
-        margin: 0;
-        font-size: 14px;
-        font-weight: 800;
-        color: #0f172a;
-    }
-
-    .sm-section-desc {
-        margin: 3px 0 0;
-        font-size: 9px;
-        line-height: 1.45;
-        color: #64748b;
+    .sm-body {
+        padding: 12px;
     }
 
     .sm-data-grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        overflow: hidden;
-        border: 1px solid #cbd5e1;
-        border-radius: 10px;
+        grid-template-columns: 1fr;
     }
 
-    .sm-field {
-        min-width: 0;
-        padding: 13px;
-        background: #fff;
-        border-right: 1px solid #cbd5e1;
-        border-bottom: 1px solid #cbd5e1;
-    }
-
+    .sm-field,
     .sm-field:nth-child(2n) {
         border-right: 0;
     }
 
     .sm-field.full {
-        grid-column: 1 / -1;
-        border-right: 0;
-    }
-
-    .sm-field-label,
-    .sm-physical-label {
-        display: block;
-        margin-bottom: 6px;
-        font-size: 9px;
-        font-weight: 800;
-        color: #475569;
-    }
-
-    .sm-required {
-        color: #dc2626;
-    }
-
-    .sm-control {
-        width: 100%;
-        min-height: 40px;
-        border: 1px solid #94a3b8;
-        border-radius: 8px;
-        background: #fff;
-        color: #0f172a;
-        padding: 0 11px;
-        font-size: 11px;
-        outline: none;
-        transition: .15s ease;
-    }
-
-    textarea.sm-control {
-        min-height: 86px;
-        padding: 10px 11px;
-        line-height: 1.5;
-        resize: vertical;
-    }
-
-    .sm-control::placeholder {
-        color: #94a3b8;
-    }
-
-    .sm-control:hover {
-        border-color: #64748b;
-    }
-
-    .sm-control:focus {
-        border-color: #2563eb;
-        box-shadow: 0 0 0 3px rgba(37,99,235,.08);
-    }
-
-    .sm-control-error {
-        border-color: #ef4444 !important;
-        background: #fff8f8 !important;
-    }
-
-    .sm-field-error {
-        margin: 5px 0 0;
-        font-size: 8px;
-        line-height: 1.4;
-        color: #dc2626;
-        font-weight: 700;
-    }
-
-    .sm-attachment-grid {
-        display: grid;
-        grid-template-columns:
-            minmax(0, 1.35fr)
-            minmax(320px, .65fr);
-        gap: 14px;
-        align-items: stretch;
-    }
-
-    .sm-card {
-        min-width: 0;
-        overflow: hidden;
-        border: 1px solid #cbd5e1;
-        border-radius: 12px;
-        background: #fff;
-    }
-
-    .sm-card-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 10px;
-        padding: 11px 13px;
-        background: #f8fafc;
-        border-bottom: 1px solid #cbd5e1;
-    }
-
-    .sm-card-title-wrap {
-        display: flex;
-        align-items: center;
-        gap: 9px;
-        min-width: 0;
-    }
-
-    .sm-card-icon {
-        width: 34px;
-        height: 34px;
-        flex: 0 0 34px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: 1px solid #bfdbfe;
-        border-radius: 8px;
-        background: #eff6ff;
-        color: #2563eb;
-    }
-
-    .sm-card-icon.green {
-        border-color: #99f6e4;
-        background: #f0fdfa;
-        color: #0f766e;
-    }
-
-    .sm-card-title {
-        margin: 0;
-        font-size: 10px;
-        font-weight: 800;
-        color: #0f172a;
-    }
-
-    .sm-card-desc {
-        margin: 2px 0 0;
-        font-size: 7.5px;
-        color: #64748b;
-    }
-
-    .sm-badge {
-        padding: 5px 8px;
-        border: 1px solid #bfdbfe;
-        border-radius: 999px;
-        background: #eff6ff;
-        color: #1d4ed8;
-        font-size: 7px;
-        font-weight: 800;
-        white-space: nowrap;
-    }
-
-    .sm-badge.optional {
-        border-color: #cbd5e1;
-        background: #fff;
-        color: #64748b;
-    }
-
-    .sm-card-body {
-        padding: 13px;
-    }
-
-    .sm-info {
-        display: flex;
-        align-items: flex-start;
-        gap: 8px;
-        margin-bottom: 10px;
-        padding: 9px;
-        border: 1px solid #bfdbfe;
-        border-radius: 8px;
-        background: #eff6ff;
-        color: #1d4ed8;
-        font-size: 8px;
-        line-height: 1.5;
-    }
-
-    .sm-mode {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 7px;
-        margin-bottom: 10px;
-    }
-
-    .sm-mode-btn {
-        min-height: 38px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-        border: 1px solid #cbd5e1;
-        border-radius: 8px;
-        background: #fff;
-        color: #475569;
-        font-size: 8px;
-        font-weight: 800;
-        cursor: pointer;
-        transition: .15s ease;
-    }
-
-    .sm-mode-btn:hover {
-        border-color: #818cf8;
-        background: #eef2ff;
-    }
-
-    .sm-mode-btn.active {
-        border-color: #4f46e5;
-        background: #eef2ff;
-        color: #4338ca;
-    }
-
-    .sm-upload-box {
-        position: relative;
-        min-height: 116px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 4px;
-        padding: 16px;
-        border: 1.5px dashed #94a3b8;
-        border-radius: 10px;
-        background: #f8fafc;
-        text-align: center;
-        cursor: pointer;
-        transition: .15s ease;
-    }
-
-    .sm-upload-box:hover {
-        border-color: #6366f1;
-        background: #eef2ff;
-    }
-
-    .sm-upload-box.has-file {
-        border-color: #34d399;
-        background: #ecfdf5;
-    }
-
-    .sm-upload-icon {
-        width: 38px;
-        height: 38px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: 3px;
-        border-radius: 9px;
-        background: #e0e7ff;
-        color: #4f46e5;
-    }
-
-    .sm-upload-box.has-file .sm-upload-icon {
-        background: #d1fae5;
-        color: #059669;
-    }
-
-    .sm-upload-title {
-        font-size: 10px;
-        font-weight: 800;
-        color: #334155;
-    }
-
-    .sm-upload-format {
-        font-size: 8px;
-        color: #64748b;
-    }
-
-    .sm-upload-limit {
-        margin-top: 2px;
-        padding: 4px 8px;
-        border-radius: 999px;
-        background: #dbeafe;
-        color: #2563eb;
-        font-size: 7px;
-        font-weight: 800;
-    }
-
-    .sm-upload-input {
-        position: absolute;
-        inset: 0;
-        width: 100%;
-        height: 100%;
-        opacity: 0;
-        cursor: pointer;
-    }
-
-    .sm-selected-file {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-top: 9px;
-        padding: 8px;
-        border: 1px solid #a7f3d0;
-        border-radius: 8px;
-        background: #ecfdf5;
-    }
-
-    .sm-selected-icon {
-        width: 28px;
-        height: 28px;
-        flex: 0 0 28px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 7px;
-        background: #d1fae5;
-        color: #059669;
-    }
-
-    .sm-selected-content {
-        min-width: 0;
-        flex: 1;
-    }
-
-    .sm-selected-title {
-        margin: 0;
-        font-size: 8px;
-        font-weight: 800;
-        color: #047857;
-    }
-
-    .sm-selected-name {
-        margin: 2px 0 0;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        font-size: 8px;
-        font-weight: 700;
-        color: #334155;
-    }
-
-    .sm-selected-size {
-        margin: 2px 0 0;
-        font-size: 7px;
-        color: #64748b;
-    }
-
-    .sm-clear {
-        width: 27px;
-        height: 27px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border: 1px solid #a7f3d0;
-        border-radius: 7px;
-        background: #fff;
-        color: #059669;
-        cursor: pointer;
-    }
-
-    .sm-compression-status {
-        margin-top: 9px;
-        padding: 8px 9px;
-        border: 1px solid #c7d2fe;
-        border-radius: 8px;
-        background: #eef2ff;
-        color: #4338ca;
-        font-size: 7.5px;
-        line-height: 1.5;
-    }
-
-    .sm-compression-status.success {
-        border-color: #a7f3d0;
-        background: #ecfdf5;
-        color: #047857;
-    }
-
-    .sm-compression-status.warning {
-        border-color: #fde68a;
-        background: #fffbeb;
-        color: #a16207;
-    }
-
-    .sm-compression-status.error {
-        border-color: #fecaca;
-        background: #fff1f2;
-        color: #be123c;
-    }
-
-    .sm-compression-status.processing {
-        border-color: #bfdbfe;
-        background: #eff6ff;
-        color: #1d4ed8;
-    }
-
-    .sm-camera-box {
-        overflow: hidden;
-        border: 1px solid #475569;
-        border-radius: 10px;
-        background: #0f172a;
-    }
-
-    .sm-camera-preview {
-        position: relative;
-        min-height: 280px;
-        background: #0f172a;
-    }
-
-    .sm-camera-video,
-    .sm-camera-image {
-        width: 100%;
-        height: 280px;
-        display: block;
-        object-fit: contain;
-        background: #0f172a;
-    }
-
-    .sm-camera-image {
-        position: absolute;
-        inset: 0;
-    }
-
-    .sm-camera-placeholder {
-        position: absolute;
-        inset: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 18px;
-        background: #0f172a;
-        text-align: center;
-    }
-
-    .sm-camera-placeholder-icon {
-        width: 44px;
-        height: 44px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 7px;
-        border-radius: 10px;
-        background: rgba(255,255,255,.07);
-        color: #94a3b8;
-    }
-
-    .sm-camera-placeholder-title {
-        margin: 0;
-        font-size: 9px;
-        font-weight: 800;
-        color: #e2e8f0;
-    }
-
-    .sm-camera-placeholder-desc {
-        margin: 3px 0 0;
-        font-size: 7px;
-        line-height: 1.4;
-        color: #64748b;
-    }
-
-    .sm-camera-error {
-        position: absolute;
-        left: 9px;
-        right: 9px;
-        bottom: 9px;
-        z-index: 5;
-        padding: 8px;
-        border-radius: 8px;
-        background: rgba(127,29,29,.94);
-        color: #fecaca;
-        font-size: 7px;
-        line-height: 1.4;
-    }
-
-    .sm-camera-frame {
-        position: absolute;
-        inset: 22px;
-        border: 1px dashed rgba(255,255,255,.22);
-        border-radius: 8px;
-        pointer-events: none;
-    }
-
-    .sm-camera-actions {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-wrap: wrap;
-        gap: 7px;
-        padding: 9px;
-        background: #111827;
-    }
-
-    .sm-camera-btn {
-        min-height: 32px;
-        min-width: 120px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 7px;
-        padding: 0 11px;
-        font-size: 7.5px;
-        font-weight: 800;
-        cursor: pointer;
-        border: 1px solid transparent;
-    }
-
-    .sm-camera-btn-primary {
-        border-color: #4338ca;
-        background: #4f46e5;
-        color: #fff;
-    }
-
-    .sm-camera-btn-success {
-        border-color: #059669;
-        background: #10b981;
-        color: #fff;
-    }
-
-    .sm-camera-btn-secondary {
-        border-color: #64748b;
-        background: #fff;
-        color: #334155;
-    }
-
-    .sm-camera-btn:disabled {
-        opacity: .45;
-        cursor: not-allowed;
-    }
-
-    .sm-snapshot {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 8px;
-        margin-top: 9px;
-        padding: 8px;
-        border: 1px solid #a7f3d0;
-        border-radius: 8px;
-        background: #ecfdf5;
-        color: #047857;
-        font-size: 8px;
-        font-weight: 800;
-    }
-
-    .sm-snapshot-text {
-        min-width: 0;
-        flex: 1;
-        line-height: 1.45;
-    }
-
-    .sm-retake {
-        min-height: 29px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 5px;
-        padding: 0 9px;
-        border: 1px solid #c7d2fe;
-        border-radius: 7px;
-        background: #fff;
-        color: #4338ca;
-        font-size: 7px;
-        font-weight: 800;
-        cursor: pointer;
-    }
-
-    .sm-physical-box {
-        min-height: 100%;
-        display: flex;
-        flex-direction: column;
-        padding: 15px;
-        border: 1.5px dashed #94a3b8;
-        border-radius: 10px;
-        background: #f8fafc;
-    }
-
-    .sm-physical-icon {
-        width: 40px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 9px;
-        background: #e0e7ff;
-        color: #4f46e5;
-    }
-
-    .sm-physical-title {
-        margin: 9px 0 0;
-        font-size: 12px;
-        font-weight: 800;
-        color: #334155;
-    }
-
-    .sm-physical-desc {
-        margin: 4px 0 0;
-        font-size: 8px;
-        line-height: 1.5;
-        color: #64748b;
-    }
-
-    .sm-physical-field {
-        margin-top: 15px;
-    }
-
-    .sm-example {
-        margin-top: 8px;
-        padding: 8px;
-        border: 1px solid #cbd5e1;
-        border-radius: 8px;
-        background: #fff;
-        font-size: 7.5px;
-        line-height: 1.45;
-        color: #64748b;
-    }
-
-    .sm-note {
-        margin-top: auto;
-        padding-top: 14px;
-        font-size: 7px;
-        line-height: 1.5;
-        color: #64748b;
+        grid-column: auto;
     }
 
     .sm-footer {
-        display: flex;
-        justify-content: flex-end;
-        gap: 8px;
-        padding: 12px 20px;
-        border-top: 1px solid #dbe3ef;
-        background: #f8fafc;
+        flex-direction: column-reverse;
+        align-items: stretch;
+        padding: 11px 12px;
     }
 
     .sm-footer-btn {
-        min-height: 38px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-        padding: 0 14px;
-        border-radius: 8px;
-        font-size: 8.5px;
-        font-weight: 800;
-        text-decoration: none;
-        cursor: pointer;
+        width: 100%;
+    }
+}
+
+@media (max-width: 460px) {
+    .sm-header {
+        padding: 17px 15px;
     }
 
-    .sm-cancel {
-        border: 1px solid #cbd5e1;
-        background: #fff;
-        color: #475569;
+    .sm-header-title {
+        font-size: 19px;
     }
 
-    .sm-submit {
-        border: 1px solid #2563eb;
-        background: #2563eb;
-        color: #fff;
-        box-shadow: 0 4px 10px rgba(37,99,235,.12);
+    .sm-card-body {
+        padding: 10px;
     }
 
-    .sm-submit:hover:not(:disabled) {
-        background: #1d4ed8;
-        border-color: #1d4ed8;
+    .sm-camera-preview,
+    .sm-camera-video,
+    .sm-camera-image {
+        min-height: 230px;
+        height: 230px;
     }
 
-    .sm-submit:disabled {
-        opacity: .6;
-        cursor: not-allowed;
+    .sm-mode {
+        grid-template-columns: 1fr;
     }
 
-    .sm-hidden {
-        display: none !important;
+    .sm-snapshot {
+        align-items: stretch;
+        flex-direction: column;
     }
 
-    @media (max-width: 900px) {
-        .sm-attachment-grid {
-            grid-template-columns: 1fr;
-        }
+    .sm-retake {
+        width: 100%;
     }
 
-    @media (max-width: 700px) {
-        .sm-page {
-            padding: 10px 10px 24px;
-        }
-
-        .sm-topbar {
-            align-items: stretch;
-            flex-direction: column;
-        }
-
-        .sm-back {
-            width: 100%;
-        }
-
-        .sm-header-inner {
-            align-items: flex-start;
-            flex-direction: column;
-        }
-
-        .sm-header-badge {
-            align-self: flex-start;
-        }
-
-        .sm-body {
-            padding: 12px;
-        }
-
-        .sm-data-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .sm-field,
-        .sm-field:nth-child(2n) {
-            border-right: 0;
-        }
-
-        .sm-field.full {
-            grid-column: auto;
-        }
-
-        .sm-footer {
-            flex-direction: column-reverse;
-            align-items: stretch;
-            padding: 11px 12px;
-        }
-
-        .sm-footer-btn {
-            width: 100%;
-        }
+    .sm-server-result-grid,
+    .sm-compression-table {
+        grid-template-columns: 1fr;
     }
 
-    @media (max-width: 460px) {
-        .sm-header {
-            padding: 17px 15px;
-        }
-
-        .sm-header-title {
-            font-size: 19px;
-        }
-
-        .sm-card-body {
-            padding: 10px;
-        }
-
-        .sm-camera-preview,
-        .sm-camera-video,
-        .sm-camera-image {
-            min-height: 230px;
-            height: 230px;
-        }
-
-        .sm-mode {
-            grid-template-columns: 1fr;
-        }
-
-        .sm-snapshot {
-            align-items: stretch;
-            flex-direction: column;
-        }
-
-        .sm-retake {
-            width: 100%;
-        }
+    .sm-file-preview-pdf {
+        height: 360px;
     }
+}
 </style>
 
 <div class="sm-page">
@@ -1048,7 +1177,6 @@
 
     </div>
 
-
     @if($formErrors->any())
 
         <div class="sm-error">
@@ -1073,6 +1201,111 @@
 
     @endif
 
+    {{-- ================================================================
+         HASIL COMPRESSION SERVER
+    ================================================================ --}}
+
+    @if(is_array($compressionResult))
+
+        <div class="sm-server-result">
+
+            <p class="sm-server-result-title">
+                Hasil Compression Server
+            </p>
+
+            <div class="sm-server-result-grid">
+
+                <div class="sm-server-result-item">
+
+                    <span class="sm-server-result-label">
+                        Jenis
+                    </span>
+
+                    <span class="sm-server-result-value">
+                        {{ strtoupper($compressionResult['type'] ?? 'PDF') }}
+                    </span>
+
+                </div>
+
+                <div class="sm-server-result-item">
+
+                    <span class="sm-server-result-label">
+                        Ukuran Asli
+                    </span>
+
+                    <span class="sm-server-result-value">
+                        {{ number_format(($compressionResult['original_size'] ?? 0) / 1048576, 2) }}
+                        MB
+                    </span>
+
+                </div>
+
+                <div class="sm-server-result-item">
+
+                    <span class="sm-server-result-label">
+                        Ukuran Akhir
+                    </span>
+
+                    <span class="sm-server-result-value">
+                        {{ number_format(($compressionResult['compressed_size'] ?? 0) / 1048576, 2) }}
+                        MB
+                    </span>
+
+                </div>
+
+                <div class="sm-server-result-item">
+
+                    <span class="sm-server-result-label">
+                        Penghematan
+                    </span>
+
+                    <span class="sm-server-result-value">
+                        {{ number_format((float) ($compressionResult['saving_percent'] ?? 0), 2) }}%
+                    </span>
+
+                </div>
+
+            </div>
+
+            @if(!empty($compressionResult['profile']))
+
+                <div
+                    style="
+                        margin-top:8px;
+                        font-size:7.5px;
+                        color:#047857;
+                    "
+                >
+                    Profile:
+                    <strong>
+                        {{ $compressionResult['profile'] }}
+                    </strong>
+                </div>
+
+            @endif
+
+            @if(
+                ($compressionResult['status'] ?? '') ===
+                'unchanged'
+            )
+
+                <div
+                    style="
+                        margin-top:6px;
+                        font-size:7.5px;
+                        color:#a16207;
+                    "
+                >
+                    Hasil compression tidak lebih kecil
+                    dari file asli sehingga file asli
+                    dipertahankan.
+                </div>
+
+            @endif
+
+        </div>
+
+    @endif
 
     <form
         id="form-surat-masuk"
@@ -1083,15 +1316,17 @@
 
         @csrf
 
-
         <input
             type="hidden"
             name="nomor_agenda"
             value="{{ old('nomor_agenda', $nomorAgenda ?? '') }}"
         >
 
-
         <div class="sm-shell">
+
+            {{-- =============================================================
+                 HEADER
+            ============================================================= --}}
 
             <header class="sm-header">
 
@@ -1124,7 +1359,6 @@
 
                         </div>
 
-
                         <div>
 
                             <p class="sm-header-kicker">
@@ -1136,15 +1370,13 @@
                             </h1>
 
                             <p class="sm-header-desc">
-                                Lengkapi data surat, lampiran digital,
-                                dan lokasi arsip fisik agar dokumen
-                                tercatat rapi dalam sistem.
+                                Lengkapi data surat, lihat hasil optimasi
+                                lampiran, dan catat lokasi arsip fisik.
                             </p>
 
                         </div>
 
                     </div>
-
 
                     <span class="sm-header-badge">
 
@@ -1171,8 +1403,11 @@
 
             </header>
 
-
             <div class="sm-body">
+
+                {{-- =============================================================
+                     INFORMASI
+                ============================================================= --}}
 
                 <section class="sm-section">
 
@@ -1193,7 +1428,6 @@
                         </div>
 
                     </div>
-
 
                     <div class="sm-data-grid">
 
@@ -1229,7 +1463,6 @@
 
                         </div>
 
-
                         <div class="sm-field">
 
                             <label
@@ -1262,7 +1495,6 @@
 
                         </div>
 
-
                         <div class="sm-field">
 
                             <label
@@ -1292,7 +1524,6 @@
 
                         </div>
 
-
                         <div class="sm-field">
 
                             <label
@@ -1321,7 +1552,6 @@
                             @endif
 
                         </div>
-
 
                         <div class="sm-field">
 
@@ -1353,11 +1583,12 @@
                                             (string) $kategori->id
                                         )
                                     >
-
                                         {{ $kategori->nama_kategori }}
 
                                         @if(!empty($kategori->sifat))
+
                                             ({{ ucfirst($kategori->sifat) }})
+
                                         @endif
 
                                     </option>
@@ -1375,7 +1606,6 @@
                             @endif
 
                         </div>
-
 
                         <div class="sm-field">
 
@@ -1395,20 +1625,11 @@
                             >
 
                                 @foreach([
-                                    'baru' =>
-                                        'Baru',
-
-                                    'diproses' =>
-                                        'Diproses',
-
-                                    'didisposisikan' =>
-                                        'Didisposisikan',
-
-                                    'selesai' =>
-                                        'Selesai',
-
-                                    'diarsipkan' =>
-                                        'Diarsipkan',
+                                    'baru' => 'Baru',
+                                    'diproses' => 'Diproses',
+                                    'didisposisikan' => 'Didisposisikan',
+                                    'selesai' => 'Selesai',
+                                    'diarsipkan' => 'Diarsipkan',
                                 ] as $value => $label)
 
                                     <option
@@ -1437,7 +1658,6 @@
                             @endif
 
                         </div>
-
 
                         <div class="sm-field full">
 
@@ -1473,6 +1693,9 @@
 
                 </section>
 
+                {{-- =============================================================
+                     LAMPIRAN
+                ============================================================= --}}
 
                 <section class="sm-section">
 
@@ -1487,16 +1710,19 @@
                             </h2>
 
                             <p class="sm-section-desc">
-                                Simpan salinan digital dan catat posisi
-                                dokumen fisik secara bersamaan.
+                                Pilih PDF, JPG, JPEG, PNG atau gunakan kamera.
+                                Hasil optimasi ditampilkan sebelum disimpan.
                             </p>
 
                         </div>
 
                     </div>
 
-
                     <div class="sm-attachment-grid">
+
+                        {{-- =====================================================
+                             DIGITAL
+                        ====================================================== --}}
 
                         <div class="sm-card">
 
@@ -1529,7 +1755,6 @@
 
                                     </div>
 
-
                                     <div>
 
                                         <h3 class="sm-card-title">
@@ -1544,13 +1769,11 @@
 
                                 </div>
 
-
                                 <span class="sm-badge">
                                     Wajib
                                 </span>
 
                             </div>
-
 
                             <div class="sm-card-body">
 
@@ -1574,22 +1797,25 @@
                                             stroke-linecap="round"
                                             d="M12 10v6M12 7h.01"
                                         />
+
                                     </svg>
 
                                     <div>
 
                                         <strong>PDF:</strong>
-                                        maksimal 10 MB dan akan
-                                        dikompresi otomatis oleh
-                                        server sebelum disimpan.
+                                        preview langsung tersedia.
+                                        Compression sebenarnya tetap
+                                        diproses server oleh Ghostscript.
+
+                                        <br>
 
                                         <strong>JPG/JPEG/PNG:</strong>
-                                        akan dioptimalkan untuk arsip.
+                                        langsung di-resize dan dikompresi
+                                        menjadi JPG sebelum dikirim.
 
                                     </div>
 
                                 </div>
-
 
                                 <div class="sm-mode">
 
@@ -1618,7 +1844,6 @@
                                         Upload File
 
                                     </button>
-
 
                                     <button
                                         type="button"
@@ -1654,6 +1879,9 @@
 
                                 </div>
 
+                                {{-- =================================================
+                                     UPLOAD PANEL
+                                ================================================== --}}
 
                                 <div id="sm-upload-panel">
 
@@ -1682,7 +1910,6 @@
 
                                         </span>
 
-
                                         <span
                                             id="sm-upload-title"
                                             class="sm-upload-title"
@@ -1690,27 +1917,31 @@
                                             Klik untuk memilih file
                                         </span>
 
-
                                         <span class="sm-upload-format">
                                             PDF, JPG, JPEG, PNG
                                         </span>
-
 
                                         <span class="sm-upload-limit">
                                             Maksimal 10 MB
                                         </span>
 
-
                                         <input
                                             id="lampiran_file"
                                             name="lampiran_file"
                                             type="file"
-                                            accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+                                            accept="
+                                                .pdf,
+                                                .jpg,
+                                                .jpeg,
+                                                .png,
+                                                application/pdf,
+                                                image/jpeg,
+                                                image/png
+                                            "
                                             class="sm-upload-input"
                                         >
 
                                     </label>
-
 
                                     <div
                                         id="sm-selected-file"
@@ -1736,10 +1967,12 @@
 
                                         </div>
 
-
                                         <div class="sm-selected-content">
 
-                                            <p class="sm-selected-title">
+                                            <p
+                                                id="sm-selected-title"
+                                                class="sm-selected-title"
+                                            >
                                                 File siap digunakan
                                             </p>
 
@@ -1754,7 +1987,6 @@
                                             ></p>
 
                                         </div>
-
 
                                         <button
                                             type="button"
@@ -1783,14 +2015,21 @@
 
                                     </div>
 
-
                                     <div
                                         id="sm-compression-status"
                                         class="sm-compression-status sm-hidden"
                                     ></div>
 
+                                    <div
+                                        id="sm-file-preview"
+                                        class="sm-file-preview sm-hidden"
+                                    ></div>
+
                                 </div>
 
+                                {{-- =================================================
+                                     CAMERA
+                                ================================================== --}}
 
                                 <div
                                     id="sm-camera-panel"
@@ -1809,14 +2048,12 @@
                                                 class="sm-camera-video"
                                             ></video>
 
-
                                             <img
                                                 id="sm-image-preview"
                                                 src=""
                                                 alt="Preview hasil scan"
                                                 class="sm-camera-image sm-hidden"
                                             >
-
 
                                             <div
                                                 id="sm-camera-placeholder"
@@ -1851,24 +2088,20 @@
 
                                                     </div>
 
-
                                                     <p class="sm-camera-placeholder-title">
                                                         Kamera belum aktif
                                                     </p>
-
 
                                                     <p
                                                         id="sm-camera-placeholder-text"
                                                         class="sm-camera-placeholder-desc"
                                                     >
-                                                        Aktifkan kamera untuk
-                                                        scan dokumen.
+                                                        Aktifkan kamera untuk scan dokumen.
                                                     </p>
 
                                                 </div>
 
                                             </div>
-
 
                                             <div
                                                 id="sm-camera-error"
@@ -1876,11 +2109,9 @@
                                                 role="alert"
                                             ></div>
 
-
                                             <div class="sm-camera-frame"></div>
 
                                         </div>
-
 
                                         <div class="sm-camera-actions">
 
@@ -1892,7 +2123,6 @@
                                                 Nyalakan Kamera
                                             </button>
 
-
                                             <button
                                                 type="button"
                                                 id="sm-capture"
@@ -1900,7 +2130,6 @@
                                             >
                                                 Ambil Foto
                                             </button>
-
 
                                             <button
                                                 type="button"
@@ -1914,14 +2143,12 @@
 
                                     </div>
 
-
                                     <input
                                         type="hidden"
                                         name="captured_image"
                                         id="sm-captured-image"
                                         value="{{ old('captured_image') }}"
                                     >
-
 
                                     <div
                                         id="sm-snapshot-preview"
@@ -1932,7 +2159,6 @@
                                             id="sm-snapshot-text"
                                             class="sm-snapshot-text"
                                         ></div>
-
 
                                         <button
                                             type="button"
@@ -1963,7 +2189,6 @@
 
                                 </div>
 
-
                                 @if($formErrors->has('lampiran_file'))
 
                                     <p class="sm-field-error">
@@ -1971,7 +2196,6 @@
                                     </p>
 
                                 @endif
-
 
                                 @if($formErrors->has('captured_image'))
 
@@ -1985,6 +2209,9 @@
 
                         </div>
 
+                        {{-- =====================================================
+                             ARSIP FISIK
+                        ====================================================== --}}
 
                         <div class="sm-card">
 
@@ -2011,7 +2238,6 @@
 
                                     </div>
 
-
                                     <div>
 
                                         <h3 class="sm-card-title">
@@ -2026,13 +2252,11 @@
 
                                 </div>
 
-
                                 <span class="sm-badge optional">
                                     Opsional
                                 </span>
 
                             </div>
-
 
                             <div class="sm-card-body">
 
@@ -2057,18 +2281,15 @@
 
                                     </div>
 
-
                                     <h4 class="sm-physical-title">
                                         Detail Lokasi Penyimpanan
                                     </h4>
-
 
                                     <p class="sm-physical-desc">
                                         Cantumkan rak, lemari, box,
                                         atau map tempat dokumen
                                         fisik disimpan.
                                     </p>
-
 
                                     <div class="sm-physical-field">
 
@@ -2078,7 +2299,6 @@
                                         >
                                             Posisi Rak / Lemari / Box
                                         </label>
-
 
                                         <input
                                             id="lokasi_arsip_fisik"
@@ -2090,7 +2310,6 @@
                                             class="sm-control {{ $formErrors->has('lokasi_arsip_fisik') ? 'sm-control-error' : '' }}"
                                         >
 
-
                                         @if($formErrors->has('lokasi_arsip_fisik'))
 
                                             <p class="sm-field-error">
@@ -2100,7 +2319,6 @@
                                         @endif
 
                                     </div>
-
 
                                     <div class="sm-example">
 
@@ -2112,13 +2330,12 @@
 
                                     </div>
 
-
                                     <div class="sm-note">
 
                                         Lokasi fisik hanya mencatat
                                         posisi dokumen asli dan tidak
-                                        mengubah berkas digital yang
-                                        tersimpan di server.
+                                        mengubah berkas digital
+                                        yang tersimpan di server.
 
                                     </div>
 
@@ -2133,7 +2350,6 @@
                 </section>
 
             </div>
-
 
             <div class="sm-footer">
 
@@ -2161,7 +2377,6 @@
 
                 </a>
 
-
                 <button
                     id="sm-submit-btn"
                     type="submit"
@@ -2183,7 +2398,6 @@
                             d="M5 13l4 4L19 7"
                         />
                     </svg>
-
 
                     <svg
                         id="sm-submit-loading"
@@ -2210,7 +2424,6 @@
                         />
                     </svg>
 
-
                     <span id="sm-submit-text">
                         Simpan Surat Masuk
                     </span>
@@ -2225,7 +2438,6 @@
 
 </div>
 
-
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
@@ -2234,11 +2446,6 @@ document.addEventListener(
     function () {
 
         'use strict';
-
-
-        /* ================================================================
-           ELEMENT
-        ================================================================ */
 
         const form =
             document.getElementById(
@@ -2285,6 +2492,11 @@ document.addEventListener(
                 'sm-selected-file'
             );
 
+        const selectedFileTitle =
+            document.getElementById(
+                'sm-selected-title'
+            );
+
         const selectedFileName =
             document.getElementById(
                 'sm-selected-file-name'
@@ -2303,6 +2515,11 @@ document.addEventListener(
         const compressionStatus =
             document.getElementById(
                 'sm-compression-status'
+            );
+
+        const filePreview =
+            document.getElementById(
+                'sm-file-preview'
             );
 
         const video =
@@ -2385,7 +2602,6 @@ document.addEventListener(
                 'sm-submit-text'
             );
 
-
         if (
             !form ||
             !fileInput ||
@@ -2393,11 +2609,6 @@ document.addEventListener(
         ) {
             return;
         }
-
-
-        /* ================================================================
-           CONFIG
-        ================================================================ */
 
         const MAX_FILE_SIZE =
             10 *
@@ -2421,20 +2632,20 @@ document.addEventListener(
             1000;
 
         const JPEG_QUALITIES = [
-            0.90,
-            0.86,
-            0.82,
-            0.78,
-            0.74,
-            0.70,
-            0.66,
-            0.62,
-            0.58,
-            0.54,
-            0.50,
-            0.46,
-            0.42,
-            0.38
+            .90,
+            .86,
+            .82,
+            .78,
+            .74,
+            .70,
+            .66,
+            .62,
+            .58,
+            .54,
+            .50,
+            .46,
+            .42,
+            .38
         ];
 
         const CAMERA_MAX_WIDTH =
@@ -2453,7 +2664,6 @@ document.addEventListener(
             1024 *
             1024;
 
-
         let cameraStream =
             null;
 
@@ -2463,10 +2673,8 @@ document.addEventListener(
         let compressionToken =
             0;
 
-
-        /* ================================================================
-           UTILITY
-        ================================================================ */
+        let previewUrl =
+            null;
 
         function formatFileSize(
             bytes
@@ -2481,8 +2689,7 @@ document.addEventListener(
 
             if (
                 bytes <
-                1024 *
-                1024
+                1024 * 1024
             ) {
                 return (
                     (
@@ -2497,14 +2704,12 @@ document.addEventListener(
                 (
                     bytes /
                     (
-                        1024 *
-                        1024
+                        1024 * 1024
                     )
                 ).toFixed(2) +
                 ' MB'
             );
         }
-
 
         function getReductionPercent(
             originalSize,
@@ -2533,7 +2738,6 @@ document.addEventListener(
             );
         }
 
-
         function getExtension(
             file
         ) {
@@ -2546,7 +2750,6 @@ document.addEventListener(
                 .pop()
                 .toLowerCase();
         }
-
 
         function isAllowedExtension(
             extension
@@ -2562,7 +2765,6 @@ document.addEventListener(
             );
         }
 
-
         function isImageExtension(
             extension
         ) {
@@ -2576,25 +2778,11 @@ document.addEventListener(
             );
         }
 
-
-        /* ================================================================
-           ALERT
-        ================================================================ */
-
         function showAlert(
             icon,
             title,
             message
         ) {
-
-            const safeMessage =
-                typeof message ===
-                    'string'
-                    ? message
-                    : String(
-                        message ?? ''
-                    );
-
 
             if (
                 typeof window.Swal !==
@@ -2602,87 +2790,34 @@ document.addEventListener(
             ) {
 
                 window.Swal.fire({
-
-                    icon:
-                        icon,
-
-                    title:
-                        title,
-
+                    icon,
+                    title,
                     text:
-                        safeMessage,
-
+                        String(
+                            message ??
+                            ''
+                        ),
                     confirmButtonText:
                         'Mengerti',
-
                     confirmButtonColor:
                         '#2563eb'
-
                 });
 
                 return;
             }
 
-
             window.alert(
-                safeMessage
+                String(
+                    message ??
+                    ''
+                )
             );
         }
-
-
-        /* ================================================================
-           CAMERA ERROR
-        ================================================================ */
-
-        function showCameraError(
-            message
-        ) {
-
-            if (!cameraError) {
-                return;
-            }
-
-            cameraError.textContent =
-                typeof message ===
-                    'string'
-                    ? message
-                    : String(
-                        message ?? ''
-                    );
-
-            cameraError.classList.remove(
-                'sm-hidden'
-            );
-        }
-
-
-        function hideCameraError() {
-
-            if (!cameraError) {
-                return;
-            }
-
-            cameraError.textContent =
-                '';
-
-            cameraError.classList.add(
-                'sm-hidden'
-            );
-        }
-
-
-        /* ================================================================
-           COMPRESSION STATUS
-        ================================================================ */
 
         function setCompressionStatus(
             html,
             type = ''
         ) {
-
-            if (!compressionStatus) {
-                return;
-            }
 
             compressionStatus.classList.remove(
                 'sm-hidden',
@@ -2701,16 +2836,12 @@ document.addEventListener(
 
             compressionStatus.innerHTML =
                 String(
-                    html ?? ''
+                    html ??
+                    ''
                 );
         }
 
-
         function clearCompressionStatus() {
-
-            if (!compressionStatus) {
-                return;
-            }
 
             compressionStatus.innerHTML =
                 '';
@@ -2727,10 +2858,96 @@ document.addEventListener(
             );
         }
 
+        function clearPreviewUrl() {
 
-        /* ================================================================
-           MODE
-        ================================================================ */
+            if (
+                previewUrl
+            ) {
+
+                URL.revokeObjectURL(
+                    previewUrl
+                );
+
+                previewUrl =
+                    null;
+            }
+        }
+
+        function clearFilePreview() {
+
+            clearPreviewUrl();
+
+            filePreview.innerHTML =
+                '';
+
+            filePreview.classList.add(
+                'sm-hidden'
+            );
+        }
+
+        function showPdfPreview(
+            file,
+            title = 'Preview PDF'
+        ) {
+
+            clearPreviewUrl();
+
+            previewUrl =
+                URL.createObjectURL(
+                    file
+                );
+
+            filePreview.innerHTML =
+                `
+                    <div class="sm-file-preview-header">
+                        ${title}
+                    </div>
+
+                    <div class="sm-file-preview-content">
+                        <iframe
+                            class="sm-file-preview-pdf"
+                            src="${previewUrl}"
+                            title="${title}"
+                        ></iframe>
+                    </div>
+                `;
+
+            filePreview.classList.remove(
+                'sm-hidden'
+            );
+        }
+
+        function showImagePreview(
+            file,
+            title = 'Preview gambar hasil kompresi'
+        ) {
+
+            clearPreviewUrl();
+
+            previewUrl =
+                URL.createObjectURL(
+                    file
+                );
+
+            filePreview.innerHTML =
+                `
+                    <div class="sm-file-preview-header">
+                        ${title}
+                    </div>
+
+                    <div class="sm-file-preview-content">
+                        <img
+                            class="sm-file-preview-image"
+                            src="${previewUrl}"
+                            alt="${title}"
+                        >
+                    </div>
+                `;
+
+            filePreview.classList.remove(
+                'sm-hidden'
+            );
+        }
 
         function setModeButton(
             button,
@@ -2754,7 +2971,6 @@ document.addEventListener(
             );
         }
 
-
         function resetCameraButtons() {
 
             startCameraBtn.classList.remove(
@@ -2770,99 +2986,90 @@ document.addEventListener(
             );
         }
 
+        function stopCameraTracks() {
+
+            if (!cameraStream) {
+                return;
+            }
+
+            cameraStream
+                .getTracks()
+                .forEach(
+                    function (
+                        track
+                    ) {
+                        track.stop();
+                    }
+                );
+
+            cameraStream =
+                null;
+        }
 
         function setUploadMode() {
 
             compressionToken++;
 
-
             stopCameraTracks();
 
-
-            if (video) {
-
-                video.srcObject =
-                    null;
-
-            }
-
+            video.srcObject =
+                null;
 
             uploadPanel.classList.remove(
                 'sm-hidden'
             );
 
-
             cameraPanel.classList.add(
                 'sm-hidden'
             );
-
 
             setModeButton(
                 btnUpload,
                 true
             );
 
-
             setModeButton(
                 btnCamera,
                 false
             );
 
-
-            hideCameraError();
-
-
             resetCameraButtons();
-
         }
-
 
         function setCameraMode() {
 
             compressionToken++;
 
-
             stopCameraTracks();
 
-
-            if (video) {
-
-                video.srcObject =
-                    null;
-
-            }
-
+            video.srcObject =
+                null;
 
             uploadPanel.classList.add(
                 'sm-hidden'
             );
 
-
             cameraPanel.classList.remove(
                 'sm-hidden'
             );
-
 
             setModeButton(
                 btnUpload,
                 false
             );
 
-
             setModeButton(
                 btnCamera,
                 true
             );
 
-
             clearSelectedFile();
 
+            clearFilePreview();
 
-            hideCameraError();
-
+            clearCameraError();
 
             resetCameraButtons();
-
 
             if (
                 !capturedImage.value
@@ -2872,31 +3079,21 @@ document.addEventListener(
                     'sm-hidden'
                 );
 
-
                 video.classList.remove(
                     'sm-hidden'
                 );
-
             }
-
         }
-
 
         btnUpload?.addEventListener(
             'click',
             setUploadMode
         );
 
-
         btnCamera?.addEventListener(
             'click',
             setCameraMode
         );
-
-
-        /* ================================================================
-           SELECTED FILE
-        ================================================================ */
 
         function showSelectedFile(
             file,
@@ -2907,10 +3104,11 @@ document.addEventListener(
                 'sm-hidden'
             );
 
+            selectedFileTitle.textContent =
+                'File siap digunakan';
 
             selectedFileName.textContent =
                 file.name;
-
 
             selectedFileSize.textContent =
                 formatFileSize(
@@ -2923,52 +3121,42 @@ document.addEventListener(
                         : ''
                 );
 
-
             uploadBox.classList.add(
                 'has-file'
             );
-
 
             uploadTitle.textContent =
                 'File siap digunakan';
         }
 
-
         function clearSelectedFile() {
 
             compressionToken++;
 
-
             fileInput.value =
                 '';
-
 
             selectedFile.classList.add(
                 'sm-hidden'
             );
 
-
             selectedFileName.textContent =
                 '';
 
-
             selectedFileSize.textContent =
                 '';
-
 
             uploadBox.classList.remove(
                 'has-file'
             );
 
-
             uploadTitle.textContent =
                 'Klik untuk memilih file';
 
-
             clearCompressionStatus();
 
+            clearFilePreview();
         }
-
 
         clearFileBtn?.addEventListener(
             'click',
@@ -2978,11 +3166,6 @@ document.addEventListener(
 
             }
         );
-
-
-        /* ================================================================
-           IMAGE
-        ================================================================ */
 
         function loadImage(
             file
@@ -2999,10 +3182,8 @@ document.addEventListener(
                             file
                         );
 
-
                     const image =
                         new Image();
-
 
                     image.onload =
                         function () {
@@ -3016,7 +3197,6 @@ document.addEventListener(
                             );
                         };
 
-
                     image.onerror =
                         function () {
 
@@ -3026,19 +3206,16 @@ document.addEventListener(
 
                             reject(
                                 new Error(
-                                    'Gambar tidak dapat dibaca oleh browser.'
+                                    'Gambar tidak dapat dibaca browser.'
                                 )
                             );
                         };
 
-
                     image.src =
                         objectUrl;
-
                 }
             );
         }
-
 
         function calculateDimensions(
             width,
@@ -3047,32 +3224,23 @@ document.addEventListener(
         ) {
 
             if (
-                width <=
-                    maxDimension &&
-                height <=
-                    maxDimension
+                width <= maxDimension &&
+                height <= maxDimension
             ) {
 
                 return {
                     width,
                     height
                 };
-
             }
-
 
             const scale =
                 Math.min(
-                    maxDimension /
-                        width,
-
-                    maxDimension /
-                        height
+                    maxDimension / width,
+                    maxDimension / height
                 );
 
-
             return {
-
                 width:
                     Math.max(
                         1,
@@ -3090,10 +3258,8 @@ document.addEventListener(
                             scale
                         )
                     )
-
             };
         }
-
 
         function buildDimensionList(
             width,
@@ -3110,9 +3276,8 @@ document.addEventListener(
                 IMAGE_MIN_DIMENSION
             ];
 
-
-            const result = [];
-
+            const result =
+                [];
 
             maxDimensions.forEach(
                 function (
@@ -3126,7 +3291,6 @@ document.addEventListener(
                             maxDimension
                         );
 
-
                     if (
                         dimensions.width <
                             IMAGE_MIN_DIMENSION &&
@@ -3135,7 +3299,6 @@ document.addEventListener(
                     ) {
                         return;
                     }
-
 
                     const duplicate =
                         result.some(
@@ -3149,10 +3312,8 @@ document.addEventListener(
                                     existing.height ===
                                         dimensions.height
                                 );
-
                             }
                         );
-
 
                     if (
                         !duplicate
@@ -3161,16 +3322,12 @@ document.addEventListener(
                         result.push(
                             dimensions
                         );
-
                     }
-
                 }
             );
 
-
             return result;
         }
-
 
         function canvasToFile(
             image,
@@ -3191,14 +3348,11 @@ document.addEventListener(
                             'canvas'
                         );
 
-
                     canvas.width =
                         width;
 
-
                     canvas.height =
                         height;
-
 
                     const context =
                         canvas.getContext(
@@ -3209,22 +3363,19 @@ document.addEventListener(
                             }
                         );
 
-
                     if (!context) {
 
                         reject(
                             new Error(
-                                'Browser tidak mendukung pemrosesan gambar.'
+                                'Browser tidak mendukung canvas.'
                             )
                         );
 
                         return;
                     }
 
-
                     context.fillStyle =
                         '#ffffff';
-
 
                     context.fillRect(
                         0,
@@ -3233,14 +3384,11 @@ document.addEventListener(
                         height
                     );
 
-
                     context.imageSmoothingEnabled =
                         true;
 
-
                     context.imageSmoothingQuality =
                         'high';
-
 
                     context.drawImage(
                         image,
@@ -3249,7 +3397,6 @@ document.addEventListener(
                         width,
                         height
                     );
-
 
                     canvas.toBlob(
                         function (
@@ -3260,13 +3407,12 @@ document.addEventListener(
 
                                 reject(
                                     new Error(
-                                        'Browser gagal membuat file JPG.'
+                                        'Browser gagal membuat JPG.'
                                     )
                                 );
 
                                 return;
                             }
-
 
                             const baseName =
                                 String(
@@ -3282,14 +3428,12 @@ document.addEventListener(
                                         '_'
                                     );
 
-
                             const fileName =
                                 (
                                     baseName ||
                                     'lampiran'
                                 ) +
                                 '_compressed.jpg';
-
 
                             resolve(
                                 new File(
@@ -3314,7 +3458,6 @@ document.addEventListener(
             );
         }
 
-
         async function compressImageFile(
             file
         ) {
@@ -3324,28 +3467,13 @@ document.addEventListener(
                     file
                 );
 
-
             const width =
                 image.naturalWidth ||
                 image.width;
 
-
             const height =
                 image.naturalHeight ||
                 image.height;
-
-
-            if (
-                width <= 0 ||
-                height <= 0
-            ) {
-
-                throw new Error(
-                    'Dimensi gambar tidak valid.'
-                );
-
-            }
-
 
             const dimensionList =
                 buildDimensionList(
@@ -3353,10 +3481,8 @@ document.addEventListener(
                     height
                 );
 
-
             let smallest =
                 null;
-
 
             for (
                 const dimension
@@ -3377,7 +3503,6 @@ document.addEventListener(
                             file.name
                         );
 
-
                     if (
                         !smallest ||
                         compressed.size <
@@ -3386,9 +3511,7 @@ document.addEventListener(
 
                         smallest =
                             compressed;
-
                     }
-
 
                     if (
                         compressed.size <=
@@ -3396,12 +3519,9 @@ document.addEventListener(
                     ) {
 
                         return compressed;
-
                     }
-
                 }
             }
-
 
             if (
                 smallest &&
@@ -3410,19 +3530,12 @@ document.addEventListener(
             ) {
 
                 return smallest;
-
             }
-
 
             throw new Error(
                 'Gambar masih terlalu besar setelah dikompres.'
             );
         }
-
-
-        /* ================================================================
-           FILE CHANGE
-        ================================================================ */
 
         fileInput.addEventListener(
             'change',
@@ -3431,24 +3544,21 @@ document.addEventListener(
                 const file =
                     fileInput.files?.[0];
 
-
                 if (!file) {
                     return;
                 }
 
-
                 const currentToken =
                     ++compressionToken;
 
+                clearCameraError();
 
-                hideCameraError();
-
+                clearFilePreview();
 
                 const extension =
                     getExtension(
                         file
                     );
-
 
                 if (
                     !isAllowedExtension(
@@ -3458,17 +3568,14 @@ document.addEventListener(
 
                     clearSelectedFile();
 
-
                     showAlert(
                         'warning',
                         'Format tidak didukung',
                         'Gunakan PDF, JPG, JPEG, atau PNG.'
                     );
 
-
                     return;
                 }
-
 
                 if (
                     file.size <= 0
@@ -3476,17 +3583,14 @@ document.addEventListener(
 
                     clearSelectedFile();
 
-
                     showAlert(
                         'warning',
                         'File tidak valid',
                         'File yang dipilih kosong.'
                     );
 
-
                     return;
                 }
-
 
                 if (
                     file.size >
@@ -3495,59 +3599,81 @@ document.addEventListener(
 
                     clearSelectedFile();
 
-
                     showAlert(
                         'warning',
                         'File terlalu besar',
                         'Ukuran file asli maksimal 10 MB.'
                     );
 
-
                     return;
                 }
 
-
-                /* ==========================================================
+                /* =========================================================
                    PDF
-                ========================================================== */
+                ========================================================= */
 
                 if (
-                    extension ===
-                    'pdf'
+                    extension === 'pdf'
                 ) {
 
                     capturedImage.value =
                         '';
 
-
                     clearCapturedPreview();
-
 
                     showSelectedFile(
                         file,
                         'PDF • siap diproses server'
                     );
 
-
                     setCompressionStatus(
-                        '✓ <strong>PDF siap.</strong><br>' +
-                        'Ukuran asli: <strong>' +
-                        formatFileSize(
-                            file.size
-                        ) +
-                        '</strong><br>' +
-                        'PDF akan diproses oleh Ghostscript di server saat disimpan.',
+                        '<strong>✓ PDF siap digunakan.</strong>' +
+
+                        '<div class="sm-compression-table">' +
+
+                        '<div class="sm-compression-item">' +
+                        '<span class="sm-compression-label">Format</span>' +
+                        '<span class="sm-compression-value">PDF</span>' +
+                        '</div>' +
+
+                        '<div class="sm-compression-item">' +
+                        '<span class="sm-compression-label">Ukuran asli</span>' +
+                        '<span class="sm-compression-value">' +
+                        formatFileSize(file.size) +
+                        '</span>' +
+                        '</div>' +
+
+                        '<div class="sm-compression-item">' +
+                        '<span class="sm-compression-label">Compression</span>' +
+                        '<span class="sm-compression-value">Server</span>' +
+                        '</div>' +
+
+                        '<div class="sm-compression-item">' +
+                        '<span class="sm-compression-label">Status</span>' +
+                        '<span class="sm-compression-value">Siap</span>' +
+                        '</div>' +
+
+                        '</div>' +
+
+                        '<br>' +
+
+                        'Preview PDF sudah ditampilkan. ' +
+                        'Ukuran hasil compression final akan diketahui ' +
+                        'setelah Ghostscript server memproses file.',
                         'processing'
                     );
 
+                    showPdfPreview(
+                        file,
+                        'Preview PDF yang dipilih'
+                    );
 
                     return;
                 }
 
-
-                /* ==========================================================
+                /* =========================================================
                    IMAGE
-                ========================================================== */
+                ========================================================= */
 
                 if (
                     !isImageExtension(
@@ -3557,23 +3683,19 @@ document.addEventListener(
                     return;
                 }
 
-
                 const originalSize =
                     file.size;
-
 
                 showSelectedFile(
                     file,
                     'Sedang mengompres...'
                 );
 
-
                 setCompressionStatus(
-                    '⏳ <strong>Sedang memproses gambar...</strong><br>' +
-                    'Gambar sedang di-resize dan dikonversi menjadi JPG.',
+                    '⏳ <strong>Sedang mengompres gambar...</strong><br>' +
+                    'Browser sedang melakukan resize dan mencari hasil JPG terbaik.',
                     'processing'
                 );
-
 
                 try {
 
@@ -3582,7 +3704,6 @@ document.addEventListener(
                             file
                         );
 
-
                     if (
                         currentToken !==
                         compressionToken
@@ -3590,51 +3711,30 @@ document.addEventListener(
                         return;
                     }
 
-
                     if (
                         compressed.size >
                         MAX_FILE_SIZE
                     ) {
 
-                        clearSelectedFile();
-
-
-                        setCompressionStatus(
-                            '✕ Hasil kompresi masih lebih besar dari 10 MB.',
-                            'error'
+                        throw new Error(
+                            'Ukuran hasil compression masih lebih dari 10 MB.'
                         );
-
-
-                        showAlert(
-                            'error',
-                            'Kompresi gagal',
-                            'Hasil gambar masih melebihi batas 10 MB.'
-                        );
-
-
-                        return;
                     }
-
 
                     const transfer =
                         new DataTransfer();
-
 
                     transfer.items.add(
                         compressed
                     );
 
-
                     fileInput.files =
                         transfer.files;
-
 
                     capturedImage.value =
                         '';
 
-
                     clearCapturedPreview();
-
 
                     const reduction =
                         getReductionPercent(
@@ -3642,42 +3742,69 @@ document.addEventListener(
                             compressed.size
                         );
 
-
                     showSelectedFile(
                         compressed,
                         'JPG • hasil kompresi'
                     );
 
-
                     setCompressionStatus(
-                        '✓ <strong>Kompresi berhasil.</strong><br>' +
-                        'Ukuran asli: <strong>' +
-                        formatFileSize(
-                            originalSize
-                        ) +
-                        '</strong><br>' +
-                        'Ukuran hasil: <strong>' +
-                        formatFileSize(
-                            compressed.size
-                        ) +
-                        '</strong><br>' +
-                        'Penghematan: <strong>' +
+                        '<strong>✓ Kompresi gambar berhasil.</strong>' +
+
+                        '<div class="sm-compression-table">' +
+
+                        '<div class="sm-compression-item">' +
+                        '<span class="sm-compression-label">Format asli</span>' +
+                        '<span class="sm-compression-value">' +
+                        extension.toUpperCase() +
+                        '</span>' +
+                        '</div>' +
+
+                        '<div class="sm-compression-item">' +
+                        '<span class="sm-compression-label">Format akhir</span>' +
+                        '<span class="sm-compression-value">JPG</span>' +
+                        '</div>' +
+
+                        '<div class="sm-compression-item">' +
+                        '<span class="sm-compression-label">Ukuran asli</span>' +
+                        '<span class="sm-compression-value">' +
+                        formatFileSize(originalSize) +
+                        '</span>' +
+                        '</div>' +
+
+                        '<div class="sm-compression-item">' +
+                        '<span class="sm-compression-label">Ukuran hasil</span>' +
+                        '<span class="sm-compression-value">' +
+                        formatFileSize(compressed.size) +
+                        '</span>' +
+                        '</div>' +
+
+                        '<div class="sm-compression-item">' +
+                        '<span class="sm-compression-label">Penghematan</span>' +
+                        '<span class="sm-compression-value">' +
                         reduction +
-                        '%</strong><br>' +
-                        'Format akhir: <strong>JPG</strong>.',
+                        '%</span>' +
+                        '</div>' +
+
+                        '<div class="sm-compression-item">' +
+                        '<span class="sm-compression-label">Status</span>' +
+                        '<span class="sm-compression-value">Siap disimpan</span>' +
+                        '</div>' +
+
+                        '</div>',
                         'success'
                     );
 
+                    showImagePreview(
+                        compressed,
+                        'Preview JPG hasil kompresi'
+                    );
 
-                } catch (
-                    error
-                ) {
+                } catch (error) {
 
                     console.error(
                         'Compression error:',
                         error
                     );
-
 
                     if (
                         currentToken !==
@@ -3686,207 +3813,426 @@ document.addEventListener(
                         return;
                     }
 
-
                     clearSelectedFile();
-
 
                     showAlert(
                         'error',
                         'Gagal memproses gambar',
-                        error &&
-                        typeof error.message ===
-                            'string'
-                            ? error.message
-                            : 'Browser gagal mengompres gambar.'
+                        error?.message ||
+                        'Browser gagal mengompres gambar.'
                     );
                 }
 
             }
         );
 
+        function clearCapturedPreview() {
 
-        /* ================================================================
-           CAMERA
-        ================================================================ */
+            capturedImage.value =
+                '';
+
+            imagePreview.src =
+                '';
+
+            imagePreview.classList.add(
+                'sm-hidden'
+            );
+
+            snapshotPreview.classList.add(
+                'sm-hidden'
+            );
+
+            snapshotText.textContent =
+                '';
+        }
+
+        function calculateCameraDimensions(
+            width,
+            height
+        ) {
+
+            const scale =
+                Math.min(
+                    CAMERA_MAX_WIDTH /
+                        width,
+                    CAMERA_MAX_HEIGHT /
+                        height,
+                    1
+                );
+
+            return {
+                width:
+                    Math.max(
+                        1,
+                        Math.round(
+                            width *
+                            scale
+                        )
+                    ),
+
+                height:
+                    Math.max(
+                        1,
+                        Math.round(
+                            height *
+                            scale
+                        )
+                    )
+            };
+        }
+
+        function estimateBinarySize(
+            dataUrl
+        ) {
+
+            const comma =
+                dataUrl.indexOf(',');
+
+            if (
+                comma === -1
+            ) {
+                return 0;
+            }
+
+            const base64 =
+                dataUrl.substring(
+                    comma + 1
+                );
+
+            const padding =
+                base64.endsWith(
+                    '=='
+                )
+                    ? 2
+                    : base64.endsWith(
+                        '='
+                    )
+                        ? 1
+                        : 0;
+
+            return Math.floor(
+                (
+                    base64.length *
+                    3
+                ) / 4
+            ) - padding;
+        }
+
+        function buildCameraImage() {
+
+            const dimensions =
+                calculateCameraDimensions(
+                    video.videoWidth,
+                    video.videoHeight
+                );
+
+            let canvas =
+                document.createElement(
+                    'canvas'
+                );
+
+            canvas.width =
+                dimensions.width;
+
+            canvas.height =
+                dimensions.height;
+
+            let context =
+                canvas.getContext(
+                    '2d',
+                    {
+                        alpha:
+                            false
+                    }
+                );
+
+            if (!context) {
+
+                throw new Error(
+                    'Browser tidak mendukung canvas.'
+                );
+            }
+
+            context.fillStyle =
+                '#ffffff';
+
+            context.fillRect(
+                0,
+                0,
+                canvas.width,
+                canvas.height
+            );
+
+            context.imageSmoothingEnabled =
+                true;
+
+            context.imageSmoothingQuality =
+                'high';
+
+            context.drawImage(
+                video,
+                0,
+                0,
+                canvas.width,
+                canvas.height
+            );
+
+            let quality =
+                .82;
+
+            let dataUrl =
+                canvas.toDataURL(
+                    'image/jpeg',
+                    quality
+                );
+
+            while (
+                estimateBinarySize(
+                    dataUrl
+                ) >
+                    CAMERA_TARGET_SIZE &&
+                quality >
+                    .38
+            ) {
+
+                quality -=
+                    .05;
+
+                dataUrl =
+                    canvas.toDataURL(
+                        'image/jpeg',
+                        quality
+                    );
+            }
+
+            let attempt =
+                0;
+
+            while (
+                estimateBinarySize(
+                    dataUrl
+                ) >
+                    CAMERA_TARGET_SIZE &&
+                attempt <
+                    5
+            ) {
+
+                attempt++;
+
+                const smallerCanvas =
+                    document.createElement(
+                        'canvas'
+                    );
+
+                smallerCanvas.width =
+                    Math.max(
+                        1,
+                        Math.round(
+                            canvas.width *
+                            .75
+                        )
+                    );
+
+                smallerCanvas.height =
+                    Math.max(
+                        1,
+                        Math.round(
+                            canvas.height *
+                            .75
+                        )
+                    );
+
+                const smallerContext =
+                    smallerCanvas.getContext(
+                        '2d',
+                        {
+                            alpha:
+                                false
+                        }
+                    );
+
+                if (!smallerContext) {
+
+                    throw new Error(
+                        'Resize kamera tidak tersedia.'
+                    );
+                }
+
+                smallerContext.fillStyle =
+                    '#ffffff';
+
+                smallerContext.fillRect(
+                    0,
+                    0,
+                    smallerCanvas.width,
+                    smallerCanvas.height
+                );
+
+                smallerContext.imageSmoothingEnabled =
+                    true;
+
+                smallerContext.imageSmoothingQuality =
+                    'high';
+
+                smallerContext.drawImage(
+                    canvas,
+                    0,
+                    0,
+                    smallerCanvas.width,
+                    smallerCanvas.height
+                );
+
+                canvas =
+                    smallerCanvas;
+
+                dataUrl =
+                    canvas.toDataURL(
+                        'image/jpeg',
+                        .58
+                    );
+            }
+
+            return dataUrl;
+        }
 
         startCameraBtn?.addEventListener(
             'click',
-            startCamera
-        );
+            async function () {
 
-
-        async function startCamera() {
-
-            hideCameraError();
-
-
-            if (
-                !window.isSecureContext
-            ) {
-
-                showCameraError(
-                    'Kamera membutuhkan HTTPS.'
-                );
-
-                return;
-            }
-
-
-            if (
-                !navigator.mediaDevices ||
-                !navigator.mediaDevices.getUserMedia
-            ) {
-
-                showCameraError(
-                    'Browser tidak mendukung akses kamera.'
-                );
-
-                return;
-            }
-
-
-            stopCameraTracks();
-
-
-            try {
-
-                cameraStream =
-                    await navigator.mediaDevices.getUserMedia({
-
-                        video: {
-
-                            facingMode: {
-                                ideal:
-                                    'environment'
-                            },
-
-                            width: {
-                                ideal:
-                                    CAMERA_MAX_WIDTH
-                            },
-
-                            height: {
-                                ideal:
-                                    CAMERA_MAX_HEIGHT
-                            }
-
-                        },
-
-                        audio:
-                            false
-
-                    });
-
-
-                video.srcObject =
-                    cameraStream;
-
-
-                await video.play();
-
-
-                video.classList.remove(
-                    'sm-hidden'
-                );
-
-
-                imagePreview.classList.add(
-                    'sm-hidden'
-                );
-
-
-                imagePreview.src =
-                    '';
-
-
-                cameraPlaceholder.classList.add(
-                    'sm-hidden'
-                );
-
-
-                startCameraBtn.classList.add(
-                    'sm-hidden'
-                );
-
-
-                captureBtn.classList.remove(
-                    'sm-hidden'
-                );
-
-
-                stopCameraBtn.classList.remove(
-                    'sm-hidden'
-                );
-
-
-            } catch (
-                error
-            ) {
-
-                console.error(
-                    'Camera error:',
-                    error
-                );
-
-
-                let message =
-                    'Kamera tidak dapat digunakan.';
-
+                hideCameraError();
 
                 if (
-                    error?.name ===
-                        'NotAllowedError' ||
-                    error?.name ===
-                        'PermissionDeniedError'
+                    !window.isSecureContext
                 ) {
 
-                    message =
-                        'Akses kamera ditolak. Izinkan kamera pada browser.';
+                    showCameraError(
+                        'Kamera membutuhkan HTTPS.'
+                    );
 
-                } else if (
-                    error?.name ===
-                    'NotFoundError'
-                ) {
-
-                    message =
-                        'Kamera tidak ditemukan.';
-
-                } else if (
-                    error?.name ===
-                    'NotReadableError'
-                ) {
-
-                    message =
-                        'Kamera sedang digunakan aplikasi lain.';
-
-                } else if (
-                    error?.name ===
-                    'SecurityError'
-                ) {
-
-                    message =
-                        'Akses kamera diblokir oleh browser.';
-
+                    return;
                 }
 
+                if (
+                    !navigator.mediaDevices ||
+                    !navigator.mediaDevices.getUserMedia
+                ) {
 
-                showCameraError(
-                    message
-                );
+                    showCameraError(
+                        'Browser tidak mendukung kamera.'
+                    );
+
+                    return;
+                }
+
+                stopCameraTracks();
+
+                try {
+
+                    cameraStream =
+                        await navigator
+                            .mediaDevices
+                            .getUserMedia({
+                                video: {
+                                    facingMode: {
+                                        ideal:
+                                            'environment'
+                                    },
+
+                                    width: {
+                                        ideal:
+                                            CAMERA_MAX_WIDTH
+                                    },
+
+                                    height: {
+                                        ideal:
+                                            CAMERA_MAX_HEIGHT
+                                    }
+                                },
+
+                                audio:
+                                    false
+                            });
+
+                    video.srcObject =
+                        cameraStream;
+
+                    await video.play();
+
+                    video.classList.remove(
+                        'sm-hidden'
+                    );
+
+                    imagePreview.classList.add(
+                        'sm-hidden'
+                    );
+
+                    imagePreview.src =
+                        '';
+
+                    cameraPlaceholder.classList.add(
+                        'sm-hidden'
+                    );
+
+                    startCameraBtn.classList.add(
+                        'sm-hidden'
+                    );
+
+                    captureBtn.classList.remove(
+                        'sm-hidden'
+                    );
+
+                    stopCameraBtn.classList.remove(
+                        'sm-hidden'
+                    );
+
+                } catch (error) {
+
+                    console.error(
+                        error
+                    );
+
+                    let message =
+                        'Kamera tidak dapat digunakan.';
+
+                    if (
+                        error?.name ===
+                            'NotAllowedError' ||
+                        error?.name ===
+                            'PermissionDeniedError'
+                    ) {
+
+                        message =
+                            'Akses kamera ditolak. Izinkan kamera pada browser.';
+
+                    } else if (
+                        error?.name ===
+                            'NotFoundError'
+                    ) {
+
+                        message =
+                            'Kamera tidak ditemukan.';
+
+                    } else if (
+                        error?.name ===
+                            'NotReadableError'
+                    ) {
+
+                        message =
+                            'Kamera sedang digunakan aplikasi lain.';
+                    }
+
+                    showCameraError(
+                        message
+                    );
+                }
             }
-        }
-
-
-        /* ================================================================
-           CAPTURE
-        ================================================================ */
+        );
 
         captureBtn?.addEventListener(
             'click',
             function () {
 
                 hideCameraError();
-
 
                 if (
                     !cameraStream ||
@@ -3901,18 +4247,15 @@ document.addEventListener(
                     return;
                 }
 
-
                 try {
 
                     const imageData =
                         buildCameraImage();
 
-
                     const binarySize =
                         estimateBinarySize(
                             imageData
                         );
-
 
                     if (
                         binarySize >
@@ -3924,402 +4267,124 @@ document.addEventListener(
                         );
                     }
 
-
                     capturedImage.value =
                         imageData;
 
-
                     imagePreview.src =
                         imageData;
-
 
                     imagePreview.classList.remove(
                         'sm-hidden'
                     );
 
-
                     video.classList.add(
                         'sm-hidden'
                     );
-
 
                     cameraPlaceholder.classList.add(
                         'sm-hidden'
                     );
 
-
-                    snapshotText.textContent =
-                        '✓ Hasil scan siap disimpan • ' +
+                    snapshotText.innerHTML =
+                        '✓ Hasil scan siap disimpan<br>' +
+                        'Format: JPG<br>' +
+                        'Ukuran: ' +
                         formatFileSize(
                             binarySize
-                        ) +
-                        ' • JPG';
-
+                        );
 
                     snapshotPreview.classList.remove(
                         'sm-hidden'
                     );
 
-
                     setCompressionStatus(
-                        '✓ <strong>Scan berhasil.</strong><br>' +
-                        'Format: <strong>JPG</strong><br>' +
-                        'Ukuran hasil: <strong>' +
-                        formatFileSize(
-                            binarySize
-                        ) +
-                        '</strong>.',
+                        '<strong>✓ Scan berhasil dikompres.</strong>' +
+
+                        '<div class="sm-compression-table">' +
+
+                        '<div class="sm-compression-item">' +
+                        '<span class="sm-compression-label">Format</span>' +
+                        '<span class="sm-compression-value">JPG</span>' +
+                        '</div>' +
+
+                        '<div class="sm-compression-item">' +
+                        '<span class="sm-compression-label">Ukuran hasil</span>' +
+                        '<span class="sm-compression-value">' +
+                        formatFileSize(binarySize) +
+                        '</span>' +
+                        '</div>' +
+
+                        '<div class="sm-compression-item">' +
+                        '<span class="sm-compression-label">Target</span>' +
+                        '<span class="sm-compression-value">≤ 2.5 MB</span>' +
+                        '</div>' +
+
+                        '<div class="sm-compression-item">' +
+                        '<span class="sm-compression-label">Status</span>' +
+                        '<span class="sm-compression-value">Siap disimpan</span>' +
+                        '</div>' +
+
+                        '</div>',
                         'success'
                     );
 
-
                     clearSelectedFile();
 
-
                     stopCamera();
-
 
                     cameraPlaceholder.classList.add(
                         'sm-hidden'
                     );
 
-
                     startCameraBtn.classList.add(
                         'sm-hidden'
                     );
-
 
                     captureBtn.classList.add(
                         'sm-hidden'
                     );
 
-
                     stopCameraBtn.classList.add(
                         'sm-hidden'
                     );
 
-
-                } catch (
-                    error
-                ) {
+                } catch (error) {
 
                     console.error(
-                        'Capture error:',
                         error
                     );
 
-
                     showCameraError(
-                        error &&
-                        typeof error.message ===
-                            'string'
-                            ? error.message
-                            : 'Gagal mengambil gambar.'
+                        error?.message ||
+                        'Gagal mengambil scan.'
                     );
                 }
 
             }
         );
 
+        function stopCamera() {
 
-        /* ================================================================
-           BUILD CAMERA IMAGE
-        ================================================================ */
+            stopCameraTracks();
 
-        function buildCameraImage() {
-
-            const canvas =
-                document.createElement(
-                    'canvas'
-                );
-
-
-            const dimensions =
-                calculateDimensions(
-                    video.videoWidth,
-                    video.videoHeight,
-                    CAMERA_MAX_WIDTH
-                );
-
-
-            canvas.width =
-                dimensions.width;
-
-
-            canvas.height =
-                dimensions.height;
-
-
-            const context =
-                canvas.getContext(
-                    '2d',
-                    {
-                        alpha:
-                            false
-                    }
-                );
-
-
-            if (!context) {
-
-                throw new Error(
-                    'Browser tidak mendukung canvas.'
-                );
+            if (video) {
+                video.srcObject =
+                    null;
             }
-
-
-            context.fillStyle =
-                '#ffffff';
-
-
-            context.fillRect(
-                0,
-                0,
-                canvas.width,
-                canvas.height
-            );
-
-
-            context.imageSmoothingEnabled =
-                true;
-
-
-            context.imageSmoothingQuality =
-                'high';
-
-
-            context.drawImage(
-                video,
-                0,
-                0,
-                canvas.width,
-                canvas.height
-            );
-
-
-            let currentCanvas =
-                canvas;
-
-
-            let quality =
-                0.82;
-
-
-            let dataUrl =
-                currentCanvas.toDataURL(
-                    'image/jpeg',
-                    quality
-                );
-
-
-            while (
-                estimateBinarySize(
-                    dataUrl
-                ) >
-                    CAMERA_TARGET_SIZE &&
-                quality >
-                    0.38
-            ) {
-
-                quality -=
-                    0.05;
-
-
-                dataUrl =
-                    currentCanvas.toDataURL(
-                        'image/jpeg',
-                        quality
-                    );
-            }
-
-
-            let attempt =
-                0;
-
-
-            while (
-                estimateBinarySize(
-                    dataUrl
-                ) >
-                    CAMERA_TARGET_SIZE &&
-                attempt <
-                    5
-            ) {
-
-                attempt++;
-
-
-                const smallerCanvas =
-                    document.createElement(
-                        'canvas'
-                    );
-
-
-                smallerCanvas.width =
-                    Math.max(
-                        1,
-                        Math.round(
-                            currentCanvas.width *
-                            0.75
-                        )
-                    );
-
-
-                smallerCanvas.height =
-                    Math.max(
-                        1,
-                        Math.round(
-                            currentCanvas.height *
-                            0.75
-                        )
-                    );
-
-
-                const smallerContext =
-                    smallerCanvas.getContext(
-                        '2d',
-                        {
-                            alpha:
-                                false
-                        }
-                    );
-
-
-                if (!smallerContext) {
-
-                    throw new Error(
-                        'Resize kamera tidak tersedia.'
-                    );
-                }
-
-
-                smallerContext.fillStyle =
-                    '#ffffff';
-
-
-                smallerContext.fillRect(
-                    0,
-                    0,
-                    smallerCanvas.width,
-                    smallerCanvas.height
-                );
-
-
-                smallerContext.imageSmoothingEnabled =
-                    true;
-
-
-                smallerContext.imageSmoothingQuality =
-                    'high';
-
-
-                smallerContext.drawImage(
-                    currentCanvas,
-                    0,
-                    0,
-                    smallerCanvas.width,
-                    smallerCanvas.height
-                );
-
-
-                currentCanvas =
-                    smallerCanvas;
-
-
-                dataUrl =
-                    currentCanvas.toDataURL(
-                        'image/jpeg',
-                        0.58
-                    );
-            }
-
-
-            return dataUrl;
-        }
-
-
-        /* ================================================================
-           BASE64 SIZE
-        ================================================================ */
-
-        function estimateBinarySize(
-            dataUrl
-        ) {
-
-            const comma =
-                dataUrl.indexOf(
-                    ','
-                );
-
 
             if (
-                comma === -1
+                !capturedImage.value
             ) {
-                return 0;
-            }
 
-
-            const base64 =
-                dataUrl.substring(
-                    comma + 1
+                video.classList.remove(
+                    'sm-hidden'
                 );
 
-
-            const padding =
-                base64.endsWith(
-                    '=='
-                )
-                    ? 2
-                    : base64.endsWith(
-                        '='
-                    )
-                        ? 1
-                        : 0;
-
-
-            return Math.floor(
-                (
-                    base64.length *
-                    3
-                ) /
-                4
-            ) -
-            padding;
+                cameraPlaceholder.classList.remove(
+                    'sm-hidden'
+                );
+            }
         }
-
-
-        /* ================================================================
-           CLEAR CAMERA
-        ================================================================ */
-
-        function clearCapturedPreview() {
-
-            capturedImage.value =
-                '';
-
-
-            imagePreview.src =
-                '';
-
-
-            imagePreview.classList.add(
-                'sm-hidden'
-            );
-
-
-            snapshotPreview.classList.add(
-                'sm-hidden'
-            );
-
-
-            snapshotText.textContent =
-                '';
-        }
-
-
-        /* ================================================================
-           RETAKE
-        ================================================================ */
 
         retakeBtn?.addEventListener(
             'click',
@@ -4327,99 +4392,39 @@ document.addEventListener(
 
                 clearCapturedPreview();
 
-
                 clearCompressionStatus();
 
-
                 hideCameraError();
-
 
                 uploadPanel.classList.add(
                     'sm-hidden'
                 );
 
-
                 cameraPanel.classList.remove(
                     'sm-hidden'
                 );
-
 
                 setModeButton(
                     btnUpload,
                     false
                 );
 
-
                 setModeButton(
                     btnCamera,
                     true
                 );
 
-
                 resetCameraButtons();
 
-
-                try {
-
-                    await startCamera();
-
-                } catch (
-                    error
-                ) {
-
-                    console.error(
-                        'Retake error:',
-                        error
-                    );
-
-
-                    showCameraError(
-                        'Kamera gagal diaktifkan kembali.'
-                    );
-                }
-
+                startCameraBtn.click();
             }
         );
-
-
-        /* ================================================================
-           STOP CAMERA TRACKS
-        ================================================================ */
-
-        function stopCameraTracks() {
-
-            if (!cameraStream) {
-                return;
-            }
-
-
-            cameraStream
-                .getTracks()
-                .forEach(
-                    function (
-                        track
-                    ) {
-
-                        track.stop();
-                    }
-                );
-
-
-            cameraStream =
-                null;
-        }
-
-
-        /* ================================================================
-           STOP CAMERA
-        ================================================================ */
 
         stopCameraBtn?.addEventListener(
             'click',
             function () {
 
                 stopCamera();
-
 
                 if (
                     capturedImage.value
@@ -4428,7 +4433,6 @@ document.addEventListener(
                     imagePreview.classList.remove(
                         'sm-hidden'
                     );
-
 
                     cameraPlaceholder.classList.add(
                         'sm-hidden'
@@ -4440,57 +4444,43 @@ document.addEventListener(
                         'sm-hidden'
                     );
 
-
                     if (
                         cameraPlaceholderText
                     ) {
 
                         cameraPlaceholderText.textContent =
                             'Kamera belum aktif';
-
                     }
-
 
                     resetCameraButtons();
                 }
-
             }
         );
 
+        function showCameraError(
+            message
+        ) {
 
-        function stopCamera() {
-
-            stopCameraTracks();
-
-
-            if (video) {
-
-                video.srcObject =
-                    null;
-
-            }
-
-
-            if (
-                !capturedImage.value
-            ) {
-
-                video.classList.remove(
-                    'sm-hidden'
+            cameraError.textContent =
+                String(
+                    message ??
+                    ''
                 );
 
-
-                cameraPlaceholder.classList.remove(
-                    'sm-hidden'
-                );
-
-            }
+            cameraError.classList.remove(
+                'sm-hidden'
+            );
         }
 
+        function hideCameraError() {
 
-        /* ================================================================
-           SUBMIT
-        ================================================================ */
+            cameraError.textContent =
+                '';
+
+            cameraError.classList.add(
+                'sm-hidden'
+            );
+        }
 
         form.addEventListener(
             'submit',
@@ -4505,9 +4495,7 @@ document.addEventListener(
                     event.preventDefault();
 
                     return;
-
                 }
-
 
                 const tanggalSurat =
                     document.getElementById(
@@ -4515,13 +4503,11 @@ document.addEventListener(
                     )?.value ||
                     '';
 
-
                 const tanggalTerima =
                     document.getElementById(
                         'tanggal_terima'
                     )?.value ||
                     '';
-
 
                 if (
                     tanggalSurat &&
@@ -4532,37 +4518,25 @@ document.addEventListener(
 
                     event.preventDefault();
 
-
                     showAlert(
                         'warning',
                         'Tanggal tidak valid',
                         'Tanggal diterima tidak boleh lebih awal dari tanggal surat.'
                     );
 
-
                     return;
                 }
-
 
                 const file =
                     fileInput.files?.[0] ||
                     null;
 
-
                 const hasFile =
                     !!file;
-
 
                 const hasCamera =
                     capturedImage.value.trim() !==
                     '';
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | LAMPIRAN WAJIB
-                |--------------------------------------------------------------------------
-                */
 
                 if (
                     !hasFile &&
@@ -4571,23 +4545,14 @@ document.addEventListener(
 
                     event.preventDefault();
 
-
                     showAlert(
                         'warning',
                         'Berkas belum dipilih',
                         'Upload berkas atau gunakan Scan Kamera.'
                     );
 
-
                     return;
                 }
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | TIDAK BOLEH DUA METODE
-                |--------------------------------------------------------------------------
-                */
 
                 if (
                     hasFile &&
@@ -4596,23 +4561,14 @@ document.addEventListener(
 
                     event.preventDefault();
 
-
                     showAlert(
                         'warning',
                         'Pilih satu metode',
                         'Gunakan Upload File atau Scan Kamera saja.'
                     );
 
-
                     return;
                 }
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | VALIDASI FILE
-                |--------------------------------------------------------------------------
-                */
 
                 if (
                     hasFile
@@ -4623,7 +4579,6 @@ document.addEventListener(
                             file
                         );
 
-
                     if (
                         !isAllowedExtension(
                             extension
@@ -4632,25 +4587,20 @@ document.addEventListener(
 
                         event.preventDefault();
 
-
                         showAlert(
                             'warning',
                             'Format tidak didukung',
                             'Gunakan PDF, JPG, JPEG, atau PNG.'
                         );
 
-
                         return;
                     }
 
-
                     if (
-                        file.size <=
-                        0
+                        file.size <= 0
                     ) {
 
                         event.preventDefault();
-
 
                         showAlert(
                             'warning',
@@ -4658,10 +4608,8 @@ document.addEventListener(
                             'File yang dipilih kosong.'
                         );
 
-
                         return;
                     }
-
 
                     if (
                         file.size >
@@ -4670,23 +4618,14 @@ document.addEventListener(
 
                         event.preventDefault();
 
-
                         showAlert(
                             'warning',
                             'File terlalu besar',
                             'Ukuran file maksimal 10 MB.'
                         );
 
-
                         return;
                     }
-
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | PDF
-                    |--------------------------------------------------------------------------
-                    */
 
                     if (
                         extension ===
@@ -4694,24 +4633,16 @@ document.addEventListener(
                     ) {
 
                         setCompressionStatus(
-                            '⏳ <strong>PDF sedang diproses oleh server.</strong><br>' +
-                            'Ghostscript sedang mengompres PDF sebelum disimpan ke Supabase.',
+                            '<strong>⏳ PDF sedang diproses server...</strong><br>' +
+                            'Ghostscript sedang memproses PDF. ' +
+                            'Jangan tutup halaman sampai proses selesai.',
                             'processing'
                         );
-
 
                         submitText.textContent =
                             'Memproses PDF...';
                     }
-
                 }
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | VALIDASI CAMERA
-                |--------------------------------------------------------------------------
-                */
 
                 if (
                     hasCamera
@@ -4722,7 +4653,6 @@ document.addEventListener(
                             capturedImage.value
                         );
 
-
                     if (
                         binarySize >
                         CAMERA_MAX_DATA_SIZE
@@ -4730,46 +4660,31 @@ document.addEventListener(
 
                         event.preventDefault();
 
-
                         showAlert(
                             'warning',
                             'Hasil scan terlalu besar',
                             'Silakan scan ulang agar ukurannya lebih kecil.'
                         );
 
-
                         return;
                     }
-
                 }
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | LOCK SUBMIT
-                |--------------------------------------------------------------------------
-                */
 
                 submitting =
                     true;
 
-
                 stopCamera();
-
 
                 submitBtn.disabled =
                     true;
-
 
                 submitIcon.classList.add(
                     'sm-hidden'
                 );
 
-
                 submitLoading.classList.remove(
                     'sm-hidden'
                 );
-
 
                 if (
                     hasCamera
@@ -4779,23 +4694,21 @@ document.addEventListener(
                         'Menyimpan hasil scan...';
 
                 } else if (
-                    !file ||
-                    getExtension(file) !==
+                    file &&
+                    getExtension(file) ===
                         'pdf'
                 ) {
 
                     submitText.textContent =
+                        'Memproses PDF...';
+
+                } else {
+
+                    submitText.textContent =
                         'Menyimpan...';
-
                 }
-
             }
         );
-
-
-        /* ================================================================
-           INITIAL STATE
-        ================================================================ */
 
         if (
             capturedImage.value
@@ -4803,54 +4716,50 @@ document.addEventListener(
 
             setCameraMode();
 
-
             imagePreview.src =
                 capturedImage.value;
-
 
             imagePreview.classList.remove(
                 'sm-hidden'
             );
 
-
             video.classList.add(
                 'sm-hidden'
             );
-
 
             cameraPlaceholder.classList.add(
                 'sm-hidden'
             );
 
-
             snapshotPreview.classList.remove(
                 'sm-hidden'
             );
 
+            const oldSize =
+                estimateBinarySize(
+                    capturedImage.value
+                );
 
-            snapshotText.textContent =
-                '✓ Hasil scan sebelumnya masih tersedia.';
-
+            snapshotText.innerHTML =
+                '✓ Hasil scan sebelumnya tersedia<br>' +
+                'Format: JPG<br>' +
+                'Ukuran: ' +
+                formatFileSize(
+                    oldSize
+                );
 
             startCameraBtn.classList.add(
                 'sm-hidden'
             );
 
-
             captureBtn.classList.add(
                 'sm-hidden'
             );
-
 
             stopCameraBtn.classList.add(
                 'sm-hidden'
             );
         }
-
-
-        /* ================================================================
-           CLEANUP
-        ================================================================ */
 
         window.addEventListener(
             'beforeunload',
@@ -4858,6 +4767,7 @@ document.addEventListener(
 
                 stopCameraTracks();
 
+                clearPreviewUrl();
             }
         );
 
