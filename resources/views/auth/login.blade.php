@@ -176,7 +176,7 @@
                         Akun Demo:
                     </div>
                     <div class="font-mono text-[11px] text-slate-500">
-                        Email: admin@arsipsurat.test &nbsp;&nbsp; Pass: password
+                        Email: name@gmail.com &nbsp;&nbsp; Pass: password
                     </div>
                 </div>
 
