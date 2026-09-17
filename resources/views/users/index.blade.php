@@ -14,7 +14,10 @@
 ```
 $rawRoles = request('role', []);
 
-if (is_scalar($rawRoles) && trim((string) $rawRoles) !== '') {
+if (
+    is_scalar($rawRoles) &&
+    trim((string) $rawRoles) !== ''
+) {
     $rawRoles = [$rawRoles];
 }
 
@@ -24,17 +27,34 @@ if (!is_array($rawRoles)) {
 
 $selectedRoles = collect($rawRoles)
     ->flatten()
-    ->filter(fn ($role) => is_scalar($role))
-    ->map(fn ($role) => strtolower(trim((string) $role)))
-    ->map(fn ($role) => $role === 'staf' ? 'staff' : $role)
-    ->filter(fn ($role) => in_array($role, [
-        'admin',
-        'pimpinan',
-        'staff',
-    ], true))
+    ->filter(
+        fn ($role) => is_scalar($role)
+    )
+    ->map(
+        fn ($role) => strtolower(
+            trim((string) $role)
+        )
+    )
+    ->map(
+        fn ($role) => $role === 'staf'
+            ? 'staff'
+            : $role
+    )
+    ->filter(
+        fn ($role) => in_array(
+            $role,
+            [
+                'admin',
+                'pimpinan',
+                'staff',
+            ],
+            true
+        )
+    )
     ->unique()
     ->values()
     ->all();
+
 
 /*
 |--------------------------------------------------------------------------
@@ -42,9 +62,15 @@ $selectedRoles = collect($rawRoles)
 |--------------------------------------------------------------------------
 */
 
-$rawStatuses = request('is_active', []);
+$rawStatuses = request(
+    'is_active',
+    []
+);
 
-if (is_scalar($rawStatuses) && trim((string) $rawStatuses) !== '') {
+if (
+    is_scalar($rawStatuses) &&
+    trim((string) $rawStatuses) !== ''
+) {
     $rawStatuses = [$rawStatuses];
 }
 
@@ -54,15 +80,26 @@ if (!is_array($rawStatuses)) {
 
 $selectedStatuses = collect($rawStatuses)
     ->flatten()
-    ->filter(fn ($status) => is_scalar($status))
-    ->map(fn ($status) => (string) $status)
-    ->filter(fn ($status) => in_array($status, [
-        '1',
-        '0',
-    ], true))
+    ->filter(
+        fn ($status) => is_scalar($status)
+    )
+    ->map(
+        fn ($status) => (string) $status
+    )
+    ->filter(
+        fn ($status) => in_array(
+            $status,
+            [
+                '1',
+                '0',
+            ],
+            true
+        )
+    )
     ->unique()
     ->values()
     ->all();
+
 
 /*
 |--------------------------------------------------------------------------
@@ -98,6 +135,7 @@ $hasFilters =
         </p>
 
     </div>
+
 
     <a
         href="{{ route('users.create') }}"
@@ -163,6 +201,7 @@ $hasFilters =
 
             </div>
 
+
             <input
                 type="text"
                 name="search"
@@ -217,6 +256,7 @@ $hasFilters =
 
                     </span>
 
+
                     <span class="users-role-trigger-content">
 
                         <span class="users-role-trigger-title">
@@ -232,12 +272,14 @@ $hasFilters =
 
                     </span>
 
+
                     <span
                         id="roleFilterCount"
                         class="users-role-count"
                     >
                         {{ count($selectedRoles) }} dipilih
                     </span>
+
 
                     <svg
                         id="roleFilterChevron"
@@ -278,6 +320,7 @@ $hasFilters =
 
                         </div>
 
+
                         <button
                             type="button"
                             id="roleFilterClose"
@@ -301,7 +344,13 @@ $hasFilters =
                                 name="role[]"
                                 value="admin"
                                 class="role-checkbox"
-                                @checked(in_array('admin', $selectedRoles, true))
+                                @checked(
+                                    in_array(
+                                        'admin',
+                                        $selectedRoles,
+                                        true
+                                    )
+                                )
                             >
 
                             <span class="users-role-option-icon admin">
@@ -332,7 +381,13 @@ $hasFilters =
                                 name="role[]"
                                 value="pimpinan"
                                 class="role-checkbox"
-                                @checked(in_array('pimpinan', $selectedRoles, true))
+                                @checked(
+                                    in_array(
+                                        'pimpinan',
+                                        $selectedRoles,
+                                        true
+                                    )
+                                )
                             >
 
                             <span class="users-role-option-icon pimpinan">
@@ -363,7 +418,13 @@ $hasFilters =
                                 name="role[]"
                                 value="staff"
                                 class="role-checkbox"
-                                @checked(in_array('staff', $selectedRoles, true))
+                                @checked(
+                                    in_array(
+                                        'staff',
+                                        $selectedRoles,
+                                        true
+                                    )
+                                )
                             >
 
                             <span class="users-role-option-icon staff">
@@ -445,6 +506,7 @@ $hasFilters =
 
                     </span>
 
+
                     <span class="users-status-trigger-content">
 
                         <span class="users-status-trigger-title">
@@ -460,12 +522,14 @@ $hasFilters =
 
                     </span>
 
+
                     <span
                         id="statusFilterCount"
                         class="users-status-count"
                     >
                         {{ count($selectedStatuses) }} dipilih
                     </span>
+
 
                     <svg
                         id="statusFilterChevron"
@@ -506,6 +570,7 @@ $hasFilters =
 
                         </div>
 
+
                         <button
                             type="button"
                             id="statusFilterClose"
@@ -529,7 +594,13 @@ $hasFilters =
                                 name="is_active[]"
                                 value="1"
                                 class="status-checkbox"
-                                @checked(in_array('1', $selectedStatuses, true))
+                                @checked(
+                                    in_array(
+                                        '1',
+                                        $selectedStatuses,
+                                        true
+                                    )
+                                )
                             >
 
                             <span class="users-status-option-icon active">
@@ -560,7 +631,13 @@ $hasFilters =
                                 name="is_active[]"
                                 value="0"
                                 class="status-checkbox"
-                                @checked(in_array('0', $selectedStatuses, true))
+                                @checked(
+                                    in_array(
+                                        '0',
+                                        $selectedStatuses,
+                                        true
+                                    )
+                                )
                             >
 
                             <span class="users-status-option-icon inactive">
@@ -690,12 +767,17 @@ $hasFilters =
                         */
 
                         $userRole = strtolower(
-                            trim((string) ($user->role ?? ''))
+                            trim(
+                                (string) (
+                                    $user->role ?? ''
+                                )
+                            )
                         );
 
                         if ($userRole === 'staf') {
                             $userRole = 'staff';
                         }
+
 
                         /*
                         |--------------------------------------------------------------------------
@@ -704,7 +786,9 @@ $hasFilters =
                         */
 
                         $userName = trim(
-                            (string) ($user->name ?? '')
+                            (string) (
+                                $user->name ?? ''
+                            )
                         );
 
                         $avatarText = strtoupper(
@@ -717,14 +801,21 @@ $hasFilters =
                             )
                         );
 
+
                         /*
                         |--------------------------------------------------------------------------
                         | STATUS AKUN
                         |--------------------------------------------------------------------------
-                        | Satu-satunya sumber status adalah users.is_active.
+                        |
+                        | Satu-satunya sumber status adalah
+                        | users.is_active.
+                        |
                         */
 
-                        $isActive = (bool) ($user->is_active ?? false);
+                        $isActive =
+                            (bool) (
+                                $user->is_active ?? false
+                            );
                     @endphp
 
 
@@ -836,6 +927,40 @@ $hasFilters =
 
                             <div class="user-actions">
 
+                                {{-- SHOW / DETAIL --}}
+
+                                <a
+                                    href="{{ route('users.show', $user->id) }}"
+                                    title="Lihat Detail"
+                                    class="user-action view"
+                                    aria-label="Lihat detail pengguna"
+                                >
+
+                                    <svg
+                                        class="h-4 w-4"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="1.8"
+                                        viewBox="0 0 24 24"
+                                    >
+
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M2.5 12s3.5-6 9.5-6s9.5 6 9.5 6s-3.5 6-9.5 6s-9.5-6-9.5-6z"
+                                        />
+
+                                        <circle
+                                            cx="12"
+                                            cy="12"
+                                            r="3"
+                                        />
+
+                                    </svg>
+
+                                </a>
+
+
                                 {{-- EDIT --}}
 
                                 <a
@@ -872,7 +997,10 @@ $hasFilters =
 
                                 {{-- DELETE --}}
 
-                                @if((int) auth()->id() !== (int) $user->id)
+                                @if(
+                                    (int) auth()->id() !==
+                                    (int) $user->id
+                                )
 
                                     <form
                                         method="POST"
@@ -1013,7 +1141,9 @@ $hasFilters =
 
             {{
                 $users
-                    ->appends(request()->query())
+                    ->appends(
+                        request()->query()
+                    )
                     ->links()
             }}
 
@@ -1028,7 +1158,7 @@ $hasFilters =
 
 {{-- =========================================================
 STYLE
-========================================================== --}}
+========================================================= --}}
 
 @push('styles')
 
@@ -1395,7 +1525,7 @@ STYLE
 
 .users-table{
     width:100%;
-    min-width:820px;
+    min-width:850px;
     border-collapse:collapse;
     border-spacing:0;
     background:#fff
@@ -1463,7 +1593,7 @@ STYLE
 }
 
 .action-column{
-    width:110px
+    width:125px
 }
 
 .user-avatar{
@@ -1580,7 +1710,7 @@ STYLE
     display:inline-flex;
     align-items:center;
     justify-content:center;
-    gap:2px
+    gap:3px
 }
 
 .user-action{
@@ -1597,6 +1727,11 @@ STYLE
     transition:
         background-color .15s ease,
         color .15s ease
+}
+
+.user-action.view:hover{
+    background:#dbeafe;
+    color:#2563eb
 }
 
 .user-action.edit:hover{
@@ -1634,7 +1769,7 @@ STYLE
 @media(max-width:767px){
 
     .users-table{
-        min-width:800px
+        min-width:850px
     }
 
     .users-table thead th,
@@ -1681,30 +1816,49 @@ document.addEventListener('DOMContentLoaded', function () {
     function setupDropdown(config) {
 
         const trigger =
-            document.getElementById(config.trigger);
+            document.getElementById(
+                config.trigger
+            );
 
         const menu =
-            document.getElementById(config.menu);
+            document.getElementById(
+                config.menu
+            );
 
         const closeButton =
-            document.getElementById(config.close);
+            document.getElementById(
+                config.close
+            );
 
         const selectAllButton =
-            document.getElementById(config.selectAll);
+            document.getElementById(
+                config.selectAll
+            );
 
         const clearAllButton =
-            document.getElementById(config.clearAll);
+            document.getElementById(
+                config.clearAll
+            );
 
         const countElement =
-            document.getElementById(config.count);
+            document.getElementById(
+                config.count
+            );
 
         const subtitleElement =
-            document.getElementById(config.subtitle);
+            document.getElementById(
+                config.subtitle
+            );
 
         const checkboxes =
-            document.querySelectorAll(config.checkbox);
+            document.querySelectorAll(
+                config.checkbox
+            );
 
-        if (!trigger || !menu) {
+        if (
+            !trigger ||
+            !menu
+        ) {
             return null;
         }
 
@@ -1718,10 +1872,12 @@ document.addEventListener('DOMContentLoaded', function () {
         function update() {
 
             const checked =
-                Array.from(checkboxes)
-                    .filter(
-                        checkbox => checkbox.checked
-                    );
+                Array.from(
+                    checkboxes
+                ).filter(
+                    checkbox =>
+                        checkbox.checked
+                );
 
             const count =
                 checked.length;
@@ -1770,7 +1926,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
                                 const title =
                                     checkbox
-                                        .closest(config.option)
+                                        .closest(
+                                            config.option
+                                        )
                                         ?.querySelector(
                                             config.label
                                         );
@@ -1797,7 +1955,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         /*
         |--------------------------------------------------------------------------
-        | OPEN
+        | OPEN MENU
         |--------------------------------------------------------------------------
         */
 
@@ -1811,7 +1969,11 @@ document.addEventListener('DOMContentLoaded', function () {
                     function (otherMenu) {
 
                         if (otherMenu !== menu) {
-                            otherMenu.classList.add('hidden');
+
+                            otherMenu.classList.add(
+                                'hidden'
+                            );
+
                         }
 
                     }
@@ -1842,9 +2004,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 );
 
 
-            menu.classList.remove('hidden');
+            menu.classList.remove(
+                'hidden'
+            );
 
-            trigger.classList.add('is-open');
+            trigger.classList.add(
+                'is-open'
+            );
 
             trigger.setAttribute(
                 'aria-expanded',
@@ -1857,13 +2023,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
         /*
         |--------------------------------------------------------------------------
-        | CLOSE
+        | CLOSE MENU
         |--------------------------------------------------------------------------
         */
 
         function closeMenu() {
 
-            menu.classList.add('hidden');
+            menu.classList.add(
+                'hidden'
+            );
 
             trigger.classList.remove(
                 'is-open'
@@ -1938,14 +2106,16 @@ document.addEventListener('DOMContentLoaded', function () {
         menu.addEventListener(
             'click',
             function (event) {
+
                 event.stopPropagation();
+
             }
         );
 
 
         /*
         |--------------------------------------------------------------------------
-        | CHECKBOX CHANGE
+        | CHECKBOX
         |--------------------------------------------------------------------------
         */
 
@@ -2034,17 +2204,38 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const roleDropdown =
         setupDropdown({
-            trigger: 'roleFilterTrigger',
-            menu: 'roleFilterMenu',
-            close: 'roleFilterClose',
-            selectAll: 'roleSelectAll',
-            clearAll: 'roleClearAll',
-            count: 'roleFilterCount',
-            subtitle: 'roleFilterSubtitle',
-            checkbox: '.role-checkbox',
-            option: '.users-role-option',
-            label: '.users-role-option-title',
-            emptyText: 'Pilih satu atau beberapa role'
+            trigger:
+                'roleFilterTrigger',
+
+            menu:
+                'roleFilterMenu',
+
+            close:
+                'roleFilterClose',
+
+            selectAll:
+                'roleSelectAll',
+
+            clearAll:
+                'roleClearAll',
+
+            count:
+                'roleFilterCount',
+
+            subtitle:
+                'roleFilterSubtitle',
+
+            checkbox:
+                '.role-checkbox',
+
+            option:
+                '.users-role-option',
+
+            label:
+                '.users-role-option-title',
+
+            emptyText:
+                'Pilih satu atau beberapa role'
         });
 
 
@@ -2056,17 +2247,38 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const statusDropdown =
         setupDropdown({
-            trigger: 'statusFilterTrigger',
-            menu: 'statusFilterMenu',
-            close: 'statusFilterClose',
-            selectAll: 'statusSelectAll',
-            clearAll: 'statusClearAll',
-            count: 'statusFilterCount',
-            subtitle: 'statusFilterSubtitle',
-            checkbox: '.status-checkbox',
-            option: '.users-status-option',
-            label: '.users-status-option-title',
-            emptyText: 'Pilih status akun'
+            trigger:
+                'statusFilterTrigger',
+
+            menu:
+                'statusFilterMenu',
+
+            close:
+                'statusFilterClose',
+
+            selectAll:
+                'statusSelectAll',
+
+            clearAll:
+                'statusClearAll',
+
+            count:
+                'statusFilterCount',
+
+            subtitle:
+                'statusFilterSubtitle',
+
+            checkbox:
+                '.status-checkbox',
+
+            option:
+                '.users-status-option',
+
+            label:
+                '.users-status-option-title',
+
+            emptyText:
+                'Pilih status akun'
         });
 
 
@@ -2096,6 +2308,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (statusDropdown) {
                 statusDropdown.closeMenu();
             }
+
         }
     );
 
@@ -2110,7 +2323,10 @@ document.addEventListener('DOMContentLoaded', function () {
         'keydown',
         function (event) {
 
-            if (event.key !== 'Escape') {
+            if (
+                event.key !==
+                'Escape'
+            ) {
                 return;
             }
 
@@ -2121,6 +2337,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (statusDropdown) {
                 statusDropdown.closeMenu();
             }
+
         }
     );
 
@@ -2132,7 +2349,9 @@ document.addEventListener('DOMContentLoaded', function () {
     */
 
     document
-        .querySelectorAll('.delete-btn')
+        .querySelectorAll(
+            '.delete-btn'
+        )
         .forEach(
             function (button) {
 
@@ -2141,7 +2360,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     function () {
 
                         const form =
-                            this.closest('.delete-form');
+                            this.closest(
+                                '.delete-form'
+                            );
 
                         if (!form) {
                             return;
@@ -2216,7 +2437,9 @@ document.addEventListener('DOMContentLoaded', function () {
                         }).then(
                             function (result) {
 
-                                if (result.isConfirmed) {
+                                if (
+                                    result.isConfirmed
+                                ) {
                                     form.submit();
                                 }
 

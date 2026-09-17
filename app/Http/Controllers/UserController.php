@@ -89,9 +89,6 @@ class UserController extends Controller
         | STATUS FILTER
         |--------------------------------------------------------------------------
         |
-        | is_active[]=1
-        | is_active[]=0
-        |
         | 1 = Aktif
         | 0 = Nonaktif
         |
@@ -142,17 +139,14 @@ class UserController extends Controller
 
         $users = User::query()
 
-            /*
-            |--------------------------------------------------------------------------
-            | SEARCH
-            |--------------------------------------------------------------------------
-            */
-
             ->when(
                 $search !== '',
                 function ($query) use ($search) {
 
-                    $keyword = '%' . $search . '%';
+                    $keyword =
+                        '%' .
+                        $search .
+                        '%';
 
                     $query->where(
                         function ($q) use ($keyword) {
@@ -177,25 +171,9 @@ class UserController extends Controller
                 }
             )
 
-            /*
-            |--------------------------------------------------------------------------
-            | ROLE FILTER
-            |--------------------------------------------------------------------------
-            */
-
             ->when(
                 $roles->isNotEmpty(),
                 function ($query) use ($roles) {
-
-                    /*
-                     * Database utama:
-                     * admin
-                     * pimpinan
-                     * staff
-                     *
-                     * Untuk kompatibilitas data lama,
-                     * staff juga membaca nilai staf.
-                     */
 
                     $databaseRoles = $roles
                         ->flatMap(
@@ -222,12 +200,6 @@ class UserController extends Controller
                 }
             )
 
-            /*
-            |--------------------------------------------------------------------------
-            | STATUS AKUN FILTER
-            |--------------------------------------------------------------------------
-            */
-
             ->when(
                 $statuses->isNotEmpty(),
                 function ($query) use ($statuses) {
@@ -239,12 +211,6 @@ class UserController extends Controller
                 }
             )
 
-            /*
-            |--------------------------------------------------------------------------
-            | SORTING
-            |--------------------------------------------------------------------------
-            */
-
             ->orderBy(
                 'created_at',
                 'desc'
@@ -253,21 +219,7 @@ class UserController extends Controller
                 'id',
                 'desc'
             )
-
-            /*
-            |--------------------------------------------------------------------------
-            | PAGINATION
-            |--------------------------------------------------------------------------
-            */
-
             ->paginate(10)
-
-            /*
-            |--------------------------------------------------------------------------
-            | PERTAHANKAN QUERY STRING
-            |--------------------------------------------------------------------------
-            */
-
             ->withQueryString();
 
         return view(
@@ -295,12 +247,6 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        /*
-        |--------------------------------------------------------------------------
-        | VALIDASI
-        |--------------------------------------------------------------------------
-        */
-
         $validated = $request->validate(
             [
                 'name' => [
@@ -367,12 +313,6 @@ class UserController extends Controller
                 FILTER_NULL_ON_FAILURE
             );
 
-        /*
-        |--------------------------------------------------------------------------
-        | FALLBACK STATUS
-        |--------------------------------------------------------------------------
-        */
-
         if ($validated['is_active'] === null) {
             $validated['is_active'] = false;
         }
@@ -390,7 +330,7 @@ class UserController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | CREATE USER
+        | CREATE
         |--------------------------------------------------------------------------
         */
 
@@ -427,6 +367,21 @@ class UserController extends Controller
 
 
     /**
+     * Menampilkan detail pengguna.
+     *
+     * Digunakan oleh:
+     * GET /users/{user}
+     */
+    public function show(User $user)
+    {
+        return view(
+            'users.show',
+            compact('user')
+        );
+    }
+
+
+    /**
      * Menampilkan form edit pengguna.
      */
     public function edit(User $user)
@@ -445,12 +400,6 @@ class UserController extends Controller
         Request $request,
         User $user
     ) {
-        /*
-        |--------------------------------------------------------------------------
-        | VALIDASI
-        |--------------------------------------------------------------------------
-        */
-
         $validated = $request->validate(
             [
                 'name' => [
@@ -511,14 +460,7 @@ class UserController extends Controller
                 FILTER_NULL_ON_FAILURE
             );
 
-        /*
-        |--------------------------------------------------------------------------
-        | STATUS TIDAK VALID
-        |--------------------------------------------------------------------------
-        */
-
         if ($requestedIsActive === null) {
-
             return back()
                 ->withInput()
                 ->with(
@@ -534,10 +476,10 @@ class UserController extends Controller
         */
 
         if (
-            (int) Auth::id() === (int) $user->id &&
+            (int) Auth::id() ===
+            (int) $user->id &&
             $requestedIsActive === false
         ) {
-
             return back()
                 ->withInput()
                 ->with(
@@ -559,7 +501,7 @@ class UserController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | PASSWORD
+        | DATA UPDATE
         |--------------------------------------------------------------------------
         */
 
@@ -571,13 +513,18 @@ class UserController extends Controller
             'is_active' => $requestedIsActive,
         ];
 
+        /*
+        |--------------------------------------------------------------------------
+        | PASSWORD OPTIONAL
+        |--------------------------------------------------------------------------
+        */
+
         if (
             isset($validated['password']) &&
             trim(
                 (string) $validated['password']
             ) !== ''
         ) {
-
             $updateData['password'] =
                 Hash::make(
                     $validated['password']
@@ -586,7 +533,7 @@ class UserController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | UPDATE USER
+        | UPDATE
         |--------------------------------------------------------------------------
         */
 
@@ -620,7 +567,7 @@ class UserController extends Controller
     {
         /*
         |--------------------------------------------------------------------------
-        | TIDAK BOLEH MENGHAPUS AKUN SENDIRI
+        | CEGAH MENGHAPUS DIRI SENDIRI
         |--------------------------------------------------------------------------
         */
 
@@ -628,7 +575,6 @@ class UserController extends Controller
             (int) Auth::id() ===
             (int) $user->id
         ) {
-
             return back()
                 ->with(
                     'error',
@@ -638,7 +584,7 @@ class UserController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | SIMPAN NAMA UNTUK ACTIVITY LOG
+        | SIMPAN NAMA
         |--------------------------------------------------------------------------
         */
 
@@ -676,16 +622,14 @@ class UserController extends Controller
     /**
      * Normalisasi role sebelum disimpan.
      *
-     * Database menggunakan:
-     *
-     * admin
-     * pimpinan
-     * staff
+     * Database:
+     * - admin
+     * - pimpinan
+     * - staff
      */
     private function normalizeRoleForDatabase(
         string $role
     ): string {
-
         $role = strtolower(
             trim($role)
         );
@@ -709,7 +653,6 @@ class UserController extends Controller
         string $module,
         string $description
     ): void {
-
         if (
             !class_exists(
                 ActivityLog::class
@@ -719,18 +662,13 @@ class UserController extends Controller
         }
 
         try {
-
             ActivityLog::catat(
                 $action,
                 $module,
                 $description
             );
-
         } catch (\Throwable) {
-
-            /*
-             * Abaikan error activity log.
-             */
+            // Abaikan error activity log.
         }
     }
 }

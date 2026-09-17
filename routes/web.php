@@ -91,20 +91,13 @@ Route::post(
 | AUTHENTICATED
 |--------------------------------------------------------------------------
 |
-| SEMUA halaman internal wajib:
+| Semua halaman internal wajib:
 |
 | 1. Sudah login
 | 2. Akunnya masih aktif
 |
-| Jika Admin menonaktifkan akun yang sedang login, maka pada request
-| berikutnya CheckActiveAccount akan:
-|
-| - mendeteksi is_active = false
-| - logout user
-| - invalidate session
-| - regenerate CSRF token
-| - redirect ke login
-| - mengirim pesan account_blocked
+| Jika akun dinonaktifkan oleh Admin saat user masih login,
+| CheckActiveAccount akan memproses logout pada request berikutnya.
 |
 */
 
@@ -147,11 +140,8 @@ Route::middleware([
                 );
 
                 return response()->json([
-                    'status' =>
-                        'success',
-
-                    'message' =>
-                        'Cache aplikasi berhasil dibersihkan.',
+                    'status' => 'success',
+                    'message' => 'Cache aplikasi berhasil dibersihkan.',
                 ]);
             }
         )->name('clear-cache');
@@ -173,11 +163,8 @@ Route::middleware([
                     );
 
                     return response()->json([
-                        'status' =>
-                            'success',
-
-                        'message' =>
-                            'Storage link berhasil dibuat.',
+                        'status' => 'success',
+                        'message' => 'Storage link berhasil dibuat.',
                     ]);
 
                 } catch (\Throwable $e) {
@@ -185,9 +172,7 @@ Route::middleware([
                     report($e);
 
                     return response()->json([
-                        'status' =>
-                            'error',
-
+                        'status' => 'error',
                         'message' =>
                             'Gagal membuat storage link: ' .
                             $e->getMessage(),
@@ -196,12 +181,6 @@ Route::middleware([
             }
         )->name('link-storage');
     });
-
-    /*
-    |--------------------------------------------------------------------------
-    | SURAT MASUK
-    |--------------------------------------------------------------------------
-    */
 
     /*
     |--------------------------------------------------------------------------
@@ -243,21 +222,6 @@ Route::middleware([
         |--------------------------------------------------------------------------
         | PREVIEW COMPRESSION
         |--------------------------------------------------------------------------
-        |
-        | Browser mengirim file PDF ke server.
-        |
-        | Browser
-        |     ↓
-        | POST /surat-masuk/preview-compression
-        |     ↓
-        | SuratMasukController@previewCompression
-        |     ↓
-        | Ghostscript
-        |     ↓
-        | temporary PDF
-        |     ↓
-        | JSON
-        |
         */
 
         Route::post(
@@ -413,7 +377,7 @@ Route::middleware([
         | DETAIL
         |--------------------------------------------------------------------------
         |
-        | HARUS PALING BAWAH
+        | Harus diletakkan setelah route statis.
         |
         */
 
@@ -424,12 +388,6 @@ Route::middleware([
             'surat-masuk.show'
         );
     });
-
-    /*
-    |--------------------------------------------------------------------------
-    | DISPOSISI
-    |--------------------------------------------------------------------------
-    */
 
     /*
     |--------------------------------------------------------------------------
@@ -503,12 +461,6 @@ Route::middleware([
 
     /*
     |--------------------------------------------------------------------------
-    | SURAT KELUAR
-    |--------------------------------------------------------------------------
-    */
-
-    /*
-    |--------------------------------------------------------------------------
     | SURAT KELUAR - ADMIN / PIMPINAN
     |--------------------------------------------------------------------------
     */
@@ -547,37 +499,6 @@ Route::middleware([
         |--------------------------------------------------------------------------
         | PREVIEW COMPRESSION
         |--------------------------------------------------------------------------
-        |
-        | Digunakan oleh halaman CREATE dan EDIT.
-        |
-        | Untuk PDF:
-        |
-        | Browser
-        |     ↓
-        | POST PDF
-        |     ↓
-        | previewCompression()
-        |     ↓
-        | Ghostscript
-        |     ↓
-        | temporary PDF
-        |     ↓
-        | session
-        |     ↓
-        | JSON + preview_url
-        |
-        | Untuk gambar:
-        |
-        | Browser
-        |     ↓
-        | POST JPG/JPEG/PNG
-        |     ↓
-        | previewCompression()
-        |     ↓
-        | GD
-        |     ↓
-        | JSON hasil compression
-        |
         */
 
         Route::post(
@@ -591,13 +512,6 @@ Route::middleware([
         |--------------------------------------------------------------------------
         | COMPRESSION PREVIEW PDF
         |--------------------------------------------------------------------------
-        |
-        | Endpoint ini digunakan oleh iframe.
-        |
-        | Contoh:
-        |
-        | /surat-keluar/compression-preview/{token}
-        |
         */
 
         Route::get(
@@ -685,7 +599,7 @@ Route::middleware([
 
         /*
         |--------------------------------------------------------------------------
-        | PREVIEW LAMPIRAN TERSIMPAN
+        | PREVIEW LAMPIRAN
         |--------------------------------------------------------------------------
         */
 
@@ -727,7 +641,7 @@ Route::middleware([
         | DETAIL
         |--------------------------------------------------------------------------
         |
-        | HARUS PALING BAWAH
+        | Harus diletakkan setelah route statis.
         |
         */
 
@@ -831,6 +745,9 @@ Route::middleware([
         |--------------------------------------------------------------------------
         | KATEGORI SURAT
         |--------------------------------------------------------------------------
+        |
+        | Tidak membutuhkan halaman show.
+        |
         */
 
         Route::resource(
@@ -844,14 +761,20 @@ Route::middleware([
         |--------------------------------------------------------------------------
         | USERS
         |--------------------------------------------------------------------------
+        |
+        | Admin dapat:
+        | - Melihat daftar pengguna
+        | - Menambah pengguna
+        | - Melihat detail pengguna
+        | - Mengedit pengguna
+        | - Menghapus pengguna
+        |
         */
 
         Route::resource(
             'users',
             UserController::class
-        )->except([
-            'show',
-        ]);
+        );
     });
 });
 
