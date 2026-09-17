@@ -11,7 +11,6 @@
 |--------------------------------------------------------------------------
 */
 
-```
 $role = strtolower(
     trim((string) ($user->role ?? ''))
 );
@@ -35,17 +34,17 @@ $isActive = (bool) ($user->is_active ?? false);
 */
 
 $roleLabel = match ($role) {
-    'admin' => 'Admin',
+    'admin'    => 'Admin',
     'pimpinan' => 'Pimpinan',
-    'staff' => 'Staf',
-    default => ucfirst($role ?: 'User'),
+    'staff'    => 'Staf',
+    default    => ucfirst($role ?: 'User'),
 };
 
 $roleDescription = match ($role) {
-    'admin' => 'Akses penuh sistem',
+    'admin'    => 'Akses penuh sistem',
     'pimpinan' => 'Akses pimpinan',
-    'staff' => 'Akses operator/staf',
-    default => 'Pengguna sistem',
+    'staff'    => 'Akses operator / staf',
+    default    => 'Pengguna sistem',
 };
 
 /*
@@ -60,53 +59,80 @@ $userName = trim(
 
 $avatarText = strtoupper(
     mb_substr(
-        $userName !== ''
-            ? $userName
-            : 'US',
+        $userName !== '' ? $userName : 'US',
         0,
         2
     )
 );
-```
 
 @endphp
 
-<div class="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-10">
+<div class="user-detail-page w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-10">
 
-```
+
 {{-- =========================================================
      HEADER
 ========================================================== --}}
+<div class="detail-page-header">
 
-<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+    <div class="detail-header-left">
 
-    <div class="min-w-0">
+        <div class="detail-title-icon">
+            <svg
+                class="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                viewBox="0 0 24 24"
+            >
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M15 19l-7-7 7-7"
+                />
+            </svg>
+        </div>
 
-        <div class="flex items-center gap-2">
+        <div class="min-w-0">
 
-            <span class="w-2.5 h-2.5 shrink-0 rounded-full bg-blue-600"></span>
+            <div class="flex items-center gap-2">
+                <h1 class="detail-page-title">
+                    Detail Pengguna
+                </h1>
 
-            <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-800 truncate">
-                Detail Pengguna
-            </h1>
+                @if($isActive)
+                    <span class="top-status active">
+                        <span class="status-dot"></span>
+                        Aktif
+                    </span>
+                @else
+                    <span class="top-status inactive">
+                        <span class="status-dot"></span>
+                        Nonaktif
+                    </span>
+                @endif
+            </div>
+
+            <p class="detail-page-subtitle">
+                Informasi lengkap akun pengguna yang tersimpan di sistem.
+            </p>
 
         </div>
 
-        <p class="mt-0.5 text-xs sm:text-sm text-slate-500">
-            Informasi lengkap akun pengguna yang tersimpan di dalam sistem.
-        </p>
-
     </div>
 
-    <div class="flex flex-col sm:flex-row gap-2">
+
+    {{-- =====================================================
+         ACTION BUTTON
+    ====================================================== --}}
+    <div class="detail-header-actions">
 
         <a
             href="{{ route('users.index') }}"
-            class="inline-flex items-center justify-center w-full sm:w-auto px-4 py-2 text-sm font-semibold text-slate-700 bg-white border-2 border-slate-300 rounded-xl hover:bg-slate-50 hover:border-slate-400 transition"
+            class="detail-action secondary"
         >
-
             <svg
-                class="w-4 h-4 mr-2"
+                class="w-4 h-4"
                 fill="none"
                 stroke="currentColor"
                 stroke-width="1.8"
@@ -119,17 +145,15 @@ $avatarText = strtoupper(
                 />
             </svg>
 
-            Kembali
-
+            <span>Kembali</span>
         </a>
 
         <a
             href="{{ route('users.edit', $user->id) }}"
-            class="inline-flex items-center justify-center w-full sm:w-auto px-4 py-2 text-sm font-semibold text-white bg-blue-600 border-2 border-blue-600 rounded-xl hover:bg-blue-700 transition"
+            class="detail-action primary"
         >
-
             <svg
-                class="w-4 h-4 mr-2"
+                class="w-4 h-4"
                 fill="none"
                 stroke="currentColor"
                 stroke-width="1.8"
@@ -148,8 +172,7 @@ $avatarText = strtoupper(
                 />
             </svg>
 
-            Edit Pengguna
-
+            <span>Edit Pengguna</span>
         </a>
 
     </div>
@@ -158,68 +181,132 @@ $avatarText = strtoupper(
 
 
 {{-- =========================================================
-     PROFILE HEADER
+     PROFILE CARD
 ========================================================== --}}
+<div class="profile-card">
 
-<div class="detail-main-card mb-4">
+    <div class="profile-card-main">
 
-    <div class="detail-profile">
-
-        <div class="detail-avatar">
+        <div class="profile-avatar">
             {{ $avatarText }}
         </div>
 
-        <div class="detail-profile-info">
+        <div class="profile-info">
 
-            <h2 class="detail-profile-name">
-                {{ $user->name ?? '-' }}
-            </h2>
+            <div class="profile-name-row">
 
-            <p class="detail-profile-email">
+                <h2 class="profile-name">
+                    {{ $user->name ?? '-' }}
+                </h2>
+
+            </div>
+
+            <p class="profile-email">
                 {{ $user->email ?? '-' }}
             </p>
 
-            <div class="detail-profile-badges">
+            <div class="profile-meta">
 
+                {{-- ROLE --}}
                 @if($role === 'admin')
 
-                    <span class="detail-role admin">
+                    <span class="role-badge admin">
+                        <svg
+                            class="w-3.5 h-3.5"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M12 3l7 4v5c0 4-2.8 7.2-7 9-4.2-1.8-7-5-7-9V7l7-4z"
+                            />
+                        </svg>
+
                         Admin
                     </span>
 
                 @elseif($role === 'pimpinan')
 
-                    <span class="detail-role pimpinan">
+                    <span class="role-badge pimpinan">
+                        <svg
+                            class="w-3.5 h-3.5"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M3 21h18"
+                            />
+
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M5 21V7l7-4 7 4v14"
+                            />
+
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M9 21v-5h6v5"
+                            />
+                        </svg>
+
                         Pimpinan
                     </span>
 
                 @elseif($role === 'staff')
 
-                    <span class="detail-role staff">
+                    <span class="role-badge staff">
+                        <svg
+                            class="w-3.5 h-3.5"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                            viewBox="0 0 24 24"
+                        >
+                            <circle
+                                cx="12"
+                                cy="8"
+                                r="3.5"
+                            />
+
+                            <path
+                                stroke-linecap="round"
+                                d="M5 20a7 7 0 0114 0"
+                            />
+                        </svg>
+
                         Staf
                     </span>
 
                 @else
 
-                    <span class="detail-role default">
+                    <span class="role-badge default">
                         {{ $roleLabel }}
                     </span>
 
                 @endif
 
 
+                {{-- STATUS --}}
                 @if($isActive)
 
-                    <span class="detail-status active">
-                        <span class="detail-status-dot"></span>
-                        Aktif
+                    <span class="account-status active">
+                        <span class="status-dot"></span>
+                        Akun Aktif
                     </span>
 
                 @else
 
-                    <span class="detail-status inactive">
-                        <span class="detail-status-dot"></span>
-                        Nonaktif
+                    <span class="account-status inactive">
+                        <span class="status-dot"></span>
+                        Akun Nonaktif
                     </span>
 
                 @endif
@@ -230,19 +317,50 @@ $avatarText = strtoupper(
 
     </div>
 
+
+    {{-- PROFILE SIDE INFO --}}
+    <div class="profile-side-info">
+
+        <div class="profile-side-item">
+
+            <span class="profile-side-label">
+                ID Pengguna
+            </span>
+
+            <span class="profile-side-value">
+                #{{ $user->id }}
+            </span>
+
+        </div>
+
+        <div class="profile-side-divider"></div>
+
+        <div class="profile-side-item">
+
+            <span class="profile-side-label">
+                Jabatan
+            </span>
+
+            <span class="profile-side-value">
+                {{ $user->jabatan ?: '-' }}
+            </span>
+
+        </div>
+
+    </div>
+
 </div>
 
 
 {{-- =========================================================
-     INFORMASI PENGGUNA
+     INFORMATION GRID
 ========================================================== --}}
-
 <div class="detail-grid">
 
-    {{-- =====================================================
-         IDENTITAS PENGGUNA
-    ====================================================== --}}
 
+    {{-- =====================================================
+         IDENTITAS
+    ====================================================== --}}
     <div class="detail-card">
 
         <div class="detail-card-header">
@@ -270,70 +388,71 @@ $avatarText = strtoupper(
 
             </div>
 
-            <div>
+            <div class="min-w-0">
 
                 <h2 class="detail-card-title">
                     Identitas Pengguna
                 </h2>
 
                 <p class="detail-card-description">
-                    Informasi dasar pengguna.
+                    Informasi dasar akun pengguna
                 </p>
 
             </div>
 
         </div>
 
+
         <div class="detail-card-body">
 
             <div class="detail-row">
 
-                <div class="detail-label">
+                <span class="detail-label">
                     ID Pengguna
-                </div>
+                </span>
 
-                <div class="detail-value">
+                <span class="detail-value strong">
                     #{{ $user->id }}
-                </div>
+                </span>
 
             </div>
 
 
             <div class="detail-row">
 
-                <div class="detail-label">
+                <span class="detail-label">
                     Nama Lengkap
-                </div>
+                </span>
 
-                <div class="detail-value">
-                    {{ $user->name ?? '-' }}
-                </div>
+                <span class="detail-value">
+                    {{ $user->name ?: '-' }}
+                </span>
 
             </div>
 
 
             <div class="detail-row">
 
-                <div class="detail-label">
+                <span class="detail-label">
                     Alamat Email
-                </div>
+                </span>
 
-                <div class="detail-value detail-break">
-                    {{ $user->email ?? '-' }}
-                </div>
+                <span class="detail-value detail-break">
+                    {{ $user->email ?: '-' }}
+                </span>
 
             </div>
 
 
             <div class="detail-row">
 
-                <div class="detail-label">
+                <span class="detail-label">
                     Jabatan / Posisi
-                </div>
+                </span>
 
-                <div class="detail-value">
-                    {{ $user->jabatan ?? '-' }}
-                </div>
+                <span class="detail-value">
+                    {{ $user->jabatan ?: '-' }}
+                </span>
 
             </div>
 
@@ -345,7 +464,6 @@ $avatarText = strtoupper(
     {{-- =====================================================
          HAK AKSES
     ====================================================== --}}
-
     <div class="detail-card">
 
         <div class="detail-card-header">
@@ -375,99 +493,100 @@ $avatarText = strtoupper(
 
             </div>
 
-            <div>
+            <div class="min-w-0">
 
                 <h2 class="detail-card-title">
                     Hak Akses
                 </h2>
 
                 <p class="detail-card-description">
-                    Role dan kewenangan akun.
+                    Role dan kewenangan akun
                 </p>
 
             </div>
 
         </div>
 
+
         <div class="detail-card-body">
 
             <div class="detail-row">
 
-                <div class="detail-label">
+                <span class="detail-label">
                     Role
-                </div>
+                </span>
 
-                <div class="detail-value detail-value-right">
+                <span class="detail-value">
 
                     @if($role === 'admin')
 
-                        <span class="detail-role admin">
+                        <span class="role-badge admin">
                             Admin
                         </span>
 
                     @elseif($role === 'pimpinan')
 
-                        <span class="detail-role pimpinan">
+                        <span class="role-badge pimpinan">
                             Pimpinan
                         </span>
 
                     @elseif($role === 'staff')
 
-                        <span class="detail-role staff">
+                        <span class="role-badge staff">
                             Staf
                         </span>
 
                     @else
 
-                        <span class="detail-role default">
+                        <span class="role-badge default">
                             {{ $roleLabel }}
                         </span>
 
                     @endif
 
-                </div>
+                </span>
 
             </div>
 
 
             <div class="detail-row">
 
-                <div class="detail-label">
+                <span class="detail-label">
                     Keterangan Role
-                </div>
+                </span>
 
-                <div class="detail-value">
+                <span class="detail-value">
                     {{ $roleDescription }}
-                </div>
+                </span>
 
             </div>
 
 
             <div class="detail-row">
 
-                <div class="detail-label">
+                <span class="detail-label">
                     Status Akun
-                </div>
+                </span>
 
-                <div class="detail-value detail-value-right">
+                <span class="detail-value">
 
                     @if($isActive)
 
-                        <span class="detail-status active">
-                            <span class="detail-status-dot"></span>
+                        <span class="account-status active">
+                            <span class="status-dot"></span>
                             Aktif
                         </span>
 
                     @else
 
-                        <span class="detail-status inactive">
-                            <span class="detail-status-dot"></span>
+                        <span class="account-status inactive">
+                            <span class="status-dot"></span>
                             Nonaktif
                         </span>
 
                     @endif
 
-                </div>
+                </span>
 
             </div>
 
@@ -477,9 +596,8 @@ $avatarText = strtoupper(
 
 
     {{-- =====================================================
-         STATUS EMAIL
+         VERIFIKASI EMAIL
     ====================================================== --}}
-
     <div class="detail-card">
 
         <div class="detail-card-header">
@@ -508,29 +626,30 @@ $avatarText = strtoupper(
 
             </div>
 
-            <div>
+            <div class="min-w-0">
 
                 <h2 class="detail-card-title">
                     Verifikasi Email
                 </h2>
 
                 <p class="detail-card-description">
-                    Status verifikasi alamat email.
+                    Status verifikasi alamat email
                 </p>
 
             </div>
 
         </div>
 
+
         <div class="detail-card-body">
 
             <div class="detail-row">
 
-                <div class="detail-label">
+                <span class="detail-label">
                     Status Verifikasi
-                </div>
+                </span>
 
-                <div class="detail-value detail-value-right">
+                <span class="detail-value">
 
                     @if($user->email_verified_at)
 
@@ -548,18 +667,18 @@ $avatarText = strtoupper(
 
                     @endif
 
-                </div>
+                </span>
 
             </div>
 
 
             <div class="detail-row">
 
-                <div class="detail-label">
+                <span class="detail-label">
                     Terverifikasi Pada
-                </div>
+                </span>
 
-                <div class="detail-value">
+                <span class="detail-value">
 
                     @if($user->email_verified_at)
 
@@ -571,7 +690,7 @@ $avatarText = strtoupper(
 
                     @endif
 
-                </div>
+                </span>
 
             </div>
 
@@ -583,7 +702,6 @@ $avatarText = strtoupper(
     {{-- =====================================================
          INFORMASI SISTEM
     ====================================================== --}}
-
     <div class="detail-card">
 
         <div class="detail-card-header">
@@ -611,64 +729,57 @@ $avatarText = strtoupper(
 
             </div>
 
-            <div>
+            <div class="min-w-0">
 
                 <h2 class="detail-card-title">
                     Informasi Sistem
                 </h2>
 
                 <p class="detail-card-description">
-                    Waktu pembuatan dan perubahan akun.
+                    Waktu aktivitas akun
                 </p>
 
             </div>
 
         </div>
 
+
         <div class="detail-card-body">
 
             <div class="detail-row">
 
-                <div class="detail-label">
+                <span class="detail-label">
                     Dibuat Pada
-                </div>
+                </span>
 
-                <div class="detail-value">
+                <span class="detail-value">
 
                     @if($user->created_at)
-
                         {{ $user->created_at->format('d/m/Y H:i:s') }}
-
                     @else
-
                         -
-
                     @endif
 
-                </div>
+                </span>
 
             </div>
 
 
             <div class="detail-row">
 
-                <div class="detail-label">
+                <span class="detail-label">
                     Terakhir Diperbarui
-                </div>
+                </span>
 
-                <div class="detail-value">
+                <span class="detail-value">
 
                     @if($user->updated_at)
-
                         {{ $user->updated_at->format('d/m/Y H:i:s') }}
-
                     @else
-
                         -
-
                     @endif
 
-                </div>
+                </span>
 
             </div>
 
@@ -680,7 +791,6 @@ $avatarText = strtoupper(
     {{-- =====================================================
          RINGKASAN AKUN
     ====================================================== --}}
-
     <div class="detail-card detail-card-full">
 
         <div class="detail-card-header">
@@ -709,80 +819,185 @@ $avatarText = strtoupper(
 
             </div>
 
-            <div>
+            <div class="min-w-0">
 
                 <h2 class="detail-card-title">
                     Ringkasan Akun
                 </h2>
 
                 <p class="detail-card-description">
-                    Status keseluruhan akun pengguna.
+                    Ringkasan kondisi akun pengguna
                 </p>
 
             </div>
 
         </div>
 
-        <div class="detail-summary">
 
-            <div class="summary-item">
+        <div class="summary-grid">
 
-                <span class="summary-label">
-                    Akun
-                </span>
+            <div class="summary-box">
 
-                @if($isActive)
+                <div class="summary-box-icon">
 
-                    <span class="summary-value active">
-                        Aktif
+                    <svg
+                        class="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        viewBox="0 0 24 24"
+                    >
+                        <circle
+                            cx="12"
+                            cy="12"
+                            r="9"
+                        />
+
+                        <path
+                            stroke-linecap="round"
+                            d="M9 12l2 2 4-4"
+                        />
+                    </svg>
+
+                </div>
+
+                <div class="summary-box-content">
+
+                    <span class="summary-label">
+                        Status Akun
                     </span>
 
-                @else
+                    @if($isActive)
 
-                    <span class="summary-value inactive">
-                        Nonaktif
+                        <span class="summary-value active">
+                            Aktif
+                        </span>
+
+                    @else
+
+                        <span class="summary-value inactive">
+                            Nonaktif
+                        </span>
+
+                    @endif
+
+                </div>
+
+            </div>
+
+
+            <div class="summary-box">
+
+                <div class="summary-box-icon">
+
+                    <svg
+                        class="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M12 3l7 4v5c0 4-2.8 7.2-7 9-4.2-1.8-7-5-7-9V7l7-4z"
+                        />
+                    </svg>
+
+                </div>
+
+                <div class="summary-box-content">
+
+                    <span class="summary-label">
+                        Role
                     </span>
 
-                @endif
+                    <span class="summary-value neutral">
+                        {{ $roleLabel }}
+                    </span>
+
+                </div>
 
             </div>
 
 
-            <div class="summary-item">
+            <div class="summary-box">
 
-                <span class="summary-label">
-                    Role
-                </span>
+                <div class="summary-box-icon">
 
-                <span class="summary-value neutral">
-                    {{ $roleLabel }}
-                </span>
+                    <svg
+                        class="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        viewBox="0 0 24 24"
+                    >
+                        <circle
+                            cx="12"
+                            cy="8"
+                            r="3.5"
+                        />
+
+                        <path
+                            stroke-linecap="round"
+                            d="M5 20a7 7 0 0114 0"
+                        />
+                    </svg>
+
+                </div>
+
+                <div class="summary-box-content">
+
+                    <span class="summary-label">
+                        Jabatan
+                    </span>
+
+                    <span class="summary-value neutral detail-break">
+                        {{ $user->jabatan ?: '-' }}
+                    </span>
+
+                </div>
 
             </div>
 
 
-            <div class="summary-item">
+            <div class="summary-box">
 
-                <span class="summary-label">
-                    Jabatan
-                </span>
+                <div class="summary-box-icon">
 
-                <span class="summary-value neutral">
-                    {{ $user->jabatan ?? '-' }}
-                </span>
+                    <svg
+                        class="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M4 6h16v12H4z"
+                        />
 
-            </div>
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M4 7l8 6 8-6"
+                        />
+                    </svg>
 
+                </div>
 
-            <div class="summary-item">
+                <div class="summary-box-content">
 
-                <span class="summary-label">
-                    Email
-                </span>
+                    <span class="summary-label">
+                        Email
+                    </span>
 
-                <span class="summary-value neutral detail-break">
-                    {{ $user->email ?? '-' }}
-                </span>
+                    <span class="summary-value neutral detail-break">
+                        {{ $user->email ?: '-' }}
+                    </span>
+
+                </div>
 
             </div>
 
@@ -792,519 +1007,757 @@ $avatarText = strtoupper(
 
 </div>
 
-
-{{-- =========================================================
-     FOOTER ACTION
-========================================================== --}}
-
-<div class="mt-4 flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
-
-    <a
-        href="{{ route('users.index') }}"
-        class="detail-footer-button secondary"
-    >
-
-        <svg
-            class="w-4 h-4 mr-2"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.8"
-            viewBox="0 0 24 24"
-        >
-            <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M15 19l-7-7 7-7"
-            />
-        </svg>
-
-        Kembali ke Daftar
-
-    </a>
-
-
-    <a
-        href="{{ route('users.edit', $user->id) }}"
-        class="detail-footer-button primary"
-    >
-
-        <svg
-            class="w-4 h-4 mr-2"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.8"
-            viewBox="0 0 24 24"
-        >
-            <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M12 20h9"
-            />
-
-            <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M16.5 3.5a2.12 2.12 0 013 3L8 18l-4 1 1-4L16.5 3.5z"
-            />
-        </svg>
-
-        Edit Pengguna
-
-    </a>
-
 </div>
-```
-
-</div>
-
-{{-- =========================================================
-CSS
-========================================================= --}}
 
 <style>
-.detail-main-card{
-    overflow:hidden;
-    border:2px solid #cbd5e1;
-    border-radius:16px;
-    background:#fff;
+/* =========================================================
+   PAGE
+========================================================= */
+
+.user-detail-page {
+    color: #0f172a;
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.detail-page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 18px;
+}
+
+.detail-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.detail-title-icon {
+    display: flex;
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #bfdbfe;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    color: #2563eb;
+}
+
+.detail-page-title {
+    color: #0f172a;
+    font-size: 21px;
+    font-weight: 800;
+    line-height: 1.25;
+    letter-spacing: -.02em;
+}
+
+.detail-page-subtitle {
+    margin-top: 3px;
+    color: #64748b;
+    font-size: 11px;
+    line-height: 1.45;
+}
+
+.detail-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.detail-action {
+    display: inline-flex;
+    min-height: 40px;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 0 14px;
+    border: 1.5px solid;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 800;
+    white-space: nowrap;
+    transition:
+        transform .15s ease,
+        background .15s ease,
+        border-color .15s ease,
+        box-shadow .15s ease;
+}
+
+.detail-action:hover {
+    transform: translateY(-1px);
+}
+
+.detail-action.secondary {
+    color: #334155;
+    background: #fff;
+    border-color: #cbd5e1;
+}
+
+.detail-action.secondary:hover {
+    background: #f8fafc;
+    border-color: #94a3b8;
+    box-shadow: 0 4px 12px rgba(15,23,42,.06);
+}
+
+.detail-action.primary {
+    color: #fff;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    border-color: #2563eb;
+    box-shadow: 0 6px 14px rgba(37,99,235,.18);
+}
+
+.detail-action.primary:hover {
+    background: linear-gradient(135deg, #1d4ed8, #1e40af);
+    box-shadow: 0 8px 18px rgba(37,99,235,.22);
+}
+
+
+/* =========================================================
+   TOP STATUS
+========================================================= */
+
+.top-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 21px;
+    padding: 0 8px;
+    border: 1px solid;
+    border-radius: 999px;
+    font-size: 8px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.top-status.active {
+    color: #047857;
+    background: #ecfdf5;
+    border-color: #a7f3d0;
+}
+
+.top-status.inactive {
+    color: #be123c;
+    background: #fff1f2;
+    border-color: #fecdd3;
+}
+
+.status-dot {
+    width: 5px;
+    height: 5px;
+    flex-shrink: 0;
+    border-radius: 999px;
+    background: currentColor;
+}
+
+
+/* =========================================================
+   PROFILE CARD
+========================================================= */
+
+.profile-card {
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    overflow: hidden;
+    margin-bottom: 16px;
+    border: 1px solid #dbe3ef;
+    border-radius: 18px;
+    background:
+        linear-gradient(
+            135deg,
+            #ffffff 0%,
+            #ffffff 70%,
+            #f8fbff 100%
+        );
     box-shadow:
-        0 1px 3px rgba(15,23,42,.06),
-        0 8px 24px rgba(15,23,42,.04)
+        0 8px 30px rgba(15,23,42,.055),
+        0 2px 8px rgba(15,23,42,.03);
 }
 
-.detail-profile{
-    display:flex;
-    align-items:center;
-    gap:16px;
-    padding:20px
+.profile-card-main {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    min-width: 0;
+    padding: 20px;
 }
 
-.detail-avatar{
-    display:flex;
-    width:68px;
-    height:68px;
-    flex-shrink:0;
-    align-items:center;
-    justify-content:center;
-    border:2px solid #bfdbfe;
-    border-radius:18px;
-    background:#eff6ff;
-    color:#2563eb;
-    font-size:20px;
-    font-weight:800
-}
-
-.detail-profile-info{
-    min-width:0;
-    flex:1
-}
-
-.detail-profile-name{
-    overflow:hidden;
-    color:#1e293b;
-    font-size:20px;
-    font-weight:800;
-    line-height:1.35;
-    text-overflow:ellipsis;
-    white-space:nowrap
-}
-
-.detail-profile-email{
-    margin-top:3px;
-    overflow:hidden;
-    color:#64748b;
-    font-size:12px;
-    line-height:1.4;
-    text-overflow:ellipsis;
-    white-space:nowrap
-}
-
-.detail-profile-badges{
-    display:flex;
-    flex-wrap:wrap;
-    align-items:center;
-    gap:7px;
-    margin-top:10px
-}
-
-.detail-grid{
-    display:grid;
-    grid-template-columns:repeat(2,minmax(0,1fr));
-    gap:14px
-}
-
-.detail-card{
-    overflow:hidden;
-    border:2px solid #cbd5e1;
-    border-radius:15px;
-    background:#fff;
+.profile-avatar {
+    display: flex;
+    width: 68px;
+    height: 68px;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #bfdbfe;
+    border-radius: 18px;
+    background:
+        linear-gradient(
+            135deg,
+            #eff6ff,
+            #dbeafe
+        );
+    color: #2563eb;
+    font-size: 19px;
+    font-weight: 900;
+    letter-spacing: -.02em;
     box-shadow:
-        0 1px 3px rgba(15,23,42,.05),
-        0 8px 20px rgba(15,23,42,.03)
+        inset 0 1px 0 rgba(255,255,255,.85);
 }
 
-.detail-card-full{
-    grid-column:1 / -1
+.profile-info {
+    min-width: 0;
 }
 
-.detail-card-header{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    padding:13px 15px;
-    border-bottom:2px solid #cbd5e1;
-    background:#f8fafc
+.profile-name {
+    overflow: hidden;
+    color: #0f172a;
+    font-size: 19px;
+    font-weight: 850;
+    line-height: 1.35;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
-.detail-card-icon{
-    display:flex;
-    width:34px;
-    height:34px;
-    flex-shrink:0;
-    align-items:center;
-    justify-content:center;
-    border-radius:9px
+.profile-email {
+    margin-top: 3px;
+    overflow: hidden;
+    color: #64748b;
+    font-size: 11px;
+    line-height: 1.45;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
-.detail-card-icon.blue{
-    color:#2563eb;
-    background:#eff6ff;
-    border:1px solid #bfdbfe
+.profile-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 7px;
+    margin-top: 11px;
 }
 
-.detail-card-icon.purple{
-    color:#7e22ce;
-    background:#faf5ff;
-    border:1px solid #e9d5ff
+
+/* =========================================================
+   PROFILE SIDE INFO
+========================================================= */
+
+.profile-side-info {
+    display: flex;
+    min-width: 220px;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    padding: 20px 24px;
+    border-left: 1px solid #e2e8f0;
+    background: rgba(248,250,252,.72);
 }
 
-.detail-card-icon.green{
-    color:#047857;
-    background:#ecfdf5;
-    border:1px solid #a7f3d0
+.profile-side-item {
+    display: flex;
+    min-width: 88px;
+    flex-direction: column;
+    gap: 4px;
 }
 
-.detail-card-icon.slate{
-    color:#475569;
-    background:#f1f5f9;
-    border:1px solid #cbd5e1
+.profile-side-label {
+    color: #94a3b8;
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: .06em;
+    text-transform: uppercase;
 }
 
-.detail-card-icon.orange{
-    color:#c2410c;
-    background:#fff7ed;
-    border:1px solid #fed7aa
+.profile-side-value {
+    color: #334155;
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 1.4;
+    word-break: break-word;
 }
 
-.detail-card-title{
-    color:#334155;
-    font-size:11px;
-    font-weight:800;
-    letter-spacing:.04em;
-    line-height:1.25;
-    text-transform:uppercase
+.profile-side-divider {
+    width: 1px;
+    height: 38px;
+    background: #dbe3ef;
 }
 
-.detail-card-description{
-    margin-top:2px;
-    color:#94a3b8;
-    font-size:8px;
-    line-height:1.25
+
+/* =========================================================
+   BADGES
+========================================================= */
+
+.role-badge,
+.account-status,
+.verification-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 25px;
+    padding: 0 9px;
+    border: 1px solid;
+    border-radius: 8px;
+    font-size: 9px;
+    font-weight: 800;
+    white-space: nowrap;
 }
 
-.detail-card-body{
-    padding:0 15px
+.role-badge.admin {
+    color: #7e22ce;
+    background: #faf5ff;
+    border-color: #e9d5ff;
 }
 
-.detail-row{
-    display:flex;
-    align-items:flex-start;
-    justify-content:space-between;
-    gap:18px;
-    padding:12px 0;
-    border-bottom:1px solid #e2e8f0
+.role-badge.pimpinan {
+    color: #b45309;
+    background: #fffbeb;
+    border-color: #fde68a;
 }
 
-.detail-row:last-child{
-    border-bottom:0
+.role-badge.staff {
+    color: #1d4ed8;
+    background: #eff6ff;
+    border-color: #bfdbfe;
 }
 
-.detail-label{
-    flex-shrink:0;
-    color:#64748b;
-    font-size:9px;
-    font-weight:800;
-    letter-spacing:.03em;
-    line-height:1.4;
-    text-transform:uppercase
+.role-badge.default {
+    color: #475569;
+    background: #f1f5f9;
+    border-color: #cbd5e1;
 }
 
-.detail-value{
-    color:#334155;
-    font-size:11px;
-    font-weight:700;
-    line-height:1.5;
-    text-align:right
+.account-status {
+    border-radius: 999px;
 }
 
-.detail-value-right{
-    display:flex;
-    align-items:center;
-    justify-content:flex-end
+.account-status.active {
+    color: #047857;
+    background: #ecfdf5;
+    border-color: #a7f3d0;
 }
 
-.detail-break{
-    overflow-wrap:anywhere;
-    word-break:break-word
+.account-status.inactive {
+    color: #be123c;
+    background: #fff1f2;
+    border-color: #fecdd3;
 }
 
-.detail-role{
-    display:inline-flex;
-    min-height:25px;
-    align-items:center;
-    border:1px solid;
-    border-radius:8px;
-    padding:0 9px;
-    font-size:9px;
-    font-weight:800;
-    white-space:nowrap
+.verification-badge {
+    border-radius: 999px;
 }
 
-.detail-role.admin{
-    border-color:#e9d5ff;
-    background:#faf5ff;
-    color:#7e22ce
+.verification-badge.verified {
+    color: #047857;
+    background: #ecfdf5;
+    border-color: #a7f3d0;
 }
 
-.detail-role.pimpinan{
-    border-color:#fde68a;
-    background:#fffbeb;
-    color:#b45309
+.verification-badge.unverified {
+    color: #b45309;
+    background: #fffbeb;
+    border-color: #fde68a;
 }
 
-.detail-role.staff{
-    border-color:#bfdbfe;
-    background:#eff6ff;
-    color:#1d4ed8
+.verification-dot {
+    width: 6px;
+    height: 6px;
+    flex-shrink: 0;
+    border-radius: 999px;
+    background: currentColor;
 }
 
-.detail-role.default{
-    border-color:#cbd5e1;
-    background:#f1f5f9;
-    color:#475569
+
+/* =========================================================
+   DETAIL GRID
+========================================================= */
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
 }
 
-.detail-status{
-    display:inline-flex;
-    min-height:25px;
-    align-items:center;
-    gap:6px;
-    border:1px solid;
-    border-radius:999px;
-    padding:0 9px;
-    font-size:9px;
-    font-weight:800;
-    white-space:nowrap
+.detail-card {
+    overflow: hidden;
+    border: 1px solid #dbe3ef;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow:
+        0 5px 18px rgba(15,23,42,.04),
+        0 1px 4px rgba(15,23,42,.025);
 }
 
-.detail-status.active{
-    border-color:#a7f3d0;
-    background:#ecfdf5;
-    color:#047857
+.detail-card-full {
+    grid-column: 1 / -1;
 }
 
-.detail-status.inactive{
-    border-color:#fecdd3;
-    background:#fff1f2;
-    color:#be123c
+
+/* =========================================================
+   CARD HEADER
+========================================================= */
+
+.detail-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 13px 15px;
+    border-bottom: 1px solid #e2e8f0;
+    background: linear-gradient(
+        180deg,
+        #ffffff,
+        #f8fafc
+    );
 }
 
-.detail-status-dot{
-    width:6px;
-    height:6px;
-    flex-shrink:0;
-    border-radius:999px;
-    background:currentColor
+.detail-card-icon {
+    display: flex;
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid;
+    border-radius: 10px;
 }
 
-.verification-badge{
-    display:inline-flex;
-    min-height:25px;
-    align-items:center;
-    gap:6px;
-    border:1px solid;
-    border-radius:999px;
-    padding:0 9px;
-    font-size:9px;
-    font-weight:800;
-    white-space:nowrap
+.detail-card-icon.blue {
+    color: #2563eb;
+    background: #eff6ff;
+    border-color: #bfdbfe;
 }
 
-.verification-badge.verified{
-    border-color:#a7f3d0;
-    background:#ecfdf5;
-    color:#047857
+.detail-card-icon.purple {
+    color: #7e22ce;
+    background: #faf5ff;
+    border-color: #e9d5ff;
 }
 
-.verification-badge.unverified{
-    border-color:#fde68a;
-    background:#fffbeb;
-    color:#b45309
+.detail-card-icon.green {
+    color: #047857;
+    background: #ecfdf5;
+    border-color: #a7f3d0;
 }
 
-.verification-dot{
-    width:6px;
-    height:6px;
-    border-radius:999px;
-    background:currentColor
+.detail-card-icon.slate {
+    color: #475569;
+    background: #f1f5f9;
+    border-color: #cbd5e1;
 }
 
-.detail-summary{
-    display:grid;
-    grid-template-columns:repeat(4,minmax(0,1fr));
-    gap:10px;
-    padding:15px
+.detail-card-icon.orange {
+    color: #c2410c;
+    background: #fff7ed;
+    border-color: #fed7aa;
 }
 
-.summary-item{
-    min-width:0;
-    padding:11px 12px;
-    border:1px solid #cbd5e1;
-    border-radius:10px;
-    background:#f8fafc
+.detail-card-title {
+    color: #334155;
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: .045em;
+    line-height: 1.25;
+    text-transform: uppercase;
 }
 
-.summary-label{
-    display:block;
-    margin-bottom:4px;
-    color:#94a3b8;
-    font-size:8px;
-    font-weight:800;
-    letter-spacing:.04em;
-    line-height:1.3;
-    text-transform:uppercase
+.detail-card-description {
+    margin-top: 2px;
+    color: #94a3b8;
+    font-size: 8px;
+    line-height: 1.3;
 }
 
-.summary-value{
-    display:block;
-    color:#334155;
-    font-size:10px;
-    font-weight:800;
-    line-height:1.4
+
+/* =========================================================
+   CARD BODY
+========================================================= */
+
+.detail-card-body {
+    padding: 0 15px;
 }
 
-.summary-value.active{
-    color:#047857
+.detail-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 11px 0;
+    border-bottom: 1px solid #edf2f7;
 }
 
-.summary-value.inactive{
-    color:#be123c
+.detail-row:last-child {
+    border-bottom: none;
 }
 
-.summary-value.neutral{
-    color:#334155
+.detail-label {
+    flex-shrink: 0;
+    color: #64748b;
+    font-size: 8px;
+    font-weight: 900;
+    letter-spacing: .055em;
+    line-height: 1.45;
+    text-transform: uppercase;
 }
 
-.detail-footer-button{
-    display:inline-flex;
-    width:100%;
-    align-items:center;
-    justify-content:center;
-    padding:.55rem 1rem;
-    border:2px solid;
-    border-radius:.65rem;
-    font-size:.76rem;
-    font-weight:700;
-    transition:all .15s ease
+.detail-value {
+    max-width: 68%;
+    color: #334155;
+    font-size: 10.5px;
+    font-weight: 700;
+    line-height: 1.5;
+    text-align: right;
 }
 
-.detail-footer-button.secondary{
-    color:#334155;
-    background:#fff;
-    border-color:#cbd5e1
+.detail-value.strong {
+    color: #0f172a;
+    font-weight: 850;
 }
 
-.detail-footer-button.secondary:hover{
-    background:#f1f5f9;
-    border-color:#94a3b8
+.detail-break {
+    overflow-wrap: anywhere;
+    word-break: break-word;
 }
 
-.detail-footer-button.primary{
-    color:#fff;
-    background:#2563eb;
-    border-color:#2563eb
+
+/* =========================================================
+   SUMMARY
+========================================================= */
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+    padding: 14px;
 }
 
-.detail-footer-button.primary:hover{
-    background:#1d4ed8;
-    border-color:#1d4ed8
+.summary-box {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    min-width: 0;
+    padding: 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background: #f8fafc;
+    transition:
+        transform .15s ease,
+        border-color .15s ease,
+        box-shadow .15s ease;
 }
 
-@media(min-width:640px){
+.summary-box:hover {
+    transform: translateY(-1px);
+    border-color: #cbd5e1;
+    box-shadow: 0 5px 14px rgba(15,23,42,.05);
+}
 
-    .detail-footer-button{
-        width:auto
+.summary-box-icon {
+    display: flex;
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #dbe3ef;
+    border-radius: 8px;
+    background: #fff;
+    color: #64748b;
+}
+
+.summary-box-content {
+    min-width: 0;
+}
+
+.summary-label {
+    display: block;
+    margin-bottom: 3px;
+    color: #94a3b8;
+    font-size: 7.5px;
+    font-weight: 900;
+    letter-spacing: .055em;
+    line-height: 1.25;
+    text-transform: uppercase;
+}
+
+.summary-value {
+    display: block;
+    color: #334155;
+    font-size: 10px;
+    font-weight: 850;
+    line-height: 1.4;
+}
+
+.summary-value.active {
+    color: #047857;
+}
+
+.summary-value.inactive {
+    color: #be123c;
+}
+
+.summary-value.neutral {
+    color: #334155;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 900px) {
+
+    .profile-card {
+        flex-direction: column;
     }
+
+    .profile-side-info {
+        justify-content: flex-start;
+        border-top: 1px solid #e2e8f0;
+        border-left: 0;
+        padding: 14px 20px;
+    }
+
+    .summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
 }
 
-@media(max-width:767px){
+@media (max-width: 767px) {
 
-    .detail-grid{
-        grid-template-columns:1fr
+    .detail-page-header {
+        align-items: flex-start;
+        flex-direction: column;
     }
 
-    .detail-card-full{
-        grid-column:auto
+    .detail-header-actions {
+        width: 100%;
     }
 
-    .detail-summary{
-        grid-template-columns:repeat(2,minmax(0,1fr))
+    .detail-action {
+        flex: 1;
     }
+
+    .detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .detail-card-full {
+        grid-column: auto;
+    }
+
 }
 
-@media(max-width:640px){
+@media (max-width: 640px) {
 
-    .detail-profile{
-        align-items:flex-start;
-        padding:16px
+    .detail-page-header {
+        gap: 12px;
+        margin-bottom: 14px;
     }
 
-    .detail-avatar{
-        width:58px;
-        height:58px;
-        border-radius:15px;
-        font-size:17px
+    .detail-title-icon {
+        width: 38px;
+        height: 38px;
     }
 
-    .detail-profile-name{
-        font-size:16px
+    .detail-page-title {
+        font-size: 18px;
     }
 
-    .detail-profile-email{
-        font-size:10px
+    .detail-page-subtitle {
+        font-size: 9px;
     }
 
-    .detail-card-body{
-        padding:0 13px
+    .detail-header-actions {
+        gap: 7px;
     }
 
-    .detail-row{
-        flex-direction:column;
-        gap:5px
+    .detail-action {
+        min-height: 38px;
+        padding: 0 11px;
+        font-size: 10px;
     }
 
-    .detail-value{
-        width:100%;
-        text-align:left
+    .profile-card-main {
+        align-items: flex-start;
+        padding: 16px;
     }
 
-    .detail-value-right{
-        justify-content:flex-start
+    .profile-avatar {
+        width: 56px;
+        height: 56px;
+        border-radius: 15px;
+        font-size: 16px;
     }
 
-    .detail-summary{
-        grid-template-columns:1fr
+    .profile-name {
+        font-size: 16px;
     }
+
+    .profile-email {
+        max-width: 100%;
+        font-size: 9px;
+    }
+
+    .profile-side-info {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        padding: 13px 16px;
+    }
+
+    .profile-side-divider {
+        width: 100%;
+        height: 1px;
+    }
+
+    .detail-card-body {
+        padding: 0 13px;
+    }
+
+    .detail-row {
+        flex-direction: column;
+        gap: 5px;
+        padding: 10px 0;
+    }
+
+    .detail-value {
+        width: 100%;
+        max-width: 100%;
+        text-align: left;
+    }
+
+    .summary-grid {
+        grid-template-columns: 1fr;
+        padding: 12px;
+    }
+
+}
+
+@media (max-width: 420px) {
+
+    .detail-action span {
+        font-size: 9px;
+    }
+
+    .profile-meta {
+        gap: 5px;
+    }
+
+    .role-badge,
+    .account-status,
+    .verification-badge {
+        font-size: 8px;
+    }
+
 }
 </style>
 
