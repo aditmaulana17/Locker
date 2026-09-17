@@ -5,535 +5,308 @@
 @section('content')
 
 @php
-/*
-|--------------------------------------------------------------------------
-| NORMALISASI ROLE
-|--------------------------------------------------------------------------
-*/
+    /*
+    |--------------------------------------------------------------------------
+    | NORMALISASI ROLE
+    |--------------------------------------------------------------------------
+    */
 
-$role = strtolower(
-    trim((string) ($user->role ?? ''))
-);
+    $role = strtolower(
+        trim((string) ($user->role ?? ''))
+    );
 
-if ($role === 'staf') {
-    $role = 'staff';
-}
+    if ($role === 'staf') {
+        $role = 'staff';
+    }
 
-/*
-|--------------------------------------------------------------------------
-| STATUS AKUN
-|--------------------------------------------------------------------------
-*/
+    /*
+    |--------------------------------------------------------------------------
+    | STATUS AKUN
+    |--------------------------------------------------------------------------
+    */
 
-$isActive = (bool) ($user->is_active ?? false);
+    $isActive = (bool) ($user->is_active ?? false);
 
-/*
-|--------------------------------------------------------------------------
-| LABEL ROLE
-|--------------------------------------------------------------------------
-*/
+    /*
+    |--------------------------------------------------------------------------
+    | LABEL ROLE
+    |--------------------------------------------------------------------------
+    */
 
-$roleLabel = match ($role) {
-    'admin'    => 'Admin',
-    'pimpinan' => 'Pimpinan',
-    'staff'    => 'Staf',
-    default    => ucfirst($role ?: 'User'),
-};
+    $roleLabel = match ($role) {
+        'admin'    => 'Admin',
+        'pimpinan' => 'Pimpinan',
+        'staff'    => 'Staf',
+        default    => ucfirst($role ?: 'User'),
+    };
 
-$roleDescription = match ($role) {
-    'admin'    => 'Akses penuh sistem',
-    'pimpinan' => 'Akses pimpinan',
-    'staff'    => 'Akses operator / staf',
-    default    => 'Pengguna sistem',
-};
+    $roleDescription = match ($role) {
+        'admin'    => 'Akses penuh sistem',
+        'pimpinan' => 'Akses pimpinan',
+        'staff'    => 'Akses operator / staf',
+        default    => 'Pengguna sistem',
+    };
 
-/*
-|--------------------------------------------------------------------------
-| AVATAR
-|--------------------------------------------------------------------------
-*/
+    /*
+    |--------------------------------------------------------------------------
+    | AVATAR
+    |--------------------------------------------------------------------------
+    */
 
-$userName = trim(
-    (string) ($user->name ?? '')
-);
+    $userName = trim(
+        (string) ($user->name ?? '')
+    );
 
-$avatarText = strtoupper(
-    mb_substr(
-        $userName !== '' ? $userName : 'US',
-        0,
-        2
-    )
-);
-
+    $avatarText = strtoupper(
+        mb_substr(
+            $userName !== '' ? $userName : 'US',
+            0,
+            2
+        )
+    );
 @endphp
+
 
 <div class="user-detail-page w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-10">
 
+    {{-- =========================================================
+         HEADER
+    ========================================================== --}}
+    <div class="detail-page-header">
 
-{{-- =========================================================
-     HEADER
-========================================================== --}}
-<div class="detail-page-header">
+        <div class="detail-header-left">
 
-    <div class="detail-header-left">
+            <div class="detail-title-icon">
 
-        <div class="detail-title-icon">
-            <svg
-                class="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.8"
-                viewBox="0 0 24 24"
-            >
-                <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M15 19l-7-7 7-7"
-                />
-            </svg>
-        </div>
+                <svg
+                    class="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M15 19l-7-7 7-7"
+                    />
+                </svg>
 
-        <div class="min-w-0">
-
-            <div class="flex items-center gap-2">
-                <h1 class="detail-page-title">
-                    Detail Pengguna
-                </h1>
-
-                @if($isActive)
-                    <span class="top-status active">
-                        <span class="status-dot"></span>
-                        Aktif
-                    </span>
-                @else
-                    <span class="top-status inactive">
-                        <span class="status-dot"></span>
-                        Nonaktif
-                    </span>
-                @endif
             </div>
 
-            <p class="detail-page-subtitle">
-                Informasi lengkap akun pengguna yang tersimpan di sistem.
-            </p>
+
+            <div class="min-w-0">
+
+                <div class="flex items-center gap-2">
+
+                    <h1 class="detail-page-title">
+                        Detail Pengguna
+                    </h1>
+
+                    @if($isActive)
+
+                        <span class="top-status active">
+                            <span class="status-dot"></span>
+                            Aktif
+                        </span>
+
+                    @else
+
+                        <span class="top-status inactive">
+                            <span class="status-dot"></span>
+                            Nonaktif
+                        </span>
+
+                    @endif
+
+                </div>
+
+
+                <p class="detail-page-subtitle">
+                    Informasi lengkap akun pengguna yang tersimpan di sistem.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        {{-- =====================================================
+             ACTION BUTTON
+        ====================================================== --}}
+        <div class="detail-header-actions">
+
+            <a
+                href="{{ route('users.index') }}"
+                class="detail-action secondary"
+            >
+
+                <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M15 19l-7-7 7-7"
+                    />
+                </svg>
+
+                <span>Kembali</span>
+
+            </a>
+
+
+            <a
+                href="{{ route('users.edit', $user->id) }}"
+                class="detail-action primary"
+            >
+
+                <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M12 20h9"
+                    />
+
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M16.5 3.5a2.12 2.12 0 013 3L8 18l-4 1 1-4L16.5 3.5z"
+                    />
+                </svg>
+
+                <span>Edit Pengguna</span>
+
+            </a>
 
         </div>
 
     </div>
 
 
-    {{-- =====================================================
-         ACTION BUTTON
-    ====================================================== --}}
-    <div class="detail-header-actions">
+    {{-- =========================================================
+         PROFILE CARD
+         
+         ID Pengguna & Jabatan DIHAPUS dari bagian atas
+    ========================================================== --}}
+    <div class="profile-card">
 
-        <a
-            href="{{ route('users.index') }}"
-            class="detail-action secondary"
-        >
-            <svg
-                class="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.8"
-                viewBox="0 0 24 24"
-            >
-                <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M15 19l-7-7 7-7"
-                />
-            </svg>
+        <div class="profile-card-main">
 
-            <span>Kembali</span>
-        </a>
-
-        <a
-            href="{{ route('users.edit', $user->id) }}"
-            class="detail-action primary"
-        >
-            <svg
-                class="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.8"
-                viewBox="0 0 24 24"
-            >
-                <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M12 20h9"
-                />
-
-                <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M16.5 3.5a2.12 2.12 0 013 3L8 18l-4 1 1-4L16.5 3.5z"
-                />
-            </svg>
-
-            <span>Edit Pengguna</span>
-        </a>
-
-    </div>
-
-</div>
+            <div class="profile-avatar">
+                {{ $avatarText }}
+            </div>
 
 
-{{-- =========================================================
-     PROFILE CARD
-========================================================== --}}
-<div class="profile-card">
-
-    <div class="profile-card-main">
-
-        <div class="profile-avatar">
-            {{ $avatarText }}
-        </div>
-
-        <div class="profile-info">
-
-            <div class="profile-name-row">
+            <div class="profile-info">
 
                 <h2 class="profile-name">
                     {{ $user->name ?? '-' }}
                 </h2>
 
-            </div>
 
-            <p class="profile-email">
-                {{ $user->email ?? '-' }}
-            </p>
-
-            <div class="profile-meta">
-
-                {{-- ROLE --}}
-                @if($role === 'admin')
-
-                    <span class="role-badge admin">
-                        <svg
-                            class="w-3.5 h-3.5"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="1.8"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="M12 3l7 4v5c0 4-2.8 7.2-7 9-4.2-1.8-7-5-7-9V7l7-4z"
-                            />
-                        </svg>
-
-                        Admin
-                    </span>
-
-                @elseif($role === 'pimpinan')
-
-                    <span class="role-badge pimpinan">
-                        <svg
-                            class="w-3.5 h-3.5"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="1.8"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="M3 21h18"
-                            />
-
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="M5 21V7l7-4 7 4v14"
-                            />
-
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="M9 21v-5h6v5"
-                            />
-                        </svg>
-
-                        Pimpinan
-                    </span>
-
-                @elseif($role === 'staff')
-
-                    <span class="role-badge staff">
-                        <svg
-                            class="w-3.5 h-3.5"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="1.8"
-                            viewBox="0 0 24 24"
-                        >
-                            <circle
-                                cx="12"
-                                cy="8"
-                                r="3.5"
-                            />
-
-                            <path
-                                stroke-linecap="round"
-                                d="M5 20a7 7 0 0114 0"
-                            />
-                        </svg>
-
-                        Staf
-                    </span>
-
-                @else
-
-                    <span class="role-badge default">
-                        {{ $roleLabel }}
-                    </span>
-
-                @endif
-
-
-                {{-- STATUS --}}
-                @if($isActive)
-
-                    <span class="account-status active">
-                        <span class="status-dot"></span>
-                        Akun Aktif
-                    </span>
-
-                @else
-
-                    <span class="account-status inactive">
-                        <span class="status-dot"></span>
-                        Akun Nonaktif
-                    </span>
-
-                @endif
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    {{-- PROFILE SIDE INFO --}}
-    <div class="profile-side-info">
-
-        <div class="profile-side-item">
-
-            <span class="profile-side-label">
-                ID Pengguna
-            </span>
-
-            <span class="profile-side-value">
-                #{{ $user->id }}
-            </span>
-
-        </div>
-
-        <div class="profile-side-divider"></div>
-
-        <div class="profile-side-item">
-
-            <span class="profile-side-label">
-                Jabatan
-            </span>
-
-            <span class="profile-side-value">
-                {{ $user->jabatan ?: '-' }}
-            </span>
-
-        </div>
-
-    </div>
-
-</div>
-
-
-{{-- =========================================================
-     INFORMATION GRID
-========================================================== --}}
-<div class="detail-grid">
-
-
-    {{-- =====================================================
-         IDENTITAS
-    ====================================================== --}}
-    <div class="detail-card">
-
-        <div class="detail-card-header">
-
-            <div class="detail-card-icon blue">
-
-                <svg
-                    class="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.8"
-                    viewBox="0 0 24 24"
-                >
-                    <circle
-                        cx="12"
-                        cy="8"
-                        r="3.5"
-                    />
-
-                    <path
-                        stroke-linecap="round"
-                        d="M5 20a7 7 0 0114 0"
-                    />
-                </svg>
-
-            </div>
-
-            <div class="min-w-0">
-
-                <h2 class="detail-card-title">
-                    Identitas Pengguna
-                </h2>
-
-                <p class="detail-card-description">
-                    Informasi dasar akun pengguna
+                <p class="profile-email">
+                    {{ $user->email ?? '-' }}
                 </p>
 
-            </div>
 
-        </div>
+                <div class="profile-meta">
 
-
-        <div class="detail-card-body">
-
-            <div class="detail-row">
-
-                <span class="detail-label">
-                    ID Pengguna
-                </span>
-
-                <span class="detail-value strong">
-                    #{{ $user->id }}
-                </span>
-
-            </div>
-
-
-            <div class="detail-row">
-
-                <span class="detail-label">
-                    Nama Lengkap
-                </span>
-
-                <span class="detail-value">
-                    {{ $user->name ?: '-' }}
-                </span>
-
-            </div>
-
-
-            <div class="detail-row">
-
-                <span class="detail-label">
-                    Alamat Email
-                </span>
-
-                <span class="detail-value detail-break">
-                    {{ $user->email ?: '-' }}
-                </span>
-
-            </div>
-
-
-            <div class="detail-row">
-
-                <span class="detail-label">
-                    Jabatan / Posisi
-                </span>
-
-                <span class="detail-value">
-                    {{ $user->jabatan ?: '-' }}
-                </span>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    {{-- =====================================================
-         HAK AKSES
-    ====================================================== --}}
-    <div class="detail-card">
-
-        <div class="detail-card-header">
-
-            <div class="detail-card-icon purple">
-
-                <svg
-                    class="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.8"
-                    viewBox="0 0 24 24"
-                >
-                    <rect
-                        x="4"
-                        y="10"
-                        width="16"
-                        height="10"
-                        rx="2"
-                    />
-
-                    <path
-                        stroke-linecap="round"
-                        d="M8 10V7a4 4 0 018 0v3"
-                    />
-                </svg>
-
-            </div>
-
-            <div class="min-w-0">
-
-                <h2 class="detail-card-title">
-                    Hak Akses
-                </h2>
-
-                <p class="detail-card-description">
-                    Role dan kewenangan akun
-                </p>
-
-            </div>
-
-        </div>
-
-
-        <div class="detail-card-body">
-
-            <div class="detail-row">
-
-                <span class="detail-label">
-                    Role
-                </span>
-
-                <span class="detail-value">
+                    {{-- =================================================
+                         ROLE
+                    ================================================== --}}
 
                     @if($role === 'admin')
 
                         <span class="role-badge admin">
+
+                            <svg
+                                class="w-3.5 h-3.5"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="1.8"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="M12 3l7 4v5c0 4-2.8 7.2-7 9-4.2-1.8-7-5-7-9V7l7-4z"
+                                />
+                            </svg>
+
                             Admin
+
                         </span>
 
                     @elseif($role === 'pimpinan')
 
                         <span class="role-badge pimpinan">
+
+                            <svg
+                                class="w-3.5 h-3.5"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="1.8"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="M3 21h18"
+                                />
+
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="M5 21V7l7-4 7 4v14"
+                                />
+
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="M9 21v-5h6v5"
+                                />
+                            </svg>
+
                             Pimpinan
+
                         </span>
 
                     @elseif($role === 'staff')
 
                         <span class="role-badge staff">
+
+                            <svg
+                                class="w-3.5 h-3.5"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="1.8"
+                                viewBox="0 0 24 24"
+                            >
+                                <circle
+                                    cx="12"
+                                    cy="8"
+                                    r="3.5"
+                                />
+
+                                <path
+                                    stroke-linecap="round"
+                                    d="M5 20a7 7 0 0114 0"
+                                />
+                            </svg>
+
                             Staf
+
                         </span>
 
                     @else
@@ -544,49 +317,34 @@ $avatarText = strtoupper(
 
                     @endif
 
-                </span>
 
-            </div>
-
-
-            <div class="detail-row">
-
-                <span class="detail-label">
-                    Keterangan Role
-                </span>
-
-                <span class="detail-value">
-                    {{ $roleDescription }}
-                </span>
-
-            </div>
-
-
-            <div class="detail-row">
-
-                <span class="detail-label">
-                    Status Akun
-                </span>
-
-                <span class="detail-value">
+                    {{-- =================================================
+                         STATUS AKUN
+                    ================================================== --}}
 
                     @if($isActive)
 
                         <span class="account-status active">
+
                             <span class="status-dot"></span>
-                            Aktif
+
+                            Akun Aktif
+
                         </span>
 
                     @else
 
                         <span class="account-status inactive">
+
                             <span class="status-dot"></span>
-                            Nonaktif
+
+                            Akun Nonaktif
+
                         </span>
 
                     @endif
 
-                </span>
+                </div>
 
             </div>
 
@@ -595,335 +353,20 @@ $avatarText = strtoupper(
     </div>
 
 
-    {{-- =====================================================
-         VERIFIKASI EMAIL
-    ====================================================== --}}
-    <div class="detail-card">
+    {{-- =========================================================
+         INFORMATION GRID
+    ========================================================== --}}
+    <div class="detail-grid">
 
-        <div class="detail-card-header">
 
-            <div class="detail-card-icon green">
+        {{-- =====================================================
+             IDENTITAS PENGGUNA
+        ====================================================== --}}
+        <div class="detail-card">
 
-                <svg
-                    class="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.8"
-                    viewBox="0 0 24 24"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M4 6h16v12H4z"
-                    />
+            <div class="detail-card-header">
 
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M4 7l8 6 8-6"
-                    />
-                </svg>
-
-            </div>
-
-            <div class="min-w-0">
-
-                <h2 class="detail-card-title">
-                    Verifikasi Email
-                </h2>
-
-                <p class="detail-card-description">
-                    Status verifikasi alamat email
-                </p>
-
-            </div>
-
-        </div>
-
-
-        <div class="detail-card-body">
-
-            <div class="detail-row">
-
-                <span class="detail-label">
-                    Status Verifikasi
-                </span>
-
-                <span class="detail-value">
-
-                    @if($user->email_verified_at)
-
-                        <span class="verification-badge verified">
-                            <span class="verification-dot"></span>
-                            Terverifikasi
-                        </span>
-
-                    @else
-
-                        <span class="verification-badge unverified">
-                            <span class="verification-dot"></span>
-                            Belum Terverifikasi
-                        </span>
-
-                    @endif
-
-                </span>
-
-            </div>
-
-
-            <div class="detail-row">
-
-                <span class="detail-label">
-                    Terverifikasi Pada
-                </span>
-
-                <span class="detail-value">
-
-                    @if($user->email_verified_at)
-
-                        {{ $user->email_verified_at->format('d/m/Y H:i:s') }}
-
-                    @else
-
-                        Belum tersedia
-
-                    @endif
-
-                </span>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    {{-- =====================================================
-         INFORMASI SISTEM
-    ====================================================== --}}
-    <div class="detail-card">
-
-        <div class="detail-card-header">
-
-            <div class="detail-card-icon slate">
-
-                <svg
-                    class="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.8"
-                    viewBox="0 0 24 24"
-                >
-                    <circle
-                        cx="12"
-                        cy="12"
-                        r="9"
-                    />
-
-                    <path
-                        stroke-linecap="round"
-                        d="M12 7v5l3 2"
-                    />
-                </svg>
-
-            </div>
-
-            <div class="min-w-0">
-
-                <h2 class="detail-card-title">
-                    Informasi Sistem
-                </h2>
-
-                <p class="detail-card-description">
-                    Waktu aktivitas akun
-                </p>
-
-            </div>
-
-        </div>
-
-
-        <div class="detail-card-body">
-
-            <div class="detail-row">
-
-                <span class="detail-label">
-                    Dibuat Pada
-                </span>
-
-                <span class="detail-value">
-
-                    @if($user->created_at)
-                        {{ $user->created_at->format('d/m/Y H:i:s') }}
-                    @else
-                        -
-                    @endif
-
-                </span>
-
-            </div>
-
-
-            <div class="detail-row">
-
-                <span class="detail-label">
-                    Terakhir Diperbarui
-                </span>
-
-                <span class="detail-value">
-
-                    @if($user->updated_at)
-                        {{ $user->updated_at->format('d/m/Y H:i:s') }}
-                    @else
-                        -
-                    @endif
-
-                </span>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    {{-- =====================================================
-         RINGKASAN AKUN
-    ====================================================== --}}
-    <div class="detail-card detail-card-full">
-
-        <div class="detail-card-header">
-
-            <div class="detail-card-icon orange">
-
-                <svg
-                    class="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.8"
-                    viewBox="0 0 24 24"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M12 3l8 4v5c0 4.5-3.3 7.8-8 9c-4.7-1.2-8-4.5-8-9V7l8-4z"
-                    />
-
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M9 12l2 2 4-4"
-                    />
-                </svg>
-
-            </div>
-
-            <div class="min-w-0">
-
-                <h2 class="detail-card-title">
-                    Ringkasan Akun
-                </h2>
-
-                <p class="detail-card-description">
-                    Ringkasan kondisi akun pengguna
-                </p>
-
-            </div>
-
-        </div>
-
-
-        <div class="summary-grid">
-
-            <div class="summary-box">
-
-                <div class="summary-box-icon">
-
-                    <svg
-                        class="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                        viewBox="0 0 24 24"
-                    >
-                        <circle
-                            cx="12"
-                            cy="12"
-                            r="9"
-                        />
-
-                        <path
-                            stroke-linecap="round"
-                            d="M9 12l2 2 4-4"
-                        />
-                    </svg>
-
-                </div>
-
-                <div class="summary-box-content">
-
-                    <span class="summary-label">
-                        Status Akun
-                    </span>
-
-                    @if($isActive)
-
-                        <span class="summary-value active">
-                            Aktif
-                        </span>
-
-                    @else
-
-                        <span class="summary-value inactive">
-                            Nonaktif
-                        </span>
-
-                    @endif
-
-                </div>
-
-            </div>
-
-
-            <div class="summary-box">
-
-                <div class="summary-box-icon">
-
-                    <svg
-                        class="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                        viewBox="0 0 24 24"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M12 3l7 4v5c0 4-2.8 7.2-7 9-4.2-1.8-7-5-7-9V7l7-4z"
-                        />
-                    </svg>
-
-                </div>
-
-                <div class="summary-box-content">
-
-                    <span class="summary-label">
-                        Role
-                    </span>
-
-                    <span class="summary-value neutral">
-                        {{ $roleLabel }}
-                    </span>
-
-                </div>
-
-            </div>
-
-
-            <div class="summary-box">
-
-                <div class="summary-box-icon">
+                <div class="detail-card-icon blue">
 
                     <svg
                         class="w-4 h-4"
@@ -946,13 +389,70 @@ $avatarText = strtoupper(
 
                 </div>
 
-                <div class="summary-box-content">
 
-                    <span class="summary-label">
-                        Jabatan
+                <div class="min-w-0">
+
+                    <h2 class="detail-card-title">
+                        Identitas Pengguna
+                    </h2>
+
+                    <p class="detail-card-description">
+                        Informasi dasar akun pengguna
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="detail-card-body">
+
+                <div class="detail-row">
+
+                    <span class="detail-label">
+                        ID Pengguna
                     </span>
 
-                    <span class="summary-value neutral detail-break">
+                    <span class="detail-value strong">
+                        #{{ $user->id }}
+                    </span>
+
+                </div>
+
+
+                <div class="detail-row">
+
+                    <span class="detail-label">
+                        Nama Lengkap
+                    </span>
+
+                    <span class="detail-value">
+                        {{ $user->name ?: '-' }}
+                    </span>
+
+                </div>
+
+
+                <div class="detail-row">
+
+                    <span class="detail-label">
+                        Alamat Email
+                    </span>
+
+                    <span class="detail-value detail-break">
+                        {{ $user->email ?: '-' }}
+                    </span>
+
+                </div>
+
+
+                <div class="detail-row">
+
+                    <span class="detail-label">
+                        Jabatan / Posisi
+                    </span>
+
+                    <span class="detail-value">
                         {{ $user->jabatan ?: '-' }}
                     </span>
 
@@ -960,10 +460,158 @@ $avatarText = strtoupper(
 
             </div>
 
+        </div>
 
-            <div class="summary-box">
 
-                <div class="summary-box-icon">
+        {{-- =====================================================
+             HAK AKSES
+        ====================================================== --}}
+        <div class="detail-card">
+
+            <div class="detail-card-header">
+
+                <div class="detail-card-icon purple">
+
+                    <svg
+                        class="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        viewBox="0 0 24 24"
+                    >
+                        <rect
+                            x="4"
+                            y="10"
+                            width="16"
+                            height="10"
+                            rx="2"
+                        />
+
+                        <path
+                            stroke-linecap="round"
+                            d="M8 10V7a4 4 0 018 0v3"
+                        />
+                    </svg>
+
+                </div>
+
+
+                <div class="min-w-0">
+
+                    <h2 class="detail-card-title">
+                        Hak Akses
+                    </h2>
+
+                    <p class="detail-card-description">
+                        Role dan kewenangan akun
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="detail-card-body">
+
+                <div class="detail-row">
+
+                    <span class="detail-label">
+                        Role
+                    </span>
+
+                    <span class="detail-value">
+
+                        @if($role === 'admin')
+
+                            <span class="role-badge admin">
+                                Admin
+                            </span>
+
+                        @elseif($role === 'pimpinan')
+
+                            <span class="role-badge pimpinan">
+                                Pimpinan
+                            </span>
+
+                        @elseif($role === 'staff')
+
+                            <span class="role-badge staff">
+                                Staf
+                            </span>
+
+                        @else
+
+                            <span class="role-badge default">
+                                {{ $roleLabel }}
+                            </span>
+
+                        @endif
+
+                    </span>
+
+                </div>
+
+
+                <div class="detail-row">
+
+                    <span class="detail-label">
+                        Keterangan Role
+                    </span>
+
+                    <span class="detail-value">
+                        {{ $roleDescription }}
+                    </span>
+
+                </div>
+
+
+                <div class="detail-row">
+
+                    <span class="detail-label">
+                        Status Akun
+                    </span>
+
+                    <span class="detail-value">
+
+                        @if($isActive)
+
+                            <span class="account-status active">
+
+                                <span class="status-dot"></span>
+
+                                Aktif
+
+                            </span>
+
+                        @else
+
+                            <span class="account-status inactive">
+
+                                <span class="status-dot"></span>
+
+                                Nonaktif
+
+                            </span>
+
+                        @endif
+
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        {{-- =====================================================
+             VERIFIKASI EMAIL
+        ====================================================== --}}
+        <div class="detail-card">
+
+            <div class="detail-card-header">
+
+                <div class="detail-card-icon green">
 
                     <svg
                         class="w-4 h-4"
@@ -987,15 +635,403 @@ $avatarText = strtoupper(
 
                 </div>
 
-                <div class="summary-box-content">
 
-                    <span class="summary-label">
-                        Email
+                <div class="min-w-0">
+
+                    <h2 class="detail-card-title">
+                        Verifikasi Email
+                    </h2>
+
+                    <p class="detail-card-description">
+                        Status verifikasi alamat email
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="detail-card-body">
+
+                <div class="detail-row">
+
+                    <span class="detail-label">
+                        Status Verifikasi
                     </span>
 
-                    <span class="summary-value neutral detail-break">
-                        {{ $user->email ?: '-' }}
+                    <span class="detail-value">
+
+                        @if($user->email_verified_at)
+
+                            <span class="verification-badge verified">
+
+                                <span class="verification-dot"></span>
+
+                                Terverifikasi
+
+                            </span>
+
+                        @else
+
+                            <span class="verification-badge unverified">
+
+                                <span class="verification-dot"></span>
+
+                                Belum Terverifikasi
+
+                            </span>
+
+                        @endif
+
                     </span>
+
+                </div>
+
+
+                <div class="detail-row">
+
+                    <span class="detail-label">
+                        Terverifikasi Pada
+                    </span>
+
+                    <span class="detail-value">
+
+                        @if($user->email_verified_at)
+
+                            {{ $user->email_verified_at->format('d/m/Y H:i:s') }}
+
+                        @else
+
+                            Belum tersedia
+
+                        @endif
+
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        {{-- =====================================================
+             INFORMASI SISTEM
+        ====================================================== --}}
+        <div class="detail-card">
+
+            <div class="detail-card-header">
+
+                <div class="detail-card-icon slate">
+
+                    <svg
+                        class="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        viewBox="0 0 24 24"
+                    >
+                        <circle
+                            cx="12"
+                            cy="12"
+                            r="9"
+                        />
+
+                        <path
+                            stroke-linecap="round"
+                            d="M12 7v5l3 2"
+                        />
+                    </svg>
+
+                </div>
+
+
+                <div class="min-w-0">
+
+                    <h2 class="detail-card-title">
+                        Informasi Sistem
+                    </h2>
+
+                    <p class="detail-card-description">
+                        Waktu aktivitas akun
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="detail-card-body">
+
+                <div class="detail-row">
+
+                    <span class="detail-label">
+                        Dibuat Pada
+                    </span>
+
+                    <span class="detail-value">
+
+                        @if($user->created_at)
+
+                            {{ $user->created_at->format('d/m/Y H:i:s') }}
+
+                        @else
+
+                            -
+
+                        @endif
+
+                    </span>
+
+                </div>
+
+
+                <div class="detail-row">
+
+                    <span class="detail-label">
+                        Terakhir Diperbarui
+                    </span>
+
+                    <span class="detail-value">
+
+                        @if($user->updated_at)
+
+                            {{ $user->updated_at->format('d/m/Y H:i:s') }}
+
+                        @else
+
+                            -
+
+                        @endif
+
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        {{-- =====================================================
+             RINGKASAN AKUN
+        ====================================================== --}}
+        <div class="detail-card detail-card-full">
+
+            <div class="detail-card-header">
+
+                <div class="detail-card-icon orange">
+
+                    <svg
+                        class="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M12 3l8 4v5c0 4.5-3.3 7.8-8 9c-4.7-1.2-8-4.5-8-9V7l8-4z"
+                        />
+
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M9 12l2 2 4-4"
+                        />
+                    </svg>
+
+                </div>
+
+
+                <div class="min-w-0">
+
+                    <h2 class="detail-card-title">
+                        Ringkasan Akun
+                    </h2>
+
+                    <p class="detail-card-description">
+                        Ringkasan kondisi akun pengguna
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="summary-grid">
+
+                {{-- STATUS AKUN --}}
+                <div class="summary-box">
+
+                    <div class="summary-box-icon">
+
+                        <svg
+                            class="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                            viewBox="0 0 24 24"
+                        >
+                            <circle
+                                cx="12"
+                                cy="12"
+                                r="9"
+                            />
+
+                            <path
+                                stroke-linecap="round"
+                                d="M9 12l2 2 4-4"
+                            />
+                        </svg>
+
+                    </div>
+
+
+                    <div class="summary-box-content">
+
+                        <span class="summary-label">
+                            Status Akun
+                        </span>
+
+                        @if($isActive)
+
+                            <span class="summary-value active">
+                                Aktif
+                            </span>
+
+                        @else
+
+                            <span class="summary-value inactive">
+                                Nonaktif
+                            </span>
+
+                        @endif
+
+                    </div>
+
+                </div>
+
+
+                {{-- ROLE --}}
+                <div class="summary-box">
+
+                    <div class="summary-box-icon">
+
+                        <svg
+                            class="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M12 3l7 4v5c0 4-2.8 7.2-7 9-4.2-1.8-7-5-7-9V7l7-4z"
+                            />
+                        </svg>
+
+                    </div>
+
+
+                    <div class="summary-box-content">
+
+                        <span class="summary-label">
+                            Role
+                        </span>
+
+                        <span class="summary-value neutral">
+                            {{ $roleLabel }}
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                {{-- JABATAN --}}
+                <div class="summary-box">
+
+                    <div class="summary-box-icon">
+
+                        <svg
+                            class="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                            viewBox="0 0 24 24"
+                        >
+                            <circle
+                                cx="12"
+                                cy="8"
+                                r="3.5"
+                            />
+
+                            <path
+                                stroke-linecap="round"
+                                d="M5 20a7 7 0 0114 0"
+                            />
+                        </svg>
+
+                    </div>
+
+
+                    <div class="summary-box-content">
+
+                        <span class="summary-label">
+                            Jabatan
+                        </span>
+
+                        <span class="summary-value neutral detail-break">
+                            {{ $user->jabatan ?: '-' }}
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                {{-- EMAIL --}}
+                <div class="summary-box">
+
+                    <div class="summary-box-icon">
+
+                        <svg
+                            class="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M4 6h16v12H4z"
+                            />
+
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M4 7l8 6 8-6"
+                            />
+                        </svg>
+
+                    </div>
+
+
+                    <div class="summary-box-content">
+
+                        <span class="summary-label">
+                            Email
+                        </span>
+
+                        <span class="summary-value neutral detail-break">
+                            {{ $user->email ?: '-' }}
+                        </span>
+
+                    </div>
 
                 </div>
 
@@ -1007,9 +1043,9 @@ $avatarText = strtoupper(
 
 </div>
 
-</div>
 
 <style>
+
 /* =========================================================
    PAGE
 ========================================================= */
@@ -1166,7 +1202,6 @@ $avatarText = strtoupper(
 .profile-card {
     display: flex;
     align-items: stretch;
-    justify-content: space-between;
     overflow: hidden;
     margin-bottom: 16px;
     border: 1px solid #dbe3ef;
@@ -1187,6 +1222,7 @@ $avatarText = strtoupper(
     display: flex;
     align-items: center;
     gap: 15px;
+    width: 100%;
     min-width: 0;
     padding: 20px;
 }
@@ -1244,51 +1280,6 @@ $avatarText = strtoupper(
     align-items: center;
     gap: 7px;
     margin-top: 11px;
-}
-
-
-/* =========================================================
-   PROFILE SIDE INFO
-========================================================= */
-
-.profile-side-info {
-    display: flex;
-    min-width: 220px;
-    align-items: center;
-    justify-content: center;
-    gap: 18px;
-    padding: 20px 24px;
-    border-left: 1px solid #e2e8f0;
-    background: rgba(248,250,252,.72);
-}
-
-.profile-side-item {
-    display: flex;
-    min-width: 88px;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.profile-side-label {
-    color: #94a3b8;
-    font-size: 8px;
-    font-weight: 800;
-    letter-spacing: .06em;
-    text-transform: uppercase;
-}
-
-.profile-side-value {
-    color: #334155;
-    font-size: 11px;
-    font-weight: 800;
-    line-height: 1.4;
-    word-break: break-word;
-}
-
-.profile-side-divider {
-    width: 1px;
-    height: 38px;
-    background: #dbe3ef;
 }
 
 
@@ -1614,22 +1605,12 @@ $avatarText = strtoupper(
 
 @media (max-width: 900px) {
 
-    .profile-card {
-        flex-direction: column;
-    }
-
-    .profile-side-info {
-        justify-content: flex-start;
-        border-top: 1px solid #e2e8f0;
-        border-left: 0;
-        padding: 14px 20px;
-    }
-
     .summary-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
 }
+
 
 @media (max-width: 767px) {
 
@@ -1655,6 +1636,7 @@ $avatarText = strtoupper(
     }
 
 }
+
 
 @media (max-width: 640px) {
 
@@ -1707,18 +1689,6 @@ $avatarText = strtoupper(
         font-size: 9px;
     }
 
-    .profile-side-info {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 10px;
-        padding: 13px 16px;
-    }
-
-    .profile-side-divider {
-        width: 100%;
-        height: 1px;
-    }
-
     .detail-card-body {
         padding: 0 13px;
     }
@@ -1742,6 +1712,7 @@ $avatarText = strtoupper(
 
 }
 
+
 @media (max-width: 420px) {
 
     .detail-action span {
@@ -1759,6 +1730,7 @@ $avatarText = strtoupper(
     }
 
 }
+
 </style>
 
 @endsection
