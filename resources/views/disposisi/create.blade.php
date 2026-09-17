@@ -3,7 +3,7 @@
 @section('title', 'Buat Disposisi Surat')
 
 @section('content')
-<div class="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-6">
+<div class="w-full max-w-6xl mx-auto px-3 sm:px-5 lg:px-7 pb-7">
 
     {{-- Error Validation --}}
     @if ($errors->any())
@@ -39,64 +39,54 @@
     @endif
 
     {{-- Header --}}
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
-
-        <div class="flex items-center gap-2.5 min-w-0">
-
-            <a href="{{ route('surat-masuk.show', $suratMasuk) }}"
-               class="flex items-center justify-center w-9 h-9 bg-white border-2 border-slate-300 rounded-lg text-slate-600 hover:bg-slate-50 hover:border-slate-400 transition shrink-0"
-               title="Kembali ke Detail Surat">
-
-                <svg class="w-4 h-4"
+    <div class="page-header">
+        <div class="page-header-main">
+            <div class="page-header-icon">
+                <svg class="w-5 h-5"
                      fill="none"
                      stroke="currentColor"
-                     viewBox="0 0 24 24">
+                     viewBox="0 0 24 24"
+                     aria-hidden="true">
                     <path stroke-linecap="round"
                           stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                          stroke-width="1.8"
+                          d="M12 6v12m6-6H6"/>
                 </svg>
-
-            </a>
+            </div>
 
             <div class="min-w-0">
+                <p class="page-header-eyebrow">
+                    Sistem Manajemen Disposisi
+                </p>
 
-                <nav class="flex flex-wrap items-center gap-1.5 text-[11px] text-slate-400 font-medium mb-0.5">
-                    <a href="{{ route('surat-masuk.index') }}"
-                       class="hover:text-slate-600 transition">
-                        Surat Masuk
-                    </a>
-
-                    <span>/</span>
-
-                    <a href="{{ route('surat-masuk.show', $suratMasuk) }}"
-                       class="hover:text-slate-600 transition">
-                        Detail
-                    </a>
-
-                    <span>/</span>
-
-                    <span class="text-slate-600">
-                        Buat Disposisi
-                    </span>
-                </nav>
-
-                <h1 class="text-xl sm:text-2xl font-bold text-slate-800 tracking-tight">
+                <h1 class="page-header-title">
                     Buat Disposisi Surat
                 </h1>
 
+                <p class="page-header-subtitle">
+                    Kirim instruksi tindak lanjut untuk surat masuk yang dipilih.
+                </p>
             </div>
         </div>
 
         <a href="{{ route('surat-masuk.show', $suratMasuk) }}"
-           class="inline-flex items-center justify-center w-full sm:w-auto px-4 py-2 text-sm font-semibold text-slate-700 bg-white border-2 border-slate-300 rounded-xl hover:bg-slate-50 hover:border-slate-400 transition">
-            Kembali
+           class="page-header-back">
+            <svg class="w-4 h-4"
+                 fill="none"
+                 stroke="currentColor"
+                 viewBox="0 0 24 24"
+                 aria-hidden="true">
+                <path stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="1.8"
+                      d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            <span>Kembali</span>
         </a>
-
     </div>
 
     {{-- Main Card --}}
-    <div class="bg-white border-2 border-slate-300 rounded-2xl shadow-sm overflow-hidden">
+    <div class="bg-white border border-slate-200 rounded-2xl shadow-[0_10px_30px_rgba(15,23,42,.06)] overflow-hidden">
 
         {{-- Referensi Surat --}}
         <div class="px-4 sm:px-5 py-3 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border-b-2 border-slate-700 text-white">
@@ -389,6 +379,97 @@
 CSS
 ============================================================= --}}
 <style>
+    /* =============================================================
+       PAGE HEADER
+    ============================================================= */
+    .page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 16px;
+        padding: 16px 18px;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        background:
+            linear-gradient(135deg, #ffffff 0%, #f8fafc 58%, #f5f3ff 100%);
+        box-shadow: 0 8px 24px rgba(15, 23, 42, .05);
+    }
+
+    .page-header-main {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+    }
+
+    .page-header-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 40px;
+        width: 40px;
+        height: 40px;
+        border-radius: 11px;
+        background: #eef2ff;
+        color: #4f46e5;
+        border: 1px solid #e0e7ff;
+    }
+
+    .page-header-eyebrow {
+        margin: 0 0 2px;
+        color: #94a3b8;
+        font-size: .62rem;
+        line-height: 1rem;
+        font-weight: 800;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+    }
+
+    .page-header-title {
+        margin: 0;
+        color: #0f172a;
+        font-size: 1.18rem;
+        line-height: 1.3;
+        font-weight: 800;
+        letter-spacing: -.02em;
+    }
+
+    .page-header-subtitle {
+        margin: 3px 0 0;
+        color: #64748b;
+        font-size: .7rem;
+        line-height: 1.2rem;
+        font-weight: 500;
+    }
+
+    .page-header-back {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        flex: 0 0 auto;
+        min-height: 38px;
+        padding: 0 .9rem;
+        color: #334155;
+        background: #fff;
+        border: 1px solid #cbd5e1;
+        border-radius: 10px;
+        font-size: .72rem;
+        line-height: 1;
+        font-weight: 750;
+        text-decoration: none;
+        transition: .15s ease;
+        white-space: nowrap;
+    }
+
+    .page-header-back:hover {
+        color: #1e293b;
+        background: #f8fafc;
+        border-color: #94a3b8;
+        transform: translateY(-1px);
+    }
+
     .form-group {
         width: 100%;
     }
@@ -526,6 +607,30 @@ CSS
     .action-button-primary:hover {
         background: #6d28d9;
         border-color: #6d28d9;
+    }
+
+    @media (max-width: 640px) {
+        .page-header {
+            align-items: stretch;
+            flex-direction: column;
+            padding: 14px;
+        }
+
+        .page-header-main {
+            align-items: flex-start;
+        }
+
+        .page-header-back {
+            width: 100%;
+        }
+
+        .page-header-title {
+            font-size: 1.05rem;
+        }
+
+        .page-header-subtitle {
+            font-size: .66rem;
+        }
     }
 
     @media (min-width: 640px) {

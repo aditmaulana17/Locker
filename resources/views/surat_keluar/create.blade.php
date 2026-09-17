@@ -25,22 +25,9 @@
     .sk-topbar {
         display: flex;
         align-items: center;
-        justify-content: space-between;
+        justify-content: flex-end;
         gap: 12px;
         margin-bottom: 12px;
-    }
-
-    .sk-breadcrumb {
-        display: flex;
-        align-items: center;
-        gap: 7px;
-        font-size: 10px;
-        color: #64748b;
-    }
-
-    .sk-breadcrumb strong {
-        color: #1e293b;
-        font-weight: 800;
     }
 
     .sk-back {
@@ -880,11 +867,6 @@
             padding: 7px 9px 20px;
         }
 
-        .sk-topbar {
-            flex-direction: column;
-            align-items: stretch;
-        }
-
         .sk-back {
             width: 100%;
         }
@@ -964,14 +946,6 @@
 
     <div class="sk-topbar">
 
-        <div class="sk-breadcrumb">
-            <span>Arsip</span>
-            <span>/</span>
-            <strong>Surat Keluar</strong>
-            <span>/</span>
-            <strong>Catat</strong>
-        </div>
-
         <a
             href="{{ route('surat-keluar.index') }}"
             class="sk-back"
@@ -1031,6 +1005,7 @@
             <div class="sk-server-grid">
 
                 <div class="sk-server-item">
+
                     <span class="sk-server-label">
                         Jenis
                     </span>
@@ -1038,9 +1013,11 @@
                     <span class="sk-server-value">
                         {{ strtoupper($compressionResult['type'] ?? '-') }}
                     </span>
+
                 </div>
 
                 <div class="sk-server-item">
+
                     <span class="sk-server-label">
                         Ukuran Asli
                     </span>
@@ -1048,9 +1025,11 @@
                     <span class="sk-server-value">
                         {{ number_format(($compressionResult['original_size'] ?? 0) / 1048576, 2) }} MB
                     </span>
+
                 </div>
 
                 <div class="sk-server-item">
+
                     <span class="sk-server-label">
                         Ukuran Akhir
                     </span>
@@ -1058,9 +1037,11 @@
                     <span class="sk-server-value">
                         {{ number_format(($compressionResult['compressed_size'] ?? 0) / 1048576, 2) }} MB
                     </span>
+
                 </div>
 
                 <div class="sk-server-item">
+
                     <span class="sk-server-label">
                         Penghematan
                     </span>
@@ -1068,6 +1049,7 @@
                     <span class="sk-server-value">
                         {{ number_format((float) ($compressionResult['saving_percent'] ?? 0), 2) }}%
                     </span>
+
                 </div>
 
             </div>
@@ -1075,10 +1057,12 @@
             @if(!empty($compressionResult['profile']))
 
                 <div style="margin-top:6px;font-size:7px;color:#047857;">
+
                     Profile:
                     <strong>
                         {{ $compressionResult['profile'] }}
                     </strong>
+
                 </div>
 
             @endif
@@ -1208,9 +1192,11 @@
                                 >
 
                                 @error('nomor_surat')
+
                                     <p class="sk-field-error">
                                         {{ $message }}
                                     </p>
+
                                 @enderror
 
                             </div>
@@ -1238,9 +1224,11 @@
                                 >
 
                                 @error('pengirim')
+
                                     <p class="sk-field-error">
                                         {{ $message }}
                                     </p>
+
                                 @enderror
 
                             </div>
@@ -1265,9 +1253,11 @@
                                 >
 
                                 @error('tanggal_surat')
+
                                     <p class="sk-field-error">
                                         {{ $message }}
                                     </p>
+
                                 @enderror
 
                             </div>
@@ -1292,9 +1282,11 @@
                                 >
 
                                 @error('tanggal_keluar')
+
                                     <p class="sk-field-error">
                                         {{ $message }}
                                     </p>
+
                                 @enderror
 
                             </div>
@@ -1336,7 +1328,9 @@
                                             {{ $kategori->nama_kategori }}
 
                                             @if(!empty($kategori->sifat))
+
                                                 ({{ ucfirst($kategori->sifat) }})
+
                                             @endif
 
                                         </option>
@@ -1360,9 +1354,11 @@
                                 @endif
 
                                 @error('kategori_surat_id')
+
                                     <p class="sk-field-error">
                                         {{ $message }}
                                     </p>
+
                                 @enderror
 
                             </div>
@@ -1422,9 +1418,11 @@
                                 </select>
 
                                 @error('status')
+
                                     <p class="sk-field-error">
                                         {{ $message }}
                                     </p>
+
                                 @enderror
 
                             </div>
@@ -1450,9 +1448,11 @@
                                 >{{ old('perihal') }}</textarea>
 
                                 @error('perihal')
+
                                     <p class="sk-field-error">
                                         {{ $message }}
                                     </p>
+
                                 @enderror
 
                             </div>
@@ -1476,9 +1476,11 @@
                                 >{{ old('ringkasan') }}</textarea>
 
                                 @error('ringkasan')
+
                                     <p class="sk-field-error">
                                         {{ $message }}
                                     </p>
+
                                 @enderror
 
                             </div>
@@ -2393,6 +2395,7 @@ document.addEventListener(
             if (
                 type
             ) {
+
                 compressionPanel.classList.add(
                     type
                 );
@@ -3153,12 +3156,6 @@ document.addEventListener(
                     return;
                 }
 
-                /*
-                |--------------------------------------------------------------------------
-                | PDF BERHASIL DIKOMPRES
-                |--------------------------------------------------------------------------
-                */
-
                 if (
                     result.compressed &&
                     result.preview_url
@@ -3226,12 +3223,6 @@ document.addEventListener(
                     return;
                 }
 
-                /*
-                |--------------------------------------------------------------------------
-                | PDF TIDAK LEBIH KECIL
-                |--------------------------------------------------------------------------
-                */
-
                 fileInfoTitle.textContent =
                     'PDF sudah optimal';
 
@@ -3291,6 +3282,7 @@ document.addEventListener(
                     token !==
                     processingToken
                 ) {
+
                     return;
                 }
 
@@ -3421,12 +3413,6 @@ document.addEventListener(
                     file
                 );
 
-                /*
-                |--------------------------------------------------------------------------
-                | PDF
-                |--------------------------------------------------------------------------
-                */
-
                 if (
                     extension === 'pdf'
                 ) {
@@ -3446,17 +3432,12 @@ document.addEventListener(
                     return;
                 }
 
-                /*
-                |--------------------------------------------------------------------------
-                | IMAGE
-                |--------------------------------------------------------------------------
-                */
-
                 if (
                     !isImageExtension(
                         extension
                     )
                 ) {
+
                     return;
                 }
 
@@ -3503,6 +3484,7 @@ document.addEventListener(
                         token !==
                         processingToken
                     ) {
+
                         return;
                     }
 
@@ -3592,6 +3574,7 @@ document.addEventListener(
                         token !==
                         processingToken
                     ) {
+
                         return;
                     }
 
@@ -3710,22 +3693,9 @@ document.addEventListener(
                         return;
                     }
 
-                    /*
-                    |--------------------------------------------------------------------------
-                    | PDF
-                    |--------------------------------------------------------------------------
-                    */
-
                     if (
                         extension === 'pdf'
                     ) {
-
-                        /*
-                        |--------------------------------------------------------------
-                        | Kalau preview compression masih tampil sebagai processing,
-                        | jangan submit.
-                        |--------------------------------------------------------------
-                        */
 
                         const isProcessing =
                             compressionPanel.classList.contains(

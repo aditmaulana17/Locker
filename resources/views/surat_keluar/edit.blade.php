@@ -136,25 +136,16 @@
         color: #1e293b;
     }
 
+    /* =========================================================
+       TOPBAR
+    ========================================================== */
+
     .ske-topbar {
         display: flex;
         align-items: center;
-        justify-content: space-between;
+        justify-content: flex-end;
         gap: 12px;
         margin-bottom: 12px;
-    }
-
-    .ske-breadcrumb {
-        display: flex;
-        align-items: center;
-        gap: 7px;
-        font-size: 10px;
-        color: #64748b;
-    }
-
-    .ske-breadcrumb strong {
-        color: #1e293b;
-        font-weight: 800;
     }
 
     .ske-back {
@@ -180,6 +171,10 @@
         color: #1e293b;
     }
 
+    /* =========================================================
+       SHELL
+    ========================================================== */
+
     .ske-shell {
         overflow: hidden;
         border: 1.5px solid #94a3b8;
@@ -189,6 +184,10 @@
             0 12px 30px rgba(15, 23, 42, .07),
             0 2px 6px rgba(15, 23, 42, .04);
     }
+
+    /* =========================================================
+       HEADER
+    ========================================================== */
 
     .ske-header {
         position: relative;
@@ -282,6 +281,10 @@
         white-space: nowrap;
     }
 
+    /* =========================================================
+       BODY
+    ========================================================== */
+
     .ske-body {
         padding: 16px;
     }
@@ -307,6 +310,10 @@
         font-size: 8px;
         line-height: 1.55;
     }
+
+    /* =========================================================
+       SECTION
+    ========================================================== */
 
     .ske-section + .ske-section {
         margin-top: 17px;
@@ -347,6 +354,10 @@
         line-height: 1.45;
         color: #64748b;
     }
+
+    /* =========================================================
+       FIELD TABLE
+    ========================================================== */
 
     .ske-field-table {
         overflow: hidden;
@@ -431,6 +442,10 @@
         color: #dc2626;
         font-weight: 700;
     }
+
+    /* =========================================================
+       ATTACHMENT
+    ========================================================== */
 
     .ske-attachment-grid {
         display: grid;
@@ -518,6 +533,10 @@
         padding: 11px;
     }
 
+    /* =========================================================
+       CURRENT FILE
+    ========================================================== */
+
     .ske-current-file {
         margin-bottom: 9px;
         padding: 8px;
@@ -584,6 +603,10 @@
         color: #64748b;
     }
 
+    /* =========================================================
+       INFO
+    ========================================================== */
+
     .ske-info {
         display: flex;
         align-items: flex-start;
@@ -609,6 +632,10 @@
         line-height: 1.55;
     }
 
+    /* =========================================================
+       VIEW CURRENT
+    ========================================================== */
+
     .ske-view-current {
         width: 100%;
         min-height: 34px;
@@ -630,6 +657,10 @@
     .ske-view-current:hover {
         background: #dbeafe;
     }
+
+    /* =========================================================
+       UPLOAD
+    ========================================================== */
 
     .ske-upload-box {
         position: relative;
@@ -707,6 +738,10 @@
         cursor: pointer;
     }
 
+    /* =========================================================
+       FILE INFO
+    ========================================================== */
+
     .ske-file-info {
         display: none;
         margin-top: 8px;
@@ -742,6 +777,10 @@
         font-size: 6.8px;
         color: #64748b;
     }
+
+    /* =========================================================
+       COMPRESSION
+    ========================================================== */
 
     .ske-compression {
         display: none;
@@ -813,6 +852,10 @@
         color: #334155;
     }
 
+    /* =========================================================
+       STATUS
+    ========================================================== */
+
     .ske-status {
         display: none;
         margin-top: 7px;
@@ -846,6 +889,10 @@
         background: #fffbeb;
         color: #a16207;
     }
+
+    /* =========================================================
+       PREVIEW
+    ========================================================== */
 
     .ske-preview {
         display: none;
@@ -925,6 +972,10 @@
         line-height: 1.45;
     }
 
+    /* =========================================================
+       SUBMIT PROGRESS
+    ========================================================== */
+
     .ske-submit-progress {
         display: none;
         margin-top: 7px;
@@ -955,6 +1006,10 @@
             transform: translateX(320%);
         }
     }
+
+    /* =========================================================
+       FOOTER
+    ========================================================== */
 
     .ske-footer {
         display: flex;
@@ -1006,6 +1061,10 @@
         display: none !important;
     }
 
+    /* =========================================================
+       RESPONSIVE
+    ========================================================== */
+
     @media (max-width: 900px) {
         .ske-attachment-grid {
             grid-template-columns: 1fr;
@@ -1023,11 +1082,6 @@
     @media (max-width: 640px) {
         .ske-page {
             padding: 7px 9px 20px;
-        }
-
-        .ske-topbar {
-            flex-direction: column;
-            align-items: stretch;
         }
 
         .ske-back {
@@ -1099,15 +1153,11 @@
 
 <div class="ske-page">
 
-    <div class="ske-topbar">
+    {{-- =========================================================
+         TOP ACTION
+    ========================================================== --}}
 
-        <div class="ske-breadcrumb">
-            <span>Arsip</span>
-            <span>/</span>
-            <strong>Surat Keluar</strong>
-            <span>/</span>
-            <strong>Edit</strong>
-        </div>
+    <div class="ske-topbar">
 
         <a
             href="{{ route('surat-keluar.index') }}"
@@ -1133,6 +1183,10 @@
 
     </div>
 
+    {{-- =========================================================
+         ERROR
+    ========================================================== --}}
+
     @if($errors->any())
 
         <div class="ske-error">
@@ -1157,6 +1211,10 @@
 
     @endif
 
+    {{-- =========================================================
+         FORM
+    ========================================================== --}}
+
     <form
         id="form-surat-keluar-edit"
         method="POST"
@@ -1169,6 +1227,10 @@
         @method('PUT')
 
         <div class="ske-shell">
+
+            {{-- =====================================================
+                 HEADER
+            ====================================================== --}}
 
             <header class="ske-header">
 
@@ -1229,7 +1291,15 @@
 
             </header>
 
+            {{-- =====================================================
+                 BODY
+            ====================================================== --}}
+
             <div class="ske-body">
+
+                {{-- =================================================
+                     INFORMASI UTAMA
+                ================================================== --}}
 
                 <section class="ske-section">
 
@@ -1255,6 +1325,7 @@
 
                         <div class="ske-field-grid">
 
+                            {{-- NOMOR SURAT --}}
                             <div class="ske-field">
 
                                 <label
@@ -1285,6 +1356,7 @@
 
                             </div>
 
+                            {{-- TUJUAN SURAT --}}
                             <div class="ske-field">
 
                                 <label
@@ -1315,6 +1387,7 @@
 
                             </div>
 
+                            {{-- TANGGAL SURAT --}}
                             <div class="ske-field">
 
                                 <label
@@ -1342,6 +1415,7 @@
 
                             </div>
 
+                            {{-- TANGGAL KELUAR --}}
                             <div class="ske-field">
 
                                 <label
@@ -1369,6 +1443,7 @@
 
                             </div>
 
+                            {{-- KATEGORI --}}
                             <div class="ske-field">
 
                                 <label
@@ -1436,6 +1511,7 @@
 
                             </div>
 
+                            {{-- STATUS --}}
                             <div class="ske-field">
 
                                 <label
@@ -1498,6 +1574,7 @@
 
                             </div>
 
+                            {{-- PERIHAL --}}
                             <div class="ske-field ske-field-full">
 
                                 <label
@@ -1526,6 +1603,7 @@
 
                             </div>
 
+                            {{-- RINGKASAN --}}
                             <div class="ske-field ske-field-full">
 
                                 <label
@@ -1565,6 +1643,10 @@
 
                 </section>
 
+                {{-- =================================================
+                     LAMPIRAN
+                ================================================== --}}
+
                 <section class="ske-section">
 
                     <div class="ske-section-head">
@@ -1588,9 +1670,9 @@
 
                     <div class="ske-attachment-grid">
 
-                        {{-- =====================================================
+                        {{-- =================================================
                              LAMPIRAN SAAT INI
-                        ====================================================== --}}
+                        ================================================== --}}
 
                         <div class="ske-card">
 
@@ -1745,9 +1827,9 @@
 
                         </div>
 
-                        {{-- =====================================================
+                        {{-- =================================================
                              FILE BARU
-                        ====================================================== --}}
+                        ================================================== --}}
 
                         <div class="ske-card">
 
@@ -1884,6 +1966,7 @@
 
                                 </label>
 
+                                {{-- FILE INFO --}}
                                 <div
                                     id="ske-file-info"
                                     class="ske-file-info"
@@ -1908,6 +1991,7 @@
 
                                 </div>
 
+                                {{-- COMPRESSION --}}
                                 <div
                                     id="ske-compression"
                                     class="ske-compression"
@@ -1991,11 +2075,13 @@
 
                                 </div>
 
+                                {{-- STATUS --}}
                                 <div
                                     id="ske-status"
                                     class="ske-status"
                                 ></div>
 
+                                {{-- PROGRESS --}}
                                 <div
                                     id="ske-submit-progress"
                                     class="ske-submit-progress"
@@ -2003,10 +2089,7 @@
                                     <div class="ske-submit-progress-bar"></div>
                                 </div>
 
-                                {{-- =================================================
-                                     PREVIEW
-                                ================================================== --}}
-
+                                {{-- PREVIEW --}}
                                 <div
                                     id="ske-preview"
                                     class="ske-preview"
@@ -2076,6 +2159,10 @@
                 </section>
 
             </div>
+
+            {{-- =====================================================
+                 FOOTER
+            ====================================================== --}}
 
             <div class="ske-footer">
 
