@@ -85,9 +85,8 @@ class User extends Authenticatable
      *
      * staf -> staff
      */
-    public static function normalizeRole(
-        ?string $role
-    ): string {
+    public static function normalizeRole(?string $role): string
+    {
         $role = strtolower(
             trim(
                 (string) $role
@@ -124,8 +123,7 @@ class User extends Authenticatable
      */
     public function isAdmin(): bool
     {
-        return $this->normalizedRole()
-            === self::ROLE_ADMIN;
+        return $this->normalizedRole() === self::ROLE_ADMIN;
     }
 
     /**
@@ -133,8 +131,7 @@ class User extends Authenticatable
      */
     public function isPimpinan(): bool
     {
-        return $this->normalizedRole()
-            === self::ROLE_PIMPINAN;
+        return $this->normalizedRole() === self::ROLE_PIMPINAN;
     }
 
     /**
@@ -142,8 +139,7 @@ class User extends Authenticatable
      */
     public function isStaff(): bool
     {
-        return $this->normalizedRole()
-            === self::ROLE_STAFF;
+        return $this->normalizedRole() === self::ROLE_STAFF;
     }
 
     /**
@@ -161,7 +157,10 @@ class User extends Authenticatable
     */
 
     /**
-     * Mengecek akun aktif.
+     * Mengecek apakah akun aktif.
+     *
+     * true  = akun dapat login dan mengakses aplikasi.
+     * false = akun dinonaktifkan / diblokir.
      */
     public function isActive(): bool
     {
@@ -169,11 +168,31 @@ class User extends Authenticatable
     }
 
     /**
-     * Mengecek akun nonaktif.
+     * Mengecek apakah akun nonaktif.
      */
     public function isInactive(): bool
     {
         return !$this->isActive();
+    }
+
+    /**
+     * Mengaktifkan akun.
+     */
+    public function activateAccount(): bool
+    {
+        $this->is_active = true;
+
+        return $this->save();
+    }
+
+    /**
+     * Menonaktifkan / memblokir akun.
+     */
+    public function deactivateAccount(): bool
+    {
+        $this->is_active = false;
+
+        return $this->save();
     }
 
     /*
@@ -278,12 +297,22 @@ class User extends Authenticatable
     /**
      * User aktif.
      */
-    public function scopeAktif(
-        Builder $query
-    ): Builder {
+    public function scopeAktif(Builder $query): Builder
+    {
         return $query->where(
             'is_active',
             true
+        );
+    }
+
+    /**
+     * User nonaktif.
+     */
+    public function scopeNonaktif(Builder $query): Builder
+    {
+        return $query->where(
+            'is_active',
+            false
         );
     }
 
@@ -293,9 +322,8 @@ class User extends Authenticatable
      * Mendukung data lama:
      * staff / staf.
      */
-    public function scopeStaff(
-        Builder $query
-    ): Builder {
+    public function scopeStaff(Builder $query): Builder
+    {
         return $query->whereRaw(
             'LOWER(TRIM(role)) IN (?, ?)',
             [
@@ -308,9 +336,8 @@ class User extends Authenticatable
     /**
      * User Admin.
      */
-    public function scopeAdmin(
-        Builder $query
-    ): Builder {
+    public function scopeAdmin(Builder $query): Builder
+    {
         return $query->whereRaw(
             'LOWER(TRIM(role)) = ?',
             [
@@ -322,9 +349,8 @@ class User extends Authenticatable
     /**
      * User Pimpinan.
      */
-    public function scopePimpinan(
-        Builder $query
-    ): Builder {
+    public function scopePimpinan(Builder $query): Builder
+    {
         return $query->whereRaw(
             'LOWER(TRIM(role)) = ?',
             [
@@ -397,10 +423,7 @@ class User extends Authenticatable
         $keyword = "%{$search}%";
 
         return $query->where(
-            function (
-                Builder $q
-            ) use ($keyword): void {
-
+            function (Builder $q) use ($keyword): void {
                 $q->where(
                     'name',
                     'like',
@@ -434,20 +457,15 @@ class User extends Authenticatable
         return match (
             $this->normalizedRole()
         ) {
+            self::ROLE_ADMIN => 'Admin',
 
-            self::ROLE_ADMIN =>
-                'Admin',
+            self::ROLE_PIMPINAN => 'Pimpinan',
 
-            self::ROLE_PIMPINAN =>
-                'Pimpinan',
+            self::ROLE_STAFF => 'Staff',
 
-            self::ROLE_STAFF =>
-                'Staff',
-
-            default =>
-                ucfirst(
-                    $this->normalizedRole()
-                ),
+            default => ucfirst(
+                $this->normalizedRole()
+            ),
         };
     }
 

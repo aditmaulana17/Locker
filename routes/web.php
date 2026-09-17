@@ -29,6 +29,10 @@ Route::get(
 |--------------------------------------------------------------------------
 | GUEST
 |--------------------------------------------------------------------------
+|
+| Route login dan register tidak menggunakan check.active karena
+| user belum terautentikasi.
+|
 */
 
 Route::middleware('guest')->group(function () {
@@ -70,6 +74,9 @@ Route::middleware('guest')->group(function () {
 |--------------------------------------------------------------------------
 | LOGOUT
 |--------------------------------------------------------------------------
+|
+| Logout tetap menggunakan auth saja.
+|
 */
 
 Route::post(
@@ -83,9 +90,28 @@ Route::post(
 |--------------------------------------------------------------------------
 | AUTHENTICATED
 |--------------------------------------------------------------------------
+|
+| SEMUA halaman internal wajib:
+|
+| 1. Sudah login
+| 2. Akunnya masih aktif
+|
+| Jika Admin menonaktifkan akun yang sedang login, maka pada request
+| berikutnya CheckActiveAccount akan:
+|
+| - mendeteksi is_active = false
+| - logout user
+| - invalidate session
+| - regenerate CSRF token
+| - redirect ke login
+| - mengirim pesan account_blocked
+|
 */
 
-Route::middleware('auth')->group(function () {
+Route::middleware([
+    'auth',
+    'check.active',
+])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
@@ -571,15 +597,6 @@ Route::middleware('auth')->group(function () {
         | Contoh:
         |
         | /surat-keluar/compression-preview/{token}
-        |
-        | Endpoint akan membaca:
-        |
-        | session('surat_keluar_pdf_preview')
-        |
-        | kemudian mengirim PDF temporary sebagai:
-        |
-        | Content-Type: application/pdf
-        | Content-Disposition: inline
         |
         */
 

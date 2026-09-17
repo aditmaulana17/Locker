@@ -13,10 +13,22 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
+
+            // Data pengguna
             $table->string('name');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+
+            // Role pengguna
+            // Nilai: admin, pimpinan, staff
+            $table->string('role')->default('staff')->index();
+
+            // Status akun
+            // true  = aktif
+            // false = nonaktif / diblokir
+            $table->boolean('is_active')->default(true)->index();
+
             $table->rememberToken();
             $table->timestamps();
         });
