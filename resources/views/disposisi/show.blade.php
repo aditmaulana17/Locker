@@ -815,29 +815,6 @@
         padding: 16px;
     }
 
-    .dd-related-agenda {
-        display: inline-flex;
-        align-items: center;
-        align-self: flex-start;
-        min-height: 25px;
-        max-width: 100%;
-        padding: 0 9px;
-        margin-bottom: 12px;
-        border-radius: 7px;
-        background: #eef2ff;
-        color: #4338ca;
-        font-family:
-            ui-monospace,
-            SFMono-Regular,
-            Menlo,
-            Monaco,
-            Consolas,
-            monospace;
-        font-size: 8px;
-        font-weight: 800;
-        overflow-wrap: anywhere;
-    }
-
     .dd-related-items {
         display: flex;
         flex-direction: column;
@@ -1727,13 +1704,6 @@
                 <div class="dd-related-body">
 
                     @if($suratMasuk)
-
-                        {{-- NOMOR SURAT --}}
-
-                        <span class="dd-related-agenda">
-                            {{ $nomorSurat }}
-                        </span>
-
 
                         <div class="dd-related-items">
 
