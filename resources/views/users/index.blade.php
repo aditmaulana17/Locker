@@ -11,7 +11,7 @@
 |--------------------------------------------------------------------------
 */
 
-```
+
 $rawRoles = request('role', []);
 
 if (
@@ -111,13 +111,12 @@ $hasFilters =
     request()->filled('search') ||
     !empty($selectedRoles) ||
     !empty($selectedStatuses);
-```
+
 
 @endphp
 
 <div class="space-y-3 pb-12 sm:space-y-4">
 
-```
 {{-- =========================================================
      HEADER
 ========================================================== --}}
@@ -1152,7 +1151,6 @@ $hasFilters =
     @endif
 
 </div>
-```
 
 </div>
 
