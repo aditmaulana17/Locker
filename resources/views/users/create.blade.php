@@ -7,19 +7,19 @@
 @php
 $oldRole = old('role', '');
 
-```
+
 if ($oldRole === 'staf') {
     $oldRole = 'staff';
 }
 
 $oldIsActive = old('is_active', '1');
-```
+
 
 @endphp
 
 <div class="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-6">
 
-```
+
 {{-- =========================================================
      HEADER
 ========================================================== --}}
@@ -640,7 +640,7 @@ $oldIsActive = old('is_active', '1');
     </form>
 
 </div>
-```
+
 
 </div>
 

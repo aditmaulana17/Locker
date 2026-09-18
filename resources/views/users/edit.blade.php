@@ -7,7 +7,7 @@
 @php
 $currentRole = strtolower(trim((string) ($user->role ?? '')));
 
-```
+
 if ($currentRole === 'staf') {
     $currentRole = 'staff';
 }
@@ -24,13 +24,13 @@ $oldIsActive = old(
 if ($oldRole === 'staf') {
     $oldRole = 'staff';
 }
-```
+
 
 @endphp
 
 <div class="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-6">
 
-```
+
 {{-- =========================================================
      HEADER
 ========================================================== --}}
@@ -658,7 +658,7 @@ if ($oldRole === 'staf') {
     </form>
 
 </div>
-```
+
 
 </div>
 
