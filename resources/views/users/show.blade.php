@@ -5,66 +5,66 @@
 @section('content')
 
 @php
-/*
-|--------------------------------------------------------------------------
-| NORMALISASI ROLE
-|--------------------------------------------------------------------------
-*/
+
+| /*                                                                         |
+| -------------------------------------------------------------------------- |
+| NORMALISASI ROLE                                                           |
+| -------------------------------------------------------------------------- |
+| */                                                                         |
 
 $role = strtolower(
-    trim((string) ($user->role ?? ''))
+trim((string) ($user->role ?? ''))
 );
 
 if ($role === 'staf') {
-    $role = 'staff';
+$role = 'staff';
 }
 
-/*
-|--------------------------------------------------------------------------
-| STATUS AKUN
-|--------------------------------------------------------------------------
-*/
+| /*                                                                         |
+| -------------------------------------------------------------------------- |
+| STATUS AKUN                                                                |
+| -------------------------------------------------------------------------- |
+| */                                                                         |
 
 $isActive = (bool) ($user->is_active ?? false);
 
-/*
-|--------------------------------------------------------------------------
-| LABEL ROLE
-|--------------------------------------------------------------------------
-*/
+| /*                                                                         |
+| -------------------------------------------------------------------------- |
+| LABEL ROLE                                                                 |
+| -------------------------------------------------------------------------- |
+| */                                                                         |
 
 $roleLabel = match ($role) {
-    'admin'    => 'Admin',
-    'pimpinan' => 'Pimpinan',
-    'staff'    => 'Staf',
-    default    => ucfirst($role ?: 'User'),
+'admin'    => 'Admin',
+'pimpinan' => 'Pimpinan',
+'staff'    => 'Staf',
+default    => ucfirst($role ?: 'User'),
 };
 
 $roleDescription = match ($role) {
-    'admin'    => 'Akses penuh sistem',
-    'pimpinan' => 'Akses pimpinan',
-    'staff'    => 'Akses operator / staf',
-    default    => 'Pengguna sistem',
+'admin'    => 'Akses penuh sistem',
+'pimpinan' => 'Akses pimpinan',
+'staff'    => 'Akses operator / staf',
+default    => 'Pengguna sistem',
 };
 
-/*
-|--------------------------------------------------------------------------
-| AVATAR
-|--------------------------------------------------------------------------
-*/
+| /*                                                                         |
+| -------------------------------------------------------------------------- |
+| AVATAR                                                                     |
+| -------------------------------------------------------------------------- |
+| */                                                                         |
 
 $userName = trim(
-    (string) ($user->name ?? '')
+(string) ($user->name ?? '')
 );
 
 $avatarText = strtoupper(
-    mb_substr(
-        $userName !== '' ? $userName : 'US',
-        0,
-        2
-    )
+mb_substr(
+$userName !== '' ? $userName : 'US',
+0,
+2
+)
 );
-
 
 @endphp
 
@@ -78,22 +78,6 @@ $avatarText = strtoupper(
 <div class="detail-page-header">
 
     <div class="detail-header-left">
-
-        <div class="detail-title-icon">
-            <svg
-                class="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.8"
-                viewBox="0 0 24 24"
-            >
-                <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M15 19l-7-7 7-7"
-                />
-            </svg>
-        </div>
 
         <div class="min-w-0">
 
@@ -140,6 +124,7 @@ $avatarText = strtoupper(
             href="{{ route('users.index') }}"
             class="detail-action secondary"
         >
+
             <svg
                 class="w-4 h-4"
                 fill="none"
@@ -155,6 +140,7 @@ $avatarText = strtoupper(
             </svg>
 
             <span>Kembali</span>
+
         </a>
 
 
@@ -162,6 +148,7 @@ $avatarText = strtoupper(
             href="{{ route('users.edit', $user->id) }}"
             class="detail-action primary"
         >
+
             <svg
                 class="w-4 h-4"
                 fill="none"
@@ -183,6 +170,7 @@ $avatarText = strtoupper(
             </svg>
 
             <span>Edit Pengguna</span>
+
         </a>
 
     </div>
@@ -478,7 +466,6 @@ $avatarText = strtoupper(
                         stroke-linecap="round"
                         d="M8 10V7a4 4 0 018 0v3"
                     />
-
                 </svg>
 
             </div>
@@ -613,7 +600,6 @@ $avatarText = strtoupper(
                         stroke-linecap="round"
                         d="M12 7v5l3 2"
                     />
-
                 </svg>
 
             </div>
@@ -645,13 +631,9 @@ $avatarText = strtoupper(
                 <span class="detail-value">
 
                     @if($user->created_at)
-
                         {{ $user->created_at->format('d/m/Y H:i:s') }}
-
                     @else
-
                         -
-
                     @endif
 
                 </span>
@@ -668,13 +650,9 @@ $avatarText = strtoupper(
                 <span class="detail-value">
 
                     @if($user->updated_at)
-
                         {{ $user->updated_at->format('d/m/Y H:i:s') }}
-
                     @else
-
                         -
-
                     @endif
 
                 </span>
@@ -718,19 +696,6 @@ $avatarText = strtoupper(
     align-items: center;
     gap: 12px;
     min-width: 0;
-}
-
-.detail-title-icon {
-    display: flex;
-    width: 42px;
-    height: 42px;
-    flex-shrink: 0;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid #bfdbfe;
-    border-radius: 12px;
-    background: linear-gradient(135deg, #eff6ff, #dbeafe);
-    color: #2563eb;
 }
 
 .detail-title-line {
@@ -1164,6 +1129,7 @@ $avatarText = strtoupper(
     .detail-card-system {
         grid-column: auto;
     }
+
 }
 
 
@@ -1208,6 +1174,7 @@ $avatarText = strtoupper(
     .detail-value {
         max-width: 62%;
     }
+
 }
 
 
@@ -1219,11 +1186,6 @@ $avatarText = strtoupper(
 
     .detail-page-header {
         margin-bottom: 14px;
-    }
-
-    .detail-title-icon {
-        width: 38px;
-        height: 38px;
     }
 
     .detail-page-title {
@@ -1304,6 +1266,7 @@ $avatarText = strtoupper(
     .detail-value {
         font-size: 10px;
     }
+
 }
 
 
@@ -1348,6 +1311,7 @@ $avatarText = strtoupper(
     .account-status {
         font-size: 8px;
     }
+
 }
 
 </style>
