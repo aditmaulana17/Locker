@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ActivityLog;
 use App\Models\Disposisi;
 use App\Models\SuratKeluar;
 use App\Models\SuratMasuk;
@@ -254,125 +253,35 @@ class DashboardController extends Controller
 
         /*
          * ==========================================================
-         * RIWAYAT SURAT KELUAR TERBARU
+         * RIWAYAT SURAT KELUAR
          * ==========================================================
          *
-         * Struktur activity_logs:
+         * PENTING:
+         * Bagian ini BUKAN ActivityLog.
          *
-         * id
-         * user_id
-         * aktivitas
-         * modul
-         * deskripsi
-         * created_at
-         * updated_at
+         * Dashboard mengambil langsung data dari tabel surat_keluar,
+         * sehingga isinya selalu mengikuti halaman Surat Keluar.
          *
-         * Tidak ada kolom surat_keluar_id.
+         * Jika tabel surat_keluar kosong:
+         *     $riwayatSuratKeluar = kosong
          *
-         * Karena itu ID surat keluar dibaca dari deskripsi aktivitas,
-         * contohnya:
+         * Jika ada surat keluar:
+         *     surat tersebut tampil di dashboard.
          *
-         * "Menambahkan surat keluar #9"
-         * "Mengubah surat keluar #9"
-         * "Menghapus surat keluar #9"
-         *
-         * Hanya aktivitas yang ID suratnya masih ada di tabel
-         * surat_keluar yang akan ditampilkan.
+         * Maksimal 5 surat keluar terbaru.
          */
 
-        /*
-         * Ambil seluruh ID surat keluar yang masih ada.
-         *
-         * Surat yang sudah dihapus/soft deleted tidak masuk
-         * ke query ini apabila model SuratKeluar menggunakan
-         * SoftDeletes.
-         */
-
-        $suratKeluarIds =
+        $riwayatSuratKeluar =
             SuratKeluar::query()
-                ->pluck('id')
-                ->map(
-                    function ($id) {
-                        return (int) $id;
-                    }
+                ->with('kategori')
+                ->orderByDesc(
+                    'created_at'
                 )
-                ->filter()
-                ->values();
-
-        /*
-         * Default kosong.
-         */
-
-        $riwayatSuratKeluar = collect();
-
-        /*
-         * Hanya lakukan query ActivityLog jika masih ada
-         * surat keluar aktif.
-         */
-
-        if ($suratKeluarIds->isNotEmpty()) {
-
-            /*
-             * Bentuk pola REGEXP.
-             *
-             * Contoh apabila ID aktif:
-             *
-             * 9, 10, 12
-             *
-             * menjadi:
-             *
-             * (^|[^0-9])#(9|10|12)([^0-9]|$)
-             *
-             * Dengan pembatas angka ini:
-             *
-             * #9
-             *
-             * tidak akan salah dianggap sebagai:
-             *
-             * #90
-             * #91
-             * #99
-             */
-
-            $idAlternatives =
-                $suratKeluarIds
-                    ->implode('|');
-
-            $activityPattern =
-                '(^|[^0-9])#(' .
-                $idAlternatives .
-                ')([^0-9]|$)';
-
-            /*
-             * Ambil aktivitas hanya dari modul surat_keluar
-             * dan hanya jika deskripsinya mengandung ID surat
-             * yang masih aktif.
-             */
-
-            $riwayatSuratKeluar =
-                ActivityLog::query()
-                    ->where(
-                        'modul',
-                        'surat_keluar'
-                    )
-                    ->whereNotNull(
-                        'deskripsi'
-                    )
-                    ->whereRaw(
-                        'deskripsi REGEXP ?',
-                        [
-                            $activityPattern
-                        ]
-                    )
-                    ->orderByDesc(
-                        'created_at'
-                    )
-                    ->orderByDesc(
-                        'id'
-                    )
-                    ->limit(5)
-                    ->get();
-        }
+                ->orderByDesc(
+                    'id'
+                )
+                ->limit(5)
+                ->get();
 
         /*
          * ==========================================================
