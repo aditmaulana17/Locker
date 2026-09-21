@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ActivityLog;
 use App\Models\Disposisi;
 use App\Models\SuratKeluar;
 use App\Models\SuratMasuk;
@@ -64,6 +65,7 @@ class DashboardController extends Controller
 
         $listDisposisi = collect();
         $suratMasukTerbaru = collect();
+        $riwayatSuratKeluar = collect();
 
         $chartLabels = [];
         $chartDataMasuk = [];
@@ -157,6 +159,9 @@ class DashboardController extends Controller
              * ======================================================
              * RETURN DASHBOARD STAFF
              * ======================================================
+             *
+             * Riwayat surat keluar tetap dikirim sebagai collection
+             * kosong agar Blade aman apabila variabel digunakan.
              */
             return view(
                 'dashboard.index',
@@ -169,6 +174,7 @@ class DashboardController extends Controller
                     'disposisiSelesai',
                     'listDisposisi',
                     'suratMasukTerbaru',
+                    'riwayatSuratKeluar',
                     'chartLabels',
                     'chartDataMasuk',
                     'chartDataKeluar',
@@ -248,6 +254,40 @@ class DashboardController extends Controller
                 )
                 ->orderByDesc(
                     'created_at'
+                )
+                ->limit(5)
+                ->get();
+
+        /*
+         * ==========================================================
+         * RIWAYAT SURAT KELUAR TERBARU
+         * ==========================================================
+         *
+         * ActivityLog sudah digunakan oleh SuratKeluarController.
+         * Module untuk surat keluar adalah:
+         *
+         * surat_keluar
+         *
+         * Riwayat diambil berdasarkan aktivitas terbaru.
+         *
+         * Activity yang saat ini sudah dicatat oleh
+         * SuratKeluarController antara lain:
+         * - create
+         * - update
+         * - delete
+         * - log
+         */
+        $riwayatSuratKeluar =
+            ActivityLog::query()
+                ->where(
+                    'module',
+                    'surat_keluar'
+                )
+                ->orderByDesc(
+                    'created_at'
+                )
+                ->orderByDesc(
+                    'id'
                 )
                 ->limit(5)
                 ->get();
@@ -437,6 +477,7 @@ class DashboardController extends Controller
                 'disposisiSelesai',
                 'listDisposisi',
                 'suratMasukTerbaru',
+                'riwayatSuratKeluar',
                 'chartLabels',
                 'chartDataMasuk',
                 'chartDataKeluar',

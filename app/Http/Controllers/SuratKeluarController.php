@@ -1465,11 +1465,43 @@ class SuratKeluarController extends Controller
             |--------------------------------------------------------------------------
             */
 
+            $nomorSurat = trim(
+                (string) (
+                    $suratKeluar->nomor_surat ??
+                    ''
+                )
+            );
+
+            $perihalSurat = trim(
+                (string) (
+                    $suratKeluar->perihal ??
+                    ''
+                )
+            );
+
+            $statusSurat = $this->getValidStatus(
+                $suratKeluar->status
+            );
+
+            $actorName = trim(
+                (string) (
+                    Auth::user()?->name ??
+                    'Sistem'
+                )
+            );
+
             $this->logActivity(
                 'create',
                 'surat_keluar',
-                'Menambahkan surat keluar #' .
-                $suratKeluar->id
+                $actorName .
+                ' membuat surat keluar #' .
+                $suratKeluar->id .
+                ' | Nomor: ' .
+                ($nomorSurat !== '' ? $nomorSurat : '-') .
+                ' | Perihal: ' .
+                ($perihalSurat !== '' ? $perihalSurat : 'Tanpa perihal') .
+                ' | Status: ' .
+                ucfirst($statusSurat)
             );
 
             DB::commit();
@@ -1612,11 +1644,19 @@ class SuratKeluarController extends Controller
         $data =
             $request->validated();
 
+        $oldStatus =
+            $this->getValidStatus(
+                $suratKeluar->status
+            );
+
         $data['status'] =
             $this->getValidStatus(
                 $data['status'] ??
                 $suratKeluar->status
             );
+
+        $newStatus =
+            $data['status'];
 
         $oldAttachment =
             $suratKeluar->lampiran_file;
@@ -1689,12 +1729,62 @@ class SuratKeluarController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            $this->logActivity(
-                'update',
-                'surat_keluar',
-                'Mengubah surat keluar #' .
-                $suratKeluar->id
+            $nomorSurat = trim(
+                (string) (
+                    $suratKeluar->nomor_surat ??
+                    ''
+                )
             );
+
+            $perihalSurat = trim(
+                (string) (
+                    $suratKeluar->perihal ??
+                    ''
+                )
+            );
+
+            $actorName = trim(
+                (string) (
+                    Auth::user()?->name ??
+                    'Sistem'
+                )
+            );
+
+            if ($oldStatus !== $newStatus) {
+
+                $this->logActivity(
+                    'status',
+                    'surat_keluar',
+                    $actorName .
+                    ' mengubah status surat keluar #' .
+                    $suratKeluar->id .
+                    ' | Nomor: ' .
+                    ($nomorSurat !== '' ? $nomorSurat : '-') .
+                    ' | Perihal: ' .
+                    ($perihalSurat !== '' ? $perihalSurat : 'Tanpa perihal') .
+                    ' | Status: ' .
+                    ucfirst($oldStatus) .
+                    ' → ' .
+                    ucfirst($newStatus)
+                );
+
+            } else {
+
+                $this->logActivity(
+                    'update',
+                    'surat_keluar',
+                    $actorName .
+                    ' memperbarui surat keluar #' .
+                    $suratKeluar->id .
+                    ' | Nomor: ' .
+                    ($nomorSurat !== '' ? $nomorSurat : '-') .
+                    ' | Perihal: ' .
+                    ($perihalSurat !== '' ? $perihalSurat : 'Tanpa perihal') .
+                    ' | Status: ' .
+                    ucfirst($newStatus)
+                );
+
+            }
 
             DB::commit();
 
@@ -1785,6 +1875,30 @@ class SuratKeluarController extends Controller
         $id =
             $suratKeluar->id;
 
+        $nomorSurat =
+            trim(
+                (string) (
+                    $suratKeluar->nomor_surat ??
+                    ''
+                )
+            );
+
+        $perihalSurat =
+            trim(
+                (string) (
+                    $suratKeluar->perihal ??
+                    ''
+                )
+            );
+
+        $actorName =
+            trim(
+                (string) (
+                    Auth::user()?->name ??
+                    'Sistem'
+                )
+            );
+
         $attachment =
             $suratKeluar->lampiran_file;
 
@@ -1792,7 +1906,10 @@ class SuratKeluarController extends Controller
             DB::transaction(
                 function () use (
                     $suratKeluar,
-                    $id
+                    $id,
+                    $actorName,
+                    $nomorSurat,
+                    $perihalSurat
                 ): void {
 
                     $suratKeluar->delete();
@@ -1800,8 +1917,13 @@ class SuratKeluarController extends Controller
                     $this->logActivity(
                         'delete',
                         'surat_keluar',
-                        'Menghapus surat keluar #' .
-                        $id
+                        $actorName .
+                        ' menghapus surat keluar #' .
+                        $id .
+                        ' | Nomor: ' .
+                        ($nomorSurat !== '' ? $nomorSurat : '-') .
+                        ' | Perihal: ' .
+                        ($perihalSurat !== '' ? $perihalSurat : 'Tanpa perihal')
                     );
                 }
             );
@@ -2070,8 +2192,17 @@ class SuratKeluarController extends Controller
         $this->logActivity(
             'log',
             'surat_keluar',
-            'Menambahkan log surat keluar #' .
-            $suratKeluar->id
+            (Auth::user()?->name ?? 'Sistem') .
+            ' menambahkan catatan aktivitas untuk surat keluar #' .
+            $suratKeluar->id .
+            ' | Nomor: ' .
+            (($suratKeluar->nomor_surat ?? '') !== ''
+                ? $suratKeluar->nomor_surat
+                : '-') .
+            ' | Perihal: ' .
+            (($suratKeluar->perihal ?? '') !== ''
+                ? $suratKeluar->perihal
+                : 'Tanpa perihal')
         );
 
         return back()
