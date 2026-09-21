@@ -27,19 +27,13 @@
      * Normalisasi:
      * staff -> staf
      */
-    $role =
-        $role === 'staff'
-            ? 'staf'
-            : $role;
+    $role = $role === 'staff'
+        ? 'staf'
+        : $role;
 
-    $isStaf =
-        $role === 'staf';
-
-    $isAdmin =
-        $role === 'admin';
-
-    $isPimpinan =
-        $role === 'pimpinan';
+    $isStaf = $role === 'staf';
+    $isAdmin = $role === 'admin';
+    $isPimpinan = $role === 'pimpinan';
 
     $roleLabel = match ($role) {
         'admin' => 'Admin',
@@ -48,10 +42,7 @@
         default => 'Pengguna',
     };
 
-    $today =
-        now()->translatedFormat(
-            'l, d F Y'
-        );
+    $today = now()->translatedFormat('l, d F Y');
 
 
     /*
@@ -843,369 +834,126 @@
 
 
         {{-- =================================================================
-            SURAT MASUK TERBARU
+            SURAT MASUK TERBARU - REDESIGN
         ================================================================== --}}
 
         <section class="dashboard-panel overflow-hidden">
 
-            <div class="flex flex-col gap-4 border-b border-slate-100 px-4 py-4 sm:px-6 sm:py-5 lg:flex-row lg:items-center lg:justify-between">
+            {{-- HEADER --}}
 
-                <div>
+            <div class="relative overflow-hidden border-b border-slate-100 bg-gradient-to-br from-white via-white to-blue-50/40 px-4 py-5 sm:px-6 sm:py-6">
 
-                    <span class="section-eyebrow">
-                        Aktivitas Terbaru
-                    </span>
+                <div class="pointer-events-none absolute -right-10 -top-16 h-36 w-36 rounded-full bg-blue-500/5 blur-2xl"></div>
 
-                    <h2 class="mt-1 text-base font-extrabold tracking-tight text-slate-800 sm:text-lg">
-                        Surat Masuk Terbaru
-                    </h2>
+                <div class="pointer-events-none absolute -bottom-20 left-1/3 h-32 w-32 rounded-full bg-indigo-500/5 blur-2xl"></div>
 
-                    <p class="mt-1 text-[10px] text-slate-400 sm:text-xs">
-                        Arsip surat yang terakhir masuk ke dalam sistem.
-                    </p>
+
+                <div class="relative flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+
+                    {{-- TITLE --}}
+
+                    <div class="flex items-start gap-3">
+
+                        <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 shadow-sm ring-1 ring-blue-100">
+
+                            <svg
+                                class="h-5 w-5"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="1.8"
+                                viewBox="0 0 24 24"
+                            >
+                                <rect
+                                    x="3"
+                                    y="5"
+                                    width="18"
+                                    height="14"
+                                    rx="2.5"
+                                />
+
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="M3.5 7.5l7.1 5.3a2.25 2.25 0 002.8 0l7.1-5.3"
+                                />
+                            </svg>
+
+                        </div>
+
+
+                        <div class="min-w-0">
+
+                            <div class="flex flex-wrap items-center gap-2">
+
+                                <span class="section-eyebrow">
+                                    Aktivitas Terbaru
+                                </span>
+
+
+                                @if(($suratMasukTerbaru ?? collect())->count() > 0)
+
+                                    <span class="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-[9px] font-bold text-blue-600 ring-1 ring-blue-100">
+
+                                        <span class="h-1.5 w-1.5 rounded-full bg-blue-500"></span>
+
+                                        {{ ($suratMasukTerbaru ?? collect())->count() }} terbaru
+
+                                    </span>
+
+                                @endif
+
+                            </div>
+
+
+                            <h2 class="mt-1 text-base font-extrabold tracking-tight text-slate-800 sm:text-lg">
+                                Surat Masuk Terbaru
+                            </h2>
+
+
+                            <p class="mt-1 max-w-xl text-[10px] leading-relaxed text-slate-400 sm:text-xs">
+                                Pantau surat yang baru ditambahkan dan aktivitas arsip terbaru dalam sistem.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    {{-- ACTION --}}
+
+                    <a
+                        href="{{ route('surat-masuk.index') }}"
+                        class="group inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-[10px] font-bold text-slate-600 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:bg-blue-600 hover:text-white hover:shadow-lg hover:shadow-blue-500/10 sm:w-auto sm:text-xs"
+                    >
+
+                        <span>
+                            Lihat Semua Surat
+                        </span>
+
+                        <svg
+                            class="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M9 5l7 7-7 7"
+                            />
+                        </svg>
+
+                    </a>
 
                 </div>
 
-
-                <a
-                    href="{{ route('surat-masuk.index') }}"
-                    class="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-100 px-3.5 py-2 text-[10px] font-bold text-slate-600 transition hover:bg-blue-600 hover:text-white sm:text-xs"
-                >
-
-                    Lihat Semua
-
-                    <svg
-                        class="h-3.5 w-3.5"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        viewBox="0 0 24 24"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M9 5l7 7-7 7"
-                        />
-                    </svg>
-
-                </a>
-
             </div>
 
 
-            {{-- =================================================================
-                DESKTOP TABLE
-            ================================================================== --}}
+            {{-- DESKTOP LIST --}}
 
-            <div class="hidden overflow-x-auto md:block">
-
-                <table class="w-full text-left">
-
-                    <thead>
-
-                        <tr class="border-b border-slate-100 bg-slate-50/70">
-
-                            {{-- NOMOR SURAT --}}
-                            <th class="table-heading">
-                                Nomor Surat
-                            </th>
-
-                            {{-- PERIHAL --}}
-                            <th class="table-heading">
-                                Perihal
-                            </th>
-
-                            {{-- PENGIRIM --}}
-                            <th class="table-heading">
-                                Pengirim
-                            </th>
-
-                            {{-- KATEGORI --}}
-                            <th class="table-heading">
-                                Kategori
-                            </th>
-
-                            {{-- STATUS --}}
-                            <th class="table-heading">
-                                Status
-                            </th>
-
-                            {{-- AKSI --}}
-                            <th class="table-heading text-right">
-                                Aksi
-                            </th>
-
-                        </tr>
-
-                    </thead>
-
-
-                    <tbody class="divide-y divide-slate-100">
-
-                        @forelse($suratMasukTerbaru ?? [] as $sm)
-
-                            @php
-
-                                $currentStatus =
-                                    strtolower(
-                                        trim(
-                                            (string) (
-                                                $sm->status ??
-                                                'baru'
-                                            )
-                                        )
-                                    );
-
-                                $currentStatusConfig =
-                                    $statusConfig[
-                                        $currentStatus
-                                    ] ?? [
-                                        'label' =>
-                                            ucfirst(
-                                                $currentStatus
-                                            ),
-
-                                        'class' =>
-                                            'bg-slate-50 text-slate-600 border-slate-200',
-
-                                        'dot' =>
-                                            'bg-slate-400',
-                                    ];
-
-                                /*
-                                 * Nomor surat.
-                                 *
-                                 * Tidak lagi menggunakan nomor_agenda.
-                                 */
-                                $nomorSurat =
-                                    trim(
-                                        (string) (
-                                            $sm->nomor_surat ??
-                                            ''
-                                        )
-                                    );
-
-                                if (
-                                    $nomorSurat === ''
-                                ) {
-                                    $nomorSurat = '-';
-                                }
-
-                            @endphp
-
-
-                            <tr class="group transition hover:bg-slate-50/70">
-
-                                {{-- =================================================
-                                    NOMOR SURAT
-                                ================================================== --}}
-
-                                <td class="table-cell">
-
-                                    <span
-                                        class="inline-flex max-w-[240px] items-center rounded-lg bg-blue-50 px-2.5 py-1.5 font-mono text-[10px] font-bold text-blue-700"
-                                        title="{{ $nomorSurat }}"
-                                    >
-
-                                        <span class="truncate">
-                                            {{ $nomorSurat }}
-                                        </span>
-
-                                    </span>
-
-                                </td>
-
-
-                                {{-- =================================================
-                                    PERIHAL
-                                ================================================== --}}
-
-                                <td class="table-cell">
-
-                                    <div class="max-w-[260px]">
-
-                                        <p
-                                            class="truncate text-xs font-bold text-slate-800"
-                                            title="{{ $sm->perihal ?? '-' }}"
-                                        >
-
-                                            {{ $sm->perihal ?? '-' }}
-
-                                        </p>
-
-                                    </div>
-
-                                </td>
-
-
-                                {{-- =================================================
-                                    PENGIRIM
-                                ================================================== --}}
-
-                                <td class="table-cell">
-
-                                    <div class="flex items-center gap-2">
-
-                                        <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-[10px] font-bold uppercase text-slate-500">
-
-                                            {{
-                                                strtoupper(
-                                                    substr(
-                                                        $sm->pengirim ?? 'P',
-                                                        0,
-                                                        1
-                                                    )
-                                                )
-                                            }}
-
-                                        </span>
-
-
-                                        <span
-                                            class="max-w-[150px] truncate text-xs text-slate-600"
-                                            title="{{ $sm->pengirim ?? '-' }}"
-                                        >
-
-                                            {{ $sm->pengirim ?? '-' }}
-
-                                        </span>
-
-                                    </div>
-
-                                </td>
-
-
-                                {{-- =================================================
-                                    KATEGORI
-                                ================================================== --}}
-
-                                <td class="table-cell">
-
-                                    <span class="text-xs text-slate-600">
-
-                                        {{ $sm->kategori->nama_kategori ?? '-' }}
-
-                                    </span>
-
-                                </td>
-
-
-                                {{-- =================================================
-                                    STATUS
-                                ================================================== --}}
-
-                                <td class="table-cell">
-
-                                    <span class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-bold {{ $currentStatusConfig['class'] }}">
-
-                                        <span class="h-1.5 w-1.5 rounded-full {{ $currentStatusConfig['dot'] }}"></span>
-
-                                        {{ $currentStatusConfig['label'] }}
-
-                                    </span>
-
-                                </td>
-
-
-                                {{-- =================================================
-                                    AKSI
-                                ================================================== --}}
-
-                                <td class="table-cell text-right">
-
-                                    <a
-                                        href="{{ route('surat-masuk.show', $sm->id) }}"
-                                        class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[10px] font-bold text-blue-600 transition hover:bg-blue-50 hover:text-blue-700"
-                                    >
-
-                                        Detail
-
-                                        <svg
-                                            class="h-3.5 w-3.5 transition group-hover:translate-x-0.5"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            stroke-width="2"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                d="M9 5l7 7-7 7"
-                                            />
-                                        </svg>
-
-                                    </a>
-
-                                </td>
-
-                            </tr>
-
-                        @empty
-
-                            <tr>
-
-                                <td
-                                    colspan="6"
-                                    class="px-6 py-14 text-center"
-                                >
-
-                                    <div class="mx-auto flex max-w-sm flex-col items-center">
-
-                                        <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
-
-                                            <svg
-                                                class="h-7 w-7"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                stroke-width="1.6"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <rect
-                                                    x="3"
-                                                    y="5"
-                                                    width="18"
-                                                    height="14"
-                                                    rx="2"
-                                                />
-
-                                                <path
-                                                    stroke-linecap="round"
-                                                    d="M3.5 7.5l7.1 5.3a2.25 2.25 0 002.8 0l7.1-5.3"
-                                                />
-                                            </svg>
-
-                                        </div>
-
-
-                                        <p class="mt-3 text-xs font-bold text-slate-700">
-                                            Belum ada surat masuk
-                                        </p>
-
-
-                                        <p class="mt-1 text-[10px] leading-relaxed text-slate-400">
-                                            Belum terdapat arsip surat masuk terbaru di dalam sistem.
-                                        </p>
-
-                                    </div>
-
-                                </td>
-
-                            </tr>
-
-                        @endforelse
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-
-            {{-- =================================================================
-                MOBILE LIST
-            ================================================================== --}}
-
-            <div class="divide-y divide-slate-100 md:hidden">
+            <div class="hidden md:block">
 
                 @forelse($suratMasukTerbaru ?? [] as $sm)
 
@@ -1237,9 +985,7 @@
                                     'bg-slate-400',
                             ];
 
-                        /*
-                         * Nomor surat untuk tampilan mobile.
-                         */
+
                         $nomorSurat =
                             trim(
                                 (string) (
@@ -1248,23 +994,46 @@
                                 )
                             );
 
-                        if (
-                            $nomorSurat === ''
-                        ) {
+                        if ($nomorSurat === '') {
                             $nomorSurat = '-';
+                        }
+
+
+                        $tanggalSurat = '-';
+
+                        if ($sm->tanggal_surat) {
+
+                            try {
+
+                                $tanggalSurat =
+                                    \Illuminate\Support\Carbon::parse(
+                                        $sm->tanggal_surat
+                                    )->translatedFormat(
+                                        'd M Y'
+                                    );
+
+                            } catch (\Throwable $e) {
+
+                                $tanggalSurat =
+                                    (string) $sm->tanggal_surat;
+
+                            }
+
                         }
 
                     @endphp
 
 
-                    <a
-                        href="{{ route('surat-masuk.show', $sm->id) }}"
-                        class="block p-4 transition active:bg-slate-50"
-                    >
+                    <div class="group relative border-b border-slate-100 px-4 py-4 transition-all duration-200 last:border-b-0 hover:bg-slate-50/70 sm:px-6">
 
-                        <div class="flex items-start gap-3">
+                        <div class="absolute inset-y-0 left-0 w-1 origin-left scale-y-0 rounded-r-full bg-blue-500 transition-transform duration-200 group-hover:scale-y-100"></div>
 
-                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+
+                        <div class="flex items-center gap-4">
+
+                            {{-- ICON --}}
+
+                            <div class="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 ring-1 ring-blue-100 transition-all duration-200 group-hover:scale-105 group-hover:bg-blue-600 group-hover:text-white group-hover:shadow-lg group-hover:shadow-blue-500/20">
 
                                 <svg
                                     class="h-5 w-5"
@@ -1288,8 +1057,356 @@
                                     />
                                 </svg>
 
+
+                                @if($currentStatus === 'baru')
+
+                                    <span class="absolute -right-1 -top-1 flex h-3.5 w-3.5">
+
+                                        <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-60"></span>
+
+                                        <span class="relative inline-flex h-3.5 w-3.5 rounded-full border-2 border-white bg-blue-500"></span>
+
+                                    </span>
+
+                                @endif
+
                             </div>
 
+
+                            {{-- INFORMATION --}}
+
+                            <div class="min-w-0 flex-1">
+
+                                <div class="flex flex-col gap-1.5 lg:flex-row lg:items-center lg:justify-between">
+
+                                    <div class="min-w-0">
+
+                                        <h3
+                                            class="truncate text-xs font-extrabold text-slate-800 transition-colors group-hover:text-blue-600 sm:text-sm"
+                                            title="{{ $sm->perihal ?? '-' }}"
+                                        >
+                                            {{ $sm->perihal ?? '-' }}
+                                        </h3>
+
+
+                                        <div class="mt-1 flex items-center gap-2">
+
+                                            <span class="font-mono text-[9px] font-bold text-blue-600 sm:text-[10px]">
+                                                {{ $nomorSurat }}
+                                            </span>
+
+                                            <span class="h-1 w-1 rounded-full bg-slate-300"></span>
+
+                                            <span class="text-[9px] text-slate-400 sm:text-[10px]">
+                                                {{ $tanggalSurat }}
+                                            </span>
+
+                                        </div>
+
+                                    </div>
+
+
+                                    {{-- STATUS --}}
+
+                                    <span class="inline-flex w-fit shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-[9px] font-bold {{ $currentStatusConfig['class'] }}">
+
+                                        <span class="h-1.5 w-1.5 rounded-full {{ $currentStatusConfig['dot'] }}"></span>
+
+                                        {{ $currentStatusConfig['label'] }}
+
+                                    </span>
+
+                                </div>
+
+
+                                {{-- META --}}
+
+                                <div class="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2">
+
+                                    <div class="flex min-w-0 items-center gap-1.5">
+
+                                        <svg
+                                            class="h-3.5 w-3.5 shrink-0 text-slate-400"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            stroke-width="1.8"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <circle
+                                                cx="12"
+                                                cy="8"
+                                                r="3.5"
+                                            />
+
+                                            <path
+                                                stroke-linecap="round"
+                                                d="M5 20a7 7 0 0114 0"
+                                            />
+                                        </svg>
+
+
+                                        <span class="max-w-[220px] truncate text-[10px] font-semibold text-slate-500">
+                                            {{ $sm->pengirim ?? '-' }}
+                                        </span>
+
+                                    </div>
+
+
+                                    <div class="flex min-w-0 items-center gap-1.5">
+
+                                        <svg
+                                            class="h-3.5 w-3.5 shrink-0 text-slate-400"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            stroke-width="1.8"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                d="M4 7.5A2.5 2.5 0 016.5 5h3l2 2h6A2.5 2.5 0 0120 9.5v7A2.5 2.5 0 0117.5 19h-11A2.5 2.5 0 014 16.5v-9z"
+                                            />
+                                        </svg>
+
+
+                                        <span class="max-w-[180px] truncate text-[10px] font-semibold text-slate-500">
+                                            {{ $sm->kategori->nama_kategori ?? '-' }}
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            {{-- DETAIL --}}
+
+                            <a
+                                href="{{ route('surat-masuk.show', $sm->id) }}"
+                                class="group/detail hidden shrink-0 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-[10px] font-bold text-slate-500 shadow-sm transition-all duration-200 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600 lg:inline-flex"
+                            >
+
+                                Detail
+
+                                <svg
+                                    class="h-3.5 w-3.5 transition-transform duration-200 group-hover/detail:translate-x-0.5"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M9 5l7 7-7 7"
+                                    />
+                                </svg>
+
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                @empty
+
+                    <div class="px-6 py-16">
+
+                        <div class="mx-auto flex max-w-md flex-col items-center text-center">
+
+                            <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 text-slate-400 ring-8 ring-slate-50">
+
+                                <svg
+                                    class="h-7 w-7"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="1.6"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <rect
+                                        x="3"
+                                        y="5"
+                                        width="18"
+                                        height="14"
+                                        rx="2"
+                                    />
+
+                                    <path
+                                        stroke-linecap="round"
+                                        d="M3.5 7.5l7.1 5.3a2.25 2.25 0 002.8 0l7.1-5.3"
+                                    />
+                                </svg>
+
+                            </div>
+
+
+                            <h3 class="mt-5 text-sm font-extrabold text-slate-700">
+                                Belum Ada Surat Masuk
+                            </h3>
+
+
+                            <p class="mt-1 max-w-sm text-[10px] leading-relaxed text-slate-400 sm:text-xs">
+                                Surat masuk terbaru yang ditambahkan ke sistem akan muncul di bagian ini.
+                            </p>
+
+
+                            @if(!$isStaf)
+
+                                <a
+                                    href="{{ route('surat-masuk.create') }}"
+                                    class="mt-5 inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-[10px] font-bold text-white shadow-lg shadow-blue-500/20 transition hover:bg-blue-700 sm:text-xs"
+                                >
+
+                                    <svg
+                                        class="h-3.5 w-3.5"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            d="M12 5v14M5 12h14"
+                                        />
+                                    </svg>
+
+                                    Tambah Surat Masuk
+
+                                </a>
+
+                            @endif
+
+                        </div>
+
+                    </div>
+
+                @endforelse
+
+            </div>
+
+
+            {{-- MOBILE --}}
+
+            <div class="md:hidden">
+
+                @forelse($suratMasukTerbaru ?? [] as $sm)
+
+                    @php
+
+                        $currentStatus =
+                            strtolower(
+                                trim(
+                                    (string) (
+                                        $sm->status ??
+                                        'baru'
+                                    )
+                                )
+                            );
+
+                        $currentStatusConfig =
+                            $statusConfig[
+                                $currentStatus
+                            ] ?? [
+                                'label' =>
+                                    ucfirst(
+                                        $currentStatus
+                                    ),
+
+                                'class' =>
+                                    'bg-slate-50 text-slate-600 border-slate-200',
+
+                                'dot' =>
+                                    'bg-slate-400',
+                            ];
+
+
+                        $nomorSurat =
+                            trim(
+                                (string) (
+                                    $sm->nomor_surat ??
+                                    ''
+                                )
+                            );
+
+                        if ($nomorSurat === '') {
+                            $nomorSurat = '-';
+                        }
+
+
+                        $tanggalSurat = '-';
+
+                        if ($sm->tanggal_surat) {
+
+                            try {
+
+                                $tanggalSurat =
+                                    \Illuminate\Support\Carbon::parse(
+                                        $sm->tanggal_surat
+                                    )->translatedFormat(
+                                        'd M Y'
+                                    );
+
+                            } catch (\Throwable $e) {
+
+                                $tanggalSurat =
+                                    (string) $sm->tanggal_surat;
+
+                            }
+
+                        }
+
+                    @endphp
+
+
+                    <a
+                        href="{{ route('surat-masuk.show', $sm->id) }}"
+                        class="group relative block border-b border-slate-100 p-4 transition-all duration-200 active:bg-slate-50"
+                    >
+
+                        <div class="flex gap-3">
+
+                            {{-- TIMELINE --}}
+
+                            <div class="relative flex w-9 shrink-0 justify-center">
+
+                                @if(!$loop->last)
+
+                                    <span class="absolute left-1/2 top-9 h-[calc(100%+1rem)] w-px -translate-x-1/2 bg-slate-200"></span>
+
+                                @endif
+
+
+                                <div class="relative z-10 flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600 ring-4 ring-white transition group-active:bg-blue-600 group-active:text-white">
+
+                                    <svg
+                                        class="h-4 w-4"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="1.8"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <rect
+                                            x="3"
+                                            y="5"
+                                            width="18"
+                                            height="14"
+                                            rx="2.5"
+                                        />
+
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M3.5 7.5l7.1 5.3a2.25 2.25 0 002.8 0l7.1-5.3"
+                                        />
+                                    </svg>
+
+                                </div>
+
+                            </div>
+
+
+                            {{-- CONTENT --}}
 
                             <div class="min-w-0 flex-1">
 
@@ -1297,25 +1414,19 @@
 
                                     <div class="min-w-0">
 
-                                        <p
-                                            class="truncate text-xs font-bold text-slate-800"
+                                        <h3
+                                            class="line-clamp-2 text-xs font-extrabold leading-relaxed text-slate-800 group-active:text-blue-600"
                                             title="{{ $sm->perihal ?? '-' }}"
                                         >
-
                                             {{ $sm->perihal ?? '-' }}
+                                        </h3>
 
-                                        </p>
-
-
-                                        {{-- NOMOR SURAT --}}
 
                                         <p
-                                            class="mt-1 truncate font-mono text-[10px] font-semibold text-blue-600"
+                                            class="mt-1 truncate font-mono text-[9px] font-bold text-blue-600"
                                             title="{{ $nomorSurat }}"
                                         >
-
                                             {{ $nomorSurat }}
-
                                         </p>
 
                                     </div>
@@ -1330,24 +1441,120 @@
                                 </div>
 
 
-                                <div class="mt-2 flex items-center gap-2 text-[10px] text-slate-400">
+                                <div class="mt-2.5 space-y-1.5">
 
-                                    <span
-                                        class="truncate"
-                                        title="{{ $sm->pengirim ?? '-' }}"
-                                    >
-                                        {{ $sm->pengirim ?? '-' }}
+                                    <div class="flex min-w-0 items-center gap-1.5">
+
+                                        <svg
+                                            class="h-3 w-3 shrink-0 text-slate-400"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            stroke-width="1.8"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <circle
+                                                cx="12"
+                                                cy="8"
+                                                r="3.5"
+                                            />
+
+                                            <path
+                                                stroke-linecap="round"
+                                                d="M5 20a7 7 0 0114 0"
+                                            />
+                                        </svg>
+
+
+                                        <span class="truncate text-[10px] font-medium text-slate-500">
+                                            {{ $sm->pengirim ?? '-' }}
+                                        </span>
+
+                                    </div>
+
+
+                                    <div class="flex min-w-0 items-center gap-2 text-[9px] text-slate-400">
+
+                                        <span class="flex min-w-0 items-center gap-1">
+
+                                            <svg
+                                                class="h-3 w-3 shrink-0"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                stroke-width="1.8"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    d="M4 7.5A2.5 2.5 0 016.5 5h3l2 2h6A2.5 2.5 0 0120 9.5v7A2.5 2.5 0 0117.5 19h-11A2.5 2.5 0 014 16.5v-9z"
+                                                />
+                                            </svg>
+
+                                            <span class="truncate">
+                                                {{ $sm->kategori->nama_kategori ?? '-' }}
+                                            </span>
+
+                                        </span>
+
+
+                                        <span class="h-1 w-1 shrink-0 rounded-full bg-slate-300"></span>
+
+
+                                        <span class="flex shrink-0 items-center gap-1">
+
+                                            <svg
+                                                class="h-3 w-3"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                stroke-width="1.8"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <rect
+                                                    x="3"
+                                                    y="5"
+                                                    width="18"
+                                                    height="15"
+                                                    rx="2"
+                                                />
+
+                                                <path
+                                                    stroke-linecap="round"
+                                                    d="M8 3v4M16 3v4M3 10h18"
+                                                />
+                                            </svg>
+
+                                            {{ $tanggalSurat }}
+
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+
+                                <div class="mt-3 flex items-center justify-between border-t border-slate-100 pt-2.5">
+
+                                    <span class="text-[9px] font-medium text-slate-400">
+                                        Ketuk untuk melihat detail
                                     </span>
 
-                                    <span>
-                                        •
-                                    </span>
 
-                                    <span
-                                        class="truncate"
-                                        title="{{ $sm->kategori->nama_kategori ?? '-' }}"
-                                    >
-                                        {{ $sm->kategori->nama_kategori ?? '-' }}
+                                    <span class="flex h-6 w-6 items-center justify-center rounded-lg bg-slate-50 text-slate-400 transition group-active:bg-blue-50 group-active:text-blue-600">
+
+                                        <svg
+                                            class="h-3.5 w-3.5"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            stroke-width="2"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                d="M9 5l7 7-7 7"
+                                            />
+                                        </svg>
+
                                     </span>
 
                                 </div>
@@ -1360,14 +1567,41 @@
 
                 @empty
 
-                    <div class="px-5 py-12 text-center">
+                    <div class="px-5 py-14 text-center">
 
-                        <p class="text-xs font-bold text-slate-700">
-                            Belum ada surat masuk
+                        <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
+
+                            <svg
+                                class="h-6 w-6"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="1.6"
+                                viewBox="0 0 24 24"
+                            >
+                                <rect
+                                    x="3"
+                                    y="5"
+                                    width="18"
+                                    height="14"
+                                    rx="2"
+                                />
+
+                                <path
+                                    stroke-linecap="round"
+                                    d="M3.5 7.5l7.1 5.3a2.25 2.25 0 002.8 0l7.1-5.3"
+                                />
+                            </svg>
+
+                        </div>
+
+
+                        <p class="mt-4 text-xs font-extrabold text-slate-700">
+                            Belum Ada Surat Masuk
                         </p>
 
-                        <p class="mt-1 text-[10px] text-slate-400">
-                            Data surat terbaru akan tampil di sini.
+
+                        <p class="mx-auto mt-1 max-w-xs text-[10px] leading-relaxed text-slate-400">
+                            Surat masuk terbaru akan tampil di sini setelah ditambahkan ke sistem.
                         </p>
 
                     </div>
@@ -1375,6 +1609,57 @@
                 @endforelse
 
             </div>
+
+
+            {{-- FOOTER --}}
+
+            @if(($suratMasukTerbaru ?? collect())->count() > 0)
+
+                <div class="border-t border-slate-100 bg-slate-50/50 px-4 py-3 sm:px-6">
+
+                    <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+
+                        <p class="text-center text-[9px] text-slate-400 sm:text-left sm:text-[10px]">
+
+                            Menampilkan
+
+                            <span class="font-bold text-slate-600">
+                                {{ ($suratMasukTerbaru ?? collect())->count() }}
+                            </span>
+
+                            surat masuk terbaru
+
+                        </p>
+
+
+                        <a
+                            href="{{ route('surat-masuk.index') }}"
+                            class="inline-flex items-center justify-center gap-1.5 text-[9px] font-bold text-blue-600 transition hover:text-blue-700 sm:text-[10px]"
+                        >
+
+                            Buka arsip surat masuk
+
+                            <svg
+                                class="h-3 w-3"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="M9 5l7 7-7 7"
+                                />
+                            </svg>
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            @endif
 
         </section>
 
@@ -1385,15 +1670,13 @@
 
     @else
 
-        {{-- ================================================================
-            STAFF SCORECARD
-        ================================================================= --}}
+        {{-- STAFF SCORECARD --}}
 
         <section>
 
             <div class="grid grid-cols-2 gap-3 sm:gap-4">
 
-                {{-- DISPOSISI MENUNGGU --}}
+                {{-- MENUNGGU --}}
 
                 <a
                     href="{{ route('disposisi.index', ['status' => ['menunggu']]) }}"
@@ -1466,7 +1749,7 @@
                 </a>
 
 
-                {{-- DISPOSISI SELESAI --}}
+                {{-- SELESAI --}}
 
                 <a
                     href="{{ route('disposisi.index', ['status' => ['selesai']]) }}"
@@ -1544,9 +1827,7 @@
         </section>
 
 
-        {{-- ================================================================
-            STAFF TASK LIST
-        ================================================================= --}}
+        {{-- STAFF TASK LIST --}}
 
         <section class="dashboard-panel overflow-hidden">
 
@@ -1597,8 +1878,6 @@
             </div>
 
 
-            {{-- TASK CONTENT --}}
-
             <div class="p-4 sm:p-6">
 
                 <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
@@ -1637,36 +1916,24 @@
                                 ];
 
 
-                            /*
-                             * TANGGAL SURAT
-                             *
-                             * Nomor agenda tidak digunakan.
-                             */
-                            $tanggalSurat =
-                                '-';
+                            $tanggalSurat = '-';
 
-                            if (
-                                $d->suratMasuk?->tanggal_surat
-                            ) {
+                            if ($d->suratMasuk?->tanggal_surat) {
 
                                 try {
 
                                     $tanggalSurat =
                                         \Illuminate\Support\Carbon::parse(
                                             $d->suratMasuk->tanggal_surat
-                                        )->format(
-                                            'd/m/Y'
-                                        );
+                                        )->format('d/m/Y');
 
-                                } catch (
-                                    \Throwable $e
-                                ) {
+                                } catch (\Throwable $e) {
 
                                     $tanggalSurat =
-                                        (string) (
-                                            $d->suratMasuk->tanggal_surat
-                                        );
+                                        (string) $d->suratMasuk->tanggal_surat;
+
                                 }
+
                             }
 
                         @endphp
@@ -1676,8 +1943,6 @@
                             href="{{ route('disposisi.show', $d->id) }}"
                             class="task-card group {{ $currentDisposisiConfig['border'] }}"
                         >
-
-                            {{-- TASK HEADER --}}
 
                             <div class="flex items-start gap-3">
 
@@ -1726,8 +1991,6 @@
 
                             </div>
 
-
-                            {{-- TASK INFORMATION --}}
 
                             <div class="mt-4 space-y-2.5">
 
@@ -1813,9 +2076,7 @@
                                         </span>
 
                                         <span class="block truncate text-[11px] font-bold text-slate-700">
-
                                             {{ $tanggalSurat }}
-
                                         </span>
 
                                     </div>
@@ -1829,24 +2090,20 @@
 
                                     @php
 
-                                        $batasWaktu =
-                                            '-';
+                                        $batasWaktu = '-';
 
                                         try {
 
                                             $batasWaktu =
                                                 \Illuminate\Support\Carbon::parse(
                                                     $d->batas_waktu
-                                                )->format(
-                                                    'd M Y'
-                                                );
+                                                )->format('d M Y');
 
-                                        } catch (
-                                            \Throwable $e
-                                        ) {
+                                        } catch (\Throwable $e) {
 
                                             $batasWaktu =
                                                 (string) $d->batas_waktu;
+
                                         }
 
                                     @endphp
@@ -1885,9 +2142,7 @@
                                             </span>
 
                                             <span class="block text-[11px] font-bold text-slate-700">
-
                                                 {{ $batasWaktu }}
-
                                             </span>
 
                                         </div>
@@ -1898,8 +2153,6 @@
 
                             </div>
 
-
-                            {{-- DETAIL --}}
 
                             <div class="mt-4 flex items-center justify-between border-t border-slate-100 pt-3">
 
@@ -1954,10 +2207,8 @@
 
 
                                 <p class="mt-1 max-w-sm text-center text-[10px] leading-relaxed text-slate-400">
-
                                     Saat ada disposisi baru yang diberikan kepada Anda,
                                     tugas tersebut akan tampil di halaman ini.
-
                                 </p>
 
                             </div>
@@ -1970,8 +2221,6 @@
 
             </div>
 
-
-            {{-- FOOTER --}}
 
             <div class="border-t border-slate-100 bg-slate-50/50 p-4 sm:p-5">
 
@@ -2039,175 +2288,105 @@
 
 
     .dashboard-action {
-
         display: flex;
-
         align-items: center;
-
         gap: .75rem;
-
         min-width: 230px;
-
         border-radius: 1rem;
-
         background: rgba(255, 255, 255, .96);
-
         padding: .7rem .8rem;
-
-        box-shadow:
-            0 10px 30px rgba(0, 0, 0, .12);
-
+        box-shadow: 0 10px 30px rgba(0, 0, 0, .12);
         transition:
             transform .2s ease,
             box-shadow .2s ease,
             background .2s ease;
-
     }
 
 
     .dashboard-action:hover {
-
         transform: translateY(-2px);
-
-        box-shadow:
-            0 15px 35px rgba(0, 0, 0, .18);
-
+        box-shadow: 0 15px 35px rgba(0, 0, 0, .18);
     }
 
 
     .dashboard-action-icon {
-
         display: flex;
-
         height: 2.5rem;
-
         width: 2.5rem;
-
         flex-shrink: 0;
-
         align-items: center;
-
         justify-content: center;
-
         border-radius: .8rem;
-
     }
 
 
     .stat-card {
-
         position: relative;
-
         display: block;
-
         overflow: hidden;
-
         border: 1px solid rgba(226, 232, 240, .9);
-
         border-radius: 1.25rem;
-
         background: #ffffff;
-
         padding: 1rem;
-
-        box-shadow:
-            0 4px 18px rgba(15, 23, 42, .045);
-
+        box-shadow: 0 4px 18px rgba(15, 23, 42, .045);
         transition:
             transform .2s ease,
             box-shadow .2s ease,
             border-color .2s ease;
-
     }
 
 
     .stat-card:hover {
-
         transform: translateY(-4px);
-
         border-color: rgba(148, 163, 184, .35);
-
-        box-shadow:
-            0 18px 40px rgba(15, 23, 42, .10);
-
+        box-shadow: 0 18px 40px rgba(15, 23, 42, .10);
     }
 
 
     .stat-color-bar {
-
         position: absolute;
-
         top: 0;
-
         bottom: 0;
-
         left: 0;
-
         width: 4px;
-
         border-radius: 0 4px 4px 0;
-
         opacity: .95;
-
     }
 
 
     .stat-label {
-
         display: block;
-
         font-size: 9px;
-
         font-weight: 800;
-
         text-transform: uppercase;
-
         letter-spacing: .08em;
-
         color: #94a3b8;
-
     }
 
 
     .stat-number {
-
         display: block;
-
         font-size: 1.65rem;
-
         line-height: 1;
-
         font-weight: 900;
-
         letter-spacing: -.04em;
-
         color: #0f172a;
-
     }
 
 
     .stat-icon {
-
         display: flex;
-
         height: 2.75rem;
-
         width: 2.75rem;
-
         flex-shrink: 0;
-
         align-items: center;
-
         justify-content: center;
-
         border-radius: .9rem;
-
         transition:
             background .2s ease,
             color .2s ease,
             transform .2s ease,
             box-shadow .2s ease;
-
     }
 
 
@@ -2217,129 +2396,76 @@
 
 
     .stat-icon-blue {
-
         background: #eff6ff;
-
         color: #2563eb;
-
-        box-shadow:
-            0 0 0 1px #dbeafe;
-
+        box-shadow: 0 0 0 1px #dbeafe;
     }
 
 
     .stat-card-blue:hover .stat-icon-blue {
-
         background: #2563eb;
-
         color: #ffffff;
-
-        box-shadow:
-            0 8px 20px rgba(37, 99, 235, .25);
-
+        box-shadow: 0 8px 20px rgba(37, 99, 235, .25);
     }
 
 
     .stat-icon-emerald {
-
         background: #ecfdf5;
-
         color: #059669;
-
-        box-shadow:
-            0 0 0 1px #d1fae5;
-
+        box-shadow: 0 0 0 1px #d1fae5;
     }
 
 
     .stat-card-emerald:hover .stat-icon-emerald {
-
         background: #059669;
-
         color: #ffffff;
-
-        box-shadow:
-            0 8px 20px rgba(5, 150, 105, .25);
-
+        box-shadow: 0 8px 20px rgba(5, 150, 105, .25);
     }
 
 
     .stat-icon-amber {
-
         background: #fffbeb;
-
         color: #d97706;
-
-        box-shadow:
-            0 0 0 1px #fef3c7;
-
+        box-shadow: 0 0 0 1px #fef3c7;
     }
 
 
     .stat-card-amber:hover .stat-icon-amber {
-
         background: #f59e0b;
-
         color: #ffffff;
-
-        box-shadow:
-            0 8px 20px rgba(245, 158, 11, .25);
-
+        box-shadow: 0 8px 20px rgba(245, 158, 11, .25);
     }
 
 
     .stat-icon-teal {
-
         background: #f0fdfa;
-
         color: #0d9488;
-
-        box-shadow:
-            0 0 0 1px #ccfbf1;
-
+        box-shadow: 0 0 0 1px #ccfbf1;
     }
 
 
     .stat-card-teal:hover .stat-icon-teal {
-
         background: #0d9488;
-
         color: #ffffff;
-
-        box-shadow:
-            0 8px 20px rgba(13, 148, 136, .25);
-
+        box-shadow: 0 8px 20px rgba(13, 148, 136, .25);
     }
 
 
     .stat-pill {
-
         display: inline-flex;
-
         align-items: center;
-
         border-radius: .55rem;
-
         padding: .3rem .55rem;
-
         font-size: 9px;
-
         font-weight: 800;
-
     }
 
 
     .stat-arrow {
-
         font-size: .9rem;
-
         font-weight: 800;
-
         opacity: .7;
-
-        transition:
-            transform .2s ease;
-
+        transition: transform .2s ease;
     }
 
 
@@ -2349,123 +2475,75 @@
 
 
     .dashboard-panel {
-
         border: 1px solid rgba(226, 232, 240, .85);
-
         border-radius: 1.25rem;
-
         background: #ffffff;
-
-        box-shadow:
-            0 4px 18px rgba(15, 23, 42, .04);
-
+        box-shadow: 0 4px 18px rgba(15, 23, 42, .04);
     }
 
 
     .section-eyebrow {
-
         display: inline-block;
-
         font-size: 9px;
-
         font-weight: 800;
-
         text-transform: uppercase;
-
         letter-spacing: .12em;
-
         color: #94a3b8;
-
-    }
-
-
-    .table-heading {
-
-        padding: .75rem 1.5rem;
-
-        font-size: 9px;
-
-        font-weight: 800;
-
-        text-transform: uppercase;
-
-        letter-spacing: .08em;
-
-        color: #94a3b8;
-
-    }
-
-
-    .table-cell {
-
-        padding: .9rem 1.5rem;
-
-        font-size: .75rem;
-
-        color: #475569;
-
     }
 
 
     .task-card {
-
         position: relative;
-
         display: block;
-
         border: 1px solid rgba(226, 232, 240, .9);
-
         border-left-width: 4px;
-
         border-radius: 1rem;
-
         background: #ffffff;
-
         padding: 1rem;
-
-        box-shadow:
-            0 3px 15px rgba(15, 23, 42, .035);
-
+        box-shadow: 0 3px 15px rgba(15, 23, 42, .035);
         transition:
             transform .2s ease,
             box-shadow .2s ease,
             background .2s ease;
-
     }
 
 
     .task-card:hover {
-
         transform: translateY(-3px);
-
         background: #fcfdff;
-
-        box-shadow:
-            0 14px 30px rgba(15, 23, 42, .08);
-
+        box-shadow: 0 14px 30px rgba(15, 23, 42, .08);
     }
 
 
     .empty-state {
-
         display: flex;
-
         flex-direction: column;
-
         align-items: center;
-
         justify-content: center;
-
         min-height: 220px;
-
         border: 1px dashed #e2e8f0;
-
         border-radius: 1rem;
-
         background: rgba(248, 250, 252, .65);
-
         padding: 2rem;
+    }
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | RECENT LETTER
+    |--------------------------------------------------------------------------
+    */
+
+    .recent-letter-row {
+        position: relative;
+        transition:
+            background-color .2s ease,
+            transform .2s ease;
+    }
+
+
+    .recent-letter-row:hover {
+        background-color: #f8fafc;
     }
 
 
@@ -2494,38 +2572,26 @@
     @media (max-width: 639px) {
 
         .dashboard-action {
-
             min-width: 0;
-
             width: 100%;
-
         }
 
 
         .stat-card {
-
             min-height: 145px;
-
         }
 
 
         .stat-number {
-
             font-size: 1.5rem;
-
         }
 
 
         .stat-pill {
-
             max-width: 100%;
-
             overflow: hidden;
-
             text-overflow: ellipsis;
-
             white-space: nowrap;
-
         }
 
     }
@@ -2539,11 +2605,8 @@
         .task-card,
         .stat-icon,
         .stat-arrow {
-
             animation: none !important;
-
             transition: none !important;
-
         }
 
     }
