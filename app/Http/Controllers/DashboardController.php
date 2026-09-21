@@ -29,6 +29,7 @@ class DashboardController extends Controller
          * NORMALISASI ROLE
          * ==========================================================
          */
+
         $role = strtolower(
             trim(
                 (string) (
@@ -55,6 +56,7 @@ class DashboardController extends Controller
          * DEFAULT DATA
          * ==========================================================
          */
+
         $totalSuratMasuk = 0;
         $totalSuratKeluar = 0;
         $suratPending = 0;
@@ -65,6 +67,13 @@ class DashboardController extends Controller
 
         $listDisposisi = collect();
         $suratMasukTerbaru = collect();
+
+        /*
+         * Default riwayat surat keluar.
+         *
+         * Dibuat sebagai collection kosong supaya Blade tetap aman
+         * terutama ketika user yang login adalah staf.
+         */
         $riwayatSuratKeluar = collect();
 
         $chartLabels = [];
@@ -79,6 +88,7 @@ class DashboardController extends Controller
          * Staf hanya melihat disposisi yang ditujukan
          * kepada akun staf yang sedang login.
          */
+
         if ($isStaf) {
 
             /*
@@ -86,6 +96,7 @@ class DashboardController extends Controller
              * QUERY DASAR DISPOSISI
              * ======================================================
              */
+
             $disposisiDasar = Disposisi::query()
                 ->where(
                     'kepada_user_id',
@@ -97,6 +108,7 @@ class DashboardController extends Controller
              * DISPOSISI MENUNGGU
              * ======================================================
              */
+
             $disposisiMenunggu =
                 (clone $disposisiDasar)
                     ->whereRaw(
@@ -110,6 +122,7 @@ class DashboardController extends Controller
              * DISPOSISI SELESAI
              * ======================================================
              */
+
             $disposisiSelesai =
                 (clone $disposisiDasar)
                     ->whereRaw(
@@ -122,15 +135,8 @@ class DashboardController extends Controller
              * ======================================================
              * DAFTAR DISPOSISI UNTUK STAFF
              * ======================================================
-             *
-             * Relasi suratMasuk WAJIB dimuat karena Blade
-             * dashboard akan mengambil:
-             *
-             * $disposisi->suratMasuk->tanggal_surat
-             *
-             * Jadi dashboard dapat menampilkan TANGGAL SURAT
-             * sebagai pengganti NOMOR AGENDA.
              */
+
             $listDisposisi =
                 Disposisi::query()
                     ->with([
@@ -160,9 +166,10 @@ class DashboardController extends Controller
              * RETURN DASHBOARD STAFF
              * ======================================================
              *
-             * Riwayat surat keluar tetap dikirim sebagai collection
-             * kosong agar Blade aman apabila variabel digunakan.
+             * Riwayat surat keluar dikirim kosong karena staf
+             * tidak menampilkan dashboard Admin/Pimpinan.
              */
+
             return view(
                 'dashboard.index',
                 compact(
@@ -187,8 +194,6 @@ class DashboardController extends Controller
          * ==========================================================
          * DASHBOARD ADMIN / PIMPINAN
          * ==========================================================
-         *
-         * Admin dan pimpinan menampilkan statistik surat.
          */
 
         /*
@@ -196,6 +201,7 @@ class DashboardController extends Controller
          * TOTAL SURAT MASUK
          * ==========================================================
          */
+
         $totalSuratMasuk =
             SuratMasuk::query()
                 ->count();
@@ -205,6 +211,7 @@ class DashboardController extends Controller
          * TOTAL SURAT KELUAR
          * ==========================================================
          */
+
         $totalSuratKeluar =
             SuratKeluar::query()
                 ->count();
@@ -214,6 +221,7 @@ class DashboardController extends Controller
          * SURAT BELUM DIPROSES
          * ==========================================================
          */
+
         $suratPending =
             SuratMasuk::query()
                 ->whereRaw(
@@ -227,6 +235,7 @@ class DashboardController extends Controller
          * SURAT SELESAI
          * ==========================================================
          */
+
         $suratSelesai =
             SuratMasuk::query()
                 ->whereRaw(
@@ -243,9 +252,8 @@ class DashboardController extends Controller
          * Pengurutan:
          * 1. tanggal_terima terbaru
          * 2. created_at terbaru
-         *
-         * Relasi kategori digunakan oleh dashboard.
          */
+
         $suratMasukTerbaru =
             SuratMasuk::query()
                 ->with('kategori')
@@ -263,24 +271,29 @@ class DashboardController extends Controller
          * RIWAYAT SURAT KELUAR TERBARU
          * ==========================================================
          *
-         * ActivityLog sudah digunakan oleh SuratKeluarController.
-         * Module untuk surat keluar adalah:
+         * Struktur tabel activity_logs Anda:
          *
-         * surat_keluar
+         * id
+         * user_id
+         * aktivitas
+         * modul
+         * deskripsi
+         * created_at
+         * updated_at
          *
-         * Riwayat diambil berdasarkan aktivitas terbaru.
+         * Jadi filter WAJIB menggunakan:
          *
-         * Activity yang saat ini sudah dicatat oleh
-         * SuratKeluarController antara lain:
-         * - create
-         * - update
-         * - delete
-         * - log
+         * modul = surat_keluar
+         *
+         * BUKAN:
+         *
+         * module = surat_keluar
          */
+
         $riwayatSuratKeluar =
             ActivityLog::query()
                 ->where(
-                    'module',
+                    'modul',
                     'surat_keluar'
                 )
                 ->orderByDesc(
@@ -297,6 +310,7 @@ class DashboardController extends Controller
          * GRAFIK 12 BULAN TERAKHIR
          * ==========================================================
          */
+
         $startMonth =
             Carbon::now()
                 ->startOfMonth()
@@ -310,9 +324,8 @@ class DashboardController extends Controller
          * ==========================================================
          * SURAT MASUK PER BULAN
          * ==========================================================
-         *
-         * Menggunakan tanggal_terima.
          */
+
         $masukPerBulan =
             SuratMasuk::query()
                 ->selectRaw(
@@ -358,9 +371,8 @@ class DashboardController extends Controller
          * ==========================================================
          * SURAT KELUAR PER BULAN
          * ==========================================================
-         *
-         * Menggunakan tanggal_surat.
          */
+
         $keluarPerBulan =
             SuratKeluar::query()
                 ->selectRaw(
@@ -407,6 +419,7 @@ class DashboardController extends Controller
          * NAMA BULAN
          * ==========================================================
          */
+
         $namaBulan = [
             1 => 'Jan',
             2 => 'Feb',
@@ -427,6 +440,7 @@ class DashboardController extends Controller
          * SUSUN DATA GRAFIK
          * ==========================================================
          */
+
         for (
             $i = 0;
             $i < 12;
@@ -466,6 +480,7 @@ class DashboardController extends Controller
          * RETURN DASHBOARD ADMIN / PIMPINAN
          * ==========================================================
          */
+
         return view(
             'dashboard.index',
             compact(
