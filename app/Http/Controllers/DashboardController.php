@@ -67,13 +67,6 @@ class DashboardController extends Controller
 
         $listDisposisi = collect();
         $suratMasukTerbaru = collect();
-
-        /*
-         * Default riwayat surat keluar.
-         *
-         * Dibuat sebagai collection kosong supaya Blade tetap aman
-         * terutama ketika user yang login adalah staf.
-         */
         $riwayatSuratKeluar = collect();
 
         $chartLabels = [];
@@ -165,9 +158,6 @@ class DashboardController extends Controller
              * ======================================================
              * RETURN DASHBOARD STAFF
              * ======================================================
-             *
-             * Riwayat surat keluar dikirim kosong karena staf
-             * tidak menampilkan dashboard Admin/Pimpinan.
              */
 
             return view(
@@ -248,10 +238,6 @@ class DashboardController extends Controller
          * ==========================================================
          * SURAT MASUK TERBARU
          * ==========================================================
-         *
-         * Pengurutan:
-         * 1. tanggal_terima terbaru
-         * 2. created_at terbaru
          */
 
         $suratMasukTerbaru =
@@ -271,7 +257,7 @@ class DashboardController extends Controller
          * RIWAYAT SURAT KELUAR TERBARU
          * ==========================================================
          *
-         * Struktur tabel activity_logs Anda:
+         * Struktur activity_logs:
          *
          * id
          * user_id
@@ -281,29 +267,112 @@ class DashboardController extends Controller
          * created_at
          * updated_at
          *
-         * Jadi filter WAJIB menggunakan:
+         * Tidak ada kolom surat_keluar_id.
          *
-         * modul = surat_keluar
+         * Karena itu ID surat keluar dibaca dari deskripsi aktivitas,
+         * contohnya:
          *
-         * BUKAN:
+         * "Menambahkan surat keluar #9"
+         * "Mengubah surat keluar #9"
+         * "Menghapus surat keluar #9"
          *
-         * module = surat_keluar
+         * Hanya aktivitas yang ID suratnya masih ada di tabel
+         * surat_keluar yang akan ditampilkan.
          */
 
-        $riwayatSuratKeluar =
-            ActivityLog::query()
-                ->where(
-                    'modul',
-                    'surat_keluar'
+        /*
+         * Ambil seluruh ID surat keluar yang masih ada.
+         *
+         * Surat yang sudah dihapus/soft deleted tidak masuk
+         * ke query ini apabila model SuratKeluar menggunakan
+         * SoftDeletes.
+         */
+
+        $suratKeluarIds =
+            SuratKeluar::query()
+                ->pluck('id')
+                ->map(
+                    function ($id) {
+                        return (int) $id;
+                    }
                 )
-                ->orderByDesc(
-                    'created_at'
-                )
-                ->orderByDesc(
-                    'id'
-                )
-                ->limit(5)
-                ->get();
+                ->filter()
+                ->values();
+
+        /*
+         * Default kosong.
+         */
+
+        $riwayatSuratKeluar = collect();
+
+        /*
+         * Hanya lakukan query ActivityLog jika masih ada
+         * surat keluar aktif.
+         */
+
+        if ($suratKeluarIds->isNotEmpty()) {
+
+            /*
+             * Bentuk pola REGEXP.
+             *
+             * Contoh apabila ID aktif:
+             *
+             * 9, 10, 12
+             *
+             * menjadi:
+             *
+             * (^|[^0-9])#(9|10|12)([^0-9]|$)
+             *
+             * Dengan pembatas angka ini:
+             *
+             * #9
+             *
+             * tidak akan salah dianggap sebagai:
+             *
+             * #90
+             * #91
+             * #99
+             */
+
+            $idAlternatives =
+                $suratKeluarIds
+                    ->implode('|');
+
+            $activityPattern =
+                '(^|[^0-9])#(' .
+                $idAlternatives .
+                ')([^0-9]|$)';
+
+            /*
+             * Ambil aktivitas hanya dari modul surat_keluar
+             * dan hanya jika deskripsinya mengandung ID surat
+             * yang masih aktif.
+             */
+
+            $riwayatSuratKeluar =
+                ActivityLog::query()
+                    ->where(
+                        'modul',
+                        'surat_keluar'
+                    )
+                    ->whereNotNull(
+                        'deskripsi'
+                    )
+                    ->whereRaw(
+                        'deskripsi REGEXP ?',
+                        [
+                            $activityPattern
+                        ]
+                    )
+                    ->orderByDesc(
+                        'created_at'
+                    )
+                    ->orderByDesc(
+                        'id'
+                    )
+                    ->limit(5)
+                    ->get();
+        }
 
         /*
          * ==========================================================
