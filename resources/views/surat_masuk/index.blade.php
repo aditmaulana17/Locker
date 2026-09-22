@@ -430,6 +430,50 @@
         0 12px 25px
         rgba(37,99,235,.25);
 }
+.surat-header-actions{
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    gap:8px;
+    flex-wrap:wrap;
+}
+.surat-export-button{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    min-height:40px;
+    padding:0 13px;
+    border:1px solid #dbe4f0;
+    border-radius:10px;
+    background:#fff;
+    color:#475569;
+    font-size:11px;
+    font-weight:700;
+    line-height:1;
+    text-decoration:none;
+    box-shadow:0 2px 8px rgba(15,23,42,.035);
+    transition:background .15s ease,border-color .15s ease,color .15s ease,transform .15s ease;
+}
+.surat-export-button:hover{
+    transform:translateY(-1px);
+}
+.surat-export-button.excel:hover{
+    border-color:#a7f3d0;
+    background:#ecfdf5;
+    color:#047857;
+}
+.surat-export-button.pdf:hover{
+    border-color:#fecdd3;
+    background:#fff1f2;
+    color:#be123c;
+}
+.surat-header-actions .surat-create-button{
+    min-height:40px;
+    padding:0 13px;
+    font-size:11px;
+    gap:6px;
+}
 /* ==========================================================================
    SCORECARD
    ========================================================================== */
@@ -1627,8 +1671,18 @@
     .surat-page-header-left{
         width:100%;
     }
-    .surat-create-button{
+    .surat-header-actions{
         width:100%;
+        gap:6px;
+        flex-wrap:nowrap;
+    }
+    .surat-header-actions .surat-export-button,
+    .surat-header-actions .surat-create-button{
+        flex:1 1 0;
+        width:auto;
+        min-width:0;
+        padding:0 9px;
+        font-size:10px;
     }
     .surat-page-title{
         font-size:24px;
@@ -1791,13 +1845,15 @@
                 </p>
             </div>
         </div>
-        @if($canManage)
+        <div class="surat-header-actions">
             <a
-                href="{{ route('surat-masuk.create') }}"
-                class="surat-create-button"
+                href="{{ route('export.surat-masuk.excel', $exportQuery) }}"
+                class="surat-export-button excel"
+                title="Export Excel"
+                aria-label="Export Excel"
             >
                 <svg
-                    class="h-5 w-5"
+                    class="h-4 w-4"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -1807,12 +1863,60 @@
                         stroke-linecap="round"
                         stroke-linejoin="round"
                         stroke-width="2"
-                        d="M12 4v16m8-8H4"
+                        d="M4 4h16v16H4zM8 8l8 8m0-8l-8 8"
                     />
                 </svg>
-                Surat Masuk
+                Excel
             </a>
-        @endif
+            <a
+                href="{{ route('export.surat-masuk.pdf', $exportQuery) }}"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="surat-export-button pdf"
+                title="Export PDF"
+                aria-label="Export PDF"
+            >
+                <svg
+                    class="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M7 3h7l4 4v14H7a2 2 0 01-2-2V5a2 2 0 012-2zm7 0v5h5"
+                    />
+                </svg>
+                PDF
+            </a>
+            @if($canManage)
+                <a
+                    href="{{ route('surat-masuk.create') }}"
+                    class="surat-create-button"
+                    title="Tambah Surat Masuk"
+                    aria-label="Tambah Surat Masuk"
+                >
+                    <svg
+                        class="h-4 w-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M12 4v16m8-8H4"
+                        />
+                    </svg>
+                    Surat Masuk
+                </a>
+            @endif
+        </div>
     </div>
     {{-- =====================================================================
          SCORECARD
