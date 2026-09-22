@@ -1071,7 +1071,6 @@
 .surat-filter-submit:hover{border-color:#94a3b8;background:#f8fafc;color:#1e293b;}
 .surat-filter-submit.has-filter{border-color:#bfdbfe;background:#eff6ff;color:#2563eb;}
 .surat-filter-submit:focus{outline:none;box-shadow:0 0 0 3px rgba(59,130,246,.10);}
-.surat-filter-chevron,.surat-date-chevron{flex:0 0 auto;}
 .surat-filter-reset{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border:1px solid #d6e0ec;border-radius:10px;background:#fff;color:#64748b;text-decoration:none;transition:background .15s ease,border-color .15s ease,color .15s ease;}
 .surat-filter-reset:hover{border-color:#fecdd3;background:#fff1f2;color:#e11d48;}
 .surat-date-wrapper{position:relative;min-width:0;}
@@ -1602,9 +1601,6 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707v3.414L9 14V9.707a1 1 0 00-.293-.707L3.293 6.293A1 1 0 013 5.586V4z" />
                         </svg>
                         <span>Filter</span>
-                        <svg class="surat-filter-chevron h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 9l6 6l6-6" />
-                        </svg>
                     </button>
                     @if($hasFilters)
                         <a href="{{ route('surat-keluar.index') }}" title="Reset Filter" aria-label="Reset Filter" class="surat-filter-reset">
@@ -1622,9 +1618,6 @@
                             </svg>
                         </div>
                         <input type="text" id="date-range" value="{{ $visibleDateRange }}" readonly autocomplete="off" placeholder="Rentang tanggal" class="surat-date-input" aria-label="Pilih rentang tanggal">
-                        <svg class="surat-date-chevron h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 9l6 6l6-6" />
-                        </svg>
                         <button type="button" id="clearDateRange" class="surat-date-clear {{ $visibleDateRange ? 'is-visible' : '' }}" title="Hapus rentang tanggal" aria-label="Hapus rentang tanggal">
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
