@@ -5,7 +5,6 @@
 @section('content')
 
 @php
-    use Illuminate\Support\Carbon;
 
     /*
     |--------------------------------------------------------------------------
@@ -38,20 +37,20 @@
         true
     );
 
+
     /*
     |--------------------------------------------------------------------------
-    | KATEGORI
+    | KATEGORI FILTER
     |--------------------------------------------------------------------------
     */
 
-    $rawKategori =
+    $rawKategori = request(
+        'kategori_id',
         request(
-            'kategori_id',
-            request(
-                'kategori_surat_id',
-                []
-            )
-        );
+            'kategori_surat_id',
+            []
+        )
+    );
 
     if (
         is_scalar($rawKategori) &&
@@ -84,6 +83,7 @@
         ->values()
         ->all();
 
+
     /*
     |--------------------------------------------------------------------------
     | STATUS
@@ -91,6 +91,7 @@
     */
 
     $statusOptions = [
+
         'draft' =>
             'Draf',
 
@@ -105,13 +106,14 @@
 
         'diarsipkan' =>
             'Diarsipkan',
+
     ];
 
-    $rawStatuses =
-        request(
-            'status',
-            []
-        );
+
+    $rawStatuses = request(
+        'status',
+        []
+    );
 
     if (
         is_scalar($rawStatuses) &&
@@ -136,6 +138,7 @@
         )
         ->map(
             function ($status) {
+
                 $status = strtolower(
                     trim(
                         (string) $status
@@ -158,13 +161,15 @@
         ->values()
         ->all();
 
+
     /*
     |--------------------------------------------------------------------------
-    | BADGE STATUS
+    | STATUS BADGE
     |--------------------------------------------------------------------------
     */
 
     $statusBadgeClasses = [
+
         'draft' =>
             'bg-slate-50 text-slate-700 border-slate-200',
 
@@ -179,7 +184,9 @@
 
         'diarsipkan' =>
             'bg-purple-50 text-purple-700 border-purple-200',
+
     ];
+
 
     /*
     |--------------------------------------------------------------------------
@@ -196,34 +203,45 @@
     $visibleDateRange = '';
 
     try {
+
         if (
             $dariTanggal &&
             $sampaiTanggal
         ) {
+
             $visibleDateRange =
-                Carbon::parse(
+                \Illuminate\Support\Carbon::parse(
                     $dariTanggal
                 )->format('d/m/Y')
                 .
                 ' - '
                 .
-                Carbon::parse(
+                \Illuminate\Support\Carbon::parse(
                     $sampaiTanggal
                 )->format('d/m/Y');
+
         } elseif ($dariTanggal) {
+
             $visibleDateRange =
-                Carbon::parse(
+                \Illuminate\Support\Carbon::parse(
                     $dariTanggal
                 )->format('d/m/Y');
+
         } elseif ($sampaiTanggal) {
+
             $visibleDateRange =
-                Carbon::parse(
+                \Illuminate\Support\Carbon::parse(
                     $sampaiTanggal
                 )->format('d/m/Y');
+
         }
+
     } catch (\Throwable $e) {
+
         $visibleDateRange = '';
+
     }
+
 
     /*
     |--------------------------------------------------------------------------
@@ -242,13 +260,11 @@
         ||
         request()->filled('sampai_tanggal');
 
+
     /*
     |--------------------------------------------------------------------------
-    | PARAMETER EXPORT
+    | EXPORT FILTER
     |--------------------------------------------------------------------------
-    |
-    | Hanya parameter filter yang diperlukan.
-    |
     */
 
     $exportFilters = [];
@@ -262,19 +278,28 @@
         );
 
     if ($searchValue !== '') {
+
         $exportFilters['search'] =
             $searchValue;
+
     }
+
 
     if (!empty($selectedKategori)) {
+
         $exportFilters['kategori_id'] =
             $selectedKategori;
+
     }
 
+
     if (!empty($selectedStatus)) {
+
         $exportFilters['status'] =
             $selectedStatus;
+
     }
+
 
     if (
         is_scalar($dariTanggal) &&
@@ -283,9 +308,12 @@
             (string) $dariTanggal
         )
     ) {
+
         $exportFilters['dari_tanggal'] =
             $dariTanggal;
+
     }
+
 
     if (
         is_scalar($sampaiTanggal) &&
@@ -294,13 +322,194 @@
             (string) $sampaiTanggal
         )
     ) {
+
         $exportFilters['sampai_tanggal'] =
             $sampaiTanggal;
+
     }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | SCORECARD
+    |--------------------------------------------------------------------------
+    |
+    | Scorecard dihitung dari seluruh data surat keluar.
+    | Tidak terpengaruh search/filter/pagination.
+    |
+    */
+
+    $suratKeluarStatistics =
+        \App\Models\SuratKeluar::query()
+            ->selectRaw(
+                'COUNT(*) AS total_suratan'
+            )
+            ->selectRaw(
+                "SUM(
+                    CASE
+                        WHEN status IN ('draft', 'draf')
+                        THEN 1
+                        ELSE 0
+                    END
+                ) AS draft_suratan"
+            )
+            ->selectRaw(
+                "SUM(
+                    CASE
+                        WHEN status = 'diproses'
+                        THEN 1
+                        ELSE 0
+                    END
+                ) AS diproses_suratan"
+            )
+            ->selectRaw(
+                "SUM(
+                    CASE
+                        WHEN status = 'dikirim'
+                        THEN 1
+                        ELSE 0
+                    END
+                ) AS dikirim_suratan"
+            )
+            ->first();
+
+
+    $totalSuratKeluar =
+        (int) (
+            $suratKeluarStatistics->total_suratan
+            ?? 0
+        );
+
+    $suratDraft =
+        (int) (
+            $suratKeluarStatistics->draft_suratan
+            ?? 0
+        );
+
+    $suratDiproses =
+        (int) (
+            $suratKeluarStatistics->diproses_suratan
+            ?? 0
+        );
+
+    $suratDikirim =
+        (int) (
+            $suratKeluarStatistics->dikirim_suratan
+            ?? 0
+        );
+
 @endphp
 
+
 @push('styles')
+
 <style>
+
+/* =========================================================
+   SCORECARD
+========================================================= */
+
+.surat-keluar-summary {
+    display: grid;
+    grid-template-columns:
+        repeat(
+            4,
+            minmax(0, 1fr)
+        );
+
+    gap: 14px;
+}
+
+.surat-keluar-summary-card {
+    position: relative;
+    display: flex;
+    min-width: 0;
+    min-height: 94px;
+    align-items: center;
+    gap: 13px;
+    overflow: hidden;
+    padding: 17px;
+    border: 1px solid #e2e8f0;
+    border-radius: 15px;
+    background: #ffffff;
+    box-shadow:
+        0 3px 12px rgba(15,23,42,.04);
+}
+
+.surat-keluar-summary-card::after {
+    content: '';
+    position: absolute;
+    right: -18px;
+    bottom: -18px;
+    width: 68px;
+    height: 68px;
+    border-radius: 999px;
+    background: rgba(248,250,252,.85);
+    pointer-events: none;
+}
+
+.surat-keluar-summary-icon {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    width: 47px;
+    min-width: 47px;
+    height: 47px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+}
+
+.surat-keluar-summary-icon.blue {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.surat-keluar-summary-icon.slate {
+    background: #f1f5f9;
+    color: #64748b;
+}
+
+.surat-keluar-summary-icon.amber {
+    background: #fffbeb;
+    color: #d97706;
+}
+
+.surat-keluar-summary-icon.green {
+    background: #ecfdf5;
+    color: #059669;
+}
+
+.surat-keluar-summary-content {
+    position: relative;
+    z-index: 1;
+    min-width: 0;
+}
+
+.surat-keluar-summary-label {
+    margin: 0 0 4px;
+    color: #64748b;
+    font-size: 10px;
+    line-height: 1.4;
+    font-weight: 700;
+}
+
+.surat-keluar-summary-value {
+    margin: 0;
+    color: #0f172a;
+    font-size: 25px;
+    line-height: 1;
+    font-weight: 800;
+}
+
+.surat-keluar-summary-note {
+    margin-top: 5px;
+    color: #94a3b8;
+    font-size: 9px;
+    line-height: 1.35;
+}
+
+
 /* =========================================================
    DATE PICKER
 ========================================================= */
@@ -318,8 +527,8 @@
     border: 2px solid #64748b;
     background: #ffffff;
     box-shadow:
-        0 24px 70px rgba(15, 23, 42, .18),
-        0 8px 25px rgba(15, 23, 42, .08);
+        0 24px 70px rgba(15,23,42,.18),
+        0 8px 25px rgba(15,23,42,.08);
 }
 
 .custom-date-picker {
@@ -409,10 +618,10 @@
 
 .custom-calendar-nav {
     display: inline-flex;
-    align-items: center;
-    justify-content: center;
     width: 34px;
     height: 34px;
+    align-items: center;
+    justify-content: center;
     flex: 0 0 34px;
     border: 0;
     border-radius: 9px;
@@ -476,9 +685,9 @@
 
 .custom-calendar-weekday {
     display: flex;
+    height: 27px;
     align-items: center;
     justify-content: center;
-    height: 27px;
     color: #94a3b8;
     font-size: 10px;
     font-weight: 800;
@@ -487,9 +696,9 @@
 
 .custom-calendar-day {
     display: flex;
+    height: 36px;
     align-items: center;
     justify-content: center;
-    height: 36px;
     border: 0;
     border-radius: 8px;
     background: transparent;
@@ -654,9 +863,9 @@
 
 .custom-picker-option {
     display: flex;
+    min-height: 40px;
     align-items: center;
     justify-content: center;
-    min-height: 40px;
     padding: 0 6px;
     border: 1px solid #cbd5e1;
     border-radius: 9px;
@@ -666,10 +875,6 @@
     font-size: 10px;
     font-weight: 700;
     cursor: pointer;
-    transition:
-        background-color .15s ease,
-        border-color .15s ease,
-        color .15s ease;
 }
 
 .custom-picker-option:hover {
@@ -689,16 +894,18 @@
         inset 0 0 0 1px #93c5fd;
 }
 
+
 /* =========================================================
    FILTER DROPDOWN
 ========================================================= */
 
 .filter-row {
     display: grid;
-    grid-template-columns: repeat(
-        2,
-        minmax(0, 1fr)
-    );
+    grid-template-columns:
+        repeat(
+            2,
+            minmax(0, 1fr)
+        );
     gap: 10px;
 }
 
@@ -714,7 +921,7 @@
     align-items: center;
     gap: 10px;
     padding: 8px 12px;
-    border: 2px solid #94a3b8;
+    border: 1px solid #cbd5e1;
     border-radius: 12px;
     background: #ffffff;
     color: #334155;
@@ -727,7 +934,7 @@
 }
 
 .filter-dropdown-trigger:hover {
-    border-color: #64748b;
+    border-color: #94a3b8;
     background: #f8fafc;
 }
 
@@ -793,7 +1000,6 @@
     margin-top: 2px;
     color: #94a3b8;
     font-size: 9px;
-    font-weight: 500;
 }
 
 .filter-dropdown-count {
@@ -849,7 +1055,7 @@
     z-index: 10020;
     display: none;
     overflow: hidden;
-    border: 2px solid #64748b;
+    border: 1px solid #cbd5e1;
     border-radius: 12px;
     background: #ffffff;
     box-shadow:
@@ -867,7 +1073,7 @@
     justify-content: space-between;
     gap: 8px;
     padding: 10px 12px;
-    border-bottom: 2px solid #cbd5e1;
+    border-bottom: 1px solid #e2e8f0;
     background: #f8fafc;
 }
 
@@ -937,27 +1143,15 @@
 
 .filter-dropdown-options {
     display: grid;
-    grid-template-columns: repeat(
-        2,
-        minmax(0, 1fr)
-    );
+    grid-template-columns:
+        repeat(
+            2,
+            minmax(0, 1fr)
+        );
     gap: 7px;
     max-height: 260px;
     overflow-y: auto;
     padding: 10px;
-}
-
-.filter-dropdown-options::-webkit-scrollbar {
-    width: 5px;
-}
-
-.filter-dropdown-options::-webkit-scrollbar-track {
-    background: #f8fafc;
-}
-
-.filter-dropdown-options::-webkit-scrollbar-thumb {
-    border-radius: 999px;
-    background: #94a3b8;
 }
 
 .filter-dropdown-option {
@@ -967,7 +1161,7 @@
     align-items: center;
     gap: 8px;
     padding: 7px 9px;
-    border: 1.5px solid #94a3b8;
+    border: 1px solid #cbd5e1;
     border-radius: 9px;
     background: #ffffff;
     cursor: pointer;
@@ -977,12 +1171,12 @@
 }
 
 .filter-dropdown-option:hover {
-    border-color: #2563eb;
+    border-color: #93c5fd;
     background: #eff6ff;
 }
 
 .filter-dropdown-option.status-option:hover {
-    border-color: #d97706;
+    border-color: #fbbf24;
     background: #fffbeb;
 }
 
@@ -1036,7 +1230,7 @@
     justify-content: space-between;
     gap: 8px;
     padding: 8px 12px;
-    border-top: 2px solid #cbd5e1;
+    border-top: 1px solid #e2e8f0;
 }
 
 .filter-dropdown-footer-count {
@@ -1050,19 +1244,20 @@
     font-size: 9px;
 }
 
+
 /* =========================================================
-   SEARCH
+   SEARCH / DATE
 ========================================================= */
 
 #search,
 #date-range {
-    border: 2px solid #94a3b8 !important;
+    border: 1px solid #cbd5e1 !important;
     background: #ffffff !important;
 }
 
 #search:hover,
 #date-range:hover {
-    border-color: #64748b !important;
+    border-color: #94a3b8 !important;
 }
 
 #search:focus,
@@ -1070,9 +1265,10 @@
     border-color: #2563eb !important;
     background: #ffffff !important;
     box-shadow:
-        0 0 0 3px rgba(37,99,235,.12) !important;
+        0 0 0 3px rgba(37,99,235,.10) !important;
     outline: none !important;
 }
+
 
 /* =========================================================
    TABLE
@@ -1080,12 +1276,11 @@
 
 .archive-table-wrapper {
     overflow: hidden;
-    border: 2px solid #64748b;
-    border-radius: 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 15px;
     background: #ffffff;
     box-shadow:
-        0 1px 3px rgba(15,23,42,.06),
-        0 8px 24px rgba(15,23,42,.04);
+        0 3px 12px rgba(15,23,42,.04);
 }
 
 .archive-table-scroll {
@@ -1101,18 +1296,18 @@
 }
 
 .archive-table thead {
-    background: #e2e8f0;
+    background: #f8fafc;
 }
 
 .archive-table thead tr {
-    border-bottom: 2px solid #475569;
+    border-bottom: 1px solid #cbd5e1;
 }
 
 .archive-table thead th {
-    padding: 12px 14px;
-    border-right: 1.5px solid #64748b;
-    border-bottom: 2px solid #475569;
-    color: #334155;
+    padding: 13px 14px;
+    border-right: 1px solid #e2e8f0;
+    border-bottom: 1px solid #cbd5e1;
+    color: #475569;
     font-size: 9px;
     font-weight: 800;
     letter-spacing: .04em;
@@ -1135,17 +1330,17 @@
 }
 
 .archive-table tbody tr:nth-child(even) {
-    background: #f8fafc;
+    background: #fafafa;
 }
 
 .archive-table tbody tr:hover {
-    background: #eff6ff;
+    background: #f8fbff;
 }
 
 .archive-table tbody td {
-    padding: 12px 14px;
-    border-right: 1px solid #94a3b8;
-    border-bottom: 1px solid #94a3b8;
+    padding: 13px 14px;
+    border-right: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
     color: #475569;
     font-size: 11px;
     line-height: 1.4;
@@ -1189,9 +1384,9 @@
     max-width: 240px;
     overflow: hidden;
     padding: 4px 8px;
-    border: 1px solid #94a3b8;
+    border: 1px solid #cbd5e1;
     border-radius: 7px;
-    background: #f1f5f9;
+    background: #f8fafc;
     color: #334155;
     font-weight: 600;
     text-overflow: ellipsis;
@@ -1218,16 +1413,16 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 2px;
+    gap: 3px;
 }
 
 .archive-table .action-button {
     display: inline-flex;
-    width: 29px;
-    height: 29px;
+    width: 30px;
+    height: 30px;
     align-items: center;
     justify-content: center;
-    border-radius: 7px;
+    border-radius: 8px;
     transition:
         background .15s ease,
         color .15s ease;
@@ -1259,11 +1454,53 @@
     text-align: center;
 }
 
+
 /* =========================================================
    RESPONSIVE
 ========================================================= */
 
+@media (max-width: 1100px) {
+
+    .surat-keluar-summary {
+        gap: 10px;
+    }
+
+    .surat-keluar-summary-card {
+        min-height: 86px;
+        padding: 13px;
+        gap: 9px;
+    }
+
+    .surat-keluar-summary-icon {
+        width: 39px;
+        min-width: 39px;
+        height: 39px;
+        border-radius: 10px;
+    }
+
+    .surat-keluar-summary-value {
+        font-size: 21px;
+    }
+
+    .surat-keluar-summary-label {
+        font-size: 9px;
+    }
+
+    .surat-keluar-summary-note {
+        font-size: 8px;
+    }
+}
+
+
 @media (max-width: 767px) {
+
+    .surat-keluar-summary {
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(0, 1fr)
+            );
+    }
 
     .filter-row {
         grid-template-columns: 1fr;
@@ -1322,29 +1559,33 @@
 
     .filter-dropdown-options {
         max-height: calc(80vh - 145px);
-        grid-template-columns: 1fr 1fr;
     }
 
     body.date-picker-lock {
         overflow: hidden;
     }
-
-    .archive-table thead th,
-    .archive-table tbody td {
-        padding: 10px 12px;
-    }
 }
 
+
 @media (max-width: 480px) {
+
+    .surat-keluar-summary {
+        grid-template-columns: 1fr;
+    }
 
     .filter-dropdown-options {
         grid-template-columns: 1fr;
     }
+
 }
+
 </style>
+
 @endpush
 
-<div class="space-y-3 sm:space-y-4">
+
+<div class="space-y-4">
+
 
     {{-- =====================================================
          HEADER
@@ -1363,6 +1604,7 @@
             </p>
 
         </div>
+
 
         <div class="grid w-full grid-cols-3 gap-1.5 sm:flex sm:w-auto sm:gap-2">
 
@@ -1392,6 +1634,7 @@
 
             </a>
 
+
             {{-- PDF --}}
 
             <a
@@ -1419,6 +1662,7 @@
                 PDF
 
             </a>
+
 
             {{-- TAMBAH --}}
 
@@ -1455,11 +1699,214 @@
     </div>
 
 
+
+    {{-- =====================================================
+         SCORECARD
+    ====================================================== --}}
+
+    <div class="surat-keluar-summary">
+
+
+        {{-- TOTAL --}}
+
+        <div class="surat-keluar-summary-card">
+
+            <div class="surat-keluar-summary-icon blue">
+
+                <svg
+                    class="h-6 w-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="1.8"
+                        d="M8 7h8M8 11h8M8 15h5M6 3h9l4 4v14H6a2 2 0 01-2-2V5a2 2 0 012-2z"
+                    />
+                </svg>
+
+            </div>
+
+
+            <div class="surat-keluar-summary-content">
+
+                <p class="surat-keluar-summary-label">
+                    Total Surat Keluar
+                </p>
+
+                <p class="surat-keluar-summary-value">
+                    {{ number_format($totalSuratKeluar, 0, ',', '.') }}
+                </p>
+
+                <div class="surat-keluar-summary-note">
+                    Seluruh surat keluar
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        {{-- DRAFT --}}
+
+        <div class="surat-keluar-summary-card">
+
+            <div class="surat-keluar-summary-icon slate">
+
+                <svg
+                    class="h-6 w-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="1.8"
+                        d="M6 3h9l3 3v15H6a2 2 0 01-2-2V5a2 2 0 012-2z"
+                    />
+
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="1.8"
+                        d="M14 3v4h4"
+                    />
+                </svg>
+
+            </div>
+
+
+            <div class="surat-keluar-summary-content">
+
+                <p class="surat-keluar-summary-label">
+                    Draf
+                </p>
+
+                <p class="surat-keluar-summary-value">
+                    {{ number_format($suratDraft, 0, ',', '.') }}
+                </p>
+
+                <div class="surat-keluar-summary-note">
+                    Surat yang masih berupa draf
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        {{-- DIPROSES --}}
+
+        <div class="surat-keluar-summary-card">
+
+            <div class="surat-keluar-summary-icon amber">
+
+                <svg
+                    class="h-6 w-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="1.8"
+                        d="M12 6v6l4 2"
+                    />
+
+                    <circle
+                        cx="12"
+                        cy="12"
+                        r="9"
+                        stroke-width="1.8"
+                    />
+                </svg>
+
+            </div>
+
+
+            <div class="surat-keluar-summary-content">
+
+                <p class="surat-keluar-summary-label">
+                    Diproses
+                </p>
+
+                <p class="surat-keluar-summary-value">
+                    {{ number_format($suratDiproses, 0, ',', '.') }}
+                </p>
+
+                <div class="surat-keluar-summary-note">
+                    Surat yang sedang diproses
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        {{-- DIKIRIM --}}
+
+        <div class="surat-keluar-summary-card">
+
+            <div class="surat-keluar-summary-icon green">
+
+                <svg
+                    class="h-6 w-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="1.8"
+                        d="M22 2L11 13"
+                    />
+
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="1.8"
+                        d="M22 2l-7 20-4-9-9-4 20-7z"
+                    />
+                </svg>
+
+            </div>
+
+
+            <div class="surat-keluar-summary-content">
+
+                <p class="surat-keluar-summary-label">
+                    Dikirim
+                </p>
+
+                <p class="surat-keluar-summary-value">
+                    {{ number_format($suratDikirim, 0, ',', '.') }}
+                </p>
+
+                <div class="surat-keluar-summary-note">
+                    Surat yang telah dikirim
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
     {{-- =====================================================
          FILTER
     ====================================================== --}}
 
-    <div class="rounded-xl border-2 border-slate-400 bg-white p-3 shadow-sm sm:p-4">
+    <div class="rounded-xl border border-slate-300 bg-white p-3 shadow-sm sm:p-4">
 
         <form
             id="filterForm"
@@ -1468,9 +1915,11 @@
             class="space-y-2.5"
         >
 
-            {{-- PENCARIAN + TANGGAL + BUTTON --}}
+
+            {{-- SEARCH + DATE + BUTTON --}}
 
             <div class="grid grid-cols-1 gap-2 lg:grid-cols-12">
+
 
                 {{-- SEARCH --}}
 
@@ -1483,6 +1932,7 @@
                         Pencarian
                     </label>
 
+
                     <div class="relative">
 
                         <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
@@ -1492,7 +1942,6 @@
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
-                                aria-hidden="true"
                             >
                                 <path
                                     stroke-linecap="round"
@@ -1504,6 +1953,7 @@
 
                         </div>
 
+
                         <input
                             type="text"
                             id="search"
@@ -1511,12 +1961,13 @@
                             value="{{ request('search') }}"
                             placeholder="Cari nomor surat, tujuan, atau perihal..."
                             autocomplete="off"
-                            class="h-11 w-full rounded-xl bg-white pl-9 pr-3 text-xs text-slate-700 outline-none transition placeholder:text-slate-400 sm:text-sm"
+                            class="h-11 w-full rounded-xl pl-9 pr-3 text-xs text-slate-700 outline-none transition placeholder:text-slate-400 sm:text-sm"
                         >
 
                     </div>
 
                 </div>
+
 
 
                 {{-- DATE --}}
@@ -1534,7 +1985,6 @@
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
-                                    aria-hidden="true"
                                 >
                                     <path
                                         stroke-linecap="round"
@@ -1546,6 +1996,7 @@
 
                             </div>
 
+
                             <input
                                 type="text"
                                 id="date-range"
@@ -1553,9 +2004,10 @@
                                 readonly
                                 autocomplete="off"
                                 placeholder="Pilih rentang tanggal..."
-                                class="date-range-input h-11 w-full rounded-xl bg-white pl-9 pr-10 text-xs font-medium text-slate-700 outline-none transition placeholder:text-slate-400 sm:text-sm"
+                                class="date-range-input h-11 w-full rounded-xl pl-9 pr-10 text-xs font-medium text-slate-700 outline-none transition placeholder:text-slate-400 sm:text-sm"
                                 aria-label="Pilih rentang tanggal"
                             >
+
 
                             <button
                                 type="button"
@@ -1570,7 +2022,6 @@
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
-                                    aria-hidden="true"
                                 >
                                     <path
                                         stroke-linecap="round"
@@ -1583,6 +2034,7 @@
                             </button>
 
                         </div>
+
 
                         <input
                             type="hidden"
@@ -1603,7 +2055,8 @@
                 </div>
 
 
-                {{-- BUTTON FILTER --}}
+
+                {{-- FILTER BUTTON --}}
 
                 <div class="lg:col-span-3">
 
@@ -1619,7 +2072,6 @@
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
-                                aria-hidden="true"
                             >
                                 <path
                                     stroke-linecap="round"
@@ -1632,6 +2084,7 @@
                             Filter
 
                         </button>
+
 
                         @if($hasFilters)
 
@@ -1647,7 +2100,6 @@
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
-                                    aria-hidden="true"
                                 >
                                     <path
                                         stroke-linecap="round"
@@ -1668,9 +2120,11 @@
             </div>
 
 
+
             {{-- KATEGORI + STATUS --}}
 
             <div class="filter-row">
+
 
                 {{-- KATEGORI --}}
 
@@ -1694,7 +2148,6 @@
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
-                                aria-hidden="true"
                             >
                                 <path
                                     stroke-linecap="round"
@@ -1705,6 +2158,7 @@
                             </svg>
 
                         </span>
+
 
                         <span class="filter-dropdown-trigger-content">
 
@@ -1723,6 +2177,7 @@
 
                             </span>
 
+
                             <span
                                 class="filter-dropdown-count category"
                                 id="kategoriCount"
@@ -1732,12 +2187,12 @@
 
                         </span>
 
+
                         <svg
                             class="filter-dropdown-arrow h-5 w-5"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
-                            aria-hidden="true"
                         >
                             <path
                                 stroke-linecap="round"
@@ -1748,6 +2203,7 @@
                         </svg>
 
                     </button>
+
 
                     <div
                         id="kategoriDropdownMenu"
@@ -1767,6 +2223,7 @@
                                 </span>
 
                             </div>
+
 
                             <div class="filter-dropdown-actions">
 
@@ -1793,6 +2250,7 @@
                             </div>
 
                         </div>
+
 
                         @if(
                             isset($kategoris) &&
@@ -1839,6 +2297,7 @@
 
                         @endif
 
+
                         <div class="filter-dropdown-menu-footer">
 
                             <span
@@ -1858,6 +2317,7 @@
                     </div>
 
                 </div>
+
 
 
                 {{-- STATUS --}}
@@ -1882,7 +2342,6 @@
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
-                                aria-hidden="true"
                             >
                                 <path
                                     stroke-linecap="round"
@@ -1893,6 +2352,7 @@
                             </svg>
 
                         </span>
+
 
                         <span class="filter-dropdown-trigger-content">
 
@@ -1911,6 +2371,7 @@
 
                             </span>
 
+
                             <span
                                 class="filter-dropdown-count status"
                                 id="statusCount"
@@ -1920,12 +2381,12 @@
 
                         </span>
 
+
                         <svg
                             class="filter-dropdown-arrow h-5 w-5"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
-                            aria-hidden="true"
                         >
                             <path
                                 stroke-linecap="round"
@@ -1936,6 +2397,7 @@
                         </svg>
 
                     </button>
+
 
                     <div
                         id="statusDropdownMenu"
@@ -1955,6 +2417,7 @@
                                 </span>
 
                             </div>
+
 
                             <div class="filter-dropdown-actions">
 
@@ -1982,9 +2445,13 @@
 
                         </div>
 
+
                         <div class="filter-dropdown-options">
 
-                            @foreach($statusOptions as $value => $label)
+                            @foreach(
+                                $statusOptions
+                                as $value => $label
+                            )
 
                                 <label class="filter-dropdown-option status-option">
 
@@ -2012,6 +2479,7 @@
 
                         </div>
 
+
                         <div class="filter-dropdown-menu-footer">
 
                             <span
@@ -2037,6 +2505,7 @@
         </form>
 
     </div>
+
 
 
     {{-- =====================================================
@@ -2081,6 +2550,7 @@
 
                 </thead>
 
+
                 <tbody>
 
                     @forelse(
@@ -2089,6 +2559,12 @@
                     )
 
                         @php
+
+                            /*
+                            |------------------------------------------------------
+                            | STATUS
+                            |------------------------------------------------------
+                            */
 
                             $status = strtolower(
                                 trim(
@@ -2113,13 +2589,11 @@
                                 ??
                                 'bg-slate-100 text-slate-600 border-slate-200';
 
+
                             /*
-                            |--------------------------------------------------------------------------
+                            |------------------------------------------------------
                             | TUJUAN
-                            |--------------------------------------------------------------------------
-                            |
-                            | Mengikuti struktur data controller/model yang kamu gunakan.
-                            |
+                            |------------------------------------------------------
                             */
 
                             $tujuan =
@@ -2136,10 +2610,11 @@
                                     ? $tujuan
                                     : '-';
 
+
                             /*
-                            |--------------------------------------------------------------------------
+                            |------------------------------------------------------
                             | TANGGAL
-                            |--------------------------------------------------------------------------
+                            |------------------------------------------------------
                             */
 
                             $tanggalRaw =
@@ -2152,28 +2627,29 @@
                             $tanggalKeluar = '-';
 
                             if ($tanggalRaw) {
+
                                 try {
 
                                     $tanggalKeluar =
-                                        Carbon::parse(
+                                        \Illuminate\Support\Carbon::parse(
                                             $tanggalRaw
                                         )->format(
                                             'd/m/Y'
                                         );
 
-                                } catch (
-                                    \Throwable $e
-                                ) {
+                                } catch (\Throwable $e) {
 
                                     $tanggalKeluar = '-';
 
                                 }
+
                             }
 
+
                             /*
-                            |--------------------------------------------------------------------------
+                            |------------------------------------------------------
                             | PERIHAL
-                            |--------------------------------------------------------------------------
+                            |------------------------------------------------------
                             */
 
                             $perihal =
@@ -2189,10 +2665,11 @@
                                     ? $perihal
                                     : '-';
 
+
                             /*
-                            |--------------------------------------------------------------------------
+                            |------------------------------------------------------
                             | KATEGORI
-                            |--------------------------------------------------------------------------
+                            |------------------------------------------------------
                             */
 
                             $kategoriNama =
@@ -2202,11 +2679,13 @@
 
                         @endphp
 
+
                         <tr>
 
                             <td class="cell-date">
                                 {{ $tanggalKeluar }}
                             </td>
+
 
                             <td class="cell-sender">
 
@@ -2219,6 +2698,7 @@
 
                             </td>
 
+
                             <td
                                 class="cell-subject max-w-xs truncate"
                                 title="{{ $perihal }}"
@@ -2226,9 +2706,11 @@
                                 {{ $perihal }}
                             </td>
 
+
                             <td class="cell-category">
                                 {{ $kategoriNama }}
                             </td>
+
 
                             <td class="cell-status">
 
@@ -2240,9 +2722,11 @@
 
                             </td>
 
+
                             <td class="action-cell">
 
                                 <div class="action-buttons">
+
 
                                     {{-- DETAIL --}}
 
@@ -2258,7 +2742,6 @@
                                             fill="none"
                                             stroke="currentColor"
                                             viewBox="0 0 24 24"
-                                            aria-hidden="true"
                                         >
                                             <path
                                                 stroke-linecap="round"
@@ -2278,7 +2761,7 @@
                                     </a>
 
 
-                                    {{-- EDIT --}}
+                                    {{-- EDIT + DELETE --}}
 
                                     @if($canManage)
 
@@ -2294,7 +2777,6 @@
                                                 fill="none"
                                                 stroke="currentColor"
                                                 viewBox="0 0 24 24"
-                                                aria-hidden="true"
                                             >
                                                 <path
                                                     stroke-linecap="round"
@@ -2314,8 +2796,6 @@
                                         </a>
 
 
-                                        {{-- DELETE --}}
-
                                         <form
                                             action="{{ route('surat-keluar.destroy', $s) }}"
                                             method="POST"
@@ -2323,7 +2803,6 @@
                                         >
 
                                             @csrf
-
                                             @method('DELETE')
 
                                             <button
@@ -2338,7 +2817,6 @@
                                                     fill="none"
                                                     stroke="currentColor"
                                                     viewBox="0 0 24 24"
-                                                    aria-hidden="true"
                                                 >
                                                     <path
                                                         stroke-linecap="round"
@@ -2374,7 +2852,9 @@
 
                         </tr>
 
+
                     @empty
+
 
                         <tr>
 
@@ -2392,7 +2872,6 @@
                                             fill="none"
                                             stroke="currentColor"
                                             viewBox="0 0 24 24"
-                                            aria-hidden="true"
                                         >
                                             <path
                                                 stroke-linecap="round"
@@ -2404,9 +2883,11 @@
 
                                     </div>
 
+
                                     <p class="text-sm font-semibold text-slate-700 sm:text-base">
                                         Belum ada data surat keluar
                                     </p>
+
 
                                     <p class="mt-0.5 max-w-md px-4 text-center text-[11px] text-slate-400 sm:text-xs">
 
@@ -2421,6 +2902,7 @@
                                         @endif
 
                                     </p>
+
 
                                     @if($hasFilters)
 
@@ -2443,7 +2925,6 @@
                                                 fill="none"
                                                 stroke="currentColor"
                                                 viewBox="0 0 24 24"
-                                                aria-hidden="true"
                                             >
                                                 <path
                                                     stroke-linecap="round"
@@ -2474,7 +2955,9 @@
         </div>
 
 
-        {{-- PAGINATION --}}
+        {{-- =====================================================
+             PAGINATION
+        ====================================================== --}}
 
         @if(
             isset($suratKeluars) &&
@@ -2485,7 +2968,7 @@
             $suratKeluars->hasPages()
         )
 
-            <div class="border-t-2 border-slate-300 px-4 py-3 sm:px-6 sm:py-4">
+            <div class="border-t border-slate-200 px-4 py-3 sm:px-6 sm:py-4">
 
                 {{ $suratKeluars->withQueryString()->links() }}
 
@@ -2496,6 +2979,7 @@
     </div>
 
 </div>
+
 
 
 {{-- =========================================================
@@ -2512,6 +2996,7 @@
         <div class="custom-date-picker-title">
             Pilih Rentang Tanggal
         </div>
+
 
         <button
             type="button"
@@ -2540,6 +3025,7 @@
             Pilih tanggal awal
         </div>
 
+
         <div class="custom-date-picker-actions">
 
             <button
@@ -2549,6 +3035,7 @@
             >
                 Bersihkan
             </button>
+
 
             <button
                 type="button"
@@ -2565,6 +3052,7 @@
 </div>
 
 
+
 {{-- =========================================================
      MONTH / YEAR PANEL
 ========================================================= --}}
@@ -2575,11 +3063,15 @@
 ></div>
 
 
+
 @push('scripts')
+
 <script>
+
 (function () {
 
     'use strict';
+
 
     /* =========================================================
        CONSTANT
@@ -2600,6 +3092,7 @@
         'Desember'
     ];
 
+
     const WEEKDAYS = [
         'Sn',
         'Sl',
@@ -2609,6 +3102,7 @@
         'Sb',
         'Mg'
     ];
+
 
     const MIN_YEAR = 2000;
 
@@ -2677,7 +3171,7 @@
 
 
     /* =========================================================
-       DATE STATE
+       STATE
     ========================================================= */
 
     let selectedStart =
@@ -2700,6 +3194,7 @@
             ? cloneDate(selectedEnd)
             : null;
 
+
     let viewMonth =
         selectedStart
             ? new Date(
@@ -2709,11 +3204,13 @@
             )
             : new Date();
 
+
     let activePanelSide =
         'left';
 
     let activePanelYear =
         new Date().getFullYear();
+
 
     viewMonth.setDate(1);
 
@@ -2739,14 +3236,17 @@
             return null;
         }
 
+
         const match =
             String(value).match(
                 /^(\d{4})-(\d{2})-(\d{2})$/
             );
 
+
         if (!match) {
             return null;
         }
+
 
         const year =
             Number(match[1]);
@@ -2757,12 +3257,14 @@
         const day =
             Number(match[3]);
 
+
         const date =
             new Date(
                 year,
                 month,
                 day
             );
+
 
         return (
             date.getFullYear() === year &&
@@ -2793,6 +3295,7 @@
             return '';
         }
 
+
         return [
             date.getFullYear(),
             pad(
@@ -2811,6 +3314,7 @@
         if (!date) {
             return '';
         }
+
 
         return [
             pad(
@@ -2841,10 +3345,7 @@
     }
 
 
-    function addMonths(
-        date,
-        amount
-    ) {
+    function addMonths(date, amount) {
 
         return new Date(
             date.getFullYear(),
@@ -2855,11 +3356,7 @@
     }
 
 
-    function isBetween(
-        date,
-        start,
-        end
-    ) {
+    function isBetween(date, start, end) {
 
         if (
             !date ||
@@ -2869,21 +3366,21 @@
             return false;
         }
 
+
         const value =
             toISO(date);
 
+
         return (
-            value >
-                toISO(start) &&
-            value <
-                toISO(end)
+            value > toISO(start) &&
+            value < toISO(end)
         );
 
     }
 
 
     /* =========================================================
-       CALENDAR
+       CALENDAR RENDER
     ========================================================= */
 
     function renderCalendars() {
@@ -2892,8 +3389,9 @@
             return;
         }
 
-        calendars.innerHTML =
-            '';
+
+        calendars.innerHTML = '';
+
 
         const leftDate =
             new Date(
@@ -2902,11 +3400,13 @@
                 1
             );
 
+
         const rightDate =
             addMonths(
                 leftDate,
                 1
             );
+
 
         calendars.appendChild(
             createCalendar(
@@ -2915,6 +3415,7 @@
             )
         );
 
+
         calendars.appendChild(
             createCalendar(
                 rightDate,
@@ -2922,7 +3423,9 @@
             )
         );
 
+
         updateSelectedLabel();
+
 
         requestAnimationFrame(
             positionDatePicker
@@ -2931,15 +3434,13 @@
     }
 
 
-    function createCalendar(
-        date,
-        side
-    ) {
+    function createCalendar(date, side) {
 
         const calendar =
             document.createElement(
                 'div'
             );
+
 
         calendar.className =
             'custom-calendar';
@@ -2950,6 +3451,7 @@
                 'div'
             );
 
+
         header.className =
             'custom-calendar-head';
 
@@ -2958,6 +3460,7 @@
             document.createElement(
                 'button'
             );
+
 
         previous.type =
             'button';
@@ -2968,16 +3471,12 @@
         previous.innerHTML =
             '&#8249;';
 
-        previous.setAttribute(
-            'aria-label',
-            'Bulan sebelumnya'
-        );
-
 
         const heading =
             document.createElement(
                 'div'
             );
+
 
         heading.className =
             'custom-calendar-heading';
@@ -2987,6 +3486,7 @@
             document.createElement(
                 'button'
             );
+
 
         monthButton.type =
             'button';
@@ -3004,6 +3504,7 @@
             document.createElement(
                 'button'
             );
+
 
         yearButton.type =
             'button';
@@ -3028,6 +3529,7 @@
                 'button'
             );
 
+
         next.type =
             'button';
 
@@ -3037,17 +3539,13 @@
         next.innerHTML =
             '&#8250;';
 
-        next.setAttribute(
-            'aria-label',
-            'Bulan berikutnya'
-        );
-
 
         header.append(
             previous,
             heading,
             next
         );
+
 
         calendar.appendChild(
             header
@@ -3131,6 +3629,7 @@
                 'div'
             );
 
+
         weekdays.className =
             'custom-calendar-weekdays';
 
@@ -3143,11 +3642,13 @@
                         'div'
                     );
 
+
                 element.className =
                     'custom-calendar-weekday';
 
                 element.textContent =
                     day;
+
 
                 weekdays.appendChild(
                     element
@@ -3167,6 +3668,7 @@
                 'div'
             );
 
+
         days.className =
             'custom-calendar-days';
 
@@ -3177,6 +3679,7 @@
         const month =
             date.getMonth();
 
+
         const firstDay =
             new Date(
                 year,
@@ -3184,10 +3687,12 @@
                 1
             ).getDay();
 
+
         const mondayOffset =
             firstDay === 0
                 ? 6
                 : firstDay - 1;
+
 
         const daysInMonth =
             new Date(
@@ -3195,6 +3700,7 @@
                 month + 1,
                 0
             ).getDate();
+
 
         const daysInPreviousMonth =
             new Date(
@@ -3211,16 +3717,12 @@
         ) {
 
             let dayNumber;
-
             let cellDate;
-
-            let otherMonth =
-                false;
+            let otherMonth = false;
 
 
             if (
-                index <
-                mondayOffset
+                index < mondayOffset
             ) {
 
                 dayNumber =
@@ -3229,6 +3731,7 @@
                     index +
                     1;
 
+
                 cellDate =
                     new Date(
                         year,
@@ -3236,10 +3739,11 @@
                         dayNumber
                     );
 
-                otherMonth =
-                    true;
 
-            } else if (
+                otherMonth = true;
+
+            }
+            else if (
                 index >=
                 mondayOffset +
                 daysInMonth
@@ -3251,6 +3755,7 @@
                     daysInMonth +
                     1;
 
+
                 cellDate =
                     new Date(
                         year,
@@ -3258,15 +3763,17 @@
                         dayNumber
                     );
 
-                otherMonth =
-                    true;
 
-            } else {
+                otherMonth = true;
+
+            }
+            else {
 
                 dayNumber =
                     index -
                     mondayOffset +
                     1;
+
 
                 cellDate =
                     new Date(
@@ -3283,6 +3790,7 @@
                     'button'
                 );
 
+
             button.type =
                 'button';
 
@@ -3290,16 +3798,17 @@
                 'custom-calendar-day';
 
             button.textContent =
-                String(
-                    dayNumber
-                );
+                String(dayNumber);
 
 
             if (otherMonth) {
+
                 button.classList.add(
                     'other-month'
                 );
+
             }
+
 
             if (
                 sameDate(
@@ -3307,10 +3816,13 @@
                     new Date()
                 )
             ) {
+
                 button.classList.add(
                     'today'
                 );
+
             }
+
 
             if (
                 tempStart &&
@@ -3321,10 +3833,13 @@
                     tempEnd
                 )
             ) {
+
                 button.classList.add(
                     'in-range'
                 );
+
             }
+
 
             if (
                 tempStart &&
@@ -3333,10 +3848,13 @@
                     tempStart
                 )
             ) {
+
                 button.classList.add(
                     'range-start'
                 );
+
             }
+
 
             if (
                 tempEnd &&
@@ -3345,9 +3863,11 @@
                     tempEnd
                 )
             ) {
+
                 button.classList.add(
                     'range-end'
                 );
+
             }
 
 
@@ -3386,9 +3906,7 @@
     function selectDate(date) {
 
         const chosen =
-            cloneDate(
-                date
-            );
+            cloneDate(date);
 
 
         if (
@@ -3402,7 +3920,8 @@
             tempEnd =
                 null;
 
-        } else if (
+        }
+        else if (
             toISO(chosen) <
             toISO(tempStart)
         ) {
@@ -3415,7 +3934,8 @@
             tempStart =
                 chosen;
 
-        } else {
+        }
+        else {
 
             tempEnd =
                 chosen;
@@ -3434,6 +3954,7 @@
             return;
         }
 
+
         if (
             tempStart &&
             tempEnd
@@ -3450,7 +3971,8 @@
                     tempEnd
                 );
 
-        } else if (tempStart) {
+        }
+        else if (tempStart) {
 
             selectedLabel.textContent =
                 formatDate(
@@ -3459,7 +3981,8 @@
                 +
                 ' - pilih tanggal akhir';
 
-        } else {
+        }
+        else {
 
             selectedLabel.textContent =
                 'Pilih tanggal awal';
@@ -3470,7 +3993,7 @@
 
 
     /* =========================================================
-       POSITION
+       DATE PICKER POSITION
     ========================================================= */
 
     function positionDatePicker() {
@@ -3487,9 +4010,11 @@
         const rect =
             dateInput.getBoundingClientRect();
 
+
         const width =
             datePicker.offsetWidth ||
             720;
+
 
         const height =
             datePicker.offsetHeight ||
@@ -3501,6 +4026,7 @@
             rect.width / 2 -
             width / 2;
 
+
         let top =
             rect.bottom +
             8;
@@ -3510,10 +4036,12 @@
             left + width >
             window.innerWidth - 10
         ) {
+
             left =
                 window.innerWidth -
                 width -
                 10;
+
         }
 
 
@@ -3526,10 +4054,12 @@
             top + height >
             window.innerHeight - 10
         ) {
+
             top =
                 rect.top -
                 height -
                 8;
+
         }
 
 
@@ -3548,7 +4078,7 @@
 
 
     /* =========================================================
-       SHOW / HIDE DATE PICKER
+       SHOW / HIDE
     ========================================================= */
 
     function showDatePicker() {
@@ -3557,21 +4087,19 @@
             return;
         }
 
+
         closePickerPanel();
 
 
         tempStart =
             selectedStart
-                ? cloneDate(
-                    selectedStart
-                )
+                ? cloneDate(selectedStart)
                 : null;
+
 
         tempEnd =
             selectedEnd
-                ? cloneDate(
-                    selectedEnd
-                )
+                ? cloneDate(selectedEnd)
                 : null;
 
 
@@ -3594,6 +4122,7 @@
             'hidden'
         );
 
+
         document.body.classList.add(
             'date-picker-lock'
         );
@@ -3612,11 +4141,14 @@
             return;
         }
 
+
         datePicker.classList.add(
             'hidden'
         );
 
+
         closePickerPanel();
+
 
         document.body.classList.remove(
             'date-picker-lock'
@@ -3639,14 +4171,18 @@
             return;
         }
 
+
         activePanelSide =
             side;
+
 
         activePanelYear =
             calendarDate.getFullYear();
 
+
         pickerPanel.innerHTML =
             '';
+
 
         pickerPanel.classList.remove(
             'hidden'
@@ -3658,6 +4194,7 @@
                 'div'
             );
 
+
         header.className =
             'custom-picker-panel-header';
 
@@ -3666,6 +4203,7 @@
             document.createElement(
                 'button'
             );
+
 
         previous.type =
             'button';
@@ -3682,6 +4220,7 @@
                 'div'
             );
 
+
         title.className =
             'custom-picker-panel-title';
 
@@ -3690,6 +4229,7 @@
             document.createElement(
                 'button'
             );
+
 
         next.type =
             'button';
@@ -3705,6 +4245,7 @@
             document.createElement(
                 'button'
             );
+
 
         close.type =
             'button';
@@ -3723,6 +4264,7 @@
             close
         );
 
+
         pickerPanel.appendChild(
             header
         );
@@ -3733,8 +4275,10 @@
                 'div'
             );
 
+
         grid.className =
             'custom-picker-grid';
+
 
         pickerPanel.appendChild(
             grid
@@ -3747,6 +4291,7 @@
                 String(
                     activePanelYear
                 );
+
 
             grid.innerHTML =
                 '';
@@ -3762,6 +4307,7 @@
                         document.createElement(
                             'button'
                         );
+
 
                     button.type =
                         'button';
@@ -3779,9 +4325,11 @@
                         monthIndex ===
                             calendarDate.getMonth()
                     ) {
+
                         button.classList.add(
                             'active'
                         );
+
                     }
 
 
@@ -3842,11 +4390,13 @@
                 event.preventDefault();
                 event.stopPropagation();
 
+
                 activePanelYear =
                     Math.max(
                         MIN_YEAR,
                         activePanelYear - 1
                     );
+
 
                 renderMonths();
 
@@ -3861,11 +4411,13 @@
                 event.preventDefault();
                 event.stopPropagation();
 
+
                 activePanelYear =
                     Math.min(
                         MAX_YEAR,
                         activePanelYear + 1
                     );
+
 
                 renderMonths();
 
@@ -3935,6 +4487,7 @@
         pickerPanel.innerHTML =
             '';
 
+
         pickerPanel.classList.remove(
             'hidden'
         );
@@ -3945,6 +4498,7 @@
                 'div'
             );
 
+
         header.className =
             'custom-picker-panel-header';
 
@@ -3953,6 +4507,7 @@
             document.createElement(
                 'button'
             );
+
 
         previous.type =
             'button';
@@ -3969,6 +4524,7 @@
                 'div'
             );
 
+
         title.className =
             'custom-picker-panel-title';
 
@@ -3977,6 +4533,7 @@
             document.createElement(
                 'button'
             );
+
 
         next.type =
             'button';
@@ -3992,6 +4549,7 @@
             document.createElement(
                 'button'
             );
+
 
         close.type =
             'button';
@@ -4010,6 +4568,7 @@
             close
         );
 
+
         pickerPanel.appendChild(
             header
         );
@@ -4020,8 +4579,10 @@
                 'div'
             );
 
+
         grid.className =
             'custom-picker-grid';
+
 
         pickerPanel.appendChild(
             grid
@@ -4036,6 +4597,7 @@
                 (
                     startYear + 11
                 );
+
 
             grid.innerHTML =
                 '';
@@ -4057,6 +4619,7 @@
                         'button'
                     );
 
+
                 button.type =
                     'button';
 
@@ -4073,9 +4636,11 @@
                     year ===
                     calendarDate.getFullYear()
                 ) {
+
                     button.classList.add(
                         'active'
                     );
+
                 }
 
 
@@ -4083,57 +4648,47 @@
                     year ===
                     new Date().getFullYear()
                 ) {
+
                     button.classList.add(
                         'current'
                     );
-                }
-
-
-                if (
-                    year >= MIN_YEAR &&
-                    year <= MAX_YEAR
-                ) {
-
-                    button.addEventListener(
-                        'click',
-                        function (event) {
-
-                            event.preventDefault();
-                            event.stopPropagation();
-
-
-                            const month =
-                                calendarDate.getMonth();
-
-
-                            viewMonth =
-                                activePanelSide ===
-                                    'left'
-                                    ? new Date(
-                                        year,
-                                        month,
-                                        1
-                                    )
-                                    : new Date(
-                                        year,
-                                        month - 1,
-                                        1
-                                    );
-
-
-                            closePickerPanel();
-
-                            renderCalendars();
-
-                        }
-                    );
-
-                } else {
-
-                    button.disabled =
-                        true;
 
                 }
+
+
+                button.addEventListener(
+                    'click',
+                    function (event) {
+
+                        event.preventDefault();
+                        event.stopPropagation();
+
+
+                        const month =
+                            calendarDate.getMonth();
+
+
+                        viewMonth =
+                            activePanelSide ===
+                                'left'
+                                ? new Date(
+                                    year,
+                                    month,
+                                    1
+                                )
+                                : new Date(
+                                    year,
+                                    month - 1,
+                                    1
+                                );
+
+
+                        closePickerPanel();
+
+                        renderCalendars();
+
+                    }
+                );
 
 
                 grid.appendChild(
@@ -4158,11 +4713,13 @@
                 event.preventDefault();
                 event.stopPropagation();
 
+
                 startYear =
                     Math.max(
                         MIN_YEAR,
                         startYear - 12
                     );
+
 
                 renderYears();
 
@@ -4177,16 +4734,19 @@
                 event.preventDefault();
                 event.stopPropagation();
 
+
                 const maxStart =
                     Math.floor(
                         MAX_YEAR / 12
                     ) * 12;
+
 
                 startYear =
                     Math.min(
                         maxStart,
                         startYear + 12
                     );
+
 
                 renderYears();
 
@@ -4206,7 +4766,7 @@
 
 
     /* =========================================================
-       POSITION PANEL
+       PANEL POSITION
     ========================================================= */
 
     function positionPickerPanel(
@@ -4240,9 +4800,11 @@
         const rect =
             anchor.getBoundingClientRect();
 
+
         const width =
             element.offsetWidth ||
             320;
+
 
         const height =
             element.offsetHeight ||
@@ -4251,6 +4813,7 @@
 
         let left =
             rect.left;
+
 
         let top =
             rect.bottom +
@@ -4308,9 +4871,11 @@
             return;
         }
 
+
         pickerPanel.classList.add(
             'hidden'
         );
+
 
         pickerPanel.innerHTML =
             '';
@@ -4335,6 +4900,7 @@
             ) {
 
                 window.Swal.fire({
+
                     icon:
                         'info',
 
@@ -4349,6 +4915,7 @@
 
                     confirmButtonColor:
                         '#2563eb'
+
                 });
 
             } else {
@@ -4369,6 +4936,7 @@
                 tempStart
             );
 
+
         selectedEnd =
             cloneDate(
                 tempEnd
@@ -4376,18 +4944,22 @@
 
 
         if (dariInput) {
+
             dariInput.value =
                 toISO(
                     selectedStart
                 );
+
         }
 
 
         if (sampaiInput) {
+
             sampaiInput.value =
                 toISO(
                     selectedEnd
                 );
+
         }
 
 
@@ -4445,20 +5017,17 @@
 
 
         if (dariInput) {
-            dariInput.value =
-                '';
+            dariInput.value = '';
         }
 
 
         if (sampaiInput) {
-            sampaiInput.value =
-                '';
+            sampaiInput.value = '';
         }
 
 
         if (dateInput) {
-            dateInput.value =
-                '';
+            dateInput.value = '';
         }
 
 
@@ -4478,6 +5047,7 @@
         viewMonth =
             new Date();
 
+
         viewMonth.setDate(
             1
         );
@@ -4489,7 +5059,7 @@
 
 
     /* =========================================================
-       DATE EVENTS
+       DATE EVENT
     ========================================================= */
 
     if (
@@ -4503,6 +5073,7 @@
 
                 event.preventDefault();
                 event.stopPropagation();
+
 
                 if (
                     datePicker.classList.contains(
@@ -4665,7 +5236,9 @@
                     'hidden'
                 )
             ) {
+
                 positionDatePicker();
+
             }
 
 
@@ -4675,7 +5248,9 @@
                     'hidden'
                 )
             ) {
+
                 closePickerPanel();
+
             }
 
         }
@@ -4693,7 +5268,9 @@
                 ) &&
                 window.innerWidth > 767
             ) {
+
                 positionDatePicker();
+
             }
 
         },
@@ -4766,22 +5343,23 @@
         );
 
 
-    function closeDropdown(
-        dropdown
-    ) {
+    function closeDropdown(dropdown) {
 
         if (!dropdown) {
             return;
         }
 
+
         dropdown.classList.remove(
             'open'
         );
+
 
         const button =
             dropdown.querySelector(
                 '.filter-dropdown-trigger'
             );
+
 
         if (button) {
 
@@ -4808,9 +5386,7 @@
     }
 
 
-    function openDropdown(
-        dropdown
-    ) {
+    function openDropdown(dropdown) {
 
         if (!dropdown) {
             return;
@@ -4821,9 +5397,11 @@
             dropdown ===
             kategoriDropdown
         ) {
+
             closeDropdown(
                 statusDropdown
             );
+
         }
 
 
@@ -4831,9 +5409,11 @@
             dropdown ===
             statusDropdown
         ) {
+
             closeDropdown(
                 kategoriDropdown
             );
+
         }
 
 
@@ -4878,10 +5458,12 @@
                         'label'
                     );
 
+
                 const span =
                     label?.querySelector(
                         'span'
                     );
+
 
                 return (
                     span?.textContent
@@ -4902,6 +5484,7 @@
             document.querySelectorAll(
                 '.kategori-checkbox:checked'
             );
+
 
         const count =
             checked.length;
@@ -4938,16 +5521,16 @@
                 kategoriSummary.textContent =
                     'Semua kategori';
 
-            } else if (
+            }
+            else if (
                 labels.length <= 2
             ) {
 
                 kategoriSummary.textContent =
-                    labels.join(
-                        ', '
-                    );
+                    labels.join(', ');
 
-            } else {
+            }
+            else {
 
                 kategoriSummary.textContent =
                     labels.length +
@@ -4966,6 +5549,7 @@
             document.querySelectorAll(
                 '.status-checkbox:checked'
             );
+
 
         const count =
             checked.length;
@@ -5002,16 +5586,16 @@
                 statusSummary.textContent =
                     'Semua status';
 
-            } else if (
+            }
+            else if (
                 labels.length <= 2
             ) {
 
                 statusSummary.textContent =
-                    labels.join(
-                        ', '
-                    );
+                    labels.join(', ');
 
-            } else {
+            }
+            else {
 
                 statusSummary.textContent =
                     labels.length +
@@ -5031,6 +5615,7 @@
             event.preventDefault();
             event.stopPropagation();
 
+
             if (
                 kategoriDropdown?.classList.contains(
                     'open'
@@ -5041,7 +5626,8 @@
                     kategoriDropdown
                 );
 
-            } else {
+            }
+            else {
 
                 openDropdown(
                     kategoriDropdown
@@ -5060,6 +5646,7 @@
             event.preventDefault();
             event.stopPropagation();
 
+
             if (
                 statusDropdown?.classList.contains(
                     'open'
@@ -5070,7 +5657,8 @@
                     statusDropdown
                 );
 
-            } else {
+            }
+            else {
 
                 openDropdown(
                     statusDropdown
@@ -5117,6 +5705,7 @@
                 event.preventDefault();
                 event.stopPropagation();
 
+
                 kategoriCheckboxes.forEach(
                     function (checkbox) {
 
@@ -5125,6 +5714,7 @@
 
                     }
                 );
+
 
                 updateKategoriFilter();
 
@@ -5143,6 +5733,7 @@
                 event.preventDefault();
                 event.stopPropagation();
 
+
                 kategoriCheckboxes.forEach(
                     function (checkbox) {
 
@@ -5151,6 +5742,7 @@
 
                     }
                 );
+
 
                 updateKategoriFilter();
 
@@ -5169,6 +5761,7 @@
                 event.preventDefault();
                 event.stopPropagation();
 
+
                 statusCheckboxes.forEach(
                     function (checkbox) {
 
@@ -5177,6 +5770,7 @@
 
                     }
                 );
+
 
                 updateStatusFilter();
 
@@ -5195,6 +5789,7 @@
                 event.preventDefault();
                 event.stopPropagation();
 
+
                 statusCheckboxes.forEach(
                     function (checkbox) {
 
@@ -5203,6 +5798,7 @@
 
                     }
                 );
+
 
                 updateStatusFilter();
 
@@ -5217,11 +5813,13 @@
             const target =
                 event.target;
 
+
             if (
                 !(target instanceof Element)
             ) {
                 return;
             }
+
 
             if (
                 !target.closest(
@@ -5237,6 +5835,10 @@
     );
 
 
+    /* =========================================================
+       ESC
+    ========================================================= */
+
     document.addEventListener(
         'keydown',
         function (event) {
@@ -5248,7 +5850,9 @@
                 return;
             }
 
+
             closeAllDropdowns();
+
 
             if (
                 datePicker &&
@@ -5282,6 +5886,7 @@
             const start =
                 dariInput?.value ||
                 '';
+
 
             const end =
                 sampaiInput?.value ||
@@ -5321,7 +5926,8 @@
 
                     });
 
-                } else {
+                }
+                else {
 
                     window.alert(
                         'Tanggal mulai tidak boleh lebih besar dari tanggal akhir.'
@@ -5354,6 +5960,7 @@
                             this.closest(
                                 '.delete-form'
                             );
+
 
                         if (!form) {
                             return;
@@ -5392,20 +5999,7 @@
                                     'Batal',
 
                                 reverseButtons:
-                                    true,
-
-                                customClass: {
-
-                                    popup:
-                                        'rounded-2xl',
-
-                                    confirmButton:
-                                        'rounded-xl text-xs font-semibold px-4 py-2.5',
-
-                                    cancelButton:
-                                        'rounded-xl text-xs font-semibold px-4 py-2.5'
-
-                                }
+                                    true
 
                             })
                             .then(
@@ -5422,17 +6016,18 @@
                                 }
                             );
 
-                            return;
                         }
+                        else {
 
+                            if (
+                                window.confirm(
+                                    'Yakin ingin menghapus surat keluar ini?'
+                                )
+                            ) {
 
-                        if (
-                            window.confirm(
-                                'Yakin ingin menghapus surat keluar ini?'
-                            )
-                        ) {
+                                form.submit();
 
-                            form.submit();
+                            }
 
                         }
 
@@ -5475,6 +6070,7 @@
             'hidden'
         );
 
+
         clearDateButton.classList.add(
             'flex'
         );
@@ -5482,12 +6078,15 @@
     }
 
 })();
+
 </script>
+
 
 <script
     src="https://cdn.jsdelivr.net/npm/sweetalert2@11"
     defer
 ></script>
+
 @endpush
 
 @endsection
