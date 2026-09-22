@@ -351,6 +351,31 @@ class SuratMasukController extends Controller
 
         /*
         |--------------------------------------------------------------------------
+        | STATUS FILE UNTUK EXPORT
+        |--------------------------------------------------------------------------
+        |
+        | Tombol Export Excel dan PDF hanya ditampilkan apabila pada data
+        | yang sedang ditampilkan/filter terdapat minimal satu surat
+        | yang mempunyai file lampiran.
+        |
+        | Tidak memeriksa isi file ke storage agar tidak melakukan request
+        | storage berulang pada setiap pembukaan halaman.
+        |
+        */
+
+        $hasUploadedFile =
+            (clone $query)
+                ->whereNotNull('lampiran_file')
+                ->where(
+                    'lampiran_file',
+                    '<>',
+                    ''
+                )
+                ->exists();
+
+
+        /*
+        |--------------------------------------------------------------------------
         | PAGINATION
         |--------------------------------------------------------------------------
         */
@@ -394,7 +419,8 @@ class SuratMasukController extends Controller
             compact(
                 'suratMasuks',
                 'kategoris',
-                'statusCounts'
+                'statusCounts',
+                'hasUploadedFile'
             )
         );
     }
