@@ -333,7 +333,12 @@
     |--------------------------------------------------------------------------
     */
     $hasVisibleData =
-        $totalSuratMasuk > 0;
+        isset($suratMasuks) &&
+        method_exists(
+            $suratMasuks,
+            'count'
+        ) &&
+        $suratMasuks->count() > 0;
     /*
     |--------------------------------------------------------------------------
     | EXPORT QUERY
@@ -1841,54 +1846,52 @@
             </div>
         </div>
         <div class="surat-header-actions">
-            @if($hasVisibleData)
-                <a
-                    href="{{ route('export.surat-masuk.excel', $exportQuery) }}"
-                    class="surat-export-button excel"
-                    title="Export Excel"
-                    aria-label="Export Excel"
+            <a
+                href="{{ route('export.surat-masuk.excel', $exportQuery) }}"
+                class="surat-export-button excel"
+                title="Export Excel"
+                aria-label="Export Excel"
+            >
+                <svg
+                    class="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
                 >
-                    <svg
-                        class="h-4 w-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        aria-hidden="true"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M4 4h16v16H4zM8 8l8 8m0-8l-8 8"
-                        />
-                    </svg>
-                    Excel
-                </a>
-                <a
-                    href="{{ route('export.surat-masuk.pdf', $exportQuery) }}"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="surat-export-button pdf"
-                    title="Export PDF"
-                    aria-label="Export PDF"
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M4 4h16v16H4zM8 8l8 8m0-8l-8 8"
+                    />
+                </svg>
+                Excel
+            </a>
+            <a
+                href="{{ route('export.surat-masuk.pdf', $exportQuery) }}"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="surat-export-button pdf"
+                title="Export PDF"
+                aria-label="Export PDF"
+            >
+                <svg
+                    class="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
                 >
-                    <svg
-                        class="h-4 w-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        aria-hidden="true"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M7 3h7l4 4v14H7a2 2 0 01-2-2V5a2 2 0 012-2zm7 0v5h5"
-                        />
-                    </svg>
-                    PDF
-                </a>
-            @endif
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M7 3h7l4 4v14H7a2 2 0 01-2-2V5a2 2 0 012-2zm7 0v5h5"
+                    />
+                </svg>
+                PDF
+            </a>
             @if($canManage)
                 <a
                     href="{{ route('surat-masuk.create') }}"
