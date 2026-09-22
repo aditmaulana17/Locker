@@ -2595,19 +2595,6 @@
                                 <div>
                                     {{ $tanggalTerima }}
                                 </div>
-                                @if(
-                                    $surat->created_at
-                                )
-                                    <div
-                                        class="mt-1 text-[9px] font-normal text-slate-400"
-                                    >
-                                        {{
-                                            Carbon::parse(
-                                                $surat->created_at
-                                            )->format('H:i')
-                                        }}
-                                    </div>
-                                @endif
                             </td>
                             {{-- PENGIRIM --}}
                             <td class="cell-sender">
