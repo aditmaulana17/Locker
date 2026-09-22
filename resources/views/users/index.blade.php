@@ -5,28 +5,26 @@
 @section('content')
 
 @php
+    use App\Models\User;
+
     /*
     |--------------------------------------------------------------------------
-    | FILTER
+    | NORMALISASI FILTER ROLE
     |--------------------------------------------------------------------------
     */
 
     $selectedRoles = request()->input('role', []);
-    $selectedStatuses = request()->input('is_active', []);
 
-    $selectedRoles = is_array($selectedRoles)
-        ? $selectedRoles
-        : [$selectedRoles];
+    if (
+        is_scalar($selectedRoles) &&
+        trim((string) $selectedRoles) !== ''
+    ) {
+        $selectedRoles = [$selectedRoles];
+    }
 
-    $selectedStatuses = is_array($selectedStatuses)
-        ? $selectedStatuses
-        : [$selectedStatuses];
-
-    /*
-    |--------------------------------------------------------------------------
-    | NORMALISASI ROLE
-    |--------------------------------------------------------------------------
-    */
+    if (!is_array($selectedRoles)) {
+        $selectedRoles = [];
+    }
 
     $selectedRoles = collect($selectedRoles)
         ->map(function ($role) {
@@ -38,32 +36,86 @@
 
             return $role;
         })
-        ->filter(fn ($role) => in_array($role, ['admin', 'pimpinan', 'staff']))
+        ->filter(function ($role) {
+            return in_array(
+                $role,
+                [
+                    'admin',
+                    'pimpinan',
+                    'staff',
+                ],
+                true
+            );
+        })
+        ->unique()
         ->values()
-        ->toArray();
+        ->all();
+
 
     /*
     |--------------------------------------------------------------------------
-    | NORMALISASI STATUS
+    | NORMALISASI FILTER STATUS
     |--------------------------------------------------------------------------
     */
 
-    $selectedStatuses = collect($selectedStatuses)
-        ->map(fn ($status) => (string) $status)
-        ->filter(fn ($status) => in_array($status, ['1', '0']))
-        ->values()
-        ->toArray();
+    $selectedStatuses = request()->input('is_active', []);
 
-    $search = trim((string) request()->input('search', ''));
+    if (
+        is_scalar($selectedStatuses) &&
+        trim((string) $selectedStatuses) !== ''
+    ) {
+        $selectedStatuses = [$selectedStatuses];
+    }
+
+    if (!is_array($selectedStatuses)) {
+        $selectedStatuses = [];
+    }
+
+    $selectedStatuses = collect($selectedStatuses)
+        ->map(function ($status) {
+            return (string) $status;
+        })
+        ->filter(function ($status) {
+            return in_array(
+                $status,
+                [
+                    '1',
+                    '0',
+                ],
+                true
+            );
+        })
+        ->unique()
+        ->values()
+        ->all();
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | SEARCH
+    |--------------------------------------------------------------------------
+    */
+
+    $search = trim(
+        (string) request()->input('search', '')
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | CEK FILTER AKTIF
+    |--------------------------------------------------------------------------
+    */
 
     $hasFilters =
         $search !== '' ||
         count($selectedRoles) > 0 ||
         count($selectedStatuses) > 0;
 
+
     /*
     |--------------------------------------------------------------------------
-    | STATISTIK
+    | JUMLAH DATA PADA TABEL
     |--------------------------------------------------------------------------
     */
 
@@ -71,1179 +123,2605 @@
         ? $users->total()
         : $users->count();
 
+
     /*
     |--------------------------------------------------------------------------
-    | LABEL FILTER
+    | SCORECARD GLOBAL
+    |--------------------------------------------------------------------------
+    |
+    | Jumlah berikut tidak dipengaruhi oleh search,
+    | filter, maupun pagination.
+    |
+    */
+
+    $allUsersCount = User::query()
+        ->count();
+
+    $activeUsersCount = User::query()
+        ->where('is_active', true)
+        ->count();
+
+    $inactiveUsersCount = User::query()
+        ->where('is_active', false)
+        ->count();
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | JUMLAH ROLE
+    |--------------------------------------------------------------------------
+    */
+
+    $roleCount = 3;
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | LABEL ROLE
     |--------------------------------------------------------------------------
     */
 
     $roleLabels = [
-        'admin' => 'Admin',
+        'admin'    => 'Admin',
         'pimpinan' => 'Pimpinan',
-        'staff' => 'Staf',
+        'staff'    => 'Staf',
     ];
 
-    $selectedRoleLabels = collect($selectedRoles)
-        ->map(fn ($role) => $roleLabels[$role] ?? ucfirst($role))
-        ->values();
+
+    /*
+    |--------------------------------------------------------------------------
+    | LABEL STATUS
+    |--------------------------------------------------------------------------
+    */
 
     $statusLabels = [
         '1' => 'Aktif',
         '0' => 'Nonaktif',
     ];
-
-    $selectedStatusLabels = collect($selectedStatuses)
-        ->map(fn ($status) => $statusLabels[$status] ?? $status)
-        ->values();
 @endphp
 
 
-{{-- =========================================================
-     PAGE HEADER
-========================================================= --}}
+<style>
+
+    /*
+    |--------------------------------------------------------------------------
+    | PAGE
+    |--------------------------------------------------------------------------
+    */
+
+    .users-page {
+        width: 100%;
+        max-width: 1600px;
+        margin: 0 auto;
+        padding: 24px;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | HEADER
+    |--------------------------------------------------------------------------
+    */
+
+    .users-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 20px;
+        margin-bottom: 24px;
+    }
+
+    .users-header-left {
+        min-width: 0;
+    }
+
+    .users-title {
+        margin: 0;
+        color: #111827;
+        font-size: 28px;
+        line-height: 1.2;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+    }
+
+    .users-subtitle {
+        margin: 8px 0 0;
+        color: #6b7280;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    .users-header-right {
+        display: flex;
+        align-items: center;
+        flex-shrink: 0;
+        gap: 10px;
+    }
+
+    .btn-add-user {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 42px;
+        padding: 0 16px;
+        border: 1px solid transparent;
+        border-radius: 10px;
+        background: #2563eb;
+        color: #ffffff;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 700;
+        box-shadow: 0 3px 10px rgba(37, 99, 235, 0.18);
+        transition:
+            background-color 0.2s ease,
+            transform 0.2s ease,
+            box-shadow 0.2s ease;
+    }
+
+    .btn-add-user:hover {
+        background: #1d4ed8;
+        color: #ffffff;
+        text-decoration: none;
+        transform: translateY(-1px);
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | SCORECARD
+    |--------------------------------------------------------------------------
+    |
+    | DESKTOP:
+    | 4 CARD DALAM SATU BARIS
+    |
+    */
+
+    .users-summary {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 16px;
+        width: 100%;
+        margin-bottom: 24px;
+    }
+
+    .summary-card {
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        min-width: 0;
+        min-height: 96px;
+        padding: 18px;
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        background: #ffffff;
+        box-shadow: 0 4px 18px rgba(15, 23, 42, 0.05);
+    }
+
+    .summary-card::after {
+        content: '';
+        position: absolute;
+        right: -18px;
+        bottom: -18px;
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.60);
+        pointer-events: none;
+    }
+
+    .summary-icon {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 48px;
+        min-width: 48px;
+        height: 48px;
+        border-radius: 13px;
+    }
+
+    .summary-icon-blue {
+        background: #eff6ff;
+        color: #2563eb;
+    }
+
+    .summary-icon-green {
+        background: #ecfdf5;
+        color: #059669;
+    }
+
+    .summary-icon-gray {
+        background: #f3f4f6;
+        color: #6b7280;
+    }
+
+    .summary-icon-purple {
+        background: #f5f3ff;
+        color: #7c3aed;
+    }
+
+    .summary-content {
+        position: relative;
+        z-index: 1;
+        min-width: 0;
+    }
+
+    .summary-label {
+        margin: 0 0 4px;
+        color: #6b7280;
+        font-size: 12px;
+        line-height: 1.4;
+        font-weight: 600;
+    }
+
+    .summary-value {
+        margin: 0;
+        color: #111827;
+        font-size: 25px;
+        line-height: 1.1;
+        font-weight: 800;
+    }
+
+    .summary-note {
+        margin-top: 5px;
+        color: #9ca3af;
+        font-size: 11px;
+        line-height: 1.4;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | FILTER CARD
+    |--------------------------------------------------------------------------
+    */
+
+    .users-filter-card {
+        margin-bottom: 20px;
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        background: #ffffff;
+        box-shadow: 0 4px 18px rgba(15, 23, 42, 0.04);
+    }
+
+    .users-filter-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 18px 20px;
+        border-bottom: 1px solid #eef0f3;
+    }
+
+    .users-filter-title {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        margin: 0;
+        color: #111827;
+        font-size: 14px;
+        font-weight: 750;
+    }
+
+    .users-filter-title svg {
+        color: #6b7280;
+    }
+
+    .users-filter-body {
+        padding: 18px 20px;
+    }
+
+    .users-filter-form {
+        display: grid;
+        grid-template-columns:
+            minmax(220px, 1.4fr)
+            minmax(180px, 1fr)
+            minmax(180px, 1fr)
+            auto;
+        align-items: end;
+        gap: 12px;
+    }
+
+    .filter-group {
+        min-width: 0;
+    }
+
+    .filter-label {
+        display: block;
+        margin-bottom: 7px;
+        color: #374151;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | SEARCH
+    |--------------------------------------------------------------------------
+    */
+
+    .search-wrapper {
+        position: relative;
+    }
+
+    .search-icon {
+        position: absolute;
+        top: 50%;
+        left: 12px;
+        z-index: 2;
+        transform: translateY(-50%);
+        color: #9ca3af;
+        pointer-events: none;
+    }
+
+    .search-input {
+        width: 100%;
+        height: 42px;
+        padding: 0 38px 0 38px;
+        border: 1px solid #d1d5db;
+        border-radius: 10px;
+        outline: none;
+        background: #ffffff;
+        color: #111827;
+        font-size: 13px;
+        transition:
+            border-color 0.2s ease,
+            box-shadow 0.2s ease;
+    }
+
+    .search-input:focus {
+        border-color: #93c5fd;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.10);
+    }
+
+    .search-clear {
+        position: absolute;
+        top: 50%;
+        right: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        padding: 0;
+        transform: translateY(-50%);
+        border: 0;
+        border-radius: 8px;
+        background: transparent;
+        color: #9ca3af;
+        cursor: pointer;
+    }
+
+    .search-clear:hover {
+        background: #f3f4f6;
+        color: #4b5563;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | DROPDOWN
+    |--------------------------------------------------------------------------
+    */
+
+    .filter-dropdown {
+        position: relative;
+    }
+
+    .filter-dropdown-button {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        height: 42px;
+        gap: 10px;
+        padding: 0 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 10px;
+        outline: none;
+        background: #ffffff;
+        color: #374151;
+        font-size: 13px;
+        cursor: pointer;
+        transition:
+            border-color 0.2s ease,
+            box-shadow 0.2s ease;
+    }
+
+    .filter-dropdown-button:hover {
+        border-color: #9ca3af;
+    }
+
+    .filter-dropdown-button.active {
+        border-color: #93c5fd;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.08);
+    }
+
+    .filter-dropdown-label {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .filter-dropdown-menu {
+        position: absolute;
+        top: calc(100% + 8px);
+        left: 0;
+        z-index: 50;
+        display: none;
+        width: 100%;
+        min-width: 210px;
+        max-height: 300px;
+        overflow-y: auto;
+        padding: 8px;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        background: #ffffff;
+        box-shadow: 0 15px 35px rgba(15, 23, 42, 0.12);
+    }
+
+    .filter-dropdown-menu.show {
+        display: block;
+    }
+
+    .filter-option {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 10px;
+        border-radius: 9px;
+        cursor: pointer;
+        transition: background 0.15s ease;
+    }
+
+    .filter-option:hover {
+        background: #f9fafb;
+    }
+
+    .filter-option input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+        margin: 0;
+        accent-color: #2563eb;
+        cursor: pointer;
+    }
+
+    .filter-option span {
+        color: #374151;
+        font-size: 13px;
+    }
+
+    .filter-menu-divider {
+        height: 1px;
+        margin: 6px 2px;
+        background: #f0f1f3;
+    }
+
+    .filter-menu-actions {
+        display: flex;
+        gap: 8px;
+        padding: 4px 2px 2px;
+    }
+
+    .filter-menu-action {
+        flex: 1;
+        min-height: 34px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        background: #ffffff;
+        color: #4b5563;
+        font-size: 11px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .filter-menu-action:hover {
+        background: #f9fafb;
+    }
+
+    .filter-menu-action.primary {
+        border-color: #bfdbfe;
+        background: #eff6ff;
+        color: #2563eb;
+    }
+
+    .filter-menu-action.primary:hover {
+        background: #dbeafe;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | FILTER ACTION
+    |--------------------------------------------------------------------------
+    */
+
+    .filter-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-filter-submit,
+    .btn-filter-reset {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        min-height: 42px;
+        padding: 0 14px;
+        border-radius: 10px;
+        font-size: 12px;
+        font-weight: 700;
+        text-decoration: none;
+        white-space: nowrap;
+        transition: all 0.2s ease;
+    }
+
+    .btn-filter-submit {
+        border: 1px solid #2563eb;
+        background: #2563eb;
+        color: #ffffff;
+        cursor: pointer;
+    }
+
+    .btn-filter-submit:hover {
+        border-color: #1d4ed8;
+        background: #1d4ed8;
+        color: #ffffff;
+    }
+
+    .btn-filter-reset {
+        border: 1px solid #d1d5db;
+        background: #ffffff;
+        color: #4b5563;
+    }
+
+    .btn-filter-reset:hover {
+        background: #f9fafb;
+        color: #111827;
+        text-decoration: none;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | ACTIVE FILTER
+    |--------------------------------------------------------------------------
+    */
+
+    .active-filter-info {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+        margin-top: 14px;
+    }
+
+    .filter-result-info {
+        color: #6b7280;
+        font-size: 12px;
+    }
+
+    .filter-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        min-height: 26px;
+        padding: 0 9px;
+        border: 1px solid #dbeafe;
+        border-radius: 999px;
+        background: #eff6ff;
+        color: #1d4ed8;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | TABLE CARD
+    |--------------------------------------------------------------------------
+    */
+
+    .users-table-card {
+        overflow: hidden;
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        background: #ffffff;
+        box-shadow: 0 4px 18px rgba(15, 23, 42, 0.04);
+    }
+
+    .users-table-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 18px 20px;
+        border-bottom: 1px solid #eef0f3;
+    }
+
+    .users-table-heading {
+        min-width: 0;
+    }
+
+    .users-table-title {
+        margin: 0;
+        color: #111827;
+        font-size: 15px;
+        font-weight: 800;
+    }
+
+    .users-table-description {
+        margin: 4px 0 0;
+        color: #9ca3af;
+        font-size: 12px;
+    }
+
+    .users-count-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 30px;
+        padding: 0 10px;
+        border: 1px solid #e5e7eb;
+        border-radius: 999px;
+        background: #f9fafb;
+        color: #4b5563;
+        font-size: 11px;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .table-responsive {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .users-table {
+        width: 100%;
+        min-width: 900px;
+        border-collapse: collapse;
+    }
+
+    .users-table thead th {
+        padding: 13px 18px;
+        border-bottom: 1px solid #e5e7eb;
+        background: #f9fafb;
+        color: #6b7280;
+        font-size: 11px;
+        line-height: 1.4;
+        font-weight: 800;
+        text-align: left;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        white-space: nowrap;
+    }
+
+    .users-table tbody td {
+        padding: 16px 18px;
+        border-bottom: 1px solid #f1f3f5;
+        vertical-align: middle;
+        color: #374151;
+        font-size: 13px;
+    }
+
+    .users-table tbody tr:last-child td {
+        border-bottom: 0;
+    }
+
+    .users-table tbody tr:hover {
+        background: #fcfcfd;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | USER
+    |--------------------------------------------------------------------------
+    */
+
+    .user-cell {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        min-width: 220px;
+    }
+
+    .user-avatar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        min-width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        background: #eff6ff;
+        color: #2563eb;
+        font-size: 13px;
+        font-weight: 800;
+    }
+
+    .user-info {
+        min-width: 0;
+    }
+
+    .user-name {
+        margin: 0;
+        overflow: hidden;
+        color: #111827;
+        font-size: 13px;
+        font-weight: 800;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .user-email {
+        margin: 3px 0 0;
+        overflow: hidden;
+        color: #9ca3af;
+        font-size: 11px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | ROLE BADGE
+    |--------------------------------------------------------------------------
+    */
+
+    .role-badge,
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        min-height: 28px;
+        padding: 0 9px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 750;
+        white-space: nowrap;
+    }
+
+    .role-admin {
+        border: 1px solid #dbeafe;
+        background: #eff6ff;
+        color: #2563eb;
+    }
+
+    .role-pimpinan {
+        border: 1px solid #ede9fe;
+        background: #f5f3ff;
+        color: #7c3aed;
+    }
+
+    .role-staff {
+        border: 1px solid #d1fae5;
+        background: #ecfdf5;
+        color: #059669;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | STATUS BADGE
+    |--------------------------------------------------------------------------
+    */
+
+    .status-active {
+        border: 1px solid #a7f3d0;
+        background: #ecfdf5;
+        color: #047857;
+    }
+
+    .status-inactive {
+        border: 1px solid #e5e7eb;
+        background: #f3f4f6;
+        color: #6b7280;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | ACTION
+    |--------------------------------------------------------------------------
+    */
+
+    .action-group {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 6px;
+    }
+
+    .action-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        padding: 0;
+        border: 1px solid #e5e7eb;
+        border-radius: 9px;
+        background: #ffffff;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .action-btn:hover {
+        text-decoration: none;
+    }
+
+    .action-view {
+        color: #2563eb;
+    }
+
+    .action-view:hover {
+        border-color: #bfdbfe;
+        background: #eff6ff;
+    }
+
+    .action-edit {
+        color: #7c3aed;
+    }
+
+    .action-edit:hover {
+        border-color: #ddd6fe;
+        background: #f5f3ff;
+    }
+
+    .action-delete {
+        color: #dc2626;
+    }
+
+    .action-delete:hover {
+        border-color: #fecaca;
+        background: #fef2f2;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | EMPTY STATE
+    |--------------------------------------------------------------------------
+    */
+
+    .users-empty {
+        padding: 60px 20px;
+        text-align: center;
+    }
+
+    .users-empty-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 58px;
+        height: 58px;
+        margin: 0 auto 14px;
+        border-radius: 16px;
+        background: #f3f4f6;
+        color: #9ca3af;
+    }
+
+    .users-empty-title {
+        margin: 0;
+        color: #111827;
+        font-size: 15px;
+        font-weight: 800;
+    }
+
+    .users-empty-text {
+        max-width: 440px;
+        margin: 7px auto 0;
+        color: #9ca3af;
+        font-size: 12px;
+        line-height: 1.6;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | PAGINATION
+    |--------------------------------------------------------------------------
+    */
+
+    .users-pagination {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 16px 20px;
+        border-top: 1px solid #eef0f3;
+    }
+
+    .pagination-info {
+        color: #6b7280;
+        font-size: 12px;
+    }
+
+    .pagination-info strong {
+        color: #374151;
+    }
+
+    .pagination-nav {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .pagination-nav a,
+    .pagination-nav span {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 34px;
+        height: 34px;
+        padding: 0 8px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        background: #ffffff;
+        color: #4b5563;
+        text-decoration: none;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .pagination-nav a:hover {
+        background: #f9fafb;
+        color: #111827;
+        text-decoration: none;
+    }
+
+    .pagination-nav .active {
+        border-color: #2563eb;
+        background: #2563eb;
+        color: #ffffff;
+    }
+
+    .pagination-nav .disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | TABLET
+    |--------------------------------------------------------------------------
+    |
+    | 4 CARD TETAP SATU BARIS
+    |
+    */
+
+    @media (min-width: 701px) and (max-width: 1200px) {
+
+        .users-summary {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .summary-card {
+            min-height: 86px;
+            padding: 14px;
+            gap: 10px;
+            border-radius: 13px;
+        }
+
+        .summary-icon {
+            width: 40px;
+            min-width: 40px;
+            height: 40px;
+            border-radius: 10px;
+        }
+
+        .summary-icon svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .summary-label {
+            font-size: 11px;
+        }
+
+        .summary-value {
+            font-size: 21px;
+        }
+
+        .summary-note {
+            font-size: 9px;
+        }
+
+        .users-filter-form {
+            grid-template-columns:
+                minmax(200px, 1.3fr)
+                minmax(150px, 1fr)
+                minmax(150px, 1fr)
+                auto;
+        }
+
+        .filter-actions {
+            flex-wrap: wrap;
+        }
+
+        .btn-filter-submit,
+        .btn-filter-reset {
+            padding: 0 11px;
+        }
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | MOBILE
+    |--------------------------------------------------------------------------
+    */
+
+    @media (max-width: 700px) {
+
+        .users-page {
+            padding: 16px;
+        }
+
+        .users-header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .users-header-right {
+            justify-content: stretch;
+        }
+
+        .btn-add-user {
+            width: 100%;
+        }
+
+        .users-title {
+            font-size: 23px;
+        }
+
+        /*
+        | 2 CARD
+        */
+
+        .users-summary {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .summary-card {
+            min-height: 84px;
+            padding: 14px;
+            gap: 10px;
+            border-radius: 13px;
+        }
+
+        .summary-icon {
+            width: 40px;
+            min-width: 40px;
+            height: 40px;
+            border-radius: 10px;
+        }
+
+        .summary-icon svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .summary-value {
+            font-size: 21px;
+        }
+
+        .summary-label {
+            font-size: 11px;
+        }
+
+        .summary-note {
+            font-size: 9px;
+        }
+
+
+        /*
+        | FILTER
+        */
+
+        .users-filter-header {
+            padding: 15px 16px;
+        }
+
+        .users-filter-body {
+            padding: 16px;
+        }
+
+        .users-filter-form {
+            grid-template-columns: 1fr;
+        }
+
+        .filter-actions {
+            flex-direction: column;
+            justify-content: stretch;
+            width: 100%;
+        }
+
+        .btn-filter-submit,
+        .btn-filter-reset {
+            width: 100%;
+        }
+
+
+        /*
+        | TABLE HEADER
+        */
+
+        .users-table-header {
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 16px;
+        }
+
+
+        /*
+        | PAGINATION
+        */
+
+        .users-pagination {
+            flex-direction: column;
+            align-items: stretch;
+            padding: 14px 16px;
+        }
+
+        .pagination-nav {
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | SMALL MOBILE
+    |--------------------------------------------------------------------------
+    */
+
+    @media (max-width: 480px) {
+
+        /*
+        | 1 CARD PER BARIS
+        */
+
+        .users-summary {
+            grid-template-columns: 1fr;
+        }
+
+        .summary-card {
+            min-height: 90px;
+            padding: 16px;
+        }
+
+        .summary-icon {
+            width: 44px;
+            min-width: 44px;
+            height: 44px;
+        }
+
+        .summary-value {
+            font-size: 23px;
+        }
+
+        .summary-label {
+            font-size: 12px;
+        }
+
+        .summary-note {
+            font-size: 10px;
+        }
+    }
+
+</style>
+
 
 <div class="users-page">
+
+    {{-- ================================================================
+         HEADER
+    ================================================================= --}}
 
     <div class="users-header">
 
         <div class="users-header-left">
 
-            <div class="users-page-icon">
-                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <path
-                        d="M16 21V19C16 16.7909 14.2091 15 12 15H6C3.79086 15 2 16.7909 2 19V21"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                        stroke-linecap="round"
-                    />
-                    <circle
-                        cx="9"
-                        cy="7"
-                        r="4"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                    />
-                    <path
-                        d="M19 8V14"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                        stroke-linecap="round"
-                    />
-                    <path
-                        d="M22 11H16"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                        stroke-linecap="round"
-                    />
-                </svg>
-            </div>
+            <h1 class="users-title">
+                Manajemen Pengguna
+            </h1>
 
-            <div>
-                <h1>Manajemen Pengguna</h1>
-                <p>
-                    Kelola akun, role, jabatan, dan status pengguna sistem.
-                </p>
-            </div>
-
-        </div>
-
-        <a href="{{ route('users.create') }}" class="btn-add-user">
-
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path
-                    d="M12 5V19"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                />
-                <path
-                    d="M5 12H19"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                />
-            </svg>
-
-            <span>Tambah Pengguna</span>
-
-        </a>
-
-    </div>
-
-
-    {{-- =====================================================
-         SUMMARY
-    ====================================================== --}}
-
-    <div class="users-summary">
-
-        <div class="summary-card">
-
-            <div class="summary-icon summary-icon-blue">
-                <svg viewBox="0 0 24 24" fill="none">
-                    <path
-                        d="M16 21V19C16 16.7909 14.2091 15 12 15H6C3.79086 15 2 16.7909 2 19V21"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                        stroke-linecap="round"
-                    />
-                    <circle
-                        cx="9"
-                        cy="7"
-                        r="4"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                    />
-                    <path
-                        d="M22 21V19C22 17.1362 20.7252 15.5701 19 15.126"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                        stroke-linecap="round"
-                    />
-                    <path
-                        d="M16 3.12891C17.7252 3.57295 19 5.13869 19 7.00001C19 8.86132 17.7252 10.4271 16 10.8711"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                        stroke-linecap="round"
-                    />
-                </svg>
-            </div>
-
-            <div class="summary-content">
-                <span>Total Pengguna</span>
-                <strong>{{ $totalUsers }}</strong>
-            </div>
+            <p class="users-subtitle">
+                Kelola akun pengguna, role, jabatan, dan status akun.
+            </p>
 
         </div>
 
 
-        <div class="summary-card">
+        <div class="users-header-right">
 
-            <div class="summary-icon summary-icon-green">
-                <svg viewBox="0 0 24 24" fill="none">
-                    <path
-                        d="M20 6L9 17L4 12"
+            @if(Route::has('users.create'))
+
+                <a
+                    href="{{ route('users.create') }}"
+                    class="btn-add-user"
+                >
+
+                    <svg
+                        width="17"
+                        height="17"
+                        viewBox="0 0 24 24"
+                        fill="none"
                         stroke="currentColor"
                         stroke-width="2"
                         stroke-linecap="round"
                         stroke-linejoin="round"
-                    />
-                </svg>
-            </div>
-
-            <div class="summary-content">
-                <span>Status</span>
-                <strong>Aktif</strong>
-                <small>Pengguna dapat masuk ke sistem</small>
-            </div>
-
-        </div>
-
-
-        <div class="summary-card">
-
-            <div class="summary-icon summary-icon-purple">
-                <svg viewBox="0 0 24 24" fill="none">
-                    <path
-                        d="M12 2L14.8 8.1L21.5 8.8L16.5 13.3L17.9 20L12 16.5L6.1 20L7.5 13.3L2.5 8.8L9.2 8.1L12 2Z"
-                        stroke="currentColor"
-                        stroke-width="1.7"
-                        stroke-linejoin="round"
-                    />
-                </svg>
-            </div>
-
-            <div class="summary-content">
-                <span>Role</span>
-                <strong>3</strong>
-                <small>Admin, Pimpinan, dan Staf</small>
-            </div>
-
-        </div>
-
-    </div>
-
-
-    {{-- =====================================================
-         MAIN CARD
-    ====================================================== --}}
-
-    <div class="users-card">
-
-        {{-- =================================================
-             CARD HEADER
-        ================================================== --}}
-
-        <div class="users-card-header">
-
-            <div>
-
-                <h2>Daftar Pengguna</h2>
-
-                <p>
-                    Daftar akun yang terdaftar pada sistem.
-                </p>
-
-            </div>
-
-            @if($hasFilters)
-
-                <div class="active-filter-indicator">
-
-                    <span class="active-filter-dot"></span>
-
-                    <span>
-                        Filter aktif
-                    </span>
-
-                </div>
-
-            @endif
-
-        </div>
-
-
-        {{-- =================================================
-             FILTER
-        ================================================== --}}
-
-        <form
-            action="{{ route('users.index') }}"
-            method="GET"
-            class="users-filter"
-            id="usersFilterForm"
-        >
-
-            {{-- SEARCH --}}
-
-            <div class="filter-search">
-
-                <svg viewBox="0 0 24 24" fill="none">
-                    <circle
-                        cx="11"
-                        cy="11"
-                        r="7"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                    />
-                    <path
-                        d="M20 20L16 16"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                        stroke-linecap="round"
-                    />
-                </svg>
-
-                <input
-                    type="text"
-                    name="search"
-                    value="{{ $search }}"
-                    placeholder="Cari nama, email, atau jabatan..."
-                    autocomplete="off"
-                >
-
-                @if($search !== '')
-
-                    <button
-                        type="button"
-                        class="search-clear"
-                        onclick="clearSearch()"
-                        aria-label="Hapus pencarian"
                     >
-                        <svg viewBox="0 0 24 24" fill="none">
-                            <path
-                                d="M6 6L18 18"
-                                stroke="currentColor"
-                                stroke-width="1.8"
-                                stroke-linecap="round"
-                            />
-                            <path
-                                d="M18 6L6 18"
-                                stroke="currentColor"
-                                stroke-width="1.8"
-                                stroke-linecap="round"
-                            />
-                        </svg>
-                    </button>
-
-                @endif
-
-            </div>
-
-
-            {{-- ROLE DROPDOWN --}}
-
-            <div class="filter-dropdown" data-dropdown="role">
-
-                <button
-                    type="button"
-                    class="filter-trigger"
-                    aria-expanded="false"
-                >
-
-                    <span class="filter-trigger-left">
-
-                        <svg viewBox="0 0 24 24" fill="none">
-                            <path
-                                d="M16 21V19C16 16.7909 14.2091 15 12 15H6C3.79086 15 2 16.7909 2 19V21"
-                                stroke="currentColor"
-                                stroke-width="1.7"
-                                stroke-linecap="round"
-                            />
-                            <circle
-                                cx="9"
-                                cy="7"
-                                r="4"
-                                stroke="currentColor"
-                                stroke-width="1.7"
-                            />
-                        </svg>
-
-                        <span class="filter-label">
-                            @if(count($selectedRoleLabels) === 0)
-                                Semua Role
-                            @elseif(count($selectedRoleLabels) === 1)
-                                {{ $selectedRoleLabels->first() }}
-                            @else
-                                {{ count($selectedRoleLabels) }} Role dipilih
-                            @endif
-                        </span>
-
-                    </span>
-
-                    <svg
-                        class="filter-chevron"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                    >
-                        <path
-                            d="M6 9L12 15L18 9"
-                            stroke="currentColor"
-                            stroke-width="1.8"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                        />
+                        <path d="M12 5v14"></path>
+                        <path d="M5 12h14"></path>
                     </svg>
 
-                </button>
-
-
-                <div class="filter-menu">
-
-                    <div class="filter-menu-header">
-
-                        <strong>Filter Role</strong>
-
-                        <button
-                            type="button"
-                            class="dropdown-clear"
-                            data-clear="role"
-                        >
-                            Hapus
-                        </button>
-
-                    </div>
-
-
-                    <label class="filter-option filter-option-all">
-
-                        <input
-                            type="checkbox"
-                            data-select-all="role"
-                        >
-
-                        <span class="custom-checkbox"></span>
-
-                        <span>Semua Role</span>
-
-                    </label>
-
-
-                    <div class="filter-divider"></div>
-
-
-                    @foreach([
-                        'admin' => 'Admin',
-                        'pimpinan' => 'Pimpinan',
-                        'staff' => 'Staf',
-                    ] as $roleValue => $roleLabel)
-
-                        <label class="filter-option">
-
-                            <input
-                                type="checkbox"
-                                name="role[]"
-                                value="{{ $roleValue }}"
-                                data-option="role"
-                                {{ in_array($roleValue, $selectedRoles) ? 'checked' : '' }}
-                            >
-
-                            <span class="custom-checkbox"></span>
-
-                            <span>{{ $roleLabel }}</span>
-
-                        </label>
-
-                    @endforeach
-
-                </div>
-
-            </div>
-
-
-            {{-- STATUS DROPDOWN --}}
-
-            <div class="filter-dropdown" data-dropdown="status">
-
-                <button
-                    type="button"
-                    class="filter-trigger"
-                    aria-expanded="false"
-                >
-
-                    <span class="filter-trigger-left">
-
-                        <svg viewBox="0 0 24 24" fill="none">
-                            <circle
-                                cx="12"
-                                cy="12"
-                                r="9"
-                                stroke="currentColor"
-                                stroke-width="1.7"
-                            />
-                            <path
-                                d="M8 12L10.7 14.7L16 9.4"
-                                stroke="currentColor"
-                                stroke-width="1.7"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                            />
-                        </svg>
-
-                        <span class="filter-label">
-                            @if(count($selectedStatusLabels) === 0)
-                                Semua Status
-                            @elseif(count($selectedStatusLabels) === 1)
-                                {{ $selectedStatusLabels->first() }}
-                            @else
-                                {{ count($selectedStatusLabels) }} Status dipilih
-                            @endif
-                        </span>
-
-                    </span>
-
-                    <svg
-                        class="filter-chevron"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                    >
-                        <path
-                            d="M6 9L12 15L18 9"
-                            stroke="currentColor"
-                            stroke-width="1.8"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                        />
-                    </svg>
-
-                </button>
-
-
-                <div class="filter-menu">
-
-                    <div class="filter-menu-header">
-
-                        <strong>Filter Status</strong>
-
-                        <button
-                            type="button"
-                            class="dropdown-clear"
-                            data-clear="status"
-                        >
-                            Hapus
-                        </button>
-
-                    </div>
-
-
-                    <label class="filter-option filter-option-all">
-
-                        <input
-                            type="checkbox"
-                            data-select-all="status"
-                        >
-
-                        <span class="custom-checkbox"></span>
-
-                        <span>Semua Status</span>
-
-                    </label>
-
-
-                    <div class="filter-divider"></div>
-
-
-                    <label class="filter-option">
-
-                        <input
-                            type="checkbox"
-                            name="is_active[]"
-                            value="1"
-                            data-option="status"
-                            {{ in_array('1', $selectedStatuses) ? 'checked' : '' }}
-                        >
-
-                        <span class="custom-checkbox"></span>
-
-                        <span class="status-option">
-
-                            <span class="status-dot status-dot-active"></span>
-
-                            Aktif
-
-                        </span>
-
-                    </label>
-
-
-                    <label class="filter-option">
-
-                        <input
-                            type="checkbox"
-                            name="is_active[]"
-                            value="0"
-                            data-option="status"
-                            {{ in_array('0', $selectedStatuses) ? 'checked' : '' }}
-                        >
-
-                        <span class="custom-checkbox"></span>
-
-                        <span class="status-option">
-
-                            <span class="status-dot status-dot-inactive"></span>
-
-                            Nonaktif
-
-                        </span>
-
-                    </label>
-
-                </div>
-
-            </div>
-
-
-            {{-- ACTION --}}
-
-            <button
-                type="submit"
-                class="btn-search"
-            >
-
-                <svg viewBox="0 0 24 24" fill="none">
-                    <circle
-                        cx="11"
-                        cy="11"
-                        r="7"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                    />
-                    <path
-                        d="M20 20L16 16"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                        stroke-linecap="round"
-                    />
-                </svg>
-
-                <span>Cari</span>
-
-            </button>
-
-
-            @if($hasFilters)
-
-                <a
-                    href="{{ route('users.index') }}"
-                    class="btn-reset"
-                >
-
-                    <svg viewBox="0 0 24 24" fill="none">
-                        <path
-                            d="M3 12C3 7.02944 7.02944 3 12 3C15.3137 3 18.2221 4.79267 19.7751 7.5"
-                            stroke="currentColor"
-                            stroke-width="1.8"
-                            stroke-linecap="round"
-                        />
-                        <path
-                            d="M21 12C21 16.9706 16.9706 21 12 21C8.68629 21 5.77789 19.2073 4.22487 16.5"
-                            stroke="currentColor"
-                            stroke-width="1.8"
-                            stroke-linecap="round"
-                        />
-                        <path
-                            d="M19.8 3.8V7.8H15.8"
-                            stroke="currentColor"
-                            stroke-width="1.8"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                        />
-                        <path
-                            d="M4.2 20.2V16.2H8.2"
-                            stroke="currentColor"
-                            stroke-width="1.8"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                        />
-                    </svg>
-
-                    <span>Reset</span>
+                    Tambah Pengguna
 
                 </a>
 
             @endif
 
-        </form>
+        </div>
+
+    </div>
 
 
-        {{-- =================================================
-             ACTIVE FILTERS
-        ================================================== --}}
 
-        @if($hasFilters)
+    {{-- ================================================================
+         SCORECARD
+    ================================================================= --}}
 
-            <div class="active-filters">
+    <div class="users-summary">
 
-                <span class="active-filters-title">
-                    Filter:
-                </span>
+        {{-- ============================================================
+             TOTAL PENGGUNA
+        ============================================================= --}}
 
+        <div class="summary-card">
 
-                @if($search !== '')
+            <div class="summary-icon summary-icon-blue">
 
-                    <span class="filter-chip">
-
-                        <span>Pencarian: {{ $search }}</span>
-
-                        <button
-                            type="button"
-                            onclick="removeSearchFilter()"
-                            aria-label="Hapus filter pencarian"
-                        >
-                            ×
-                        </button>
-
-                    </span>
-
-                @endif
-
-
-                @foreach($selectedRoleLabels as $label)
-
-                    <span class="filter-chip">
-                        <span>{{ $label }}</span>
-                    </span>
-
-                @endforeach
-
-
-                @foreach($selectedStatusLabels as $label)
-
-                    <span class="filter-chip">
-                        <span>{{ $label }}</span>
-                    </span>
-
-                @endforeach
+                <svg
+                    width="22"
+                    height="22"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                >
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
 
             </div>
 
-        @endif
 
+            <div class="summary-content">
 
-        {{-- =================================================
-             TABLE
-        ================================================== --}}
+                <p class="summary-label">
+                    Total Pengguna
+                </p>
 
-        <div class="users-table-wrapper">
+                <p class="summary-value">
+                    {{ number_format($allUsersCount, 0, ',', '.') }}
+                </p>
 
-            <table class="users-table">
+                <div class="summary-note">
+                    Seluruh akun pengguna
+                </div>
 
-                <thead>
-
-                    <tr>
-
-                        <th class="column-user">
-                            Pengguna
-                        </th>
-
-                        <th>
-                            Role
-                        </th>
-
-                        <th>
-                            Jabatan
-                        </th>
-
-                        <th>
-                            Status
-                        </th>
-
-                        <th class="column-action">
-                            Aksi
-                        </th>
-
-                    </tr>
-
-                </thead>
-
-
-                <tbody>
-
-                    @forelse($users as $user)
-
-                        @php
-
-                            /*
-                            |--------------------------------------------------------------------------
-                            | ROLE USER
-                            |--------------------------------------------------------------------------
-                            */
-
-                            $userRole = strtolower(
-                                trim((string) ($user->role ?? ''))
-                            );
-
-                            if ($userRole === 'staf') {
-                                $userRole = 'staff';
-                            }
-
-                            /*
-                            |--------------------------------------------------------------------------
-                            | ROLE LABEL
-                            |--------------------------------------------------------------------------
-                            */
-
-                            $roleLabel = match ($userRole) {
-                                'admin' => 'Admin',
-                                'pimpinan' => 'Pimpinan',
-                                'staff' => 'Staf',
-                                default => ucfirst($userRole ?: 'Tidak ada'),
-                            };
-
-                            /*
-                            |--------------------------------------------------------------------------
-                            | ROLE CLASS
-                            |--------------------------------------------------------------------------
-                            */
-
-                            $roleClass = match ($userRole) {
-                                'admin' => 'role-admin',
-                                'pimpinan' => 'role-pimpinan',
-                                'staff' => 'role-staff',
-                                default => 'role-default',
-                            };
-
-                            /*
-                            |--------------------------------------------------------------------------
-                            | INITIAL
-                            |--------------------------------------------------------------------------
-                            */
-
-                            $name = trim((string) ($user->name ?? ''));
-
-                            $nameParts = preg_split(
-                                '/\s+/',
-                                $name,
-                                -1,
-                                PREG_SPLIT_NO_EMPTY
-                            );
-
-                            if (count($nameParts) >= 2) {
-
-                                $initials =
-                                    mb_substr($nameParts[0], 0, 1) .
-                                    mb_substr(end($nameParts), 0, 1);
-
-                            } elseif (count($nameParts) === 1) {
-
-                                $initials =
-                                    mb_substr($nameParts[0], 0, 2);
-
-                            } else {
-
-                                $initials = 'U';
-
-                            }
-
-                            $initials = strtoupper($initials);
-
-                            /*
-                            |--------------------------------------------------------------------------
-                            | STATUS
-                            |--------------------------------------------------------------------------
-                            */
-
-                            $isActive = (bool) $user->is_active;
-
-                        @endphp
-
-
-                        <tr>
-
-                            {{-- USER --}}
-
-                            <td>
-
-                                <div class="user-cell">
-
-                                    <div class="user-avatar">
-                                        {{ $initials }}
-                                    </div>
-
-
-                                    <div class="user-info">
-
-                                        <a
-                                            href="{{ route('users.show', $user) }}"
-                                            class="user-name"
-                                        >
-                                            {{ $user->name }}
-                                        </a>
-
-                                        <span class="user-email">
-                                            {{ $user->email }}
-                                        </span>
-
-                                    </div>
-
-                                </div>
-
-                            </td>
-
-
-                            {{-- ROLE --}}
-
-                            <td>
-
-                                <span class="role-badge {{ $roleClass }}">
-
-                                    <span class="role-badge-dot"></span>
-
-                                    {{ $roleLabel }}
-
-                                </span>
-
-                            </td>
-
-
-                            {{-- JABATAN --}}
-
-                            <td>
-
-                                @if(!empty($user->jabatan))
-
-                                    <span class="position-text">
-                                        {{ $user->jabatan }}
-                                    </span>
-
-                                @else
-
-                                    <span class="position-empty">
-                                        —
-                                    </span>
-
-                                @endif
-
-                            </td>
-
-
-                            {{-- STATUS --}}
-
-                            <td>
-
-                                @if($isActive)
-
-                                    <span class="status-badge status-active">
-
-                                        <span class="status-badge-dot"></span>
-
-                                        Aktif
-
-                                    </span>
-
-                                @else
-
-                                    <span class="status-badge status-inactive">
-
-                                        <span class="status-badge-dot"></span>
-
-                                        Nonaktif
-
-                                    </span>
-
-                                @endif
-
-                            </td>
-
-
-                            {{-- ACTION --}}
-
-                            <td>
-
-                                <div class="user-actions">
-
-                                    {{-- DETAIL --}}
-
-                                    <a
-                                        href="{{ route('users.show', $user) }}"
-                                        class="action-button action-view"
-                                        title="Lihat detail"
-                                    >
-
-                                        <svg viewBox="0 0 24 24" fill="none">
-                                            <path
-                                                d="M2.5 12C3.8 7.8 7.5 5 12 5C16.5 5 20.2 7.8 21.5 12C20.2 16.2 16.5 19 12 19C7.5 19 3.8 16.2 2.5 12Z"
-                                                stroke="currentColor"
-                                                stroke-width="1.7"
-                                            />
-                                            <circle
-                                                cx="12"
-                                                cy="12"
-                                                r="3"
-                                                stroke="currentColor"
-                                                stroke-width="1.7"
-                                            />
-                                        </svg>
-
-                                        <span>Detail</span>
-
-                                    </a>
-
-
-                                    {{-- EDIT --}}
-
-                                    <a
-                                        href="{{ route('users.edit', $user) }}"
-                                        class="action-button action-edit"
-                                        title="Edit pengguna"
-                                    >
-
-                                        <svg viewBox="0 0 24 24" fill="none">
-                                            <path
-                                                d="M12 20H21"
-                                                stroke="currentColor"
-                                                stroke-width="1.7"
-                                                stroke-linecap="round"
-                                            />
-                                            <path
-                                                d="M16.5 3.5C17.3284 2.67157 18.6716 2.67157 19.5 3.5C20.3284 4.32843 20.3284 5.67157 19.5 6.5L8 18L3 19L4 14L16.5 3.5Z"
-                                                stroke="currentColor"
-                                                stroke-width="1.7"
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                            />
-                                        </svg>
-
-                                        <span>Edit</span>
-
-                                    </a>
-
-
-                                    {{-- DELETE --}}
-
-                                    @if(auth()->id() !== $user->id)
-
-                                        <form
-                                            action="{{ route('users.destroy', $user) }}"
-                                            method="POST"
-                                            class="delete-user-form"
-                                        >
-
-                                            @csrf
-                                            @method('DELETE')
-
-                                            <button
-                                                type="submit"
-                                                class="action-button action-delete"
-                                                title="Hapus pengguna"
-                                            >
-
-                                                <svg viewBox="0 0 24 24" fill="none">
-                                                    <path
-                                                        d="M4 7H20"
-                                                        stroke="currentColor"
-                                                        stroke-width="1.7"
-                                                        stroke-linecap="round"
-                                                    />
-                                                    <path
-                                                        d="M10 11V17"
-                                                        stroke="currentColor"
-                                                        stroke-width="1.7"
-                                                        stroke-linecap="round"
-                                                    />
-                                                    <path
-                                                        d="M14 11V17"
-                                                        stroke="currentColor"
-                                                        stroke-width="1.7"
-                                                        stroke-linecap="round"
-                                                    />
-                                                    <path
-                                                        d="M6 7L7 20H17L18 7"
-                                                        stroke="currentColor"
-                                                        stroke-width="1.7"
-                                                        stroke-linejoin="round"
-                                                    />
-                                                    <path
-                                                        d="M9 7V4H15V7"
-                                                        stroke="currentColor"
-                                                        stroke-width="1.7"
-                                                        stroke-linejoin="round"
-                                                    />
-                                                </svg>
-
-                                                <span>Hapus</span>
-
-                                            </button>
-
-                                        </form>
-
-                                    @endif
-
-                                </div>
-
-                            </td>
-
-                        </tr>
-
-
-                    @empty
-
-                        <tr>
-
-                            <td colspan="5">
-
-                                <div class="empty-state">
-
-                                    <div class="empty-icon">
-
-                                        <svg viewBox="0 0 24 24" fill="none">
-                                            <path
-                                                d="M16 21V19C16 16.7909 14.2091 15 12 15H6C3.79086 15 2 16.7909 2 19V21"
-                                                stroke="currentColor"
-                                                stroke-width="1.7"
-                                                stroke-linecap="round"
-                                            />
-                                            <circle
-                                                cx="9"
-                                                cy="7"
-                                                r="4"
-                                                stroke="currentColor"
-                                                stroke-width="1.7"
-                                            />
-                                            <path
-                                                d="M19 8V14"
-                                                stroke="currentColor"
-                                                stroke-width="1.7"
-                                                stroke-linecap="round"
-                                            />
-                                            <path
-                                                d="M22 11H16"
-                                                stroke="currentColor"
-                                                stroke-width="1.7"
-                                                stroke-linecap="round"
-                                            />
-                                        </svg>
-
-                                    </div>
-
-
-                                    @if($hasFilters)
-
-                                        <h3>Pengguna tidak ditemukan</h3>
-
-                                        <p>
-                                            Tidak ada pengguna yang sesuai
-                                            dengan filter pencarian.
-                                        </p>
-
-                                        <a
-                                            href="{{ route('users.index') }}"
-                                            class="empty-action"
-                                        >
-                                            Reset Filter
-                                        </a>
-
-                                    @else
-
-                                        <h3>Belum ada pengguna</h3>
-
-                                        <p>
-                                            Belum ada akun pengguna yang
-                                            terdaftar pada sistem.
-                                        </p>
-
-                                        <a
-                                            href="{{ route('users.create') }}"
-                                            class="empty-action"
-                                        >
-                                            Tambah Pengguna
-                                        </a>
-
-                                    @endif
-
-                                </div>
-
-                            </td>
-
-                        </tr>
-
-                    @endforelse
-
-                </tbody>
-
-            </table>
+            </div>
 
         </div>
 
 
-        {{-- =================================================
-             PAGINATION
-        ================================================== --}}
 
-        @if(method_exists($users, 'hasPages') && $users->hasPages())
+        {{-- ============================================================
+             AKUN AKTIF
+        ============================================================= --}}
 
-            <div class="users-pagination">
+        <div class="summary-card">
 
-                <div class="pagination-info">
+            <div class="summary-icon summary-icon-green">
 
-                    Menampilkan
+                <svg
+                    width="22"
+                    height="22"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                >
+                    <path d="M20 6 9 17l-5-5"></path>
+                </svg>
 
-                    <strong>
-                        {{ $users->firstItem() ?? 0 }}
-                    </strong>
+            </div>
 
-                    sampai
 
-                    <strong>
-                        {{ $users->lastItem() ?? 0 }}
-                    </strong>
+            <div class="summary-content">
 
-                    dari
+                <p class="summary-label">
+                    Akun Aktif
+                </p>
 
-                    <strong>
-                        {{ $users->total() }}
-                    </strong>
+                <p class="summary-value">
+                    {{ number_format($activeUsersCount, 0, ',', '.') }}
+                </p>
 
-                    pengguna
+                <div class="summary-note">
+                    Akun yang dapat login
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        {{-- ============================================================
+             AKUN NONAKTIF
+        ============================================================= --}}
+
+        <div class="summary-card">
+
+            <div class="summary-icon summary-icon-gray">
+
+                <svg
+                    width="22"
+                    height="22"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                >
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M8 12h8"></path>
+                </svg>
+
+            </div>
+
+
+            <div class="summary-content">
+
+                <p class="summary-label">
+                    Akun Nonaktif
+                </p>
+
+                <p class="summary-value">
+                    {{ number_format($inactiveUsersCount, 0, ',', '.') }}
+                </p>
+
+                <div class="summary-note">
+                    Akun yang dinonaktifkan
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        {{-- ============================================================
+             ROLE
+        ============================================================= --}}
+
+        <div class="summary-card">
+
+            <div class="summary-icon summary-icon-purple">
+
+                <svg
+                    width="22"
+                    height="22"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                >
+                    <path d="M12 2 4 5v6c0 5.25 3.5 10 8 11 4.5-1 8-5.75 8-11V5l-8-3Z"></path>
+                    <path d="M9 12l2 2 4-4"></path>
+                </svg>
+
+            </div>
+
+
+            <div class="summary-content">
+
+                <p class="summary-label">
+                    Role
+                </p>
+
+                <p class="summary-value">
+                    {{ $roleCount }}
+                </p>
+
+                <div class="summary-note">
+                    Admin, Pimpinan, Staf
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    {{-- ================================================================
+         FILTER
+    ================================================================= --}}
+
+    <div class="users-filter-card">
+
+        <div class="users-filter-header">
+
+            <h2 class="users-filter-title">
+
+                <svg
+                    width="17"
+                    height="17"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                >
+                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                </svg>
+
+                Filter Pengguna
+
+            </h2>
+
+        </div>
+
+
+        <div class="users-filter-body">
+
+            <form
+                action="{{ url()->current() }}"
+                method="GET"
+                class="users-filter-form"
+                id="usersFilterForm"
+            >
+
+                {{-- ==================================================
+                     SEARCH
+                =================================================== --}}
+
+                <div class="filter-group">
+
+                    <label
+                        for="search"
+                        class="filter-label"
+                    >
+                        Cari Pengguna
+                    </label>
+
+
+                    <div class="search-wrapper">
+
+                        <span class="search-icon">
+
+                            <svg
+                                width="16"
+                                height="16"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <path d="m21 21-4.35-4.35"></path>
+                            </svg>
+
+                        </span>
+
+
+                        <input
+                            type="text"
+                            name="search"
+                            id="search"
+                            value="{{ $search }}"
+                            class="search-input"
+                            placeholder="Nama atau email..."
+                            autocomplete="off"
+                        >
+
+
+                        @if($search !== '')
+
+                            <button
+                                type="button"
+                                class="search-clear"
+                                id="clearSearch"
+                                aria-label="Hapus pencarian"
+                            >
+
+                                <svg
+                                    width="15"
+                                    height="15"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                >
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+
+                            </button>
+
+                        @endif
+
+                    </div>
 
                 </div>
 
 
-                <div class="pagination-links">
 
-                    {{ $users->appends(request()->query())->links() }}
+                {{-- ==================================================
+                     ROLE
+                =================================================== --}}
+
+                <div class="filter-group">
+
+                    <label class="filter-label">
+                        Role
+                    </label>
+
+
+                    <div
+                        class="filter-dropdown"
+                        data-dropdown
+                    >
+
+                        <button
+                            type="button"
+                            class="filter-dropdown-button"
+                            data-dropdown-button
+                        >
+
+                            <span
+                                class="filter-dropdown-label"
+                                data-dropdown-label
+                            >
+
+                                @if(count($selectedRoles) === 0)
+
+                                    Semua Role
+
+                                @elseif(count($selectedRoles) === 1)
+
+                                    {{ $roleLabels[$selectedRoles[0]] ?? 'Role' }}
+
+                                @else
+
+                                    {{ count($selectedRoles) }} role dipilih
+
+                                @endif
+
+                            </span>
+
+
+                            <svg
+                                width="16"
+                                height="16"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+
+                        </button>
+
+
+                        <div
+                            class="filter-dropdown-menu"
+                            data-dropdown-menu
+                        >
+
+                            {{-- SEMUA --}}
+                            <label class="filter-option">
+
+                                <input
+                                    type="checkbox"
+                                    data-role-select-all
+                                    {{ count($selectedRoles) === 3 ? 'checked' : '' }}
+                                >
+
+                                <span>
+                                    Semua Role
+                                </span>
+
+                            </label>
+
+
+                            <div class="filter-menu-divider"></div>
+
+
+                            {{-- ADMIN --}}
+                            <label class="filter-option">
+
+                                <input
+                                    type="checkbox"
+                                    name="role[]"
+                                    value="admin"
+                                    data-role-option
+                                    {{ in_array('admin', $selectedRoles, true) ? 'checked' : '' }}
+                                >
+
+                                <span>
+                                    Admin
+                                </span>
+
+                            </label>
+
+
+                            {{-- PIMPINAN --}}
+                            <label class="filter-option">
+
+                                <input
+                                    type="checkbox"
+                                    name="role[]"
+                                    value="pimpinan"
+                                    data-role-option
+                                    {{ in_array('pimpinan', $selectedRoles, true) ? 'checked' : '' }}
+                                >
+
+                                <span>
+                                    Pimpinan
+                                </span>
+
+                            </label>
+
+
+                            {{-- STAFF --}}
+                            <label class="filter-option">
+
+                                <input
+                                    type="checkbox"
+                                    name="role[]"
+                                    value="staff"
+                                    data-role-option
+                                    {{ in_array('staff', $selectedRoles, true) ? 'checked' : '' }}
+                                >
+
+                                <span>
+                                    Staf
+                                </span>
+
+                            </label>
+
+
+                            <div class="filter-menu-divider"></div>
+
+
+                            <div class="filter-menu-actions">
+
+                                <button
+                                    type="button"
+                                    class="filter-menu-action primary"
+                                    data-select-all-role
+                                >
+                                    Pilih Semua
+                                </button>
+
+
+                                <button
+                                    type="button"
+                                    class="filter-menu-action"
+                                    data-clear-role
+                                >
+                                    Bersihkan
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </div>
 
                 </div>
+
+
+
+                {{-- ==================================================
+                     STATUS
+                =================================================== --}}
+
+                <div class="filter-group">
+
+                    <label class="filter-label">
+                        Status Akun
+                    </label>
+
+
+                    <div
+                        class="filter-dropdown"
+                        data-dropdown
+                    >
+
+                        <button
+                            type="button"
+                            class="filter-dropdown-button"
+                            data-dropdown-button
+                        >
+
+                            <span
+                                class="filter-dropdown-label"
+                                data-dropdown-label
+                            >
+
+                                @if(count($selectedStatuses) === 0)
+
+                                    Semua Status
+
+                                @elseif(count($selectedStatuses) === 1)
+
+                                    {{ $statusLabels[$selectedStatuses[0]] ?? 'Status' }}
+
+                                @else
+
+                                    {{ count($selectedStatuses) }} status dipilih
+
+                                @endif
+
+                            </span>
+
+
+                            <svg
+                                width="16"
+                                height="16"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+
+                        </button>
+
+
+                        <div
+                            class="filter-dropdown-menu"
+                            data-dropdown-menu
+                        >
+
+                            {{-- SEMUA STATUS --}}
+                            <label class="filter-option">
+
+                                <input
+                                    type="checkbox"
+                                    data-status-select-all
+                                    {{ count($selectedStatuses) === 2 ? 'checked' : '' }}
+                                >
+
+                                <span>
+                                    Semua Status
+                                </span>
+
+                            </label>
+
+
+                            <div class="filter-menu-divider"></div>
+
+
+                            {{-- AKTIF --}}
+                            <label class="filter-option">
+
+                                <input
+                                    type="checkbox"
+                                    name="is_active[]"
+                                    value="1"
+                                    data-status-option
+                                    {{ in_array('1', $selectedStatuses, true) ? 'checked' : '' }}
+                                >
+
+                                <span>
+                                    Aktif
+                                </span>
+
+                            </label>
+
+
+                            {{-- NONAKTIF --}}
+                            <label class="filter-option">
+
+                                <input
+                                    type="checkbox"
+                                    name="is_active[]"
+                                    value="0"
+                                    data-status-option
+                                    {{ in_array('0', $selectedStatuses, true) ? 'checked' : '' }}
+                                >
+
+                                <span>
+                                    Nonaktif
+                                </span>
+
+                            </label>
+
+
+                            <div class="filter-menu-divider"></div>
+
+
+                            <div class="filter-menu-actions">
+
+                                <button
+                                    type="button"
+                                    class="filter-menu-action primary"
+                                    data-select-all-status
+                                >
+                                    Pilih Semua
+                                </button>
+
+
+                                <button
+                                    type="button"
+                                    class="filter-menu-action"
+                                    data-clear-status
+                                >
+                                    Bersihkan
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                {{-- ==================================================
+                     BUTTON
+                =================================================== --}}
+
+                <div class="filter-actions">
+
+                    <button
+                        type="submit"
+                        class="btn-filter-submit"
+                    >
+
+                        <svg
+                            width="15"
+                            height="15"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        >
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="m21 21-4.35-4.35"></path>
+                        </svg>
+
+                        Terapkan
+
+                    </button>
+
+
+                    @if($hasFilters)
+
+                        <a
+                            href="{{ url()->current() }}"
+                            class="btn-filter-reset"
+                        >
+
+                            <svg
+                                width="15"
+                                height="15"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <path d="M3 12a9 9 0 1 0 3-6.7"></path>
+                                <polyline points="3 4 3 10 9 10"></polyline>
+                            </svg>
+
+                            Reset
+
+                        </a>
+
+                    @endif
+
+                </div>
+
+            </form>
+
+
+
+            {{-- ======================================================
+                 FILTER TERPILIH
+            ======================================================= --}}
+
+            @if($hasFilters)
+
+                <div class="active-filter-info">
+
+                    <span class="filter-result-info">
+                        Filter aktif:
+                    </span>
+
+
+                    @if($search !== '')
+
+                        <span class="filter-badge">
+                            Pencarian: "{{ $search }}"
+                        </span>
+
+                    @endif
+
+
+                    @foreach($selectedRoles as $role)
+
+                        <span class="filter-badge">
+                            Role:
+                            {{ $roleLabels[$role] ?? ucfirst($role) }}
+                        </span>
+
+                    @endforeach
+
+
+                    @foreach($selectedStatuses as $status)
+
+                        <span class="filter-badge">
+                            Status:
+                            {{ $statusLabels[$status] ?? $status }}
+                        </span>
+
+                    @endforeach
+
+                </div>
+
+            @endif
+
+        </div>
+
+    </div>
+
+
+
+    {{-- ================================================================
+         TABLE
+    ================================================================= --}}
+
+    <div class="users-table-card">
+
+        <div class="users-table-header">
+
+            <div class="users-table-heading">
+
+                <h2 class="users-table-title">
+                    Daftar Pengguna
+                </h2>
+
+                <p class="users-table-description">
+                    Menampilkan data akun pengguna sistem.
+                </p>
+
+            </div>
+
+
+            <div class="users-count-badge">
+
+                {{ number_format($totalUsers, 0, ',', '.') }}
+
+                pengguna
+
+            </div>
+
+        </div>
+
+
+
+        @if($users->count() > 0)
+
+            <div class="table-responsive">
+
+                <table class="users-table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Pengguna
+                            </th>
+
+                            <th>
+                                Role
+                            </th>
+
+                            <th>
+                                Jabatan
+                            </th>
+
+                            <th>
+                                Status
+                            </th>
+
+                            <th style="text-align:right;">
+                                Aksi
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        @foreach($users as $user)
+
+                            @php
+
+                                /*
+                                |--------------------------------------------------------------------------
+                                | NORMALISASI ROLE USER
+                                |--------------------------------------------------------------------------
+                                */
+
+                                $userRole = strtolower(
+                                    trim((string) ($user->role ?? ''))
+                                );
+
+                                if ($userRole === 'staf') {
+                                    $userRole = 'staff';
+                                }
+
+
+                                $userRoleLabel =
+                                    $roleLabels[$userRole]
+                                    ?? ucfirst(
+                                        $userRole ?: 'Tidak diketahui'
+                                    );
+
+
+                                /*
+                                |--------------------------------------------------------------------------
+                                | NAMA USER
+                                |--------------------------------------------------------------------------
+                                */
+
+                                $userName = trim(
+                                    (string) ($user->name ?? '')
+                                );
+
+
+                                /*
+                                |--------------------------------------------------------------------------
+                                | AVATAR
+                                |--------------------------------------------------------------------------
+                                */
+
+                                $avatarInitial = strtoupper(
+                                    substr(
+                                        $userName !== ''
+                                            ? $userName
+                                            : 'U',
+                                        0,
+                                        1
+                                    )
+                                );
+
+
+                                /*
+                                |--------------------------------------------------------------------------
+                                | STATUS
+                                |--------------------------------------------------------------------------
+                                */
+
+                                $isActive =
+                                    (bool) ($user->is_active ?? false);
+
+                            @endphp
+
+
+                            <tr>
+
+                                {{-- ==================================================
+                                     USER
+                                =================================================== --}}
+
+                                <td>
+
+                                    <div class="user-cell">
+
+                                        <div class="user-avatar">
+                                            {{ $avatarInitial }}
+                                        </div>
+
+
+                                        <div class="user-info">
+
+                                            <p class="user-name">
+                                                {{ $user->name }}
+                                            </p>
+
+                                            <p class="user-email">
+                                                {{ $user->email }}
+                                            </p>
+
+                                        </div>
+
+                                    </div>
+
+                                </td>
+
+
+
+                                {{-- ==================================================
+                                     ROLE
+                                =================================================== --}}
+
+                                <td>
+
+                                    <span
+                                        class="
+                                            role-badge
+                                            {{
+                                                $userRole === 'admin'
+                                                    ? 'role-admin'
+                                                    : (
+                                                        $userRole === 'pimpinan'
+                                                            ? 'role-pimpinan'
+                                                            : 'role-staff'
+                                                    )
+                                            }}
+                                        "
+                                    >
+                                        {{ $userRoleLabel }}
+                                    </span>
+
+                                </td>
+
+
+
+                                {{-- ==================================================
+                                     JABATAN
+                                =================================================== --}}
+
+                                <td>
+                                    {{ $user->jabatan ?: '-' }}
+                                </td>
+
+
+
+                                {{-- ==================================================
+                                     STATUS
+                                =================================================== --}}
+
+                                <td>
+
+                                    @if($isActive)
+
+                                        <span class="status-badge status-active">
+
+                                            <svg
+                                                width="12"
+                                                height="12"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                stroke-width="2.5"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                            >
+                                                <path d="M20 6 9 17l-5-5"></path>
+                                            </svg>
+
+                                            Aktif
+
+                                        </span>
+
+                                    @else
+
+                                        <span class="status-badge status-inactive">
+
+                                            <svg
+                                                width="12"
+                                                height="12"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                stroke-width="2.2"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                            >
+                                                <circle
+                                                    cx="12"
+                                                    cy="12"
+                                                    r="9"
+                                                ></circle>
+
+                                                <path
+                                                    d="M8 12h8"
+                                                ></path>
+                                            </svg>
+
+                                            Nonaktif
+
+                                        </span>
+
+                                    @endif
+
+                                </td>
+
+
+
+                                {{-- ==================================================
+                                     AKSI
+                                =================================================== --}}
+
+                                <td>
+
+                                    <div class="action-group">
+
+                                        {{-- DETAIL --}}
+                                        @if(Route::has('users.show'))
+
+                                            <a
+                                                href="{{ route('users.show', $user) }}"
+                                                class="action-btn action-view"
+                                                title="Detail"
+                                            >
+
+                                                <svg
+                                                    width="16"
+                                                    height="16"
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    stroke-width="2"
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                >
+                                                    <path
+                                                        d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12Z"
+                                                    ></path>
+
+                                                    <circle
+                                                        cx="12"
+                                                        cy="12"
+                                                        r="3"
+                                                    ></circle>
+                                                </svg>
+
+                                            </a>
+
+                                        @endif
+
+
+                                        {{-- EDIT --}}
+                                        @if(Route::has('users.edit'))
+
+                                            <a
+                                                href="{{ route('users.edit', $user) }}"
+                                                class="action-btn action-edit"
+                                                title="Edit"
+                                            >
+
+                                                <svg
+                                                    width="16"
+                                                    height="16"
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    stroke-width="2"
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                >
+                                                    <path
+                                                        d="M12 20h9"
+                                                    ></path>
+
+                                                    <path
+                                                        d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"
+                                                    ></path>
+                                                </svg>
+
+                                            </a>
+
+                                        @endif
+
+
+                                        {{-- DELETE --}}
+                                        @if(Route::has('users.destroy'))
+
+                                            <form
+                                                action="{{ route('users.destroy', $user) }}"
+                                                method="POST"
+                                                class="delete-user-form"
+                                                style="display:inline;"
+                                            >
+
+                                                @csrf
+                                                @method('DELETE')
+
+
+                                                <button
+                                                    type="submit"
+                                                    class="action-btn action-delete"
+                                                    title="Hapus"
+                                                >
+
+                                                    <svg
+                                                        width="16"
+                                                        height="16"
+                                                        viewBox="0 0 24 24"
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        stroke-width="2"
+                                                        stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                    >
+                                                        <polyline
+                                                            points="3 6 5 6 21 6"
+                                                        ></polyline>
+
+                                                        <path
+                                                            d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"
+                                                        ></path>
+
+                                                        <path
+                                                            d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                                                        ></path>
+
+                                                    </svg>
+
+                                                </button>
+
+                                            </form>
+
+                                        @endif
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+                        @endforeach
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+
+            {{-- ============================================================
+                 PAGINATION
+            ============================================================= --}}
+
+            @if($users->hasPages())
+
+                <div class="users-pagination">
+
+                    <div class="pagination-info">
+
+                        Menampilkan
+
+                        <strong>
+                            {{ $users->firstItem() ?? 0 }}
+                        </strong>
+
+                        sampai
+
+                        <strong>
+                            {{ $users->lastItem() ?? 0 }}
+                        </strong>
+
+                        dari
+
+                        <strong>
+                            {{ number_format($users->total(), 0, ',', '.') }}
+                        </strong>
+
+                        pengguna
+
+                    </div>
+
+
+                    <div class="pagination-nav">
+
+                        {{-- PREVIOUS --}}
+                        @if($users->onFirstPage())
+
+                            <span class="disabled">
+                                ‹
+                            </span>
+
+                        @else
+
+                            <a
+                                href="{{ $users->previousPageUrl() }}"
+                            >
+                                ‹
+                            </a>
+
+                        @endif
+
+
+                        {{-- PAGE NUMBER --}}
+                        @foreach(
+                            $users->getUrlRange(
+                                max(1, $users->currentPage() - 2),
+                                min(
+                                    $users->lastPage(),
+                                    $users->currentPage() + 2
+                                )
+                            )
+                            as $page => $url
+                        )
+
+                            @if($page == $users->currentPage())
+
+                                <span class="active">
+                                    {{ $page }}
+                                </span>
+
+                            @else
+
+                                <a href="{{ $url }}">
+                                    {{ $page }}
+                                </a>
+
+                            @endif
+
+                        @endforeach
+
+
+                        {{-- NEXT --}}
+                        @if($users->hasMorePages())
+
+                            <a
+                                href="{{ $users->nextPageUrl() }}"
+                            >
+                                ›
+                            </a>
+
+                        @else
+
+                            <span class="disabled">
+                                ›
+                            </span>
+
+                        @endif
+
+                    </div>
+
+                </div>
+
+            @endif
+
+
+        @else
+
+            {{-- ============================================================
+                 EMPTY STATE
+            ============================================================= --}}
+
+            <div class="users-empty">
+
+                <div class="users-empty-icon">
+
+                    <svg
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    >
+                        <path
+                            d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"
+                        ></path>
+
+                        <circle
+                            cx="9"
+                            cy="7"
+                            r="4"
+                        ></circle>
+
+                        <path
+                            d="M22 21v-2a4 4 0 0 0-3-3.87"
+                        ></path>
+
+                        <path
+                            d="M16 3.13a4 4 0 0 1 0 7.75"
+                        ></path>
+
+                    </svg>
+
+                </div>
+
+
+                <h3 class="users-empty-title">
+                    Tidak ada pengguna
+                </h3>
+
+
+                <p class="users-empty-text">
+
+                    @if($hasFilters)
+
+                        Tidak ditemukan pengguna yang sesuai
+                        dengan pencarian atau filter yang dipilih.
+
+                    @else
+
+                        Belum ada data pengguna yang tersedia.
+
+                    @endif
+
+                </p>
+
+
+                @if($hasFilters)
+
+                    <div style="margin-top:16px;">
+
+                        <a
+                            href="{{ url()->current() }}"
+                            class="btn-filter-reset"
+                        >
+                            Reset Filter
+                        </a>
+
+                    </div>
+
+                @endif
 
             </div>
 
@@ -1254,1227 +2732,8 @@
 </div>
 
 
-{{-- =========================================================
-     STYLE
-========================================================= --}}
-
-@push('styles')
-
-<style>
-
-    /* =====================================================
-       BASE
-    ====================================================== */
-
-    .users-page {
-        width: 100%;
-        max-width: 1440px;
-        margin: 0 auto;
-        padding: 24px;
-        color: #172033;
-    }
-
-
-    /* =====================================================
-       HEADER
-    ====================================================== */
-
-    .users-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 20px;
-        margin-bottom: 24px;
-    }
-
-    .users-header-left {
-        display: flex;
-        align-items: center;
-        gap: 14px;
-    }
-
-    .users-page-icon {
-        width: 48px;
-        height: 48px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 13px;
-        background: #eef4ff;
-        color: #2563eb;
-        flex: 0 0 auto;
-    }
-
-    .users-page-icon svg {
-        width: 25px;
-        height: 25px;
-    }
-
-    .users-header h1 {
-        margin: 0;
-        font-size: 24px;
-        line-height: 1.25;
-        font-weight: 750;
-        letter-spacing: -0.025em;
-        color: #111827;
-    }
-
-    .users-header p {
-        margin: 5px 0 0;
-        color: #667085;
-        font-size: 14px;
-    }
-
-
-    /* =====================================================
-       ADD BUTTON
-    ====================================================== */
-
-    .btn-add-user {
-        min-height: 42px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        padding: 0 16px;
-        border-radius: 9px;
-        background: #2563eb;
-        color: #fff;
-        text-decoration: none;
-        font-size: 14px;
-        font-weight: 650;
-        border: 1px solid #2563eb;
-        transition: .18s ease;
-        white-space: nowrap;
-    }
-
-    .btn-add-user:hover {
-        background: #1d4ed8;
-        border-color: #1d4ed8;
-        color: #fff;
-        transform: translateY(-1px);
-    }
-
-    .btn-add-user svg {
-        width: 18px;
-        height: 18px;
-    }
-
-
-    /* =====================================================
-       SUMMARY
-    ====================================================== */
-
-    .users-summary {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 16px;
-        margin-bottom: 20px;
-    }
-
-    .summary-card {
-        display: flex;
-        align-items: center;
-        gap: 14px;
-        min-height: 92px;
-        padding: 16px 18px;
-        background: #fff;
-        border: 1px solid #e6eaf0;
-        border-radius: 13px;
-        box-shadow: 0 2px 7px rgba(16, 24, 40, .025);
-    }
-
-    .summary-icon {
-        width: 44px;
-        height: 44px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 11px;
-        flex: 0 0 auto;
-    }
-
-    .summary-icon svg {
-        width: 22px;
-        height: 22px;
-    }
-
-    .summary-icon-blue {
-        background: #eff6ff;
-        color: #2563eb;
-    }
-
-    .summary-icon-green {
-        background: #ecfdf3;
-        color: #16a34a;
-    }
-
-    .summary-icon-purple {
-        background: #f5f3ff;
-        color: #7c3aed;
-    }
-
-    .summary-content {
-        min-width: 0;
-    }
-
-    .summary-content span {
-        display: block;
-        font-size: 12px;
-        color: #667085;
-        margin-bottom: 3px;
-    }
-
-    .summary-content strong {
-        display: block;
-        font-size: 20px;
-        line-height: 1.2;
-        font-weight: 750;
-        color: #111827;
-    }
-
-    .summary-content small {
-        display: block;
-        margin-top: 3px;
-        color: #98a2b3;
-        font-size: 11px;
-    }
-
-
-    /* =====================================================
-       MAIN CARD
-    ====================================================== */
-
-    .users-card {
-        overflow: visible;
-        background: #fff;
-        border: 1px solid #e6eaf0;
-        border-radius: 14px;
-        box-shadow: 0 2px 10px rgba(16, 24, 40, .025);
-    }
-
-    .users-card-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 20px;
-        padding: 20px 22px 17px;
-        border-bottom: 1px solid #edf0f4;
-    }
-
-    .users-card-header h2 {
-        margin: 0;
-        font-size: 17px;
-        font-weight: 720;
-        color: #111827;
-    }
-
-    .users-card-header p {
-        margin: 4px 0 0;
-        color: #667085;
-        font-size: 13px;
-    }
-
-    .active-filter-indicator {
-        display: inline-flex;
-        align-items: center;
-        gap: 7px;
-        padding: 6px 10px;
-        border-radius: 999px;
-        background: #eff6ff;
-        color: #2563eb;
-        font-size: 12px;
-        font-weight: 600;
-    }
-
-    .active-filter-dot {
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-        background: #2563eb;
-    }
-
-
-    /* =====================================================
-       FILTER
-    ====================================================== */
-
-    .users-filter {
-        display: flex;
-        align-items: center;
-        gap: 9px;
-        padding: 15px 22px;
-        background: #fafbfc;
-        border-bottom: 1px solid #edf0f4;
-    }
-
-    .filter-search {
-        position: relative;
-        display: flex;
-        align-items: center;
-        min-width: 280px;
-        flex: 1;
-        max-width: 420px;
-    }
-
-    .filter-search > svg {
-        position: absolute;
-        left: 12px;
-        width: 18px;
-        height: 18px;
-        color: #98a2b3;
-        pointer-events: none;
-    }
-
-    .filter-search input {
-        width: 100%;
-        height: 40px;
-        padding: 0 38px 0 38px;
-        border: 1px solid #dfe3e8;
-        border-radius: 8px;
-        background: #fff;
-        color: #101828;
-        outline: none;
-        font-size: 13px;
-        transition: .15s ease;
-    }
-
-    .filter-search input::placeholder {
-        color: #98a2b3;
-    }
-
-    .filter-search input:focus {
-        border-color: #84a9ff;
-        box-shadow: 0 0 0 3px rgba(37, 99, 235, .08);
-    }
-
-    .search-clear {
-        position: absolute;
-        right: 8px;
-        width: 25px;
-        height: 25px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: 0;
-        border-radius: 6px;
-        background: transparent;
-        color: #98a2b3;
-        cursor: pointer;
-    }
-
-    .search-clear:hover {
-        background: #f2f4f7;
-        color: #344054;
-    }
-
-    .search-clear svg {
-        width: 15px;
-        height: 15px;
-    }
-
-
-    /* =====================================================
-       DROPDOWN
-    ====================================================== */
-
-    .filter-dropdown {
-        position: relative;
-    }
-
-    .filter-trigger {
-        height: 40px;
-        min-width: 155px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        padding: 0 11px;
-        border: 1px solid #dfe3e8;
-        border-radius: 8px;
-        background: #fff;
-        color: #344054;
-        cursor: pointer;
-        font-size: 13px;
-        transition: .15s ease;
-    }
-
-    .filter-trigger:hover,
-    .filter-dropdown.is-open .filter-trigger {
-        border-color: #b8c4d6;
-        background: #fff;
-    }
-
-    .filter-trigger-left {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        min-width: 0;
-    }
-
-    .filter-trigger-left > svg {
-        width: 17px;
-        height: 17px;
-        color: #667085;
-        flex: 0 0 auto;
-    }
-
-    .filter-label {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-
-    .filter-chevron {
-        width: 15px;
-        height: 15px;
-        color: #667085;
-        transition: transform .18s ease;
-    }
-
-    .filter-dropdown.is-open .filter-chevron {
-        transform: rotate(180deg);
-    }
-
-    .filter-menu {
-        position: absolute;
-        top: calc(100% + 7px);
-        left: 0;
-        z-index: 100;
-        width: 230px;
-        padding: 8px;
-        background: #fff;
-        border: 1px solid #e4e7ec;
-        border-radius: 10px;
-        box-shadow:
-            0 10px 30px rgba(16, 24, 40, .10),
-            0 2px 7px rgba(16, 24, 40, .04);
-        opacity: 0;
-        visibility: hidden;
-        transform: translateY(-5px);
-        transition: .15s ease;
-    }
-
-    .filter-dropdown.is-open .filter-menu {
-        opacity: 1;
-        visibility: visible;
-        transform: translateY(0);
-    }
-
-    .filter-menu-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 6px 7px 9px;
-    }
-
-    .filter-menu-header strong {
-        color: #344054;
-        font-size: 12px;
-        font-weight: 700;
-    }
-
-    .dropdown-clear {
-        padding: 0;
-        border: 0;
-        background: none;
-        color: #2563eb;
-        cursor: pointer;
-        font-size: 11px;
-        font-weight: 600;
-    }
-
-    .dropdown-clear:hover {
-        text-decoration: underline;
-    }
-
-    .filter-divider {
-        height: 1px;
-        margin: 4px 0 6px;
-        background: #f0f2f5;
-    }
-
-    .filter-option {
-        position: relative;
-        display: flex;
-        align-items: center;
-        gap: 9px;
-        min-height: 36px;
-        padding: 6px 8px;
-        border-radius: 7px;
-        color: #344054;
-        cursor: pointer;
-        font-size: 13px;
-    }
-
-    .filter-option:hover {
-        background: #f8fafc;
-    }
-
-    .filter-option input {
-        position: absolute;
-        opacity: 0;
-        pointer-events: none;
-    }
-
-    .custom-checkbox {
-        width: 17px;
-        height: 17px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: 1px solid #cfd4dc;
-        border-radius: 5px;
-        background: #fff;
-        flex: 0 0 auto;
-        transition: .15s ease;
-    }
-
-    .filter-option input:checked + .custom-checkbox {
-        background: #2563eb;
-        border-color: #2563eb;
-    }
-
-    .filter-option input:checked + .custom-checkbox::after {
-        content: '';
-        width: 8px;
-        height: 4px;
-        border-left: 1.7px solid #fff;
-        border-bottom: 1.7px solid #fff;
-        transform: rotate(-45deg) translateY(-1px);
-    }
-
-    .status-option {
-        display: inline-flex;
-        align-items: center;
-        gap: 7px;
-    }
-
-    .status-dot {
-        width: 7px;
-        height: 7px;
-        border-radius: 50%;
-    }
-
-    .status-dot-active {
-        background: #16a34a;
-    }
-
-    .status-dot-inactive {
-        background: #98a2b3;
-    }
-
-
-    /* =====================================================
-       BUTTON FILTER
-    ====================================================== */
-
-    .btn-search,
-    .btn-reset {
-        height: 40px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 7px;
-        padding: 0 13px;
-        border-radius: 8px;
-        font-size: 13px;
-        font-weight: 650;
-        cursor: pointer;
-        text-decoration: none;
-        white-space: nowrap;
-        transition: .15s ease;
-    }
-
-    .btn-search {
-        border: 1px solid #2563eb;
-        background: #2563eb;
-        color: #fff;
-    }
-
-    .btn-search:hover {
-        background: #1d4ed8;
-        border-color: #1d4ed8;
-    }
-
-    .btn-search svg,
-    .btn-reset svg {
-        width: 16px;
-        height: 16px;
-    }
-
-    .btn-reset {
-        border: 1px solid #dfe3e8;
-        background: #fff;
-        color: #475467;
-    }
-
-    .btn-reset:hover {
-        background: #f8fafc;
-        color: #111827;
-    }
-
-
-    /* =====================================================
-       ACTIVE FILTER
-    ====================================================== */
-
-    .active-filters {
-        display: flex;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 7px;
-        padding: 10px 22px;
-        border-bottom: 1px solid #edf0f4;
-    }
-
-    .active-filters-title {
-        color: #667085;
-        font-size: 11px;
-        font-weight: 600;
-    }
-
-    .filter-chip {
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        padding: 4px 8px;
-        border-radius: 6px;
-        background: #f2f4f7;
-        color: #475467;
-        font-size: 11px;
-        font-weight: 550;
-    }
-
-    .filter-chip button {
-        width: 15px;
-        height: 15px;
-        padding: 0;
-        border: 0;
-        background: transparent;
-        color: #98a2b3;
-        cursor: pointer;
-        font-size: 15px;
-        line-height: 12px;
-    }
-
-
-    /* =====================================================
-       TABLE
-    ====================================================== */
-
-    .users-table-wrapper {
-        width: 100%;
-        overflow-x: auto;
-    }
-
-    .users-table {
-        width: 100%;
-        border-collapse: collapse;
-        min-width: 800px;
-    }
-
-    .users-table thead th {
-        height: 45px;
-        padding: 0 22px;
-        background: #fafbfc;
-        border-bottom: 1px solid #edf0f4;
-        color: #667085;
-        font-size: 11px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: .035em;
-        text-align: left;
-        white-space: nowrap;
-    }
-
-    .users-table tbody td {
-        padding: 13px 22px;
-        border-bottom: 1px solid #f0f2f5;
-        vertical-align: middle;
-        font-size: 13px;
-    }
-
-    .users-table tbody tr:last-child td {
-        border-bottom: 0;
-    }
-
-    .users-table tbody tr {
-        transition: background .12s ease;
-    }
-
-    .users-table tbody tr:hover {
-        background: #fcfdff;
-    }
-
-    .column-user {
-        width: 34%;
-    }
-
-    .column-action {
-        width: 1%;
-        white-space: nowrap;
-    }
-
-
-    /* =====================================================
-       USER CELL
-    ====================================================== */
-
-    .user-cell {
-        display: flex;
-        align-items: center;
-        gap: 11px;
-        min-width: 230px;
-    }
-
-    .user-avatar {
-        width: 39px;
-        height: 39px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex: 0 0 auto;
-        border-radius: 10px;
-        background: #eef4ff;
-        color: #2563eb;
-        font-size: 12px;
-        font-weight: 750;
-        letter-spacing: .02em;
-    }
-
-    .user-info {
-        min-width: 0;
-    }
-
-    .user-name {
-        display: block;
-        max-width: 300px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        color: #101828;
-        font-weight: 650;
-        font-size: 13px;
-        text-decoration: none;
-    }
-
-    .user-name:hover {
-        color: #2563eb;
-    }
-
-    .user-email {
-        display: block;
-        max-width: 300px;
-        margin-top: 3px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        color: #98a2b3;
-        font-size: 11px;
-    }
-
-
-    /* =====================================================
-       ROLE
-    ====================================================== */
-
-    .role-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        min-height: 27px;
-        padding: 0 9px;
-        border-radius: 6px;
-        font-size: 11px;
-        font-weight: 650;
-        white-space: nowrap;
-    }
-
-    .role-badge-dot {
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-    }
-
-    .role-admin {
-        background: #eef4ff;
-        color: #2563eb;
-    }
-
-    .role-admin .role-badge-dot {
-        background: #2563eb;
-    }
-
-    .role-pimpinan {
-        background: #f5f3ff;
-        color: #7c3aed;
-    }
-
-    .role-pimpinan .role-badge-dot {
-        background: #7c3aed;
-    }
-
-    .role-staff {
-        background: #ecfdf3;
-        color: #15803d;
-    }
-
-    .role-staff .role-badge-dot {
-        background: #16a34a;
-    }
-
-    .role-default {
-        background: #f2f4f7;
-        color: #667085;
-    }
-
-    .role-default .role-badge-dot {
-        background: #98a2b3;
-    }
-
-
-    /* =====================================================
-       POSITION
-    ====================================================== */
-
-    .position-text {
-        color: #475467;
-        font-size: 12px;
-    }
-
-    .position-empty {
-        color: #98a2b3;
-    }
-
-
-    /* =====================================================
-       STATUS
-    ====================================================== */
-
-    .status-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        min-height: 27px;
-        padding: 0 9px;
-        border-radius: 6px;
-        font-size: 11px;
-        font-weight: 650;
-        white-space: nowrap;
-    }
-
-    .status-badge-dot {
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-    }
-
-    .status-active {
-        background: #ecfdf3;
-        color: #15803d;
-    }
-
-    .status-active .status-badge-dot {
-        background: #16a34a;
-    }
-
-    .status-inactive {
-        background: #f2f4f7;
-        color: #667085;
-    }
-
-    .status-inactive .status-badge-dot {
-        background: #98a2b3;
-    }
-
-
-    /* =====================================================
-       ACTION
-    ====================================================== */
-
-    .user-actions {
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-        gap: 5px;
-    }
-
-    .action-button {
-        min-height: 31px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 5px;
-        padding: 0 8px;
-        border: 1px solid transparent;
-        border-radius: 7px;
-        background: transparent;
-        font-family: inherit;
-        font-size: 11px;
-        font-weight: 600;
-        text-decoration: none;
-        cursor: pointer;
-        transition: .15s ease;
-        white-space: nowrap;
-    }
-
-    .action-button svg {
-        width: 14px;
-        height: 14px;
-    }
-
-    .action-view {
-        color: #475467;
-    }
-
-    .action-view:hover {
-        background: #f2f4f7;
-        color: #111827;
-    }
-
-    .action-edit {
-        color: #2563eb;
-    }
-
-    .action-edit:hover {
-        background: #eff6ff;
-        color: #1d4ed8;
-    }
-
-    .action-delete {
-        color: #dc2626;
-    }
-
-    .action-delete:hover {
-        background: #fef2f2;
-        color: #b91c1c;
-    }
-
-    .delete-user-form {
-        margin: 0;
-        padding: 0;
-    }
-
-
-    /* =====================================================
-       EMPTY
-    ====================================================== */
-
-    .empty-state {
-        display: flex;
-        align-items: center;
-        flex-direction: column;
-        justify-content: center;
-        padding: 60px 20px;
-        text-align: center;
-    }
-
-    .empty-icon {
-        width: 56px;
-        height: 56px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: 13px;
-        border-radius: 14px;
-        background: #f2f4f7;
-        color: #98a2b3;
-    }
-
-    .empty-icon svg {
-        width: 27px;
-        height: 27px;
-    }
-
-    .empty-state h3 {
-        margin: 0;
-        color: #344054;
-        font-size: 15px;
-        font-weight: 700;
-    }
-
-    .empty-state p {
-        max-width: 400px;
-        margin: 5px 0 15px;
-        color: #98a2b3;
-        font-size: 12px;
-    }
-
-    .empty-action {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 34px;
-        padding: 0 12px;
-        border: 1px solid #dfe3e8;
-        border-radius: 7px;
-        color: #344054;
-        background: #fff;
-        text-decoration: none;
-        font-size: 12px;
-        font-weight: 650;
-    }
-
-    .empty-action:hover {
-        background: #f8fafc;
-        color: #111827;
-    }
-
-
-    /* =====================================================
-       PAGINATION
-    ====================================================== */
-
-    .users-pagination {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 20px;
-        padding: 14px 22px;
-        border-top: 1px solid #edf0f4;
-    }
-
-    .pagination-info {
-        color: #667085;
-        font-size: 11px;
-    }
-
-    .pagination-info strong {
-        color: #344054;
-        font-weight: 650;
-    }
-
-    .pagination-links nav {
-        display: flex;
-        align-items: center;
-    }
-
-    .pagination-links nav > div:first-child {
-        display: none;
-    }
-
-    .pagination-links nav > div:last-child {
-        display: flex;
-        align-items: center;
-    }
-
-    .pagination-links nav a,
-    .pagination-links nav span {
-        min-width: 30px;
-        height: 30px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        padding: 0 7px;
-        border: 1px solid #e4e7ec;
-        border-left: 0;
-        background: #fff;
-        color: #475467;
-        font-size: 11px;
-        text-decoration: none;
-    }
-
-    .pagination-links nav > div:last-child > :first-child {
-        border-left: 1px solid #e4e7ec;
-        border-radius: 7px 0 0 7px;
-    }
-
-    .pagination-links nav > div:last-child > :last-child {
-        border-radius: 0 7px 7px 0;
-    }
-
-    .pagination-links nav span[aria-current="page"] {
-        background: #2563eb;
-        border-color: #2563eb;
-        color: #fff;
-    }
-
-
-    /* =====================================================
-       TABLET
-    ====================================================== */
-
-    @media (max-width: 1000px) {
-
-        .users-summary {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
-
-        .users-summary .summary-card:last-child {
-            grid-column: 1 / -1;
-        }
-
-        .users-filter {
-            flex-wrap: wrap;
-        }
-
-        .filter-search {
-            min-width: 100%;
-            max-width: none;
-        }
-
-    }
-
-
-    /* =====================================================
-       MOBILE
-    ====================================================== */
-
-    @media (max-width: 700px) {
-
-        .users-page {
-            padding: 14px;
-        }
-
-        .users-header {
-            align-items: flex-start;
-            flex-direction: column;
-        }
-
-        .users-header-left {
-            width: 100%;
-        }
-
-        .users-header h1 {
-            font-size: 20px;
-        }
-
-        .users-header p {
-            font-size: 12px;
-            line-height: 1.5;
-        }
-
-        .btn-add-user {
-            width: 100%;
-        }
-
-        .users-summary {
-            grid-template-columns: 1fr;
-            gap: 10px;
-        }
-
-        .users-summary .summary-card:last-child {
-            grid-column: auto;
-        }
-
-        .summary-card {
-            min-height: 78px;
-        }
-
-        .users-card-header {
-            align-items: flex-start;
-            flex-direction: column;
-            padding: 17px;
-        }
-
-        .users-filter {
-            align-items: stretch;
-            flex-direction: column;
-            padding: 13px 15px;
-        }
-
-        .filter-search {
-            min-width: 100%;
-        }
-
-        .filter-dropdown,
-        .filter-trigger {
-            width: 100%;
-        }
-
-        .filter-trigger {
-            min-width: 100%;
-        }
-
-        .filter-menu {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            width: calc(100vw - 36px);
-            max-width: 360px;
-            transform: translate(-50%, -47%);
-            z-index: 1000;
-        }
-
-        .filter-dropdown.is-open .filter-menu {
-            transform: translate(-50%, -50%);
-        }
-
-        .btn-search,
-        .btn-reset {
-            width: 100%;
-        }
-
-        .active-filters {
-            padding: 10px 15px;
-        }
-
-        .users-table-wrapper {
-            overflow-x: auto;
-        }
-
-        .users-table {
-            min-width: 800px;
-        }
-
-        .users-pagination {
-            align-items: flex-start;
-            flex-direction: column;
-            padding: 13px 15px;
-        }
-
-        .pagination-links {
-            width: 100%;
-            overflow-x: auto;
-        }
-
-    }
-
-
-    /* =====================================================
-       SMALL MOBILE
-    ====================================================== */
-
-    @media (max-width: 420px) {
-
-        .users-page {
-            padding: 10px;
-        }
-
-        .users-page-icon {
-            width: 42px;
-            height: 42px;
-        }
-
-        .users-page-icon svg {
-            width: 22px;
-            height: 22px;
-        }
-
-        .users-header h1 {
-            font-size: 18px;
-        }
-
-        .users-card {
-            border-radius: 11px;
-        }
-
-    }
-
-</style>
-
-@endpush
-
-
-{{-- =========================================================
-     SCRIPT
-========================================================= --}}
-
-@push('scripts')
 
 <script>
-
 document.addEventListener('DOMContentLoaded', function () {
 
     /*
@@ -2483,288 +2742,482 @@ document.addEventListener('DOMContentLoaded', function () {
     |--------------------------------------------------------------------------
     */
 
-    const dropdowns = document.querySelectorAll('[data-dropdown]');
-
-    function closeAllDropdowns(except = null) {
-
-        dropdowns.forEach(function (dropdown) {
-
-            if (dropdown !== except) {
-
-                dropdown.classList.remove('is-open');
-
-                const trigger =
-                    dropdown.querySelector('.filter-trigger');
-
-                if (trigger) {
-                    trigger.setAttribute(
-                        'aria-expanded',
-                        'false'
-                    );
-                }
-
-            }
-
-        });
-
-    }
+    const dropdowns =
+        document.querySelectorAll('[data-dropdown]');
 
 
     dropdowns.forEach(function (dropdown) {
 
-        const trigger =
-            dropdown.querySelector('.filter-trigger');
+        const button =
+            dropdown.querySelector('[data-dropdown-button]');
 
-        if (!trigger) {
+        const menu =
+            dropdown.querySelector('[data-dropdown-menu]');
+
+
+        if (!button || !menu) {
             return;
         }
 
-        trigger.addEventListener('click', function (event) {
 
-            event.preventDefault();
+        button.addEventListener('click', function (event) {
+
             event.stopPropagation();
 
-            const isOpen =
-                dropdown.classList.contains('is-open');
 
-            closeAllDropdowns(dropdown);
+            dropdowns.forEach(function (otherDropdown) {
 
-            dropdown.classList.toggle(
-                'is-open',
-                !isOpen
-            );
+                if (otherDropdown === dropdown) {
+                    return;
+                }
 
-            trigger.setAttribute(
-                'aria-expanded',
-                String(!isOpen)
+
+                const otherMenu =
+                    otherDropdown.querySelector(
+                        '[data-dropdown-menu]'
+                    );
+
+                const otherButton =
+                    otherDropdown.querySelector(
+                        '[data-dropdown-button]'
+                    );
+
+
+                if (otherMenu) {
+                    otherMenu.classList.remove('show');
+                }
+
+
+                if (otherButton) {
+                    otherButton.classList.remove('active');
+                }
+
+            });
+
+
+            menu.classList.toggle('show');
+
+            button.classList.toggle(
+                'active',
+                menu.classList.contains('show')
             );
 
         });
-
-
-        const type =
-            dropdown.dataset.dropdown;
-
-        const optionInputs =
-            dropdown.querySelectorAll(
-                '[data-option="' + type + '"]'
-            );
-
-        const selectAll =
-            dropdown.querySelector(
-                '[data-select-all="' + type + '"]'
-            );
-
-        const clearButton =
-            dropdown.querySelector(
-                '[data-clear="' + type + '"]'
-            );
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | SELECT ALL STATE
-        |--------------------------------------------------------------------------
-        */
-
-        function updateSelectAllState() {
-
-            if (!selectAll || !optionInputs.length) {
-                return;
-            }
-
-            const checkedCount =
-                Array.from(optionInputs)
-                    .filter(input => input.checked)
-                    .length;
-
-            selectAll.checked =
-                checkedCount === optionInputs.length;
-
-            selectAll.indeterminate =
-                checkedCount > 0 &&
-                checkedCount < optionInputs.length;
-
-            updateLabel();
-
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | UPDATE LABEL
-        |--------------------------------------------------------------------------
-        */
-
-        function updateLabel() {
-
-            const label =
-                dropdown.querySelector('.filter-label');
-
-            if (!label) {
-                return;
-            }
-
-            const checked =
-                Array.from(optionInputs)
-                    .filter(input => input.checked);
-
-            if (checked.length === 0) {
-
-                label.textContent =
-                    type === 'role'
-                        ? 'Semua Role'
-                        : 'Semua Status';
-
-                return;
-            }
-
-            if (checked.length === 1) {
-
-                const text =
-                    checked[0]
-                        .closest('.filter-option')
-                        ?.querySelector('span:last-child')
-                        ?.textContent
-                        ?.trim();
-
-                label.textContent =
-                    text || '1 dipilih';
-
-                return;
-            }
-
-            label.textContent =
-                checked.length +
-                (
-                    type === 'role'
-                        ? ' Role dipilih'
-                        : ' Status dipilih'
-                );
-
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | OPTION CHANGE
-        |--------------------------------------------------------------------------
-        */
-
-        optionInputs.forEach(function (input) {
-
-            input.addEventListener(
-                'change',
-                updateSelectAllState
-            );
-
-        });
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | SELECT ALL
-        |--------------------------------------------------------------------------
-        */
-
-        if (selectAll) {
-
-            selectAll.addEventListener(
-                'change',
-                function () {
-
-                    optionInputs.forEach(
-                        input => {
-                            input.checked =
-                                selectAll.checked;
-                        }
-                    );
-
-                    updateLabel();
-
-                }
-            );
-
-        }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | CLEAR
-        |--------------------------------------------------------------------------
-        */
-
-        if (clearButton) {
-
-            clearButton.addEventListener(
-                'click',
-                function (event) {
-
-                    event.preventDefault();
-                    event.stopPropagation();
-
-                    optionInputs.forEach(
-                        input => {
-                            input.checked = false;
-                        }
-                    );
-
-                    if (selectAll) {
-                        selectAll.checked = false;
-                        selectAll.indeterminate = false;
-                    }
-
-                    updateLabel();
-
-                }
-            );
-
-        }
-
-
-        updateSelectAllState();
 
     });
 
 
     /*
     |--------------------------------------------------------------------------
-    | OUTSIDE CLICK
+    | CLOSE DROPDOWN
     |--------------------------------------------------------------------------
     */
 
-    document.addEventListener(
-        'click',
-        function (event) {
+    document.addEventListener('click', function () {
 
-            if (
-                !event.target.closest(
-                    '.filter-dropdown'
-                )
-            ) {
-                closeAllDropdowns();
+        dropdowns.forEach(function (dropdown) {
+
+            const menu =
+                dropdown.querySelector(
+                    '[data-dropdown-menu]'
+                );
+
+            const button =
+                dropdown.querySelector(
+                    '[data-dropdown-button]'
+                );
+
+
+            if (menu) {
+                menu.classList.remove('show');
             }
 
-        }
-    );
+
+            if (button) {
+                button.classList.remove('active');
+            }
+
+        });
+
+    });
+
 
 
     /*
     |--------------------------------------------------------------------------
-    | ESC
+    | ROLE FILTER
     |--------------------------------------------------------------------------
     */
 
-    document.addEventListener(
-        'keydown',
-        function (event) {
+    const roleOptions =
+        document.querySelectorAll('[data-role-option]');
 
-            if (event.key === 'Escape') {
-                closeAllDropdowns();
-            }
+
+    const roleSelectAll =
+        document.querySelector('[data-role-select-all]');
+
+
+    const roleDropdown =
+        document.querySelector(
+            '[data-role-option]'
+        )?.closest('[data-dropdown]');
+
+
+    const roleDropdownLabel =
+        roleDropdown?.querySelector(
+            '[data-dropdown-label]'
+        );
+
+
+    function updateRoleLabel() {
+
+        if (!roleDropdownLabel) {
+            return;
+        }
+
+
+        const selected =
+            Array.from(roleOptions)
+                .filter(function (checkbox) {
+                    return checkbox.checked;
+                });
+
+
+        if (selected.length === 0) {
+
+            roleDropdownLabel.textContent =
+                'Semua Role';
 
         }
-    );
+        else if (selected.length === 1) {
+
+            const labels = {
+                admin: 'Admin',
+                pimpinan: 'Pimpinan',
+                staff: 'Staf'
+            };
+
+
+            roleDropdownLabel.textContent =
+                labels[selected[0].value] ?? 'Role';
+
+        }
+        else {
+
+            roleDropdownLabel.textContent =
+                selected.length + ' role dipilih';
+
+        }
+
+
+        if (roleSelectAll) {
+
+            roleSelectAll.checked =
+                selected.length === roleOptions.length &&
+                roleOptions.length > 0;
+
+        }
+
+    }
+
+
+    roleOptions.forEach(function (checkbox) {
+
+        checkbox.addEventListener(
+            'change',
+            updateRoleLabel
+        );
+
+    });
+
+
+    if (roleSelectAll) {
+
+        roleSelectAll.addEventListener(
+            'change',
+            function () {
+
+                roleOptions.forEach(
+                    function (checkbox) {
+                        checkbox.checked =
+                            roleSelectAll.checked;
+                    }
+                );
+
+
+                updateRoleLabel();
+
+            }
+        );
+
+    }
+
+
+    const selectAllRoleButton =
+        document.querySelector(
+            '[data-select-all-role]'
+        );
+
+
+    if (selectAllRoleButton) {
+
+        selectAllRoleButton.addEventListener(
+            'click',
+            function (event) {
+
+                event.preventDefault();
+                event.stopPropagation();
+
+
+                roleOptions.forEach(
+                    function (checkbox) {
+                        checkbox.checked = true;
+                    }
+                );
+
+
+                updateRoleLabel();
+
+            }
+        );
+
+    }
+
+
+    const clearRoleButton =
+        document.querySelector(
+            '[data-clear-role]'
+        );
+
+
+    if (clearRoleButton) {
+
+        clearRoleButton.addEventListener(
+            'click',
+            function (event) {
+
+                event.preventDefault();
+                event.stopPropagation();
+
+
+                roleOptions.forEach(
+                    function (checkbox) {
+                        checkbox.checked = false;
+                    }
+                );
+
+
+                updateRoleLabel();
+
+            }
+        );
+
+    }
+
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | STATUS FILTER
+    |--------------------------------------------------------------------------
+    */
+
+    const statusOptions =
+        document.querySelectorAll(
+            '[data-status-option]'
+        );
+
+
+    const statusSelectAll =
+        document.querySelector(
+            '[data-status-select-all]'
+        );
+
+
+    const statusDropdown =
+        document.querySelector(
+            '[data-status-option]'
+        )?.closest('[data-dropdown]');
+
+
+    const statusDropdownLabel =
+        statusDropdown?.querySelector(
+            '[data-dropdown-label]'
+        );
+
+
+    function updateStatusLabel() {
+
+        if (!statusDropdownLabel) {
+            return;
+        }
+
+
+        const selected =
+            Array.from(statusOptions)
+                .filter(function (checkbox) {
+                    return checkbox.checked;
+                });
+
+
+        if (selected.length === 0) {
+
+            statusDropdownLabel.textContent =
+                'Semua Status';
+
+        }
+        else if (selected.length === 1) {
+
+            statusDropdownLabel.textContent =
+                selected[0].value === '1'
+                    ? 'Aktif'
+                    : 'Nonaktif';
+
+        }
+        else {
+
+            statusDropdownLabel.textContent =
+                selected.length +
+                ' status dipilih';
+
+        }
+
+
+        if (statusSelectAll) {
+
+            statusSelectAll.checked =
+                selected.length === statusOptions.length &&
+                statusOptions.length > 0;
+
+        }
+
+    }
+
+
+    statusOptions.forEach(function (checkbox) {
+
+        checkbox.addEventListener(
+            'change',
+            updateStatusLabel
+        );
+
+    });
+
+
+    if (statusSelectAll) {
+
+        statusSelectAll.addEventListener(
+            'change',
+            function () {
+
+                statusOptions.forEach(
+                    function (checkbox) {
+                        checkbox.checked =
+                            statusSelectAll.checked;
+                    }
+                );
+
+
+                updateStatusLabel();
+
+            }
+        );
+
+    }
+
+
+    const selectAllStatusButton =
+        document.querySelector(
+            '[data-select-all-status]'
+        );
+
+
+    if (selectAllStatusButton) {
+
+        selectAllStatusButton.addEventListener(
+            'click',
+            function (event) {
+
+                event.preventDefault();
+                event.stopPropagation();
+
+
+                statusOptions.forEach(
+                    function (checkbox) {
+                        checkbox.checked = true;
+                    }
+                );
+
+
+                updateStatusLabel();
+
+            }
+        );
+
+    }
+
+
+    const clearStatusButton =
+        document.querySelector(
+            '[data-clear-status]'
+        );
+
+
+    if (clearStatusButton) {
+
+        clearStatusButton.addEventListener(
+            'click',
+            function (event) {
+
+                event.preventDefault();
+                event.stopPropagation();
+
+
+                statusOptions.forEach(
+                    function (checkbox) {
+                        checkbox.checked = false;
+                    }
+                );
+
+
+                updateStatusLabel();
+
+            }
+        );
+
+    }
+
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | CLEAR SEARCH
+    |--------------------------------------------------------------------------
+    */
+
+    const clearSearchButton =
+        document.getElementById('clearSearch');
+
+
+    const searchInput =
+        document.getElementById('search');
+
+
+    if (clearSearchButton && searchInput) {
+
+        clearSearchButton.addEventListener(
+            'click',
+            function () {
+
+                searchInput.value = '';
+
+                searchInput.focus();
+
+            }
+        );
+
+    }
+
 
 
     /*
@@ -2773,182 +3226,44 @@ document.addEventListener('DOMContentLoaded', function () {
     |--------------------------------------------------------------------------
     */
 
-    document
-        .querySelectorAll('.delete-user-form')
-        .forEach(function (form) {
+    const deleteForms =
+        document.querySelectorAll(
+            '.delete-user-form'
+        );
 
-            form.addEventListener(
-                'submit',
-                function (event) {
 
+    deleteForms.forEach(function (form) {
+
+        form.addEventListener(
+            'submit',
+            function (event) {
+
+                const confirmed = confirm(
+                    'Apakah Anda yakin ingin menghapus pengguna ini?'
+                );
+
+
+                if (!confirmed) {
                     event.preventDefault();
-
-                    const submitDelete =
-                        function () {
-                            form.submit();
-                        };
-
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | SWEET ALERT
-                    |--------------------------------------------------------------------------
-                    */
-
-                    if (
-                        typeof window.Swal !== 'undefined'
-                    ) {
-
-                        Swal.fire({
-
-                            title: 'Hapus pengguna?',
-                            text: 'Data pengguna yang dihapus tidak dapat dikembalikan.',
-                            icon: 'warning',
-
-                            showCancelButton: true,
-
-                            confirmButtonText:
-                                'Ya, hapus',
-
-                            cancelButtonText:
-                                'Batal',
-
-                            reverseButtons: true,
-
-                            buttonsStyling: true,
-
-                            customClass: {
-
-                                confirmButton:
-                                    'swal-confirm-delete',
-
-                                cancelButton:
-                                    'swal-cancel-delete'
-
-                            }
-
-                        }).then(function (result) {
-
-                            if (result.isConfirmed) {
-                                submitDelete();
-                            }
-
-                        });
-
-                    } else {
-
-                        if (
-                            window.confirm(
-                                'Apakah Anda yakin ingin menghapus pengguna ini?'
-                            )
-                        ) {
-                            submitDelete();
-                        }
-
-                    }
-
                 }
-            );
 
-        });
+            }
+        );
+
+    });
+
 
 
     /*
     |--------------------------------------------------------------------------
-    | MOBILE DROPDOWN BACKDROP BEHAVIOR
+    | INITIAL UPDATE
     |--------------------------------------------------------------------------
     */
 
-    document.addEventListener(
-        'touchstart',
-        function (event) {
-
-            const opened =
-                document.querySelector(
-                    '.filter-dropdown.is-open'
-                );
-
-            if (!opened) {
-                return;
-            }
-
-            if (
-                !event.target.closest(
-                    '.filter-dropdown'
-                )
-            ) {
-                closeAllDropdowns();
-            }
-
-        }
-    );
+    updateRoleLabel();
+    updateStatusLabel();
 
 });
-
-
-/*
-|--------------------------------------------------------------------------
-| CLEAR SEARCH
-|--------------------------------------------------------------------------
-*/
-
-function clearSearch() {
-
-    const form =
-        document.getElementById(
-            'usersFilterForm'
-        );
-
-    if (!form) {
-        return;
-    }
-
-    const input =
-        form.querySelector(
-            'input[name="search"]'
-        );
-
-    if (input) {
-        input.value = '';
-    }
-
-    form.submit();
-
-}
-
-
-/*
-|--------------------------------------------------------------------------
-| REMOVE SEARCH FILTER
-|--------------------------------------------------------------------------
-*/
-
-function removeSearchFilter() {
-
-    const form =
-        document.getElementById(
-            'usersFilterForm'
-        );
-
-    if (!form) {
-        return;
-    }
-
-    const input =
-        form.querySelector(
-            'input[name="search"]'
-        );
-
-    if (input) {
-        input.value = '';
-    }
-
-    form.submit();
-
-}
-
 </script>
-
-@endpush
 
 @endsection

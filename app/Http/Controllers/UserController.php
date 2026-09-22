@@ -23,6 +23,12 @@ class UserController extends Controller
      * - Alias staf -> staff
      * - Pagination
      * - Query string
+     *
+     * Scorecard:
+     * - Total Pengguna
+     * - Akun Aktif
+     * - Akun Nonaktif
+     * - Jumlah Role
      */
     public function index(Request $request)
     {
@@ -35,6 +41,7 @@ class UserController extends Controller
         $search = trim(
             (string) $request->input('search', '')
         );
+
 
         /*
         |--------------------------------------------------------------------------
@@ -84,6 +91,7 @@ class UserController extends Controller
             ->unique()
             ->values();
 
+
         /*
         |--------------------------------------------------------------------------
         | STATUS FILTER
@@ -131,9 +139,82 @@ class UserController extends Controller
             ->unique()
             ->values();
 
+
         /*
         |--------------------------------------------------------------------------
-        | QUERY USER
+        | SCORECARD
+        |--------------------------------------------------------------------------
+        |
+        | Perhitungan dilakukan sebelum query filter tabel.
+        |
+        | Artinya:
+        | - Search tidak memengaruhi scorecard
+        | - Filter role tidak memengaruhi scorecard
+        | - Filter status tidak memengaruhi scorecard
+        | - Pagination tidak memengaruhi scorecard
+        |
+        */
+
+        $userStatistics = User::query()
+            ->selectRaw(
+                'COUNT(*) AS total_users'
+            )
+            ->selectRaw(
+                'SUM(
+                    CASE
+                        WHEN is_active = 1 THEN 1
+                        ELSE 0
+                    END
+                ) AS active_users'
+            )
+            ->selectRaw(
+                'SUM(
+                    CASE
+                        WHEN is_active = 0 THEN 1
+                        ELSE 0
+                    END
+                ) AS inactive_users'
+            )
+            ->first();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | NILAI SCORECARD
+        |--------------------------------------------------------------------------
+        */
+
+        $allUsersCount = (int) (
+            $userStatistics->total_users ?? 0
+        );
+
+        $activeUsersCount = (int) (
+            $userStatistics->active_users ?? 0
+        );
+
+        $inactiveUsersCount = (int) (
+            $userStatistics->inactive_users ?? 0
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | JUMLAH ROLE
+        |--------------------------------------------------------------------------
+        |
+        | Sistem menggunakan 3 role:
+        | - Admin
+        | - Pimpinan
+        | - Staff
+        |
+        */
+
+        $roleCount = 3;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | QUERY DATA USER
         |--------------------------------------------------------------------------
         */
 
@@ -174,6 +255,17 @@ class UserController extends Controller
             ->when(
                 $roles->isNotEmpty(),
                 function ($query) use ($roles) {
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | STAFF / STAF
+                    |--------------------------------------------------------------------------
+                    |
+                    | Staff pada filter dianggap cocok dengan:
+                    | - staff
+                    | - staf
+                    |
+                    */
 
                     $databaseRoles = $roles
                         ->flatMap(
@@ -222,12 +314,47 @@ class UserController extends Controller
             ->paginate(10)
             ->withQueryString();
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | VIEW
+        |--------------------------------------------------------------------------
+        */
+
         return view(
             'users.index',
             [
+                /*
+                |--------------------------------------------------------------
+                | TABLE
+                |--------------------------------------------------------------
+                */
+
                 'users' => $users,
+
+                /*
+                |--------------------------------------------------------------
+                | FILTER
+                |--------------------------------------------------------------
+                */
+
                 'selectedRoles' => $roles->all(),
+
                 'selectedStatuses' => $statuses->all(),
+
+                /*
+                |--------------------------------------------------------------
+                | SCORECARD
+                |--------------------------------------------------------------
+                */
+
+                'allUsersCount' => $allUsersCount,
+
+                'activeUsersCount' => $activeUsersCount,
+
+                'inactiveUsersCount' => $inactiveUsersCount,
+
+                'roleCount' => $roleCount,
             ]
         );
     }
@@ -247,6 +374,12 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
+        /*
+        |--------------------------------------------------------------------------
+        | VALIDASI
+        |--------------------------------------------------------------------------
+        */
+
         $validated = $request->validate(
             [
                 'name' => [
@@ -289,6 +422,7 @@ class UserController extends Controller
             ]
         );
 
+
         /*
         |--------------------------------------------------------------------------
         | NORMALISASI ROLE
@@ -299,6 +433,7 @@ class UserController extends Controller
             $this->normalizeRoleForDatabase(
                 $validated['role']
             );
+
 
         /*
         |--------------------------------------------------------------------------
@@ -317,6 +452,7 @@ class UserController extends Controller
             $validated['is_active'] = false;
         }
 
+
         /*
         |--------------------------------------------------------------------------
         | PASSWORD
@@ -328,22 +464,31 @@ class UserController extends Controller
                 $validated['password']
             );
 
+
         /*
         |--------------------------------------------------------------------------
-        | CREATE
+        | CREATE USER
         |--------------------------------------------------------------------------
         */
 
         $user = User::create(
             [
                 'name' => $validated['name'],
+
                 'email' => $validated['email'],
+
                 'password' => $validated['password'],
+
                 'role' => $validated['role'],
-                'jabatan' => $validated['jabatan'] ?? null,
-                'is_active' => $validated['is_active'],
+
+                'jabatan' =>
+                    $validated['jabatan'] ?? null,
+
+                'is_active' =>
+                    $validated['is_active'],
             ]
         );
+
 
         /*
         |--------------------------------------------------------------------------
@@ -356,6 +501,13 @@ class UserController extends Controller
             'user',
             'Menambah pengguna ' . $user->name
         );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | REDIRECT
+        |--------------------------------------------------------------------------
+        */
 
         return redirect()
             ->route('users.index')
@@ -400,6 +552,12 @@ class UserController extends Controller
         Request $request,
         User $user
     ) {
+        /*
+        |--------------------------------------------------------------------------
+        | VALIDASI
+        |--------------------------------------------------------------------------
+        */
+
         $validated = $request->validate(
             [
                 'name' => [
@@ -447,6 +605,7 @@ class UserController extends Controller
             ]
         );
 
+
         /*
         |--------------------------------------------------------------------------
         | NORMALISASI STATUS
@@ -460,7 +619,9 @@ class UserController extends Controller
                 FILTER_NULL_ON_FAILURE
             );
 
+
         if ($requestedIsActive === null) {
+
             return back()
                 ->withInput()
                 ->with(
@@ -468,6 +629,7 @@ class UserController extends Controller
                     'Status akun tidak valid.'
                 );
         }
+
 
         /*
         |--------------------------------------------------------------------------
@@ -480,6 +642,7 @@ class UserController extends Controller
             (int) $user->id &&
             $requestedIsActive === false
         ) {
+
             return back()
                 ->withInput()
                 ->with(
@@ -487,6 +650,7 @@ class UserController extends Controller
                     'Anda tidak dapat menonaktifkan akun Anda sendiri.'
                 );
         }
+
 
         /*
         |--------------------------------------------------------------------------
@@ -499,6 +663,7 @@ class UserController extends Controller
                 $validated['role']
             );
 
+
         /*
         |--------------------------------------------------------------------------
         | DATA UPDATE
@@ -506,12 +671,23 @@ class UserController extends Controller
         */
 
         $updateData = [
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'role' => $validated['role'],
-            'jabatan' => $validated['jabatan'] ?? null,
-            'is_active' => $requestedIsActive,
+
+            'name' =>
+                $validated['name'],
+
+            'email' =>
+                $validated['email'],
+
+            'role' =>
+                $validated['role'],
+
+            'jabatan' =>
+                $validated['jabatan'] ?? null,
+
+            'is_active' =>
+                $requestedIsActive,
         ];
+
 
         /*
         |--------------------------------------------------------------------------
@@ -525,19 +701,24 @@ class UserController extends Controller
                 (string) $validated['password']
             ) !== ''
         ) {
+
             $updateData['password'] =
                 Hash::make(
                     $validated['password']
                 );
         }
 
+
         /*
         |--------------------------------------------------------------------------
-        | UPDATE
+        | UPDATE USER
         |--------------------------------------------------------------------------
         */
 
-        $user->update($updateData);
+        $user->update(
+            $updateData
+        );
+
 
         /*
         |--------------------------------------------------------------------------
@@ -550,6 +731,13 @@ class UserController extends Controller
             'user',
             'Mengubah data pengguna ' . $user->name
         );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | REDIRECT
+        |--------------------------------------------------------------------------
+        */
 
         return redirect()
             ->route('users.index')
@@ -575,12 +763,14 @@ class UserController extends Controller
             (int) Auth::id() ===
             (int) $user->id
         ) {
+
             return back()
                 ->with(
                     'error',
                     'Anda tidak dapat menghapus akun Anda sendiri.'
                 );
         }
+
 
         /*
         |--------------------------------------------------------------------------
@@ -590,6 +780,7 @@ class UserController extends Controller
 
         $nama = $user->name;
 
+
         /*
         |--------------------------------------------------------------------------
         | DELETE
@@ -597,6 +788,7 @@ class UserController extends Controller
         */
 
         $user->delete();
+
 
         /*
         |--------------------------------------------------------------------------
@@ -609,6 +801,13 @@ class UserController extends Controller
             'user',
             'Menghapus pengguna ' . $nama
         );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | REDIRECT
+        |--------------------------------------------------------------------------
+        */
 
         return redirect()
             ->route('users.index')
@@ -630,13 +829,16 @@ class UserController extends Controller
     private function normalizeRoleForDatabase(
         string $role
     ): string {
+
         $role = strtolower(
             trim($role)
         );
 
+
         if ($role === 'staf') {
             return 'staff';
         }
+
 
         return $role;
     }
@@ -653,6 +855,7 @@ class UserController extends Controller
         string $module,
         string $description
     ): void {
+
         if (
             !class_exists(
                 ActivityLog::class
@@ -661,14 +864,23 @@ class UserController extends Controller
             return;
         }
 
+
         try {
+
             ActivityLog::catat(
                 $action,
                 $module,
                 $description
             );
+
         } catch (\Throwable) {
-            // Abaikan error activity log.
+
+            /*
+            |--------------------------------------------------------------------------
+            | Abaikan error activity log.
+            |--------------------------------------------------------------------------
+            */
+
         }
     }
 }

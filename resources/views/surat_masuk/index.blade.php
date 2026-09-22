@@ -5,6 +5,7 @@
 @section('content')
 
 @php
+
     use Illuminate\Support\Carbon;
 
     /*
@@ -29,6 +30,7 @@
         $userRole = 'staff';
     }
 
+
     /*
     |--------------------------------------------------------------------------
     | HAK AKSES
@@ -44,6 +46,7 @@
         true
     );
 
+
     /*
     |--------------------------------------------------------------------------
     | STATUS
@@ -57,6 +60,155 @@
         'selesai' => 'Selesai',
         'diarsipkan' => 'Diarsipkan',
     ];
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | SCORECARD
+    |--------------------------------------------------------------------------
+    |
+    | Controller mengirim $statusCounts yang dihitung dari seluruh data
+    | yang boleh dilihat user, bukan dari data pagination.
+    |
+    | Struktur:
+    |
+    | [
+    |     'total' => 4,
+    |     'baru' => 4,
+    |     'diproses' => 0,
+    |     'didisposisikan' => 0,
+    |     'selesai' => 0,
+    |     'diarsipkan' => 0,
+    | ]
+    |
+    */
+
+    $statusCounts = is_array($statusCounts ?? null)
+        ? $statusCounts
+        : [];
+
+    $totalSuratMasuk = (int) (
+        $statusCounts['total']
+        ?? 0
+    );
+
+    $suratBaru = (int) (
+        $statusCounts['baru']
+        ?? 0
+    );
+
+    $suratDiproses = (int) (
+        $statusCounts['diproses']
+        ?? 0
+    );
+
+    $suratSelesai = (int) (
+        $statusCounts['selesai']
+        ?? 0
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | FALLBACK
+    |--------------------------------------------------------------------------
+    |
+    | Hanya digunakan apabila Controller belum mengirim $statusCounts.
+    | Untuk data sedikit, halaman tetap bisa tampil.
+    |
+    */
+
+    if (
+        !isset($statusCounts['total']) &&
+        isset($suratMasuks)
+    ) {
+
+        if (
+            method_exists(
+                $suratMasuks,
+                'total'
+            )
+        ) {
+
+            $totalSuratMasuk =
+                (int) $suratMasuks->total();
+
+        } else {
+
+            $totalSuratMasuk =
+                (int) $suratMasuks->count();
+        }
+
+
+        if (
+            method_exists(
+                $suratMasuks,
+                'getCollection'
+            )
+        ) {
+
+            $scorecardCollection =
+                collect(
+                    $suratMasuks->getCollection()
+                );
+
+        } else {
+
+            $scorecardCollection =
+                collect(
+                    $suratMasuks
+                );
+        }
+
+
+        $suratBaru =
+            $scorecardCollection
+                ->filter(
+                    fn ($item) =>
+                        strtolower(
+                            trim(
+                                (string) (
+                                    $item->status ??
+                                    ''
+                                )
+                            )
+                        ) === 'baru'
+                )
+                ->count();
+
+
+        $suratDiproses =
+            $scorecardCollection
+                ->filter(
+                    fn ($item) =>
+                        strtolower(
+                            trim(
+                                (string) (
+                                    $item->status ??
+                                    ''
+                                )
+                            )
+                        ) === 'diproses'
+                )
+                ->count();
+
+
+        $suratSelesai =
+            $scorecardCollection
+                ->filter(
+                    fn ($item) =>
+                        strtolower(
+                            trim(
+                                (string) (
+                                    $item->status ??
+                                    ''
+                                )
+                            )
+                        ) === 'selesai'
+                )
+                ->count();
+    }
+
 
     /*
     |--------------------------------------------------------------------------
@@ -72,18 +224,27 @@
         )
     );
 
+
     if (
         is_scalar($rawKategori) &&
         trim((string) $rawKategori) !== ''
     ) {
-        $rawKategori = [$rawKategori];
+
+        $rawKategori = [
+            $rawKategori
+        ];
     }
+
 
     if (!is_array($rawKategori)) {
         $rawKategori = [];
     }
 
-    $selectedKategori = collect($rawKategori)
+
+    $selectedKategori =
+        collect(
+            $rawKategori
+        )
         ->flatten()
         ->filter(
             fn ($id) =>
@@ -93,11 +254,14 @@
         )
         ->map(
             fn ($id) =>
-                (string) ((int) $id)
+                (string) (
+                    (int) $id
+                )
         )
         ->unique()
         ->values()
         ->all();
+
 
     /*
     |--------------------------------------------------------------------------
@@ -105,23 +269,33 @@
     |--------------------------------------------------------------------------
     */
 
-    $rawStatus = request(
-        'status',
-        []
-    );
+    $rawStatus =
+        request(
+            'status',
+            []
+        );
+
 
     if (
         is_scalar($rawStatus) &&
         trim((string) $rawStatus) !== ''
     ) {
-        $rawStatus = [$rawStatus];
+
+        $rawStatus = [
+            $rawStatus
+        ];
     }
+
 
     if (!is_array($rawStatus)) {
         $rawStatus = [];
     }
 
-    $selectedStatus = collect($rawStatus)
+
+    $selectedStatus =
+        collect(
+            $rawStatus
+        )
         ->filter(
             fn ($status) =>
                 is_scalar($status)
@@ -145,6 +319,7 @@
         ->values()
         ->all();
 
+
     /*
     |--------------------------------------------------------------------------
     | RENTANG TANGGAL
@@ -152,27 +327,40 @@
     */
 
     $dariTanggal =
-        request('dari_tanggal');
+        request(
+            'dari_tanggal'
+        );
+
 
     $sampaiTanggal =
-        request('sampai_tanggal');
+        request(
+            'sampai_tanggal'
+        );
+
 
     $visibleDateRange = '';
+
 
     if (
         $dariTanggal &&
         $sampaiTanggal
     ) {
-        try {
-            $start = Carbon::createFromFormat(
-                'Y-m-d',
-                $dariTanggal
-            );
 
-            $end = Carbon::createFromFormat(
-                'Y-m-d',
-                $sampaiTanggal
-            );
+        try {
+
+            $start =
+                Carbon::createFromFormat(
+                    'Y-m-d',
+                    $dariTanggal
+                );
+
+
+            $end =
+                Carbon::createFromFormat(
+                    'Y-m-d',
+                    $sampaiTanggal
+                );
+
 
             $visibleDateRange =
                 $start->format('d/m/Y') .
@@ -180,12 +368,14 @@
                 $end->format('d/m/Y');
 
         } catch (\Throwable $e) {
+
             $visibleDateRange = '';
         }
 
     } elseif ($dariTanggal) {
 
         try {
+
             $visibleDateRange =
                 Carbon::createFromFormat(
                     'Y-m-d',
@@ -193,12 +383,14 @@
                 )->format('d/m/Y');
 
         } catch (\Throwable $e) {
+
             $visibleDateRange = '';
         }
 
     } elseif ($sampaiTanggal) {
 
         try {
+
             $visibleDateRange =
                 Carbon::createFromFormat(
                     'Y-m-d',
@@ -206,9 +398,11 @@
                 )->format('d/m/Y');
 
         } catch (\Throwable $e) {
+
             $visibleDateRange = '';
         }
     }
+
 
     /*
     |--------------------------------------------------------------------------
@@ -223,52 +417,21 @@
         request()->filled('dari_tanggal') ||
         request()->filled('sampai_tanggal');
 
+
     /*
     |--------------------------------------------------------------------------
-    | DATA
+    | DATA TABEL
     |--------------------------------------------------------------------------
     */
 
     $hasVisibleData =
         isset($suratMasuks) &&
-        method_exists($suratMasuks, 'count') &&
+        method_exists(
+            $suratMasuks,
+            'count'
+        ) &&
         $suratMasuks->count() > 0;
 
-    /*
-    |--------------------------------------------------------------------------
-    | STATISTIK
-    |--------------------------------------------------------------------------
-    |
-    | Jika Controller sudah mengirim $totalSuratMasuk,
-    | $suratBaru, $suratDiproses, $suratSelesai maka
-    | nilai tersebut akan digunakan.
-    |
-    */
-
-    $totalSuratMasuk =
-        $totalSuratMasuk ??
-        (
-            isset($suratMasuks) &&
-            method_exists($suratMasuks, 'total')
-                ? $suratMasuks->total()
-                : (
-                    isset($suratMasuks)
-                        ? $suratMasuks->count()
-                        : 0
-                )
-        );
-
-    $suratBaru =
-        $suratBaru ??
-        ($statusCounts['baru'] ?? 0);
-
-    $suratDiproses =
-        $suratDiproses ??
-        ($statusCounts['diproses'] ?? 0);
-
-    $suratSelesai =
-        $suratSelesai ??
-        ($statusCounts['selesai'] ?? 0);
 
     /*
     |--------------------------------------------------------------------------
@@ -276,13 +439,16 @@
     |--------------------------------------------------------------------------
     */
 
-    $exportQuery = request()->query();
+    $exportQuery =
+        request()->query();
+
 @endphp
 
 
 @push('styles')
 
 <style>
+
 /* ==========================================================================
    PAGE
    ========================================================================== */
@@ -293,7 +459,7 @@
 
 
 /* ==========================================================================
-   PAGE HEADER
+   HEADER
    ========================================================================== */
 
 .surat-page-header{
@@ -315,49 +481,77 @@
     display:flex;
     align-items:center;
     justify-content:center;
+
     width:60px;
     height:60px;
+
     flex:0 0 60px;
+
     border-radius:15px;
-    background:linear-gradient(
-        135deg,
-        #dbeafe,
-        #eff6ff
-    );
+
+    background:
+        linear-gradient(
+            135deg,
+            #dbeafe,
+            #eff6ff
+        );
+
     color:#2563eb;
 }
 
 .surat-page-title{
     margin:0;
+
     color:#172554;
+
     font-size:30px;
+
     font-weight:800;
+
     line-height:1.1;
+
     letter-spacing:-.025em;
 }
 
 .surat-page-description{
     margin-top:5px;
+
     color:#64748b;
+
     font-size:14px;
+
     line-height:1.5;
 }
 
 .surat-create-button{
     display:inline-flex;
+
     align-items:center;
+
     justify-content:center;
+
     gap:8px;
+
     min-height:46px;
+
     padding:0 20px;
+
     border-radius:10px;
+
     background:#2563eb;
+
     color:#fff;
+
     font-size:13px;
+
     font-weight:700;
+
     text-decoration:none;
+
     box-shadow:
-        0 8px 20px rgba(37,99,235,.20);
+        0 8px 20px
+        rgba(37,99,235,.20);
+
     transition:
         background .15s ease,
         transform .15s ease,
@@ -366,77 +560,97 @@
 
 .surat-create-button:hover{
     background:#1d4ed8;
-    transform:translateY(-1px);
+
+    transform:
+        translateY(-1px);
+
     box-shadow:
-        0 12px 25px rgba(37,99,235,.25);
+        0 12px 25px
+        rgba(37,99,235,.25);
 }
 
 
 /* ==========================================================================
-   STATISTICS
+   SCORECARD
    ========================================================================== */
 
 .surat-stat-grid{
     display:grid;
+
     grid-template-columns:
-        repeat(4,minmax(0,1fr));
+        repeat(
+            4,
+            minmax(0,1fr)
+        );
+
     gap:16px;
+
     margin-bottom:20px;
 }
 
 .surat-stat-card{
     position:relative;
-    display:flex;
-    align-items:center;
-    gap:15px;
-    min-height:124px;
-    padding:18px 20px;
-    overflow:hidden;
-    border:1px solid #dbe4f0;
-    border-radius:12px;
-    background:#fff;
-    box-shadow:
-        0 2px 8px rgba(15,23,42,.035);
-}
 
-.surat-stat-card::after{
-    content:'';
-    position:absolute;
-    right:-28px;
-    bottom:-35px;
-    width:100px;
-    height:100px;
-    border-radius:50%;
-    opacity:.35;
+    display:flex;
+
+    align-items:center;
+
+    gap:15px;
+
+    min-height:124px;
+
+    padding:18px 20px;
+
+    overflow:hidden;
+
+    border:1px solid #dbe4f0;
+
+    border-radius:12px;
+
+    background:#fff;
+
+    box-shadow:
+        0 2px 8px
+        rgba(15,23,42,.035);
 }
 
 .surat-stat-icon{
     display:flex;
+
     align-items:center;
+
     justify-content:center;
+
     width:52px;
+
     height:52px;
+
     flex:0 0 52px;
+
     border-radius:14px;
 }
 
 .surat-stat-icon.blue{
     background:#eaf2ff;
+
     color:#2563eb;
 }
 
 .surat-stat-icon.red{
     background:#ffe9ec;
+
     color:#e11d48;
 }
 
 .surat-stat-icon.amber{
     background:#fff4dc;
+
     color:#d97706;
 }
 
 .surat-stat-icon.green{
     background:#dcf8ee;
+
     color:#059669;
 }
 
@@ -446,15 +660,21 @@
 
 .surat-stat-label{
     color:#64748b;
+
     font-size:12px;
+
     font-weight:600;
 }
 
 .surat-stat-value{
     margin-top:4px;
+
     color:#172033;
+
     font-size:28px;
+
     font-weight:800;
+
     line-height:1;
 }
 
@@ -464,65 +684,102 @@
 
 .surat-stat-description{
     margin-top:7px;
+
     color:#94a3b8;
+
     font-size:11px;
 }
 
 
 /* ==========================================================================
-   FILTER CONTAINER
+   FILTER
    ========================================================================== */
 
 .surat-filter-card{
     margin-bottom:14px;
+
     padding:18px;
+
     border:1px solid #dbe4f0;
+
     border-radius:12px;
+
     background:#fff;
+
     box-shadow:
-        0 2px 10px rgba(15,23,42,.035);
+        0 2px 10px
+        rgba(15,23,42,.035);
 }
 
 .surat-filter-main{
     display:grid;
+
     grid-template-columns:
         minmax(0,1fr)
         auto
         290px;
+
     gap:10px;
+
     align-items:center;
 }
 
 .surat-search-wrapper{
     position:relative;
+
     min-width:0;
 }
 
 .surat-search-icon{
     position:absolute;
+
     top:50%;
+
     left:14px;
+
     z-index:2;
+
     display:flex;
+
     align-items:center;
+
     justify-content:center;
+
     width:18px;
+
     height:18px;
+
     color:#64748b;
-    transform:translateY(-50%);
+
+    transform:
+        translateY(-50%);
+
     pointer-events:none;
 }
 
 .surat-search-input{
     width:100%;
+
     height:44px;
-    padding:0 14px 0 43px;
+
+    padding:
+        0
+        14px
+        0
+        43px;
+
     border:1px solid #d6e0ec;
+
     border-radius:10px;
+
     outline:none;
+
     background:#fff;
+
     color:#334155;
+
     font-size:12px;
+
     transition:
         border-color .15s ease,
         box-shadow .15s ease;
@@ -538,8 +795,10 @@
 
 .surat-search-input:focus{
     border-color:#3b82f6;
+
     box-shadow:
-        0 0 0 3px rgba(59,130,246,.10);
+        0 0 0 3px
+        rgba(59,130,246,.10);
 }
 
 
@@ -549,19 +808,33 @@
 
 .surat-filter-submit{
     display:inline-flex;
+
     align-items:center;
+
     justify-content:center;
+
     gap:7px;
+
     height:44px;
+
     min-width:112px;
+
     padding:0 17px;
+
     border:1px solid #d6e0ec;
+
     border-radius:10px;
+
     background:#fff;
+
     color:#475569;
+
     font-size:12px;
+
     font-weight:700;
+
     cursor:pointer;
+
     transition:
         background .15s ease,
         border-color .15s ease,
@@ -570,13 +843,17 @@
 
 .surat-filter-submit:hover{
     border-color:#94a3b8;
+
     background:#f8fafc;
+
     color:#1e293b;
 }
 
 .surat-filter-submit.has-filter{
     border-color:#bfdbfe;
+
     background:#eff6ff;
+
     color:#2563eb;
 }
 
@@ -591,16 +868,31 @@
 
 .surat-date-input{
     width:100%;
+
     height:44px;
-    padding:0 38px 0 42px;
+
+    padding:
+        0
+        38px
+        0
+        42px;
+
     border:1px solid #d6e0ec;
+
     border-radius:10px;
+
     outline:none;
+
     background:#fff;
+
     color:#475569;
+
     font-size:12px;
+
     font-weight:600;
+
     cursor:pointer;
+
     transition:
         border-color .15s ease,
         box-shadow .15s ease;
@@ -612,76 +904,124 @@
 
 .surat-date-input:focus{
     border-color:#3b82f6;
+
     box-shadow:
-        0 0 0 3px rgba(59,130,246,.10);
+        0 0 0 3px
+        rgba(59,130,246,.10);
 }
 
 .surat-date-left-icon{
     position:absolute;
+
     top:50%;
+
     left:14px;
+
     z-index:2;
+
     display:flex;
+
     align-items:center;
+
     justify-content:center;
+
     color:#64748b;
-    transform:translateY(-50%);
+
+    transform:
+        translateY(-50%);
+
     pointer-events:none;
 }
 
 .surat-date-clear{
     position:absolute;
+
     top:50%;
+
     right:4px;
+
     display:none;
+
     align-items:center;
+
     justify-content:center;
+
     width:34px;
+
     height:34px;
+
     border:0;
+
     border-radius:8px;
+
     background:transparent;
+
     color:#94a3b8;
+
     cursor:pointer;
-    transform:translateY(-50%);
+
+    transform:
+        translateY(-50%);
 }
 
 .surat-date-clear:hover{
     background:#fff1f2;
+
     color:#e11d48;
 }
 
 
 /* ==========================================================================
-   FILTER DROPDOWNS
+   DROPDOWN
    ========================================================================== */
 
 .surat-filter-secondary{
     display:grid;
+
     grid-template-columns:
-        repeat(2,minmax(0,1fr));
+        repeat(
+            2,
+            minmax(0,1fr)
+        );
+
     gap:10px;
+
     margin-top:10px;
 }
 
 .surat-filter-dropdown{
     position:relative;
+
     min-width:0;
 }
 
 .surat-filter-trigger{
     display:flex;
+
     align-items:center;
+
     width:100%;
+
     min-height:48px;
+
     gap:10px;
-    padding:7px 12px;
+
+    padding:
+        7px
+        12px;
+
     border:1px solid #d6e0ec;
+
     border-radius:10px;
+
     background:#fff;
+
     color:#334155;
+
     text-align:left;
+
     cursor:pointer;
+
     transition:
         border-color .15s ease,
         background .15s ease,
@@ -690,120 +1030,175 @@
 
 .surat-filter-trigger:hover{
     border-color:#b8c5d6;
+
     background:#f8fafc;
 }
 
 .surat-filter-trigger.is-open,
 .surat-filter-trigger:focus{
     outline:none;
+
     border-color:#3b82f6;
+
     box-shadow:
-        0 0 0 3px rgba(59,130,246,.10);
+        0 0 0 3px
+        rgba(59,130,246,.10);
 }
 
 .surat-filter-trigger.is-active{
     border-color:#93c5fd;
+
     background:#f8fbff;
 }
 
 .surat-filter-icon{
     display:flex;
+
     align-items:center;
+
     justify-content:center;
+
     width:32px;
+
     height:32px;
+
     flex:0 0 32px;
+
     border-radius:8px;
 }
 
 .surat-filter-icon.category{
     background:#eff6ff;
+
     color:#2563eb;
 }
 
 .surat-filter-icon.status{
     background:#fff7ed;
+
     color:#d97706;
 }
 
 .surat-filter-trigger-content{
     min-width:0;
+
     flex:1;
 }
 
 .surat-filter-trigger-title{
     display:block;
+
     color:#334155;
+
     font-size:11px;
+
     font-weight:700;
 }
 
 .surat-filter-trigger-subtitle{
     display:block;
+
     margin-top:2px;
+
     overflow:hidden;
+
     color:#94a3b8;
+
     font-size:9px;
+
     line-height:1.2;
+
     text-overflow:ellipsis;
+
     white-space:nowrap;
 }
 
 .surat-filter-count{
     display:inline-flex;
+
     align-items:center;
+
     justify-content:center;
+
     min-width:60px;
+
     height:23px;
+
     padding:0 8px;
+
     border-radius:999px;
+
     font-size:9px;
+
     font-weight:700;
+
     white-space:nowrap;
 }
 
 .surat-filter-count.category{
     background:#eff6ff;
+
     color:#2563eb;
 }
 
 .surat-filter-count.status{
     background:#fff7ed;
+
     color:#d97706;
 }
 
 .surat-filter-chevron{
     display:flex;
+
     align-items:center;
+
     justify-content:center;
+
     width:18px;
+
     height:18px;
+
     color:#64748b;
-    transition:transform .2s ease;
+
+    transition:
+        transform .2s ease;
 }
 
-.surat-filter-trigger.is-open .surat-filter-chevron{
-    transform:rotate(180deg);
+.surat-filter-trigger.is-open
+.surat-filter-chevron{
+    transform:
+        rotate(180deg);
 }
 
 
 /* ==========================================================================
-   FILTER MENU
+   DROPDOWN MENU
    ========================================================================== */
 
 .surat-filter-menu{
     position:absolute;
+
     top:calc(100% + 7px);
+
     right:0;
+
     left:0;
+
     z-index:9998;
+
     overflow:hidden;
+
     border:1px solid #cbd5e1;
+
     border-radius:12px;
+
     background:#fff;
+
     box-shadow:
-        0 20px 45px rgba(15,23,42,.15),
-        0 5px 15px rgba(15,23,42,.06);
+        0 20px 45px
+        rgba(15,23,42,.15),
+        0 5px 15px
+        rgba(15,23,42,.06);
 }
 
 .surat-filter-menu.hidden{
@@ -812,38 +1207,59 @@
 
 .surat-filter-menu-header{
     display:flex;
+
     align-items:center;
+
     justify-content:space-between;
+
     gap:10px;
-    padding:11px 12px;
+
+    padding:
+        11px
+        12px;
+
     border-bottom:1px solid #e2e8f0;
+
     background:#f8fafc;
 }
 
 .surat-filter-menu-title{
     color:#334155;
+
     font-size:11px;
+
     font-weight:800;
 }
 
 .surat-filter-menu-description{
     margin-top:2px;
+
     color:#94a3b8;
+
     font-size:9px;
 }
 
 .surat-filter-menu-actions{
     display:flex;
+
     gap:3px;
 }
 
 .surat-filter-action{
     border:0;
+
     border-radius:6px;
-    padding:5px 7px;
+
+    padding:
+        5px
+        7px;
+
     background:transparent;
+
     font-size:9px;
+
     font-weight:700;
+
     cursor:pointer;
 }
 
@@ -865,24 +1281,43 @@
 
 .surat-filter-options{
     display:grid;
+
     grid-template-columns:
-        repeat(2,minmax(0,1fr));
+        repeat(
+            2,
+            minmax(0,1fr)
+        );
+
     gap:7px;
+
     max-height:260px;
+
     padding:10px;
+
     overflow-y:auto;
 }
 
 .surat-filter-option{
     display:flex;
+
     align-items:center;
+
     min-height:38px;
+
     gap:8px;
-    padding:7px 9px;
+
+    padding:
+        7px
+        9px;
+
     border:1px solid #dbe3ed;
+
     border-radius:8px;
+
     background:#fff;
+
     cursor:pointer;
+
     transition:
         border-color .15s ease,
         background .15s ease;
@@ -891,24 +1326,35 @@
 .surat-filter-option:hover,
 .surat-filter-option.is-selected{
     border-color:#93c5fd;
+
     background:#eff6ff;
 }
 
 .surat-filter-option input{
     width:15px;
+
     height:15px;
+
     margin:0;
+
     accent-color:#2563eb;
+
     cursor:pointer;
 }
 
 .surat-filter-option-text{
     min-width:0;
+
     overflow:hidden;
+
     color:#475569;
+
     font-size:10px;
+
     font-weight:600;
+
     text-overflow:ellipsis;
+
     white-space:nowrap;
 }
 
@@ -919,21 +1365,31 @@
 
 .surat-filter-menu-footer{
     display:flex;
+
     align-items:center;
+
     justify-content:space-between;
+
     gap:8px;
-    padding:8px 12px;
+
+    padding:
+        8px
+        12px;
+
     border-top:1px solid #e2e8f0;
 }
 
 .surat-filter-footer-count{
     color:#64748b;
+
     font-size:9px;
+
     font-weight:600;
 }
 
 .surat-filter-footer-hint{
     color:#94a3b8;
+
     font-size:9px;
 }
 
@@ -945,18 +1401,28 @@
 .custom-date-picker,
 .custom-picker-panel{
     border:1px solid #cbd5e1;
+
     background:#fff;
+
     box-shadow:
-        0 24px 70px rgba(15,23,42,.18),
-        0 8px 25px rgba(15,23,42,.08);
+        0 24px 70px
+        rgba(15,23,42,.18),
+        0 8px 25px
+        rgba(15,23,42,.08);
 }
 
 .custom-date-picker{
     position:fixed;
+
     z-index:999999;
+
     width:720px;
-    max-width:calc(100vw - 20px);
+
+    max-width:
+        calc(100vw - 20px);
+
     overflow:hidden;
+
     border-radius:14px;
 }
 
@@ -967,134 +1433,219 @@
 
 .custom-date-picker-header{
     display:flex;
+
     align-items:center;
+
     justify-content:space-between;
-    padding:11px 14px;
-    border-bottom:1px solid #e2e8f0;
+
+    padding:
+        11px
+        14px;
+
+    border-bottom:
+        1px solid
+        #e2e8f0;
 }
 
 .custom-date-picker-title{
     color:#334155;
+
     font-size:12px;
+
     font-weight:800;
 }
 
 .custom-date-picker-close,
 .custom-picker-panel-close{
     display:flex;
+
     align-items:center;
+
     justify-content:center;
+
     border:0;
+
     background:#f8fafc;
+
     color:#64748b;
+
     cursor:pointer;
 }
 
 .custom-date-picker-close{
     width:30px;
+
     height:30px;
+
     border-radius:8px;
+
     font-size:18px;
 }
 
 .custom-date-picker-close:hover,
 .custom-picker-panel-close:hover{
     background:#f1f5f9;
+
     color:#ef4444;
 }
 
 .custom-date-picker-calendars{
     display:grid;
+
     grid-template-columns:
-        repeat(2,minmax(0,1fr));
+        repeat(
+            2,
+            minmax(0,1fr)
+        );
 }
 
 .custom-calendar{
-    padding:13px 15px 11px;
+    padding:
+        13px
+        15px
+        11px;
 }
 
 .custom-calendar+.custom-calendar{
-    border-left:1px solid #e2e8f0;
+    border-left:
+        1px solid
+        #e2e8f0;
 }
 
 .custom-calendar-head{
     display:flex;
+
     align-items:center;
+
     justify-content:space-between;
+
     gap:5px;
+
     min-height:38px;
+
     margin-bottom:5px;
 }
 
 .custom-calendar-month-buttons{
     display:flex;
+
     align-items:center;
+
     justify-content:center;
+
     flex:1;
+
     gap:4px;
 }
 
 .custom-calendar-nav{
     display:flex;
+
     align-items:center;
+
     justify-content:center;
+
     width:32px;
+
     height:32px;
+
     flex:0 0 32px;
+
     border:0;
+
     border-radius:8px;
+
     background:transparent;
+
     color:#64748b;
+
     font-size:21px;
+
     cursor:pointer;
 }
 
 .custom-calendar-nav:hover{
     background:#eff6ff;
+
     color:#2563eb;
 }
 
 .custom-calendar-month,
 .custom-calendar-year{
     display:inline-flex;
+
     align-items:center;
+
     justify-content:center;
+
     gap:5px;
+
     min-height:32px;
+
     border:1px solid #dbe3ed;
+
     border-radius:8px;
-    padding:6px 9px;
+
+    padding:
+        6px
+        9px;
+
     background:#f8fafc;
+
     color:#334155;
+
     font-family:inherit;
+
     font-size:11px;
+
     font-weight:800;
+
     cursor:pointer;
 }
 
 .custom-calendar-month:hover,
 .custom-calendar-year:hover{
     border-color:#93c5fd;
+
     background:#eff6ff;
+
     color:#2563eb;
 }
 
 .custom-calendar-month::after,
 .custom-calendar-year::after{
     content:'';
+
     width:6px;
+
     height:6px;
+
     margin-top:-3px;
-    border-right:1.5px solid currentColor;
-    border-bottom:1.5px solid currentColor;
-    transform:rotate(45deg);
+
+    border-right:
+        1.5px
+        solid
+        currentColor;
+
+    border-bottom:
+        1.5px
+        solid
+        currentColor;
+
+    transform:
+        rotate(45deg);
 }
 
 .custom-calendar-weekdays,
 .custom-calendar-days{
     display:grid;
+
     grid-template-columns:
-        repeat(7,minmax(0,1fr));
+        repeat(
+            7,
+            minmax(0,1fr)
+        );
+
     gap:2px;
 }
 
@@ -1104,31 +1655,49 @@
 
 .custom-calendar-weekday{
     display:flex;
+
     align-items:center;
+
     justify-content:center;
+
     height:26px;
+
     color:#94a3b8;
+
     font-size:9px;
+
     font-weight:800;
 }
 
 .custom-calendar-day{
     display:flex;
+
     align-items:center;
+
     justify-content:center;
+
     height:34px;
+
     border:0;
+
     border-radius:7px;
+
     background:transparent;
+
     color:#475569;
+
     font-family:inherit;
+
     font-size:10px;
+
     font-weight:600;
+
     cursor:pointer;
 }
 
 .custom-calendar-day:hover{
     background:#eff6ff;
+
     color:#2563eb;
 }
 
@@ -1138,25 +1707,41 @@
 
 .custom-calendar-day.today{
     box-shadow:
-        inset 0 0 0 1px #93c5fd;
+        inset 0 0 0 1px
+        #93c5fd;
+
     color:#2563eb;
 }
 
 .custom-calendar-day.in-range{
     border-radius:0;
+
     background:#eff6ff;
+
     color:#2563eb;
 }
 
 .custom-calendar-day.range-start{
-    border-radius:999px 0 0 999px;
+    border-radius:
+        999px
+        0
+        0
+        999px;
+
     background:#2563eb;
+
     color:#fff;
 }
 
 .custom-calendar-day.range-end{
-    border-radius:0 999px 999px 0;
+    border-radius:
+        0
+        999px
+        999px
+        0;
+
     background:#2563eb;
+
     color:#fff;
 }
 
@@ -1166,36 +1751,59 @@
 
 .custom-date-picker-footer{
     display:flex;
+
     align-items:center;
+
     justify-content:space-between;
+
     gap:10px;
-    padding:10px 12px;
-    border-top:1px solid #e2e8f0;
+
+    padding:
+        10px
+        12px;
+
+    border-top:
+        1px solid
+        #e2e8f0;
 }
 
 .custom-date-picker-selected{
     min-width:0;
+
     color:#64748b;
+
     font-size:10px;
+
     font-weight:700;
 }
 
 .custom-date-picker-actions{
     display:flex;
+
     align-items:center;
+
     gap:6px;
 }
 
 .custom-date-picker-button{
     height:34px;
+
     border:1px solid #dbe3ed;
+
     border-radius:8px;
+
     padding:0 12px;
+
     background:#f8fafc;
+
     color:#475569;
+
     font-family:inherit;
+
     font-size:10px;
+
     font-weight:700;
+
     cursor:pointer;
 }
 
@@ -1205,7 +1813,9 @@
 
 .custom-date-picker-button.apply{
     border-color:#2563eb;
+
     background:#2563eb;
+
     color:#fff;
 }
 
@@ -1215,84 +1825,128 @@
 
 .custom-picker-panel{
     position:fixed;
+
     z-index:1000000;
+
     width:310px;
-    max-width:calc(100vw - 20px);
+
+    max-width:
+        calc(100vw - 20px);
+
     padding:12px;
+
     border-radius:12px;
 }
 
 .custom-picker-panel-header{
     display:flex;
+
     align-items:center;
+
     justify-content:space-between;
+
     gap:8px;
+
     margin-bottom:10px;
+
     padding-bottom:9px;
-    border-bottom:1px solid #e2e8f0;
+
+    border-bottom:
+        1px solid
+        #e2e8f0;
 }
 
 .custom-picker-panel-title{
     flex:1;
+
     color:#334155;
+
     font-size:12px;
+
     font-weight:800;
+
     text-align:center;
 }
 
 .custom-picker-panel-close{
     width:28px;
+
     height:28px;
+
     border-radius:7px;
+
     font-size:17px;
 }
 
 .custom-picker-month-grid,
 .custom-picker-year-grid{
     display:grid;
+
     gap:7px;
 }
 
 .custom-picker-month-grid{
     grid-template-columns:
-        repeat(3,1fr);
+        repeat(
+            3,
+            1fr
+        );
 }
 
 .custom-picker-year-grid{
     grid-template-columns:
-        repeat(4,1fr);
+        repeat(
+            4,
+            1fr
+        );
 }
 
 .custom-picker-option{
     display:flex;
+
     align-items:center;
+
     justify-content:center;
+
     min-height:40px;
+
     border:1px solid #dbe3ed;
+
     border-radius:9px;
+
     background:#fff;
+
     color:#475569;
+
     font-family:inherit;
+
     font-size:10px;
+
     font-weight:700;
+
     cursor:pointer;
 }
 
 .custom-picker-option:hover{
     border-color:#93c5fd;
+
     background:#eff6ff;
+
     color:#2563eb;
 }
 
 .custom-picker-option.active{
     border-color:#2563eb;
+
     background:#2563eb;
+
     color:#fff;
 }
 
 .custom-picker-option.current{
     box-shadow:
-        inset 0 0 0 1px #93c5fd;
+        inset 0 0 0 1px
+        #93c5fd;
 }
 
 .custom-picker-option.active.current{
@@ -1301,25 +1955,37 @@
 
 .custom-picker-year-navigation{
     display:flex;
+
     align-items:center;
+
     gap:4px;
 }
 
 .custom-picker-year-nav{
     display:flex;
+
     align-items:center;
+
     justify-content:center;
+
     width:29px;
+
     height:29px;
+
     border:0;
+
     border-radius:7px;
+
     background:#f8fafc;
+
     color:#64748b;
+
     cursor:pointer;
 }
 
 .custom-picker-year-nav:hover{
     background:#eff6ff;
+
     color:#2563eb;
 }
 
@@ -1330,11 +1996,16 @@
 
 .archive-table-wrapper{
     overflow:hidden;
+
     border:1px solid #dbe4f0;
+
     border-radius:12px;
+
     background:#fff;
+
     box-shadow:
-        0 2px 10px rgba(15,23,42,.035);
+        0 2px 10px
+        rgba(15,23,42,.035);
 }
 
 .archive-table-scroll{
@@ -1343,9 +2014,13 @@
 
 .archive-table{
     width:100%;
+
     min-width:1000px;
+
     border-collapse:collapse;
+
     border-spacing:0;
+
     background:#fff;
 }
 
@@ -1354,19 +2029,34 @@
 }
 
 .archive-table thead tr{
-    border-bottom:1px solid #e2e8f0;
+    border-bottom:
+        1px solid
+        #e2e8f0;
 }
 
 .archive-table thead th{
-    padding:14px 16px;
-    border-bottom:1px solid #e2e8f0;
+    padding:
+        14px
+        16px;
+
+    border-bottom:
+        1px solid
+        #e2e8f0;
+
     color:#64748b;
+
     font-size:9px;
+
     font-weight:800;
+
     letter-spacing:.04em;
+
     line-height:1.3;
+
     text-align:left;
+
     text-transform:uppercase;
+
     white-space:nowrap;
 }
 
@@ -1380,6 +2070,7 @@
 
 .archive-table tbody tr{
     background:#fff;
+
     transition:
         background-color .15s ease;
 }
@@ -1389,11 +2080,20 @@
 }
 
 .archive-table tbody td{
-    padding:14px 16px;
-    border-bottom:1px solid #edf2f7;
+    padding:
+        14px
+        16px;
+
+    border-bottom:
+        1px solid
+        #edf2f7;
+
     color:#475569;
+
     font-size:11px;
+
     line-height:1.4;
+
     vertical-align:middle;
 }
 
@@ -1407,7 +2107,9 @@
 
 .archive-table .cell-date{
     color:#334155;
+
     font-weight:700;
+
     white-space:nowrap;
 }
 
@@ -1417,6 +2119,7 @@
 
 .archive-table .cell-subject{
     color:#1e293b;
+
     font-weight:700;
 }
 
@@ -1426,129 +2129,209 @@
 
 .archive-table .sender-name{
     display:block;
+
     max-width:220px;
+
     overflow:hidden;
+
     color:#334155;
+
     font-weight:700;
+
     text-overflow:ellipsis;
+
     white-space:nowrap;
 }
 
 .archive-table .sender-email{
     display:block;
+
     max-width:220px;
+
     margin-top:2px;
+
     overflow:hidden;
+
     color:#94a3b8;
+
     font-size:9px;
+
     text-overflow:ellipsis;
+
     white-space:nowrap;
 }
 
 .archive-table .subject-number{
     display:block;
+
     margin-top:3px;
+
     color:#94a3b8;
+
     font-size:9px;
+
     font-weight:500;
 }
 
+
+/* ==========================================================================
+   CATEGORY BADGE
+   ========================================================================== */
+
 .category-badge{
     display:inline-flex;
+
     align-items:center;
+
     gap:6px;
+
     min-height:28px;
-    padding:0 10px;
+
+    padding:
+        0
+        10px;
+
     border-radius:999px;
+
     background:#eff6ff;
+
     color:#2563eb;
+
     font-size:9px;
+
     font-weight:700;
+
     white-space:nowrap;
 }
 
 .category-badge.education{
     background:#dcf8ee;
+
     color:#059669;
 }
 
 .category-badge.invitation{
     background:#f0e9ff;
+
     color:#7c3aed;
 }
 
 .category-badge.report{
     background:#fff0d7;
+
     color:#d97706;
 }
 
+
+/* ==========================================================================
+   STATUS BADGE
+   ========================================================================== */
+
 .status-badge{
     display:inline-flex;
+
     align-items:center;
+
     gap:6px;
+
     min-height:28px;
-    padding:0 10px;
+
+    padding:
+        0
+        10px;
+
     border-radius:999px;
+
     font-size:9px;
+
     font-weight:800;
+
     white-space:nowrap;
 }
 
 .status-dot{
     width:7px;
+
     height:7px;
+
     border-radius:999px;
-    background:currentColor;
+
+    background:
+        currentColor;
 }
 
 .status-baru{
     background:#eaf2ff;
+
     color:#2563eb;
 }
 
 .status-diproses{
     background:#fff4dc;
+
     color:#d97706;
 }
 
 .status-didisposisikan{
     background:#f0e9ff;
+
     color:#7c3aed;
 }
 
 .status-selesai{
     background:#dcf8ee;
+
     color:#059669;
 }
 
 .status-diarsipkan{
     background:#f1f5f9;
+
     color:#64748b;
 }
 
+
+/* ==========================================================================
+   ACTION
+   ========================================================================== */
+
 .action-cell{
     width:130px;
+
     text-align:center!important;
+
     white-space:nowrap;
 }
 
 .action-buttons{
     display:inline-flex;
+
     align-items:center;
+
     justify-content:center;
+
     gap:5px;
 }
 
 .action-button{
     display:inline-flex;
+
     align-items:center;
+
     justify-content:center;
+
     width:38px;
+
     height:38px;
+
     border:1px solid #e2e8f0;
+
     border-radius:9px;
+
     background:#fff;
+
     color:#64748b;
+
     transition:
         background .15s ease,
         color .15s ease,
@@ -1557,19 +2340,25 @@
 
 .action-button:hover{
     border-color:#bfdbfe;
+
     background:#eff6ff;
+
     color:#2563eb;
 }
 
 .action-button.edit:hover{
     border-color:#fde68a;
+
     background:#fffbeb;
+
     color:#d97706;
 }
 
 .action-button.delete:hover{
     border-color:#fecdd3;
+
     background:#fff1f2;
+
     color:#e11d48;
 }
 
@@ -1579,19 +2368,33 @@
    ========================================================================== */
 
 .archive-table-empty{
-    padding:55px 20px!important;
+    padding:
+        55px
+        20px!important;
+
     text-align:center;
 }
 
 .archive-empty-icon{
     display:flex;
+
     align-items:center;
+
     justify-content:center;
+
     width:56px;
+
     height:56px;
-    margin:0 auto 12px;
+
+    margin:
+        0
+        auto
+        12px;
+
     border-radius:16px;
+
     background:#f1f5f9;
+
     color:#94a3b8;
 }
 
@@ -1601,8 +2404,13 @@
    ========================================================================== */
 
 .archive-pagination{
-    padding:12px 20px;
-    border-top:1px solid #e2e8f0;
+    padding:
+        12px
+        20px;
+
+    border-top:
+        1px solid
+        #e2e8f0;
 }
 
 
@@ -1614,7 +2422,10 @@
 
     .surat-stat-grid{
         grid-template-columns:
-            repeat(2,minmax(0,1fr));
+            repeat(
+                2,
+                minmax(0,1fr)
+            );
     }
 
     .surat-filter-main{
@@ -1632,6 +2443,7 @@
 
     .surat-page-header{
         align-items:flex-start;
+
         flex-direction:column;
     }
 
@@ -1652,19 +2464,26 @@
     }
 
     .surat-stat-grid{
-        grid-template-columns:1fr 1fr;
+        grid-template-columns:
+            1fr
+            1fr;
+
         gap:10px;
     }
 
     .surat-stat-card{
         min-height:105px;
+
         padding:13px;
+
         gap:10px;
     }
 
     .surat-stat-icon{
         width:42px;
+
         height:42px;
+
         flex-basis:42px;
     }
 
@@ -1698,12 +2517,23 @@
 
     .surat-filter-menu{
         position:fixed;
+
         top:50%;
+
         right:auto;
+
         left:50%;
-        width:calc(100vw - 24px);
+
+        width:
+            calc(100vw - 24px);
+
         max-width:430px;
-        transform:translate(-50%,-50%);
+
+        transform:
+            translate(
+                -50%,
+                -50%
+            );
     }
 
     .surat-filter-options{
@@ -1712,11 +2542,22 @@
 
     .custom-date-picker{
         top:50%;
+
         left:50%;
-        width:calc(100vw - 16px);
-        max-height:calc(100vh - 16px);
+
+        width:
+            calc(100vw - 16px);
+
+        max-height:
+            calc(100vh - 16px);
+
         overflow-y:auto;
-        transform:translate(-50%,-50%);
+
+        transform:
+            translate(
+                -50%,
+                -50%
+            );
     }
 
     .custom-date-picker-calendars{
@@ -1724,7 +2565,10 @@
     }
 
     .custom-calendar+.custom-calendar{
-        border-top:1px solid #e2e8f0;
+        border-top:
+            1px solid
+            #e2e8f0;
+
         border-left:0;
     }
 
@@ -1734,14 +2578,24 @@
 
     .custom-picker-panel{
         top:50%!important;
+
         left:50%!important;
-        width:calc(100vw - 24px);
-        transform:translate(-50%,-50%);
+
+        width:
+            calc(100vw - 24px);
+
+        transform:
+            translate(
+                -50%,
+                -50%
+            );
     }
 
     .custom-date-picker-footer{
         position:sticky;
+
         bottom:0;
+
         background:#fff;
     }
 
@@ -1766,10 +2620,13 @@
 
     .surat-page-icon{
         width:48px;
+
         height:48px;
+
         flex-basis:48px;
     }
 }
+
 </style>
 
 @endpush
@@ -1860,7 +2717,7 @@
 
 
     {{-- =====================================================================
-         STATISTIK
+         SCORECARD
     ====================================================================== --}}
 
     <div class="surat-stat-grid">
@@ -2080,10 +2937,6 @@
             action="{{ route('surat-masuk.index') }}"
         >
 
-            {{-- =============================================================
-                 FILTER UTAMA
-            ============================================================== --}}
-
             <div class="surat-filter-main">
 
 
@@ -2237,9 +3090,7 @@
             </div>
 
 
-            {{-- =============================================================
-                 KATEGORI + STATUS
-            ============================================================== --}}
+            {{-- KATEGORI + STATUS --}}
 
             <div class="surat-filter-secondary">
 
@@ -2367,9 +3218,14 @@
 
                         <div class="surat-filter-options">
 
-                            @forelse(($kategoris ?? collect()) as $kategori)
+                            @forelse(
+                                ($kategoris ?? collect())
+                                as $kategori
+                            )
 
-                                <label class="surat-filter-option">
+                                <label
+                                    class="surat-filter-option"
+                                >
 
                                     <input
                                         type="checkbox"
@@ -2384,6 +3240,7 @@
                                             )
                                         )
                                     >
+
 
                                     <span
                                         class="surat-filter-option-text"
@@ -2411,7 +3268,8 @@
                                 class="surat-filter-footer-count"
                                 data-footer-count
                             >
-                                {{ count($selectedKategori) }} kategori dipilih
+                                {{ count($selectedKategori) }}
+                                kategori dipilih
                             </span>
 
                             <span class="surat-filter-footer-hint">
@@ -2548,9 +3406,14 @@
 
                         <div class="surat-filter-options">
 
-                            @foreach($statusOptions as $value => $label)
+                            @foreach(
+                                $statusOptions
+                                as $value => $label
+                            )
 
-                                <label class="surat-filter-option">
+                                <label
+                                    class="surat-filter-option"
+                                >
 
                                     <input
                                         type="checkbox"
@@ -2566,7 +3429,10 @@
                                         )
                                     >
 
-                                    <span class="surat-filter-option-text">
+
+                                    <span
+                                        class="surat-filter-option-text"
+                                    >
                                         {{ $label }}
                                     </span>
 
@@ -2583,7 +3449,8 @@
                                 class="surat-filter-footer-count"
                                 data-footer-count
                             >
-                                {{ count($selectedStatus) }} status dipilih
+                                {{ count($selectedStatus) }}
+                                status dipilih
                             </span>
 
                             <span class="surat-filter-footer-hint">
@@ -2648,40 +3515,72 @@
 
                 <tbody>
 
-                    @forelse(($suratMasuks ?? collect()) as $surat)
+                    @forelse(
+                        ($suratMasuks ?? collect())
+                        as $surat
+                    )
 
                         @php
 
-                            $status = strtolower(
-                                trim(
-                                    (string) (
-                                        $surat->status ??
-                                        'baru'
+                            /*
+                            |--------------------------------------------------------------------------
+                            | STATUS
+                            |--------------------------------------------------------------------------
+                            */
+
+                            $status =
+                                strtolower(
+                                    trim(
+                                        (string) (
+                                            $surat->status ??
+                                            'baru'
+                                        )
                                     )
-                                )
-                            );
+                                );
+
 
                             $statusLabel =
-                                $statusOptions[$status] ??
-                                ucfirst($status);
+                                $statusOptions[
+                                    $status
+                                ]
+                                ??
+                                ucfirst(
+                                    $status
+                                );
 
-                            $tanggalTerima = '-';
 
-                            if ($surat->tanggal_terima) {
+                            /*
+                            |--------------------------------------------------------------------------
+                            | TANGGAL
+                            |--------------------------------------------------------------------------
+                            */
+
+                            $tanggalTerima =
+                                '-';
+
+
+                            if (
+                                $surat->tanggal_terima
+                            ) {
 
                                 try {
 
                                     $tanggalTerima =
                                         Carbon::parse(
                                             $surat->tanggal_terima
-                                        )->format('d M Y');
+                                        )->format(
+                                            'd M Y'
+                                        );
 
-                                } catch (\Throwable $e) {
+                                } catch (
+                                    \Throwable $e
+                                ) {
 
-                                    $tanggalTerima = '-';
-
+                                    $tanggalTerima =
+                                        '-';
                                 }
                             }
+
 
                             /*
                             |--------------------------------------------------------------------------
@@ -2692,12 +3591,17 @@
                             $kategoriNama =
                                 strtolower(
                                     (string) (
-                                        $surat->kategori?->nama_kategori ??
-                                        ''
+                                        $surat
+                                            ->kategori
+                                            ?->nama_kategori
+                                        ?? ''
                                     )
                                 );
 
-                            $categoryClass = '';
+
+                            $categoryClass =
+                                '';
+
 
                             if (
                                 str_contains(
@@ -2705,7 +3609,9 @@
                                     'pendidikan'
                                 )
                             ) {
-                                $categoryClass = 'education';
+
+                                $categoryClass =
+                                    'education';
 
                             } elseif (
                                 str_contains(
@@ -2713,7 +3619,9 @@
                                     'undangan'
                                 )
                             ) {
-                                $categoryClass = 'invitation';
+
+                                $categoryClass =
+                                    'invitation';
 
                             } elseif (
                                 str_contains(
@@ -2721,13 +3629,16 @@
                                     'laporan'
                                 )
                             ) {
-                                $categoryClass = 'report';
+
+                                $categoryClass =
+                                    'report';
                             }
 
                         @endphp
 
 
                         <tr>
+
 
                             {{-- TANGGAL --}}
 
@@ -2737,11 +3648,20 @@
                                     {{ $tanggalTerima }}
                                 </div>
 
-                                @if($surat->created_at)
 
-                                    <div class="mt-1 text-[9px] font-normal text-slate-400">
+                                @if(
+                                    $surat->created_at
+                                )
 
-                                        {{ Carbon::parse($surat->created_at)->format('H:i') }}
+                                    <div
+                                        class="mt-1 text-[9px] font-normal text-slate-400"
+                                    >
+
+                                        {{
+                                            Carbon::parse(
+                                                $surat->created_at
+                                            )->format('H:i')
+                                        }}
 
                                     </div>
 
@@ -2762,7 +3682,12 @@
                                 </span>
 
 
-                                @if(!empty($surat->email_pengirim))
+                                @if(
+                                    !empty(
+                                        $surat
+                                            ->email_pengirim
+                                    )
+                                )
 
                                     <span
                                         class="sender-email"
@@ -2788,13 +3713,19 @@
                                 </div>
 
 
-                                @if(!empty($surat->nomor_surat))
+                                @if(
+                                    !empty(
+                                        $surat
+                                            ->nomor_surat
+                                    )
+                                )
 
                                     <div
                                         class="subject-number"
                                         title="{{ $surat->nomor_surat }}"
                                     >
-                                        No. {{ $surat->nomor_surat }}
+                                        No.
+                                        {{ $surat->nomor_surat }}
                                     </div>
 
                                 @endif
@@ -2806,7 +3737,9 @@
 
                             <td class="cell-category">
 
-                                <span class="category-badge {{ $categoryClass }}">
+                                <span
+                                    class="category-badge {{ $categoryClass }}"
+                                >
 
                                     <svg
                                         class="h-3.5 w-3.5"
@@ -2823,7 +3756,12 @@
                                         />
                                     </svg>
 
-                                    {{ $surat->kategori?->nama_kategori ?? '-' }}
+                                    {{
+                                        $surat
+                                            ->kategori
+                                            ?->nama_kategori
+                                        ?? '-'
+                                    }}
 
                                 </span>
 
@@ -2835,10 +3773,15 @@
                             <td>
 
                                 <span
-                                    class="status-badge status-{{ $status }}"
+                                    class="
+                                        status-badge
+                                        status-{{ $status }}
+                                    "
                                 >
 
-                                    <span class="status-dot"></span>
+                                    <span
+                                        class="status-dot"
+                                    ></span>
 
                                     {{ $statusLabel }}
 
@@ -2857,7 +3800,12 @@
                                     {{-- DETAIL --}}
 
                                     <a
-                                        href="{{ route('surat-masuk.show', $surat) }}"
+                                        href="{{
+                                            route(
+                                                'surat-masuk.show',
+                                                $surat
+                                            )
+                                        }}"
                                         class="action-button"
                                         title="Lihat Detail & Disposisi"
                                         aria-label="Lihat detail surat"
@@ -2894,7 +3842,12 @@
                                         {{-- EDIT --}}
 
                                         <a
-                                            href="{{ route('surat-masuk.edit', $surat) }}"
+                                            href="{{
+                                                route(
+                                                    'surat-masuk.edit',
+                                                    $surat
+                                                )
+                                            }}"
                                             class="action-button edit"
                                             title="Ubah Data"
                                             aria-label="Ubah data surat"
@@ -2928,7 +3881,12 @@
                                         {{-- DELETE --}}
 
                                         <form
-                                            action="{{ route('surat-masuk.destroy', $surat) }}"
+                                            action="{{
+                                                route(
+                                                    'surat-masuk.destroy',
+                                                    $surat
+                                                )
+                                            }}"
                                             method="POST"
                                             class="delete-form inline"
                                         >
@@ -2986,6 +3944,7 @@
 
                         </tr>
 
+
                     @empty
 
                         <tr>
@@ -2997,7 +3956,9 @@
 
                                 <div>
 
-                                    <div class="archive-empty-icon">
+                                    <div
+                                        class="archive-empty-icon"
+                                    >
 
                                         <svg
                                             class="h-7 w-7"
@@ -3017,18 +3978,24 @@
                                     </div>
 
 
-                                    <p class="text-sm font-bold text-slate-700 sm:text-base">
+                                    <p
+                                        class="text-sm font-bold text-slate-700 sm:text-base"
+                                    >
                                         Belum ada data surat masuk
                                     </p>
 
 
-                                    <p class="mx-auto mt-1 max-w-md text-xs text-slate-400">
+                                    <p
+                                        class="mx-auto mt-1 max-w-md text-xs text-slate-400"
+                                    >
 
                                         @if($hasFilters)
 
                                             Tidak ada surat yang sesuai dengan filter yang digunakan.
 
-                                        @elseif($userRole === 'staff')
+                                        @elseif(
+                                            $userRole === 'staff'
+                                        )
 
                                             Belum ada surat masuk yang didisposisikan kepada Anda.
 
@@ -3044,7 +4011,11 @@
                                     @if($hasFilters)
 
                                         <a
-                                            href="{{ route('surat-masuk.index') }}"
+                                            href="{{
+                                                route(
+                                                    'surat-masuk.index'
+                                                )
+                                            }}"
                                             class="mt-4 inline-flex items-center rounded-lg bg-slate-900 px-4 py-2 text-xs font-semibold text-white transition hover:bg-slate-800"
                                         >
                                             Reset Filter
@@ -3053,7 +4024,11 @@
                                     @elseif($canManage)
 
                                         <a
-                                            href="{{ route('surat-masuk.create') }}"
+                                            href="{{
+                                                route(
+                                                    'surat-masuk.create'
+                                                )
+                                            }}"
                                             class="mt-4 inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-blue-700"
                                         >
 
@@ -3097,7 +4072,10 @@
 
         @if(
             isset($suratMasuks) &&
-            method_exists($suratMasuks, 'hasPages') &&
+            method_exists(
+                $suratMasuks,
+                'hasPages'
+            ) &&
             $suratMasuks->hasPages()
         )
 
@@ -3118,9 +4096,9 @@
 </div>
 
 
-{{-- ========================================================================
-     CUSTOM DATE PICKER
-======================================================================== --}}
+{{-- ==========================================================================
+     DATE PICKER
+     ========================================================================== --}}
 
 <div
     id="customDatePicker"
@@ -3202,7 +4180,7 @@
 
     /*
     |--------------------------------------------------------------------------
-    | KONFIGURASI DATE PICKER
+    | CONFIG
     |--------------------------------------------------------------------------
     */
 
@@ -3221,6 +4199,7 @@
         'Desember'
     ];
 
+
     const WEEKDAYS = [
         'Sn',
         'Sl',
@@ -3231,10 +4210,14 @@
         'Mg'
     ];
 
+
     const MIN_YEAR = 2000;
 
+
     const MAX_YEAR =
-        new Date().getFullYear() + 20;
+        new Date()
+            .getFullYear() +
+        20;
 
 
     /*
@@ -3248,50 +4231,60 @@
             'date-range'
         );
 
+
     const dariInput =
         document.getElementById(
             'dari_tanggal'
         );
+
 
     const sampaiInput =
         document.getElementById(
             'sampai_tanggal'
         );
 
+
     const clearButton =
         document.getElementById(
             'clearDateRange'
         );
+
 
     const picker =
         document.getElementById(
             'customDatePicker'
         );
 
+
     const calendars =
         document.getElementById(
             'customDateCalendars'
         );
+
 
     const panel =
         document.getElementById(
             'customPickerPanel'
         );
 
+
     const closePickerButton =
         document.getElementById(
             'datePickerClose'
         );
+
 
     const clearPickerButton =
         document.getElementById(
             'datePickerClear'
         );
 
+
     const applyPickerButton =
         document.getElementById(
             'datePickerApply'
         );
+
 
     const selectedLabel =
         document.getElementById(
@@ -3310,38 +4303,51 @@
             dariInput?.value || ''
         );
 
+
     let selectedEnd =
         parseDate(
             sampaiInput?.value || ''
         );
 
+
     let tempStart =
         selectedStart
-            ? cloneDate(selectedStart)
+            ? cloneDate(
+                selectedStart
+            )
             : null;
+
 
     let tempEnd =
         selectedEnd
-            ? cloneDate(selectedEnd)
+            ? cloneDate(
+                selectedEnd
+            )
             : null;
+
 
     let viewLeft =
         selectedStart
             ? new Date(
-                selectedStart.getFullYear(),
-                selectedStart.getMonth(),
+                selectedStart
+                    .getFullYear(),
+                selectedStart
+                    .getMonth(),
                 1
             )
             : new Date();
 
-    let panelSide = 'left';
+
+    let panelSide =
+        'left';
+
 
     viewLeft.setDate(1);
 
 
     /*
     |--------------------------------------------------------------------------
-    | DATE HELPERS
+    | HELPERS
     |--------------------------------------------------------------------------
     */
 
@@ -3361,23 +4367,29 @@
             return null;
         }
 
+
         const match =
             String(value).match(
                 /^(\d{4})-(\d{2})-(\d{2})$/
             );
 
+
         if(!match){
             return null;
         }
 
+
         const year =
             Number(match[1]);
+
 
         const month =
             Number(match[2]) - 1;
 
+
         const day =
             Number(match[3]);
+
 
         const date =
             new Date(
@@ -3385,6 +4397,7 @@
                 month,
                 day
             );
+
 
         if(
             date.getFullYear() !== year ||
@@ -3394,6 +4407,7 @@
             return null;
         }
 
+
         return date;
     }
 
@@ -3401,7 +4415,10 @@
     function pad(value){
 
         return String(value)
-            .padStart(2,'0');
+            .padStart(
+                2,
+                '0'
+            );
     }
 
 
@@ -3411,10 +4428,15 @@
             return '';
         }
 
+
         return [
             date.getFullYear(),
-            pad(date.getMonth() + 1),
-            pad(date.getDate())
+            pad(
+                date.getMonth() + 1
+            ),
+            pad(
+                date.getDate()
+            )
         ].join('-');
     }
 
@@ -3425,22 +4447,33 @@
             return '';
         }
 
+
         return [
-            pad(date.getDate()),
-            pad(date.getMonth() + 1),
+            pad(
+                date.getDate()
+            ),
+            pad(
+                date.getMonth() + 1
+            ),
             date.getFullYear()
         ].join('/');
     }
 
 
-    function sameDate(a,b){
+    function sameDate(
+        a,
+        b
+    ){
 
         return !!(
             a &&
             b &&
-            a.getFullYear() === b.getFullYear() &&
-            a.getMonth() === b.getMonth() &&
-            a.getDate() === b.getDate()
+            a.getFullYear() ===
+                b.getFullYear() &&
+            a.getMonth() ===
+                b.getMonth() &&
+            a.getDate() ===
+                b.getDate()
         );
     }
 
@@ -3452,7 +4485,8 @@
 
         return new Date(
             date.getFullYear(),
-            date.getMonth() + amount,
+            date.getMonth() +
+                amount,
             1
         );
     }
@@ -3472,12 +4506,16 @@
             return false;
         }
 
+
         const value =
             toISO(date);
 
+
         return (
-            value > toISO(start) &&
-            value < toISO(end)
+            value >
+                toISO(start) &&
+            value <
+                toISO(end)
         );
     }
 
@@ -3494,7 +4532,10 @@
             return;
         }
 
-        calendars.innerHTML = '';
+
+        calendars.innerHTML =
+            '';
+
 
         const leftDate =
             new Date(
@@ -3503,11 +4544,13 @@
                 1
             );
 
+
         const rightDate =
             addMonths(
                 leftDate,
                 1
             );
+
 
         calendars.appendChild(
             createCalendar(
@@ -3516,6 +4559,7 @@
             )
         );
 
+
         calendars.appendChild(
             createCalendar(
                 rightDate,
@@ -3523,7 +4567,9 @@
             )
         );
 
+
         updateSelectedLabel();
+
 
         requestAnimationFrame(
             positionPicker
@@ -3537,29 +4583,42 @@
     ){
 
         const calendar =
-            document.createElement('div');
+            document.createElement(
+                'div'
+            );
+
 
         calendar.className =
             'custom-calendar';
 
 
         const header =
-            document.createElement('div');
+            document.createElement(
+                'div'
+            );
+
 
         header.className =
             'custom-calendar-head';
 
 
         const previous =
-            document.createElement('button');
+            document.createElement(
+                'button'
+            );
 
-        previous.type = 'button';
+
+        previous.type =
+            'button';
+
 
         previous.className =
             'custom-calendar-nav';
 
+
         previous.innerHTML =
             '&#8249;';
+
 
         previous.setAttribute(
             'aria-label',
@@ -3568,15 +4627,22 @@
 
 
         const next =
-            document.createElement('button');
+            document.createElement(
+                'button'
+            );
 
-        next.type = 'button';
+
+        next.type =
+            'button';
+
 
         next.className =
             'custom-calendar-nav';
 
+
         next.innerHTML =
             '&#8250;';
+
 
         next.setAttribute(
             'aria-label',
@@ -3585,20 +4651,28 @@
 
 
         const monthButtons =
-            document.createElement('div');
+            document.createElement(
+                'div'
+            );
+
 
         monthButtons.className =
             'custom-calendar-month-buttons';
 
 
         const monthButton =
-            document.createElement('button');
+            document.createElement(
+                'button'
+            );
+
 
         monthButton.type =
             'button';
 
+
         monthButton.className =
             'custom-calendar-month';
+
 
         monthButton.textContent =
             MONTHS[
@@ -3607,13 +4681,18 @@
 
 
         const yearButton =
-            document.createElement('button');
+            document.createElement(
+                'button'
+            );
+
 
         yearButton.type =
             'button';
 
+
         yearButton.className =
             'custom-calendar-year';
+
 
         yearButton.textContent =
             String(
@@ -3639,7 +4718,9 @@
             function(event){
 
                 event.preventDefault();
+
                 event.stopPropagation();
+
 
                 showMonthPanel(
                     date,
@@ -3655,7 +4736,9 @@
             function(event){
 
                 event.preventDefault();
+
                 event.stopPropagation();
+
 
                 showYearPanel(
                     date,
@@ -3671,13 +4754,16 @@
             function(event){
 
                 event.preventDefault();
+
                 event.stopPropagation();
+
 
                 viewLeft =
                     addMonths(
                         viewLeft,
                         -1
                     );
+
 
                 renderCalendars();
             }
@@ -3689,13 +4775,16 @@
             function(event){
 
                 event.preventDefault();
+
                 event.stopPropagation();
+
 
                 viewLeft =
                     addMonths(
                         viewLeft,
                         1
                     );
+
 
                 renderCalendars();
             }
@@ -3708,7 +4797,10 @@
 
 
         const weekdays =
-            document.createElement('div');
+            document.createElement(
+                'div'
+            );
+
 
         weekdays.className =
             'custom-calendar-weekdays';
@@ -3718,13 +4810,18 @@
             function(day){
 
                 const element =
-                    document.createElement('div');
+                    document.createElement(
+                        'div'
+                    );
+
 
                 element.className =
                     'custom-calendar-weekday';
 
+
                 element.textContent =
                     day;
+
 
                 weekdays.appendChild(
                     element
@@ -3739,7 +4836,10 @@
 
 
         const days =
-            document.createElement('div');
+            document.createElement(
+                'div'
+            );
+
 
         days.className =
             'custom-calendar-days';
@@ -3747,6 +4847,7 @@
 
         const year =
             date.getFullYear();
+
 
         const month =
             date.getMonth();
@@ -3792,11 +4893,13 @@
 
             let cellDate;
 
-            let otherMonth = false;
+            let otherMonth =
+                false;
 
 
             if(
-                index < mondayOffset
+                index <
+                mondayOffset
             ){
 
                 dayNumber =
@@ -3805,6 +4908,7 @@
                     index +
                     1;
 
+
                 cellDate =
                     new Date(
                         year,
@@ -3812,7 +4916,9 @@
                         dayNumber
                     );
 
-                otherMonth = true;
+
+                otherMonth =
+                    true;
 
             } else if(
                 index >=
@@ -3826,6 +4932,7 @@
                     daysInMonth +
                     1;
 
+
                 cellDate =
                     new Date(
                         year,
@@ -3833,7 +4940,9 @@
                         dayNumber
                     );
 
-                otherMonth = true;
+
+                otherMonth =
+                    true;
 
             } else {
 
@@ -3841,6 +4950,7 @@
                     index -
                     mondayOffset +
                     1;
+
 
                 cellDate =
                     new Date(
@@ -3856,17 +4966,24 @@
                     'button'
                 );
 
+
             button.type =
                 'button';
+
 
             button.className =
                 'custom-calendar-day';
 
+
             button.textContent =
-                String(dayNumber);
+                String(
+                    dayNumber
+                );
 
 
-            if(otherMonth){
+            if(
+                otherMonth
+            ){
 
                 button.classList.add(
                     'other-month'
@@ -3936,7 +5053,9 @@
                 function(event){
 
                     event.preventDefault();
+
                     event.stopPropagation();
+
 
                     selectDate(
                         cellDate
@@ -3966,10 +5085,14 @@
     |--------------------------------------------------------------------------
     */
 
-    function selectDate(date){
+    function selectDate(
+        date
+    ){
 
         const chosen =
-            cloneDate(date);
+            cloneDate(
+                date
+            );
 
 
         if(
@@ -3992,6 +5115,7 @@
                 cloneDate(
                     tempStart
                 );
+
 
             tempStart =
                 chosen;
@@ -4026,9 +5150,14 @@
         ){
 
             selectedLabel.textContent =
-                formatDate(tempStart) +
+                formatDate(
+                    tempStart
+                ) +
                 ' - ' +
-                formatDate(tempEnd);
+                formatDate(
+                    tempEnd
+                );
+
 
             return;
         }
@@ -4037,8 +5166,11 @@
         if(tempStart){
 
             selectedLabel.textContent =
-                formatDate(tempStart) +
+                formatDate(
+                    tempStart
+                ) +
                 ' - pilih tanggal akhir';
+
 
             return;
         }
@@ -4051,7 +5183,7 @@
 
     /*
     |--------------------------------------------------------------------------
-    | POSITION DATE PICKER
+    | POSITION
     |--------------------------------------------------------------------------
     */
 
@@ -4071,11 +5203,13 @@
 
 
         const width =
-            picker.offsetWidth || 720;
+            picker.offsetWidth ||
+            720;
 
 
         const height =
-            picker.offsetHeight || 500;
+            picker.offsetHeight ||
+            500;
 
 
         let left =
@@ -4085,7 +5219,8 @@
 
 
         let top =
-            rect.bottom + 8;
+            rect.bottom +
+            8;
 
 
         if(
@@ -4101,7 +5236,9 @@
 
 
         if(left < 10){
-            left = 10;
+
+            left =
+                10;
         }
 
 
@@ -4118,12 +5255,15 @@
 
 
         if(top < 10){
-            top = 10;
+
+            top =
+                10;
         }
 
 
         picker.style.left =
             left + 'px';
+
 
         picker.style.top =
             top + 'px';
@@ -4132,7 +5272,7 @@
 
     /*
     |--------------------------------------------------------------------------
-    | OPEN PICKER
+    | SHOW / HIDE
     |--------------------------------------------------------------------------
     */
 
@@ -4148,13 +5288,17 @@
 
         tempStart =
             selectedStart
-                ? cloneDate(selectedStart)
+                ? cloneDate(
+                    selectedStart
+                )
                 : null;
 
 
         tempEnd =
             selectedEnd
-                ? cloneDate(selectedEnd)
+                ? cloneDate(
+                    selectedEnd
+                )
                 : null;
 
 
@@ -4162,8 +5306,10 @@
 
             viewLeft =
                 new Date(
-                    tempStart.getFullYear(),
-                    tempStart.getMonth(),
+                    tempStart
+                        .getFullYear(),
+                    tempStart
+                        .getMonth(),
                     1
                 );
         }
@@ -4240,17 +5386,24 @@
 
 
         const header =
-            document.createElement('div');
+            document.createElement(
+                'div'
+            );
+
 
         header.className =
             'custom-picker-panel-header';
 
 
         const title =
-            document.createElement('div');
+            document.createElement(
+                'div'
+            );
+
 
         title.className =
             'custom-picker-panel-title';
+
 
         title.textContent =
             'Pilih Bulan ' +
@@ -4258,13 +5411,18 @@
 
 
         const close =
-            document.createElement('button');
+            document.createElement(
+                'button'
+            );
+
 
         close.type =
             'button';
 
+
         close.className =
             'custom-picker-panel-close';
+
 
         close.innerHTML =
             '&times;';
@@ -4288,7 +5446,10 @@
 
 
         const grid =
-            document.createElement('div');
+            document.createElement(
+                'div'
+            );
+
 
         grid.className =
             'custom-picker-month-grid';
@@ -4305,11 +5466,14 @@
                         'button'
                     );
 
+
                 button.type =
                     'button';
 
+
                 button.className =
                     'custom-picker-option';
+
 
                 button.textContent =
                     monthName;
@@ -4331,20 +5495,25 @@
                     function(event){
 
                         event.preventDefault();
+
                         event.stopPropagation();
 
 
                         const newDate =
                             new Date(
-                                calendarDate.getFullYear(),
+                                calendarDate
+                                    .getFullYear(),
                                 monthIndex,
                                 1
                             );
 
 
                         viewLeft =
-                            panelSide === 'left'
+                            panelSide ===
+                            'left'
+
                                 ? newDate
+
                                 : addMonths(
                                     newDate,
                                     -1
@@ -4352,6 +5521,7 @@
 
 
                         closePanel();
+
 
                         renderCalendars();
                     }
@@ -4400,7 +5570,8 @@
 
         const startYear =
             Math.floor(
-                calendarDate.getFullYear() /
+                calendarDate
+                    .getFullYear() /
                 12
             ) * 12;
 
@@ -4429,65 +5600,93 @@
 
 
         const header =
-            document.createElement('div');
+            document.createElement(
+                'div'
+            );
+
 
         header.className =
             'custom-picker-panel-header';
 
 
         const title =
-            document.createElement('div');
+            document.createElement(
+                'div'
+            );
+
 
         title.className =
             'custom-picker-panel-title';
 
+
         title.textContent =
             startYear +
             ' - ' +
-            (startYear + 11);
+            (
+                startYear +
+                11
+            );
 
 
         const navigation =
-            document.createElement('div');
+            document.createElement(
+                'div'
+            );
+
 
         navigation.className =
             'custom-picker-year-navigation';
 
 
         const previous =
-            document.createElement('button');
+            document.createElement(
+                'button'
+            );
+
 
         previous.type =
             'button';
 
+
         previous.className =
             'custom-picker-year-nav';
+
 
         previous.innerHTML =
             '&#8249;';
 
 
         const next =
-            document.createElement('button');
+            document.createElement(
+                'button'
+            );
+
 
         next.type =
             'button';
 
+
         next.className =
             'custom-picker-year-nav';
+
 
         next.innerHTML =
             '&#8250;';
 
 
         const close =
-            document.createElement('button');
+            document.createElement(
+                'button'
+            );
+
 
         close.type =
             'button';
 
+
         close.className =
             'custom-picker-panel-close';
+
 
         close.innerHTML =
             '&times;';
@@ -4498,7 +5697,9 @@
             function(event){
 
                 event.preventDefault();
+
                 event.stopPropagation();
+
 
                 renderYearPanel(
                     calendarDate,
@@ -4514,7 +5715,9 @@
             function(event){
 
                 event.preventDefault();
+
                 event.stopPropagation();
+
 
                 renderYearPanel(
                     calendarDate,
@@ -4550,7 +5753,10 @@
 
 
         const grid =
-            document.createElement('div');
+            document.createElement(
+                'div'
+            );
+
 
         grid.className =
             'custom-picker-year-grid';
@@ -4567,11 +5773,14 @@
                     'button'
                 );
 
+
             button.type =
                 'button';
 
+
             button.className =
                 'custom-picker-option';
+
 
             button.textContent =
                 String(year);
@@ -4590,7 +5799,8 @@
 
             if(
                 year ===
-                new Date().getFullYear()
+                new Date()
+                    .getFullYear()
             ){
 
                 button.classList.add(
@@ -4613,20 +5823,25 @@
                     function(event){
 
                         event.preventDefault();
+
                         event.stopPropagation();
 
 
                         const month =
-                            calendarDate.getMonth();
+                            calendarDate
+                                .getMonth();
 
 
                         viewLeft =
-                            panelSide === 'left'
+                            panelSide ===
+                            'left'
+
                                 ? new Date(
                                     year,
                                     month,
                                     1
                                 )
+
                                 : new Date(
                                     year,
                                     month - 1,
@@ -4635,6 +5850,7 @@
 
 
                         closePanel();
+
 
                         renderCalendars();
                     }
@@ -4662,7 +5878,7 @@
 
     /*
     |--------------------------------------------------------------------------
-    | PANEL POSITION
+    | POSITION PANEL
     |--------------------------------------------------------------------------
     */
 
@@ -4683,8 +5899,11 @@
             window.innerWidth <= 767
         ){
 
-            element.style.left = '';
-            element.style.top = '';
+            element.style.left =
+                '';
+
+            element.style.top =
+                '';
 
             return;
         }
@@ -4695,11 +5914,13 @@
 
 
         const width =
-            element.offsetWidth || 310;
+            element.offsetWidth ||
+            310;
 
 
         const height =
-            element.offsetHeight || 300;
+            element.offsetHeight ||
+            300;
 
 
         let left =
@@ -4709,7 +5930,8 @@
 
 
         let top =
-            rect.bottom + 8;
+            rect.bottom +
+            8;
 
 
         if(
@@ -4725,7 +5947,9 @@
 
 
         if(left < 10){
-            left = 10;
+
+            left =
+                10;
         }
 
 
@@ -4742,12 +5966,15 @@
 
 
         if(top < 10){
-            top = 10;
+
+            top =
+                10;
         }
 
 
         element.style.left =
             left + 'px';
+
 
         element.style.top =
             top + 'px';
@@ -4773,7 +6000,7 @@
 
     /*
     |--------------------------------------------------------------------------
-    | APPLY DATE
+    | APPLY DATE RANGE
     |--------------------------------------------------------------------------
     */
 
@@ -4791,10 +6018,17 @@
 
                 window.Swal.fire({
                     icon:'info',
+
                     title:'Pilih rentang tanggal',
-                    text:'Silakan pilih tanggal awal dan tanggal akhir terlebih dahulu.',
-                    confirmButtonText:'Mengerti',
-                    confirmButtonColor:'#2563eb'
+
+                    text:
+                        'Silakan pilih tanggal awal dan tanggal akhir terlebih dahulu.',
+
+                    confirmButtonText:
+                        'Mengerti',
+
+                    confirmButtonColor:
+                        '#2563eb'
                 });
 
             } else {
@@ -4803,6 +6037,7 @@
                     'Silakan pilih tanggal awal dan tanggal akhir terlebih dahulu.'
                 );
             }
+
 
             return;
         }
@@ -4870,27 +6105,37 @@
 
     function clearDateRange(){
 
-        selectedStart = null;
+        selectedStart =
+            null;
 
-        selectedEnd = null;
+        selectedEnd =
+            null;
 
-        tempStart = null;
+        tempStart =
+            null;
 
-        tempEnd = null;
+        tempEnd =
+            null;
 
 
         if(dariInput){
-            dariInput.value = '';
+
+            dariInput.value =
+                '';
         }
 
 
         if(sampaiInput){
-            sampaiInput.value = '';
+
+            sampaiInput.value =
+                '';
         }
 
 
         if(dateInput){
-            dateInput.value = '';
+
+            dateInput.value =
+                '';
         }
 
 
@@ -4904,7 +6149,10 @@
         viewLeft =
             new Date();
 
-        viewLeft.setDate(1);
+
+        viewLeft.setDate(
+            1
+        );
 
 
         hidePicker();
@@ -4927,6 +6175,7 @@
             function(event){
 
                 event.preventDefault();
+
                 event.stopPropagation();
 
 
@@ -4967,6 +6216,7 @@
             function(event){
 
                 event.preventDefault();
+
                 event.stopPropagation();
 
                 hidePicker();
@@ -4979,6 +6229,7 @@
             function(event){
 
                 event.preventDefault();
+
                 event.stopPropagation();
 
                 clearDateRange();
@@ -4991,6 +6242,7 @@
             function(event){
 
                 event.preventDefault();
+
                 event.stopPropagation();
 
                 applyDateRange();
@@ -5003,6 +6255,7 @@
             function(event){
 
                 event.preventDefault();
+
                 event.stopPropagation();
 
                 clearDateRange();
@@ -5129,7 +6382,7 @@
 
     /*
     |--------------------------------------------------------------------------
-    | FILTER DROPDOWN
+    | FILTER DROPDOWNS
     |--------------------------------------------------------------------------
     */
 
@@ -5154,6 +6407,7 @@
                 dropdown.querySelector(
                     '[data-dropdown-trigger]'
                 );
+
 
             const menu =
                 dropdown.querySelector(
@@ -5194,7 +6448,8 @@
                 function(dropdown){
 
                     if(
-                        dropdown !== except
+                        dropdown !==
+                        except
                     ){
 
                         closeDropdown(
@@ -5211,7 +6466,8 @@
         ){
 
             const type =
-                dropdown.dataset.filterDropdown;
+                dropdown.dataset
+                    .filterDropdown;
 
 
             const selector =
@@ -5228,7 +6484,8 @@
 
             const checked =
                 dropdown.querySelectorAll(
-                    selector + ':checked'
+                    selector +
+                    ':checked'
                 );
 
 
@@ -5268,7 +6525,8 @@
                     count +
                     ' ' +
                     (
-                        type === 'kategori'
+                        type ===
+                        'kategori'
                             ? 'kategori'
                             : 'status'
                     ) +
@@ -5330,7 +6588,8 @@
 
 
                 const type =
-                    dropdown.dataset.filterDropdown;
+                    dropdown.dataset
+                        .filterDropdown;
 
 
                 const selector =
@@ -5362,6 +6621,7 @@
                     function(event){
 
                         event.preventDefault();
+
                         event.stopPropagation();
 
 
@@ -5381,6 +6641,7 @@
                             closeDropdown(
                                 dropdown
                             );
+
 
                             return;
                         }
@@ -5439,6 +6700,7 @@
                     function(event){
 
                         event.preventDefault();
+
                         event.stopPropagation();
 
 
@@ -5463,6 +6725,7 @@
                     function(event){
 
                         event.preventDefault();
+
                         event.stopPropagation();
 
 
@@ -5524,7 +6787,7 @@
 
     /*
     |--------------------------------------------------------------------------
-    | VALIDASI FORM
+    | VALIDASI
     |--------------------------------------------------------------------------
     */
 
@@ -5539,11 +6802,13 @@
         function(event){
 
             const start =
-                dariInput?.value || '';
+                dariInput?.value ||
+                '';
 
 
             const end =
-                sampaiInput?.value || '';
+                sampaiInput?.value ||
+                '';
 
 
             if(
@@ -5562,14 +6827,18 @@
 
                     window.Swal.fire({
                         icon:'warning',
-                        title:'Rentang tanggal tidak valid',
-                        text:'Tanggal mulai tidak boleh lebih besar dari tanggal akhir.',
-                        confirmButtonText:'Mengerti',
-                        confirmButtonColor:'#2563eb',
-                        customClass:{
-                            popup:'rounded-2xl',
-                            confirmButton:'rounded-xl text-xs font-semibold px-4 py-2.5'
-                        }
+
+                        title:
+                            'Rentang tanggal tidak valid',
+
+                        text:
+                            'Tanggal mulai tidak boleh lebih besar dari tanggal akhir.',
+
+                        confirmButtonText:
+                            'Mengerti',
+
+                        confirmButtonColor:
+                            '#2563eb'
                     });
 
                 } else {
@@ -5615,20 +6884,33 @@
                     ){
 
                         window.Swal.fire({
-                            title:'Hapus Surat Masuk?',
-                            text:'Data yang dihapus akan dipindahkan ke tempat sampah.',
-                            icon:'warning',
-                            showCancelButton:true,
-                            confirmButtonColor:'#ef4444',
-                            cancelButtonColor:'#64748b',
-                            confirmButtonText:'Ya, Hapus!',
-                            cancelButtonText:'Batal',
-                            reverseButtons:true,
-                            customClass:{
-                                popup:'rounded-2xl',
-                                confirmButton:'rounded-xl text-xs font-semibold px-4 py-2.5',
-                                cancelButton:'rounded-xl text-xs font-semibold px-4 py-2.5'
-                            }
+                            title:
+                                'Hapus Surat Masuk?',
+
+                            text:
+                                'Data yang dihapus akan dipindahkan ke tempat sampah.',
+
+                            icon:
+                                'warning',
+
+                            showCancelButton:
+                                true,
+
+                            confirmButtonColor:
+                                '#ef4444',
+
+                            cancelButtonColor:
+                                '#64748b',
+
+                            confirmButtonText:
+                                'Ya, Hapus!',
+
+                            cancelButtonText:
+                                'Batal',
+
+                            reverseButtons:
+                                true
+
                         }).then(
                             function(result){
 
@@ -5640,6 +6922,7 @@
                                 }
                             }
                         );
+
 
                         return;
                     }
@@ -5688,7 +6971,6 @@
         clearButton.style.display =
             'flex';
     }
-
 
 })();
 </script>
