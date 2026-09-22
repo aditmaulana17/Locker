@@ -1056,6 +1056,40 @@
     outline: none !important;
 }
 /* =========================================================
+   FILTER LAYOUT
+========================================================= */
+.surat-filter-card{margin-bottom:14px;padding:18px;border:1px solid #dbe4f0;border-radius:12px;background:#fff;box-shadow:0 2px 10px rgba(15,23,42,.035);}
+.surat-filter-main{display:grid;grid-template-columns:minmax(0,1fr) auto 240px;gap:10px;align-items:center;}
+.surat-search-wrapper{position:relative;min-width:0;}
+.surat-search-icon{position:absolute;top:50%;left:14px;z-index:2;display:flex;align-items:center;justify-content:center;width:18px;height:18px;color:#64748b;transform:translateY(-50%);pointer-events:none;}
+.surat-search-input{width:100%;height:44px;padding:0 14px 0 43px;border:1px solid #d6e0ec;border-radius:10px;outline:none;background:#fff;color:#334155;font-size:12px;transition:border-color .15s ease,box-shadow .15s ease;}
+.surat-search-input::placeholder{color:#94a3b8;}
+.surat-search-input:hover{border-color:#b8c5d6;}
+.surat-search-input:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.10);}
+.surat-filter-actions{display:flex;align-items:center;gap:6px;}
+.surat-filter-submit{display:inline-flex;align-items:center;justify-content:center;gap:7px;height:44px;min-width:122px;padding:0 14px;border:1px solid #d6e0ec;border-radius:10px;background:#fff;color:#475569;font-size:12px;font-weight:700;cursor:pointer;transition:background .15s ease,border-color .15s ease,color .15s ease,box-shadow .15s ease;}
+.surat-filter-submit:hover{border-color:#94a3b8;background:#f8fafc;color:#1e293b;}
+.surat-filter-submit.has-filter{border-color:#bfdbfe;background:#eff6ff;color:#2563eb;}
+.surat-filter-submit:focus{outline:none;box-shadow:0 0 0 3px rgba(59,130,246,.10);}
+.surat-filter-chevron,.surat-date-chevron{flex:0 0 auto;}
+.surat-filter-reset{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border:1px solid #d6e0ec;border-radius:10px;background:#fff;color:#64748b;text-decoration:none;transition:background .15s ease,border-color .15s ease,color .15s ease;}
+.surat-filter-reset:hover{border-color:#fecdd3;background:#fff1f2;color:#e11d48;}
+.surat-date-wrapper{position:relative;min-width:0;}
+.surat-date-field{position:relative;}
+.surat-date-input{width:100%;height:44px;padding:0 44px 0 42px;border:1px solid #d6e0ec;border-radius:10px;outline:none;background:#fff;color:#475569;font-size:12px;font-weight:600;cursor:pointer;transition:border-color .15s ease,box-shadow .15s ease;}
+.surat-date-input:hover{border-color:#b8c5d6;}
+.surat-date-input:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.10);}
+.surat-date-left-icon{position:absolute;top:50%;left:14px;z-index:2;display:flex;align-items:center;justify-content:center;color:#64748b;transform:translateY(-50%);pointer-events:none;}
+.surat-date-chevron{position:absolute;top:50%;right:12px;z-index:2;color:#64748b;transform:translateY(-50%);pointer-events:none;}
+.surat-date-clear{position:absolute;top:50%;right:30px;z-index:3;display:none;align-items:center;justify-content:center;width:26px;height:26px;border:0;border-radius:7px;background:transparent;color:#94a3b8;cursor:pointer;transform:translateY(-50%);padding:0;}
+.surat-date-clear.is-visible{display:flex;}
+.surat-date-clear:hover{background:#fff1f2;color:#e11d48;}
+.filter-row{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px;}
+.filter-dropdown-trigger{min-height:48px;padding:7px 12px;border-color:#d6e0ec;border-radius:10px;background:#fff;}
+.filter-dropdown-trigger:hover{border-color:#b8c5d6;background:#f8fafc;}
+.filter-dropdown-icon{width:32px;height:32px;flex-basis:32px;border-radius:8px;}
+.filter-dropdown-menu{top:calc(100% + 7px);border-color:#cbd5e1;border-radius:12px;}
+/* =========================================================
    TABLE
 ========================================================= */
 .archive-table-wrapper {
@@ -1213,6 +1247,17 @@
 /* =========================================================
    RESPONSIVE
 ========================================================= */
+@media (max-width: 1100px) {
+    .surat-filter-main{grid-template-columns:minmax(0,1fr) auto 220px;}
+}
+@media (max-width: 767px) {
+    .surat-filter-card{padding:12px;}
+    .surat-filter-main{grid-template-columns:1fr;gap:8px;}
+    .surat-filter-actions{width:100%;}
+    .surat-filter-submit{flex:1;}
+    .surat-filter-reset{width:44px;flex:0 0 44px;}
+    .surat-date-wrapper{width:100%;}
+}
 @media (max-width: 1100px) {
     .surat-keluar-summary {
         gap: 10px;
@@ -1536,163 +1581,61 @@
     {{-- =====================================================
          FILTER
     ====================================================== --}}
-    <div class="rounded-xl border border-slate-300 bg-white p-3 shadow-sm sm:p-4">
-        <form
-            id="filterForm"
-            method="GET"
-            action="{{ route('surat-keluar.index') }}"
-            class="space-y-2.5"
-        >
-            {{-- SEARCH + DATE + BUTTON --}}
-            <div class="grid grid-cols-1 gap-2 lg:grid-cols-12">
-                {{-- SEARCH --}}
-                <div class="lg:col-span-5">
-                    <label
-                        for="search"
-                        class="sr-only"
-                    >
-                        Pencarian
-                    </label>
-                    <div class="relative">
-                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-                            <svg
-                                class="h-4 w-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0a7 7 0 0114 0z"
-                                />
+    {{-- =====================================================
+         FILTER
+    ====================================================== --}}
+    <div class="surat-filter-card">
+        <form id="filterForm" method="GET" action="{{ route('surat-keluar.index') }}" class="space-y-2.5">
+            {{-- SEARCH + FILTER + DATE --}}
+            <div class="surat-filter-main">
+                <div class="surat-search-wrapper">
+                    <div class="surat-search-icon" aria-hidden="true">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0a7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+                    <input type="search" id="search" name="search" value="{{ request('search') }}" placeholder="Cari perihal, nomor surat, atau tujuan..." autocomplete="off" class="surat-search-input">
+                </div>
+                <div class="surat-filter-actions">
+                    <button type="submit" class="surat-filter-submit {{ $hasFilters ? 'has-filter' : '' }}" title="Terapkan filter">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707v3.414L9 14V9.707a1 1 0 00-.293-.707L3.293 6.293A1 1 0 013 5.586V4z" />
+                        </svg>
+                        <span>Filter</span>
+                        <svg class="surat-filter-chevron h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 9l6 6l6-6" />
+                        </svg>
+                    </button>
+                    @if($hasFilters)
+                        <a href="{{ route('surat-keluar.index') }}" title="Reset Filter" aria-label="Reset Filter" class="surat-filter-reset">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </a>
+                    @endif
+                </div>
+                <div class="surat-date-wrapper">
+                    <div class="surat-date-field">
+                        <div class="surat-date-left-icon" aria-hidden="true">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5v12a2 2 0 002 2z" />
                             </svg>
                         </div>
-                        <input
-                            type="text"
-                            id="search"
-                            name="search"
-                            value="{{ request('search') }}"
-                            placeholder="Cari nomor surat, tujuan, atau perihal..."
-                            autocomplete="off"
-                            class="h-11 w-full rounded-xl pl-9 pr-3 text-xs text-slate-700 outline-none transition placeholder:text-slate-400 sm:text-sm"
-                        >
-                    </div>
-                </div>
-                {{-- DATE --}}
-                <div class="lg:col-span-4">
-                    <div class="date-range-wrapper">
-                        <div class="relative">
-                            <div class="pointer-events-none absolute inset-y-0 left-0 z-10 flex items-center pl-3 text-slate-400">
-                                <svg
-                                    class="h-4 w-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5v12a2 2 0 002 2z"
-                                    />
-                                </svg>
-                            </div>
-                            <input
-                                type="text"
-                                id="date-range"
-                                value="{{ $visibleDateRange }}"
-                                readonly
-                                autocomplete="off"
-                                placeholder="Pilih rentang tanggal..."
-                                class="date-range-input h-11 w-full rounded-xl pl-9 pr-10 text-xs font-medium text-slate-700 outline-none transition placeholder:text-slate-400 sm:text-sm"
-                                aria-label="Pilih rentang tanggal"
-                            >
-                            <button
-                                type="button"
-                                id="clearDateRange"
-                                title="Hapus tanggal"
-                                aria-label="Hapus tanggal"
-                                class="{{ $visibleDateRange ? 'flex' : 'hidden' }} absolute inset-y-0 right-0 z-20 w-10 items-center justify-center text-slate-400 transition hover:text-rose-500"
-                            >
-                                <svg
-                                    class="h-4 w-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M6 18L18 6M6 6l12 12"
-                                    />
-                                </svg>
-                            </button>
-                        </div>
-                        <input
-                            type="hidden"
-                            name="dari_tanggal"
-                            id="dari_tanggal"
-                            value="{{ $dariTanggal }}"
-                        >
-                        <input
-                            type="hidden"
-                            name="sampai_tanggal"
-                            id="sampai_tanggal"
-                            value="{{ $sampaiTanggal }}"
-                        >
-                    </div>
-                </div>
-                {{-- FILTER BUTTON --}}
-                <div class="lg:col-span-3">
-                    <div class="flex h-11 gap-1.5">
-                        <button
-                            type="submit"
-                            class="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-slate-900 px-3 text-xs font-semibold text-white shadow-sm transition hover:bg-slate-800 sm:text-sm"
-                        >
-                            <svg
-                                class="h-4 w-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707v3.414L9 14V9.707a1 1 0 00-.293-.707L3.293 6.293A1 1 0 013 5.586V4z"
-                                />
+                        <input type="text" id="date-range" value="{{ $visibleDateRange }}" readonly autocomplete="off" placeholder="Rentang tanggal" class="surat-date-input" aria-label="Pilih rentang tanggal">
+                        <svg class="surat-date-chevron h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 9l6 6l6-6" />
+                        </svg>
+                        <button type="button" id="clearDateRange" class="surat-date-clear {{ $visibleDateRange ? 'is-visible' : '' }}" title="Hapus rentang tanggal" aria-label="Hapus rentang tanggal">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                             </svg>
-                            Filter
                         </button>
-                        @if($hasFilters)
-                            <a
-                                href="{{ route('surat-keluar.index') }}"
-                                title="Reset Filter"
-                                aria-label="Reset Filter"
-                                class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-slate-300 bg-slate-100 text-slate-500 transition hover:bg-slate-200 hover:text-slate-700"
-                            >
-                                <svg
-                                    class="h-4 w-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M6 18L18 6M6 6l12 12"
-                                    />
-                                </svg>
-                            </a>
-                        @endif
                     </div>
+                    <input type="hidden" name="dari_tanggal" id="dari_tanggal" value="{{ $dariTanggal }}">
+                    <input type="hidden" name="sampai_tanggal" id="sampai_tanggal" value="{{ $sampaiTanggal }}">
                 </div>
             </div>
-            {{-- KATEGORI + STATUS --}}
+        {{-- KATEGORI + STATUS --}}
             <div class="filter-row">
                 {{-- KATEGORI --}}
                 <div
