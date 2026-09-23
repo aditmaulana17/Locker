@@ -1326,6 +1326,7 @@
                         <div class="ske-field-grid">
 
                             {{-- NOMOR SURAT --}}
+
                             <div class="ske-field">
 
                                 <label
@@ -1349,14 +1350,17 @@
                                 >
 
                                 @error('nomor_surat')
+
                                     <p class="ske-field-error">
                                         {{ $message }}
                                     </p>
+
                                 @enderror
 
                             </div>
 
                             {{-- TUJUAN SURAT --}}
+
                             <div class="ske-field">
 
                                 <label
@@ -1380,14 +1384,17 @@
                                 >
 
                                 @error('pengirim')
+
                                     <p class="ske-field-error">
                                         {{ $message }}
                                     </p>
+
                                 @enderror
 
                             </div>
 
                             {{-- TANGGAL SURAT --}}
+
                             <div class="ske-field">
 
                                 <label
@@ -1408,14 +1415,17 @@
                                 >
 
                                 @error('tanggal_surat')
+
                                     <p class="ske-field-error">
                                         {{ $message }}
                                     </p>
+
                                 @enderror
 
                             </div>
 
                             {{-- TANGGAL KELUAR --}}
+
                             <div class="ske-field">
 
                                 <label
@@ -1436,14 +1446,17 @@
                                 >
 
                                 @error('tanggal_keluar')
+
                                     <p class="ske-field-error">
                                         {{ $message }}
                                     </p>
+
                                 @enderror
 
                             </div>
 
                             {{-- KATEGORI --}}
+
                             <div class="ske-field">
 
                                 <label
@@ -1481,8 +1494,11 @@
                                             {{ $kategori->nama_kategori }}
 
                                             @if(!empty($kategori->sifat))
+
                                                 ({{ ucfirst($kategori->sifat) }})
+
                                             @endif
+
                                         </option>
 
                                     @endforeach
@@ -1504,14 +1520,17 @@
                                 @endif
 
                                 @error('kategori_surat_id')
+
                                     <p class="ske-field-error">
                                         {{ $message }}
                                     </p>
+
                                 @enderror
 
                             </div>
 
                             {{-- STATUS --}}
+
                             <div class="ske-field">
 
                                 <label
@@ -1567,14 +1586,17 @@
                                 </select>
 
                                 @error('status')
+
                                     <p class="ske-field-error">
                                         {{ $message }}
                                     </p>
+
                                 @enderror
 
                             </div>
 
                             {{-- PERIHAL --}}
+
                             <div class="ske-field ske-field-full">
 
                                 <label
@@ -1596,43 +1618,11 @@
                                 >{{ old('perihal', $suratKeluar->perihal) }}</textarea>
 
                                 @error('perihal')
+
                                     <p class="ske-field-error">
                                         {{ $message }}
                                     </p>
-                                @enderror
 
-                            </div>
-
-                            {{-- RINGKASAN --}}
-                            <div class="ske-field ske-field-full">
-
-                                <label
-                                    for="ringkasan"
-                                    class="ske-field-label"
-                                >
-                                    Ringkasan Isi Surat
-                                </label>
-
-                                <textarea
-                                    id="ringkasan"
-                                    name="ringkasan"
-                                    rows="3"
-                                    maxlength="5000"
-                                    placeholder="Tuliskan ringkasan singkat isi surat..."
-                                    class="ske-control @error('ringkasan') ske-control-error @enderror"
-                                >{{ old('ringkasan', $suratKeluar->ringkasan) }}</textarea>
-
-                                <p
-                                    class="ske-field-error"
-                                    style="color:#94a3b8;"
-                                >
-                                    Maksimal 5.000 karakter.
-                                </p>
-
-                                @error('ringkasan')
-                                    <p class="ske-field-error">
-                                        {{ $message }}
-                                    </p>
                                 @enderror
 
                             </div>
@@ -1967,6 +1957,7 @@
                                 </label>
 
                                 {{-- FILE INFO --}}
+
                                 <div
                                     id="ske-file-info"
                                     class="ske-file-info"
@@ -1992,6 +1983,7 @@
                                 </div>
 
                                 {{-- COMPRESSION --}}
+
                                 <div
                                     id="ske-compression"
                                     class="ske-compression"
@@ -2076,20 +2068,25 @@
                                 </div>
 
                                 {{-- STATUS --}}
+
                                 <div
                                     id="ske-status"
                                     class="ske-status"
                                 ></div>
 
                                 {{-- PROGRESS --}}
+
                                 <div
                                     id="ske-submit-progress"
                                     class="ske-submit-progress"
                                 >
+
                                     <div class="ske-submit-progress-bar"></div>
+
                                 </div>
 
                                 {{-- PREVIEW --}}
+
                                 <div
                                     id="ske-preview"
                                     class="ske-preview"

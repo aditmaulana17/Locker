@@ -232,21 +232,6 @@ class SuratMasukController extends Controller
                                         ''
                                     )
                                 )
-                            ) = 'diproses'
-                            THEN 1
-                            ELSE 0
-                        END
-                    ) AS diproses,
-
-                    SUM(
-                        CASE
-                            WHEN LOWER(
-                                TRIM(
-                                    COALESCE(
-                                        status,
-                                        ''
-                                    )
-                                )
                             ) = 'didisposisikan'
                             THEN 1
                             ELSE 0
@@ -303,12 +288,6 @@ class SuratMasukController extends Controller
             'baru' =>
                 (int) (
                     $statusResult->baru
-                    ?? 0
-                ),
-
-            'diproses' =>
-                (int) (
-                    $statusResult->diproses
                     ?? 0
                 ),
 

@@ -1457,34 +1457,6 @@
 
                             </div>
 
-                            <div class="sk-field sk-field-full">
-
-                                <label
-                                    for="ringkasan"
-                                    class="sk-field-label"
-                                >
-                                    Ringkasan Isi Surat
-                                </label>
-
-                                <textarea
-                                    id="ringkasan"
-                                    name="ringkasan"
-                                    rows="3"
-                                    maxlength="5000"
-                                    placeholder="Tuliskan ringkasan singkat isi surat..."
-                                    class="sk-control @error('ringkasan') sk-control-error @enderror"
-                                >{{ old('ringkasan') }}</textarea>
-
-                                @error('ringkasan')
-
-                                    <p class="sk-field-error">
-                                        {{ $message }}
-                                    </p>
-
-                                @enderror
-
-                            </div>
-
                         </div>
 
                     </div>

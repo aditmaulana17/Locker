@@ -1353,29 +1353,356 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* ==========================================================================
+   HEADER
+   ========================================================================== */
+
+.surat-page-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:20px;
+    margin-bottom:20px;
+}
+
+.surat-page-header-left{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    min-width:0;
+}
+
+.surat-page-icon{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    width:60px;
+    height:60px;
+
+    flex:0 0 60px;
+
+    border-radius:15px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #dbeafe,
+            #eff6ff
+        );
+
+    color:#2563eb;
+}
+
+.surat-page-title{
+    margin:0;
+
+    color:#172554;
+
+    font-size:30px;
+
+    font-weight:800;
+
+    line-height:1.1;
+
+    letter-spacing:-.025em;
+}
+
+.surat-page-description{
+    margin-top:5px;
+
+    color:#64748b;
+
+    font-size:14px;
+
+    line-height:1.5;
+}
+
+.surat-create-button{
+    display:inline-flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    gap:8px;
+
+    min-height:46px;
+
+    padding:0 20px;
+
+    border-radius:10px;
+
+    background:#2563eb;
+
+    color:#fff;
+
+    font-size:13px;
+
+    font-weight:700;
+
+    text-decoration:none;
+
+    box-shadow:
+        0 8px 20px
+        rgba(37,99,235,.20);
+
+    transition:
+        background .15s ease,
+        transform .15s ease,
+        box-shadow .15s ease;
+}
+
+.surat-create-button:hover{
+    background:#1d4ed8;
+
+    transform:
+        translateY(-1px);
+
+    box-shadow:
+        0 12px 25px
+        rgba(37,99,235,.25);
+}
+
+
+
+
+/* ========================================================================
+   SURAT KELUAR -> SURAT MASUK VISUAL OVERRIDES
+   Scorecard sengaja tidak disentuh.
+   Selector lama tetap dipakai oleh JavaScript agar fungsi tidak berubah.
+   ======================================================================== */
+
+.surat-page{min-width:0;}
+.surat-page-header{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:20px;}
+.surat-page-header-left{display:flex;align-items:center;gap:16px;min-width:0;}
+.surat-page-icon{display:flex;align-items:center;justify-content:center;width:60px;height:60px;flex:0 0 60px;border-radius:15px;background:linear-gradient(135deg,#dbeafe,#eff6ff);color:#2563eb;}
+.surat-page-title{margin:0;color:#172554;font-size:30px;font-weight:800;line-height:1.1;letter-spacing:-.025em;}
+.surat-page-description{margin-top:5px;color:#64748b;font-size:14px;line-height:1.5;}
+.surat-header-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap;}
+.surat-export-button{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:40px;padding:0 13px;border:1px solid #dbe4f0;border-radius:10px;background:#fff;color:#475569;font-size:11px;font-weight:700;line-height:1;text-decoration:none;box-shadow:0 2px 8px rgba(15,23,42,.035);transition:background .15s ease,border-color .15s ease,color .15s ease,transform .15s ease;}
+.surat-export-button:hover{transform:translateY(-1px);}
+.surat-export-button.excel:hover{border-color:#a7f3d0;background:#ecfdf5;color:#047857;}
+.surat-export-button.pdf:hover{border-color:#fecdd3;background:#fff1f2;color:#be123c;}
+.surat-header-actions .surat-create-button{min-height:40px;padding:0 13px;font-size:11px;gap:6px;display:inline-flex;align-items:center;justify-content:center;border-radius:10px;background:#2563eb;color:#fff;font-weight:700;text-decoration:none;box-shadow:0 8px 20px rgba(37,99,235,.20);transition:background .15s ease,transform .15s ease,box-shadow .15s ease;}
+.surat-header-actions .surat-create-button:hover{background:#1d4ed8;transform:translateY(-1px);box-shadow:0 12px 25px rgba(37,99,235,.25);}
+
+/* Filter card and primary row */
+.surat-filter-card{margin-bottom:14px;padding:18px;border:1px solid #dbe4f0;border-radius:12px;background:#fff;box-shadow:0 2px 10px rgba(15,23,42,.035);}
+.surat-filter-main{display:grid;grid-template-columns:minmax(0,1fr) auto 290px;gap:10px;align-items:center;}
+.surat-search-wrapper{position:relative;min-width:0;}
+.surat-search-icon{position:absolute;top:50%;left:14px;z-index:2;display:flex;align-items:center;justify-content:center;width:18px;height:18px;color:#64748b;transform:translateY(-50%);pointer-events:none;}
+.surat-search-input{width:100%;height:44px;padding:0 14px 0 43px;border:1px solid #d6e0ec;border-radius:10px;outline:none;background:#fff;color:#334155;font-size:12px;transition:border-color .15s ease,box-shadow .15s ease;}
+.surat-search-input::placeholder{color:#94a3b8;}
+.surat-search-input:hover{border-color:#b8c5d6;}
+.surat-search-input:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.10);}
+.surat-filter-actions{display:flex;align-items:center;gap:6px;}
+.surat-filter-submit{display:inline-flex;align-items:center;justify-content:center;gap:7px;height:44px;min-width:112px;padding:0 17px;border:1px solid #d6e0ec;border-radius:10px;background:#fff;color:#475569;font-size:12px;font-weight:700;cursor:pointer;transition:background .15s ease,border-color .15s ease,color .15s ease;}
+.surat-filter-submit:hover{border-color:#94a3b8;background:#f8fafc;color:#1e293b;}
+.surat-filter-submit.has-filter{border-color:#bfdbfe;background:#eff6ff;color:#2563eb;}
+.surat-filter-reset{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border:1px solid #d6e0ec;border-radius:10px;background:#fff;color:#64748b;text-decoration:none;transition:background .15s ease,border-color .15s ease,color .15s ease;}
+.surat-filter-reset:hover{border-color:#fecdd3;background:#fff1f2;color:#e11d48;}
+
+/* Date */
+.surat-date-wrapper{position:relative;min-width:0;}
+.surat-date-field{position:relative;}
+.surat-date-input{width:100%;height:44px;padding:0 38px 0 42px;border:1px solid #d6e0ec;border-radius:10px;outline:none;background:#fff;color:#475569;font-size:12px;font-weight:600;cursor:pointer;transition:border-color .15s ease,box-shadow .15s ease;}
+.surat-date-input:hover{border-color:#b8c5d6;}
+.surat-date-input:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.10);}
+.surat-date-left-icon{position:absolute;top:50%;left:14px;z-index:2;display:flex;align-items:center;justify-content:center;color:#64748b;transform:translateY(-50%);pointer-events:none;}
+.surat-date-chevron{position:absolute;top:50%;right:12px;z-index:2;color:#64748b;transform:translateY(-50%);pointer-events:none;}
+.surat-date-clear{position:absolute;top:50%;right:4px;display:none;align-items:center;justify-content:center;width:34px;height:34px;border:0;border-radius:8px;background:transparent;color:#94a3b8;cursor:pointer;transform:translateY(-50%);padding:0;}
+.surat-date-clear.is-visible{display:flex;}
+.surat-date-clear:hover{background:#fff1f2;color:#e11d48;}
+
+/* Old filter dropdown selectors, styled like Surat Masuk */
+.filter-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px;}
+.filter-dropdown{position:relative;min-width:0;}
+.filter-dropdown-trigger{display:flex;align-items:center;width:100%;min-height:48px;gap:10px;padding:7px 12px;border:1px solid #d6e0ec;border-radius:10px;background:#fff;color:#334155;text-align:left;cursor:pointer;transition:border-color .15s ease,background .15s ease,box-shadow .15s ease;}
+.filter-dropdown-trigger:hover{border-color:#b8c5d6;background:#f8fafc;}
+.filter-dropdown-trigger[aria-expanded="true"]{outline:none;border-color:#3b82f6;background:#f8fbff;box-shadow:0 0 0 3px rgba(59,130,246,.10);}
+.filter-dropdown-trigger.status-trigger[aria-expanded="true"]{border-color:#d97706;background:#fffcf0;box-shadow:0 0 0 3px rgba(217,119,6,.10);}
+.filter-dropdown-trigger-content{display:flex;align-items:center;gap:10px;min-width:0;flex:1;}
+.filter-dropdown-icon{display:flex;align-items:center;justify-content:center;width:32px;height:32px;flex:0 0 32px;border-radius:8px;background:#eff6ff;color:#2563eb;}
+.filter-dropdown-icon.status{background:#fff7ed;color:#d97706;}
+.filter-dropdown-text{min-width:0;flex:1;}
+.filter-dropdown-title,.filter-dropdown-subtitle{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.filter-dropdown-title{color:#334155;font-size:11px;font-weight:700;}
+.filter-dropdown-subtitle{margin-top:2px;color:#94a3b8;font-size:9px;line-height:1.2;}
+.filter-dropdown-count{display:inline-flex;align-items:center;justify-content:center;min-width:60px;height:23px;padding:0 8px;border-radius:999px;font-size:9px;font-weight:700;white-space:nowrap;}
+.filter-dropdown-count.category{background:#eff6ff;color:#2563eb;}
+.filter-dropdown-count.status{background:#fff7ed;color:#d97706;}
+.filter-dropdown-arrow{flex:0 0 auto;color:#64748b;transition:transform .2s ease,color .2s ease;}
+.filter-dropdown-trigger[aria-expanded="true"] .filter-dropdown-arrow{transform:rotate(180deg);color:#2563eb;}
+.filter-dropdown-trigger.status-trigger[aria-expanded="true"] .filter-dropdown-arrow{color:#d97706;}
+.filter-dropdown-menu{position:absolute;top:calc(100% + 7px);right:0;left:0;z-index:9998;display:none;overflow:hidden;border:1px solid #cbd5e1;border-radius:12px;background:#fff;box-shadow:0 20px 45px rgba(15,23,42,.15),0 5px 15px rgba(15,23,42,.06);}
+.filter-dropdown.open .filter-dropdown-menu{display:block;}
+.filter-dropdown-menu-header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 12px;border-bottom:1px solid #e2e8f0;background:#f8fafc;}
+.filter-dropdown-menu-title-wrap{min-width:0;}
+.filter-dropdown-menu-title{display:block;color:#334155;font-size:11px;font-weight:800;}
+.filter-dropdown-menu-description{display:block;margin-top:2px;color:#94a3b8;font-size:9px;}
+.filter-dropdown-actions{display:inline-flex;align-items:center;gap:3px;flex:0 0 auto;}
+.filter-dropdown-action{border:0;border-radius:6px;padding:5px 7px;background:transparent;font-size:9px;font-weight:700;cursor:pointer;}
+.filter-dropdown-action.category{color:#2563eb;}
+.filter-dropdown-action.status{color:#d97706;}
+.filter-dropdown-action.clear{color:#64748b;}
+.filter-dropdown-action.category:hover{background:#eff6ff;}
+.filter-dropdown-action.status:hover{background:#fff7ed;}
+.filter-dropdown-action.clear:hover{background:#f1f5f9;}
+.filter-dropdown-divider{color:#cbd5e1;font-size:10px;}
+.filter-dropdown-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;max-height:260px;overflow-y:auto;padding:10px;}
+.filter-dropdown-option{display:flex;align-items:center;min-height:38px;gap:8px;padding:7px 9px;border:1px solid #dbe3ed;border-radius:8px;background:#fff;cursor:pointer;transition:border-color .15s ease,background .15s ease;}
+.filter-dropdown-option:hover,.filter-dropdown-option:has(input:checked){border-color:#93c5fd;background:#eff6ff;}
+.filter-dropdown-option.status-option:hover{border-color:#fbbf24;background:#fff7ed;}
+.filter-dropdown-option.status-option:has(input:checked){border-color:#fbbf24;background:#fff7ed;}
+.filter-dropdown-option input{width:15px;height:15px;margin:0;accent-color:#2563eb;cursor:pointer;}
+.filter-dropdown-option span{min-width:0;overflow:hidden;color:#475569;font-size:10px;font-weight:600;text-overflow:ellipsis;white-space:nowrap;}
+.filter-dropdown-option:has(input:checked) span{color:#1d4ed8;}
+.filter-dropdown-option.status-option:has(input:checked) span{color:#b45309;}
+.filter-dropdown-empty{padding:18px 10px;color:#94a3b8;font-size:10px;text-align:center;}
+.filter-dropdown-menu-footer{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;border-top:1px solid #e2e8f0;}
+.filter-dropdown-footer-count{color:#64748b;font-size:9px;font-weight:600;}
+.filter-dropdown-footer-hint{color:#94a3b8;font-size:9px;}
+
+/* Table */
+.archive-table-wrapper{overflow:hidden;border:1px solid #dbe4f0;border-radius:12px;background:#fff;box-shadow:0 2px 10px rgba(15,23,42,.035);}
+.archive-table-scroll{overflow-x:auto;}
+.archive-table{width:100%;min-width:1000px;border-collapse:collapse;border-spacing:0;background:#fff;}
+.archive-table thead{background:#f8fafc;}
+.archive-table thead tr{border-bottom:1px solid #e2e8f0;}
+.archive-table thead th{padding:14px 16px;border-bottom:1px solid #e2e8f0;color:#64748b;font-size:9px;font-weight:800;letter-spacing:.04em;line-height:1.3;text-align:left;text-transform:uppercase;white-space:nowrap;}
+.archive-table thead th:first-child{padding-left:22px;}
+.archive-table thead th:last-child{text-align:center;}
+.archive-table tbody tr{background:#fff;transition:background-color .15s ease;}
+.archive-table tbody tr:hover{background:#f8fbff;}
+.archive-table tbody td{padding:14px 16px;border-bottom:1px solid #edf2f7;color:#475569;font-size:11px;line-height:1.4;vertical-align:middle;}
+.archive-table tbody td:first-child{padding-left:22px;}
+.archive-table tbody tr:last-child td{border-bottom:0;}
+.archive-table .cell-date{color:#334155;font-weight:700;white-space:nowrap;}
+.archive-table .cell-sender{color:#334155;}
+.archive-table .cell-subject{color:#1e293b;font-weight:700;}
+.archive-table .cell-category{color:#64748b;}
+.archive-table .sender-badge{display:inline-block;max-width:220px;overflow:hidden;padding:0;border:0;border-radius:0;background:transparent;color:#334155;font-weight:700;text-overflow:ellipsis;vertical-align:middle;white-space:nowrap;}
+.archive-table .status-badge{display:inline-flex;align-items:center;gap:6px;min-height:28px;padding:0 10px;border:0;border-radius:999px;font-size:9px;font-weight:800;white-space:nowrap;}
+.archive-table .action-cell{width:130px;text-align:center!important;white-space:nowrap;}
+.archive-table .action-buttons{display:inline-flex;align-items:center;justify-content:center;gap:5px;}
+.archive-table .action-button{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border:1px solid #e2e8f0;border-radius:9px;background:#fff;color:#64748b;transition:background .15s ease,color .15s ease,border-color .15s ease;}
+.archive-table .action-button:hover{border-color:#bfdbfe;background:#eff6ff;color:#2563eb;}
+.archive-table .action-button.edit:hover{border-color:#fde68a;background:#fffbeb;color:#d97706;}
+.archive-table .action-button.delete:hover{border-color:#fecdd3;background:#fff1f2;color:#e11d48;}
+.archive-table-empty{padding:55px 20px!important;text-align:center;}
+.archive-empty-icon{display:flex;align-items:center;justify-content:center;width:56px;height:56px;margin:0 auto 12px;border-radius:16px;background:#f1f5f9;color:#94a3b8;}
+.archive-pagination{padding:12px 20px;border-top:1px solid #e2e8f0;}
+
+/* Date picker visual treatment */
+.custom-date-picker,.custom-picker-panel{border:1px solid #cbd5e1;background:#fff;box-shadow:0 24px 70px rgba(15,23,42,.18),0 8px 25px rgba(15,23,42,.08);}
+.custom-date-picker{border-radius:14px;}
+.custom-date-picker-header{padding:11px 14px;border-bottom:1px solid #e2e8f0;}
+.custom-date-picker-title{color:#334155;font-size:12px;font-weight:800;}
+.custom-date-picker-close,.custom-picker-panel-close{background:#f8fafc;color:#64748b;}
+.custom-date-picker-close:hover,.custom-picker-panel-close:hover{background:#f1f5f9;color:#ef4444;}
+.custom-calendar + .custom-calendar{border-left:1px solid #e2e8f0;}
+.custom-calendar-nav:hover{background:#eff6ff;color:#2563eb;}
+.custom-calendar-month-button,.custom-calendar-year-button{min-height:32px;border:1px solid #dbe3ed;border-radius:8px;background:#f8fafc;color:#334155;font-size:11px;}
+.custom-calendar-month-button:hover,.custom-calendar-year-button:hover{border-color:#93c5fd;background:#eff6ff;color:#2563eb;}
+.custom-calendar-day{height:34px;border-radius:7px;color:#475569;font-size:10px;}
+.custom-calendar-day:hover{background:#eff6ff;color:#2563eb;}
+.custom-calendar-day.today{box-shadow:inset 0 0 0 1px #93c5fd;color:#2563eb;}
+.custom-calendar-day.in-range{background:#eff6ff;color:#2563eb;}
+.custom-calendar-day.range-start,.custom-calendar-day.range-end{background:#2563eb;color:#fff;}
+.custom-date-picker-footer{padding:10px 12px;border-top:1px solid #e2e8f0;}
+.custom-date-picker-selected{color:#64748b;font-size:10px;font-weight:700;}
+.custom-date-picker-button{height:34px;border:1px solid #dbe3ed;border-radius:8px;padding:0 12px;background:#f8fafc;color:#475569;font-size:10px;font-weight:700;}
+.custom-date-picker-button.apply{border-color:#2563eb;background:#2563eb;color:#fff;}
+.custom-picker-panel{width:310px;padding:12px;border-radius:12px;}
+.custom-picker-panel-header{border-bottom:1px solid #e2e8f0;}
+.custom-picker-option{min-height:40px;border:1px solid #dbe3ed;border-radius:9px;background:#fff;color:#475569;font-size:10px;font-weight:700;}
+.custom-picker-option:hover{border-color:#93c5fd;background:#eff6ff;color:#2563eb;}
+.custom-picker-option.active{border-color:#2563eb;background:#2563eb;color:#fff;}
+
+@media (max-width:1100px){
+    .surat-page-header{gap:14px;}
+    .surat-header-actions{gap:6px;}
+    .surat-filter-main{grid-template-columns:minmax(0,1fr) auto;}
+    .surat-date-wrapper{grid-column:1/-1;}
+}
+@media (max-width:767px){
+    .surat-page-header{align-items:flex-start;flex-direction:column;}
+    .surat-page-header-left{width:100%;}
+    .surat-header-actions{width:100%;gap:6px;flex-wrap:nowrap;}
+    .surat-header-actions .surat-export-button,.surat-header-actions .surat-create-button{flex:1 1 0;width:auto;min-width:0;padding:0 9px;font-size:10px;}
+    .surat-page-title{font-size:24px;}
+    .surat-page-description{font-size:12px;}
+    .surat-filter-card{padding:12px;}
+    .surat-filter-main{grid-template-columns:1fr;}
+    .surat-filter-actions{width:100%;}
+    .surat-filter-submit{flex:1;}
+    .surat-filter-reset{width:44px;flex:0 0 44px;}
+    .filter-row{grid-template-columns:1fr;}
+    .filter-dropdown-menu{position:fixed;top:50%;left:50%;right:auto;width:calc(100vw - 24px);max-width:430px;max-height:80vh;transform:translate(-50%,-50%);}
+    .filter-dropdown-options{max-height:calc(80vh - 145px);}
+    .custom-date-picker{top:50%;left:50%;width:calc(100vw - 16px);max-height:calc(100vh - 16px);overflow-y:auto;transform:translate(-50%,-50%);}
+    .custom-date-picker-calendars,.custom-date-calendars{grid-template-columns:1fr;}
+    .custom-calendar + .custom-calendar{border-top:1px solid #e2e8f0;border-left:0;}
+    .custom-calendar-day{height:38px;}
+    .custom-picker-panel{top:50%!important;left:50%!important;width:calc(100vw - 24px);transform:translate(-50%,-50%);}
+    .custom-date-picker-footer{position:sticky;bottom:0;background:#fff;}
+    body.date-picker-lock{overflow:hidden;}
+}
+@media (max-width:480px){
+    .surat-header-actions .surat-export-button,.surat-header-actions .surat-create-button{font-size:9px;}
+    .filter-dropdown-options{grid-template-columns:1fr;}
+}
+
 </style>
 @endpush
-<div class="space-y-4">
-    {{-- =====================================================
+<div class="surat-page space-y-4">
+    {{-- =====================================================================
          HEADER
-    ====================================================== --}}
-    <div class="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-        <div class="min-w-0">
-            <h1 class="text-xl font-bold tracking-tight text-slate-800 sm:text-2xl">
-                Surat Keluar
-            </h1>
-            <p class="mt-0.5 text-xs text-slate-500 sm:text-sm">
-                Kelola dan pantau seluruh arsip surat keluar organisasi Anda.
-            </p>
+    ====================================================================== --}}
+    <div class="surat-page-header">
+        <div class="surat-page-header-left">
+            <div class="surat-page-icon">
+                <svg
+                    class="h-7 w-7"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M3 8l9 6 9-6"
+                    />
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                    />
+                </svg>
+            </div>
+            <div class="min-w-0">
+                <h1 class="surat-page-title">
+                    Surat Keluar
+                </h1>
+                <p class="surat-page-description">
+                    Kelola dan pantau seluruh arsip surat keluar organisasi Anda.
+                </p>
+            </div>
         </div>
-        <div class="grid w-full grid-cols-3 gap-1.5 sm:flex sm:w-auto sm:gap-2">
-            {{-- EXCEL --}}
+        <div class="surat-header-actions">
             <a
                 href="{{ route('export.surat-keluar.excel', $exportFilters) }}"
-                class="inline-flex items-center justify-center gap-1.5 rounded-xl border border-emerald-300 bg-emerald-50 px-2.5 py-2 text-xs font-semibold text-emerald-700 shadow-sm transition hover:bg-emerald-100 sm:px-3.5"
+                class="surat-export-button excel"
+                title="Export Excel"
+                aria-label="Export Excel"
             >
                 <svg
-                    class="h-4 w-4 shrink-0"
+                    class="h-4 w-4"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -1390,15 +1717,16 @@
                 </svg>
                 Excel
             </a>
-            {{-- PDF --}}
             <a
                 href="{{ route('export.surat-keluar.pdf', $exportFilters) }}"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="inline-flex items-center justify-center gap-1.5 rounded-xl border border-rose-300 bg-rose-50 px-2.5 py-2 text-xs font-semibold text-rose-700 shadow-sm transition hover:bg-rose-100 sm:px-3.5"
+                class="surat-export-button pdf"
+                title="Export PDF"
+                aria-label="Export PDF"
             >
                 <svg
-                    class="h-4 w-4 shrink-0"
+                    class="h-4 w-4"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -1408,19 +1736,20 @@
                         stroke-linecap="round"
                         stroke-linejoin="round"
                         stroke-width="2"
-                        d="M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                        d="M7 3h7l4 4v14H7a2 2 0 01-2-2V5a2 2 0 012-2zm7 0v5h5"
                     />
                 </svg>
                 PDF
             </a>
-            {{-- TAMBAH --}}
             @if($canManage)
                 <a
                     href="{{ route('surat-keluar.create') }}"
-                    class="inline-flex items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-2.5 py-2 text-xs font-semibold text-white shadow-md shadow-blue-600/20 transition hover:bg-blue-700 sm:px-4"
+                    class="surat-create-button"
+                    title="Tambah Surat Keluar"
+                    aria-label="Tambah Surat Keluar"
                 >
                     <svg
-                        class="h-4 w-4 shrink-0"
+                        class="h-4 w-4"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -1438,6 +1767,7 @@
             @endif
         </div>
     </div>
+
     {{-- =====================================================
          SCORECARD
     ====================================================== --}}
@@ -2265,7 +2595,7 @@
     </div>
     <div
         id="customDateCalendars"
-        class="custom-date-calendars"
+        class="custom-date-calendars custom-date-picker-calendars"
     ></div>
     <div class="custom-date-picker-footer">
         <div

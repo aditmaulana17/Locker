@@ -77,8 +77,8 @@
         $statusCounts['baru']
         ?? 0
     );
-    $suratDiproses = (int) (
-        $statusCounts['diproses']
+    $suratDidisposisikan = (int) (
+        $statusCounts['didisposisikan']
         ?? 0
     );
     $suratSelesai = (int) (
@@ -140,7 +140,7 @@
                         ) === 'baru'
                 )
                 ->count();
-        $suratDiproses =
+        $suratDidisposisikan =
             $scorecardCollection
                 ->filter(
                     fn ($item) =>
@@ -151,7 +151,7 @@
                                     ''
                                 )
                             )
-                        ) === 'diproses'
+                        ) === 'didisposisikan'
                 )
                 ->count();
         $suratSelesai =
@@ -1485,13 +1485,6 @@
     text-overflow:ellipsis;
     white-space:nowrap;
 }
-.archive-table .subject-number{
-    display:block;
-    margin-top:3px;
-    color:#94a3b8;
-    font-size:9px;
-    font-weight:500;
-}
 /* ==========================================================================
    CATEGORY BADGE
    ========================================================================== */
@@ -1994,7 +1987,7 @@
                 </div>
             </div>
         </div>
-        {{-- DIPROSES --}}
+        {{-- DIDISPOSISIKAN --}}
         <div class="surat-stat-card">
             <div class="surat-stat-icon amber">
                 <svg
@@ -2020,13 +2013,13 @@
             </div>
             <div class="surat-stat-content">
                 <div class="surat-stat-label">
-                    Diproses
+                    Didisposisikan
                 </div>
                 <div class="surat-stat-value">
-                    {{ number_format($suratDiproses) }}
+                    {{ number_format($suratDidisposisikan) }}
                 </div>
                 <div class="surat-stat-description">
-                    Sedang proses
+                    Sudah didisposisikan
                 </div>
             </div>
         </div>
@@ -2626,20 +2619,6 @@
                                 >
                                     {{ $surat->perihal ?? '-' }}
                                 </div>
-                                @if(
-                                    !empty(
-                                        $surat
-                                            ->nomor_surat
-                                    )
-                                )
-                                    <div
-                                        class="subject-number"
-                                        title="{{ $surat->nomor_surat }}"
-                                    >
-                                        No.
-                                        {{ $surat->nomor_surat }}
-                                    </div>
-                                @endif
                             </td>
                             {{-- KATEGORI --}}
                             <td class="cell-category">

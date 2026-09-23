@@ -5,237 +5,227 @@
 @section('content')
 
 @php
-    /*
-    |--------------------------------------------------------------------------
-    | ROLE PENGGUNA
-    |--------------------------------------------------------------------------
-    */
+/*
+|--------------------------------------------------------------------------
+| ROLE PENGGUNA
+|--------------------------------------------------------------------------
+*/
 
-    $user = auth()->user();
 
-    $userRole = strtolower(
-        trim(
-            (string) (
-                $user->role
-                ?? $user->jabatan
-                ?? ''
+$user = auth()->user();
+
+$userRole = strtolower(
+    trim(
+        (string) (
+            $user->role
+            ?? $user->jabatan
+            ?? ''
+        )
+    )
+);
+
+if ($userRole === 'staf') {
+    $userRole = 'staff';
+}
+
+$canManageSurat = in_array(
+    $userRole,
+    [
+        'admin',
+        'pimpinan',
+    ],
+    true
+);
+
+/*
+|--------------------------------------------------------------------------
+| STATUS
+|--------------------------------------------------------------------------
+*/
+
+$status = strtolower(
+    trim(
+        (string) (
+            $suratKeluar->status
+            ?? 'draft'
+        )
+    )
+);
+
+if ($status === 'draf') {
+    $status = 'draft';
+}
+
+$statusLabels = [
+    'draft'      => 'Draft',
+    'diproses'   => 'Diproses',
+    'disetujui'  => 'Disetujui',
+    'dikirim'    => 'Dikirim',
+    'diarsipkan' => 'Diarsipkan',
+];
+
+$statusClasses = [
+    'draft'      => 'sk-status-draft',
+    'diproses'   => 'sk-status-diproses',
+    'disetujui'  => 'sk-status-disetujui',
+    'dikirim'    => 'sk-status-dikirim',
+    'diarsipkan' => 'sk-status-arsip',
+];
+
+$statusLabel =
+    $statusLabels[$status]
+    ?? ucfirst($status);
+
+$statusClass =
+    $statusClasses[$status]
+    ?? 'sk-status-draft';
+
+/*
+|--------------------------------------------------------------------------
+| TANGGAL
+|--------------------------------------------------------------------------
+*/
+
+$tanggalSurat = '-';
+$tanggalKeluar = '-';
+
+try {
+    if ($suratKeluar->tanggal_surat) {
+        $tanggalSurat =
+            \Illuminate\Support\Carbon::parse(
+                $suratKeluar->tanggal_surat
+            )->translatedFormat('d F Y');
+    }
+} catch (\Throwable $e) {
+    $tanggalSurat = '-';
+}
+
+try {
+    if ($suratKeluar->tanggal_keluar) {
+        $tanggalKeluar =
+            \Illuminate\Support\Carbon::parse(
+                $suratKeluar->tanggal_keluar
+            )->translatedFormat('d F Y');
+    }
+} catch (\Throwable $e) {
+    $tanggalKeluar = '-';
+}
+
+/*
+|--------------------------------------------------------------------------
+| INFORMASI SURAT
+|--------------------------------------------------------------------------
+*/
+
+$tujuanSurat = trim(
+    (string) (
+        $suratKeluar->pengirim
+        ?? ''
+    )
+);
+
+if ($tujuanSurat === '') {
+    $tujuanSurat = '-';
+}
+
+$nomorSurat = trim(
+    (string) (
+        $suratKeluar->nomor_surat
+        ?? ''
+    )
+);
+
+if ($nomorSurat === '') {
+    $nomorSurat = '-';
+}
+
+$perihal = trim(
+    (string) (
+        $suratKeluar->perihal
+        ?? ''
+    )
+);
+
+if ($perihal === '') {
+    $perihal = 'Tanpa Perihal';
+}
+
+$kategoriNama =
+    $suratKeluar->kategori?->nama_kategori
+    ?? '-';
+
+$pembuatNama =
+    $suratKeluar->pembuat?->name
+    ?? '-';
+
+/*
+|--------------------------------------------------------------------------
+| LAMPIRAN
+|--------------------------------------------------------------------------
+*/
+
+$lampiranPath =
+    $suratKeluar->lampiran_file
+    ?? null;
+
+$lampiranUrl = null;
+
+if (!empty($lampiranPath)) {
+
+    if (
+        filter_var(
+            $lampiranPath,
+            FILTER_VALIDATE_URL
+        )
+    ) {
+        $lampiranUrl =
+            $lampiranPath;
+
+    } elseif (
+        \Illuminate\Support\Facades\Route::has(
+            'surat-keluar.preview-lampiran'
+        )
+    ) {
+        $lampiranUrl =
+            route(
+                'surat-keluar.preview-lampiran',
+                $suratKeluar
+            );
+    }
+}
+
+$lampiranExtension =
+    !empty($lampiranPath)
+        ? strtolower(
+            pathinfo(
+                $lampiranPath,
+                PATHINFO_EXTENSION
             )
         )
-    );
+        : '';
 
-    if ($userRole === 'staf') {
-        $userRole = 'staff';
-    }
+$lampiranNama =
+    !empty($lampiranPath)
+        ? basename($lampiranPath)
+        : null;
 
-    $canManageSurat = in_array(
-        $userRole,
+$isImage =
+    in_array(
+        $lampiranExtension,
         [
-            'admin',
-            'pimpinan',
+            'jpg',
+            'jpeg',
+            'png',
+            'webp',
+            'gif',
         ],
         true
     );
 
+$isPdf =
+    $lampiranExtension === 'pdf';
 
-    /*
-    |--------------------------------------------------------------------------
-    | STATUS
-    |--------------------------------------------------------------------------
-    */
-
-    $status = strtolower(
-        trim(
-            (string) (
-                $suratKeluar->status
-                ?? 'draft'
-            )
-        )
-    );
-
-    if ($status === 'draf') {
-        $status = 'draft';
-    }
-
-    $statusLabels = [
-        'draft'      => 'Draft',
-        'diproses'   => 'Diproses',
-        'disetujui'  => 'Disetujui',
-        'dikirim'    => 'Dikirim',
-        'diarsipkan' => 'Diarsipkan',
-    ];
-
-    $statusClasses = [
-        'draft'      => 'sk-status-draft',
-        'diproses'   => 'sk-status-diproses',
-        'disetujui'  => 'sk-status-disetujui',
-        'dikirim'    => 'sk-status-dikirim',
-        'diarsipkan' => 'sk-status-arsip',
-    ];
-
-    $statusLabel =
-        $statusLabels[$status]
-        ?? ucfirst($status);
-
-    $statusClass =
-        $statusClasses[$status]
-        ?? 'sk-status-draft';
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | TANGGAL
-    |--------------------------------------------------------------------------
-    */
-
-    $tanggalSurat = '-';
-    $tanggalKeluar = '-';
-
-    try {
-        if ($suratKeluar->tanggal_surat) {
-            $tanggalSurat =
-                \Illuminate\Support\Carbon::parse(
-                    $suratKeluar->tanggal_surat
-                )->translatedFormat('d F Y');
-        }
-    } catch (\Throwable $e) {
-        $tanggalSurat = '-';
-    }
-
-    try {
-        if ($suratKeluar->tanggal_keluar) {
-            $tanggalKeluar =
-                \Illuminate\Support\Carbon::parse(
-                    $suratKeluar->tanggal_keluar
-                )->translatedFormat('d F Y');
-        }
-    } catch (\Throwable $e) {
-        $tanggalKeluar = '-';
-    }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | INFORMASI SURAT
-    |--------------------------------------------------------------------------
-    */
-
-    $tujuanSurat = trim(
-        (string) (
-            $suratKeluar->pengirim
-            ?? ''
-        )
-    );
-
-    if ($tujuanSurat === '') {
-        $tujuanSurat = '-';
-    }
-
-    $nomorSurat = trim(
-        (string) (
-            $suratKeluar->nomor_surat
-            ?? ''
-        )
-    );
-
-    if ($nomorSurat === '') {
-        $nomorSurat = '-';
-    }
-
-    $perihal = trim(
-        (string) (
-            $suratKeluar->perihal
-            ?? ''
-        )
-    );
-
-    if ($perihal === '') {
-        $perihal = 'Tanpa Perihal';
-    }
-
-    $ringkasan = trim(
-        (string) (
-            $suratKeluar->ringkasan
-            ?? ''
-        )
-    );
-
-    $kategoriNama =
-        $suratKeluar->kategori?->nama_kategori
-        ?? '-';
-
-    $pembuatNama =
-        $suratKeluar->pembuat?->name
-        ?? '-';
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | LAMPIRAN
-    |--------------------------------------------------------------------------
-    */
-
-    $lampiranPath =
-        $suratKeluar->lampiran_file
-        ?? null;
-
-    $lampiranUrl = null;
-
-    if (!empty($lampiranPath)) {
-
-        if (
-            filter_var(
-                $lampiranPath,
-                FILTER_VALIDATE_URL
-            )
-        ) {
-            $lampiranUrl =
-                $lampiranPath;
-
-        } elseif (
-            \Illuminate\Support\Facades\Route::has(
-                'surat-keluar.preview-lampiran'
-            )
-        ) {
-            $lampiranUrl =
-                route(
-                    'surat-keluar.preview-lampiran',
-                    $suratKeluar
-                );
-        }
-    }
-
-    $lampiranExtension =
-        !empty($lampiranPath)
-            ? strtolower(
-                pathinfo(
-                    $lampiranPath,
-                    PATHINFO_EXTENSION
-                )
-            )
-            : '';
-
-    $lampiranNama =
-        !empty($lampiranPath)
-            ? basename($lampiranPath)
-            : null;
-
-    $isImage =
-        in_array(
-            $lampiranExtension,
-            [
-                'jpg',
-                'jpeg',
-                'png',
-                'webp',
-                'gif',
-            ],
-            true
-        );
-
-    $isPdf =
-        $lampiranExtension === 'pdf';
 @endphp
-
 
 <style>
     /* =========================================================
@@ -807,35 +797,6 @@
     }
 
     /* =========================================================
-       RINGKASAN
-    ========================================================== */
-
-    .sk-ringkasan-card {
-        margin-top: 16px;
-        overflow: hidden;
-    }
-
-    .sk-ringkasan-body {
-        padding: 16px 17px;
-    }
-
-    .sk-ringkasan-box {
-        padding: 14px 15px;
-        border: 1px solid #e5e7eb;
-        border-radius: 10px;
-        background: #f8fafc;
-    }
-
-    .sk-ringkasan-text {
-        margin: 0;
-        font-size: 11px;
-        line-height: 1.7;
-        color: #475569;
-        white-space: pre-line;
-        overflow-wrap: anywhere;
-    }
-
-    /* =========================================================
        ATTACHMENT
     ========================================================== */
 
@@ -1135,7 +1096,6 @@
         }
 
         .sk-perihal-body,
-        .sk-ringkasan-body,
         .sk-attachment-body {
             padding: 14px;
         }
@@ -1211,46 +1171,80 @@
     }
 </style>
 
-
 <div class="sk-detail-page">
 
-    {{-- =====================================================
-         ALERT SUCCESS
-    ====================================================== --}}
+{{-- =====================================================
+     ALERT SUCCESS
+====================================================== --}}
 
-    @if(session('success'))
-        <div
-            class="sk-alert sk-alert-success"
-            role="alert"
+@if(session('success'))
+    <div
+        class="sk-alert sk-alert-success"
+        role="alert"
+    >
+        <div class="sk-alert-inner">
+
+            <div class="sk-alert-icon">
+
+                <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M5 13l4 4L19 7"
+                    />
+                </svg>
+
+            </div>
+
+            <p class="sk-alert-text">
+                {{ session('success') }}
+            </p>
+
+        </div>
+
+        <button
+            type="button"
+            class="sk-alert-close"
+            onclick="this.closest('[role=alert]')?.remove()"
+            aria-label="Tutup"
         >
-            <div class="sk-alert-inner">
-                <div class="sk-alert-icon">
-                    <svg
-                        class="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M5 13l4 4L19 7"
-                        />
-                    </svg>
-                </div>
-
-                <p class="sk-alert-text">
-                    {{ session('success') }}
-                </p>
-            </div>
-
-            <button
-                type="button"
-                class="sk-alert-close"
-                onclick="this.closest('[role=alert]')?.remove()"
-                aria-label="Tutup"
+            <svg
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
             >
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M6 18L18 6M6 6l12 12"
+                />
+            </svg>
+        </button>
+
+    </div>
+@endif
+
+{{-- =====================================================
+     ALERT ERROR
+====================================================== --}}
+
+@if(session('error'))
+    <div
+        class="sk-alert sk-alert-error"
+        role="alert"
+    >
+        <div class="sk-alert-inner">
+
+            <div class="sk-alert-icon">
+
                 <svg
                     class="w-4 h-4"
                     fill="none"
@@ -1261,536 +1255,149 @@
                         stroke-linecap="round"
                         stroke-linejoin="round"
                         stroke-width="2"
-                        d="M6 18L18 6M6 6l12 12"
+                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                     />
                 </svg>
-            </button>
+
+            </div>
+
+            <p class="sk-alert-text">
+                {{ session('error') }}
+            </p>
+
         </div>
-    @endif
 
-
-    {{-- =====================================================
-         ALERT ERROR
-    ====================================================== --}}
-
-    @if(session('error'))
-        <div
-            class="sk-alert sk-alert-error"
-            role="alert"
+        <button
+            type="button"
+            class="sk-alert-close"
+            onclick="this.closest('[role=alert]')?.remove()"
+            aria-label="Tutup"
         >
-            <div class="sk-alert-inner">
-                <div class="sk-alert-icon">
-                    <svg
-                        class="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                    </svg>
-                </div>
-
-                <p class="sk-alert-text">
-                    {{ session('error') }}
-                </p>
-            </div>
-
-            <button
-                type="button"
-                class="sk-alert-close"
-                onclick="this.closest('[role=alert]')?.remove()"
-                aria-label="Tutup"
+            <svg
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
             >
-                <svg
-                    class="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M6 18L18 6M6 6l12 12"
-                    />
-                </svg>
-            </button>
-        </div>
-    @endif
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M6 18L18 6M6 6l12 12"
+                />
+            </svg>
+        </button>
 
+    </div>
+@endif
 
-    {{-- =====================================================
-         HEADER
-    ====================================================== --}}
+{{-- =====================================================
+     HEADER
+====================================================== --}}
 
-    <div class="sk-header">
+<div class="sk-header">
 
-        <div class="sk-header-left">
+    <div class="sk-header-left">
 
-            <a
-                href="{{ route('surat-keluar.index') }}"
-                class="sk-back"
-                title="Kembali"
-                aria-label="Kembali ke Surat Keluar"
+        <a
+            href="{{ route('surat-keluar.index') }}"
+            class="sk-back"
+            title="Kembali"
+            aria-label="Kembali ke Surat Keluar"
+        >
+            <svg
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
             >
-                <svg
-                    class="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                    />
-                </svg>
-            </a>
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                />
+            </svg>
+        </a>
 
-            <div class="sk-header-content">
+        <div class="sk-header-content">
 
-                <div class="sk-breadcrumb">
-                    <a href="{{ route('surat-keluar.index') }}">
-                        Surat Keluar
-                    </a>
+            <div class="sk-breadcrumb">
 
-                    <span>/</span>
+                <a href="{{ route('surat-keluar.index') }}">
+                    Surat Keluar
+                </a>
 
-                    <span>Detail Arsip</span>
-                </div>
+                <span>/</span>
 
-                <h1 class="sk-header-title">
-                    Detail Surat Keluar
-                </h1>
-
-                <p class="sk-header-subtitle">
-                    Informasi surat, status arsip, dan berkas digital.
-                </p>
+                <span>Detail Arsip</span>
 
             </div>
 
+            <h1 class="sk-header-title">
+                Detail Surat Keluar
+            </h1>
+
+            <p class="sk-header-subtitle">
+                Informasi surat, status arsip, dan berkas digital.
+            </p>
+
         </div>
 
+    </div>
 
-        {{-- =================================================
-             EDIT HANYA ADMIN / PIMPINAN
-        ================================================== --}}
+    {{-- =================================================
+         EDIT HANYA ADMIN / PIMPINAN
+    ================================================== --}}
 
-        @if(
-            $canManageSurat &&
-            \Illuminate\Support\Facades\Route::has(
-                'surat-keluar.edit'
-            )
+    @if(
+        $canManageSurat &&
+        \Illuminate\Support\Facades\Route::has(
+            'surat-keluar.edit'
         )
-            <a
-                href="{{ route('surat-keluar.edit', $suratKeluar) }}"
-                class="sk-header-action"
-                title="Edit arsip surat"
+    )
+
+        <a
+            href="{{ route('surat-keluar.edit', $suratKeluar) }}"
+            class="sk-header-action"
+            title="Edit arsip surat"
+        >
+            <svg
+                class="w-3.5 h-3.5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
             >
-                <svg
-                    class="w-3.5 h-3.5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h5m5.5-1.5a2.121 2.121 0 003 0l5.5-5.5a2.121 2.121 0 003-3L15 10.5V13h-2.5z"
-                    />
-                </svg>
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h5m5.5-1.5a2.121 2.121 0 003 0l5.5-5.5a2.121 2.121 0 003-3L15 10.5V13h-2.5z"
+                />
+            </svg>
 
-                Edit Arsip
-            </a>
-        @endif
+            Edit Arsip
+        </a>
 
-    </div>
+    @endif
 
+</div>
 
-    {{-- =====================================================
-         TOP GRID
-    ====================================================== --}}
+{{-- =====================================================
+     TOP GRID
+====================================================== --}}
 
-    <div class="sk-top-grid">
+<div class="sk-top-grid">
 
-        {{-- =================================================
-             KIRI
-        ================================================== --}}
+    {{-- =================================================
+         KIRI
+    ================================================== --}}
 
-        <div class="sk-left-column">
+    <div class="sk-left-column">
 
-            {{-- INFORMASI SURAT --}}
+        {{-- INFORMASI SURAT --}}
 
-            <div class="sk-card sk-info-card">
-
-                <div class="sk-card-header">
-
-                    <div class="sk-card-heading">
-
-                        <div class="sk-card-heading-icon">
-                            <svg
-                                class="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="1.8"
-                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586A1.5 1.5 0 0118 8.5V19a2 2 0 01-2 2z"
-                                />
-                            </svg>
-                        </div>
-
-                        <div>
-                            <h2 class="sk-card-title">
-                                Informasi Surat
-                            </h2>
-
-                            <p class="sk-card-subtitle">
-                                Data utama arsip surat keluar.
-                            </p>
-                        </div>
-
-                    </div>
-
-                    <span class="sk-status {{ $statusClass }}">
-                        {{ $statusLabel }}
-                    </span>
-
-                </div>
-
-
-                <div class="sk-info-table-wrap">
-
-                    <table class="sk-info-table">
-
-                        <tbody>
-
-                            <tr>
-
-                                <td>
-                                    <span class="sk-info-label">
-                                        Nomor Surat
-                                    </span>
-
-                                    <p class="sk-info-value">
-                                        {{ $nomorSurat }}
-                                    </p>
-                                </td>
-
-                                <td>
-                                    <span class="sk-info-label">
-                                        Tujuan Surat
-                                    </span>
-
-                                    <p class="sk-info-value">
-                                        {{ $tujuanSurat }}
-                                    </p>
-                                </td>
-
-                                <td>
-                                    <span class="sk-info-label">
-                                        Kategori Surat
-                                    </span>
-
-                                    <p class="sk-info-value">
-                                        {{ $kategoriNama }}
-                                    </p>
-                                </td>
-
-                            </tr>
-
-                            <tr>
-
-                                <td>
-                                    <span class="sk-info-label">
-                                        Tanggal Surat
-                                    </span>
-
-                                    <p class="sk-info-value sk-info-date">
-
-                                        <svg
-                                            class="sk-date-icon"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2"
-                                                d="M8 2v4M16 2v4M3 10h18M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z"
-                                            />
-                                        </svg>
-
-                                        <span>
-                                            {{ $tanggalSurat }}
-                                        </span>
-
-                                    </p>
-                                </td>
-
-                                <td>
-                                    <span class="sk-info-label">
-                                        Tanggal Keluar
-                                    </span>
-
-                                    <p class="sk-info-value sk-info-date">
-
-                                        <svg
-                                            class="sk-date-icon"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2"
-                                                d="M8 2v4M16 2v4M3 10h18M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z"
-                                            />
-                                        </svg>
-
-                                        <span>
-                                            {{ $tanggalKeluar }}
-                                        </span>
-
-                                    </p>
-                                </td>
-
-                                <td>
-                                    <span class="sk-info-label">
-                                        Dibuat Oleh
-                                    </span>
-
-                                    <p class="sk-info-value">
-                                        {{ $pembuatNama }}
-                                    </p>
-                                </td>
-
-                            </tr>
-
-                        </tbody>
-
-                    </table>
-
-                </div>
-
-            </div>
-
-
-            {{-- PERIHAL --}}
-
-            <div class="sk-card sk-perihal-card">
-
-                <div class="sk-card-header">
-
-                    <div class="sk-card-heading">
-
-                        <div class="sk-card-heading-icon">
-
-                            <svg
-                                class="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="1.8"
-                                    d="M4 6h16M4 12h16M4 18h10"
-                                />
-                            </svg>
-
-                        </div>
-
-                        <div>
-
-                            <h2 class="sk-card-title">
-                                Perihal Surat
-                            </h2>
-
-                            <p class="sk-card-subtitle">
-                                Pokok atau tujuan utama surat.
-                            </p>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <div class="sk-perihal-body">
-
-                    <div class="sk-perihal-box">
-
-                        <p class="sk-perihal-text">
-                            {{ $perihal }}
-                        </p>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        {{-- =================================================
-             KANAN
-        ================================================== --}}
-
-        <div class="sk-right-column">
-
-            <div class="sk-card sk-side-card">
-
-                <div class="sk-card-header">
-
-                    <div class="sk-card-heading">
-
-                        <div class="sk-card-heading-icon">
-
-                            <svg
-                                class="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="1.8"
-                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586A1.5 1.5 0 0118 8.5V19a2 2 0 01-2 2z"
-                                />
-                            </svg>
-
-                        </div>
-
-                        <div>
-
-                            <h2 class="sk-card-title">
-                                Status Arsip
-                            </h2>
-
-                            <p class="sk-card-subtitle">
-                                Status dan informasi pengelolaan surat.
-                            </p>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <div class="sk-side-body">
-
-                    <div class="sk-side-status">
-
-                        <span class="sk-status {{ $statusClass }}">
-                            {{ $statusLabel }}
-                        </span>
-
-                    </div>
-
-
-                    <div class="sk-side-list">
-
-                        <div class="sk-side-item">
-
-                            <span class="sk-side-label">
-                                Nomor Arsip
-                            </span>
-
-                            <p class="sk-side-value">
-                                #{{ $suratKeluar->id }}
-                            </p>
-
-                        </div>
-
-
-                        <div class="sk-side-item">
-
-                            <span class="sk-side-label">
-                                Nomor Surat
-                            </span>
-
-                            <p class="sk-side-value">
-                                {{ $nomorSurat }}
-                            </p>
-
-                        </div>
-
-
-                        <div class="sk-side-item">
-
-                            <span class="sk-side-label">
-                                Kategori
-                            </span>
-
-                            <p class="sk-side-value">
-                                {{ $kategoriNama }}
-                            </p>
-
-                        </div>
-
-
-                        <div class="sk-side-item">
-
-                            <span class="sk-side-label">
-                                Dibuat Oleh
-                            </span>
-
-                            <p class="sk-side-value">
-                                {{ $pembuatNama }}
-                            </p>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="sk-side-note">
-
-                        <p class="sk-side-note-title">
-                            Informasi Arsip
-                        </p>
-
-                        <p class="sk-side-note-text">
-                            Surat keluar tersimpan sebagai bagian
-                            dari arsip digital sistem.
-                        </p>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    {{-- =====================================================
-         RINGKASAN
-    ====================================================== --}}
-
-    @if($ringkasan !== '')
-
-        <div class="sk-card sk-ringkasan-card">
+        <div class="sk-card sk-info-card">
 
             <div class="sk-card-header">
 
@@ -1808,7 +1415,7 @@
                                 stroke-linecap="round"
                                 stroke-linejoin="round"
                                 stroke-width="1.8"
-                                d="M4 5h16M4 9h16M4 13h10M4 17h8"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586A1.5 1.5 0 0118 8.5V19a2 2 0 01-2 2z"
                             />
                         </svg>
 
@@ -1817,11 +1424,187 @@
                     <div>
 
                         <h2 class="sk-card-title">
-                            Ringkasan Isi Surat
+                            Informasi Surat
                         </h2>
 
                         <p class="sk-card-subtitle">
-                            Ringkasan singkat isi dokumen.
+                            Data utama arsip surat keluar.
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <span class="sk-status {{ $statusClass }}">
+                    {{ $statusLabel }}
+                </span>
+
+            </div>
+
+            <div class="sk-info-table-wrap">
+
+                <table class="sk-info-table">
+
+                    <tbody>
+
+                        <tr>
+
+                            <td>
+
+                                <span class="sk-info-label">
+                                    Nomor Surat
+                                </span>
+
+                                <p class="sk-info-value">
+                                    {{ $nomorSurat }}
+                                </p>
+
+                            </td>
+
+                            <td>
+
+                                <span class="sk-info-label">
+                                    Tujuan Surat
+                                </span>
+
+                                <p class="sk-info-value">
+                                    {{ $tujuanSurat }}
+                                </p>
+
+                            </td>
+
+                            <td>
+
+                                <span class="sk-info-label">
+                                    Kategori Surat
+                                </span>
+
+                                <p class="sk-info-value">
+                                    {{ $kategoriNama }}
+                                </p>
+
+                            </td>
+
+                        </tr>
+
+                        <tr>
+
+                            <td>
+
+                                <span class="sk-info-label">
+                                    Tanggal Surat
+                                </span>
+
+                                <p class="sk-info-value sk-info-date">
+
+                                    <svg
+                                        class="sk-date-icon"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M8 2v4M16 2v4M3 10h18M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z"
+                                        />
+                                    </svg>
+
+                                    <span>
+                                        {{ $tanggalSurat }}
+                                    </span>
+
+                                </p>
+
+                            </td>
+
+                            <td>
+
+                                <span class="sk-info-label">
+                                    Tanggal Keluar
+                                </span>
+
+                                <p class="sk-info-value sk-info-date">
+
+                                    <svg
+                                        class="sk-date-icon"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M8 2v4M16 2v4M3 10h18M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z"
+                                        />
+                                    </svg>
+
+                                    <span>
+                                        {{ $tanggalKeluar }}
+                                    </span>
+
+                                </p>
+
+                            </td>
+
+                            <td>
+
+                                <span class="sk-info-label">
+                                    Dibuat Oleh
+                                </span>
+
+                                <p class="sk-info-value">
+                                    {{ $pembuatNama }}
+                                </p>
+
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+        {{-- PERIHAL --}}
+
+        <div class="sk-card sk-perihal-card">
+
+            <div class="sk-card-header">
+
+                <div class="sk-card-heading">
+
+                    <div class="sk-card-heading-icon">
+
+                        <svg
+                            class="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="1.8"
+                                d="M4 6h16M4 12h16M4 18h10"
+                            />
+                        </svg>
+
+                    </div>
+
+                    <div>
+
+                        <h2 class="sk-card-title">
+                            Perihal Surat
+                        </h2>
+
+                        <p class="sk-card-subtitle">
+                            Pokok atau tujuan utama surat.
                         </p>
 
                     </div>
@@ -1830,13 +1613,12 @@
 
             </div>
 
+            <div class="sk-perihal-body">
 
-            <div class="sk-ringkasan-body">
+                <div class="sk-perihal-box">
 
-                <div class="sk-ringkasan-box">
-
-                    <p class="sk-ringkasan-text">
-                        {{ $ringkasan }}
+                    <p class="sk-perihal-text">
+                        {{ $perihal }}
                     </p>
 
                 </div>
@@ -1845,267 +1627,389 @@
 
         </div>
 
-    @endif
+    </div>
 
+    {{-- =================================================
+         KANAN
+    ================================================== --}}
 
-    {{-- =====================================================
-         LAMPIRAN DIGITAL
-    ====================================================== --}}
+    <div class="sk-right-column">
 
-    <div class="sk-card sk-attachment-card">
+        <div class="sk-card sk-side-card">
 
-        <div class="sk-card-header">
+            <div class="sk-card-header">
 
-            <div class="sk-card-heading">
+                <div class="sk-card-heading">
 
-                <div class="sk-card-heading-icon">
+                    <div class="sk-card-heading-icon">
 
-                    <svg
-                        class="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
+                        <svg
+                            class="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="1.8"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586A1.5 1.5 0 0118 8.5V19a2 2 0 01-2 2z"
+                            />
+                        </svg>
+
+                    </div>
+
+                    <div>
+
+                        <h2 class="sk-card-title">
+                            Status Arsip
+                        </h2>
+
+                        <p class="sk-card-subtitle">
+                            Status dan informasi pengelolaan surat.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="sk-side-body">
+
+                <div class="sk-side-status">
+
+                    <span class="sk-status {{ $statusClass }}">
+                        {{ $statusLabel }}
+                    </span>
+
+                </div>
+
+                <div class="sk-side-list">
+
+                    <div class="sk-side-item">
+
+                        <span class="sk-side-label">
+                            Nomor Arsip
+                        </span>
+
+                        <p class="sk-side-value">
+                            #{{ $suratKeluar->id }}
+                        </p>
+
+                    </div>
+
+                    <div class="sk-side-item">
+
+                        <span class="sk-side-label">
+                            Nomor Surat
+                        </span>
+
+                        <p class="sk-side-value">
+                            {{ $nomorSurat }}
+                        </p>
+
+                    </div>
+
+                    <div class="sk-side-item">
+
+                        <span class="sk-side-label">
+                            Kategori
+                        </span>
+
+                        <p class="sk-side-value">
+                            {{ $kategoriNama }}
+                        </p>
+
+                    </div>
+
+                    <div class="sk-side-item">
+
+                        <span class="sk-side-label">
+                            Dibuat Oleh
+                        </span>
+
+                        <p class="sk-side-value">
+                            {{ $pembuatNama }}
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <div class="sk-side-note">
+
+                    <p class="sk-side-note-title">
+                        Informasi Arsip
+                    </p>
+
+                    <p class="sk-side-note-text">
+                        Surat keluar tersimpan sebagai bagian
+                        dari arsip digital sistem.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{{-- =====================================================
+     LAMPIRAN DIGITAL
+====================================================== --}}
+
+<div class="sk-card sk-attachment-card">
+
+    <div class="sk-card-header">
+
+        <div class="sk-card-heading">
+
+            <div class="sk-card-heading-icon">
+
+                <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="1.8"
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586A1.5 1.5 0 0118 8.5V19a2 2 0 01-2 2z"
+                    />
+                </svg>
+
+            </div>
+
+            <div>
+
+                <h2 class="sk-card-title">
+                    Berkas Lampiran Digital
+                </h2>
+
+                <p class="sk-card-subtitle">
+                    Dokumen digital yang tersimpan pada arsip surat ini.
+                </p>
+
+            </div>
+
+        </div>
+
+        @if($lampiranExtension)
+
+            <span class="sk-extension">
+                .{{ $lampiranExtension }}
+            </span>
+
+        @endif
+
+    </div>
+
+    <div class="sk-attachment-body">
+
+        @if(
+            !empty($lampiranPath) &&
+            !empty($lampiranUrl)
+        )
+
+            {{-- FILE BAR --}}
+
+            <div class="sk-file-bar">
+
+                <div class="sk-file-info">
+
+                    <div class="sk-file-icon">
+
+                        <svg
+                            class="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="1.8"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586A1.5 1.5 0 0118 8.5V19a2 2 0 01-2 2"
+                            />
+                        </svg>
+
+                    </div>
+
+                    <div class="min-w-0">
+
+                        <p class="sk-file-name">
+                            {{ $lampiranNama }}
+                        </p>
+
+                        <p class="sk-file-state">
+                            Lampiran tersimpan
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <div class="sk-file-actions">
+
+                    <a
+                        href="{{ $lampiranUrl }}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="sk-file-btn sk-file-btn-open"
                     >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="1.8"
-                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586A1.5 1.5 0 0118 8.5V19a2 2 0 01-2 2z"
-                        />
-                    </svg>
+                        <svg
+                            class="w-3.5 h-3.5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                            />
+                        </svg>
 
-                </div>
+                        Buka
+                    </a>
 
-                <div>
+                    <a
+                        href="{{ $lampiranUrl }}"
+                        download
+                        class="sk-file-btn sk-file-btn-download"
+                    >
+                        <svg
+                            class="w-3.5 h-3.5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                            />
+                        </svg>
 
-                    <h2 class="sk-card-title">
-                        Berkas Lampiran Digital
-                    </h2>
-
-                    <p class="sk-card-subtitle">
-                        Dokumen digital yang tersimpan pada arsip surat ini.
-                    </p>
+                        Unduh
+                    </a>
 
                 </div>
 
             </div>
 
+            {{-- VIEWER --}}
 
-            @if($lampiranExtension)
+            <div class="sk-viewer">
 
-                <span class="sk-extension">
-                    .{{ $lampiranExtension }}
-                </span>
+                @if($isImage)
 
-            @endif
+                    <div class="sk-image-wrapper">
 
-        </div>
-
-
-        <div class="sk-attachment-body">
-
-            @if(
-                !empty($lampiranPath) &&
-                !empty($lampiranUrl)
-            )
-
-                {{-- FILE BAR --}}
-
-                <div class="sk-file-bar">
-
-                    <div class="sk-file-info">
-
-                        <div class="sk-file-icon">
-
-                            <svg
-                                class="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="1.8"
-                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586A1.5 1.5 0 0118 8.5V19a2 2 0 01-2 2"
-                                />
-                            </svg>
-
-                        </div>
-
-                        <div class="min-w-0">
-
-                            <p class="sk-file-name">
-                                {{ $lampiranNama }}
-                            </p>
-
-                            <p class="sk-file-state">
-                                Lampiran tersimpan
-                            </p>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="sk-file-actions">
-
-                        <a
-                            href="{{ $lampiranUrl }}"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            class="sk-file-btn sk-file-btn-open"
-                        >
-                            <svg
-                                class="w-3.5 h-3.5"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                                />
-                            </svg>
-
-                            Buka
-                        </a>
-
-
-                        <a
-                            href="{{ $lampiranUrl }}"
-                            download
-                            class="sk-file-btn sk-file-btn-download"
-                        >
-                            <svg
-                                class="w-3.5 h-3.5"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                                />
-                            </svg>
-
-                            Unduh
-                        </a>
-
-                    </div>
-
-                </div>
-
-
-                {{-- VIEWER --}}
-
-                <div class="sk-viewer">
-
-                    @if($isImage)
-
-                        <div class="sk-image-wrapper">
-
-                            <img
-                                src="{{ $lampiranUrl }}"
-                                alt="Lampiran Surat Keluar"
-                                class="sk-image"
-                                loading="lazy"
-                            >
-
-                        </div>
-
-                    @elseif($isPdf)
-
-                        <iframe
+                        <img
                             src="{{ $lampiranUrl }}"
-                            class="sk-pdf"
-                            title="Pratinjau PDF Surat Keluar"
+                            alt="Lampiran Surat Keluar"
+                            class="sk-image"
                             loading="lazy"
-                        ></iframe>
+                        >
 
-                    @else
+                    </div>
 
-                        <div class="sk-viewer-empty">
+                @elseif($isPdf)
 
-                            <svg
-                                class="w-10 h-10 text-slate-300"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="1.5"
-                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586A1.5 1.5 0 0118 8.5V19a2 2 0 01-2 2z"
-                                />
-                            </svg>
+                    <iframe
+                        src="{{ $lampiranUrl }}"
+                        class="sk-pdf"
+                        title="Pratinjau PDF Surat Keluar"
+                        loading="lazy"
+                    ></iframe>
 
-                            <p class="sk-viewer-empty-title">
-                                Pratinjau tidak tersedia
-                            </p>
+                @else
 
-                            <p class="sk-viewer-empty-text">
-                                Format
-                                <strong>
-                                    .{{ $lampiranExtension ?: 'dokumen' }}
-                                </strong>
-                                tidak dapat ditampilkan langsung.
-                                Gunakan tombol Buka atau Unduh.
-                            </p>
+                    <div class="sk-viewer-empty">
 
-                        </div>
+                        <svg
+                            class="w-10 h-10 text-slate-300"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="1.5"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586A1.5 1.5 0 0118 8.5V19a2 2 0 01-2 2z"
+                            />
+                        </svg>
 
-                    @endif
+                        <p class="sk-viewer-empty-title">
+                            Pratinjau tidak tersedia
+                        </p>
 
-                </div>
+                        <p class="sk-viewer-empty-text">
+                            Format
+                            <strong>
+                                .{{ $lampiranExtension ?: 'dokumen' }}
+                            </strong>
+                            tidak dapat ditampilkan langsung.
+                            Gunakan tombol Buka atau Unduh.
+                        </p>
 
-            @else
+                    </div>
 
-                <div class="sk-no-file">
+                @endif
 
-                    <svg
-                        class="w-4 h-4 shrink-0"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="1.5"
-                            d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636"
-                        />
-                    </svg>
+            </div>
 
-                    <p>
-                        Tidak ada berkas digital yang dilampirkan pada surat ini.
-                    </p>
+        @else
 
-                </div>
+            <div class="sk-no-file">
 
-            @endif
+                <svg
+                    class="w-4 h-4 shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="1.5"
+                        d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636"
+                    />
+                </svg>
 
-        </div>
+                <p>
+                    Tidak ada berkas digital yang dilampirkan pada surat ini.
+                </p>
 
-    </div>
+            </div>
 
-
-    {{-- =====================================================
-         FOOTER
-    ====================================================== --}}
-
-    <div class="sk-system-footer">
-
-        <span>
-            Sistem Kendali Surat Keluar
-        </span>
+        @endif
 
     </div>
+
+</div>
+
+{{-- =====================================================
+     FOOTER
+====================================================== --}}
+
+<div class="sk-system-footer">
+
+    <span>
+        Sistem Kendali Surat Keluar
+    </span>
+
+</div>
 
 </div>
 
