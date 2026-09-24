@@ -6730,3 +6730,87 @@
 ></script>
 @endpush
 @endsection
+
+
+<style>
+/* Penyesuaian akhir filter: tombol Filter dan Rentang Tanggal rapat tanpa jarak berlebih */
+.surat-filter-main {
+    gap: 6px !important;
+    align-items: center !important;
+}
+.surat-filter-main .surat-date-wrapper,
+.surat-filter-main .surat-filter-submit {
+    margin: 0 !important;
+}
+.surat-filter-main .surat-filter-submit {
+    width: auto !important;
+    min-width: 72px !important;
+    height: 36px !important;
+    padding: 0 12px !important;
+    font-size: 11px !important;
+}
+.surat-filter-main .surat-date-wrapper {
+    gap: 4px !important;
+}
+.surat-filter-main .surat-date-wrapper > * {
+    margin: 0 !important;
+}
+
+/* Teks di dalam dropdown dibuat lebih kecil dan ringkas */
+.surat-filter-menu-title {
+    font-size: 11px !important;
+    line-height: 1.25 !important;
+}
+.surat-filter-menu-description {
+    font-size: 9px !important;
+    line-height: 1.25 !important;
+}
+.surat-filter-footer-count,
+.surat-filter-footer-hint {
+    font-size: 9px !important;
+    line-height: 1.25 !important;
+}
+.surat-filter-menu-header {
+    gap: 8px !important;
+    padding: 8px 10px !important;
+}
+.surat-filter-menu-footer {
+    padding: 7px 10px !important;
+    gap: 6px !important;
+}
+.surat-filter-action {
+    font-size: 9px !important;
+    line-height: 1.2 !important;
+    padding: 4px 7px !important;
+}
+.surat-filter-option {
+    font-size: 10px !important;
+    line-height: 1.25 !important;
+    padding: 6px 7px !important;
+}
+.surat-filter-option label {
+    font-size: 10px !important;
+    line-height: 1.25 !important;
+}
+.surat-filter-option input[type="checkbox"] {
+    width: 14px !important;
+    height: 14px !important;
+    margin: 0 !important;
+}
+.surat-filter-options {
+    gap: 4px !important;
+    padding: 8px 10px !important;
+}
+
+/* Trigger dropdown tetap compact */
+.surat-filter-trigger {
+    min-height: 36px !important;
+    padding: 0 10px !important;
+    font-size: 10px !important;
+}
+.surat-filter-trigger .filter-label,
+.surat-filter-trigger .filter-text,
+.surat-filter-trigger span {
+    font-size: 10px !important;
+}
+</style>
