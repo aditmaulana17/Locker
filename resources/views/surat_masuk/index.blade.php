@@ -6735,7 +6735,7 @@
 <style>
 /* Penyesuaian akhir filter: tombol Filter dan Rentang Tanggal rapat tanpa jarak berlebih */
 .surat-filter-main {
-    gap: 6px !important;
+    gap: 4px !important;
     align-items: center !important;
 }
 .surat-filter-main .surat-date-wrapper,
@@ -6750,7 +6750,7 @@
     font-size: 11px !important;
 }
 .surat-filter-main .surat-date-wrapper {
-    gap: 4px !important;
+    gap: 6px !important;
 }
 .surat-filter-main .surat-date-wrapper > * {
     margin: 0 !important;
