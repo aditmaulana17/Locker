@@ -74,6 +74,7 @@ class SuratKeluarController extends Controller
             'mono_dpi' => 300,
             'jpeg_quality' => 70,
         ],
+
         [
             'name' => 'ebook-120',
             'preset' => '/ebook',
@@ -82,6 +83,7 @@ class SuratKeluarController extends Controller
             'mono_dpi' => 240,
             'jpeg_quality' => 60,
         ],
+
         [
             'name' => 'screen-96',
             'preset' => '/screen',
@@ -251,6 +253,7 @@ class SuratKeluarController extends Controller
                 ) use (
                     $keyword
                 ): void {
+
                     $q
                         ->where(
                             'nomor_surat',
@@ -264,6 +267,11 @@ class SuratKeluarController extends Controller
                         )
                         ->orWhere(
                             'pengirim',
+                            'like',
+                            $keyword
+                        )
+                        ->orWhere(
+                            'ringkasan',
                             'like',
                             $keyword
                         )
@@ -533,28 +541,22 @@ class SuratKeluarController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | SCORECARD
+        | STATISTIK
         |--------------------------------------------------------------------------
         |
-        | Statistik dihitung dari seluruh data surat keluar.
-        |
-        | Scorecard TIDAK dipengaruhi:
-        | - Search
-        | - Filter kategori
-        | - Filter status
-        | - Filter tanggal
-        | - Pagination
+        | Statistik dihitung dari seluruh arsip surat keluar.
+        | Tidak dipengaruhi search, filter, maupun pagination.
+        | Empat nilai utama digunakan sebagai scorecard halaman.
+        | Disetujui dan Diarsipkan juga dihitung untuk ringkasan status.
         |
         */
 
         $statistics = SuratKeluar::query()
-            ->selectRaw(
-                'COUNT(*) AS total_surat_keluar'
-            )
+            ->selectRaw('COUNT(*) AS total_surat_keluar')
             ->selectRaw(
                 "SUM(
                     CASE
-                        WHEN status IN ('draft', 'draf')
+                        WHEN LOWER(TRIM(status)) IN ('draft', 'draf')
                         THEN 1
                         ELSE 0
                     END
@@ -563,7 +565,7 @@ class SuratKeluarController extends Controller
             ->selectRaw(
                 "SUM(
                     CASE
-                        WHEN status = 'diproses'
+                        WHEN LOWER(TRIM(status)) = 'diproses'
                         THEN 1
                         ELSE 0
                     END
@@ -572,105 +574,104 @@ class SuratKeluarController extends Controller
             ->selectRaw(
                 "SUM(
                     CASE
-                        WHEN status = 'dikirim'
+                        WHEN LOWER(TRIM(status)) = 'disetujui'
+                        THEN 1
+                        ELSE 0
+                    END
+                ) AS surat_disetujui"
+            )
+            ->selectRaw(
+                "SUM(
+                    CASE
+                        WHEN LOWER(TRIM(status)) = 'dikirim'
                         THEN 1
                         ELSE 0
                     END
                 ) AS surat_dikirim"
             )
+            ->selectRaw(
+                "SUM(
+                    CASE
+                        WHEN LOWER(TRIM(status)) = 'diarsipkan'
+                        THEN 1
+                        ELSE 0
+                    END
+                ) AS surat_diarsipkan"
+            )
             ->first();
 
-        /*
-        |--------------------------------------------------------------------------
-        | NILAI SCORECARD
-        |--------------------------------------------------------------------------
-        */
+        $totalSuratKeluar = (int) ($statistics->total_surat_keluar ?? 0);
+        $suratDraft = (int) ($statistics->surat_draft ?? 0);
+        $suratDiproses = (int) ($statistics->surat_diproses ?? 0);
+        $suratDisetujui = (int) ($statistics->surat_disetujui ?? 0);
+        $suratDikirim = (int) ($statistics->surat_dikirim ?? 0);
+        $suratDiarsipkan = (int) ($statistics->surat_diarsipkan ?? 0);
 
-        $totalSuratKeluar =
-            (int) (
-                $statistics->total_surat_keluar
-                ?? 0
-            );
-
-        $suratDraft =
-            (int) (
-                $statistics->surat_draft
-                ?? 0
-            );
-
-        $suratDiproses =
-            (int) (
-                $statistics->surat_diproses
-                ?? 0
-            );
-
-        $suratDikirim =
-            (int) (
-                $statistics->surat_dikirim
-                ?? 0
-            );
+        $statusCounts = [
+            'total' => $totalSuratKeluar,
+            'draft' => $suratDraft,
+            'diproses' => $suratDiproses,
+            'disetujui' => $suratDisetujui,
+            'dikirim' => $suratDikirim,
+            'diarsipkan' => $suratDiarsipkan,
+        ];
 
         /*
         |--------------------------------------------------------------------------
-        | QUERY TABEL
+        | QUERY DATA TABEL
         |--------------------------------------------------------------------------
         |
-        | Tetap menggunakan semua filter yang sudah ada.
+        | Tetap menggunakan semua filter yang sudah tersedia.
         |
         */
 
-        $query =
-            $this->buildFilteredQuery(
-                $request
-            );
+        $query = $this->buildFilteredQuery($request);
 
         /*
         |--------------------------------------------------------------------------
-        | STATUS FILE UNTUK EXPORT
+        | STATUS FILE EXPORT
+        |--------------------------------------------------------------------------
+        */
+
+        $hasUploadedFile = (clone $query)
+            ->whereNotNull('lampiran_file')
+            ->where('lampiran_file', '<>', '')
+            ->exists();
+
+        /*
+        |--------------------------------------------------------------------------
+        | RINGKASAN KATEGORI
         |--------------------------------------------------------------------------
         |
-        | Export hanya ditampilkan apabila hasil filter mempunyai
-        | minimal satu surat yang memiliki lampiran_file.
+        | Mengikuti seluruh data yang dapat dilihat user,
+        | bukan hanya halaman pagination aktif.
         |
         */
 
-        $hasUploadedFile =
-            (clone $query)
-                ->whereNotNull(
-                    'lampiran_file'
-                )
-                ->where(
-                    'lampiran_file',
-                    '<>',
-                    ''
-                )
-                ->exists();
+        $categoryCounts = SuratKeluar::query()
+            ->select('kategori_surat_id')
+            ->selectRaw('COUNT(*) AS total')
+            ->with('kategori:id,nama_kategori')
+            ->groupBy('kategori_surat_id')
+            ->orderByDesc('total')
+            ->get();
 
         /*
         |--------------------------------------------------------------------------
         | PAGINATION
         |--------------------------------------------------------------------------
+        |
+        | Surat terbaru ditampilkan lebih dahulu.
+        |
         */
 
-        $suratKeluars =
-            $query
-                ->orderByRaw(
-                    'tanggal_keluar IS NULL ASC'
-                )
-                ->orderBy(
-                    'tanggal_keluar',
-                    'asc'
-                )
-                ->orderBy(
-                    'created_at',
-                    'asc'
-                )
-                ->orderBy(
-                    'id',
-                    'asc'
-                )
-                ->paginate(10)
-                ->withQueryString();
+        $suratKeluars = $query
+            ->orderByRaw('tanggal_keluar IS NULL ASC')
+            ->orderBy('tanggal_keluar', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc')
+            ->paginate(10)
+            ->withQueryString();
 
         /*
         |--------------------------------------------------------------------------
@@ -678,66 +679,24 @@ class SuratKeluarController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $kategoris =
-            KategoriSurat::query()
-                ->orderBy(
-                    'nama_kategori'
-                )
-                ->get();
-
-        /*
-        |--------------------------------------------------------------------------
-        | VIEW
-        |--------------------------------------------------------------------------
-        */
+        $kategoris = KategoriSurat::query()
+            ->orderBy('nama_kategori')
+            ->get();
 
         return view(
             'surat_keluar.index',
             [
-                /*
-                |------------------------------------------------------------------
-                | DATA TABEL
-                |------------------------------------------------------------------
-                */
-
-                'suratKeluars' =>
-                    $suratKeluars,
-
-                /*
-                |------------------------------------------------------------------
-                | KATEGORI
-                |------------------------------------------------------------------
-                */
-
-                'kategoris' =>
-                    $kategoris,
-
-                /*
-                |------------------------------------------------------------------
-                | SCORECARD
-                |------------------------------------------------------------------
-                */
-
-                'totalSuratKeluar' =>
-                    $totalSuratKeluar,
-
-                'suratDraft' =>
-                    $suratDraft,
-
-                'suratDiproses' =>
-                    $suratDiproses,
-
-                'suratDikirim' =>
-                    $suratDikirim,
-
-                /*
-                |------------------------------------------------------------------
-                | STATUS FILE EXPORT
-                |------------------------------------------------------------------
-                */
-
-                'hasUploadedFile' =>
-                    $hasUploadedFile,
+                'suratKeluars' => $suratKeluars,
+                'kategoris' => $kategoris,
+                'totalSuratKeluar' => $totalSuratKeluar,
+                'suratDraft' => $suratDraft,
+                'suratDiproses' => $suratDiproses,
+                'suratDisetujui' => $suratDisetujui,
+                'suratDikirim' => $suratDikirim,
+                'suratDiarsipkan' => $suratDiarsipkan,
+                'statusCounts' => $statusCounts,
+                'categoryCounts' => $categoryCounts,
+                'hasUploadedFile' => $hasUploadedFile,
             ]
         );
     }
@@ -1627,34 +1586,30 @@ class SuratKeluarController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            $nomorSurat =
-                trim(
-                    (string) (
-                        $suratKeluar->nomor_surat ??
-                        ''
-                    )
-                );
+            $nomorSurat = trim(
+                (string) (
+                    $suratKeluar->nomor_surat ??
+                    ''
+                )
+            );
 
-            $perihalSurat =
-                trim(
-                    (string) (
-                        $suratKeluar->perihal ??
-                        ''
-                    )
-                );
+            $perihalSurat = trim(
+                (string) (
+                    $suratKeluar->perihal ??
+                    ''
+                )
+            );
 
-            $statusSurat =
-                $this->getValidStatus(
-                    $suratKeluar->status
-                );
+            $statusSurat = $this->getValidStatus(
+                $suratKeluar->status
+            );
 
-            $actorName =
-                trim(
-                    (string) (
-                        Auth::user()?->name ??
-                        'Sistem'
-                    )
-                );
+            $actorName = trim(
+                (string) (
+                    Auth::user()?->name ??
+                    'Sistem'
+                )
+            );
 
             $this->logActivity(
                 'create',
@@ -1663,21 +1618,11 @@ class SuratKeluarController extends Controller
                 ' membuat surat keluar #' .
                 $suratKeluar->id .
                 ' | Nomor: ' .
-                (
-                    $nomorSurat !== ''
-                        ? $nomorSurat
-                        : '-'
-                ) .
+                ($nomorSurat !== '' ? $nomorSurat : '-') .
                 ' | Perihal: ' .
-                (
-                    $perihalSurat !== ''
-                        ? $perihalSurat
-                        : 'Tanpa perihal'
-                ) .
+                ($perihalSurat !== '' ? $perihalSurat : 'Tanpa perihal') .
                 ' | Status: ' .
-                ucfirst(
-                    $statusSurat
-                )
+                ucfirst($statusSurat)
             );
 
             DB::commit();
@@ -1905,34 +1850,29 @@ class SuratKeluarController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            $nomorSurat =
-                trim(
-                    (string) (
-                        $suratKeluar->nomor_surat ??
-                        ''
-                    )
-                );
+            $nomorSurat = trim(
+                (string) (
+                    $suratKeluar->nomor_surat ??
+                    ''
+                )
+            );
 
-            $perihalSurat =
-                trim(
-                    (string) (
-                        $suratKeluar->perihal ??
-                        ''
-                    )
-                );
+            $perihalSurat = trim(
+                (string) (
+                    $suratKeluar->perihal ??
+                    ''
+                )
+            );
 
-            $actorName =
-                trim(
-                    (string) (
-                        Auth::user()?->name ??
-                        'Sistem'
-                    )
-                );
+            $actorName = trim(
+                (string) (
+                    Auth::user()?->name ??
+                    'Sistem'
+                )
+            );
 
-            if (
-                $oldStatus !==
-                $newStatus
-            ) {
+            if ($oldStatus !== $newStatus) {
+
                 $this->logActivity(
                     'status',
                     'surat_keluar',
@@ -1940,23 +1880,17 @@ class SuratKeluarController extends Controller
                     ' mengubah status surat keluar #' .
                     $suratKeluar->id .
                     ' | Nomor: ' .
-                    (
-                        $nomorSurat !== ''
-                            ? $nomorSurat
-                            : '-'
-                    ) .
+                    ($nomorSurat !== '' ? $nomorSurat : '-') .
                     ' | Perihal: ' .
-                    (
-                        $perihalSurat !== ''
-                            ? $perihalSurat
-                            : 'Tanpa perihal'
-                    ) .
+                    ($perihalSurat !== '' ? $perihalSurat : 'Tanpa perihal') .
                     ' | Status: ' .
                     ucfirst($oldStatus) .
                     ' → ' .
                     ucfirst($newStatus)
                 );
+
             } else {
+
                 $this->logActivity(
                     'update',
                     'surat_keluar',
@@ -1964,20 +1898,13 @@ class SuratKeluarController extends Controller
                     ' memperbarui surat keluar #' .
                     $suratKeluar->id .
                     ' | Nomor: ' .
-                    (
-                        $nomorSurat !== ''
-                            ? $nomorSurat
-                            : '-'
-                    ) .
+                    ($nomorSurat !== '' ? $nomorSurat : '-') .
                     ' | Perihal: ' .
-                    (
-                        $perihalSurat !== ''
-                            ? $perihalSurat
-                            : 'Tanpa perihal'
-                    ) .
+                    ($perihalSurat !== '' ? $perihalSurat : 'Tanpa perihal') .
                     ' | Status: ' .
                     ucfirst($newStatus)
                 );
+
             }
 
             DB::commit();
@@ -2016,7 +1943,7 @@ class SuratKeluarController extends Controller
             if (
                 $newAttachment &&
                 $newAttachment !==
-                $oldAttachment
+                    $oldAttachment
             ) {
                 $this->deleteAttachment(
                     $newAttachment
@@ -2105,6 +2032,7 @@ class SuratKeluarController extends Controller
                     $nomorSurat,
                     $perihalSurat
                 ): void {
+
                     $suratKeluar->delete();
 
                     $this->logActivity(
@@ -2114,17 +2042,9 @@ class SuratKeluarController extends Controller
                         ' menghapus surat keluar #' .
                         $id .
                         ' | Nomor: ' .
-                        (
-                            $nomorSurat !== ''
-                                ? $nomorSurat
-                                : '-'
-                        ) .
+                        ($nomorSurat !== '' ? $nomorSurat : '-') .
                         ' | Perihal: ' .
-                        (
-                            $perihalSurat !== ''
-                                ? $perihalSurat
-                                : 'Tanpa perihal'
-                        )
+                        ($perihalSurat !== '' ? $perihalSurat : 'Tanpa perihal')
                     );
                 }
             );
@@ -2282,6 +2202,7 @@ class SuratKeluarController extends Controller
                 function () use (
                     $stream
                 ): void {
+
                     fpassthru(
                         $stream
                     );
@@ -2396,17 +2317,13 @@ class SuratKeluarController extends Controller
             ' menambahkan catatan aktivitas untuk surat keluar #' .
             $suratKeluar->id .
             ' | Nomor: ' .
-            (
-                ($suratKeluar->nomor_surat ?? '') !== ''
-                    ? $suratKeluar->nomor_surat
-                    : '-'
-            ) .
+            (($suratKeluar->nomor_surat ?? '') !== ''
+                ? $suratKeluar->nomor_surat
+                : '-') .
             ' | Perihal: ' .
-            (
-                ($suratKeluar->perihal ?? '') !== ''
-                    ? $suratKeluar->perihal
-                    : 'Tanpa perihal'
-            )
+            (($suratKeluar->perihal ?? '') !== ''
+                ? $suratKeluar->perihal
+                : 'Tanpa perihal')
         );
 
         return back()
@@ -3159,9 +3076,7 @@ class SuratKeluarController extends Controller
             $versionCode
         );
 
-        if (
-            $versionCode !== 0
-        ) {
+        if ($versionCode !== 0) {
             throw new RuntimeException(
                 'Ghostscript gagal dijalankan.'
             );
@@ -3337,10 +3252,7 @@ class SuratKeluarController extends Controller
                     5
                 );
 
-            if (
-                $header !==
-                '%PDF-'
-            ) {
+            if ($header !== '%PDF-') {
                 @unlink(
                     $outputPath
                 );
@@ -3537,9 +3449,7 @@ class SuratKeluarController extends Controller
                     false,
             };
 
-        if (
-            $source === false
-        ) {
+        if ($source === false) {
             throw new RuntimeException(
                 'Gambar tidak dapat diproses oleh GD.'
             );
@@ -3628,9 +3538,7 @@ class SuratKeluarController extends Controller
                     $targetHeight
                 );
 
-            if (
-                $destination === false
-            ) {
+            if ($destination === false) {
                 throw new RuntimeException(
                     'Canvas gambar gagal dibuat.'
                 );
@@ -3925,9 +3833,7 @@ class SuratKeluarController extends Controller
                 )
             );
 
-        if (
-            $mime === 'image/jpg'
-        ) {
+        if ($mime === 'image/jpg') {
             $mime =
                 'image/jpeg';
         }
@@ -4186,9 +4092,7 @@ class SuratKeluarController extends Controller
                 $path !== '' &&
                 is_file($path)
             ) {
-                @unlink(
-                    $path
-                );
+                @unlink($path);
             }
         }
 
@@ -4445,7 +4349,6 @@ class SuratKeluarController extends Controller
                     $description
                 );
             }
-
         } catch (Throwable $e) {
             Log::warning(
                 'Gagal mencatat Activity Log surat keluar.',
