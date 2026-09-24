@@ -73,6 +73,10 @@
         $statusCounts['total']
         ?? 0
     );
+    $suratBaru = (int) (
+        $statusCounts['baru']
+        ?? 0
+    );
     $suratDiproses = (int) (
         $statusCounts['diproses']
         ?? 0
@@ -170,20 +174,6 @@
                                 )
                             )
                         ) === 'diproses'
-                )
-                ->count();
-        $suratDidisposisikan =
-            $scorecardCollection
-                ->filter(
-                    fn ($item) =>
-                        strtolower(
-                            trim(
-                                (string) (
-                                    $item->status ??
-                                    ''
-                                )
-                            )
-                        ) === 'didisposisikan'
                 )
                 ->count();
         $suratSelesai =
@@ -456,39 +446,94 @@
 
     $categorySummary = collect();
 
-    if (
-        isset($suratMasuks) &&
-        method_exists($suratMasuks, 'getCollection')
-    ) {
+    /*
+    |--------------------------------------------------------------------------
+    | RINGKASAN KATEGORI
+    |--------------------------------------------------------------------------
+    |
+    | Utamakan data kategori dari controller karena query tersebut mengikuti
+    | hak akses user dan tidak terpengaruh pagination/filter tabel.
+    |
+    | Jika controller belum mengirim $categoryCounts, gunakan data pada
+    | halaman aktif sebagai fallback agar Blade tetap kompatibel.
+    |
+    */
+    if (isset($categoryCounts)) {
         $categorySummary =
-            collect(
-                $suratMasuks->getCollection()
-            );
-    } elseif (isset($suratMasuks)) {
-        $categorySummary =
-            collect($suratMasuks);
+            collect($categoryCounts)
+                ->mapWithKeys(
+                    function ($item) {
+                        $name =
+                            trim(
+                                (string) (
+                                    $item
+                                        ->kategori
+                                        ?->nama_kategori
+                                    ?? 'Tanpa Kategori'
+                                )
+                            );
+
+                        if ($name === '') {
+                            $name = 'Tanpa Kategori';
+                        }
+
+                        return [
+                            $name =>
+                                (int) (
+                                    $item->total
+                                    ?? 0
+                                ),
+                        ];
+                    }
+                )
+                ->filter(
+                    fn ($jumlah) =>
+                        (int) $jumlah > 0
+                )
+                ->sortDesc()
+                ->take(5);
     }
 
-    $categorySummary = $categorySummary
-        ->map(
-            fn ($item) =>
-                trim(
-                    (string) (
-                        $item->kategori
-                            ?->nama_kategori
-                        ?? 'Tanpa Kategori'
-                    )
+    if (
+        $categorySummary->isEmpty() &&
+        isset($suratMasuks)
+    ) {
+        $categoryCollection =
+            method_exists(
+                $suratMasuks,
+                'getCollection'
+            )
+                ? collect(
+                    $suratMasuks
+                        ->getCollection()
                 )
-        )
-        ->map(
-            fn ($name) =>
-                $name !== ''
-                    ? $name
-                    : 'Tanpa Kategori'
-        )
-        ->countBy()
-        ->sortDesc()
-        ->take(5);
+                : collect(
+                    $suratMasuks
+                );
+
+        $categorySummary =
+            $categoryCollection
+                ->map(
+                    fn ($item) =>
+                        trim(
+                            (string) (
+                                $item
+                                    ->kategori
+                                    ?->nama_kategori
+                                ?? 'Tanpa Kategori'
+                            )
+                        )
+                )
+                ->map(
+                    fn ($name) =>
+                        $name !== ''
+                            ? $name
+                            : 'Tanpa Kategori'
+                )
+                ->countBy()
+                ->sortDesc()
+                ->take(5);
+    }
 
 
 @endphp
@@ -3206,12 +3251,12 @@
             <div class="surat-side-card-content">
                 <div
                     class="surat-donut"
-                    style="--donut: { $chartGradient };"
+                    style="--donut: {{ $chartGradient }};"
                     aria-label="Ringkasan status surat masuk"
                 >
                     <div class="surat-donut-center">
                         <div class="surat-donut-number">
-                            { number_format($chartTotal) }
+                            {{ number_format($chartTotal) }}
                         </div>
                         <div class="surat-donut-label">
                             Surat
@@ -3225,12 +3270,12 @@
                             <div class="surat-legend-name">
                                 <span
                                     class="surat-legend-dot"
-                                    style="background: { $item['color'] };"
+                                    style="background: {{ $item['color'] }};"
                                 ></span>
-                                <span>{ $label }</span>
+                                <span>{{ $label }}</span>
                             </div>
                             <span class="surat-legend-value">
-                                { number_format($item['value']) }
+                                {{ number_format($item['value']) }}
                             </span>
                         </div>
                     @endforeach
@@ -3268,18 +3313,18 @@
                             <div class="surat-category-row">
                                 <span
                                     class="surat-category-name"
-                                    title="{ $namaKategori }"
+                                    title="{{ $namaKategori }}"
                                 >
-                                    { $namaKategori }
+                                    {{ $namaKategori }}
                                 </span>
                                 <span class="surat-category-count">
-                                    { number_format($jumlah) }
+                                    {{ number_format($jumlah) }}
                                 </span>
                             </div>
                         @endforeach
                     </div>
                     <p class="mt-3 text-[8px] text-slate-400">
-                        Berdasarkan data pada halaman saat ini.
+                        Berdasarkan data yang dapat Anda lihat.
                     </p>
                 @else
                     <div class="surat-side-empty">
@@ -3376,7 +3421,6 @@
     id="customPickerPanel"
     class="custom-picker-panel hidden"
 ></div>
-@push('scripts')
 @push('scripts')
 <script>
 (function(){
