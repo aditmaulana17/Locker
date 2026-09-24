@@ -132,7 +132,7 @@
 
     $boardCollections = collect($boardDisposisis ?? []);
     if ($boardCollections->isEmpty() && isset($disposisis)) {
-        $boardCollections = collect($disposisis)->groupBy(function ($item) {
+        $boardCollections = collect($disposisis)->groupBy(function ($item) use ($statusOptions) {
             $status = strtolower(trim((string) ($item->status ?? 'menunggu')));
             return in_array($status, array_keys($statusOptions), true) ? $status : 'menunggu';
         });
