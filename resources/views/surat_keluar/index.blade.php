@@ -255,6 +255,10 @@
     | Tidak terpengaruh search/filter/pagination.
     |
     */
+    $statusCounts = is_array($statusCounts ?? null)
+        ? $statusCounts
+        : [];
+
     $suratKeluarStatistics =
         \App\Models\SuratKeluar::query()
             ->selectRaw(
@@ -308,12 +312,33 @@
             $suratKeluarStatistics->dikirim_suratan
             ?? 0
         );
+    $suratDisetujui = (int) (
+        $statusCounts['disetujui']
+        ?? 0
+    );
+    $suratDiarsipkan = (int) (
+        $statusCounts['diarsipkan']
+        ?? 0
+    );
 
     $categorySummary = collect();
-    if (isset($suratKeluars)) {
+
+    if (isset($categoryCounts)) {
+        $categorySummary = collect($categoryCounts)
+            ->mapWithKeys(function ($item) {
+                $name = trim((string) ($item->kategori?->nama_kategori ?? 'Tanpa Kategori'));
+                return [$name !== '' ? $name : 'Tanpa Kategori' => (int) ($item->total ?? 0)];
+            })
+            ->filter(fn ($jumlah) => $jumlah > 0)
+            ->sortDesc()
+            ->take(5);
+    }
+
+    if ($categorySummary->isEmpty() && isset($suratKeluars)) {
         $categoryCollection = method_exists($suratKeluars, 'getCollection')
             ? collect($suratKeluars->getCollection())
             : collect($suratKeluars);
+
         $categorySummary = $categoryCollection
             ->map(fn ($item) => trim((string) ($item->kategori?->nama_kategori ?? 'Tanpa Kategori')))
             ->map(fn ($name) => $name !== '' ? $name : 'Tanpa Kategori')
@@ -325,7 +350,9 @@
     $statusChartData = [
         'Draf' => ['value' => $suratDraft, 'color' => '#64748b'],
         'Diproses' => ['value' => $suratDiproses, 'color' => '#d97706'],
+        'Disetujui' => ['value' => $suratDisetujui, 'color' => '#2563eb'],
         'Dikirim' => ['value' => $suratDikirim, 'color' => '#059669'],
+        'Diarsipkan' => ['value' => $suratDiarsipkan, 'color' => '#7c3aed'],
     ];
     $statusChartTotal = array_sum(array_column($statusChartData, 'value'));
     $statusChartGradient = '#e2e8f0';
@@ -364,23 +391,27 @@
 .surat-create-button{border:1px solid #2563eb;background:#2563eb;color:#fff;box-shadow:0 8px 20px rgba(37,99,235,.18);}
 .surat-create-button:hover{border-color:#1d4ed8;background:#1d4ed8;transform:translateY(-1px);box-shadow:0 12px 24px rgba(37,99,235,.23);}
 /* SCORECARD */
-.surat-keluar-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:18px;}
-.surat-keluar-summary-card{position:relative;display:flex;align-items:center;min-width:0;min-height:100px;gap:13px;overflow:hidden;padding:17px;border:1px solid #dbe4f0;border-radius:16px;background:#fff;box-shadow:0 4px 16px rgba(15,23,42,.04);}
+.surat-keluar-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:15px;}
+.surat-keluar-summary-card{position:relative;display:flex;align-items:center;min-width:0;min-height:92px;gap:12px;overflow:hidden;padding:14px 16px;border:1px solid #dbe4f0;border-radius:15px;background:#fff;box-shadow:0 3px 12px rgba(15,23,42,.035);transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease;}
+.surat-keluar-summary-card:hover{transform:translateY(-1px);border-color:#cbd5e1;box-shadow:0 7px 20px rgba(15,23,42,.06);}
 .surat-keluar-summary-card::before{content:'';position:absolute;left:0;top:12px;bottom:12px;width:3px;border-radius:0 6px 6px 0;background:#2563eb;}
 .surat-keluar-summary-card:nth-child(2)::before{background:#64748b;}
 .surat-keluar-summary-card:nth-child(3)::before{background:#d97706;}
-.surat-keluar-summary-card:nth-child(4)::before{background:#059669;}
-.surat-keluar-summary-icon{display:flex;align-items:center;justify-content:center;width:44px;height:44px;flex:0 0 44px;border-radius:12px;}
+.surat-keluar-summary-card:nth-child(4)::before{background:#2563eb;}
+.surat-keluar-summary-card:nth-child(5)::before{background:#059669;}
+.surat-keluar-summary-card:nth-child(6)::before{background:#7c3aed;}
+.surat-keluar-summary-icon{display:flex;align-items:center;justify-content:center;width:42px;height:42px;flex:0 0 42px;border-radius:11px;}
 .surat-keluar-summary-icon.blue{background:#eff6ff;color:#2563eb;}
 .surat-keluar-summary-icon.slate{background:#f1f5f9;color:#64748b;}
 .surat-keluar-summary-icon.amber{background:#fffbeb;color:#d97706;}
 .surat-keluar-summary-icon.green{background:#ecfdf5;color:#059669;}
+.surat-keluar-summary-icon.purple{background:#f5f3ff;color:#7c3aed;}
 .surat-keluar-summary-content{min-width:0;}
-.surat-keluar-summary-label{margin:0 0 4px;color:#64748b;font-size:10px;font-weight:700;}
-.surat-keluar-summary-value{margin:0;color:#0f172a;font-size:24px;font-weight:800;line-height:1;}
-.surat-keluar-summary-note{margin-top:5px;color:#94a3b8;font-size:9px;line-height:1.35;}
+.surat-keluar-summary-label{margin:0 0 3px;color:#64748b;font-size:10px;font-weight:700;}
+.surat-keluar-summary-value{margin:0;color:#0f172a;font-size:23px;font-weight:800;line-height:1;}
+.surat-keluar-summary-note{margin-top:4px;color:#94a3b8;font-size:8.5px;line-height:1.3;}
 /* WORKSPACE */
-.surat-workspace{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:16px;align-items:start;}
+.surat-workspace{display:grid;grid-template-columns:minmax(0,1fr) 292px;gap:16px;align-items:start;}
 .surat-main-card,.surat-side-card{overflow:hidden;border:1px solid #dbe4f0;border-radius:16px;background:#fff;box-shadow:0 3px 14px rgba(15,23,42,.04);}
 .surat-main-card-header,.surat-side-card-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 18px;border-bottom:1px solid #edf2f7;}
 .surat-main-card-title-wrap{display:flex;align-items:center;gap:10px;min-width:0;}
@@ -389,19 +420,19 @@
 .surat-main-card-subtitle{margin-top:2px;color:#94a3b8;font-size:9px;line-height:1.4;}
 .surat-sort-badge{display:inline-flex;align-items:center;gap:5px;min-height:30px;padding:0 9px;border:1px solid #dbe4f0;border-radius:9px;background:#fff;color:#475569;font-size:9px;font-weight:700;white-space:nowrap;}
 /* FILTER */
-.surat-filter-card{margin:0;padding:14px 18px 16px;border:0;border-bottom:1px solid #edf2f7;border-radius:0;background:#fff;box-shadow:none;}
-.surat-filter-main{display:grid;grid-template-columns:minmax(0,1fr) auto 245px;gap:8px;align-items:center;}
+.surat-filter-card{margin:0;padding:14px 18px 15px;border:0;border-bottom:1px solid #edf2f7;border-radius:0;background:#fff;box-shadow:none;}
+.surat-filter-main{display:grid;grid-template-columns:minmax(0,1fr) auto 250px;gap:9px;align-items:center;}
 .surat-search-wrapper{position:relative;min-width:0;}
 .surat-search-icon{position:absolute;top:50%;left:12px;z-index:2;display:flex;align-items:center;justify-content:center;width:17px;height:17px;color:#64748b;transform:translateY(-50%);pointer-events:none;}
-.surat-search-input,.surat-date-input{width:100%;height:42px;border:1px solid #d6e0ec;border-radius:10px;outline:none;background:#fff;color:#334155;font-size:11px;transition:.15s ease;}
+.surat-search-input,.surat-date-input{width:100%;height:42px;border:1px solid #d6e0ec;border-radius:10px;outline:none;background:#fff;color:#334155;font-size:11px;transition:border-color .15s ease,box-shadow .15s ease;}
 .surat-search-input{padding:0 12px 0 38px;}
 .surat-search-input::placeholder,.surat-date-input::placeholder{color:#94a3b8;}
 .surat-search-input:hover,.surat-date-input:hover{border-color:#b8c5d6;}
-.surat-search-input:focus,.surat-date-input:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.1);}
+.surat-search-input:focus,.surat-date-input:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.08);}
 .surat-filter-actions{display:flex;align-items:center;gap:5px;}
-.surat-filter-submit{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:42px;min-width:104px;padding:0 14px;border:1px solid #d6e0ec;border-radius:10px;background:#fff;color:#475569;font-size:11px;font-weight:700;cursor:pointer;transition:.15s ease;}
-.surat-filter-submit:hover{border-color:#94a3b8;background:#f8fafc;color:#1e293b;}
-.surat-filter-submit.has-filter{border-color:#bfdbfe;background:#eff6ff;color:#2563eb;}
+.surat-filter-submit{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:42px;min-width:104px;padding:0 14px;border:1px solid #2563eb;border-radius:10px;background:#2563eb;color:#fff;font-size:11px;font-weight:700;cursor:pointer;box-shadow:0 5px 14px rgba(37,99,235,.14);transition:.15s ease;}
+.surat-filter-submit:hover{border-color:#1d4ed8;background:#1d4ed8;box-shadow:0 7px 18px rgba(37,99,235,.18);}
+.surat-filter-submit.has-filter{border-color:#2563eb;background:#2563eb;color:#fff;}
 .surat-filter-reset{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border:1px solid #d6e0ec;border-radius:10px;background:#fff;color:#64748b;text-decoration:none;transition:.15s ease;}
 .surat-filter-reset:hover{border-color:#fecdd3;background:#fff1f2;color:#e11d48;}
 .surat-date-wrapper{position:relative;min-width:0;}
@@ -492,8 +523,8 @@
 .custom-date-picker-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-top:1px solid #e2e8f0}.custom-date-picker-selected{min-width:0;color:#64748b;font-size:10px;font-weight:700}.custom-date-picker-actions{display:flex;align-items:center;gap:6px}.custom-date-picker-button{height:34px;border:1px solid #dbe3ed;border-radius:8px;padding:0 12px;background:#f8fafc;color:#475569;font-size:10px;font-weight:700;cursor:pointer}.custom-date-picker-button.apply{border-color:#2563eb;background:#2563eb;color:#fff}
 .custom-picker-panel{position:fixed;z-index:1000000;width:310px;max-width:calc(100vw - 20px);padding:12px;border-radius:12px}.custom-picker-panel-header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;padding-bottom:9px;border-bottom:1px solid #e2e8f0}.custom-picker-panel-title{flex:1;color:#334155;font-size:12px;font-weight:800;text-align:center}.custom-picker-panel-close{width:28px;height:28px;border-radius:7px;font-size:17px}.custom-picker-month-grid,.custom-picker-year-grid,.custom-picker-grid{display:grid;gap:7px}.custom-picker-month-grid{grid-template-columns:repeat(3,1fr)}.custom-picker-year-grid{grid-template-columns:repeat(4,1fr)}.custom-picker-option{display:flex;align-items:center;justify-content:center;min-height:40px;padding:0 6px;border:1px solid #dbe3ed;border-radius:9px;background:#fff;color:#475569;font-size:10px;font-weight:700;cursor:pointer}.custom-picker-option:hover{border-color:#93c5fd;background:#eff6ff;color:#2563eb}.custom-picker-option.active{border-color:#2563eb;background:#2563eb;color:#fff}.custom-picker-option.current:not(.active){box-shadow:inset 0 0 0 1px #93c5fd}
 /* RESPONSIVE */
-@media(max-width:1100px){.surat-workspace{grid-template-columns:minmax(0,1fr)}.surat-sidebar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.surat-filter-main{grid-template-columns:minmax(0,1fr) auto}.surat-date-wrapper{grid-column:1/-1}}
-@media(max-width:767px){.surat-page-header{align-items:flex-start;flex-direction:column}.surat-page-header-left{width:100%}.surat-header-actions{width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}.surat-header-actions .surat-export-button,.surat-header-actions .surat-create-button{width:100%;padding:0 8px;font-size:9px}.surat-page-title{font-size:24px}.surat-page-description{font-size:11px}.surat-keluar-summary{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.surat-keluar-summary-card{min-height:88px;padding:13px;gap:9px}.surat-keluar-summary-icon{width:38px;height:38px;flex-basis:38px;border-radius:10px}.surat-keluar-summary-value{font-size:21px}.surat-keluar-summary-note{font-size:8px}.surat-sidebar{display:flex;flex-direction:column}.surat-filter-card{padding:12px}.surat-filter-main{grid-template-columns:1fr;gap:8px}.surat-filter-actions{width:100%}.surat-filter-submit{flex:1}.surat-filter-reset{width:42px;flex:0 0 42px}.filter-row{grid-template-columns:1fr}.filter-dropdown-menu{position:fixed;top:50%;left:50%;right:auto;width:calc(100vw - 24px);max-width:430px;max-height:80vh;transform:translate(-50%,-50%)}.filter-dropdown-options{max-height:calc(80vh - 145px)}.archive-table-scroll{overflow:visible}.archive-table{min-width:0;table-layout:auto}.archive-table thead{display:none}.archive-table,.archive-table tbody,.archive-table tr,.archive-table td{display:block;width:100%}.archive-table tbody tr{margin:0;padding:10px 12px;border-bottom:1px solid #edf2f7;background:#fff}.archive-table tbody td{display:grid;grid-template-columns:82px minmax(0,1fr);gap:10px;align-items:center;padding:6px 0;border:0;font-size:10px}.archive-table tbody td::before{content:attr(data-label);color:#94a3b8;font-size:8px;font-weight:800;letter-spacing:.03em;text-transform:uppercase}.archive-table tbody td:last-child{display:flex;justify-content:space-between;align-items:center;padding-top:8px;margin-top:4px;border-top:1px solid #f1f5f9;text-align:left}.archive-table tbody td:last-child::before{content:attr(data-label)}.archive-table .action-buttons{margin-left:auto}.archive-table .sender-badge{max-width:none}.archive-table .cell-subject{white-space:normal}.custom-date-picker{top:50%;left:50%;width:calc(100vw - 16px);max-height:calc(100vh - 16px);overflow-y:auto;transform:translate(-50%,-50%)}.custom-date-calendars,.custom-date-picker-calendars{grid-template-columns:1fr}.custom-calendar+.custom-calendar{border-top:1px solid #e2e8f0;border-left:0}.custom-calendar-day{height:38px}.custom-picker-panel{top:50%!important;left:50%!important;width:calc(100vw - 24px);transform:translate(-50%,-50%)}body.date-picker-lock{overflow:hidden}}
+@media(max-width:1100px){.surat-keluar-summary{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.surat-workspace{grid-template-columns:minmax(0,1fr)}.surat-sidebar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.surat-filter-main{grid-template-columns:minmax(0,1fr) auto}.surat-date-wrapper{grid-column:1/-1}}
+@media(max-width:767px){.surat-page-header{align-items:flex-start;flex-direction:column}.surat-page-header-left{width:100%}.surat-header-actions{width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}.surat-header-actions .surat-export-button,.surat-header-actions .surat-create-button{width:100%;padding:0 8px;font-size:9px}.surat-page-title{font-size:24px}.surat-page-description{font-size:11px}.surat-keluar-summary{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.surat-keluar-summary-card{min-height:86px;padding:12px;gap:8px}.surat-keluar-summary-icon{width:37px;height:37px;flex-basis:37px;border-radius:10px}.surat-keluar-summary-value{font-size:20px}.surat-keluar-summary-note{font-size:8px}.surat-sidebar{display:flex;flex-direction:column}.surat-filter-card{padding:12px}.surat-filter-main{grid-template-columns:1fr;gap:8px}.surat-filter-actions{width:100%}.surat-filter-submit{flex:1}.surat-filter-reset{width:42px;flex:0 0 42px}.filter-row{grid-template-columns:1fr}.filter-dropdown-menu{position:fixed;top:50%;left:50%;right:auto;width:calc(100vw - 24px);max-width:430px;max-height:80vh;transform:translate(-50%,-50%)}.filter-dropdown-options{max-height:calc(80vh - 145px)}.archive-table-scroll{overflow:visible}.archive-table{min-width:0;table-layout:auto}.archive-table thead{display:none}.archive-table,.archive-table tbody,.archive-table tr,.archive-table td{display:block;width:100%}.archive-table tbody tr{margin:0;padding:10px 12px;border-bottom:1px solid #edf2f7;background:#fff}.archive-table tbody td{display:grid;grid-template-columns:82px minmax(0,1fr);gap:10px;align-items:center;padding:6px 0;border:0;font-size:10px}.archive-table tbody td::before{content:attr(data-label);color:#94a3b8;font-size:8px;font-weight:800;letter-spacing:.03em;text-transform:uppercase}.archive-table tbody td:last-child{display:flex;justify-content:space-between;align-items:center;padding-top:8px;margin-top:4px;border-top:1px solid #f1f5f9;text-align:left}.archive-table tbody td:last-child::before{content:attr(data-label)}.archive-table .action-buttons{margin-left:auto}.archive-table .sender-badge{max-width:none}.archive-table .cell-subject{white-space:normal}.custom-date-picker{top:50%;left:50%;width:calc(100vw - 16px);max-height:calc(100vh - 16px);overflow-y:auto;transform:translate(-50%,-50%)}.custom-date-calendars,.custom-date-picker-calendars{grid-template-columns:1fr}.custom-calendar+.custom-calendar{border-top:1px solid #e2e8f0;border-left:0}.custom-calendar-day{height:38px}.custom-picker-panel{top:50%!important;left:50%!important;width:calc(100vw - 24px);transform:translate(-50%,-50%)}body.date-picker-lock{overflow:hidden}}
 @media(max-width:480px){.surat-keluar-summary{grid-template-columns:1fr}.surat-header-actions{grid-template-columns:1fr 1fr}.surat-header-actions .surat-create-button{grid-column:1/-1}.filter-dropdown-options{grid-template-columns:1fr}}
 </style>
 @endpush
@@ -612,138 +643,80 @@
          SCORECARD
     ====================================================== --}}
     <div class="surat-keluar-summary">
-        {{-- TOTAL --}}
         <div class="surat-keluar-summary-card">
             <div class="surat-keluar-summary-icon blue">
-                <svg
-                    class="h-6 w-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="1.8"
-                        d="M8 7h8M8 11h8M8 15h5M6 3h9l4 4v14H6a2 2 0 01-2-2V5a2 2 0 012-2z"
-                    />
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 7h8M8 11h8M8 15h5M6 3h9l4 4v14H6a2 2 0 01-2-2V5a2 2 0 012-2z"/>
                 </svg>
             </div>
             <div class="surat-keluar-summary-content">
-                <p class="surat-keluar-summary-label">
-                    Total Surat Keluar
-                </p>
-                <p class="surat-keluar-summary-value">
-                    {{ number_format($totalSuratKeluar, 0, ',', '.') }}
-                </p>
-                <div class="surat-keluar-summary-note">
-                    Seluruh surat keluar
-                </div>
+                <p class="surat-keluar-summary-label">Total Surat Keluar</p>
+                <p class="surat-keluar-summary-value">{{ number_format($totalSuratKeluar, 0, ',', '.') }}</p>
+                <div class="surat-keluar-summary-note">Seluruh surat keluar</div>
             </div>
         </div>
-        {{-- DRAFT --}}
         <div class="surat-keluar-summary-card">
             <div class="surat-keluar-summary-icon slate">
-                <svg
-                    class="h-6 w-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="1.8"
-                        d="M6 3h9l3 3v15H6a2 2 0 01-2-2V5a2 2 0 012-2z"
-                    />
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="1.8"
-                        d="M14 3v4h4"
-                    />
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 3h9l3 3v15H6a2 2 0 01-2-2V5a2 2 0 012-2z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M14 3v4h4"/>
                 </svg>
             </div>
             <div class="surat-keluar-summary-content">
-                <p class="surat-keluar-summary-label">
-                    Draf
-                </p>
-                <p class="surat-keluar-summary-value">
-                    {{ number_format($suratDraft, 0, ',', '.') }}
-                </p>
-                <div class="surat-keluar-summary-note">
-                    Surat yang masih berupa draf
-                </div>
+                <p class="surat-keluar-summary-label">Draf</p>
+                <p class="surat-keluar-summary-value">{{ number_format($suratDraft, 0, ',', '.') }}</p>
+                <div class="surat-keluar-summary-note">Surat yang masih berupa draf</div>
             </div>
         </div>
-        {{-- DIPROSES --}}
         <div class="surat-keluar-summary-card">
             <div class="surat-keluar-summary-icon amber">
-                <svg
-                    class="h-6 w-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="1.8"
-                        d="M12 6v6l4 2"
-                    />
-                    <circle
-                        cx="12"
-                        cy="12"
-                        r="9"
-                        stroke-width="1.8"
-                    />
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 6v6l4 2"/>
+                    <circle cx="12" cy="12" r="9" stroke-width="1.8"/>
                 </svg>
             </div>
             <div class="surat-keluar-summary-content">
-                <p class="surat-keluar-summary-label">
-                    Diproses
-                </p>
-                <p class="surat-keluar-summary-value">
-                    {{ number_format($suratDiproses, 0, ',', '.') }}
-                </p>
-                <div class="surat-keluar-summary-note">
-                    Surat yang sedang diproses
-                </div>
+                <p class="surat-keluar-summary-label">Diproses</p>
+                <p class="surat-keluar-summary-value">{{ number_format($suratDiproses, 0, ',', '.') }}</p>
+                <div class="surat-keluar-summary-note">Surat yang sedang diproses</div>
             </div>
         </div>
-        {{-- DIKIRIM --}}
         <div class="surat-keluar-summary-card">
-            <div class="surat-keluar-summary-icon green">
-                <svg
-                    class="h-6 w-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="1.8"
-                        d="M22 2L11 13"
-                    />
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="1.8"
-                        d="M22 2l-7 20-4-9-9-4 20-7z"
-                    />
+            <div class="surat-keluar-summary-icon blue">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 2l3 7 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1 3-7z"/>
                 </svg>
             </div>
             <div class="surat-keluar-summary-content">
-                <p class="surat-keluar-summary-label">
-                    Dikirim
-                </p>
-                <p class="surat-keluar-summary-value">
-                    {{ number_format($suratDikirim, 0, ',', '.') }}
-                </p>
-                <div class="surat-keluar-summary-note">
-                    Surat yang telah dikirim
-                </div>
+                <p class="surat-keluar-summary-label">Disetujui</p>
+                <p class="surat-keluar-summary-value">{{ number_format($suratDisetujui, 0, ',', '.') }}</p>
+                <div class="surat-keluar-summary-note">Surat yang telah disetujui</div>
+            </div>
+        </div>
+        <div class="surat-keluar-summary-card">
+            <div class="surat-keluar-summary-icon green">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M22 2L11 13"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M22 2l-7 20-4-9-9-4 20-7z"/>
+                </svg>
+            </div>
+            <div class="surat-keluar-summary-content">
+                <p class="surat-keluar-summary-label">Dikirim</p>
+                <p class="surat-keluar-summary-value">{{ number_format($suratDikirim, 0, ',', '.') }}</p>
+                <div class="surat-keluar-summary-note">Surat yang telah dikirim</div>
+            </div>
+        </div>
+        <div class="surat-keluar-summary-card">
+            <div class="surat-keluar-summary-icon purple">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 3l8 4v5c0 4.5-3.1 7.8-8 9-4.9-1.2-8-4.5-8-9V7l8-4z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12l2 2 4-4"/>
+                </svg>
+            </div>
+            <div class="surat-keluar-summary-content">
+                <p class="surat-keluar-summary-label">Diarsipkan</p>
+                <p class="surat-keluar-summary-value">{{ number_format($suratDiarsipkan, 0, ',', '.') }}</p>
+                <div class="surat-keluar-summary-note">Surat yang telah diarsipkan</div>
             </div>
         </div>
     </div>
