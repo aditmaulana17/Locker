@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Disposisi;
 use App\Models\SuratKeluar;
 use App\Models\SuratMasuk;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
@@ -54,6 +53,9 @@ class DashboardController extends Controller
          * ==========================================================
          * DEFAULT DATA
          * ==========================================================
+         *
+         * Semua nilai default agar view tetap aman ketika dashboard
+         * digunakan oleh role Staff maupun Admin/Pimpinan.
          */
 
         $totalSuratMasuk = 0;
@@ -68,17 +70,13 @@ class DashboardController extends Controller
         $suratMasukTerbaru = collect();
         $riwayatSuratKeluar = collect();
 
-        $chartLabels = [];
-        $chartDataMasuk = [];
-        $chartDataKeluar = [];
-
         /*
          * ==========================================================
          * DASHBOARD STAF
          * ==========================================================
          *
-         * Staf hanya melihat disposisi yang ditujukan
-         * kepada akun staf yang sedang login.
+         * Staf hanya melihat disposisi yang ditujukan kepada akun
+         * staf yang sedang login.
          */
 
         if ($isStaf) {
@@ -171,9 +169,6 @@ class DashboardController extends Controller
                     'listDisposisi',
                     'suratMasukTerbaru',
                     'riwayatSuratKeluar',
-                    'chartLabels',
-                    'chartDataMasuk',
-                    'chartDataKeluar',
                     'isStaf'
                 )
             );
@@ -183,6 +178,10 @@ class DashboardController extends Controller
          * ==========================================================
          * DASHBOARD ADMIN / PIMPINAN
          * ==========================================================
+         *
+         * Scorecard dan statistik dihitung dari seluruh arsip.
+         * Tidak dibatasi bulan, sehingga pergantian bulan tidak
+         * mereset atau mengosongkan data dashboard.
          */
 
         /*
@@ -209,6 +208,8 @@ class DashboardController extends Controller
          * ==========================================================
          * SURAT BELUM DIPROSES
          * ==========================================================
+         *
+         * Menghitung seluruh surat masuk dengan status "baru".
          */
 
         $suratPending =
@@ -223,6 +224,8 @@ class DashboardController extends Controller
          * ==========================================================
          * SURAT SELESAI
          * ==========================================================
+         *
+         * Menghitung seluruh surat masuk dengan status "selesai".
          */
 
         $suratSelesai =
@@ -237,6 +240,10 @@ class DashboardController extends Controller
          * ==========================================================
          * SURAT MASUK TERBARU
          * ==========================================================
+         *
+         * Selalu mengambil 5 surat masuk terbaru.
+         * Ketika bulan berganti, data lama tidak dihapus atau di-reset;
+         * daftar hanya bergeser apabila ada surat yang lebih baru.
          */
 
         $suratMasukTerbaru =
@@ -256,19 +263,12 @@ class DashboardController extends Controller
          * RIWAYAT SURAT KELUAR
          * ==========================================================
          *
-         * PENTING:
-         * Bagian ini BUKAN ActivityLog.
-         *
-         * Dashboard mengambil langsung data dari tabel surat_keluar,
-         * sehingga isinya selalu mengikuti halaman Surat Keluar.
-         *
-         * Jika tabel surat_keluar kosong:
-         *     $riwayatSuratKeluar = kosong
-         *
-         * Jika ada surat keluar:
-         *     surat tersebut tampil di dashboard.
+         * Data diambil langsung dari tabel surat_keluar, bukan
+         * ActivityLog, sehingga daftar selalu mengikuti data surat
+         * keluar yang sebenarnya.
          *
          * Maksimal 5 surat keluar terbaru.
+         * Pergantian bulan tidak mereset data.
          */
 
         $riwayatSuratKeluar =
@@ -285,178 +285,14 @@ class DashboardController extends Controller
 
         /*
          * ==========================================================
-         * GRAFIK 12 BULAN TERAKHIR
-         * ==========================================================
-         */
-
-        $startMonth =
-            Carbon::now()
-                ->startOfMonth()
-                ->subMonths(11);
-
-        $endMonth =
-            Carbon::now()
-                ->endOfMonth();
-
-        /*
-         * ==========================================================
-         * SURAT MASUK PER BULAN
-         * ==========================================================
-         */
-
-        $masukPerBulan =
-            SuratMasuk::query()
-                ->selectRaw(
-                    '
-                    YEAR(tanggal_terima) AS tahun,
-                    MONTH(tanggal_terima) AS bulan,
-                    COUNT(*) AS total
-                    '
-                )
-                ->whereNotNull(
-                    'tanggal_terima'
-                )
-                ->whereBetween(
-                    'tanggal_terima',
-                    [
-                        $startMonth
-                            ->copy()
-                            ->startOfDay(),
-
-                        $endMonth
-                            ->copy()
-                            ->endOfDay(),
-                    ]
-                )
-                ->groupByRaw(
-                    '
-                    YEAR(tanggal_terima),
-                    MONTH(tanggal_terima)
-                    '
-                )
-                ->get()
-                ->keyBy(
-                    function ($row) {
-                        return sprintf(
-                            '%04d-%02d',
-                            $row->tahun,
-                            $row->bulan
-                        );
-                    }
-                );
-
-        /*
-         * ==========================================================
-         * SURAT KELUAR PER BULAN
-         * ==========================================================
-         */
-
-        $keluarPerBulan =
-            SuratKeluar::query()
-                ->selectRaw(
-                    '
-                    YEAR(tanggal_surat) AS tahun,
-                    MONTH(tanggal_surat) AS bulan,
-                    COUNT(*) AS total
-                    '
-                )
-                ->whereNotNull(
-                    'tanggal_surat'
-                )
-                ->whereBetween(
-                    'tanggal_surat',
-                    [
-                        $startMonth
-                            ->copy()
-                            ->startOfDay(),
-
-                        $endMonth
-                            ->copy()
-                            ->endOfDay(),
-                    ]
-                )
-                ->groupByRaw(
-                    '
-                    YEAR(tanggal_surat),
-                    MONTH(tanggal_surat)
-                    '
-                )
-                ->get()
-                ->keyBy(
-                    function ($row) {
-                        return sprintf(
-                            '%04d-%02d',
-                            $row->tahun,
-                            $row->bulan
-                        );
-                    }
-                );
-
-        /*
-         * ==========================================================
-         * NAMA BULAN
-         * ==========================================================
-         */
-
-        $namaBulan = [
-            1 => 'Jan',
-            2 => 'Feb',
-            3 => 'Mar',
-            4 => 'Apr',
-            5 => 'Mei',
-            6 => 'Jun',
-            7 => 'Jul',
-            8 => 'Agu',
-            9 => 'Sep',
-            10 => 'Okt',
-            11 => 'Nov',
-            12 => 'Des',
-        ];
-
-        /*
-         * ==========================================================
-         * SUSUN DATA GRAFIK
-         * ==========================================================
-         */
-
-        for (
-            $i = 0;
-            $i < 12;
-            $i++
-        ) {
-
-            $currentMonth =
-                $startMonth
-                    ->copy()
-                    ->addMonths($i);
-
-            $key =
-                $currentMonth->format(
-                    'Y-m'
-                );
-
-            $chartLabels[] =
-                $namaBulan[
-                    (int) $currentMonth->month
-                ];
-
-            $chartDataMasuk[] =
-                (int) (
-                    $masukPerBulan[$key]->total
-                    ?? 0
-                );
-
-            $chartDataKeluar[] =
-                (int) (
-                    $keluarPerBulan[$key]->total
-                    ?? 0
-                );
-        }
-
-        /*
-         * ==========================================================
          * RETURN DASHBOARD ADMIN / PIMPINAN
          * ==========================================================
+         *
+         * Dashboard versi baru menggunakan donut chart berdasarkan
+         * total surat masuk dan total surat keluar. Karena data donut
+         * berasal dari dua total di atas, tidak diperlukan lagi query
+         * grafik 12 bulan dan tidak ada data chart yang di-reset ketika
+         * bulan berubah.
          */
 
         return view(
@@ -471,9 +307,6 @@ class DashboardController extends Controller
                 'listDisposisi',
                 'suratMasukTerbaru',
                 'riwayatSuratKeluar',
-                'chartLabels',
-                'chartDataMasuk',
-                'chartDataKeluar',
                 'isStaf'
             )
         );

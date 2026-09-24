@@ -73,8 +73,8 @@
         $statusCounts['total']
         ?? 0
     );
-    $suratBaru = (int) (
-        $statusCounts['baru']
+    $suratDiproses = (int) (
+        $statusCounts['diproses']
         ?? 0
     );
     $suratDidisposisikan = (int) (
@@ -83,6 +83,10 @@
     );
     $suratSelesai = (int) (
         $statusCounts['selesai']
+        ?? 0
+    );
+    $suratDiarsipkan = (int) (
+        $statusCounts['diarsipkan']
         ?? 0
     );
     /*
@@ -154,6 +158,34 @@
                         ) === 'didisposisikan'
                 )
                 ->count();
+        $suratDiproses =
+            $scorecardCollection
+                ->filter(
+                    fn ($item) =>
+                        strtolower(
+                            trim(
+                                (string) (
+                                    $item->status ??
+                                    ''
+                                )
+                            )
+                        ) === 'diproses'
+                )
+                ->count();
+        $suratDidisposisikan =
+            $scorecardCollection
+                ->filter(
+                    fn ($item) =>
+                        strtolower(
+                            trim(
+                                (string) (
+                                    $item->status ??
+                                    ''
+                                )
+                            )
+                        ) === 'didisposisikan'
+                )
+                ->count();
         $suratSelesai =
             $scorecardCollection
                 ->filter(
@@ -166,6 +198,20 @@
                                 )
                             )
                         ) === 'selesai'
+                )
+                ->count();
+        $suratDiarsipkan =
+            $scorecardCollection
+                ->filter(
+                    fn ($item) =>
+                        strtolower(
+                            trim(
+                                (string) (
+                                    $item->status ??
+                                    ''
+                                )
+                            )
+                        ) === 'diarsipkan'
                 )
                 ->count();
     }
@@ -346,6 +392,105 @@
     */
     $exportQuery =
         request()->query();
+    /*
+    |--------------------------------------------------------------------------
+    | RINGKASAN STATUS & KATEGORI
+    |--------------------------------------------------------------------------
+    */
+    $chartData = [
+        'Baru' => [
+            'value' => $suratBaru,
+            'color' => '#2563eb',
+        ],
+        'Diproses' => [
+            'value' => $suratDiproses,
+            'color' => '#d97706',
+        ],
+        'Didisposisikan' => [
+            'value' => $suratDidisposisikan,
+            'color' => '#7c3aed',
+        ],
+        'Selesai' => [
+            'value' => $suratSelesai,
+            'color' => '#059669',
+        ],
+        'Diarsipkan' => [
+            'value' => $suratDiarsipkan,
+            'color' => '#64748b',
+        ],
+    ];
+
+    $chartTotal = array_sum(
+        array_column($chartData, 'value')
+    );
+
+    $chartGradient = '#e2e8f0';
+    if ($chartTotal > 0) {
+        $parts = [];
+        $cursor = 0;
+        foreach ($chartData as $item) {
+            if ($item['value'] <= 0) {
+                continue;
+            }
+
+            $start = $cursor;
+            $cursor += (
+                $item['value'] /
+                $chartTotal
+            ) * 360;
+
+            $parts[] =
+                $item['color'] .
+                ' ' .
+                round($start, 2) .
+                'deg ' .
+                round($cursor, 2) .
+                'deg';
+        }
+
+        $chartGradient =
+            'conic-gradient(' .
+            implode(', ', $parts) .
+            ')';
+    }
+
+    $categorySummary = collect();
+
+    if (
+        isset($suratMasuks) &&
+        method_exists($suratMasuks, 'getCollection')
+    ) {
+        $categorySummary =
+            collect(
+                $suratMasuks->getCollection()
+            );
+    } elseif (isset($suratMasuks)) {
+        $categorySummary =
+            collect($suratMasuks);
+    }
+
+    $categorySummary = $categorySummary
+        ->map(
+            fn ($item) =>
+                trim(
+                    (string) (
+                        $item->kategori
+                            ?->nama_kategori
+                        ?? 'Tanpa Kategori'
+                    )
+                )
+        )
+        ->map(
+            fn ($name) =>
+                $name !== ''
+                    ? $name
+                    : 'Tanpa Kategori'
+        )
+        ->countBy()
+        ->sortDesc()
+        ->take(5);
+
+
 @endphp
 @push('styles')
 <style>
@@ -355,6 +500,7 @@
 .surat-page{
     min-width:0;
 }
+
 /* ==========================================================================
    HEADER
    ========================================================================== */
@@ -362,74 +508,46 @@
     display:flex;
     align-items:center;
     justify-content:space-between;
-    gap:20px;
-    margin-bottom:20px;
+    gap:24px;
+    margin-bottom:16px;
 }
+
 .surat-page-header-left{
     display:flex;
     align-items:center;
-    gap:16px;
+    gap:14px;
     min-width:0;
 }
+
 .surat-page-icon{
     display:flex;
     align-items:center;
     justify-content:center;
-    width:60px;
-    height:60px;
-    flex:0 0 60px;
-    border-radius:15px;
-    background:
-        linear-gradient(
-            135deg,
-            #dbeafe,
-            #eff6ff
-        );
+    width:54px;
+    height:54px;
+    flex:0 0 54px;
+    border-radius:16px;
+    background:linear-gradient(135deg,#dbeafe,#eff6ff);
     color:#2563eb;
+    box-shadow:inset 0 0 0 1px rgba(37,99,235,.05);
 }
+
 .surat-page-title{
     margin:0;
     color:#172554;
-    font-size:30px;
+    font-size:28px;
     font-weight:800;
     line-height:1.1;
     letter-spacing:-.025em;
 }
+
 .surat-page-description{
-    margin-top:5px;
+    margin-top:4px;
     color:#64748b;
-    font-size:14px;
+    font-size:13px;
     line-height:1.5;
 }
-.surat-create-button{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    gap:8px;
-    min-height:46px;
-    padding:0 20px;
-    border-radius:10px;
-    background:#2563eb;
-    color:#fff;
-    font-size:13px;
-    font-weight:700;
-    text-decoration:none;
-    box-shadow:
-        0 8px 20px
-        rgba(37,99,235,.20);
-    transition:
-        background .15s ease,
-        transform .15s ease,
-        box-shadow .15s ease;
-}
-.surat-create-button:hover{
-    background:#1d4ed8;
-    transform:
-        translateY(-1px);
-    box-shadow:
-        0 12px 25px
-        rgba(37,99,235,.25);
-}
+
 .surat-header-actions{
     display:flex;
     align-items:center;
@@ -437,206 +555,288 @@
     gap:8px;
     flex-wrap:wrap;
 }
-.surat-export-button{
+
+.surat-export-button,
+.surat-create-button{
     display:inline-flex;
     align-items:center;
     justify-content:center;
-    gap:6px;
+    gap:7px;
     min-height:40px;
     padding:0 13px;
-    border:1px solid #dbe4f0;
-    border-radius:10px;
-    background:#fff;
-    color:#475569;
+    border-radius:11px;
     font-size:11px;
     font-weight:700;
     line-height:1;
     text-decoration:none;
-    box-shadow:0 2px 8px rgba(15,23,42,.035);
-    transition:background .15s ease,border-color .15s ease,color .15s ease,transform .15s ease;
+    transition:
+        background .15s ease,
+        border-color .15s ease,
+        color .15s ease,
+        transform .15s ease,
+        box-shadow .15s ease;
 }
+
+.surat-export-button{
+    border:1px solid #dbe4f0;
+    background:#fff;
+    color:#475569;
+    box-shadow:0 2px 8px rgba(15,23,42,.035);
+}
+
 .surat-export-button:hover{
     transform:translateY(-1px);
 }
+
 .surat-export-button.excel:hover{
     border-color:#a7f3d0;
     background:#ecfdf5;
     color:#047857;
 }
+
 .surat-export-button.pdf:hover{
     border-color:#fecdd3;
     background:#fff1f2;
     color:#be123c;
 }
-.surat-header-actions .surat-create-button{
-    min-height:40px;
-    padding:0 13px;
-    font-size:11px;
-    gap:6px;
+
+.surat-create-button{
+    border:1px solid #2563eb;
+    background:#2563eb;
+    color:#fff;
+    box-shadow:0 8px 20px rgba(37,99,235,.18);
 }
+
+.surat-create-button:hover{
+    border-color:#1d4ed8;
+    background:#1d4ed8;
+    transform:translateY(-1px);
+    box-shadow:0 12px 24px rgba(37,99,235,.23);
+}
+
 /* ==========================================================================
-   SCORECARD
+   COMPACT SUMMARY
    ========================================================================== */
-.surat-stat-grid{
+.surat-summary{
     display:grid;
-    grid-template-columns:
-        repeat(
-            4,
-            minmax(0,1fr)
-        );
-    gap:16px;
-    margin-bottom:20px;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    margin-bottom:16px;
+    overflow:hidden;
+    border:1px solid #dbe4f0;
+    border-radius:14px;
+    background:#fff;
+    box-shadow:0 2px 10px rgba(15,23,42,.035);
 }
-.surat-stat-card{
+
+.surat-summary-item{
     position:relative;
     display:flex;
     align-items:center;
-    gap:15px;
-    min-height:124px;
-    padding:18px 20px;
-    overflow:hidden;
-    border:1px solid #dbe4f0;
-    border-radius:12px;
-    background:#fff;
-    box-shadow:
-        0 2px 8px
-        rgba(15,23,42,.035);
+    gap:11px;
+    min-width:0;
+    padding:14px 16px;
 }
-.surat-stat-icon{
+
+.surat-summary-item + .surat-summary-item{
+    border-left:1px solid #edf2f7;
+}
+
+.surat-summary-icon{
     display:flex;
     align-items:center;
     justify-content:center;
-    width:52px;
-    height:52px;
-    flex:0 0 52px;
-    border-radius:14px;
+    width:34px;
+    height:34px;
+    flex:0 0 34px;
+    border-radius:10px;
 }
-.surat-stat-icon.blue{
-    background:#eaf2ff;
-    color:#2563eb;
-}
-.surat-stat-icon.red{
-    background:#ffe9ec;
-    color:#e11d48;
-}
-.surat-stat-icon.amber{
-    background:#fff4dc;
-    color:#d97706;
-}
-.surat-stat-icon.green{
-    background:#dcf8ee;
-    color:#059669;
-}
-.surat-stat-content{
+
+.surat-summary-icon.blue{background:#eff6ff;color:#2563eb;}
+.surat-summary-icon.red{background:#fff1f2;color:#e11d48;}
+.surat-summary-icon.purple{background:#f5f3ff;color:#7c3aed;}
+.surat-summary-icon.green{background:#ecfdf5;color:#059669;}
+
+.surat-summary-text{
     min-width:0;
 }
-.surat-stat-label{
-    color:#64748b;
-    font-size:12px;
-    font-weight:600;
+
+.surat-summary-label{
+    color:#94a3b8;
+    font-size:10px;
+    font-weight:700;
 }
-.surat-stat-value{
-    margin-top:4px;
+
+.surat-summary-value{
+    margin-top:2px;
     color:#172033;
-    font-size:28px;
+    font-size:20px;
     font-weight:800;
     line-height:1;
 }
-.surat-stat-value.red{
-    color:#e11d48;
+
+.surat-summary-meta{
+    margin-top:3px;
+    color:#cbd5e1;
+    font-size:9px;
+    white-space:nowrap;
 }
-.surat-stat-description{
-    margin-top:7px;
+
+/* ==========================================================================
+   WORKSPACE
+   ========================================================================== */
+.surat-workspace{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 286px;
+    gap:16px;
+    align-items:start;
+}
+
+.surat-main-card{
+    min-width:0;
+    overflow:hidden;
+    border:1px solid #dbe4f0;
+    border-radius:16px;
+    background:#fff;
+    box-shadow:0 3px 14px rgba(15,23,42,.04);
+}
+
+.surat-main-card-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    padding:17px 20px 14px;
+    border-bottom:1px solid #edf2f7;
+}
+
+.surat-main-card-title-wrap{
+    display:flex;
+    align-items:center;
+    gap:11px;
+    min-width:0;
+}
+
+.surat-main-card-icon{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:38px;
+    height:38px;
+    flex:0 0 38px;
+    border-radius:11px;
+    background:#eff6ff;
+    color:#2563eb;
+}
+
+.surat-main-card-title{
+    margin:0;
+    color:#172033;
+    font-size:14px;
+    font-weight:800;
+}
+
+.surat-main-card-subtitle{
+    margin-top:2px;
     color:#94a3b8;
-    font-size:11px;
+    font-size:10px;
+    line-height:1.4;
 }
+
+.surat-sort-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    min-height:32px;
+    padding:0 10px;
+    border:1px solid #dbe4f0;
+    border-radius:9px;
+    background:#fff;
+    color:#475569;
+    font-size:10px;
+    font-weight:700;
+    white-space:nowrap;
+}
+
 /* ==========================================================================
    FILTER
    ========================================================================== */
-.surat-filter-card{
-    margin-bottom:14px;
-    padding:18px;
-    border:1px solid #dbe4f0;
-    border-radius:12px;
-    background:#fff;
-    box-shadow:
-        0 2px 10px
-        rgba(15,23,42,.035);
+.surat-main-card .surat-filter-card{
+    margin:0;
+    padding:15px 20px 16px;
+    border:0;
+    border-bottom:1px solid #edf2f7;
+    border-radius:0;
+    box-shadow:none;
 }
+
 .surat-filter-main{
     display:grid;
-    grid-template-columns:
-        minmax(0,1fr)
-        auto
-        290px;
-    gap:10px;
+    grid-template-columns:minmax(0,1fr) auto 250px;
+    gap:8px;
     align-items:center;
 }
+
 .surat-search-wrapper{
     position:relative;
     min-width:0;
 }
+
 .surat-search-icon{
     position:absolute;
     top:50%;
-    left:14px;
+    left:13px;
     z-index:2;
     display:flex;
     align-items:center;
     justify-content:center;
-    width:18px;
-    height:18px;
+    width:17px;
+    height:17px;
     color:#64748b;
-    transform:
-        translateY(-50%);
+    transform:translateY(-50%);
     pointer-events:none;
 }
+
 .surat-search-input{
     width:100%;
-    height:44px;
-    padding:
-        0
-        14px
-        0
-        43px;
+    height:40px;
+    padding:0 13px 0 40px;
     border:1px solid #d6e0ec;
     border-radius:10px;
     outline:none;
     background:#fff;
     color:#334155;
-    font-size:12px;
-    transition:
-        border-color .15s ease,
-        box-shadow .15s ease;
+    font-size:11px;
+    transition:border-color .15s ease,box-shadow .15s ease;
 }
+
 .surat-search-input::placeholder{
     color:#94a3b8;
 }
-.surat-search-input:hover{
+
+.surat-search-input:hover,
+.surat-date-input:hover{
     border-color:#b8c5d6;
 }
-.surat-search-input:focus{
+
+.surat-search-input:focus,
+.surat-date-input:focus{
     border-color:#3b82f6;
-    box-shadow:
-        0 0 0 3px
-        rgba(59,130,246,.10);
+    box-shadow:0 0 0 3px rgba(59,130,246,.10);
 }
-/* ==========================================================================
-   FILTER BUTTON
-   ========================================================================== */
+
 .surat-filter-submit{
     display:inline-flex;
     align-items:center;
     justify-content:center;
-    gap:7px;
-    height:44px;
-    min-width:112px;
-    padding:0 17px;
+    gap:6px;
+    height:40px;
+    min-width:96px;
+    padding:0 14px;
     border:1px solid #d6e0ec;
     border-radius:10px;
     background:#fff;
     color:#475569;
-    font-size:12px;
+    font-size:11px;
     font-weight:700;
     cursor:pointer;
     transition:
@@ -644,64 +844,51 @@
         border-color .15s ease,
         color .15s ease;
 }
+
 .surat-filter-submit:hover{
     border-color:#94a3b8;
     background:#f8fafc;
     color:#1e293b;
 }
+
 .surat-filter-submit.has-filter{
     border-color:#bfdbfe;
     background:#eff6ff;
     color:#2563eb;
 }
-/* ==========================================================================
-   DATE RANGE
-   ========================================================================== */
+
 .surat-date-wrapper{
     position:relative;
 }
+
 .surat-date-input{
     width:100%;
-    height:44px;
-    padding:
-        0
-        38px
-        0
-        42px;
+    height:40px;
+    padding:0 36px 0 39px;
     border:1px solid #d6e0ec;
     border-radius:10px;
     outline:none;
     background:#fff;
     color:#475569;
-    font-size:12px;
+    font-size:11px;
     font-weight:600;
     cursor:pointer;
-    transition:
-        border-color .15s ease,
-        box-shadow .15s ease;
+    transition:border-color .15s ease,box-shadow .15s ease;
 }
-.surat-date-input:hover{
-    border-color:#b8c5d6;
-}
-.surat-date-input:focus{
-    border-color:#3b82f6;
-    box-shadow:
-        0 0 0 3px
-        rgba(59,130,246,.10);
-}
+
 .surat-date-left-icon{
     position:absolute;
     top:50%;
-    left:14px;
+    left:13px;
     z-index:2;
     display:flex;
     align-items:center;
     justify-content:center;
     color:#64748b;
-    transform:
-        translateY(-50%);
+    transform:translateY(-50%);
     pointer-events:none;
 }
+
 .surat-date-clear{
     position:absolute;
     top:50%;
@@ -709,287 +896,524 @@
     display:none;
     align-items:center;
     justify-content:center;
-    width:34px;
-    height:34px;
+    width:31px;
+    height:31px;
     border:0;
     border-radius:8px;
     background:transparent;
     color:#94a3b8;
     cursor:pointer;
-    transform:
-        translateY(-50%);
+    transform:translateY(-50%);
 }
+
 .surat-date-clear:hover{
     background:#fff1f2;
     color:#e11d48;
 }
-/* ==========================================================================
-   DROPDOWN
-   ========================================================================== */
+
 .surat-filter-secondary{
     display:grid;
-    grid-template-columns:
-        repeat(
-            2,
-            minmax(0,1fr)
-        );
-    gap:10px;
-    margin-top:10px;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:8px;
+    margin-top:8px;
 }
-.surat-filter-dropdown{
-    position:relative;
-    min-width:0;
-}
+
 .surat-filter-trigger{
-    display:flex;
-    align-items:center;
-    width:100%;
-    min-height:48px;
-    gap:10px;
-    padding:
-        7px
-        12px;
-    border:1px solid #d6e0ec;
-    border-radius:10px;
-    background:#fff;
-    color:#334155;
-    text-align:left;
-    cursor:pointer;
-    transition:
-        border-color .15s ease,
-        background .15s ease,
-        box-shadow .15s ease;
+    min-height:44px;
 }
-.surat-filter-trigger:hover{
-    border-color:#b8c5d6;
-    background:#f8fafc;
-}
-.surat-filter-trigger.is-open,
-.surat-filter-trigger:focus{
-    outline:none;
-    border-color:#3b82f6;
-    box-shadow:
-        0 0 0 3px
-        rgba(59,130,246,.10);
-}
-.surat-filter-trigger.is-active{
-    border-color:#93c5fd;
-    background:#f8fbff;
-}
-.surat-filter-icon{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    width:32px;
-    height:32px;
-    flex:0 0 32px;
-    border-radius:8px;
-}
-.surat-filter-icon.category{
-    background:#eff6ff;
-    color:#2563eb;
-}
-.surat-filter-icon.status{
-    background:#fff7ed;
-    color:#d97706;
-}
-.surat-filter-trigger-content{
-    min-width:0;
-    flex:1;
-}
-.surat-filter-trigger-title{
-    display:block;
-    color:#334155;
-    font-size:11px;
-    font-weight:700;
-}
-.surat-filter-trigger-subtitle{
-    display:block;
-    margin-top:2px;
-    overflow:hidden;
-    color:#94a3b8;
-    font-size:9px;
-    line-height:1.2;
-    text-overflow:ellipsis;
-    white-space:nowrap;
-}
-.surat-filter-count{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    min-width:60px;
-    height:23px;
-    padding:0 8px;
-    border-radius:999px;
-    font-size:9px;
-    font-weight:700;
-    white-space:nowrap;
-}
-.surat-filter-count.category{
-    background:#eff6ff;
-    color:#2563eb;
-}
-.surat-filter-count.status{
-    background:#fff7ed;
-    color:#d97706;
-}
-.surat-filter-chevron{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    width:18px;
-    height:18px;
-    color:#64748b;
-    transition:
-        transform .2s ease;
-}
-.surat-filter-trigger.is-open
-.surat-filter-chevron{
-    transform:
-        rotate(180deg);
-}
-/* ==========================================================================
-   DROPDOWN MENU
-   ========================================================================== */
+
 .surat-filter-menu{
-    position:absolute;
-    top:calc(100% + 7px);
-    right:0;
-    left:0;
-    z-index:9998;
-    overflow:hidden;
-    border:1px solid #cbd5e1;
     border-radius:12px;
+}
+
+/* ==========================================================================
+   WORKSPACE SIDEBAR
+   ========================================================================== */
+.surat-sidebar{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    min-width:0;
+}
+
+.surat-side-card{
+    overflow:hidden;
+    border:1px solid #dbe4f0;
+    border-radius:16px;
     background:#fff;
-    box-shadow:
-        0 20px 45px
-        rgba(15,23,42,.15),
-        0 5px 15px
-        rgba(15,23,42,.06);
+    box-shadow:0 3px 14px rgba(15,23,42,.04);
 }
-.surat-filter-menu.hidden{
-    display:none!important;
-}
-.surat-filter-menu-header{
+
+.surat-side-card-header{
     display:flex;
     align-items:center;
-    justify-content:space-between;
-    gap:10px;
-    padding:
-        11px
-        12px;
-    border-bottom:1px solid #e2e8f0;
-    background:#f8fafc;
+    gap:9px;
+    padding:14px 15px;
+    border-bottom:1px solid #edf2f7;
 }
-.surat-filter-menu-title{
-    color:#334155;
+
+.surat-side-card-icon{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:30px;
+    height:30px;
+    flex:0 0 30px;
+    border-radius:9px;
+    background:#eff6ff;
+    color:#2563eb;
+}
+
+.surat-side-card-title{
+    color:#172033;
     font-size:11px;
     font-weight:800;
 }
-.surat-filter-menu-description{
-    margin-top:2px;
-    color:#94a3b8;
-    font-size:9px;
+
+.surat-side-card-content{
+    padding:15px;
 }
-.surat-filter-menu-actions{
-    display:flex;
-    gap:3px;
-}
-.surat-filter-action{
-    border:0;
-    border-radius:6px;
-    padding:
-        5px
-        7px;
-    background:transparent;
-    font-size:9px;
-    font-weight:700;
-    cursor:pointer;
-}
-.surat-filter-action.select{
-    color:#2563eb;
-}
-.surat-filter-action.select:hover{
-    background:#eff6ff;
-}
-.surat-filter-action.clear{
-    color:#64748b;
-}
-.surat-filter-action.clear:hover{
-    background:#f1f5f9;
-}
-.surat-filter-options{
-    display:grid;
-    grid-template-columns:
-        repeat(
-            2,
-            minmax(0,1fr)
-        );
-    gap:7px;
-    max-height:260px;
-    padding:10px;
-    overflow-y:auto;
-}
-.surat-filter-option{
+
+.surat-donut{
+    position:relative;
     display:flex;
     align-items:center;
-    min-height:38px;
-    gap:8px;
-    padding:
-        7px
-        9px;
-    border:1px solid #dbe3ed;
-    border-radius:8px;
+    justify-content:center;
+    width:142px;
+    height:142px;
+    margin:2px auto 14px;
+    border-radius:999px;
+    background:var(--donut);
+}
+
+.surat-donut::after{
+    content:'';
+    position:absolute;
+    inset:23px;
+    border-radius:999px;
     background:#fff;
-    cursor:pointer;
-    transition:
-        border-color .15s ease,
-        background .15s ease;
+    box-shadow:0 0 0 1px rgba(226,232,240,.8);
 }
-.surat-filter-option:hover,
-.surat-filter-option.is-selected{
-    border-color:#93c5fd;
-    background:#eff6ff;
+
+.surat-donut-center{
+    position:relative;
+    z-index:2;
+    text-align:center;
 }
-.surat-filter-option input{
-    width:15px;
-    height:15px;
-    margin:0;
-    accent-color:#2563eb;
-    cursor:pointer;
+
+.surat-donut-number{
+    color:#172033;
+    font-size:25px;
+    font-weight:800;
+    line-height:1;
 }
-.surat-filter-option-text{
+
+.surat-donut-label{
+    margin-top:4px;
+    color:#94a3b8;
+    font-size:8px;
+    font-weight:800;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+}
+
+.surat-legend{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+}
+
+.surat-legend-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+}
+
+.surat-legend-name{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    min-width:0;
+    color:#64748b;
+    font-size:9px;
+    font-weight:600;
+}
+
+.surat-legend-dot{
+    width:8px;
+    height:8px;
+    flex:0 0 8px;
+    border-radius:999px;
+}
+
+.surat-legend-value{
+    color:#334155;
+    font-size:10px;
+    font-weight:800;
+}
+
+.surat-category-list{
+    display:flex;
+    flex-direction:column;
+}
+
+.surat-category-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding:9px 0;
+    border-bottom:1px solid #f1f5f9;
+}
+
+.surat-category-row:last-child{
+    border-bottom:0;
+    padding-bottom:0;
+}
+
+.surat-category-row:first-child{
+    padding-top:0;
+}
+
+.surat-category-name{
     min-width:0;
     overflow:hidden;
     color:#475569;
-    font-size:10px;
+    font-size:9px;
     font-weight:600;
     text-overflow:ellipsis;
     white-space:nowrap;
 }
-.surat-filter-option.is-selected
-.surat-filter-option-text{
-    color:#1d4ed8;
-}
-.surat-filter-menu-footer{
-    display:flex;
+
+.surat-category-count{
+    display:inline-flex;
     align-items:center;
-    justify-content:space-between;
-    gap:8px;
-    padding:
-        8px
-        12px;
-    border-top:1px solid #e2e8f0;
-}
-.surat-filter-footer-count{
-    color:#64748b;
+    justify-content:center;
+    min-width:23px;
+    height:22px;
+    padding:0 7px;
+    border-radius:999px;
+    background:#eff6ff;
+    color:#2563eb;
     font-size:9px;
-    font-weight:600;
+    font-weight:800;
 }
-.surat-filter-footer-hint{
+
+.surat-side-empty{
+    padding:8px 0 2px;
     color:#94a3b8;
     font-size:9px;
+    line-height:1.5;
 }
+
+.surat-tip{
+    border:1px solid #dbeafe;
+    background:linear-gradient(135deg,#f8fbff,#eff6ff);
+}
+
+.surat-tip .surat-side-card-content{
+    display:flex;
+    align-items:flex-start;
+    gap:9px;
+}
+
+.surat-tip-icon{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:30px;
+    height:30px;
+    flex:0 0 30px;
+    border-radius:9px;
+    background:#dbeafe;
+    color:#2563eb;
+}
+
+.surat-tip-title{
+    color:#1e3a8a;
+    font-size:10px;
+    font-weight:800;
+}
+
+.surat-tip-text{
+    margin-top:3px;
+    color:#64748b;
+    font-size:9px;
+    line-height:1.5;
+}
+
+/* ==========================================================================
+   TABLE
+   ========================================================================== */
+.archive-table-wrapper{
+    overflow:hidden;
+    border:0;
+    border-radius:0;
+    background:#fff;
+    box-shadow:none;
+}
+
+.archive-table-scroll{
+    overflow-x:auto;
+}
+
+.archive-table{
+    width:100%;
+    min-width:930px;
+    border-collapse:collapse;
+    border-spacing:0;
+    background:#fff;
+}
+
+.archive-table thead{
+    background:#f8fafc;
+}
+
+.archive-table thead tr{
+    border-bottom:1px solid #e2e8f0;
+}
+
+.archive-table thead th{
+    padding:12px 13px;
+    color:#64748b;
+    font-size:8.5px;
+    font-weight:800;
+    letter-spacing:.04em;
+    line-height:1.3;
+    text-align:left;
+    text-transform:uppercase;
+    white-space:nowrap;
+}
+
+.archive-table thead th:first-child{
+    padding-left:20px;
+}
+
+.archive-table thead th:last-child{
+    text-align:center;
+}
+
+.archive-table tbody tr{
+    background:#fff;
+    transition:background-color .15s ease;
+}
+
+.archive-table tbody tr:hover{
+    background:#f8fbff;
+}
+
+.archive-table tbody td{
+    padding:13px;
+    border-bottom:1px solid #edf2f7;
+    color:#475569;
+    font-size:10px;
+    line-height:1.4;
+    vertical-align:middle;
+}
+
+.archive-table tbody td:first-child{
+    padding-left:20px;
+}
+
+.archive-table tbody tr:last-child td{
+    border-bottom:0;
+}
+
+.archive-table .cell-date{
+    color:#334155;
+    font-weight:700;
+    white-space:nowrap;
+}
+
+.archive-table .cell-sender{
+    color:#334155;
+}
+
+.archive-table .cell-subject{
+    color:#1e293b;
+    font-weight:700;
+}
+
+.archive-table .cell-category{
+    color:#64748b;
+}
+
+.archive-table .sender-name{
+    display:block;
+    max-width:190px;
+    overflow:hidden;
+    color:#334155;
+    font-weight:700;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+.archive-table .sender-email{
+    display:block;
+    max-width:190px;
+    margin-top:2px;
+    overflow:hidden;
+    color:#94a3b8;
+    font-size:8.5px;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+/* ==========================================================================
+   BADGES
+   ========================================================================== */
+.category-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    min-height:25px;
+    padding:0 8px;
+    border-radius:999px;
+    background:#eff6ff;
+    color:#2563eb;
+    font-size:8.5px;
+    font-weight:700;
+    white-space:nowrap;
+}
+
+.category-badge.education{
+    background:#dcf8ee;
+    color:#059669;
+}
+
+.category-badge.invitation{
+    background:#f0e9ff;
+    color:#7c3aed;
+}
+
+.category-badge.report{
+    background:#fff0d7;
+    color:#d97706;
+}
+
+.status-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    min-height:25px;
+    padding:0 8px;
+    border-radius:999px;
+    font-size:8.5px;
+    font-weight:800;
+    white-space:nowrap;
+}
+
+.status-dot{
+    width:6px;
+    height:6px;
+    border-radius:999px;
+    background:currentColor;
+}
+
+.status-baru{
+    background:#eaf2ff;
+    color:#2563eb;
+}
+
+.status-diproses{
+    background:#fff4dc;
+    color:#d97706;
+}
+
+.status-didisposisikan{
+    background:#f0e9ff;
+    color:#7c3aed;
+}
+
+.status-selesai{
+    background:#dcf8ee;
+    color:#059669;
+}
+
+.status-diarsipkan{
+    background:#f1f5f9;
+    color:#64748b;
+}
+
+/* ==========================================================================
+   ACTIONS
+   ========================================================================== */
+.action-cell{
+    width:118px;
+    text-align:center!important;
+    white-space:nowrap;
+}
+
+.action-buttons{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:4px;
+}
+
+.action-button{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:34px;
+    height:34px;
+    border:1px solid #e2e8f0;
+    border-radius:9px;
+    background:#fff;
+    color:#64748b;
+    transition:
+        background .15s ease,
+        color .15s ease,
+        border-color .15s ease;
+}
+
+.action-button:hover{
+    border-color:#bfdbfe;
+    background:#eff6ff;
+    color:#2563eb;
+}
+
+.action-button.edit:hover{
+    border-color:#fde68a;
+    background:#fffbeb;
+    color:#d97706;
+}
+
+.action-button.delete:hover{
+    border-color:#fecdd3;
+    background:#fff1f2;
+    color:#e11d48;
+}
+
+/* ==========================================================================
+   EMPTY
+   ========================================================================== */
+.archive-table-empty{
+    padding:48px 20px!important;
+    text-align:center;
+}
+
+.archive-empty-icon{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:54px;
+    height:54px;
+    margin:0 auto 12px;
+    border-radius:16px;
+    background:#f1f5f9;
+    color:#94a3b8;
+}
+
+/* ==========================================================================
+   PAGINATION
+   ========================================================================== */
+.archive-pagination{
+    padding:11px 20px 13px;
+    border-top:1px solid #edf2f7;
+}
+
 /* ==========================================================================
    DATE PICKER
    ========================================================================== */
@@ -998,40 +1422,38 @@
     border:1px solid #cbd5e1;
     background:#fff;
     box-shadow:
-        0 24px 70px
-        rgba(15,23,42,.18),
-        0 8px 25px
-        rgba(15,23,42,.08);
+        0 24px 70px rgba(15,23,42,.18),
+        0 8px 25px rgba(15,23,42,.08);
 }
+
 .custom-date-picker{
     position:fixed;
     z-index:999999;
     width:720px;
-    max-width:
-        calc(100vw - 20px);
+    max-width:calc(100vw - 20px);
     overflow:hidden;
     border-radius:14px;
 }
+
 .custom-date-picker.hidden,
 .custom-picker-panel.hidden{
     display:none!important;
 }
+
 .custom-date-picker-header{
     display:flex;
     align-items:center;
     justify-content:space-between;
-    padding:
-        11px
-        14px;
-    border-bottom:
-        1px solid
-        #e2e8f0;
+    padding:11px 14px;
+    border-bottom:1px solid #e2e8f0;
 }
+
 .custom-date-picker-title{
     color:#334155;
     font-size:12px;
     font-weight:800;
 }
+
 .custom-date-picker-close,
 .custom-picker-panel-close{
     display:flex;
@@ -1042,36 +1464,33 @@
     color:#64748b;
     cursor:pointer;
 }
+
 .custom-date-picker-close{
     width:30px;
     height:30px;
     border-radius:8px;
     font-size:18px;
 }
+
 .custom-date-picker-close:hover,
 .custom-picker-panel-close:hover{
     background:#f1f5f9;
     color:#ef4444;
 }
+
 .custom-date-picker-calendars{
     display:grid;
-    grid-template-columns:
-        repeat(
-            2,
-            minmax(0,1fr)
-        );
+    grid-template-columns:repeat(2,minmax(0,1fr));
 }
+
 .custom-calendar{
-    padding:
-        13px
-        15px
-        11px;
+    padding:13px 15px 11px;
 }
+
 .custom-calendar+.custom-calendar{
-    border-left:
-        1px solid
-        #e2e8f0;
+    border-left:1px solid #e2e8f0;
 }
+
 .custom-calendar-head{
     display:flex;
     align-items:center;
@@ -1080,6 +1499,7 @@
     min-height:38px;
     margin-bottom:5px;
 }
+
 .custom-calendar-month-buttons{
     display:flex;
     align-items:center;
@@ -1087,6 +1507,7 @@
     flex:1;
     gap:4px;
 }
+
 .custom-calendar-nav{
     display:flex;
     align-items:center;
@@ -1101,10 +1522,12 @@
     font-size:21px;
     cursor:pointer;
 }
+
 .custom-calendar-nav:hover{
     background:#eff6ff;
     color:#2563eb;
 }
+
 .custom-calendar-month,
 .custom-calendar-year{
     display:inline-flex;
@@ -1114,9 +1537,7 @@
     min-height:32px;
     border:1px solid #dbe3ed;
     border-radius:8px;
-    padding:
-        6px
-        9px;
+    padding:6px 9px;
     background:#f8fafc;
     color:#334155;
     font-family:inherit;
@@ -1124,42 +1545,36 @@
     font-weight:800;
     cursor:pointer;
 }
+
 .custom-calendar-month:hover,
 .custom-calendar-year:hover{
     border-color:#93c5fd;
     background:#eff6ff;
     color:#2563eb;
 }
+
 .custom-calendar-month::after,
 .custom-calendar-year::after{
     content:'';
     width:6px;
     height:6px;
     margin-top:-3px;
-    border-right:
-        1.5px
-        solid
-        currentColor;
-    border-bottom:
-        1.5px
-        solid
-        currentColor;
-    transform:
-        rotate(45deg);
+    border-right:1.5px solid currentColor;
+    border-bottom:1.5px solid currentColor;
+    transform:rotate(45deg);
 }
+
 .custom-calendar-weekdays,
 .custom-calendar-days{
     display:grid;
-    grid-template-columns:
-        repeat(
-            7,
-            minmax(0,1fr)
-        );
+    grid-template-columns:repeat(7,minmax(0,1fr));
     gap:2px;
 }
+
 .custom-calendar-weekdays{
     margin-bottom:3px;
 }
+
 .custom-calendar-weekday{
     display:flex;
     align-items:center;
@@ -1169,6 +1584,7 @@
     font-size:9px;
     font-weight:800;
 }
+
 .custom-calendar-day{
     display:flex;
     align-items:center;
@@ -1183,68 +1599,65 @@
     font-weight:600;
     cursor:pointer;
 }
+
 .custom-calendar-day:hover{
     background:#eff6ff;
     color:#2563eb;
 }
+
 .custom-calendar-day.other-month{
     color:#cbd5e1;
 }
+
 .custom-calendar-day.today{
-    box-shadow:
-        inset 0 0 0 1px
-        #93c5fd;
+    box-shadow:inset 0 0 0 1px #93c5fd;
     color:#2563eb;
 }
+
 .custom-calendar-day.in-range{
     border-radius:0;
     background:#eff6ff;
     color:#2563eb;
 }
+
 .custom-calendar-day.range-start{
-    border-radius:
-        999px
-        0
-        0
-        999px;
+    border-radius:999px 0 0 999px;
     background:#2563eb;
     color:#fff;
 }
+
 .custom-calendar-day.range-end{
-    border-radius:
-        0
-        999px
-        999px
-        0;
+    border-radius:0 999px 999px 0;
     background:#2563eb;
     color:#fff;
 }
+
 .custom-calendar-day.range-start.range-end{
     border-radius:999px;
 }
+
 .custom-date-picker-footer{
     display:flex;
     align-items:center;
     justify-content:space-between;
     gap:10px;
-    padding:
-        10px
-        12px;
-    border-top:
-        1px solid
-        #e2e8f0;
+    padding:10px 12px;
+    border-top:1px solid #e2e8f0;
 }
+
 .custom-date-picker-selected{
     min-width:0;
     color:#64748b;
     font-size:10px;
     font-weight:700;
 }
+
 .custom-date-picker-actions{
     display:flex;
     align-items:center;
     gap:6px;
 }
+
 .custom-date-picker-button{
     height:34px;
     border:1px solid #dbe3ed;
@@ -1257,26 +1670,30 @@
     font-weight:700;
     cursor:pointer;
 }
+
 .custom-date-picker-button:hover{
     background:#f1f5f9;
 }
+
 .custom-date-picker-button.apply{
     border-color:#2563eb;
     background:#2563eb;
     color:#fff;
 }
+
 .custom-date-picker-button.apply:hover{
     background:#1d4ed8;
 }
+
 .custom-picker-panel{
     position:fixed;
     z-index:1000000;
     width:310px;
-    max-width:
-        calc(100vw - 20px);
+    max-width:calc(100vw - 20px);
     padding:12px;
     border-radius:12px;
 }
+
 .custom-picker-panel-header{
     display:flex;
     align-items:center;
@@ -1284,10 +1701,9 @@
     gap:8px;
     margin-bottom:10px;
     padding-bottom:9px;
-    border-bottom:
-        1px solid
-        #e2e8f0;
+    border-bottom:1px solid #e2e8f0;
 }
+
 .custom-picker-panel-title{
     flex:1;
     color:#334155;
@@ -1295,31 +1711,28 @@
     font-weight:800;
     text-align:center;
 }
+
 .custom-picker-panel-close{
     width:28px;
     height:28px;
     border-radius:7px;
     font-size:17px;
 }
+
 .custom-picker-month-grid,
 .custom-picker-year-grid{
     display:grid;
     gap:7px;
 }
+
 .custom-picker-month-grid{
-    grid-template-columns:
-        repeat(
-            3,
-            1fr
-        );
+    grid-template-columns:repeat(3,1fr);
 }
+
 .custom-picker-year-grid{
-    grid-template-columns:
-        repeat(
-            4,
-            1fr
-        );
+    grid-template-columns:repeat(4,1fr);
 }
+
 .custom-picker-option{
     display:flex;
     align-items:center;
@@ -1334,29 +1747,33 @@
     font-weight:700;
     cursor:pointer;
 }
+
 .custom-picker-option:hover{
     border-color:#93c5fd;
     background:#eff6ff;
     color:#2563eb;
 }
+
 .custom-picker-option.active{
     border-color:#2563eb;
     background:#2563eb;
     color:#fff;
 }
+
 .custom-picker-option.current{
-    box-shadow:
-        inset 0 0 0 1px
-        #93c5fd;
+    box-shadow:inset 0 0 0 1px #93c5fd;
 }
+
 .custom-picker-option.active.current{
     box-shadow:none;
 }
+
 .custom-picker-year-navigation{
     display:flex;
     align-items:center;
     gap:4px;
 }
+
 .custom-picker-year-nav{
     display:flex;
     align-items:center;
@@ -1369,439 +1786,340 @@
     color:#64748b;
     cursor:pointer;
 }
+
 .custom-picker-year-nav:hover{
     background:#eff6ff;
     color:#2563eb;
 }
-/* ==========================================================================
-   TABLE
-   ========================================================================== */
-.archive-table-wrapper{
-    overflow:hidden;
-    border:1px solid #dbe4f0;
-    border-radius:12px;
-    background:#fff;
-    box-shadow:
-        0 2px 10px
-        rgba(15,23,42,.035);
-}
-.archive-table-scroll{
-    overflow-x:auto;
-}
-.archive-table{
-    width:100%;
-    min-width:1000px;
-    border-collapse:collapse;
-    border-spacing:0;
-    background:#fff;
-}
-.archive-table thead{
-    background:#f8fafc;
-}
-.archive-table thead tr{
-    border-bottom:
-        1px solid
-        #e2e8f0;
-}
-.archive-table thead th{
-    padding:
-        14px
-        16px;
-    border-bottom:
-        1px solid
-        #e2e8f0;
-    color:#64748b;
-    font-size:9px;
-    font-weight:800;
-    letter-spacing:.04em;
-    line-height:1.3;
-    text-align:left;
-    text-transform:uppercase;
-    white-space:nowrap;
-}
-.archive-table thead th:first-child{
-    padding-left:22px;
-}
-.archive-table thead th:last-child{
-    text-align:center;
-}
-.archive-table tbody tr{
-    background:#fff;
-    transition:
-        background-color .15s ease;
-}
-.archive-table tbody tr:hover{
-    background:#f8fbff;
-}
-.archive-table tbody td{
-    padding:
-        14px
-        16px;
-    border-bottom:
-        1px solid
-        #edf2f7;
-    color:#475569;
-    font-size:11px;
-    line-height:1.4;
-    vertical-align:middle;
-}
-.archive-table tbody td:first-child{
-    padding-left:22px;
-}
-.archive-table tbody tr:last-child td{
-    border-bottom:0;
-}
-.archive-table .cell-date{
-    color:#334155;
-    font-weight:700;
-    white-space:nowrap;
-}
-.archive-table .cell-sender{
-    color:#334155;
-}
-.archive-table .cell-subject{
-    color:#1e293b;
-    font-weight:700;
-}
-.archive-table .cell-category{
-    color:#64748b;
-}
-.archive-table .sender-name{
-    display:block;
-    max-width:220px;
-    overflow:hidden;
-    color:#334155;
-    font-weight:700;
-    text-overflow:ellipsis;
-    white-space:nowrap;
-}
-.archive-table .sender-email{
-    display:block;
-    max-width:220px;
-    margin-top:2px;
-    overflow:hidden;
-    color:#94a3b8;
-    font-size:9px;
-    text-overflow:ellipsis;
-    white-space:nowrap;
-}
-/* ==========================================================================
-   CATEGORY BADGE
-   ========================================================================== */
-.category-badge{
-    display:inline-flex;
-    align-items:center;
-    gap:6px;
-    min-height:28px;
-    padding:
-        0
-        10px;
-    border-radius:999px;
-    background:#eff6ff;
-    color:#2563eb;
-    font-size:9px;
-    font-weight:700;
-    white-space:nowrap;
-}
-.category-badge.education{
-    background:#dcf8ee;
-    color:#059669;
-}
-.category-badge.invitation{
-    background:#f0e9ff;
-    color:#7c3aed;
-}
-.category-badge.report{
-    background:#fff0d7;
-    color:#d97706;
-}
-/* ==========================================================================
-   STATUS BADGE
-   ========================================================================== */
-.status-badge{
-    display:inline-flex;
-    align-items:center;
-    gap:6px;
-    min-height:28px;
-    padding:
-        0
-        10px;
-    border-radius:999px;
-    font-size:9px;
-    font-weight:800;
-    white-space:nowrap;
-}
-.status-dot{
-    width:7px;
-    height:7px;
-    border-radius:999px;
-    background:
-        currentColor;
-}
-.status-baru{
-    background:#eaf2ff;
-    color:#2563eb;
-}
-.status-diproses{
-    background:#fff4dc;
-    color:#d97706;
-}
-.status-didisposisikan{
-    background:#f0e9ff;
-    color:#7c3aed;
-}
-.status-selesai{
-    background:#dcf8ee;
-    color:#059669;
-}
-.status-diarsipkan{
-    background:#f1f5f9;
-    color:#64748b;
-}
-/* ==========================================================================
-   ACTION
-   ========================================================================== */
-.action-cell{
-    width:130px;
-    text-align:center!important;
-    white-space:nowrap;
-}
-.action-buttons{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    gap:5px;
-}
-.action-button{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    width:38px;
-    height:38px;
-    border:1px solid #e2e8f0;
-    border-radius:9px;
-    background:#fff;
-    color:#64748b;
-    transition:
-        background .15s ease,
-        color .15s ease,
-        border-color .15s ease;
-}
-.action-button:hover{
-    border-color:#bfdbfe;
-    background:#eff6ff;
-    color:#2563eb;
-}
-.action-button.edit:hover{
-    border-color:#fde68a;
-    background:#fffbeb;
-    color:#d97706;
-}
-.action-button.delete:hover{
-    border-color:#fecdd3;
-    background:#fff1f2;
-    color:#e11d48;
-}
-/* ==========================================================================
-   EMPTY
-   ========================================================================== */
-.archive-table-empty{
-    padding:
-        55px
-        20px!important;
-    text-align:center;
-}
-.archive-empty-icon{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    width:56px;
-    height:56px;
-    margin:
-        0
-        auto
-        12px;
-    border-radius:16px;
-    background:#f1f5f9;
-    color:#94a3b8;
-}
-/* ==========================================================================
-   PAGINATION
-   ========================================================================== */
-.archive-pagination{
-    padding:
-        12px
-        20px;
-    border-top:
-        1px solid
-        #e2e8f0;
-}
+
 /* ==========================================================================
    RESPONSIVE
    ========================================================================== */
 @media(max-width:1100px){
-    .surat-stat-grid{
-        grid-template-columns:
-            repeat(
-                2,
-                minmax(0,1fr)
-            );
+    .surat-workspace{
+        grid-template-columns:minmax(0,1fr);
     }
+
+    .surat-sidebar{
+        display:grid;
+        grid-template-columns:repeat(2,minmax(0,1fr));
+    }
+
+    .surat-tip{
+        grid-column:1/-1;
+    }
+
     .surat-filter-main{
-        grid-template-columns:
-            minmax(0,1fr)
-            auto;
+        grid-template-columns:minmax(0,1fr) auto;
     }
+
     .surat-date-wrapper{
         grid-column:1/-1;
     }
+
+    .surat-summary{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+    }
+
+    .surat-summary-item:nth-child(3){
+        border-left:0;
+        border-top:1px solid #edf2f7;
+    }
+
+    .surat-summary-item:nth-child(4){
+        border-top:1px solid #edf2f7;
+    }
 }
+
 @media(max-width:767px){
     .surat-page-header{
         align-items:flex-start;
         flex-direction:column;
+        gap:12px;
     }
+
     .surat-page-header-left{
         width:100%;
     }
+
     .surat-header-actions{
         width:100%;
-        gap:6px;
-        flex-wrap:nowrap;
     }
+
     .surat-header-actions .surat-export-button,
     .surat-header-actions .surat-create-button{
         flex:1 1 0;
-        width:auto;
         min-width:0;
         padding:0 9px;
         font-size:10px;
     }
+
     .surat-page-title{
         font-size:24px;
     }
+
     .surat-page-description{
-        font-size:12px;
+        font-size:11px;
     }
-    .surat-stat-grid{
-        grid-template-columns:
-            1fr
-            1fr;
-        gap:10px;
+
+    .surat-summary{
+        grid-template-columns:1fr 1fr;
     }
-    .surat-stat-card{
-        min-height:105px;
-        padding:13px;
-        gap:10px;
-    }
-    .surat-stat-icon{
-        width:42px;
-        height:42px;
-        flex-basis:42px;
-    }
-    .surat-stat-value{
-        font-size:22px;
-    }
-    .surat-stat-label{
-        font-size:10px;
-    }
-    .surat-stat-description{
-        font-size:9px;
-    }
-    .surat-filter-card{
+
+    .surat-summary-item{
         padding:12px;
     }
+
+    .surat-summary-item + .surat-summary-item{
+        border-left:1px solid #edf2f7;
+    }
+
+    .surat-summary-item:nth-child(odd){
+        border-left:0;
+    }
+
+    .surat-summary-item:nth-child(n+3){
+        border-top:1px solid #edf2f7;
+    }
+
+    .surat-summary-icon{
+        width:31px;
+        height:31px;
+        flex-basis:31px;
+    }
+
+    .surat-summary-value{
+        font-size:18px;
+    }
+
+    .surat-summary-meta{
+        display:none;
+    }
+
+    .surat-main-card-header{
+        padding:14px;
+    }
+
+    .surat-main-card-title{
+        font-size:13px;
+    }
+
+    .surat-main-card-subtitle{
+        font-size:9px;
+    }
+
+    .surat-sort-badge{
+        display:none;
+    }
+
+    .surat-main-card .surat-filter-card{
+        padding:12px;
+    }
+
     .surat-filter-main{
         grid-template-columns:1fr;
     }
+
     .surat-filter-submit{
         width:100%;
     }
+
     .surat-filter-secondary{
         grid-template-columns:1fr;
     }
+
     .surat-filter-menu{
         position:fixed;
         top:50%;
         right:auto;
         left:50%;
-        width:
-            calc(100vw - 24px);
+        width:calc(100vw - 24px);
         max-width:430px;
-        transform:
-            translate(
-                -50%,
-                -50%
-            );
+        transform:translate(-50%,-50%);
     }
+
     .surat-filter-options{
         max-height:55vh;
     }
+
+    .archive-table-scroll{
+        overflow:visible;
+    }
+
+    .archive-table{
+        min-width:0;
+        width:100%;
+    }
+
+    .archive-table thead{
+        display:none;
+    }
+
+    .archive-table,
+    .archive-table tbody,
+    .archive-table tr,
+    .archive-table td{
+        display:block;
+        width:100%;
+    }
+
+    .archive-table tbody tr{
+        margin:0;
+        padding:10px 12px;
+        border-bottom:1px solid #edf2f7;
+        background:#fff;
+    }
+
+    .archive-table tbody tr:last-child{
+        border-bottom:0;
+    }
+
+    .archive-table tbody td,
+    .archive-table tbody td:first-child{
+        display:grid;
+        grid-template-columns:88px minmax(0,1fr);
+        gap:10px;
+        align-items:center;
+        padding:6px 0;
+        border-bottom:0;
+        font-size:10px;
+    }
+
+    .archive-table tbody td::before{
+        content:attr(data-label);
+        color:#94a3b8;
+        font-size:8px;
+        font-weight:800;
+        letter-spacing:.03em;
+        text-transform:uppercase;
+    }
+
+    .archive-table tbody td.action-cell{
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        width:100%;
+        padding-top:8px;
+        margin-top:4px;
+        border-top:1px solid #f1f5f9;
+    }
+
+    .archive-table tbody td.action-cell::before{
+        content:attr(data-label);
+    }
+
+    .action-buttons{
+        margin-left:auto;
+    }
+
+    .archive-table .sender-name,
+    .archive-table .sender-email{
+        max-width:none;
+    }
+
+    .cell-subject{
+        max-width:none!important;
+        white-space:normal!important;
+    }
+
+    .surat-sidebar{
+        display:flex;
+        flex-direction:column;
+    }
+
+    .surat-side-card{
+        border-radius:14px;
+    }
+
+    .surat-donut{
+        width:130px;
+        height:130px;
+    }
+
     .custom-date-picker{
         top:50%;
         left:50%;
-        width:
-            calc(100vw - 16px);
-        max-height:
-            calc(100vh - 16px);
+        width:calc(100vw - 16px);
+        max-height:calc(100vh - 16px);
         overflow-y:auto;
-        transform:
-            translate(
-                -50%,
-                -50%
-            );
+        transform:translate(-50%,-50%);
     }
+
     .custom-date-picker-calendars{
         grid-template-columns:1fr;
     }
+
     .custom-calendar+.custom-calendar{
-        border-top:
-            1px solid
-            #e2e8f0;
+        border-top:1px solid #e2e8f0;
         border-left:0;
     }
+
     .custom-calendar-day{
         height:38px;
     }
+
     .custom-picker-panel{
         top:50%!important;
         left:50%!important;
-        width:
-            calc(100vw - 24px);
-        transform:
-            translate(
-                -50%,
-                -50%
-            );
+        width:calc(100vw - 24px);
+        transform:translate(-50%,-50%);
     }
+
     .custom-date-picker-footer{
         position:sticky;
         bottom:0;
         background:#fff;
     }
+
     body.date-picker-lock{
         overflow:hidden;
     }
 }
+
 @media(max-width:480px){
-    .surat-stat-grid{
-        grid-template-columns:1fr;
-    }
-    .surat-filter-options{
-        grid-template-columns:1fr;
-    }
-    .surat-page-header-left{
-        gap:11px;
-    }
     .surat-page-icon{
-        width:48px;
-        height:48px;
-        flex-basis:48px;
+        width:46px;
+        height:46px;
+        flex-basis:46px;
+    }
+
+    .surat-header-actions{
+        display:grid;
+        grid-template-columns:1fr 1fr;
+    }
+
+    .surat-summary{
+        grid-template-columns:1fr;
+    }
+
+    .surat-summary-item,
+    .surat-summary-item + .surat-summary-item{
+        border-left:0;
+    }
+
+    .surat-summary-item + .surat-summary-item{
+        border-top:1px solid #edf2f7;
+    }
+
+    .surat-main-card-title-wrap{
+        align-items:flex-start;
+    }
+
+    .surat-main-card-icon{
+        width:34px;
+        height:34px;
+        flex-basis:34px;
+    }
+
+    .surat-main-card-subtitle{
+        display:none;
     }
 }
 </style>
 @endpush
+
 <div class="surat-page space-y-4">
+
     {{-- =====================================================================
          HEADER
     ====================================================================== --}}
@@ -1911,159 +2229,124 @@
             @endif
         </div>
     </div>
-    {{-- =====================================================================
-         SCORECARD
-    ====================================================================== --}}
-    <div class="surat-stat-grid">
-        {{-- TOTAL --}}
-        <div class="surat-stat-card">
-            <div class="surat-stat-icon blue">
-                <svg
-                    class="h-6 w-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M7 4h10a2 2 0 012 2v12a2 2 0 01-2 2H7a2 2 0 01-2-2V6a2 2 0 012-2z"
-                    />
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M9 8h6M9 12h6M9 16h4"
-                    />
+
+    <div class="surat-summary">
+        <div class="surat-summary-item">
+            <div class="surat-summary-icon blue">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M7 4h10a2 2 0 012 2v12a2 2 0 01-2 2H7a2 2 0 01-2-2V6a2 2 0 012-2z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 8h6M9 12h6M9 16h4"/>
                 </svg>
             </div>
-            <div class="surat-stat-content">
-                <div class="surat-stat-label">
-                    Total Surat Masuk
-                </div>
-                <div class="surat-stat-value">
-                    {{ number_format($totalSuratMasuk) }}
-                </div>
-                <div class="surat-stat-description">
-                    Semua surat masuk
-                </div>
+            <div class="surat-summary-text">
+                <div class="surat-summary-label">Total Surat Masuk</div>
+                <div class="surat-summary-value">{{ number_format($totalSuratMasuk) }}</div>
+                <div class="surat-summary-meta">Semua arsip</div>
             </div>
         </div>
-        {{-- BARU --}}
-        <div class="surat-stat-card">
-            <div class="surat-stat-icon red">
-                <svg
-                    class="h-6 w-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M3 8l9 6 9-6"
-                    />
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                    />
+        <div class="surat-summary-item">
+            <div class="surat-summary-icon red">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 8l9 6 9-6"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                 </svg>
             </div>
-            <div class="surat-stat-content">
-                <div class="surat-stat-label">
-                    Surat Baru
-                </div>
-                <div class="surat-stat-value red">
-                    {{ number_format($suratBaru) }}
-                </div>
-                <div class="surat-stat-description">
-                    Perlu dicek
-                </div>
+            <div class="surat-summary-text">
+                <div class="surat-summary-label">Surat Baru</div>
+                <div class="surat-summary-value">{{ number_format($suratBaru) }}</div>
+                <div class="surat-summary-meta">Perlu dicek</div>
             </div>
         </div>
-        {{-- DIDISPOSISIKAN --}}
-        <div class="surat-stat-card">
-            <div class="surat-stat-icon amber">
-                <svg
-                    class="h-6 w-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                >
-                    <circle
-                        cx="12"
-                        cy="12"
-                        r="9"
-                        stroke-width="2"
-                    />
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M12 7v5l3 2"
-                    />
+        <div class="surat-summary-item">
+            <div class="surat-summary-icon purple">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zm8-1a3 3 0 100-6m3 17v-2a4 4 0 00-3-3.87"/>
                 </svg>
             </div>
-            <div class="surat-stat-content">
-                <div class="surat-stat-label">
-                    Didisposisikan
-                </div>
-                <div class="surat-stat-value">
-                    {{ number_format($suratDidisposisikan) }}
-                </div>
-                <div class="surat-stat-description">
-                    Sudah didisposisikan
-                </div>
+            <div class="surat-summary-text">
+                <div class="surat-summary-label">Didisposisikan</div>
+                <div class="surat-summary-value">{{ number_format($suratDidisposisikan) }}</div>
+                <div class="surat-summary-meta">Sudah diteruskan</div>
             </div>
         </div>
-        {{-- SELESAI --}}
-        <div class="surat-stat-card">
-            <div class="surat-stat-icon green">
-                <svg
-                    class="h-6 w-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                >
-                    <circle
-                        cx="12"
-                        cy="12"
-                        r="9"
-                        stroke-width="2"
-                    />
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M8 12l2.5 2.5L16 9"
-                    />
+        <div class="surat-summary-item">
+            <div class="surat-summary-icon green">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.8"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8.5 12.5l2.4 2.4 4.7-5"/>
                 </svg>
             </div>
-            <div class="surat-stat-content">
-                <div class="surat-stat-label">
-                    Selesai
-                </div>
-                <div class="surat-stat-value">
-                    {{ number_format($suratSelesai) }}
-                </div>
-                <div class="surat-stat-description">
-                    Telah ditindaklanjuti
-                </div>
+            <div class="surat-summary-text">
+                <div class="surat-summary-label">Selesai</div>
+                <div class="surat-summary-value">{{ number_format($suratSelesai) }}</div>
+                <div class="surat-summary-meta">Telah ditindaklanjuti</div>
             </div>
         </div>
     </div>
-    {{-- =====================================================================
-         FILTER
-    ====================================================================== --}}
-    <div class="surat-filter-card">
+
+
+<div class="surat-workspace">
+    <div class="surat-main-card">
+        <div class="surat-main-card-header">
+            <div class="surat-main-card-title-wrap">
+                <div class="surat-main-card-icon">
+                    <svg
+                        class="h-5 w-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="1.8"
+                            d="M6 4h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2z"
+                        />
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="1.8"
+                            d="M8 9h8M8 13h8M8 17h5"
+                        />
+                    </svg>
+                </div>
+                <div class="min-w-0">
+                    <h2 class="surat-main-card-title">
+                        Daftar Surat Masuk
+                    </h2>
+                    <p class="surat-main-card-subtitle">
+                        Menampilkan surat masuk sesuai filter yang dipilih.
+                    </p>
+                </div>
+            </div>
+
+            <div class="surat-sort-badge">
+                <svg
+                    class="h-3.5 w-3.5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="1.8"
+                        d="M8 6h12M8 12h8M8 18h5"
+                    />
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="1.8"
+                        d="M4 6v12m0 0l-2-2m2 2l2-2"
+                    />
+                </svg>
+                Terbaru
+            </div>
+        </div>
+
+            <div class="surat-filter-card">
         <form
             id="filterForm"
             method="GET"
@@ -2460,7 +2743,8 @@
             </div>
         </form>
     </div>
-    {{-- =====================================================================
+
+            {{-- =====================================================================
          TABLE
     ====================================================================== --}}
     <div class="archive-table-wrapper">
@@ -2584,13 +2868,13 @@
                         @endphp
                         <tr>
                             {{-- TANGGAL --}}
-                            <td class="cell-date">
+                            <td class="cell-date" data-label="Tanggal">
                                 <div>
                                     {{ $tanggalTerima }}
                                 </div>
                             </td>
                             {{-- PENGIRIM --}}
-                            <td class="cell-sender">
+                            <td class="cell-sender" data-label="Pengirim">
                                 <span
                                     class="sender-name"
                                     title="{{ $surat->pengirim ?? '-' }}"
@@ -2612,7 +2896,7 @@
                                 @endif
                             </td>
                             {{-- PERIHAL --}}
-                            <td>
+                            <td data-label="Perihal">
                                 <div
                                     class="cell-subject max-w-[280px] truncate"
                                     title="{{ $surat->perihal ?? '-' }}"
@@ -2621,7 +2905,7 @@
                                 </div>
                             </td>
                             {{-- KATEGORI --}}
-                            <td class="cell-category">
+                            <td class="cell-category" data-label="Kategori">
                                 <span
                                     class="category-badge {{ $categoryClass }}"
                                 >
@@ -2648,7 +2932,7 @@
                                 </span>
                             </td>
                             {{-- STATUS --}}
-                            <td>
+                            <td data-label="Status">
                                 <span
                                     class="
                                         status-badge
@@ -2662,7 +2946,7 @@
                                 </span>
                             </td>
                             {{-- AKSI --}}
-                            <td class="action-cell">
+                            <td class="action-cell" data-label="Aksi">
                                 <div class="action-buttons">
                                     {{-- DETAIL --}}
                                     <a
@@ -2887,7 +3171,158 @@
             </div>
         @endif
     </div>
+    </div>
+
+    <aside class="surat-sidebar">
+        <section class="surat-side-card">
+            <div class="surat-side-card-header">
+                <div class="surat-side-card-icon">
+                    <svg
+                        class="h-4 w-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="1.8"
+                            d="M4 19V5M4 19h16"
+                        />
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="1.8"
+                            d="M7 15l3-3 3 2 4-5"
+                        />
+                    </svg>
+                </div>
+                <span class="surat-side-card-title">
+                    Ringkasan Status
+                </span>
+            </div>
+
+            <div class="surat-side-card-content">
+                <div
+                    class="surat-donut"
+                    style="--donut: { $chartGradient };"
+                    aria-label="Ringkasan status surat masuk"
+                >
+                    <div class="surat-donut-center">
+                        <div class="surat-donut-number">
+                            { number_format($chartTotal) }
+                        </div>
+                        <div class="surat-donut-label">
+                            Surat
+                        </div>
+                    </div>
+                </div>
+
+                <div class="surat-legend">
+                    @foreach($chartData as $label => $item)
+                        <div class="surat-legend-row">
+                            <div class="surat-legend-name">
+                                <span
+                                    class="surat-legend-dot"
+                                    style="background: { $item['color'] };"
+                                ></span>
+                                <span>{ $label }</span>
+                            </div>
+                            <span class="surat-legend-value">
+                                { number_format($item['value']) }
+                            </span>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+
+        <section class="surat-side-card">
+            <div class="surat-side-card-header">
+                <div class="surat-side-card-icon">
+                    <svg
+                        class="h-4 w-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="1.8"
+                            d="M5 6h14M5 12h14M5 18h9"
+                        />
+                    </svg>
+                </div>
+                <span class="surat-side-card-title">
+                    Kategori Surat
+                </span>
+            </div>
+
+            <div class="surat-side-card-content">
+                @if($categorySummary->count())
+                    <div class="surat-category-list">
+                        @foreach($categorySummary as $namaKategori => $jumlah)
+                            <div class="surat-category-row">
+                                <span
+                                    class="surat-category-name"
+                                    title="{ $namaKategori }"
+                                >
+                                    { $namaKategori }
+                                </span>
+                                <span class="surat-category-count">
+                                    { number_format($jumlah) }
+                                </span>
+                            </div>
+                        @endforeach
+                    </div>
+                    <p class="mt-3 text-[8px] text-slate-400">
+                        Berdasarkan data pada halaman saat ini.
+                    </p>
+                @else
+                    <div class="surat-side-empty">
+                        Belum ada kategori yang dapat diringkas.
+                    </div>
+                @endif
+            </div>
+        </section>
+
+        <section class="surat-side-card surat-tip">
+            <div class="surat-side-card-content">
+                <div class="surat-tip-icon">
+                    <svg
+                        class="h-4 w-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="1.8"
+                            d="M9 18h6M10 21h4M8.5 14.5a5 5 0 117-4.2c0 2.1-.8 3.2-2 4.4-.6.6-.9 1.2-1 2.3h-3c-.1-1.1-.4-1.7-1-2.3-1.2-1.2-2-2.3-2-4.4"
+                        />
+                    </svg>
+                </div>
+                <div class="min-w-0">
+                    <div class="surat-tip-title">
+                        Tips
+                    </div>
+                    <div class="surat-tip-text">
+                        Gunakan filter kategori, status, atau rentang tanggal
+                        untuk menemukan surat lebih cepat.
+                    </div>
+                </div>
+            </div>
+        </section>
+    </aside>
 </div>
+
+</div>
+
 {{-- ==========================================================================
      DATE PICKER
      ========================================================================== --}}
@@ -2941,6 +3376,7 @@
     id="customPickerPanel"
     class="custom-picker-panel hidden"
 ></div>
+@push('scripts')
 @push('scripts')
 <script>
 (function(){

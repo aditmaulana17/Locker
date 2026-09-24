@@ -313,6 +313,28 @@ class SuratMasukController extends Controller
 
         /*
         |--------------------------------------------------------------------------
+        | RINGKASAN KATEGORI
+        |--------------------------------------------------------------------------
+        |
+        | Dipakai pada panel ringkasan di halaman Surat Masuk.
+        | Perhitungan menggunakan query akses dasar sehingga mengikuti
+        | hak akses user dan tidak dipengaruhi filter maupun pagination.
+        |
+        */
+
+        $categoryCounts =
+            (clone $accessQuery)
+                ->reorder()
+                ->select('kategori_surat_id')
+                ->selectRaw('COUNT(*) AS total')
+                ->with('kategori:id,nama_kategori')
+                ->groupBy('kategori_surat_id')
+                ->orderByDesc('total')
+                ->get();
+
+
+        /*
+        |--------------------------------------------------------------------------
         | QUERY TABEL
         |--------------------------------------------------------------------------
         |
@@ -363,11 +385,11 @@ class SuratMasukController extends Controller
             $query
                 ->orderBy(
                     'tanggal_terima',
-                    'asc'
+                    'desc'
                 )
                 ->orderBy(
                     'id',
-                    'asc'
+                    'desc'
                 )
                 ->paginate(10)
                 ->withQueryString();
@@ -399,6 +421,7 @@ class SuratMasukController extends Controller
                 'suratMasuks',
                 'kategoris',
                 'statusCounts',
+                'categoryCounts',
                 'hasUploadedFile'
             )
         );
