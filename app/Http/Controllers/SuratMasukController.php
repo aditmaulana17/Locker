@@ -377,6 +377,32 @@ class SuratMasukController extends Controller
 
         /*
         |--------------------------------------------------------------------------
+        | URUTAN DATA
+        |--------------------------------------------------------------------------
+        | desc = terbaru ke terlama
+        | asc  = terlama ke terbaru
+        |
+        | Nilai selain asc/desc dipaksa kembali ke desc agar URL tidak dapat
+        | mengubah kolom ORDER BY secara langsung.
+        */
+
+        $sortOrder =
+            strtolower(
+                trim(
+                    (string) $request->input(
+                        'sort',
+                        'desc'
+                    )
+                )
+            );
+
+        if (!in_array($sortOrder, ['asc', 'desc'], true)) {
+            $sortOrder = 'desc';
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
         | PAGINATION
         |--------------------------------------------------------------------------
         */
@@ -385,11 +411,11 @@ class SuratMasukController extends Controller
             $query
                 ->orderBy(
                     'tanggal_terima',
-                    'desc'
+                    $sortOrder
                 )
                 ->orderBy(
                     'id',
-                    'desc'
+                    $sortOrder
                 )
                 ->paginate(10)
                 ->withQueryString();
@@ -422,7 +448,8 @@ class SuratMasukController extends Controller
                 'kategoris',
                 'statusCounts',
                 'categoryCounts',
-                'hasUploadedFile'
+                'hasUploadedFile',
+                'sortOrder'
             )
         );
     }

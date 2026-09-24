@@ -382,6 +382,47 @@
     */
     $exportQuery =
         request()->query();
+
+    /*
+    |--------------------------------------------------------------------------
+    | URUTAN DATA
+    |--------------------------------------------------------------------------
+    | desc = terbaru ke terlama
+    | asc  = terlama ke terbaru
+    */
+    $sortOrder = strtolower(
+        trim(
+            (string) request()->input('sort', 'desc')
+        )
+    );
+
+    if (!in_array($sortOrder, ['asc', 'desc'], true)) {
+        $sortOrder = 'desc';
+    }
+
+    $sortLabel =
+        $sortOrder === 'desc'
+            ? 'Terbaru'
+            : 'Terlama';
+
+    $nextSortOrder =
+        $sortOrder === 'desc'
+            ? 'asc'
+            : 'desc';
+
+    $sortUrl = route(
+        'surat-masuk.index',
+        array_merge(
+            request()->except(['sort', 'page']),
+            ['sort' => $nextSortOrder]
+        )
+    );
+
+    $sortTitle =
+        $sortOrder === 'desc'
+            ? 'Klik untuk menampilkan dari terlama ke terbaru'
+            : 'Klik untuk menampilkan dari terbaru ke terlama';
+
     /*
     |--------------------------------------------------------------------------
     | RINGKASAN STATUS & KATEGORI
@@ -799,7 +840,18 @@
     color:#475569;
     font-size:10px;
     font-weight:700;
+    text-decoration:none;
     white-space:nowrap;
+    cursor:pointer;
+    transition:background .15s ease,border-color .15s ease,color .15s ease,transform .15s ease,box-shadow .15s ease;
+}
+
+.surat-sort-badge:hover{
+    border-color:#bfdbfe;
+    background:#eff6ff;
+    color:#2563eb;
+    transform:translateY(-1px);
+    box-shadow:0 5px 14px rgba(37,99,235,.10);
 }
 
 /* ==========================================================================
@@ -1919,7 +1971,9 @@
     }
 
     .surat-sort-badge{
-        display:none;
+        display:inline-flex;
+        min-height:32px;
+        font-size:9px;
     }
 
     .surat-main-card .surat-filter-card{
@@ -3267,7 +3321,12 @@
                 </div>
             </div>
 
-            <div class="surat-sort-badge">
+            <a
+                href="{{ $sortUrl }}"
+                class="surat-sort-badge"
+                title="{{ $sortTitle }}"
+                aria-label="{{ $sortTitle }}"
+            >
                 <svg
                     class="h-3.5 w-3.5"
                     fill="none"
@@ -3288,8 +3347,22 @@
                         d="M4 6v12m0 0l-2-2m2 2l2-2"
                     />
                 </svg>
-                Terbaru
-            </div>
+                {{ $sortLabel }}
+                <svg
+                    class="h-3.5 w-3.5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="1.8"
+                        d="M8 9l4-4 4 4M16 15l-4 4-4-4"
+                    />
+                </svg>
+            </a>
         </div>
 
             <div class="surat-filter-card">
@@ -3298,6 +3371,11 @@
             method="GET"
             action="{{ route('surat-masuk.index') }}"
         >
+            <input
+                type="hidden"
+                name="sort"
+                value="{{ $sortOrder }}"
+            >
             <div class="surat-filter-main">
                 {{-- SEARCH --}}
                 <div class="surat-search-wrapper">
