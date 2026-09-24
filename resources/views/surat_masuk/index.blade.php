@@ -3,106 +3,27 @@
 @section('content')
 @php
     use Illuminate\Support\Carbon;
-    /*
-    |--------------------------------------------------------------------------
-    | USER
-    |--------------------------------------------------------------------------
-    */
-    $user = auth()->user();
-    $userRole = strtolower(
-        trim(
-            (string) (
-                $user->role ??
-                $user->jabatan ??
-                ''
-            )
-        )
-    );
+$user = auth()->user();
+    $userRole = strtolower(trim((string) ($user->role ?? $user->jabatan ?? '')));
     if ($userRole === 'staf') {
         $userRole = 'staff';
     }
-    /*
-    |--------------------------------------------------------------------------
-    | HAK AKSES
-    |--------------------------------------------------------------------------
-    */
-    $canManage = in_array(
-        $userRole,
-        [
-            'admin',
-            'pimpinan',
-        ],
-        true
-    );
-    /*
-    |--------------------------------------------------------------------------
-    | STATUS
-    |--------------------------------------------------------------------------
-    */
-    $statusOptions = [
+$canManage = in_array($userRole, ['admin', 'pimpinan'], true);
+$statusOptions = [
         'baru' => 'Baru',
         'diproses' => 'Diproses',
         'didisposisikan' => 'Didisposisikan',
         'selesai' => 'Selesai',
         'diarsipkan' => 'Diarsipkan',
     ];
-    /*
-    |--------------------------------------------------------------------------
-    | SCORECARD
-    |--------------------------------------------------------------------------
-    |
-    | Controller mengirim $statusCounts yang dihitung dari seluruh data
-    | yang boleh dilihat user, bukan dari data pagination.
-    |
-    | Struktur:
-    |
-    | [
-    |     'total' => 4,
-    |     'baru' => 4,
-    |     'diproses' => 0,
-    |     'didisposisikan' => 0,
-    |     'selesai' => 0,
-    |     'diarsipkan' => 0,
-    | ]
-    |
-    */
-    $statusCounts = is_array($statusCounts ?? null)
-        ? $statusCounts
-        : [];
-    $totalSuratMasuk = (int) (
-        $statusCounts['total']
-        ?? 0
-    );
-    $suratBaru = (int) (
-        $statusCounts['baru']
-        ?? 0
-    );
-    $suratDiproses = (int) (
-        $statusCounts['diproses']
-        ?? 0
-    );
-    $suratDidisposisikan = (int) (
-        $statusCounts['didisposisikan']
-        ?? 0
-    );
-    $suratSelesai = (int) (
-        $statusCounts['selesai']
-        ?? 0
-    );
-    $suratDiarsipkan = (int) (
-        $statusCounts['diarsipkan']
-        ?? 0
-    );
-    /*
-    |--------------------------------------------------------------------------
-    | FALLBACK
-    |--------------------------------------------------------------------------
-    |
-    | Hanya digunakan apabila Controller belum mengirim $statusCounts.
-    | Untuk data sedikit, halaman tetap bisa tampil.
-    |
-    */
-    if (
+$statusCounts = is_array($statusCounts ?? null) ? $statusCounts : [];
+    $totalSuratMasuk = (int) ($statusCounts['total'] ?? 0);
+    $suratBaru = (int) ($statusCounts['baru'] ?? 0);
+    $suratDiproses = (int) ($statusCounts['diproses'] ?? 0);
+    $suratDidisposisikan = (int) ($statusCounts['didisposisikan'] ?? 0);
+    $suratSelesai = (int) ($statusCounts['selesai'] ?? 0);
+    $suratDiarsipkan = (int) ($statusCounts['diarsipkan'] ?? 0);
+if (
         !isset($statusCounts['total']) &&
         isset($suratMasuks)
     ) {
@@ -205,12 +126,7 @@
                 )
                 ->count();
     }
-    /*
-    |--------------------------------------------------------------------------
-    | KATEGORI TERPILIH
-    |--------------------------------------------------------------------------
-    */
-    $rawKategori = request(
+$rawKategori = request(
         'kategori_id',
         request(
             'kategori_surat_id',
@@ -248,12 +164,7 @@
         ->unique()
         ->values()
         ->all();
-    /*
-    |--------------------------------------------------------------------------
-    | STATUS TERPILIH
-    |--------------------------------------------------------------------------
-    */
-    $rawStatus =
+$rawStatus =
         request(
             'status',
             []
@@ -295,12 +206,7 @@
         ->unique()
         ->values()
         ->all();
-    /*
-    |--------------------------------------------------------------------------
-    | RENTANG TANGGAL
-    |--------------------------------------------------------------------------
-    */
-    $dariTanggal =
+$dariTanggal =
         request(
             'dari_tanggal'
         );
@@ -352,42 +258,22 @@
             $visibleDateRange = '';
         }
     }
-    /*
-    |--------------------------------------------------------------------------
-    | FILTER AKTIF
-    |--------------------------------------------------------------------------
-    */
-    $hasFilters =
+$hasFilters =
         request()->filled('search') ||
         !empty($selectedKategori) ||
         !empty($selectedStatus) ||
         request()->filled('dari_tanggal') ||
         request()->filled('sampai_tanggal');
-    /*
-    |--------------------------------------------------------------------------
-    | DATA TABEL
-    |--------------------------------------------------------------------------
-    */
-    $hasVisibleData =
+$hasVisibleData =
         isset($suratMasuks) &&
         method_exists(
             $suratMasuks,
             'count'
         ) &&
         $suratMasuks->count() > 0;
-    /*
-    |--------------------------------------------------------------------------
-    | EXPORT QUERY
-    |--------------------------------------------------------------------------
-    */
-    $exportQuery =
+$exportQuery =
         request()->query();
-    /*
-    |--------------------------------------------------------------------------
-    | RINGKASAN STATUS & KATEGORI
-    |--------------------------------------------------------------------------
-    */
-    $chartData = [
+$chartData = [
         'Baru' => [
             'value' => $suratBaru,
             'color' => '#2563eb',
@@ -409,11 +295,9 @@
             'color' => '#64748b',
         ],
     ];
-
     $chartTotal = array_sum(
         array_column($chartData, 'value')
     );
-
     $chartGradient = '#e2e8f0';
     if ($chartTotal > 0) {
         $parts = [];
@@ -422,13 +306,11 @@
             if ($item['value'] <= 0) {
                 continue;
             }
-
             $start = $cursor;
             $cursor += (
                 $item['value'] /
                 $chartTotal
             ) * 360;
-
             $parts[] =
                 $item['color'] .
                 ' ' .
@@ -437,28 +319,13 @@
                 round($cursor, 2) .
                 'deg';
         }
-
         $chartGradient =
             'conic-gradient(' .
             implode(', ', $parts) .
             ')';
     }
-
     $categorySummary = collect();
-
-    /*
-    |--------------------------------------------------------------------------
-    | RINGKASAN KATEGORI
-    |--------------------------------------------------------------------------
-    |
-    | Utamakan data kategori dari controller karena query tersebut mengikuti
-    | hak akses user dan tidak terpengaruh pagination/filter tabel.
-    |
-    | Jika controller belum mengirim $categoryCounts, gunakan data pada
-    | halaman aktif sebagai fallback agar Blade tetap kompatibel.
-    |
-    */
-    if (isset($categoryCounts)) {
+if (isset($categoryCounts)) {
         $categorySummary =
             collect($categoryCounts)
                 ->mapWithKeys(
@@ -472,11 +339,9 @@
                                     ?? 'Tanpa Kategori'
                                 )
                             );
-
                         if ($name === '') {
                             $name = 'Tanpa Kategori';
                         }
-
                         return [
                             $name =>
                                 (int) (
@@ -493,7 +358,6 @@
                 ->sortDesc()
                 ->take(5);
     }
-
     if (
         $categorySummary->isEmpty() &&
         isset($suratMasuks)
@@ -510,7 +374,6 @@
                 : collect(
                     $suratMasuks
                 );
-
         $categorySummary =
             $categoryCollection
                 ->map(
@@ -534,8 +397,6 @@
                 ->sortDesc()
                 ->take(5);
     }
-
-
 @endphp
 @push('styles')
 <style>
@@ -1257,7 +1118,6 @@
     }
 }
 
-
 /* ==========================================================================
    WORKSPACE SIDEBAR
    ========================================================================== */
@@ -1435,42 +1295,6 @@
 .surat-side-empty{
     padding:8px 0 2px;
     color:#94a3b8;
-    font-size:9px;
-    line-height:1.5;
-}
-
-.surat-tip{
-    border:1px solid #dbeafe;
-    background:linear-gradient(135deg,#f8fbff,#eff6ff);
-}
-
-.surat-tip .surat-side-card-content{
-    display:flex;
-    align-items:flex-start;
-    gap:9px;
-}
-
-.surat-tip-icon{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    width:30px;
-    height:30px;
-    flex:0 0 30px;
-    border-radius:9px;
-    background:#dbeafe;
-    color:#2563eb;
-}
-
-.surat-tip-title{
-    color:#1e3a8a;
-    font-size:10px;
-    font-weight:800;
-}
-
-.surat-tip-text{
-    margin-top:3px;
-    color:#64748b;
     font-size:9px;
     line-height:1.5;
 }
@@ -2172,10 +1996,6 @@
         grid-template-columns:repeat(2,minmax(0,1fr));
     }
 
-    .surat-tip{
-        grid-column:1/-1;
-    }
-
     .surat-filter-main{
         grid-template-columns:minmax(0,1fr) auto;
     }
@@ -2674,7 +2494,6 @@
             </div>
         </div>
     </div>
-
 
 <div class="surat-workspace">
     <div class="surat-main-card">
@@ -3677,36 +3496,6 @@
                         Belum ada kategori yang dapat diringkas.
                     </div>
                 @endif
-            </div>
-        </section>
-
-        <section class="surat-side-card surat-tip">
-            <div class="surat-side-card-content">
-                <div class="surat-tip-icon">
-                    <svg
-                        class="h-4 w-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        aria-hidden="true"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="1.8"
-                            d="M9 18h6M10 21h4M8.5 14.5a5 5 0 117-4.2c0 2.1-.8 3.2-2 4.4-.6.6-.9 1.2-1 2.3h-3c-.1-1.1-.4-1.7-1-2.3-1.2-1.2-2-2.3-2-4.4"
-                        />
-                    </svg>
-                </div>
-                <div class="min-w-0">
-                    <div class="surat-tip-title">
-                        Tips
-                    </div>
-                    <div class="surat-tip-text">
-                        Gunakan filter kategori, status, atau rentang tanggal
-                        untuk menemukan surat lebih cepat.
-                    </div>
-                </div>
             </div>
         </section>
     </aside>
