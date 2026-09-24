@@ -123,29 +123,20 @@
         );
     };
 
-    /*
-     * Statistik dihitung dari seluruh disposisi yang boleh dilihat user.
-     * Ini tidak dipengaruhi search, filter tanggal, filter status, maupun pagination.
-     */
-    $statsQuery = \App\Models\Disposisi::query();
-
-    if ($userRole === 'staf') {
-        $statsQuery->where('kepada_user_id', auth()->id());
-    }
-
-    $statistics = (clone $statsQuery)
-        ->selectRaw('COUNT(*) AS total')
-        ->selectRaw("SUM(CASE WHEN LOWER(TRIM(COALESCE(status, 'menunggu'))) = 'menunggu' THEN 1 ELSE 0 END) AS menunggu")
-        ->selectRaw("SUM(CASE WHEN LOWER(TRIM(COALESCE(status, 'menunggu'))) = 'diproses' THEN 1 ELSE 0 END) AS diproses")
-        ->selectRaw("SUM(CASE WHEN LOWER(TRIM(COALESCE(status, 'menunggu'))) = 'selesai' THEN 1 ELSE 0 END) AS selesai")
-        ->first();
-
-    $totalDisposisi = (int) ($statistics->total ?? 0);
-    $disposisiMenunggu = (int) ($statistics->menunggu ?? 0);
-    $disposisiDiproses = (int) ($statistics->diproses ?? 0);
-    $disposisiSelesai = (int) ($statistics->selesai ?? 0);
+    $totalDisposisi = (int) ($totalDisposisi ?? 0);
+    $disposisiMenunggu = (int) ($disposisiMenunggu ?? 0);
+    $disposisiDiproses = (int) ($disposisiDiproses ?? 0);
+    $disposisiSelesai = (int) ($disposisiSelesai ?? 0);
 
     $exportFilters = request()->query();
+
+    $boardCollections = collect($boardDisposisis ?? []);
+    if ($boardCollections->isEmpty() && isset($disposisis)) {
+        $boardCollections = collect($disposisis)->groupBy(function ($item) {
+            $status = strtolower(trim((string) ($item->status ?? 'menunggu')));
+            return in_array($status, array_keys($statusOptions), true) ? $status : 'menunggu';
+        });
+    }
 @endphp
 
 @push('styles')
@@ -319,7 +310,7 @@
             <div class="disposition-stat-note">Seluruh disposisi yang dapat Anda akses</div>
         </a>
 
-        <a href="{{ route('disposisi.index', ['status' => ['menunggu']]) }}" class="disposition-stat waiting">
+        <a href="{{ route('disposisi.index', array_merge(request()->except(['status','page']), ['status' => ['menunggu']])) }}" class="disposition-stat waiting">
             <div class="disposition-stat-top">
                 <p class="disposition-stat-label">Menunggu</p>
                 <div class="disposition-stat-icon waiting">
@@ -330,7 +321,7 @@
             <div class="disposition-stat-note">Perlu segera ditindaklanjuti</div>
         </a>
 
-        <a href="{{ route('disposisi.index', ['status' => ['diproses']]) }}" class="disposition-stat process">
+        <a href="{{ route('disposisi.index', array_merge(request()->except(['status','page']), ['status' => ['diproses']])) }}" class="disposition-stat process">
             <div class="disposition-stat-top">
                 <p class="disposition-stat-label">Diproses</p>
                 <div class="disposition-stat-icon process">
@@ -341,7 +332,7 @@
             <div class="disposition-stat-note">Sedang dikerjakan oleh penerima</div>
         </a>
 
-        <a href="{{ route('disposisi.index', ['status' => ['selesai']]) }}" class="disposition-stat done">
+        <a href="{{ route('disposisi.index', array_merge(request()->except(['status','page']), ['status' => ['selesai']])) }}" class="disposition-stat done">
             <div class="disposition-stat-top">
                 <p class="disposition-stat-label">Selesai</p>
                 <div class="disposition-stat-icon done">
@@ -409,14 +400,6 @@
                 </div>
             </div>
 
-            @php
-                $boardCollections = collect($disposisis ?? collect())
-                    ->groupBy(function ($item) {
-                        $status = strtolower(trim((string) ($item->status ?? 'menunggu')));
-                        return in_array($status, ['menunggu', 'diproses', 'selesai'], true) ? $status : 'menunggu';
-                    });
-            @endphp
-
             <div class="disposition-columns">
                 @foreach(['menunggu', 'diproses', 'selesai'] as $columnStatus)
                     @php
@@ -460,7 +443,6 @@
                                 <article class="disposition-card">
                                     <div class="disposition-card-top">
                                         <span class="disposition-card-number">No. {{ $nomorSurat }}</span>
-                                        <span class="disposition-card-menu" aria-hidden="true"><svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></span>
                                     </div>
 
                                     <h3 class="disposition-card-title" title="{{ $perihal }}">{{ $perihal }}</h3>
@@ -528,8 +510,16 @@
             </div>
         </div>
 
-        @if(isset($disposisis) && method_exists($disposisis, 'hasPages') && $disposisis->hasPages())
-            <div class="disposition-pagination">{{ $disposisis->withQueryString()->links() }}</div>
+        @php
+            $boardVisibleCount = $boardCollections->flatten(1)->count();
+        @endphp
+        @if($boardVisibleCount > 0)
+            <div class="disposition-pagination flex items-center justify-between gap-3">
+                <span>Menampilkan {{ number_format($boardVisibleCount, 0, ',', '.') }} disposisi pada hasil saat ini.</span>
+                @if($hasFilters)
+                    <a href="{{ route('disposisi.index') }}">Tampilkan semua</a>
+                @endif
+            </div>
         @endif
     </section>
 </div>
