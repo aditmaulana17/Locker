@@ -3,27 +3,106 @@
 @section('content')
 @php
     use Illuminate\Support\Carbon;
-$user = auth()->user();
-    $userRole = strtolower(trim((string) ($user->role ?? $user->jabatan ?? '')));
+    /*
+    |--------------------------------------------------------------------------
+    | USER
+    |--------------------------------------------------------------------------
+    */
+    $user = auth()->user();
+    $userRole = strtolower(
+        trim(
+            (string) (
+                $user->role ??
+                $user->jabatan ??
+                ''
+            )
+        )
+    );
     if ($userRole === 'staf') {
         $userRole = 'staff';
     }
-$canManage = in_array($userRole, ['admin', 'pimpinan'], true);
-$statusOptions = [
+    /*
+    |--------------------------------------------------------------------------
+    | HAK AKSES
+    |--------------------------------------------------------------------------
+    */
+    $canManage = in_array(
+        $userRole,
+        [
+            'admin',
+            'pimpinan',
+        ],
+        true
+    );
+    /*
+    |--------------------------------------------------------------------------
+    | STATUS
+    |--------------------------------------------------------------------------
+    */
+    $statusOptions = [
         'baru' => 'Baru',
         'diproses' => 'Diproses',
         'didisposisikan' => 'Didisposisikan',
         'selesai' => 'Selesai',
         'diarsipkan' => 'Diarsipkan',
     ];
-$statusCounts = is_array($statusCounts ?? null) ? $statusCounts : [];
-    $totalSuratMasuk = (int) ($statusCounts['total'] ?? 0);
-    $suratBaru = (int) ($statusCounts['baru'] ?? 0);
-    $suratDiproses = (int) ($statusCounts['diproses'] ?? 0);
-    $suratDidisposisikan = (int) ($statusCounts['didisposisikan'] ?? 0);
-    $suratSelesai = (int) ($statusCounts['selesai'] ?? 0);
-    $suratDiarsipkan = (int) ($statusCounts['diarsipkan'] ?? 0);
-if (
+    /*
+    |--------------------------------------------------------------------------
+    | SCORECARD
+    |--------------------------------------------------------------------------
+    |
+    | Controller mengirim $statusCounts yang dihitung dari seluruh data
+    | yang boleh dilihat user, bukan dari data pagination.
+    |
+    | Struktur:
+    |
+    | [
+    |     'total' => 4,
+    |     'baru' => 4,
+    |     'diproses' => 0,
+    |     'didisposisikan' => 0,
+    |     'selesai' => 0,
+    |     'diarsipkan' => 0,
+    | ]
+    |
+    */
+    $statusCounts = is_array($statusCounts ?? null)
+        ? $statusCounts
+        : [];
+    $totalSuratMasuk = (int) (
+        $statusCounts['total']
+        ?? 0
+    );
+    $suratBaru = (int) (
+        $statusCounts['baru']
+        ?? 0
+    );
+    $suratDiproses = (int) (
+        $statusCounts['diproses']
+        ?? 0
+    );
+    $suratDidisposisikan = (int) (
+        $statusCounts['didisposisikan']
+        ?? 0
+    );
+    $suratSelesai = (int) (
+        $statusCounts['selesai']
+        ?? 0
+    );
+    $suratDiarsipkan = (int) (
+        $statusCounts['diarsipkan']
+        ?? 0
+    );
+    /*
+    |--------------------------------------------------------------------------
+    | FALLBACK
+    |--------------------------------------------------------------------------
+    |
+    | Hanya digunakan apabila Controller belum mengirim $statusCounts.
+    | Untuk data sedikit, halaman tetap bisa tampil.
+    |
+    */
+    if (
         !isset($statusCounts['total']) &&
         isset($suratMasuks)
     ) {
@@ -126,7 +205,12 @@ if (
                 )
                 ->count();
     }
-$rawKategori = request(
+    /*
+    |--------------------------------------------------------------------------
+    | KATEGORI TERPILIH
+    |--------------------------------------------------------------------------
+    */
+    $rawKategori = request(
         'kategori_id',
         request(
             'kategori_surat_id',
@@ -164,7 +248,12 @@ $rawKategori = request(
         ->unique()
         ->values()
         ->all();
-$rawStatus =
+    /*
+    |--------------------------------------------------------------------------
+    | STATUS TERPILIH
+    |--------------------------------------------------------------------------
+    */
+    $rawStatus =
         request(
             'status',
             []
@@ -206,7 +295,12 @@ $rawStatus =
         ->unique()
         ->values()
         ->all();
-$dariTanggal =
+    /*
+    |--------------------------------------------------------------------------
+    | RENTANG TANGGAL
+    |--------------------------------------------------------------------------
+    */
+    $dariTanggal =
         request(
             'dari_tanggal'
         );
@@ -258,22 +352,42 @@ $dariTanggal =
             $visibleDateRange = '';
         }
     }
-$hasFilters =
+    /*
+    |--------------------------------------------------------------------------
+    | FILTER AKTIF
+    |--------------------------------------------------------------------------
+    */
+    $hasFilters =
         request()->filled('search') ||
         !empty($selectedKategori) ||
         !empty($selectedStatus) ||
         request()->filled('dari_tanggal') ||
         request()->filled('sampai_tanggal');
-$hasVisibleData =
+    /*
+    |--------------------------------------------------------------------------
+    | DATA TABEL
+    |--------------------------------------------------------------------------
+    */
+    $hasVisibleData =
         isset($suratMasuks) &&
         method_exists(
             $suratMasuks,
             'count'
         ) &&
         $suratMasuks->count() > 0;
-$exportQuery =
+    /*
+    |--------------------------------------------------------------------------
+    | EXPORT QUERY
+    |--------------------------------------------------------------------------
+    */
+    $exportQuery =
         request()->query();
-$chartData = [
+    /*
+    |--------------------------------------------------------------------------
+    | RINGKASAN STATUS & KATEGORI
+    |--------------------------------------------------------------------------
+    */
+    $chartData = [
         'Baru' => [
             'value' => $suratBaru,
             'color' => '#2563eb',
@@ -295,9 +409,11 @@ $chartData = [
             'color' => '#64748b',
         ],
     ];
+
     $chartTotal = array_sum(
         array_column($chartData, 'value')
     );
+
     $chartGradient = '#e2e8f0';
     if ($chartTotal > 0) {
         $parts = [];
@@ -306,11 +422,13 @@ $chartData = [
             if ($item['value'] <= 0) {
                 continue;
             }
+
             $start = $cursor;
             $cursor += (
                 $item['value'] /
                 $chartTotal
             ) * 360;
+
             $parts[] =
                 $item['color'] .
                 ' ' .
@@ -319,13 +437,28 @@ $chartData = [
                 round($cursor, 2) .
                 'deg';
         }
+
         $chartGradient =
             'conic-gradient(' .
             implode(', ', $parts) .
             ')';
     }
+
     $categorySummary = collect();
-if (isset($categoryCounts)) {
+
+    /*
+    |--------------------------------------------------------------------------
+    | RINGKASAN KATEGORI
+    |--------------------------------------------------------------------------
+    |
+    | Utamakan data kategori dari controller karena query tersebut mengikuti
+    | hak akses user dan tidak terpengaruh pagination/filter tabel.
+    |
+    | Jika controller belum mengirim $categoryCounts, gunakan data pada
+    | halaman aktif sebagai fallback agar Blade tetap kompatibel.
+    |
+    */
+    if (isset($categoryCounts)) {
         $categorySummary =
             collect($categoryCounts)
                 ->mapWithKeys(
@@ -339,9 +472,11 @@ if (isset($categoryCounts)) {
                                     ?? 'Tanpa Kategori'
                                 )
                             );
+
                         if ($name === '') {
                             $name = 'Tanpa Kategori';
                         }
+
                         return [
                             $name =>
                                 (int) (
@@ -358,6 +493,7 @@ if (isset($categoryCounts)) {
                 ->sortDesc()
                 ->take(5);
     }
+
     if (
         $categorySummary->isEmpty() &&
         isset($suratMasuks)
@@ -374,6 +510,7 @@ if (isset($categoryCounts)) {
                 : collect(
                     $suratMasuks
                 );
+
         $categorySummary =
             $categoryCollection
                 ->map(
@@ -397,6 +534,8 @@ if (isset($categoryCounts)) {
                 ->sortDesc()
                 ->take(5);
     }
+
+
 @endphp
 @push('styles')
 <style>
@@ -828,294 +967,8 @@ if (isset($categoryCounts)) {
     min-height:44px;
 }
 
-/* ==========================================================================
-   FILTER DROPDOWNS
-   ========================================================================== */
-.surat-filter-dropdown{
-    position:relative;
-    min-width:0;
-}
-
-.surat-filter-trigger{
-    width:100%;
-    display:flex;
-    align-items:center;
-    gap:10px;
-    min-height:44px;
-    padding:7px 11px;
-    border:1px solid #d6e0ec;
-    border-radius:10px;
-    background:#fff;
-    color:#475569;
-    text-align:left;
-    cursor:pointer;
-    transition:
-        border-color .15s ease,
-        background .15s ease,
-        box-shadow .15s ease;
-}
-
-.surat-filter-trigger:hover{
-    border-color:#b8c5d6;
-    background:#f8fafc;
-}
-
-.surat-filter-trigger.is-open,
-.surat-filter-trigger.is-active{
-    border-color:#93c5fd;
-    background:#eff6ff;
-    box-shadow:0 0 0 3px rgba(59,130,246,.08);
-}
-
-.surat-filter-icon{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    width:30px;
-    height:30px;
-    flex:0 0 30px;
-    border-radius:8px;
-}
-
-.surat-filter-icon.category{
-    background:#eff6ff;
-    color:#2563eb;
-}
-
-.surat-filter-icon.status{
-    background:#f5f3ff;
-    color:#7c3aed;
-}
-
-.surat-filter-trigger-content{
-    display:flex;
-    flex-direction:column;
-    align-items:flex-start;
-    justify-content:center;
-    min-width:0;
-    flex:1 1 auto;
-}
-
-.surat-filter-trigger-title{
-    display:block;
-    max-width:100%;
-    overflow:hidden;
-    color:#334155;
-    font-size:10px;
-    font-weight:800;
-    line-height:1.2;
-    text-overflow:ellipsis;
-    white-space:nowrap;
-}
-
-.surat-filter-trigger-subtitle{
-    display:block;
-    max-width:100%;
-    margin-top:2px;
-    overflow:hidden;
-    color:#94a3b8;
-    font-size:8.5px;
-    font-weight:600;
-    line-height:1.25;
-    text-overflow:ellipsis;
-    white-space:nowrap;
-}
-
-.surat-filter-count{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    flex:0 0 auto;
-    min-height:22px;
-    padding:0 7px;
-    border-radius:999px;
-    background:#f1f5f9;
-    color:#64748b;
-    font-size:8.5px;
-    font-weight:800;
-    white-space:nowrap;
-}
-
-.surat-filter-count.category{
-    background:#eff6ff;
-    color:#2563eb;
-}
-
-.surat-filter-count.status{
-    background:#f5f3ff;
-    color:#7c3aed;
-}
-
-.surat-filter-chevron{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    flex:0 0 auto;
-    color:#94a3b8;
-    transition:transform .15s ease,color .15s ease;
-}
-
-.surat-filter-trigger.is-open .surat-filter-chevron{
-    color:#2563eb;
-    transform:rotate(180deg);
-}
-
 .surat-filter-menu{
-    position:absolute;
-    top:calc(100% + 7px);
-    left:0;
-    right:0;
-    z-index:10000;
-    min-width:290px;
-    overflow:hidden;
-    border:1px solid #dbe4f0;
     border-radius:12px;
-    background:#fff;
-    box-shadow:
-        0 20px 45px rgba(15,23,42,.14),
-        0 5px 18px rgba(15,23,42,.08);
-}
-
-.surat-filter-menu.hidden{
-    display:none!important;
-}
-
-.surat-filter-menu-header{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:10px;
-    padding:11px 12px;
-    border-bottom:1px solid #edf2f7;
-    background:#f8fafc;
-}
-
-.surat-filter-menu-title{
-    color:#334155;
-    font-size:10px;
-    font-weight:800;
-}
-
-.surat-filter-menu-description{
-    margin-top:2px;
-    color:#94a3b8;
-    font-size:8.5px;
-    line-height:1.35;
-}
-
-.surat-filter-menu-actions{
-    display:flex;
-    align-items:center;
-    gap:3px;
-}
-
-.surat-filter-action{
-    border:0;
-    border-radius:7px;
-    padding:5px 7px;
-    background:transparent;
-    font-size:8.5px;
-    font-weight:800;
-    cursor:pointer;
-}
-
-.surat-filter-action.select{
-    color:#2563eb;
-}
-
-.surat-filter-action.clear{
-    color:#64748b;
-}
-
-.surat-filter-action.select:hover,
-.surat-filter-action.clear:hover{
-    background:#eaf2ff;
-}
-
-.surat-filter-options{
-    display:grid;
-    grid-template-columns:repeat(2,minmax(0,1fr));
-    gap:7px;
-    max-height:260px;
-    padding:10px;
-    overflow-y:auto;
-}
-
-.surat-filter-option{
-    display:flex;
-    align-items:center;
-    min-height:37px;
-    gap:8px;
-    padding:7px 9px;
-    border:1px solid #dbe3ed;
-    border-radius:8px;
-    background:#fff;
-    cursor:pointer;
-    transition:
-        border-color .15s ease,
-        background .15s ease;
-}
-
-.surat-filter-option:hover,
-.surat-filter-option.is-selected{
-    border-color:#93c5fd;
-    background:#eff6ff;
-}
-
-.surat-filter-option input{
-    width:15px;
-    height:15px;
-    margin:0;
-    accent-color:#2563eb;
-    cursor:pointer;
-}
-
-.surat-filter-option-text{
-    min-width:0;
-    overflow:hidden;
-    color:#475569;
-    font-size:9px;
-    font-weight:600;
-    text-overflow:ellipsis;
-    white-space:nowrap;
-}
-
-.surat-filter-option.is-selected .surat-filter-option-text{
-    color:#1d4ed8;
-}
-
-.surat-filter-menu-footer{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:8px;
-    padding:8px 12px;
-    border-top:1px solid #edf2f7;
-    background:#fff;
-}
-
-.surat-filter-footer-count{
-    color:#64748b;
-    font-size:8.5px;
-    font-weight:700;
-}
-
-.surat-filter-footer-hint{
-    color:#94a3b8;
-    font-size:8.5px;
-}
-
-@media(max-width:767px){
-    .surat-filter-menu{
-        position:fixed;
-        top:50%;
-        right:auto;
-        left:50%;
-        width:calc(100vw - 24px);
-        max-width:430px;
-        min-width:0;
-        transform:translate(-50%,-50%);
-    }
 }
 
 /* ==========================================================================
@@ -1299,6 +1152,11 @@ if (isset($categoryCounts)) {
     line-height:1.5;
 }
 
+
+
+
+
+
 /* ==========================================================================
    TABLE
    ========================================================================== */
@@ -1316,8 +1174,7 @@ if (isset($categoryCounts)) {
 
 .archive-table{
     width:100%;
-    min-width:0;
-    table-layout:fixed;
+    min-width:930px;
     border-collapse:collapse;
     border-spacing:0;
     background:#fff;
@@ -1390,10 +1247,6 @@ if (isset($categoryCounts)) {
 .archive-table .cell-subject{
     color:#1e293b;
     font-weight:700;
-    max-width:100%;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    white-space:nowrap;
 }
 
 .archive-table .cell-category{
@@ -1501,39 +1354,9 @@ if (isset($categoryCounts)) {
    ACTIONS
    ========================================================================== */
 .action-cell{
-    width:112px;
+    width:118px;
     text-align:center!important;
     white-space:nowrap;
-}
-
-.archive-table th:nth-child(1),
-.archive-table td:nth-child(1){
-    width:112px;
-}
-
-.archive-table th:nth-child(2),
-.archive-table td:nth-child(2){
-    width:185px;
-}
-
-.archive-table th:nth-child(3),
-.archive-table td:nth-child(3){
-    width:auto;
-}
-
-.archive-table th:nth-child(4),
-.archive-table td:nth-child(4){
-    width:135px;
-}
-
-.archive-table th:nth-child(5),
-.archive-table td:nth-child(5){
-    width:112px;
-}
-
-.archive-table th:nth-child(6),
-.archive-table td:nth-child(6){
-    width:112px;
 }
 
 .action-buttons{
@@ -2115,14 +1938,6 @@ if (isset($categoryCounts)) {
         grid-template-columns:1fr;
     }
 
-    .surat-filter-trigger{
-        padding:7px 10px;
-    }
-
-    .surat-filter-trigger-subtitle{
-        max-width:170px;
-    }
-
     .surat-filter-menu{
         position:fixed;
         top:50%;
@@ -2144,22 +1959,6 @@ if (isset($categoryCounts)) {
     .archive-table{
         min-width:0;
         width:100%;
-        table-layout:auto;
-    }
-
-    .archive-table th:nth-child(1),
-    .archive-table td:nth-child(1),
-    .archive-table th:nth-child(2),
-    .archive-table td:nth-child(2),
-    .archive-table th:nth-child(3),
-    .archive-table td:nth-child(3),
-    .archive-table th:nth-child(4),
-    .archive-table td:nth-child(4),
-    .archive-table th:nth-child(5),
-    .archive-table td:nth-child(5),
-    .archive-table th:nth-child(6),
-    .archive-table td:nth-child(6){
-        width:auto;
     }
 
     .archive-table thead{
@@ -2326,6 +2125,942 @@ if (isset($categoryCounts)) {
         display:none;
     }
 }
+
+/* ==========================================================================
+   FINAL LAYOUT REFINEMENT
+   ========================================================================== */
+
+/* SCORECARD: lebih lega, terpisah, dan mudah dipindai */
+.surat-summary{
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:12px;
+    margin-bottom:18px;
+    overflow:visible;
+    border:0;
+    border-radius:0;
+    background:transparent;
+    box-shadow:none;
+}
+
+.surat-summary-item{
+    min-height:88px;
+    padding:17px 18px;
+    gap:13px;
+    border:1px solid #dbe4f0;
+    border-radius:14px;
+    background:#fff;
+    box-shadow:0 3px 14px rgba(15,23,42,.045);
+}
+
+.surat-summary-item + .surat-summary-item{
+    border-left:1px solid #dbe4f0;
+}
+
+.surat-summary-icon{
+    width:40px;
+    height:40px;
+    flex:0 0 40px;
+    border-radius:11px;
+}
+
+.surat-summary-label{
+    font-size:10px;
+    letter-spacing:.01em;
+}
+
+.surat-summary-value{
+    margin-top:4px;
+    font-size:23px;
+}
+
+.surat-summary-meta{
+    margin-top:4px;
+    font-size:9px;
+}
+
+/* WORKSPACE: sidebar sedikit lebih lebar agar tabel mempunyai ruang yang cukup */
+.surat-workspace{
+    grid-template-columns:minmax(0,1fr) 300px;
+    gap:18px;
+}
+
+/* SIDEBAR mengikuti tinggi alami dan dimulai sejajar dengan tabel */
+.surat-sidebar{
+    gap:14px;
+    align-self:start;
+}
+
+.surat-side-card{
+    border-radius:15px;
+}
+
+/* FILTER lebih lapang dan konsisten */
+.surat-main-card .surat-filter-card{
+    padding:17px 18px 18px;
+}
+
+.surat-filter-main{
+    grid-template-columns:minmax(0,1fr) 104px 230px;
+    gap:10px;
+}
+
+.surat-filter-secondary{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:10px;
+    margin-top:10px;
+}
+
+.surat-filter-trigger{
+    min-height:46px;
+    padding:8px 12px;
+}
+
+.surat-filter-menu{
+    min-width:300px;
+}
+
+.surat-filter-options{
+    gap:8px;
+}
+
+/* TABEL DESKTOP: paksa penuh mengikuti lebar kartu,
+   tanpa scrollbar horizontal pada layar normal */
+.archive-table-wrapper{
+    width:100%;
+    max-width:100%;
+}
+
+.archive-table-scroll{
+    width:100%;
+    max-width:100%;
+    overflow-x:hidden;
+}
+
+.archive-table{
+    width:100%;
+    max-width:100%;
+    min-width:0;
+    table-layout:fixed;
+}
+
+.archive-table th,
+.archive-table td{
+    box-sizing:border-box;
+}
+
+.archive-table thead th{
+    padding:12px 10px;
+}
+
+.archive-table tbody td{
+    padding:13px 10px;
+}
+
+.archive-table thead th:first-child,
+.archive-table tbody td:first-child{
+    padding-left:16px;
+}
+
+.archive-table th:nth-child(1),
+.archive-table td:nth-child(1){
+    width:98px;
+}
+
+.archive-table th:nth-child(2),
+.archive-table td:nth-child(2){
+    width:176px;
+}
+
+.archive-table th:nth-child(3),
+.archive-table td:nth-child(3){
+    width:auto;
+    min-width:0;
+}
+
+.archive-table th:nth-child(4),
+.archive-table td:nth-child(4){
+    width:132px;
+}
+
+.archive-table th:nth-child(5),
+.archive-table td:nth-child(5){
+    width:108px;
+}
+
+.archive-table th:nth-child(6),
+.archive-table td:nth-child(6){
+    width:126px;
+}
+
+.archive-table tbody td{
+    overflow:hidden;
+}
+
+.archive-table .cell-subject,
+.archive-table .cell-sender,
+.archive-table .cell-category{
+    min-width:0;
+}
+
+.archive-table .cell-subject{
+    display:block;
+    width:100%;
+    max-width:100%;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+.archive-table .sender-name,
+.archive-table .sender-email{
+    max-width:100%;
+}
+
+.category-badge,
+.status-badge{
+    max-width:100%;
+}
+
+.category-badge{
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.action-cell{
+    width:126px;
+}
+
+.action-buttons{
+    gap:5px;
+    width:100%;
+}
+
+.action-button{
+    width:32px;
+    height:32px;
+    flex:0 0 32px;
+}
+
+/* Beri ruang visual di antara header tabel dan isi */
+.archive-table tbody tr{
+    min-height:56px;
+}
+
+@media(max-width:1100px){
+    .surat-summary{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+        gap:12px;
+    }
+
+    .surat-summary-item + .surat-summary-item{
+        border-left:1px solid #dbe4f0;
+    }
+
+    .surat-workspace{
+        grid-template-columns:minmax(0,1fr);
+        gap:14px;
+    }
+
+    .surat-sidebar{
+        display:grid;
+        grid-template-columns:repeat(2,minmax(0,1fr));
+        gap:14px;
+    }
+
+    .surat-filter-main{
+        grid-template-columns:minmax(0,1fr) 104px;
+    }
+
+    .surat-date-wrapper{
+        grid-column:1/-1;
+    }
+
+    .archive-table-scroll{
+        overflow-x:auto;
+    }
+}
+
+@media(max-width:767px){
+    .surat-summary{
+        grid-template-columns:1fr 1fr;
+        gap:10px;
+        margin-bottom:14px;
+    }
+
+    .surat-summary-item{
+        min-height:82px;
+        padding:14px;
+        gap:10px;
+    }
+
+    .surat-summary-icon{
+        width:34px;
+        height:34px;
+        flex-basis:34px;
+    }
+
+    .surat-summary-value{
+        font-size:20px;
+    }
+
+    .surat-filter-main{
+        grid-template-columns:1fr;
+        gap:9px;
+    }
+
+    .surat-filter-secondary{
+        grid-template-columns:1fr;
+        gap:9px;
+    }
+
+    .surat-filter-submit{
+        width:100%;
+    }
+
+    .surat-sidebar{
+        display:flex;
+        flex-direction:column;
+        gap:12px;
+    }
+
+    .archive-table-scroll{
+        overflow:visible;
+    }
+
+    .archive-table{
+        min-width:0;
+        width:100%;
+        table-layout:auto;
+    }
+
+    .archive-table th:nth-child(1),
+    .archive-table td:nth-child(1),
+    .archive-table th:nth-child(2),
+    .archive-table td:nth-child(2),
+    .archive-table th:nth-child(3),
+    .archive-table td:nth-child(3),
+    .archive-table th:nth-child(4),
+    .archive-table td:nth-child(4),
+    .archive-table th:nth-child(5),
+    .archive-table td:nth-child(5),
+    .archive-table th:nth-child(6),
+    .archive-table td:nth-child(6){
+        width:auto;
+    }
+
+    .action-cell{
+        width:100%;
+    }
+
+    .action-button{
+        width:34px;
+        height:34px;
+        flex-basis:34px;
+    }
+}
+
+@media(max-width:480px){
+    .surat-summary{
+        grid-template-columns:1fr;
+    }
+}
+
+
+
+/* ==========================================================================
+   POLISHED UI REFINEMENT
+   ========================================================================== */
+
+/* PAGE FLOW */
+.surat-page{
+    padding-bottom:20px;
+}
+
+/* SCORECARD */
+.surat-summary{
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:14px;
+    margin:2px 0 20px;
+}
+
+.surat-summary-item{
+    position:relative;
+    min-height:104px;
+    padding:18px 18px 17px;
+    gap:14px;
+    overflow:hidden;
+    border:1px solid #e2e8f0;
+    border-radius:17px;
+    background:#fff;
+    box-shadow:0 8px 24px rgba(15,23,42,.055);
+    transition:
+        transform .18s ease,
+        box-shadow .18s ease,
+        border-color .18s ease;
+}
+
+.surat-summary-item::before{
+    content:'';
+    position:absolute;
+    inset:0 auto 0 0;
+    width:4px;
+    border-radius:17px 0 0 17px;
+}
+
+.surat-summary-item:nth-child(1)::before{background:#2563eb;}
+.surat-summary-item:nth-child(2)::before{background:#e11d48;}
+.surat-summary-item:nth-child(3)::before{background:#7c3aed;}
+.surat-summary-item:nth-child(4)::before{background:#059669;}
+
+.surat-summary-item:hover{
+    transform:translateY(-2px);
+    border-color:#cbd5e1;
+    box-shadow:0 12px 28px rgba(15,23,42,.08);
+}
+
+.surat-summary-item + .surat-summary-item{
+    border-left:1px solid #e2e8f0;
+}
+
+.surat-summary-icon{
+    width:44px;
+    height:44px;
+    flex:0 0 44px;
+    border-radius:13px;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.7);
+}
+
+.surat-summary-label{
+    color:#64748b;
+    font-size:10px;
+    font-weight:800;
+    letter-spacing:.015em;
+}
+
+.surat-summary-value{
+    margin-top:5px;
+    color:#0f172a;
+    font-size:25px;
+    font-weight:850;
+    letter-spacing:-.025em;
+    line-height:1;
+}
+
+.surat-summary-meta{
+    margin-top:5px;
+    color:#94a3b8;
+    font-size:9.5px;
+    font-weight:600;
+}
+
+/* WORKSPACE */
+.surat-workspace{
+    grid-template-columns:minmax(0,1fr) 308px;
+    gap:20px;
+}
+
+.surat-main-card,
+.surat-side-card{
+    border-color:#e2e8f0;
+    border-radius:18px;
+    box-shadow:0 8px 26px rgba(15,23,42,.045);
+}
+
+/* MAIN CARD HEADER */
+.surat-main-card-header{
+    padding:18px 20px 16px;
+    background:linear-gradient(180deg,#ffffff 0%,#fbfdff 100%);
+}
+
+.surat-main-card-icon{
+    width:42px;
+    height:42px;
+    flex-basis:42px;
+    border-radius:12px;
+    background:#eff6ff;
+    color:#2563eb;
+}
+
+.surat-main-card-title{
+    font-size:15px;
+    letter-spacing:-.01em;
+}
+
+.surat-main-card-subtitle{
+    margin-top:4px;
+    font-size:10px;
+    color:#94a3b8;
+}
+
+.surat-sort-badge{
+    min-height:34px;
+    padding:0 11px;
+    border-radius:10px;
+    background:#f8fafc;
+    color:#475569;
+    font-size:10px;
+}
+
+/* FILTER PANEL */
+.surat-main-card .surat-filter-card{
+    margin:0;
+    padding:16px 18px 18px;
+    border-bottom:1px solid #eef2f7;
+    background:#f8fafc;
+}
+
+.surat-filter-main{
+    grid-template-columns:minmax(0,1fr) 104px 236px;
+    gap:10px;
+}
+
+.surat-search-wrapper,
+.surat-date-wrapper,
+.surat-filter-dropdown{
+    min-width:0;
+}
+
+.surat-search-input,
+.surat-date-input{
+    height:44px;
+    border-color:#d8e1eb;
+    border-radius:12px;
+    background:#fff;
+    font-size:11px;
+    box-shadow:0 1px 2px rgba(15,23,42,.02);
+}
+
+.surat-search-input{
+    padding-left:42px;
+}
+
+.surat-search-input:hover,
+.surat-date-input:hover{
+    border-color:#c4d0dc;
+}
+
+.surat-search-input:focus,
+.surat-date-input:focus{
+    border-color:#60a5fa;
+    box-shadow:0 0 0 4px rgba(59,130,246,.10);
+}
+
+.surat-filter-submit{
+    height:44px;
+    min-width:104px;
+    border:1px solid #2563eb;
+    border-radius:12px;
+    background:#2563eb;
+    color:#fff;
+    box-shadow:0 6px 14px rgba(37,99,235,.16);
+}
+
+.surat-filter-submit:hover{
+    border-color:#1d4ed8;
+    background:#1d4ed8;
+    color:#fff;
+    box-shadow:0 8px 18px rgba(37,99,235,.20);
+}
+
+.surat-filter-submit.has-filter{
+    border-color:#2563eb;
+    background:#2563eb;
+    color:#fff;
+}
+
+.surat-filter-secondary{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:10px;
+    margin-top:10px;
+}
+
+.surat-filter-trigger{
+    display:flex;
+    align-items:center;
+    min-height:50px;
+    width:100%;
+    padding:8px 12px;
+    border:1px solid #d8e1eb;
+    border-radius:12px;
+    background:#fff;
+    box-shadow:0 1px 2px rgba(15,23,42,.02);
+    cursor:pointer;
+    transition:
+        border-color .16s ease,
+        box-shadow .16s ease,
+        background .16s ease;
+}
+
+.surat-filter-trigger:hover,
+.surat-filter-trigger[aria-expanded="true"]{
+    border-color:#93c5fd;
+    background:#fff;
+    box-shadow:0 0 0 3px rgba(59,130,246,.07);
+}
+
+.surat-filter-icon{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:32px;
+    height:32px;
+    flex:0 0 32px;
+    margin-right:10px;
+    border-radius:9px;
+    background:#eff6ff;
+    color:#2563eb;
+}
+
+.surat-filter-icon.status{
+    background:#f5f3ff;
+    color:#7c3aed;
+}
+
+.surat-filter-trigger-content{
+    min-width:0;
+    text-align:left;
+}
+
+.surat-filter-trigger-title{
+    display:block;
+    color:#1e293b;
+    font-size:10.5px;
+    font-weight:800;
+    line-height:1.2;
+}
+
+.surat-filter-trigger-subtitle{
+    display:block;
+    margin-top:3px;
+    overflow:hidden;
+    color:#94a3b8;
+    font-size:8.5px;
+    font-weight:600;
+    line-height:1.2;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+.surat-filter-count{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-width:52px;
+    height:24px;
+    margin-left:auto;
+    padding:0 8px;
+    border-radius:999px;
+    background:#eff6ff;
+    color:#2563eb;
+    font-size:8.5px;
+    font-weight:800;
+    white-space:nowrap;
+}
+
+.surat-filter-count.status{
+    background:#f5f3ff;
+    color:#7c3aed;
+}
+
+.surat-filter-chevron{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:22px;
+    height:22px;
+    margin-left:6px;
+    color:#94a3b8;
+    transition:transform .16s ease,color .16s ease;
+}
+
+.surat-filter-trigger[aria-expanded="true"] .surat-filter-chevron{
+    color:#2563eb;
+    transform:rotate(180deg);
+}
+
+.surat-filter-menu{
+    min-width:320px;
+    overflow:hidden;
+    border:1px solid #dbe4ee;
+    border-radius:14px;
+    background:#fff;
+    box-shadow:0 18px 44px rgba(15,23,42,.14),0 4px 12px rgba(15,23,42,.06);
+}
+
+.surat-filter-menu-header{
+    padding:13px 14px;
+    background:#f8fafc;
+    border-bottom:1px solid #e8eef5;
+}
+
+.surat-filter-menu-title{
+    color:#1e293b;
+    font-size:11px;
+    font-weight:800;
+}
+
+.surat-filter-menu-description{
+    margin-top:3px;
+    color:#94a3b8;
+    font-size:8.5px;
+}
+
+.surat-filter-options{
+    gap:7px;
+    max-height:260px;
+    padding:10px;
+}
+
+.surat-filter-option{
+    min-height:40px;
+    padding:7px 9px;
+    border-color:#e2e8f0;
+    border-radius:10px;
+}
+
+.surat-filter-option:hover,
+.surat-filter-option.is-selected{
+    border-color:#bfdbfe;
+    background:#f8fbff;
+}
+
+.surat-filter-menu-footer{
+    padding:9px 12px;
+    border-top:1px solid #e8eef5;
+    background:#fff;
+}
+
+/* SIDEBAR */
+.surat-sidebar{
+    gap:14px;
+}
+
+.surat-side-card-header{
+    padding:15px 16px;
+    background:linear-gradient(180deg,#ffffff 0%,#fbfdff 100%);
+}
+
+.surat-side-card-icon{
+    width:32px;
+    height:32px;
+    flex-basis:32px;
+    border-radius:10px;
+}
+
+.surat-side-card-title{
+    font-size:11.5px;
+}
+
+.surat-side-card-content{
+    padding:16px;
+}
+
+/* TABLE */
+.archive-table-wrapper{
+    background:#fff;
+}
+
+.archive-table{
+    table-layout:fixed;
+}
+
+.archive-table thead{
+    background:#f8fafc;
+}
+
+.archive-table thead tr{
+    border-bottom:1px solid #e6edf5;
+}
+
+.archive-table thead th{
+    padding:12px 11px;
+    color:#64748b;
+    font-size:8.5px;
+    letter-spacing:.055em;
+}
+
+.archive-table tbody tr{
+    transition:
+        background-color .14s ease,
+        box-shadow .14s ease;
+}
+
+.archive-table tbody tr:hover{
+    background:#fbfdff;
+}
+
+.archive-table tbody td{
+    padding:15px 11px;
+    border-bottom:1px solid #edf2f7;
+    color:#475569;
+    font-size:10px;
+}
+
+.archive-table .cell-date{
+    color:#334155;
+    font-size:9.5px;
+    font-weight:800;
+}
+
+.archive-table .sender-name,
+.archive-table .cell-subject{
+    color:#1e293b;
+    font-weight:700;
+}
+
+.archive-table .sender-email{
+    color:#94a3b8;
+}
+
+.category-badge,
+.status-badge{
+    min-height:27px;
+    padding:0 9px;
+    font-size:8.5px;
+    border:1px solid transparent;
+}
+
+.category-badge{
+    background:#eff6ff;
+    color:#2563eb;
+}
+
+.status-badge{
+    background:#eff6ff;
+    color:#2563eb;
+}
+
+.action-cell{
+    width:126px;
+}
+
+.action-buttons{
+    gap:6px;
+}
+
+.action-button{
+    width:33px;
+    height:33px;
+    flex-basis:33px;
+    border-color:#dfe7f0;
+    border-radius:10px;
+    background:#fff;
+}
+
+.action-button:hover{
+    border-color:#bfdbfe;
+    background:#eff6ff;
+    color:#2563eb;
+}
+
+/* PAGINATION */
+.archive-pagination{
+    padding:12px 18px 14px;
+    background:#fff;
+}
+
+/* RESPONSIVE */
+@media(max-width:1200px){
+    .surat-workspace{
+        grid-template-columns:minmax(0,1fr) 286px;
+        gap:16px;
+    }
+
+    .surat-summary{
+        gap:12px;
+    }
+}
+
+@media(max-width:1100px){
+    .surat-summary{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+    }
+
+    .surat-workspace{
+        grid-template-columns:1fr;
+    }
+
+    .surat-sidebar{
+        display:grid;
+        grid-template-columns:repeat(2,minmax(0,1fr));
+        gap:14px;
+    }
+
+    .surat-filter-main{
+        grid-template-columns:minmax(0,1fr) 104px;
+    }
+
+    .surat-date-wrapper{
+        grid-column:1/-1;
+    }
+}
+
+@media(max-width:767px){
+    .surat-summary{
+        grid-template-columns:1fr 1fr;
+        gap:10px;
+        margin-bottom:14px;
+    }
+
+    .surat-summary-item{
+        min-height:88px;
+        padding:14px;
+        gap:10px;
+        border-radius:14px;
+    }
+
+    .surat-summary-item::before{
+        width:3px;
+    }
+
+    .surat-summary-icon{
+        width:36px;
+        height:36px;
+        flex-basis:36px;
+    }
+
+    .surat-summary-value{
+        font-size:21px;
+    }
+
+    .surat-filter-main,
+    .surat-filter-secondary{
+        grid-template-columns:1fr;
+    }
+
+    .surat-filter-submit{
+        width:100%;
+    }
+
+    .surat-sidebar{
+        display:flex;
+        flex-direction:column;
+    }
+}
+
+@media(max-width:480px){
+    .surat-summary{
+        grid-template-columns:1fr;
+    }
+
+    .surat-summary-item,
+    .surat-summary-item + .surat-summary-item{
+        border-left:1px solid #e2e8f0;
+    }
+
+    .surat-main-card-header{
+        padding:15px 14px 14px;
+    }
+
+    .surat-main-card .surat-filter-card{
+        padding:12px;
+    }
+
+    .surat-filter-trigger{
+        min-height:48px;
+    }
+}
+
 </style>
 @endpush
 
@@ -2494,6 +3229,7 @@ if (isset($categoryCounts)) {
             </div>
         </div>
     </div>
+
 
 <div class="surat-workspace">
     <div class="surat-main-card">
@@ -3398,6 +4134,57 @@ if (isset($categoryCounts)) {
                             stroke-linecap="round"
                             stroke-linejoin="round"
                             stroke-width="1.8"
+                            d="M5 6h14M5 12h14M5 18h9"
+                        />
+                    </svg>
+                </div>
+                <span class="surat-side-card-title">
+                    Kategori Surat
+                </span>
+            </div>
+
+            <div class="surat-side-card-content">
+                @if($categorySummary->count())
+                    <div class="surat-category-list">
+                        @foreach($categorySummary as $namaKategori => $jumlah)
+                            <div class="surat-category-row">
+                                <span
+                                    class="surat-category-name"
+                                    title="{{ $namaKategori }}"
+                                >
+                                    {{ $namaKategori }}
+                                </span>
+                                <span class="surat-category-count">
+                                    {{ number_format($jumlah) }}
+                                </span>
+                            </div>
+                        @endforeach
+                    </div>
+                    <p class="mt-3 text-[8px] text-slate-400">
+                        Berdasarkan data yang dapat Anda lihat.
+                    </p>
+                @else
+                    <div class="surat-side-empty">
+                        Belum ada kategori yang dapat diringkas.
+                    </div>
+                @endif
+            </div>
+        </section>
+
+        <section class="surat-side-card">
+            <div class="surat-side-card-header">
+                <div class="surat-side-card-icon">
+                    <svg
+                        class="h-4 w-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="1.8"
                             d="M4 19V5M4 19h16"
                         />
                         <path
@@ -3445,57 +4232,6 @@ if (isset($categoryCounts)) {
                         </div>
                     @endforeach
                 </div>
-            </div>
-        </section>
-
-        <section class="surat-side-card">
-            <div class="surat-side-card-header">
-                <div class="surat-side-card-icon">
-                    <svg
-                        class="h-4 w-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        aria-hidden="true"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="1.8"
-                            d="M5 6h14M5 12h14M5 18h9"
-                        />
-                    </svg>
-                </div>
-                <span class="surat-side-card-title">
-                    Kategori Surat
-                </span>
-            </div>
-
-            <div class="surat-side-card-content">
-                @if($categorySummary->count())
-                    <div class="surat-category-list">
-                        @foreach($categorySummary as $namaKategori => $jumlah)
-                            <div class="surat-category-row">
-                                <span
-                                    class="surat-category-name"
-                                    title="{{ $namaKategori }}"
-                                >
-                                    {{ $namaKategori }}
-                                </span>
-                                <span class="surat-category-count">
-                                    {{ number_format($jumlah) }}
-                                </span>
-                            </div>
-                        @endforeach
-                    </div>
-                    <p class="mt-3 text-[8px] text-slate-400">
-                        Berdasarkan data yang dapat Anda lihat.
-                    </p>
-                @else
-                    <div class="surat-side-empty">
-                        Belum ada kategori yang dapat diringkas.
-                    </div>
-                @endif
             </div>
         </section>
     </aside>
