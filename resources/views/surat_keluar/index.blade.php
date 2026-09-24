@@ -214,10 +214,54 @@
                 ''
             )
         );
+
+    /*
+    |--------------------------------------------------------------------------
+    | URUTAN DATA
+    |--------------------------------------------------------------------------
+    |
+    | desc = terbaru ke terlama
+    | asc  = terlama ke terbaru
+    |
+    */
+    $sortOrder = strtolower(
+        trim(
+            (string) request()->input('sort', 'desc')
+        )
+    );
+
+    if (!in_array($sortOrder, ['asc', 'desc'], true)) {
+        $sortOrder = 'desc';
+    }
+
+    $sortLabel =
+        $sortOrder === 'desc'
+            ? 'Terbaru'
+            : 'Terlama';
+
+    $nextSortOrder =
+        $sortOrder === 'desc'
+            ? 'asc'
+            : 'desc';
+
+    $sortUrl = route(
+        'surat-keluar.index',
+        array_merge(
+            request()->except(['sort', 'page']),
+            ['sort' => $nextSortOrder]
+        )
+    );
+
+    $sortTitle =
+        $sortOrder === 'desc'
+            ? 'Klik untuk menampilkan dari terlama ke terbaru'
+            : 'Klik untuk menampilkan dari terbaru ke terlama';
     if ($searchValue !== '') {
         $exportFilters['search'] =
             $searchValue;
     }
+
+    $exportFilters['sort'] = $sortOrder;
     if (!empty($selectedKategori)) {
         $exportFilters['kategori_id'] =
             $selectedKategori;
@@ -416,7 +460,7 @@
 .surat-main-card-icon,.surat-side-card-icon{display:flex;align-items:center;justify-content:center;width:36px;height:36px;flex:0 0 36px;border-radius:10px;background:#eff6ff;color:#2563eb;}
 .surat-main-card-title{margin:0;color:#172033;font-size:14px;font-weight:800;}
 .surat-main-card-subtitle{margin-top:2px;color:#94a3b8;font-size:9px;line-height:1.4;}
-.surat-sort-badge{display:inline-flex;align-items:center;gap:5px;min-height:30px;padding:0 9px;border:1px solid #dbe4f0;border-radius:9px;background:#fff;color:#475569;font-size:9px;font-weight:700;white-space:nowrap;}
+.surat-sort-badge{display:inline-flex;align-items:center;gap:5px;min-height:30px;padding:0 9px;border:1px solid #dbe4f0;border-radius:9px;background:#fff;color:#475569;font-size:9px;font-weight:700;text-decoration:none;white-space:nowrap;cursor:pointer;transition:.15s ease;}.surat-sort-badge:hover{border-color:#bfdbfe;background:#eff6ff;color:#2563eb;transform:translateY(-1px);box-shadow:0 5px 14px rgba(37,99,235,.10);}
 /* FILTER */
 .surat-filter-card{margin:0;padding:14px 18px 15px;border:0;border-bottom:1px solid #edf2f7;border-radius:0;background:#fff;box-shadow:none;}
 .surat-filter-main{display:grid;grid-template-columns:minmax(0,1fr) auto 250px;gap:9px;align-items:center;}
@@ -709,13 +753,18 @@
                         <p class="surat-main-card-subtitle">Menampilkan surat keluar sesuai filter yang dipilih.</p>
                     </div>
                 </div>
-                <div class="surat-sort-badge">
+                <a
+                    href="{{ $sortUrl }}"
+                    class="surat-sort-badge"
+                    title="{{ $sortTitle }}"
+                    aria-label="{{ $sortTitle }}"
+                >
                     <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 6h12M8 12h8M8 18h5"/>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 6v12m0 0l-2-2m2 2l2-2"/>
                     </svg>
-                    Terbaru
-                </div>
+                    {{ $sortLabel }}
+                </a>
             </div>
 
     {{-- =====================================================
@@ -723,6 +772,7 @@
     ====================================================== --}}
     <div class="surat-filter-card">
         <form id="filterForm" method="GET" action="{{ route('surat-keluar.index') }}">
+            <input type="hidden" name="sort" value="{{ $sortOrder }}">
             {{-- SEARCH + FILTER + DATE --}}
             <div class="surat-filter-main">
                 <div class="surat-search-wrapper">

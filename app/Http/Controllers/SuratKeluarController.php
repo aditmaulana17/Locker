@@ -658,18 +658,33 @@ class SuratKeluarController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | PAGINATION
+        | URUTAN DATA + PAGINATION
         |--------------------------------------------------------------------------
         |
-        | Surat terbaru ditampilkan lebih dahulu.
+        | Default: terbaru ke terlama (DESC).
+        | sort=asc: terlama ke terbaru.
+        | Nilai selain asc/desc dikembalikan ke DESC.
         |
         */
 
+        $sortOrder = strtolower(
+            trim(
+                (string) $request->input(
+                    'sort',
+                    'desc'
+                )
+            )
+        );
+
+        if (!in_array($sortOrder, ['asc', 'desc'], true)) {
+            $sortOrder = 'desc';
+        }
+
         $suratKeluars = $query
             ->orderByRaw('tanggal_keluar IS NULL ASC')
-            ->orderBy('tanggal_keluar', 'desc')
-            ->orderBy('created_at', 'desc')
-            ->orderBy('id', 'desc')
+            ->orderBy('tanggal_keluar', $sortOrder)
+            ->orderBy('created_at', $sortOrder)
+            ->orderBy('id', $sortOrder)
             ->paginate(10)
             ->withQueryString();
 
@@ -697,6 +712,7 @@ class SuratKeluarController extends Controller
                 'statusCounts' => $statusCounts,
                 'categoryCounts' => $categoryCounts,
                 'hasUploadedFile' => $hasUploadedFile,
+                'sortOrder' => $sortOrder,
             ]
         );
     }
