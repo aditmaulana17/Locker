@@ -2532,10 +2532,10 @@
                                             '#10b981'
                                         ],
 
-                                        borderColor: '#ffffff',
-                                        borderWidth: 4,
-                                        hoverOffset: 7,
-                                        spacing: 2,
+                                        borderColor: 'transparent',
+                                        borderWidth: 0,
+                                        hoverOffset: 0,
+                                        spacing: 0,
                                     }
                                 ]
 
