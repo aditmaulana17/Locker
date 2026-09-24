@@ -73,10 +73,6 @@
         $statusCounts['total']
         ?? 0
     );
-    $suratBaru = (int) (
-        $statusCounts['baru']
-        ?? 0
-    );
     $suratDiproses = (int) (
         $statusCounts['diproses']
         ?? 0
