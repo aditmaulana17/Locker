@@ -1995,9 +1995,10 @@
     .surat-filter-menu{
         position:fixed;
         top:50%;
-        right:auto;
+        right:auto!important;
         left:50%;
         width:calc(100vw - 24px);
+        min-width:0;
         max-width:430px;
         transform:translate(-50%,-50%);
     }
@@ -2674,6 +2675,10 @@
     min-width:0;
 }
 
+.surat-filter-dropdown{
+    position:relative;
+}
+
 .surat-search-input,
 .surat-date-input{
     height:44px;
@@ -2832,13 +2837,29 @@
     transform:rotate(180deg);
 }
 
+.surat-filter-trigger.is-active{
+    border-color:#93c5fd;
+    background:#f8fbff;
+}
+
 .surat-filter-menu{
-    min-width:320px;
+    position:absolute;
+    top:calc(100% + 8px);
+    left:0;
+    z-index:100;
+    width:min(360px, calc(100vw - 32px));
+    min-width:300px;
+    max-width:calc(100vw - 32px);
     overflow:hidden;
     border:1px solid #dbe4ee;
     border-radius:14px;
     background:#fff;
     box-shadow:0 18px 44px rgba(15,23,42,.14),0 4px 12px rgba(15,23,42,.06);
+}
+
+.surat-filter-dropdown[data-filter-dropdown="status"] .surat-filter-menu{
+    right:0;
+    left:auto;
 }
 
 .surat-filter-menu-header{
@@ -2866,16 +2887,52 @@
 }
 
 .surat-filter-option{
+    display:flex;
+    align-items:center;
+    gap:9px;
     min-height:40px;
     padding:7px 9px;
-    border-color:#e2e8f0;
+    border:1px solid #e2e8f0;
     border-radius:10px;
+    background:#fff;
+    color:#475569;
+    cursor:pointer;
+    user-select:none;
+    transition:
+        border-color .15s ease,
+        background .15s ease,
+        color .15s ease;
+}
+
+.surat-filter-option input[type="checkbox"]{
+    width:16px;
+    height:16px;
+    flex:0 0 16px;
+    margin:0;
+    accent-color:#2563eb;
+    cursor:pointer;
+}
+
+.surat-filter-option-text{
+    min-width:0;
+    overflow:hidden;
+    color:#475569;
+    font-size:10px;
+    font-weight:650;
+    line-height:1.35;
+    text-overflow:ellipsis;
+    white-space:nowrap;
 }
 
 .surat-filter-option:hover,
 .surat-filter-option.is-selected{
     border-color:#bfdbfe;
     background:#f8fbff;
+}
+
+.surat-filter-option.is-selected .surat-filter-option-text{
+    color:#1d4ed8;
+    font-weight:750;
 }
 
 .surat-filter-menu-footer{
