@@ -3450,6 +3450,131 @@
     }
 }
 
+
+/* ==========================================================================
+   FILTER DROPDOWN - COMPACT FINAL
+   ========================================================================== */
+
+/* Tombol Filter dibuat compact */
+.surat-filter-submit{
+    min-width:82px!important;
+    width:82px!important;
+    height:38px!important;
+    padding:0 10px!important;
+    border-radius:9px!important;
+    font-size:10px!important;
+    box-shadow:0 4px 10px rgba(37,99,235,.12)!important;
+}
+
+.surat-filter-submit svg{
+    width:14px!important;
+    height:14px!important;
+}
+
+/* Menu dropdown tidak memanjang ke bawah */
+.surat-filter-menu{
+    width:420px!important;
+    max-width:min(420px,calc(100vw - 32px))!important;
+}
+
+/* Kategori dan status otomatis 3 kolom.
+   Jika jumlah item:
+   6 => 3 + 3
+   5 => 3 + 2
+   4 => 3 + 1
+   3 => 3
+   2 => 2
+   1 => 1
+*/
+.surat-filter-options{
+    display:grid!important;
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    gap:7px!important;
+    max-height:none!important;
+    overflow-y:visible!important;
+    align-items:stretch!important;
+}
+
+.surat-filter-option{
+    min-width:0!important;
+    min-height:40px!important;
+    width:100%!important;
+    padding:7px 8px!important;
+}
+
+.surat-filter-option-text{
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+    white-space:nowrap!important;
+}
+
+/* Jika hanya sedikit pilihan, jangan dipaksa melebar secara visual */
+.surat-filter-options:has(.surat-filter-option:nth-child(1):last-child){
+    grid-template-columns:1fr!important;
+}
+
+.surat-filter-options:has(.surat-filter-option:nth-child(2):last-child){
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+}
+
+.surat-filter-options:has(.surat-filter-option:nth-child(3):last-child){
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+}
+
+/* Dropdown tidak terlalu tinggi walaupun kategori/status bertambah banyak.
+   Setelah 9 item, tetap 3 kolom dan area pilihan melakukan scroll. */
+.surat-filter-options:has(.surat-filter-option:nth-child(10)){
+    max-height:230px!important;
+    overflow-y:auto!important;
+}
+
+/* Scrollbar kecil */
+.surat-filter-options::-webkit-scrollbar{
+    width:5px;
+}
+
+.surat-filter-options::-webkit-scrollbar-track{
+    background:#f8fafc;
+}
+
+.surat-filter-options::-webkit-scrollbar-thumb{
+    border-radius:999px;
+    background:#cbd5e1;
+}
+
+@media (max-width:900px){
+    .surat-filter-submit{
+        width:82px!important;
+        min-width:82px!important;
+    }
+
+    .surat-filter-menu{
+        width:390px!important;
+        max-width:calc(100vw - 24px)!important;
+    }
+}
+
+@media (max-width:720px){
+    .surat-filter-submit{
+        width:100%!important;
+        min-width:0!important;
+    }
+
+    .surat-filter-options{
+        grid-template-columns:repeat(2,minmax(0,1fr))!important;
+        max-height:280px!important;
+        overflow-y:auto!important;
+    }
+
+    .surat-filter-options:has(.surat-filter-option:nth-child(1):last-child){
+        grid-template-columns:1fr!important;
+    }
+
+    .surat-filter-options:has(.surat-filter-option:nth-child(2):last-child){
+        grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    }
+}
+
 </style>
 @endpush
 
