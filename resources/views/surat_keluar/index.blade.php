@@ -391,15 +391,13 @@
 .surat-create-button{border:1px solid #2563eb;background:#2563eb;color:#fff;box-shadow:0 8px 20px rgba(37,99,235,.18);}
 .surat-create-button:hover{border-color:#1d4ed8;background:#1d4ed8;transform:translateY(-1px);box-shadow:0 12px 24px rgba(37,99,235,.23);}
 /* SCORECARD */
-.surat-keluar-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:15px;}
-.surat-keluar-summary-card{position:relative;display:flex;align-items:center;min-width:0;min-height:92px;gap:12px;overflow:hidden;padding:14px 16px;border:1px solid #dbe4f0;border-radius:15px;background:#fff;box-shadow:0 3px 12px rgba(15,23,42,.035);transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease;}
+.surat-keluar-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:16px;}
+.surat-keluar-summary-card{position:relative;display:flex;align-items:center;min-width:0;min-height:94px;gap:12px;overflow:hidden;padding:15px 16px;border:1px solid #dbe4f0;border-radius:15px;background:#fff;box-shadow:0 3px 12px rgba(15,23,42,.035);transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease;}
 .surat-keluar-summary-card:hover{transform:translateY(-1px);border-color:#cbd5e1;box-shadow:0 7px 20px rgba(15,23,42,.06);}
 .surat-keluar-summary-card::before{content:'';position:absolute;left:0;top:12px;bottom:12px;width:3px;border-radius:0 6px 6px 0;background:#2563eb;}
 .surat-keluar-summary-card:nth-child(2)::before{background:#64748b;}
 .surat-keluar-summary-card:nth-child(3)::before{background:#d97706;}
-.surat-keluar-summary-card:nth-child(4)::before{background:#2563eb;}
-.surat-keluar-summary-card:nth-child(5)::before{background:#059669;}
-.surat-keluar-summary-card:nth-child(6)::before{background:#7c3aed;}
+.surat-keluar-summary-card:nth-child(4)::before{background:#059669;}
 .surat-keluar-summary-icon{display:flex;align-items:center;justify-content:center;width:42px;height:42px;flex:0 0 42px;border-radius:11px;}
 .surat-keluar-summary-icon.blue{background:#eff6ff;color:#2563eb;}
 .surat-keluar-summary-icon.slate{background:#f1f5f9;color:#64748b;}
@@ -682,18 +680,6 @@
             </div>
         </div>
         <div class="surat-keluar-summary-card">
-            <div class="surat-keluar-summary-icon blue">
-                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 2l3 7 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1 3-7z"/>
-                </svg>
-            </div>
-            <div class="surat-keluar-summary-content">
-                <p class="surat-keluar-summary-label">Disetujui</p>
-                <p class="surat-keluar-summary-value">{{ number_format($suratDisetujui, 0, ',', '.') }}</p>
-                <div class="surat-keluar-summary-note">Surat yang telah disetujui</div>
-            </div>
-        </div>
-        <div class="surat-keluar-summary-card">
             <div class="surat-keluar-summary-icon green">
                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M22 2L11 13"/>
@@ -706,20 +692,8 @@
                 <div class="surat-keluar-summary-note">Surat yang telah dikirim</div>
             </div>
         </div>
-        <div class="surat-keluar-summary-card">
-            <div class="surat-keluar-summary-icon purple">
-                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 3l8 4v5c0 4.5-3.1 7.8-8 9-4.9-1.2-8-4.5-8-9V7l8-4z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12l2 2 4-4"/>
-                </svg>
-            </div>
-            <div class="surat-keluar-summary-content">
-                <p class="surat-keluar-summary-label">Diarsipkan</p>
-                <p class="surat-keluar-summary-value">{{ number_format($suratDiarsipkan, 0, ',', '.') }}</p>
-                <div class="surat-keluar-summary-note">Surat yang telah diarsipkan</div>
-            </div>
-        </div>
     </div>
+
     <div class="surat-workspace">
         <div class="surat-main-card">
             <div class="surat-main-card-header">
