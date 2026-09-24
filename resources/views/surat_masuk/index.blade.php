@@ -868,8 +868,8 @@
 
 .surat-filter-main{
     display:grid;
-    grid-template-columns:minmax(0,1fr) auto 250px;
-    gap:8px;
+    grid-template-columns:minmax(0,1fr) 250px 108px;
+    gap:10px;
     align-items:center;
 }
 
@@ -1203,10 +1203,6 @@
     font-size:9px;
     line-height:1.5;
 }
-
-
-
-
 
 
 /* ==========================================================================
@@ -2521,7 +2517,6 @@
 }
 
 
-
 /* ==========================================================================
    POLISHED UI REFINEMENT
    ========================================================================== */
@@ -2672,6 +2667,7 @@
 .surat-search-wrapper,
 .surat-date-wrapper,
 .surat-filter-dropdown{
+    position:relative;
     min-width:0;
 }
 
@@ -3169,6 +3165,288 @@
 
     .surat-filter-trigger{
         min-height:48px;
+    }
+}
+
+
+/* ==========================================================================
+   FILTER DROPDOWN - FINAL LAYOUT
+   ========================================================================== */
+.surat-filter-main{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) 250px 108px!important;
+    gap:10px!important;
+    align-items:center!important;
+}
+
+.surat-filter-secondary{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:10px!important;
+    margin-top:10px!important;
+}
+
+.surat-filter-dropdown{
+    position:relative!important;
+    min-width:0!important;
+}
+
+.surat-filter-trigger{
+    display:flex!important;
+    align-items:center!important;
+    width:100%!important;
+    min-height:48px!important;
+    padding:7px 11px!important;
+    border:1px solid #d8e1eb!important;
+    border-radius:11px!important;
+    background:#fff!important;
+    color:#334155!important;
+    box-shadow:0 1px 2px rgba(15,23,42,.025)!important;
+    cursor:pointer!important;
+}
+
+.surat-filter-trigger:hover,
+.surat-filter-trigger[aria-expanded="true"],
+.surat-filter-trigger.is-active{
+    border-color:#93c5fd!important;
+    background:#f8fbff!important;
+    box-shadow:0 0 0 3px rgba(59,130,246,.07)!important;
+}
+
+.surat-filter-icon{
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    width:31px!important;
+    height:31px!important;
+    flex:0 0 31px!important;
+    margin-right:9px!important;
+    border-radius:9px!important;
+    background:#eff6ff!important;
+    color:#2563eb!important;
+}
+
+.surat-filter-icon.status{
+    background:#f5f3ff!important;
+    color:#7c3aed!important;
+}
+
+.surat-filter-trigger-content{
+    display:flex!important;
+    flex:1 1 auto!important;
+    flex-direction:column!important;
+    align-items:flex-start!important;
+    min-width:0!important;
+    text-align:left!important;
+}
+
+.surat-filter-trigger-label{
+    color:#334155!important;
+    font-size:10px!important;
+    font-weight:800!important;
+    line-height:1.2!important;
+}
+
+.surat-filter-trigger-description{
+    display:block!important;
+    max-width:100%!important;
+    margin-top:3px!important;
+    overflow:hidden!important;
+    color:#94a3b8!important;
+    font-size:9px!important;
+    line-height:1.25!important;
+    text-overflow:ellipsis!important;
+    white-space:nowrap!important;
+}
+
+.surat-filter-count{
+    display:inline-flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    min-width:24px!important;
+    height:22px!important;
+    margin-left:8px!important;
+    padding:0 7px!important;
+    border-radius:999px!important;
+    background:#eff6ff!important;
+    color:#2563eb!important;
+    font-size:9px!important;
+    font-weight:800!important;
+    white-space:nowrap!important;
+}
+
+.surat-filter-chevron{
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    margin-left:7px!important;
+    color:#94a3b8!important;
+    transition:transform .16s ease,color .16s ease!important;
+}
+
+.surat-filter-trigger[aria-expanded="true"] .surat-filter-chevron{
+    color:#2563eb!important;
+    transform:rotate(180deg)!important;
+}
+
+.surat-filter-menu{
+    position:absolute!important;
+    top:calc(100% + 8px)!important;
+    left:0!important;
+    right:auto!important;
+    z-index:120!important;
+    width:360px!important;
+    max-width:min(360px,calc(100vw - 32px))!important;
+    overflow:hidden!important;
+    border:1px solid #dbe4ee!important;
+    border-radius:14px!important;
+    background:#fff!important;
+    box-shadow:0 20px 45px rgba(15,23,42,.15),0 5px 14px rgba(15,23,42,.06)!important;
+}
+
+.surat-filter-dropdown[data-filter-dropdown="status"] .surat-filter-menu{
+    right:0!important;
+    left:auto!important;
+}
+
+.surat-filter-menu-header{
+    display:flex!important;
+    align-items:flex-start!important;
+    justify-content:space-between!important;
+    gap:12px!important;
+    padding:13px 14px 11px!important;
+    border-bottom:1px solid #eef2f7!important;
+}
+
+.surat-filter-menu-title{
+    color:#172033!important;
+    font-size:11px!important;
+    font-weight:800!important;
+}
+
+.surat-filter-menu-description{
+    margin-top:3px!important;
+    color:#94a3b8!important;
+    font-size:9px!important;
+    line-height:1.35!important;
+}
+
+.surat-filter-menu-actions{
+    display:flex!important;
+    align-items:center!important;
+    gap:5px!important;
+    flex:0 0 auto!important;
+}
+
+.surat-filter-action{
+    min-height:28px!important;
+    padding:0 8px!important;
+    border:1px solid #e2e8f0!important;
+    border-radius:7px!important;
+    background:#fff!important;
+    color:#64748b!important;
+    font-size:9px!important;
+    font-weight:750!important;
+    cursor:pointer!important;
+}
+
+.surat-filter-options{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    gap:6px!important;
+    max-height:280px!important;
+    padding:10px!important;
+    overflow-y:auto!important;
+}
+
+.surat-filter-option{
+    display:flex!important;
+    align-items:center!important;
+    gap:9px!important;
+    min-height:38px!important;
+    padding:7px 9px!important;
+    border:1px solid #e2e8f0!important;
+    border-radius:9px!important;
+    background:#fff!important;
+    cursor:pointer!important;
+}
+
+.surat-filter-option:hover,
+.surat-filter-option.is-selected{
+    border-color:#bfdbfe!important;
+    background:#f8fbff!important;
+}
+
+.surat-filter-option input[type="checkbox"]{
+    width:16px!important;
+    height:16px!important;
+    flex:0 0 16px!important;
+    margin:0!important;
+    accent-color:#2563eb!important;
+    cursor:pointer!important;
+}
+
+.surat-filter-option-text{
+    min-width:0!important;
+    overflow:hidden!important;
+    color:#475569!important;
+    font-size:10px!important;
+    font-weight:650!important;
+    line-height:1.35!important;
+    text-overflow:ellipsis!important;
+    white-space:nowrap!important;
+}
+
+.surat-filter-menu-footer{
+    display:flex!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+    gap:10px!important;
+    min-height:39px!important;
+    padding:8px 12px!important;
+    border-top:1px solid #eef2f7!important;
+    background:#f8fafc!important;
+}
+
+@media (max-width: 900px){
+    .surat-filter-main{
+        grid-template-columns:minmax(0,1fr) 220px 100px!important;
+    }
+}
+
+@media (max-width: 720px){
+    .surat-filter-main{
+        grid-template-columns:1fr!important;
+    }
+
+    .surat-filter-secondary{
+        grid-template-columns:1fr!important;
+    }
+
+    .surat-filter-menu,
+    .surat-filter-dropdown[data-filter-dropdown="status"] .surat-filter-menu{
+        position:fixed!important;
+        top:50%!important;
+        right:auto!important;
+        left:50%!important;
+        width:calc(100vw - 24px)!important;
+        min-width:0!important;
+        max-width:430px!important;
+        transform:translate(-50%,-50%)!important;
+    }
+}
+
+@media (max-width: 480px){
+    .surat-main-card .surat-filter-card{
+        padding:12px!important;
+    }
+
+    .surat-filter-menu-header{
+        padding:12px!important;
+    }
+
+    .surat-filter-options{
+        max-height:calc(100vh - 190px)!important;
     }
 }
 
