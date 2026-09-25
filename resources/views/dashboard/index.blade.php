@@ -786,15 +786,15 @@
             RIWAYAT & STATISTIK SURAT
         ================================================================== --}}
 
-        <section class="grid grid-cols-1 gap-4 lg:grid-cols-12 lg:gap-5 xl:gap-6">
+        <section class="grid grid-cols-1 gap-4 lg:grid-cols-12 lg:gap-4 xl:gap-5">
 
             {{-- ============================================================
                 RIWAYAT SURAT MASUK
             ============================================================= --}}
 
-            <section class="dashboard-panel overflow-hidden lg:col-span-5">
+            <section class="dashboard-panel dashboard-history-panel overflow-hidden lg:col-span-6 xl:col-span-4">
 
-                <div class="relative overflow-hidden border-b border-slate-100 bg-gradient-to-br from-white via-white to-blue-50/40 px-4 py-4 sm:px-5 sm:py-5">
+                <div class="dashboard-history-header relative overflow-hidden border-b border-slate-100 bg-gradient-to-br from-white via-white to-blue-50/40 px-3.5 py-3.5 sm:px-4 sm:py-4">
 
                     <div class="pointer-events-none absolute -right-12 -top-16 h-40 w-40 rounded-full bg-blue-500/5 blur-3xl"></div>
 
@@ -918,7 +918,7 @@
 
                         <a
                             href="{{ route('surat-masuk.show', $sm->id) }}"
-                            class="group block px-4 py-3.5 transition-colors duration-200 hover:bg-blue-50/40 sm:px-5"
+                            class="dashboard-history-row group block px-3.5 py-3 transition-colors duration-200 hover:bg-blue-50/40 sm:px-4"
                         >
 
                             <div class="flex items-start gap-3">
@@ -1073,9 +1073,9 @@
                 RIWAYAT SURAT KELUAR
             ============================================================= --}}
 
-            <section class="dashboard-panel overflow-hidden lg:col-span-5">
+            <section class="dashboard-panel dashboard-history-panel overflow-hidden lg:col-span-6 xl:col-span-4">
 
-                <div class="relative overflow-hidden border-b border-slate-100 bg-gradient-to-br from-white via-white to-emerald-50/40 px-4 py-4 sm:px-5 sm:py-5">
+                <div class="dashboard-history-header relative overflow-hidden border-b border-slate-100 bg-gradient-to-br from-white via-white to-emerald-50/40 px-3.5 py-3.5 sm:px-4 sm:py-4">
 
                     <div class="pointer-events-none absolute -right-12 -top-16 h-40 w-40 rounded-full bg-emerald-500/5 blur-3xl"></div>
 
@@ -1198,7 +1198,7 @@
 
                         <a
                             href="{{ route('surat-keluar.show', $suratKeluar->id) }}"
-                            class="group block px-4 py-3.5 transition-colors duration-200 hover:bg-emerald-50/40 sm:px-5"
+                            class="dashboard-history-row group block px-3.5 py-3 transition-colors duration-200 hover:bg-emerald-50/40 sm:px-4"
                         >
 
                             <div class="flex items-start gap-3">
@@ -1370,7 +1370,7 @@
                 GRAFIK LINGKARAN / DONUT
             ============================================================= --}}
 
-            <section class="dashboard-panel overflow-hidden lg:col-span-2">
+            <section class="dashboard-panel dashboard-stat-panel overflow-hidden lg:col-span-12 xl:col-span-4">
 
                 <div class="relative overflow-hidden border-b border-slate-100 bg-gradient-to-br from-white via-white to-indigo-50/40 px-4 py-4 sm:px-5 sm:py-5">
 
@@ -1392,7 +1392,7 @@
                             </div>
                             <form method="GET" action="{{ url()->current() }}" class="shrink-0">
                                 <label for="stat_month" class="sr-only">Pilih bulan statistik</label>
-                                <select id="stat_month" name="stat_month" onchange="this.form.submit()" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-[10px] font-bold text-slate-600 shadow-sm outline-none transition focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100 sm:w-[150px]">
+                                <select id="stat_month" name="stat_month" onchange="this.form.submit()" class="stat-month-select w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-[10px] font-bold text-slate-600 shadow-sm outline-none transition focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100 sm:w-[150px]">
                                     @foreach($statMonthOptions as $option)
                                         <option value="{{ $option['value'] }}" @selected($option['value'] === $selectedStatMonth)>{{ $option['label'] }}</option>
                                     @endforeach
@@ -1400,7 +1400,7 @@
                             </form>
                         </div>
                         <p class="mt-2 text-[10px] leading-relaxed text-slate-400 sm:text-xs">
-                            Perbandingan arsip surat masuk dan surat keluar pada {{ $selectedStatMonthLabel }}.
+                            Jumlah surat yang diinput pada {{ $selectedStatMonthLabel }}.
                         </p>
                     </div>
 
@@ -1417,11 +1417,11 @@
 
                 <div class="p-4 sm:p-5">
 
-                    <div class="relative mx-auto h-52 w-full max-w-[220px] sm:h-56">
+                    <div class="stat-chart-wrap relative mx-auto h-48 w-full max-w-[250px] sm:h-52">
                         <canvas id="suratDonutChart"></canvas>
                     </div>
 
-                    <div class="mt-4 space-y-2.5">
+                    <div class="stat-breakdown mt-4 space-y-2.5">
 
                         <div class="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50/70 px-3 py-2.5">
                             <div class="flex min-w-0 items-center gap-2">
@@ -2322,6 +2322,83 @@
             transition: none !important;
         }
 
+    }
+
+    /* ================================================================
+       DASHBOARD HISTORY + MONTHLY STATISTICS
+       ================================================================ */
+    .dashboard-history-panel {
+        min-width: 0;
+    }
+
+    .dashboard-history-header {
+        min-height: 82px;
+    }
+
+    .dashboard-history-row {
+        min-width: 0;
+    }
+
+    .dashboard-stat-panel {
+        min-width: 0;
+    }
+
+    .dashboard-stat-panel .stat-month-select {
+        min-width: 145px;
+        max-width: 170px;
+    }
+
+    .dashboard-stat-panel .stat-chart-wrap {
+        min-height: 188px;
+    }
+
+    .dashboard-stat-panel .stat-breakdown {
+        display: grid;
+        gap: 8px;
+    }
+
+    .dashboard-stat-panel .stat-breakdown > div {
+        min-height: 42px;
+    }
+
+    @media (max-width: 1279px) and (min-width: 1024px) {
+        .dashboard-stat-panel .stat-chart-wrap {
+            min-height: 210px;
+        }
+    }
+
+    @media (max-width: 1023px) {
+        .dashboard-history-panel .dashboard-history-header {
+            min-height: 76px;
+        }
+
+        .dashboard-stat-panel {
+            width: 100%;
+        }
+
+        .dashboard-stat-panel .stat-month-select {
+            min-width: 145px;
+        }
+    }
+
+    @media (max-width: 639px) {
+        .dashboard-history-header {
+            min-height: 72px;
+        }
+
+        .dashboard-history-row {
+            padding-top: .7rem !important;
+            padding-bottom: .7rem !important;
+        }
+
+        .dashboard-stat-panel .stat-month-select {
+            width: 100%;
+            max-width: none;
+        }
+
+        .dashboard-stat-panel .stat-chart-wrap {
+            min-height: 185px;
+        }
     }
 
 </style>

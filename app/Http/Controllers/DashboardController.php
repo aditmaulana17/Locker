@@ -207,11 +207,20 @@ class DashboardController extends Controller
 
         /*
          * ==========================================================
-         * STATISTIK BULANAN
+         * STATISTIK BULANAN BERDASARKAN WAKTU INPUT
          * ==========================================================
-         * Admin/Pimpinan dapat memilih bulan untuk melihat perbandingan
-         * surat masuk dan surat keluar berdasarkan tanggal surat.
-         * Scorecard di atas tetap menggunakan seluruh data seperti semula.
+         * Admin/Pimpinan dapat memilih bulan untuk melihat berapa
+         * banyak data surat yang benar-benar dimasukkan ke sistem
+         * pada bulan tersebut.
+         *
+         * Dasar perhitungan menggunakan created_at, bukan
+         * tanggal_surat, sehingga perubahan tanggal pada isi surat
+         * tidak memindahkan statistik ke bulan lain.
+         *
+         * Pilihan statistik minimal tersedia untuk 12 bulan terakhir,
+         * sehingga bulan tanpa input tetap dapat dipilih dan bernilai 0.
+         * Jika arsip lebih lama tersedia, periode tersebut juga tetap
+         * dimasukkan ke daftar pilihan.
          */
         $requestedStatMonth = trim(
             (string) request()->query('stat_month', now()->format('Y-m'))
@@ -234,10 +243,10 @@ class DashboardController extends Controller
         $statSuratMasuk =
             SuratMasuk::query()
                 ->whereBetween(
-                    'tanggal_surat',
+                    'created_at',
                     [
-                        $statMonthStart->toDateString(),
-                        $statMonthEnd->toDateString(),
+                        $statMonthStart,
+                        $statMonthEnd,
                     ]
                 )
                 ->count();
@@ -245,10 +254,10 @@ class DashboardController extends Controller
         $statSuratKeluar =
             SuratKeluar::query()
                 ->whereBetween(
-                    'tanggal_surat',
+                    'created_at',
                     [
-                        $statMonthStart->toDateString(),
-                        $statMonthEnd->toDateString(),
+                        $statMonthStart,
+                        $statMonthEnd,
                     ]
                 )
                 ->count();
@@ -257,13 +266,13 @@ class DashboardController extends Controller
 
         $statFirstIncomingDate =
             SuratMasuk::query()
-                ->whereNotNull('tanggal_surat')
-                ->min('tanggal_surat');
+                ->whereNotNull('created_at')
+                ->min('created_at');
 
         $statFirstOutgoingDate =
             SuratKeluar::query()
-                ->whereNotNull('tanggal_surat')
-                ->min('tanggal_surat');
+                ->whereNotNull('created_at')
+                ->min('created_at');
 
         $statFirstDates = collect([
             $statFirstIncomingDate,
@@ -279,6 +288,11 @@ class DashboardController extends Controller
         }
 
         $statCurrentDate = now()->startOfMonth();
+        $minimumStatStart = $statCurrentDate->copy()->subMonths(11)->startOfMonth();
+
+        if ($statFirstDate->greaterThan($minimumStatStart)) {
+            $statFirstDate = $minimumStatStart;
+        }
 
         if ($statFirstDate->greaterThan($statCurrentDate)) {
             $statFirstDate = $statCurrentDate->copy();
