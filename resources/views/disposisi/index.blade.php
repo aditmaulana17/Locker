@@ -125,7 +125,6 @@
 @media(max-width:480px){.disposisi-header-actions{grid-template-columns:1fr}.disposisi-top-button.primary{grid-column:auto}.disposisi-summary-card{padding:9px}.disposisi-summary-icon{width:29px;height:29px;flex-basis:29px}.disposisi-table-title{font-size:11px}.disposisi-table-subtitle{font-size:7.5px}.archive-status-options{grid-template-columns:1fr}}
 </style>
 @endpush
-@endpush
 
 <div class="disposisi-page space-y-4 sm:space-y-5">
     {{-- HEADER --}}
