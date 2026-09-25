@@ -41,6 +41,28 @@ class DisposisiController extends Controller
             );
         }
 
+        // Ringkasan hanya mengikuti hak akses user, bukan filter tabel.
+        $disposisiStatsQuery = Disposisi::query();
+
+        if ($role === 'staf') {
+            $disposisiStatsQuery->where(
+                'kepada_user_id',
+                (int) $user->id
+            );
+        }
+
+        $disposisiStatsByStatus = (clone $disposisiStatsQuery)
+            ->selectRaw('LOWER(TRIM(status)) AS status, COUNT(*) AS total')
+            ->groupByRaw('LOWER(TRIM(status))')
+            ->pluck('total', 'status');
+
+        $disposisiStats = [
+            'total' => (clone $disposisiStatsQuery)->count(),
+            'menunggu' => (int) ($disposisiStatsByStatus['menunggu'] ?? 0),
+            'diproses' => (int) ($disposisiStatsByStatus['diproses'] ?? 0),
+            'selesai' => (int) ($disposisiStatsByStatus['selesai'] ?? 0),
+        ];
+
         /*
          * =====================================================
          * FILTER STATUS
@@ -261,7 +283,7 @@ class DisposisiController extends Controller
 
         return view(
             'disposisi.index',
-            compact('disposisis')
+            compact('disposisis', 'disposisiStats')
         );
     }
 
