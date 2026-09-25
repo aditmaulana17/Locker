@@ -214,7 +214,6 @@
                 ''
             )
         );
-
     /*
     |--------------------------------------------------------------------------
     | URUTAN DATA
@@ -229,21 +228,17 @@
             (string) request()->input('sort', 'desc')
         )
     );
-
     if (!in_array($sortOrder, ['asc', 'desc'], true)) {
         $sortOrder = 'desc';
     }
-
     $sortLabel =
         $sortOrder === 'desc'
             ? 'Terbaru'
             : 'Terlama';
-
     $nextSortOrder =
         $sortOrder === 'desc'
             ? 'asc'
             : 'desc';
-
     $sortUrl = route(
         'surat-keluar.index',
         array_merge(
@@ -251,7 +246,6 @@
             ['sort' => $nextSortOrder]
         )
     );
-
     $sortTitle =
         $sortOrder === 'desc'
             ? 'Klik untuk menampilkan dari terlama ke terbaru'
@@ -260,7 +254,6 @@
         $exportFilters['search'] =
             $searchValue;
     }
-
     $exportFilters['sort'] = $sortOrder;
     if (!empty($selectedKategori)) {
         $exportFilters['kategori_id'] =
@@ -302,7 +295,6 @@
     $statusCounts = is_array($statusCounts ?? null)
         ? $statusCounts
         : [];
-
     $suratKeluarStatistics =
         \App\Models\SuratKeluar::query()
             ->selectRaw(
@@ -364,9 +356,7 @@
         $statusCounts['diarsipkan']
         ?? 0
     );
-
     $categorySummary = collect();
-
     if (isset($categoryCounts)) {
         $categorySummary = collect($categoryCounts)
             ->mapWithKeys(function ($item) {
@@ -377,12 +367,10 @@
             ->sortDesc()
             ->take(5);
     }
-
     if ($categorySummary->isEmpty() && isset($suratKeluars)) {
         $categoryCollection = method_exists($suratKeluars, 'getCollection')
             ? collect($suratKeluars->getCollection())
             : collect($suratKeluars);
-
         $categorySummary = $categoryCollection
             ->map(fn ($item) => trim((string) ($item->kategori?->nama_kategori ?? 'Tanpa Kategori')))
             ->map(fn ($name) => $name !== '' ? $name : 'Tanpa Kategori')
@@ -390,7 +378,6 @@
             ->sortDesc()
             ->take(5);
     }
-
     $statusChartData = [
         'Draf' => ['value' => $suratDraft, 'color' => '#64748b'],
         'Diproses' => ['value' => $suratDiproses, 'color' => '#d97706'],
@@ -400,7 +387,6 @@
     ];
     $statusChartTotal = array_sum(array_column($statusChartData, 'value'));
     $statusChartGradient = '#e2e8f0';
-
     if ($statusChartTotal > 0) {
         $segments = [];
         $cursor = 0;
@@ -414,7 +400,6 @@
         }
         $statusChartGradient = 'conic-gradient(' . implode(', ', $segments) . ')';
     }
-
 @endphp
 @push('styles')
 <style>
@@ -463,7 +448,7 @@
 .surat-sort-badge{display:inline-flex;align-items:center;gap:5px;min-height:30px;padding:0 9px;border:1px solid #dbe4f0;border-radius:9px;background:#fff;color:#475569;font-size:9px;font-weight:700;text-decoration:none;white-space:nowrap;cursor:pointer;transition:.15s ease;}.surat-sort-badge:hover{border-color:#bfdbfe;background:#eff6ff;color:#2563eb;transform:translateY(-1px);box-shadow:0 5px 14px rgba(37,99,235,.10);}
 /* FILTER */
 .surat-filter-card{margin:0;padding:14px 18px 15px;border:0;border-bottom:1px solid #edf2f7;border-radius:0;background:#fff;box-shadow:none;}
-.surat-filter-main{display:grid;grid-template-columns:minmax(0,1fr) auto 250px;gap:9px;align-items:center;}
+.surat-filter-main{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(270px,320px);gap:9px;align-items:center;}
 .surat-search-wrapper{position:relative;min-width:0;}
 .surat-search-icon{position:absolute;top:50%;left:12px;z-index:2;display:flex;align-items:center;justify-content:center;width:17px;height:17px;color:#64748b;transform:translateY(-50%);pointer-events:none;}
 .surat-search-input,.surat-date-input{width:100%;height:42px;border:1px solid #d6e0ec;border-radius:10px;outline:none;background:#fff;color:#334155;font-size:11px;transition:border-color .15s ease,box-shadow .15s ease;}
@@ -471,11 +456,11 @@
 .surat-search-input::placeholder,.surat-date-input::placeholder{color:#94a3b8;}
 .surat-search-input:hover,.surat-date-input:hover{border-color:#b8c5d6;}
 .surat-search-input:focus,.surat-date-input:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.08);}
-.surat-filter-actions{display:flex;align-items:center;gap:5px;}
-.surat-filter-submit{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:42px;min-width:104px;padding:0 14px;border:1px solid #2563eb;border-radius:10px;background:#2563eb;color:#fff;font-size:11px;font-weight:700;cursor:pointer;box-shadow:0 5px 14px rgba(37,99,235,.14);transition:.15s ease;}
+.surat-filter-actions{display:flex;align-items:center;justify-content:flex-start;gap:5px;min-width:0;}
+.surat-filter-submit{display:inline-flex;align-items:center;justify-content:center;gap:5px;width:82px;height:42px;min-width:82px;padding:0 10px;border:1px solid #2563eb;border-radius:10px;background:#2563eb;color:#fff;font-size:10px;font-weight:700;cursor:pointer;box-shadow:0 5px 14px rgba(37,99,235,.14);transition:.15s ease;}
 .surat-filter-submit:hover{border-color:#1d4ed8;background:#1d4ed8;box-shadow:0 7px 18px rgba(37,99,235,.18);}
 .surat-filter-submit.has-filter{border-color:#2563eb;background:#2563eb;color:#fff;}
-.surat-filter-reset{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border:1px solid #d6e0ec;border-radius:10px;background:#fff;color:#64748b;text-decoration:none;transition:.15s ease;}
+.surat-filter-reset{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border:1px solid #d6e0ec;border-radius:9px;background:#fff;color:#64748b;text-decoration:none;transition:.15s ease;}
 .surat-filter-reset:hover{border-color:#fecdd3;background:#fff1f2;color:#e11d48;}
 .surat-date-wrapper{position:relative;min-width:0;}
 .surat-date-field{position:relative;}
@@ -487,18 +472,18 @@
 .surat-date-clear:hover{background:#fff1f2;color:#e11d48;}
 .filter-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:8px;}
 .filter-dropdown{position:relative;min-width:0;}
-.filter-dropdown-trigger{display:flex;align-items:center;width:100%;min-height:46px;gap:9px;padding:7px 10px;border:1px solid #d6e0ec;border-radius:10px;background:#fff;color:#334155;text-align:left;cursor:pointer;transition:.15s ease;}
+.filter-dropdown-trigger{display:flex;align-items:center;width:100%;min-height:44px;gap:8px;padding:6px 9px;border:1px solid #d6e0ec;border-radius:10px;background:#fff;color:#334155;text-align:left;cursor:pointer;transition:.15s ease;}
 .filter-dropdown-trigger:hover{border-color:#b8c5d6;background:#f8fafc;}
 .filter-dropdown-trigger[aria-expanded="true"]{border-color:#3b82f6;background:#f8fbff;box-shadow:0 0 0 3px rgba(59,130,246,.08);}
 .filter-dropdown-trigger.status-trigger[aria-expanded="true"]{border-color:#d97706;background:#fffcf0;box-shadow:0 0 0 3px rgba(217,119,6,.08);}
-.filter-dropdown-trigger-content{display:flex;align-items:center;gap:9px;min-width:0;flex:1;}
-.filter-dropdown-icon{display:flex;align-items:center;justify-content:center;width:30px;height:30px;flex:0 0 30px;border-radius:8px;background:#eff6ff;color:#2563eb;}
+.filter-dropdown-trigger-content{display:flex;align-items:center;gap:8px;min-width:0;flex:1;}
+.filter-dropdown-icon{display:flex;align-items:center;justify-content:center;width:28px;height:28px;flex:0 0 28px;border-radius:8px;background:#eff6ff;color:#2563eb;}
 .filter-dropdown-icon.status{background:#fffbeb;color:#d97706;}
 .filter-dropdown-text{min-width:0;flex:1;}
 .filter-dropdown-title,.filter-dropdown-subtitle{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .filter-dropdown-title{color:#334155;font-size:10px;font-weight:800;}
-.filter-dropdown-subtitle{margin-top:2px;color:#94a3b8;font-size:8.5px;}
-.filter-dropdown-count{display:inline-flex;align-items:center;justify-content:center;min-width:58px;min-height:22px;padding:0 7px;border-radius:999px;font-size:8px;font-weight:800;white-space:nowrap;}
+.filter-dropdown-subtitle{margin-top:2px;color:#94a3b8;font-size:8px;}
+.filter-dropdown-count{display:inline-flex;align-items:center;justify-content:center;min-width:54px;min-height:21px;padding:0 6px;border-radius:999px;font-size:7.5px;font-weight:800;white-space:nowrap;}
 .filter-dropdown-count.category{background:#eff6ff;color:#2563eb;}
 .filter-dropdown-count.status{background:#fffbeb;color:#b45309;}
 .filter-dropdown-arrow{flex:0 0 auto;color:#94a3b8;transition:.15s ease;}
@@ -506,24 +491,26 @@
 .filter-dropdown-trigger.status-trigger[aria-expanded="true"] .filter-dropdown-arrow{color:#d97706;}
 .filter-dropdown-menu{position:absolute;top:calc(100% + 7px);left:0;right:0;z-index:10020;display:none;overflow:hidden;border:1px solid #dbe4f0;border-radius:12px;background:#fff;box-shadow:0 20px 45px rgba(15,23,42,.14),0 5px 18px rgba(15,23,42,.08);}
 .filter-dropdown.open .filter-dropdown-menu{display:block;}
-.filter-dropdown-menu-header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 11px;border-bottom:1px solid #edf2f7;background:#f8fafc;}
+.filter-dropdown-menu-header{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 10px;border-bottom:1px solid #edf2f7;background:#f8fafc;}
 .filter-dropdown-menu-title-wrap{min-width:0;}
-.filter-dropdown-menu-title{display:block;color:#334155;font-size:10px;font-weight:800;}
-.filter-dropdown-menu-description{display:block;margin-top:2px;color:#94a3b8;font-size:8px;}
-.filter-dropdown-actions{display:inline-flex;align-items:center;gap:3px;flex:0 0 auto;}
-.filter-dropdown-action{border:0;border-radius:6px;background:transparent;padding:5px 6px;font-size:8px;font-weight:800;cursor:pointer;}
+.filter-dropdown-menu-title{display:block;color:#334155;font-size:9px;font-weight:800;}
+.filter-dropdown-menu-description{display:block;margin-top:2px;color:#94a3b8;font-size:7px;}
+.filter-dropdown-actions{display:inline-flex;align-items:center;gap:2px;flex:0 0 auto;}
+.filter-dropdown-action{border:0;border-radius:6px;background:transparent;padding:4px 5px;font-size:7px;font-weight:800;cursor:pointer;}
 .filter-dropdown-action.category{color:#2563eb}.filter-dropdown-action.status{color:#d97706}.filter-dropdown-action.clear{color:#64748b}
 .filter-dropdown-action.category:hover{background:#eff6ff}.filter-dropdown-action.status:hover{background:#fffbeb}.filter-dropdown-action.clear:hover{background:#f1f5f9}
-.filter-dropdown-divider{color:#cbd5e1;font-size:9px;}
-.filter-dropdown-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;max-height:240px;overflow-y:auto;padding:9px;}
-.filter-dropdown-option{display:flex;align-items:center;min-width:0;min-height:36px;gap:7px;padding:6px 8px;border:1px solid #dbe3ed;border-radius:8px;background:#fff;cursor:pointer;transition:.15s ease;}
+.filter-dropdown-divider{color:#cbd5e1;font-size:8px;}
+.filter-dropdown-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;max-height:240px;overflow-y:auto;padding:8px;}
+.filter-dropdown-option{display:flex;align-items:center;min-width:0;min-height:36px;gap:6px;padding:6px 7px;border:1px solid #dbe3ed;border-radius:8px;background:#fff;cursor:pointer;transition:.15s ease;}
 .filter-dropdown-option:hover{border-color:#93c5fd;background:#eff6ff;}
 .filter-dropdown-option.status-option:hover{border-color:#fbbf24;background:#fffbeb;}
-.filter-dropdown-option input{width:14px;height:14px;margin:0;cursor:pointer;}
-.filter-dropdown-option span{min-width:0;overflow:hidden;color:#475569;font-size:9px;font-weight:600;text-overflow:ellipsis;white-space:nowrap;}
+.filter-dropdown-option input{width:13px;height:13px;margin:0;cursor:pointer;accent-color:#2563eb;}
+.filter-dropdown-option span{min-width:0;overflow:hidden;color:#475569;font-size:8px;font-weight:600;text-overflow:ellipsis;white-space:nowrap;}
 .filter-dropdown-option:has(input:checked){border-color:#2563eb;background:#eff6ff}.filter-dropdown-option.status-option:has(input:checked){border-color:#d97706;background:#fffbeb}
-.filter-dropdown-menu-footer{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 10px;border-top:1px solid #edf2f7;}
-.filter-dropdown-footer-count{color:#64748b;font-size:8px;font-weight:700}.filter-dropdown-footer-hint{color:#94a3b8;font-size:8px;}
+.filter-dropdown-menu-footer{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:6px 9px;border-top:1px solid #edf2f7;}
+.filter-dropdown-footer-count,.filter-dropdown-footer-hint{font-size:7px;line-height:1.2;}
+.filter-dropdown-footer-count{color:#64748b;font-weight:700}.filter-dropdown-footer-hint{color:#94a3b8;}
+.filter-dropdown-empty{padding:18px 10px;text-align:center;color:#94a3b8;font-size:8px;}
 /* SIDEBAR */
 .surat-sidebar{display:flex;flex-direction:column;gap:12px;min-width:0;}
 .surat-side-card-header{justify-content:flex-start;}
@@ -565,10 +552,69 @@
 .custom-date-picker-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-top:1px solid #e2e8f0}.custom-date-picker-selected{min-width:0;color:#64748b;font-size:10px;font-weight:700}.custom-date-picker-actions{display:flex;align-items:center;gap:6px}.custom-date-picker-button{height:34px;border:1px solid #dbe3ed;border-radius:8px;padding:0 12px;background:#f8fafc;color:#475569;font-size:10px;font-weight:700;cursor:pointer}.custom-date-picker-button.apply{border-color:#2563eb;background:#2563eb;color:#fff}
 .custom-picker-panel{position:fixed;z-index:1000000;width:310px;max-width:calc(100vw - 20px);padding:12px;border-radius:12px}.custom-picker-panel-header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;padding-bottom:9px;border-bottom:1px solid #e2e8f0}.custom-picker-panel-title{flex:1;color:#334155;font-size:12px;font-weight:800;text-align:center}.custom-picker-panel-close{width:28px;height:28px;border-radius:7px;font-size:17px}.custom-picker-month-grid,.custom-picker-year-grid,.custom-picker-grid{display:grid;gap:7px}.custom-picker-month-grid{grid-template-columns:repeat(3,1fr)}.custom-picker-year-grid{grid-template-columns:repeat(4,1fr)}.custom-picker-option{display:flex;align-items:center;justify-content:center;min-height:40px;padding:0 6px;border:1px solid #dbe3ed;border-radius:9px;background:#fff;color:#475569;font-size:10px;font-weight:700;cursor:pointer}.custom-picker-option:hover{border-color:#93c5fd;background:#eff6ff;color:#2563eb}.custom-picker-option.active{border-color:#2563eb;background:#2563eb;color:#fff}.custom-picker-option.current:not(.active){box-shadow:inset 0 0 0 1px #93c5fd}
 /* RESPONSIVE */
-@media(max-width:1100px){.surat-keluar-summary{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.surat-workspace{grid-template-columns:minmax(0,1fr)}.surat-sidebar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.surat-filter-main{grid-template-columns:minmax(0,1fr) auto}.surat-date-wrapper{grid-column:1/-1}}
-@media(max-width:767px){.surat-page-header{align-items:flex-start;flex-direction:column}.surat-page-header-left{width:100%}.surat-header-actions{width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}.surat-header-actions .surat-export-button,.surat-header-actions .surat-create-button{width:100%;padding:0 8px;font-size:9px}.surat-page-title{font-size:24px}.surat-page-description{font-size:11px}.surat-keluar-summary{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.surat-keluar-summary-card{min-height:86px;padding:12px;gap:8px}.surat-keluar-summary-icon{width:37px;height:37px;flex-basis:37px;border-radius:10px}.surat-keluar-summary-value{font-size:20px}.surat-keluar-summary-note{font-size:8px}.surat-sidebar{display:flex;flex-direction:column}.surat-filter-card{padding:12px}.surat-filter-main{grid-template-columns:1fr;gap:8px}.surat-filter-actions{width:100%}.surat-filter-submit{flex:1}.surat-filter-reset{width:42px;flex:0 0 42px}.filter-row{grid-template-columns:1fr}.filter-dropdown-menu{position:fixed;top:50%;left:50%;right:auto;width:calc(100vw - 24px);max-width:430px;max-height:80vh;transform:translate(-50%,-50%)}.filter-dropdown-options{max-height:calc(80vh - 145px)}.archive-table-scroll{overflow:visible}.archive-table{min-width:0;table-layout:auto}.archive-table thead{display:none}.archive-table,.archive-table tbody,.archive-table tr,.archive-table td{display:block;width:100%}.archive-table tbody tr{margin:0;padding:10px 12px;border-bottom:1px solid #edf2f7;background:#fff}.archive-table tbody td{display:grid;grid-template-columns:82px minmax(0,1fr);gap:10px;align-items:center;padding:6px 0;border:0;font-size:10px}.archive-table tbody td::before{content:attr(data-label);color:#94a3b8;font-size:8px;font-weight:800;letter-spacing:.03em;text-transform:uppercase}.archive-table tbody td:last-child{display:flex;justify-content:space-between;align-items:center;padding-top:8px;margin-top:4px;border-top:1px solid #f1f5f9;text-align:left}.archive-table tbody td:last-child::before{content:attr(data-label)}.archive-table .action-buttons{margin-left:auto}.archive-table .sender-badge{max-width:none}.archive-table .cell-subject{white-space:normal}.custom-date-picker{top:50%;left:50%;width:calc(100vw - 16px);max-height:calc(100vh - 16px);overflow-y:auto;transform:translate(-50%,-50%)}.custom-date-calendars,.custom-date-picker-calendars{grid-template-columns:1fr}.custom-calendar+.custom-calendar{border-top:1px solid #e2e8f0;border-left:0}.custom-calendar-day{height:38px}.custom-picker-panel{top:50%!important;left:50%!important;width:calc(100vw - 24px);transform:translate(-50%,-50%)}body.date-picker-lock{overflow:hidden}}
-@media(max-width:480px){.surat-keluar-summary{grid-template-columns:1fr}.surat-header-actions{grid-template-columns:1fr 1fr}.surat-header-actions .surat-create-button{grid-column:1/-1}.filter-dropdown-options{grid-template-columns:1fr}}
-</style>
+@media(max-width:1100px){
+.surat-keluar-summary{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.surat-workspace{grid-template-columns:minmax(0,1fr)}
+.surat-sidebar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+.surat-filter-main{grid-template-columns:minmax(0,1fr) auto}
+.surat-date-wrapper{grid-column:1/-1}
+}
+@media(max-width:767px){
+.surat-page-header{align-items:flex-start;flex-direction:column;gap:12px}
+.surat-page-header-left{width:100%}
+.surat-header-actions{width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+.surat-header-actions .surat-export-button,.surat-header-actions .surat-create-button{width:100%;padding:0 8px;font-size:9px}
+.surat-page-title{font-size:24px}
+.surat-page-description{font-size:11px}
+.surat-keluar-summary{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.surat-keluar-summary-card{min-height:86px;padding:12px;gap:8px}
+.surat-keluar-summary-icon{width:37px;height:37px;flex-basis:37px;border-radius:10px}
+.surat-keluar-summary-value{font-size:20px}
+.surat-keluar-summary-note{font-size:8px}
+.surat-sidebar{display:flex;flex-direction:column}
+.surat-filter-card{padding:12px}
+.surat-filter-main{grid-template-columns:minmax(0,1fr) auto;gap:8px}
+.surat-filter-actions{width:auto}
+.surat-filter-submit{width:82px;min-width:82px}
+.surat-filter-reset{width:34px;flex:0 0 34px}
+.surat-date-wrapper{grid-column:1/-1}
+.filter-row{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.filter-dropdown-menu{position:fixed;top:50%;left:50%;right:auto;width:calc(100vw - 24px);max-width:430px;max-height:80vh;transform:translate(-50%,-50%)}
+.filter-dropdown-options{grid-template-columns:repeat(3,minmax(0,1fr));max-height:calc(80vh - 145px)}
+.filter-dropdown-option span{font-size:8px}
+.archive-table-scroll{overflow:visible}
+.archive-table{min-width:0;table-layout:auto}
+.archive-table thead{display:none}
+.archive-table,.archive-table tbody,.archive-table tr,.archive-table td{display:block;width:100%}
+.archive-table tbody tr{margin:0;padding:10px 12px;border-bottom:1px solid #edf2f7;background:#fff}
+.archive-table tbody td{display:grid;grid-template-columns:82px minmax(0,1fr);gap:10px;align-items:center;padding:6px 0;border:0;font-size:10px}
+.archive-table tbody td::before{content:attr(data-label);color:#94a3b8;font-size:8px;font-weight:800;letter-spacing:.03em;text-transform:uppercase}
+.archive-table tbody td:last-child{display:flex;justify-content:space-between;align-items:center;padding-top:8px;margin-top:4px;border-top:1px solid #f1f5f9;text-align:left}
+.archive-table tbody td:last-child::before{content:attr(data-label)}
+.archive-table .action-buttons{margin-left:auto}
+.archive-table .sender-badge{max-width:none}
+.archive-table .cell-subject{white-space:normal}
+.custom-date-picker{top:50%;left:50%;width:calc(100vw - 16px);max-height:calc(100vh - 16px);overflow-y:auto;transform:translate(-50%,-50%)}
+.custom-date-calendars,.custom-date-picker-calendars{grid-template-columns:1fr}
+.custom-calendar+.custom-calendar{border-top:1px solid #e2e8f0;border-left:0}
+.custom-calendar-day{height:38px}
+.custom-picker-panel{top:50%!important;left:50%!important;width:calc(100vw - 24px);transform:translate(-50%,-50%)}
+body.date-picker-lock{overflow:hidden}
+}
+@media(max-width:480px){
+.surat-keluar-summary{grid-template-columns:1fr}
+.surat-header-actions{grid-template-columns:1fr 1fr}
+.surat-header-actions .surat-create-button{grid-column:1/-1}
+.surat-filter-main{grid-template-columns:1fr auto}
+.surat-filter-actions{justify-content:flex-end}
+.surat-filter-submit{width:78px;min-width:78px;height:40px;font-size:9px}
+.surat-filter-reset{width:32px;height:32px}
+.filter-row{grid-template-columns:1fr}
+.filter-dropdown-options{grid-template-columns:repeat(2,minmax(0,1fr))}
+.filter-dropdown-menu-header{align-items:flex-start}
+.filter-dropdown-actions{margin-top:1px}
+.filter-dropdown-footer-count,.filter-dropdown-footer-hint{font-size:6.5px}
+}</style>
 @endpush
 <div class="surat-page space-y-4">
     {{-- =====================================================================
@@ -680,7 +726,6 @@
             @endif
         </div>
     </div>
-
     {{-- =====================================================
          SCORECARD
     ====================================================== --}}
@@ -737,7 +782,6 @@
             </div>
         </div>
     </div>
-
     <div class="surat-workspace">
         <div class="surat-main-card">
             <div class="surat-main-card-header">
@@ -766,7 +810,6 @@
                     {{ $sortLabel }}
                 </a>
             </div>
-
     {{-- =====================================================
          FILTER
     ====================================================== --}}
@@ -1093,7 +1136,6 @@
             </div>
         </form>
     </div>
-
     {{-- =====================================================
          TABLE
     ====================================================== --}}
