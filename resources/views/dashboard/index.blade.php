@@ -44,7 +44,6 @@
 
     $today = now()->translatedFormat('l, d F Y');
 
-
     /*
     |--------------------------------------------------------------------------
     | STATUS SURAT MASUK
@@ -88,7 +87,6 @@
             'dot' => 'bg-slate-500',
         ],
     ];
-
 
     /*
     |--------------------------------------------------------------------------
@@ -140,7 +138,6 @@
         ],
     ];
 
-
     /*
     |--------------------------------------------------------------------------
     | STATUS DISPOSISI
@@ -170,7 +167,6 @@
         ],
     ];
 
-
     /*
     |--------------------------------------------------------------------------
     | DATA RIWAYAT SURAT KELUAR
@@ -188,9 +184,7 @@
 
 @endphp
 
-
 <div class="dashboard-page space-y-6 sm:space-y-7 lg:space-y-8">
-
 
     {{-- =====================================================================
         HERO
@@ -210,11 +204,9 @@
 
         </div>
 
-
         <div class="relative z-10 p-5 sm:p-7 lg:p-9">
 
             <div class="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
-
 
                 {{-- HERO CONTENT --}}
 
@@ -236,7 +228,6 @@
 
                         </span>
 
-
                         <span class="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[10px] font-semibold text-slate-300 sm:text-xs">
 
                             {{ $roleLabel }}
@@ -244,7 +235,6 @@
                         </span>
 
                     </div>
-
 
                     <h1 class="max-w-3xl text-2xl font-extrabold leading-tight tracking-tight text-white sm:text-3xl lg:text-4xl">
 
@@ -255,7 +245,6 @@
                         </span>
 
                     </h1>
-
 
                     <p class="mt-3 max-w-2xl text-xs leading-relaxed text-slate-300 sm:text-sm">
 
@@ -270,7 +259,6 @@
                         @endif
 
                     </p>
-
 
                     <div class="mt-5 flex items-center gap-2 text-[11px] font-medium text-slate-400 sm:text-xs">
 
@@ -300,7 +288,6 @@
                     </div>
 
                 </div>
-
 
                 {{-- HERO ACTION --}}
 
@@ -333,7 +320,6 @@
 
                             </span>
 
-
                             <span class="text-left">
 
                                 <span class="block text-xs font-bold text-slate-800">
@@ -345,7 +331,6 @@
                                 </span>
 
                             </span>
-
 
                             <svg
                                 class="ml-auto h-4 w-4 text-slate-300 transition group-hover:translate-x-1 group-hover:text-blue-500"
@@ -362,7 +347,6 @@
                             </svg>
 
                         </a>
-
 
                         {{-- SURAT KELUAR --}}
 
@@ -395,7 +379,6 @@
 
                             </span>
 
-
                             <span class="text-left">
 
                                 <span class="block text-xs font-bold text-slate-800">
@@ -407,7 +390,6 @@
                                 </span>
 
                             </span>
-
 
                             <svg
                                 class="ml-auto h-4 w-4 text-slate-300 transition group-hover:translate-x-1 group-hover:text-emerald-500"
@@ -459,7 +441,6 @@
 
                             </span>
 
-
                             <span class="text-left">
 
                                 <span class="block text-xs font-bold text-slate-800">
@@ -471,7 +452,6 @@
                                 </span>
 
                             </span>
-
 
                             <svg
                                 class="ml-auto h-4 w-4 text-slate-300 transition group-hover:translate-x-1 group-hover:text-purple-500"
@@ -499,7 +479,6 @@
 
     </section>
 
-
     {{-- =====================================================================
         ADMIN / PIMPINAN
     ====================================================================== --}}
@@ -513,7 +492,6 @@
         <section>
 
             <div class="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
-
 
                 {{-- SURAT MASUK --}}
 
@@ -532,13 +510,11 @@
                                 Surat Masuk
                             </span>
 
-
                             <div class="mt-3 flex items-baseline gap-1">
 
                                 <span class="stat-number">
                                     {{ $totalSuratMasuk ?? 0 }}
                                 </span>
-
 
                                 <span class="hidden text-[10px] font-semibold text-slate-400 sm:inline">
                                     surat
@@ -547,7 +523,6 @@
                             </div>
 
                         </div>
-
 
                         <div class="stat-icon stat-icon-blue">
 
@@ -577,13 +552,11 @@
 
                     </div>
 
-
                     <div class="mt-4 flex items-center justify-between">
 
                         <span class="stat-pill bg-blue-50 text-blue-600">
                             Arsip Masuk
                         </span>
-
 
                         <span class="stat-arrow text-blue-500">
                             →
@@ -592,7 +565,6 @@
                     </div>
 
                 </a>
-
 
                 {{-- SURAT KELUAR --}}
 
@@ -603,7 +575,6 @@
 
                     <div class="stat-color-bar bg-emerald-500"></div>
 
-
                     <div class="flex items-start justify-between gap-3">
 
                         <div class="min-w-0">
@@ -612,13 +583,11 @@
                                 Surat Keluar
                             </span>
 
-
                             <div class="mt-3 flex items-baseline gap-1">
 
                                 <span class="stat-number">
                                     {{ $totalSuratKeluar ?? 0 }}
                                 </span>
-
 
                                 <span class="hidden text-[10px] font-semibold text-slate-400 sm:inline">
                                     surat
@@ -627,7 +596,6 @@
                             </div>
 
                         </div>
-
 
                         <div class="stat-icon stat-icon-emerald">
 
@@ -655,13 +623,11 @@
 
                     </div>
 
-
                     <div class="mt-4 flex items-center justify-between">
 
                         <span class="stat-pill bg-emerald-50 text-emerald-600">
                             Arsip Keluar
                         </span>
-
 
                         <span class="stat-arrow text-emerald-500">
                             →
@@ -670,7 +636,6 @@
                     </div>
 
                 </a>
-
 
                 {{-- BELUM DIPROSES --}}
 
@@ -681,7 +646,6 @@
 
                     <div class="stat-color-bar bg-amber-500"></div>
 
-
                     <div class="flex items-start justify-between gap-3">
 
                         <div class="min-w-0">
@@ -690,13 +654,11 @@
                                 Belum Diproses
                             </span>
 
-
                             <div class="mt-3 flex items-baseline gap-1">
 
                                 <span class="stat-number">
                                     {{ $suratPending ?? 0 }}
                                 </span>
-
 
                                 <span class="hidden text-[10px] font-semibold text-slate-400 sm:inline">
                                     surat
@@ -705,7 +667,6 @@
                             </div>
 
                         </div>
-
 
                         <div class="stat-icon stat-icon-amber">
 
@@ -732,13 +693,11 @@
 
                     </div>
 
-
                     <div class="mt-4 flex items-center justify-between">
 
                         <span class="stat-pill bg-amber-50 text-amber-600">
                             Perlu Tindakan
                         </span>
-
 
                         <span class="stat-arrow text-amber-500">
                             →
@@ -747,7 +706,6 @@
                     </div>
 
                 </a>
-
 
                 {{-- SELESAI --}}
 
@@ -758,7 +716,6 @@
 
                     <div class="stat-color-bar bg-teal-500"></div>
 
-
                     <div class="flex items-start justify-between gap-3">
 
                         <div class="min-w-0">
@@ -767,13 +724,11 @@
                                 Selesai
                             </span>
 
-
                             <div class="mt-3 flex items-baseline gap-1">
 
                                 <span class="stat-number">
                                     {{ $suratSelesai ?? 0 }}
                                 </span>
-
 
                                 <span class="hidden text-[10px] font-semibold text-slate-400 sm:inline">
                                     surat
@@ -782,7 +737,6 @@
                             </div>
 
                         </div>
-
 
                         <div class="stat-icon stat-icon-teal">
 
@@ -810,13 +764,11 @@
 
                     </div>
 
-
                     <div class="mt-4 flex items-center justify-between">
 
                         <span class="stat-pill bg-teal-50 text-teal-600">
                             Terselesaikan
                         </span>
-
 
                         <span class="stat-arrow text-teal-500">
                             →
@@ -829,7 +781,6 @@
             </div>
 
         </section>
-
 
         {{-- =================================================================
             RIWAYAT & STATISTIK SURAT
@@ -1117,7 +1068,6 @@
                 @endif
 
             </section>
-
 
             {{-- ============================================================
                 RIWAYAT SURAT KELUAR
@@ -1416,7 +1366,6 @@
 
             </section>
 
-
             {{-- ============================================================
                 GRAFIK LINGKARAN / DONUT
             ============================================================= --}}
@@ -1428,53 +1377,42 @@
                     <div class="pointer-events-none absolute -right-10 -top-12 h-32 w-32 rounded-full bg-indigo-500/5 blur-3xl"></div>
 
                     <div class="relative">
-
-                        <div class="flex items-center gap-3">
-
-                            <span class="flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 shadow-sm ring-1 ring-indigo-100">
-
-                                <svg
-                                    class="h-5 w-5"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    stroke-width="1.8"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <circle
-                                        cx="12"
-                                        cy="12"
-                                        r="8.5"
-                                    />
-
-                                    <path
-                                        stroke-linecap="round"
-                                        d="M12 3.5a8.5 8.5 0 018.5 8.5"
-                                    />
-                                </svg>
-
-                            </span>
-
-                            <div class="min-w-0">
-                                <span class="section-eyebrow">Statistik</span>
-                                <h2 class="mt-1 truncate text-sm font-extrabold tracking-tight text-slate-800 sm:text-base">
-                                    Statistik Surat
-                                </h2>
+                        <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                            <div class="flex min-w-0 items-center gap-3">
+                                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 shadow-sm ring-1 ring-indigo-100">
+                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true">
+                                        <circle cx="12" cy="12" r="8.5"/>
+                                        <path stroke-linecap="round" d="M12 3.5a8.5 8.5 0 018.5 8.5"/>
+                                    </svg>
+                                </span>
+                                <div class="min-w-0">
+                                    <span class="section-eyebrow">Statistik</span>
+                                    <h2 class="mt-1 truncate text-sm font-extrabold tracking-tight text-slate-800 sm:text-base">Statistik Surat</h2>
+                                </div>
                             </div>
-
+                            <form method="GET" action="{{ url()->current() }}" class="shrink-0">
+                                <label for="stat_month" class="sr-only">Pilih bulan statistik</label>
+                                <select id="stat_month" name="stat_month" onchange="this.form.submit()" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-[10px] font-bold text-slate-600 shadow-sm outline-none transition focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100 sm:w-[150px]">
+                                    @foreach($statMonthOptions as $option)
+                                        <option value="{{ $option['value'] }}" @selected($option['value'] === $selectedStatMonth)>{{ $option['label'] }}</option>
+                                    @endforeach
+                                </select>
+                            </form>
                         </div>
-
                         <p class="mt-2 text-[10px] leading-relaxed text-slate-400 sm:text-xs">
-                            Perbandingan total arsip surat masuk dan surat keluar.
+                            Perbandingan arsip surat masuk dan surat keluar pada {{ $selectedStatMonthLabel }}.
                         </p>
-
                     </div>
 
                 </div>
 
                 @php
-                    $chartSuratMasuk = (int) ($totalSuratMasuk ?? 0);
-                    $chartSuratKeluar = (int) ($totalSuratKeluar ?? 0);
-                    $chartTotalArsip = $chartSuratMasuk + $chartSuratKeluar;
+                    $chartSuratMasuk = (int) ($statSuratMasuk ?? 0);
+                    $chartSuratKeluar = (int) ($statSuratKeluar ?? 0);
+                    $chartTotalArsip = (int) ($statTotalArsip ?? ($chartSuratMasuk + $chartSuratKeluar));
+                    $selectedStatMonth = $selectedStatMonth ?? now()->format('Y-m');
+                    $selectedStatMonthLabel = $selectedStatMonthLabel ?? now()->translatedFormat('F Y');
+                    $statMonthOptions = collect($statMonthOptions ?? []);
                 @endphp
 
                 <div class="p-4 sm:p-5">
@@ -1527,7 +1465,6 @@
 
         </section>
 
-
     @else
 
         {{-- =================================================================
@@ -1538,7 +1475,6 @@
 
             <div class="grid grid-cols-2 gap-3 sm:gap-4">
 
-
                 {{-- MENUNGGU --}}
 
                 <a
@@ -1548,7 +1484,6 @@
 
                     <div class="stat-color-bar bg-amber-500"></div>
 
-
                     <div class="flex items-start justify-between gap-3">
 
                         <div class="min-w-0">
@@ -1557,13 +1492,11 @@
                                 Menunggu
                             </span>
 
-
                             <div class="mt-3 flex items-baseline gap-1">
 
                                 <span class="stat-number">
                                     {{ $disposisiMenunggu ?? 0 }}
                                 </span>
-
 
                                 <span class="hidden text-[10px] font-semibold text-slate-400 sm:inline">
                                     tugas
@@ -1572,7 +1505,6 @@
                             </div>
 
                         </div>
-
 
                         <div class="stat-icon stat-icon-amber">
 
@@ -1599,13 +1531,11 @@
 
                     </div>
 
-
                     <div class="mt-4 flex items-center justify-between">
 
                         <span class="stat-pill bg-amber-50 text-amber-600">
                             Perlu Ditindaklanjuti
                         </span>
-
 
                         <span class="stat-arrow text-amber-500">
                             →
@@ -1614,7 +1544,6 @@
                     </div>
 
                 </a>
-
 
                 {{-- SELESAI --}}
 
@@ -1625,7 +1554,6 @@
 
                     <div class="stat-color-bar bg-teal-500"></div>
 
-
                     <div class="flex items-start justify-between gap-3">
 
                         <div class="min-w-0">
@@ -1634,13 +1562,11 @@
                                 Selesai
                             </span>
 
-
                             <div class="mt-3 flex items-baseline gap-1">
 
                                 <span class="stat-number">
                                     {{ $disposisiSelesai ?? 0 }}
                                 </span>
-
 
                                 <span class="hidden text-[10px] font-semibold text-slate-400 sm:inline">
                                     tugas
@@ -1649,7 +1575,6 @@
                             </div>
 
                         </div>
-
 
                         <div class="stat-icon stat-icon-teal">
 
@@ -1677,13 +1602,11 @@
 
                     </div>
 
-
                     <div class="mt-4 flex items-center justify-between">
 
                         <span class="stat-pill bg-teal-50 text-teal-600">
                             Tuntas
                         </span>
-
 
                         <span class="stat-arrow text-teal-500">
                             →
@@ -1696,7 +1619,6 @@
             </div>
 
         </section>
-
 
         {{-- =================================================================
             STAFF TASK LIST
@@ -1733,13 +1655,11 @@
 
                     </div>
 
-
                     <div>
 
                         <h2 class="text-sm font-extrabold text-slate-800 sm:text-base">
                             Disposisi Tugas Untuk Saya
                         </h2>
-
 
                         <p class="mt-0.5 text-[10px] text-slate-400 sm:text-xs">
                             Tugas surat masuk yang perlu Anda tindak lanjuti.
@@ -1750,7 +1670,6 @@
                 </div>
 
             </div>
-
 
             <div class="p-4 sm:p-6">
 
@@ -1770,7 +1689,6 @@
                                     )
                                 );
 
-
                             $currentDisposisiConfig =
                                 $disposisiConfig[
                                     $status
@@ -1781,7 +1699,6 @@
                                     'border' => 'border-l-slate-400',
                                     'icon' => 'bg-slate-50 text-slate-500',
                                 ];
-
 
                             $tanggalSurat = '-';
 
@@ -1806,7 +1723,6 @@
                             }
 
                         @endphp
-
 
                         <a
                             href="{{ route('disposisi.show', $d->id) }}"
@@ -1840,7 +1756,6 @@
 
                                 </div>
 
-
                                 <div class="min-w-0 flex-1">
 
                                     <h3 class="line-clamp-2 text-xs font-bold leading-relaxed text-slate-800 transition group-hover:text-blue-600 sm:text-sm">
@@ -1849,13 +1764,11 @@
 
                                 </div>
 
-
                                 <span class="shrink-0 rounded-full border px-2 py-1 text-[8px] font-bold {{ $currentDisposisiConfig['class'] }}">
                                     {{ $currentDisposisiConfig['label'] }}
                                 </span>
 
                             </div>
-
 
                             <div class="mt-4 space-y-2.5">
 
@@ -1886,13 +1799,11 @@
 
                                     </span>
 
-
                                     <div class="min-w-0">
 
                                         <span class="block text-[9px] font-semibold uppercase tracking-wide text-slate-400">
                                             Dari
                                         </span>
-
 
                                         <span class="block truncate text-[11px] font-semibold text-slate-700">
                                             {{ $d->dari?->name ?? $d->dari?->nama ?? '-' }}
@@ -1901,7 +1812,6 @@
                                     </div>
 
                                 </div>
-
 
                                 {{-- TANGGAL --}}
 
@@ -1932,13 +1842,11 @@
 
                                     </span>
 
-
                                     <div>
 
                                         <span class="block text-[9px] font-semibold uppercase tracking-wide text-slate-400">
                                             Tanggal Surat
                                         </span>
-
 
                                         <span class="block text-[11px] font-bold text-slate-700">
                                             {{ $tanggalSurat }}
@@ -1947,7 +1855,6 @@
                                     </div>
 
                                 </div>
-
 
                                 {{-- BATAS WAKTU --}}
 
@@ -1975,7 +1882,6 @@
 
                                     @endphp
 
-
                                     <div class="flex items-center gap-2">
 
                                         <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-slate-50 text-slate-400">
@@ -2001,13 +1907,11 @@
 
                                         </span>
 
-
                                         <div>
 
                                             <span class="block text-[9px] font-semibold uppercase tracking-wide text-slate-400">
                                                 Batas Waktu
                                             </span>
-
 
                                             <span class="block text-[11px] font-bold text-slate-700">
                                                 {{ $batasWaktu }}
@@ -2021,13 +1925,11 @@
 
                             </div>
 
-
                             <div class="mt-4 flex items-center justify-between border-t border-slate-100 pt-3">
 
                                 <span class="text-[10px] font-medium text-slate-400">
                                     Lihat detail tugas
                                 </span>
-
 
                                 <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-50 text-slate-400 transition group-hover:bg-blue-50 group-hover:text-blue-600">
                                     →
@@ -2068,11 +1970,9 @@
 
                                 </div>
 
-
                                 <p class="mt-4 text-xs font-bold text-slate-700">
                                     Tidak ada tugas baru
                                 </p>
-
 
                                 <p class="mt-1 max-w-sm text-center text-[10px] leading-relaxed text-slate-400">
                                     Saat ada disposisi baru yang diberikan kepada Anda,
@@ -2088,7 +1988,6 @@
                 </div>
 
             </div>
-
 
             <div class="border-t border-slate-100 bg-slate-50/50 p-4 sm:p-5">
 
@@ -2123,7 +2022,6 @@
 
 </div>
 
-
 {{-- ========================================================================
     DASHBOARD STYLE
 ============================================================================ --}}
@@ -2133,7 +2031,6 @@
     .dashboard-page {
         animation: dashboardFade .45s ease-out;
     }
-
 
     @keyframes dashboardFade {
 
@@ -2149,11 +2046,9 @@
 
     }
 
-
     .hero-dashboard {
         isolation: isolate;
     }
-
 
     .dashboard-action {
         display: flex;
@@ -2170,12 +2065,10 @@
             background .2s ease;
     }
 
-
     .dashboard-action:hover {
         transform: translateY(-2px);
         box-shadow: 0 15px 35px rgba(0, 0, 0, .18);
     }
-
 
     .dashboard-action-icon {
         display: flex;
@@ -2186,7 +2079,6 @@
         justify-content: center;
         border-radius: .8rem;
     }
-
 
     .stat-card {
         position: relative;
@@ -2203,13 +2095,11 @@
             border-color .2s ease;
     }
 
-
     .stat-card:hover {
         transform: translateY(-4px);
         border-color: rgba(148, 163, 184, .35);
         box-shadow: 0 18px 40px rgba(15, 23, 42, .10);
     }
-
 
     .stat-color-bar {
         position: absolute;
@@ -2221,7 +2111,6 @@
         opacity: .95;
     }
 
-
     .stat-label {
         display: block;
         font-size: 9px;
@@ -2231,7 +2120,6 @@
         color: #94a3b8;
     }
 
-
     .stat-number {
         display: block;
         font-size: 1.65rem;
@@ -2240,7 +2128,6 @@
         letter-spacing: -.04em;
         color: #0f172a;
     }
-
 
     .stat-icon {
         display: flex;
@@ -2257,11 +2144,9 @@
             box-shadow .2s ease;
     }
 
-
     .stat-card:hover .stat-icon {
         transform: scale(1.07);
     }
-
 
     .stat-icon-blue {
         background: #eff6ff;
@@ -2269,13 +2154,11 @@
         box-shadow: 0 0 0 1px #dbeafe;
     }
 
-
     .stat-card-blue:hover .stat-icon-blue {
         background: #2563eb;
         color: #ffffff;
         box-shadow: 0 8px 20px rgba(37, 99, 235, .25);
     }
-
 
     .stat-icon-emerald {
         background: #ecfdf5;
@@ -2283,13 +2166,11 @@
         box-shadow: 0 0 0 1px #d1fae5;
     }
 
-
     .stat-card-emerald:hover .stat-icon-emerald {
         background: #059669;
         color: #ffffff;
         box-shadow: 0 8px 20px rgba(5, 150, 105, .25);
     }
-
 
     .stat-icon-amber {
         background: #fffbeb;
@@ -2297,13 +2178,11 @@
         box-shadow: 0 0 0 1px #fef3c7;
     }
 
-
     .stat-card-amber:hover .stat-icon-amber {
         background: #f59e0b;
         color: #ffffff;
         box-shadow: 0 8px 20px rgba(245, 158, 11, .25);
     }
-
 
     .stat-icon-teal {
         background: #f0fdfa;
@@ -2311,13 +2190,11 @@
         box-shadow: 0 0 0 1px #ccfbf1;
     }
 
-
     .stat-card-teal:hover .stat-icon-teal {
         background: #0d9488;
         color: #ffffff;
         box-shadow: 0 8px 20px rgba(13, 148, 136, .25);
     }
-
 
     .stat-pill {
         display: inline-flex;
@@ -2328,7 +2205,6 @@
         font-weight: 800;
     }
 
-
     .stat-arrow {
         font-size: .9rem;
         font-weight: 800;
@@ -2336,11 +2212,9 @@
         transition: transform .2s ease;
     }
 
-
     .stat-card:hover .stat-arrow {
         transform: translateX(4px);
     }
-
 
     .dashboard-panel {
         border: 1px solid rgba(226, 232, 240, .85);
@@ -2348,7 +2222,6 @@
         background: #ffffff;
         box-shadow: 0 4px 18px rgba(15, 23, 42, .04);
     }
-
 
     .section-eyebrow {
         display: inline-block;
@@ -2358,7 +2231,6 @@
         letter-spacing: .12em;
         color: #94a3b8;
     }
-
 
     .task-card {
         position: relative;
@@ -2375,13 +2247,11 @@
             background .2s ease;
     }
 
-
     .task-card:hover {
         transform: translateY(-3px);
         background: #fcfdff;
         box-shadow: 0 14px 30px rgba(15, 23, 42, .08);
     }
-
 
     .empty-state {
         display: flex;
@@ -2394,7 +2264,6 @@
         background: rgba(248, 250, 252, .65);
         padding: 2rem;
     }
-
 
     @media (min-width: 640px) {
 
@@ -2417,7 +2286,6 @@
 
     }
 
-
     @media (max-width: 639px) {
 
         .dashboard-action {
@@ -2425,16 +2293,13 @@
             width: 100%;
         }
 
-
         .stat-card {
             min-height: 145px;
         }
 
-
         .stat-number {
             font-size: 1.5rem;
         }
-
 
         .stat-pill {
             max-width: 100%;
@@ -2444,7 +2309,6 @@
         }
 
     }
-
 
     @media (prefers-reduced-motion: reduce) {
 
@@ -2461,7 +2325,6 @@
     }
 
 </style>
-
 
 {{-- ========================================================================
     CHART JS - DONUT STATISTIK SURAT
@@ -2487,10 +2350,10 @@
                 }
 
                 const chartMasuk =
-                    Number({{ (int) ($totalSuratMasuk ?? 0) }});
+                    Number({{ (int) ($statSuratMasuk ?? 0) }});
 
                 const chartKeluar =
-                    Number({{ (int) ($totalSuratKeluar ?? 0) }});
+                    Number({{ (int) ($statSuratKeluar ?? 0) }});
 
                 const totalArsip =
                     chartMasuk + chartKeluar;
@@ -2522,15 +2385,13 @@
 
                                 datasets: [
                                     {
-                                        data: [
-                                            chartMasuk,
-                                            chartKeluar
-                                        ],
+                                        data: totalArsip > 0
+                                            ? [chartMasuk, chartKeluar]
+                                            : [1],
 
-                                        backgroundColor: [
-                                            '#2563eb',
-                                            '#10b981'
-                                        ],
+                                        backgroundColor: totalArsip > 0
+                                            ? ['#2563eb', '#10b981']
+                                            : ['#e2e8f0'],
 
                                         borderColor: 'transparent',
                                         borderWidth: 0,
@@ -2572,15 +2433,12 @@
                                         callbacks: {
 
                                             label: function (context) {
+                                                if (totalArsip <= 0) {
+                                                    return ' Tidak ada arsip pada bulan ini';
+                                                }
 
-                                                const value =
-                                                    Number(context.raw || 0);
-
-                                                const percentage =
-                                                    totalArsip > 0
-                                                        ? ((value / totalArsip) * 100).toFixed(1)
-                                                        : '0.0';
-
+                                                const value = Number(context.raw || 0);
+                                                const percentage = ((value / totalArsip) * 100).toFixed(1);
                                                 return ` ${value} surat (${percentage}%)`;
                                             }
 

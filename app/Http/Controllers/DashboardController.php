@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Disposisi;
 use App\Models\SuratKeluar;
 use App\Models\SuratMasuk;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
@@ -206,6 +207,97 @@ class DashboardController extends Controller
 
         /*
          * ==========================================================
+         * STATISTIK BULANAN
+         * ==========================================================
+         * Admin/Pimpinan dapat memilih bulan untuk melihat perbandingan
+         * surat masuk dan surat keluar berdasarkan tanggal surat.
+         * Scorecard di atas tetap menggunakan seluruh data seperti semula.
+         */
+        $requestedStatMonth = trim(
+            (string) request()->query('stat_month', now()->format('Y-m'))
+        );
+
+        try {
+            $selectedStatMonthDate = Carbon::createFromFormat(
+                'Y-m',
+                $requestedStatMonth
+            )->startOfMonth();
+        } catch (\Throwable $e) {
+            $selectedStatMonthDate = now()->startOfMonth();
+        }
+
+        $selectedStatMonth = $selectedStatMonthDate->format('Y-m');
+        $selectedStatMonthLabel = $selectedStatMonthDate->translatedFormat('F Y');
+        $statMonthStart = $selectedStatMonthDate->copy()->startOfMonth();
+        $statMonthEnd = $selectedStatMonthDate->copy()->endOfMonth();
+
+        $statSuratMasuk =
+            SuratMasuk::query()
+                ->whereBetween(
+                    'tanggal_surat',
+                    [
+                        $statMonthStart->toDateString(),
+                        $statMonthEnd->toDateString(),
+                    ]
+                )
+                ->count();
+
+        $statSuratKeluar =
+            SuratKeluar::query()
+                ->whereBetween(
+                    'tanggal_surat',
+                    [
+                        $statMonthStart->toDateString(),
+                        $statMonthEnd->toDateString(),
+                    ]
+                )
+                ->count();
+
+        $statTotalArsip = $statSuratMasuk + $statSuratKeluar;
+
+        $statFirstIncomingDate =
+            SuratMasuk::query()
+                ->whereNotNull('tanggal_surat')
+                ->min('tanggal_surat');
+
+        $statFirstOutgoingDate =
+            SuratKeluar::query()
+                ->whereNotNull('tanggal_surat')
+                ->min('tanggal_surat');
+
+        $statFirstDates = collect([
+            $statFirstIncomingDate,
+            $statFirstOutgoingDate,
+        ])->filter();
+
+        if ($statFirstDates->isNotEmpty()) {
+            $statFirstDate = Carbon::parse(
+                $statFirstDates->sort()->first()
+            )->startOfMonth();
+        } else {
+            $statFirstDate = now()->startOfMonth();
+        }
+
+        $statCurrentDate = now()->startOfMonth();
+
+        if ($statFirstDate->greaterThan($statCurrentDate)) {
+            $statFirstDate = $statCurrentDate->copy();
+        }
+
+        $statMonthOptions = collect();
+        $monthsToShow = $statFirstDate->diffInMonths($statCurrentDate);
+
+        for ($monthOffset = 0; $monthOffset <= $monthsToShow; $monthOffset++) {
+            $month = $statCurrentDate->copy()->subMonths($monthOffset);
+
+            $statMonthOptions->push([
+                'value' => $month->format('Y-m'),
+                'label' => $month->translatedFormat('F Y'),
+            ]);
+        }
+
+        /*
+         * ==========================================================
          * SURAT BELUM DIPROSES
          * ==========================================================
          *
@@ -288,11 +380,9 @@ class DashboardController extends Controller
          * RETURN DASHBOARD ADMIN / PIMPINAN
          * ==========================================================
          *
-         * Dashboard versi baru menggunakan donut chart berdasarkan
-         * total surat masuk dan total surat keluar. Karena data donut
-         * berasal dari dua total di atas, tidak diperlukan lagi query
-         * grafik 12 bulan dan tidak ada data chart yang di-reset ketika
-         * bulan berubah.
+         * Dashboard menggunakan donut chart berdasarkan statistik
+         * bulan yang dipilih. Scorecard tetap menggunakan total seluruh
+         * arsip sehingga tidak berubah ketika periode statistik diganti.
          */
 
         return view(
@@ -307,7 +397,13 @@ class DashboardController extends Controller
                 'listDisposisi',
                 'suratMasukTerbaru',
                 'riwayatSuratKeluar',
-                'isStaf'
+                'isStaf',
+                'selectedStatMonth',
+                'selectedStatMonthLabel',
+                'statSuratMasuk',
+                'statSuratKeluar',
+                'statTotalArsip',
+                'statMonthOptions'
             )
         );
     }
