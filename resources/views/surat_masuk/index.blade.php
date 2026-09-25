@@ -3239,6 +3239,54 @@
     .surat-filter-count{display:none}
     .archive-table tbody td,.archive-table tbody td:first-child{grid-template-columns:72px minmax(0,1fr)}
 }
+
+/* FINAL FILTER LAYOUT */
+.surat-filter-main{display:grid!important;grid-template-columns:minmax(0,1fr) 82px minmax(320px,.8fr)!important;gap:8px!important;align-items:center!important}
+.surat-filter-submit{width:82px!important;min-width:82px!important;height:40px!important;padding:0 9px!important;border-radius:10px!important;font-size:10px!important;gap:5px!important}
+.surat-date-wrapper{grid-column:auto!important;min-width:0!important}
+.surat-date-wrapper>.relative{width:100%!important}
+.surat-date-input{width:100%!important;height:40px!important;padding:0 36px 0 39px!important;border-radius:10px!important;font-size:10.5px!important}
+.surat-filter-secondary{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;margin-top:8px!important}
+.surat-filter-trigger{min-height:44px!important;padding:6px 10px!important;border-radius:10px!important}
+.surat-filter-menu{width:430px!important;min-width:320px!important;max-width:min(430px,calc(100vw - 24px))!important}
+.surat-filter-options{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px!important;padding:8px!important;max-height:230px!important;overflow-y:auto!important;align-items:stretch!important}
+.surat-filter-options:has(.surat-filter-option:nth-child(1):last-child){grid-template-columns:1fr!important}
+.surat-filter-options:has(.surat-filter-option:nth-child(2):last-child){grid-template-columns:repeat(2,minmax(0,1fr))!important}
+.surat-filter-options:has(.surat-filter-option:nth-child(4):last-child){grid-template-columns:repeat(2,minmax(0,1fr))!important}
+.surat-filter-option{min-width:0!important;min-height:37px!important;width:100%!important;padding:6px 7px!important;border-radius:8px!important}
+.surat-filter-option input[type="checkbox"]{width:15px!important;height:15px!important;flex:0 0 15px!important}
+.surat-filter-option-text{min-width:0!important;overflow:hidden!important;font-size:9px!important;line-height:1.25!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+.surat-filter-menu-header{padding:10px 11px!important;gap:9px!important}
+.surat-filter-menu-title{font-size:10.5px!important}
+.surat-filter-menu-description{margin-top:2px!important;font-size:8px!important}
+.surat-filter-menu-actions{gap:4px!important}
+.surat-filter-action{min-height:26px!important;padding:0 7px!important;border-radius:7px!important;font-size:8px!important}
+.surat-filter-menu-footer{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:7px!important;min-height:34px!important;padding:7px 10px!important;line-height:1.2!important}
+.surat-filter-menu-footer [data-footer-count]{min-width:0!important;font-size:8.5px!important;font-weight:700!important;white-space:nowrap!important}
+.surat-filter-footer-hint{min-width:0!important;overflow:hidden!important;color:#94a3b8!important;font-size:8px!important;font-weight:600!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+@media(max-width:1100px){
+    .surat-filter-main{grid-template-columns:minmax(0,1fr) 82px minmax(280px,.78fr)!important}
+}
+@media(max-width:900px){
+    .surat-filter-main{grid-template-columns:minmax(0,1fr) 80px minmax(260px,.72fr)!important}
+}
+@media(max-width:720px){
+    .surat-filter-main{grid-template-columns:minmax(0,1fr) 80px!important;gap:8px!important}
+    .surat-date-wrapper{grid-column:1/-1!important}
+    .surat-filter-submit{width:80px!important;min-width:80px!important}
+    .surat-filter-secondary{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+    .surat-filter-menu{position:fixed!important;top:50%!important;left:50%!important;right:auto!important;width:calc(100vw - 24px)!important;min-width:0!important;max-width:430px!important;transform:translate(-50%,-50%)!important}
+    .surat-filter-options{grid-template-columns:repeat(3,minmax(0,1fr))!important;max-height:55vh!important}
+}
+@media(max-width:540px){
+    .surat-filter-secondary{grid-template-columns:1fr!important}
+    .surat-filter-options{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+    .surat-filter-menu-footer{align-items:center!important}
+}
+@media(max-width:390px){
+    .surat-filter-main{grid-template-columns:minmax(0,1fr) 76px!important;gap:7px!important}
+    .surat-filter-submit{width:76px!important;min-width:76px!important;padding:0 7px!important}
+}
 </style>
 @endpush
 <div class="surat-page">
