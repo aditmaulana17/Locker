@@ -38,7 +38,7 @@ class KategoriSuratController extends Controller
         $data = $request->validate([
             'nama_kategori' => ['required', 'string', 'max:100'],
             'kode'          => ['required', 'string', 'max:20', 'unique:kategori_surats,kode'],
-            'sifat'         => ['required', 'in:biasa,penting,rahasia'],
+            'sifat'         => ['required', 'in:biasa,penting,rahasia,segera'],
             'keterangan'    => ['nullable', 'string'],
         ]);
 
@@ -54,6 +54,7 @@ class KategoriSuratController extends Controller
     public function show(KategoriSurat $kategori)
     {
         $kategori->loadCount(['suratMasuk', 'suratKeluar']);
+
         return view('kategori.show', compact('kategori'));
     }
 
@@ -73,7 +74,7 @@ class KategoriSuratController extends Controller
         $data = $request->validate([
             'nama_kategori' => ['required', 'string', 'max:100'],
             'kode'          => ['required', 'string', 'max:20', 'unique:kategori_surats,kode,' . $kategori->id],
-            'sifat'         => ['required', 'in:biasa,penting,rahasia'],
+            'sifat'         => ['required', 'in:biasa,penting,rahasia,segera'],
             'keterangan'    => ['nullable', 'string'],
         ]);
 
