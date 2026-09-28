@@ -56,6 +56,9 @@ class SuratKeluarController extends Controller
     private const MAX_FILE_SIZE =
         10 * 1024 * 1024;
 
+    private const COMPRESSION_THRESHOLD =
+        2 * 1024 * 1024;
+
     /*
     |--------------------------------------------------------------------------
     | PDF
@@ -857,6 +860,78 @@ class SuratKeluarController extends Controller
                     );
                 }
 
+                // PDF di bawah 2 MB tidak perlu dikompres.
+                if (
+                    $originalSize <
+                    self::COMPRESSION_THRESHOLD
+                ) {
+                    $token = Str::random(64);
+                    $directory = storage_path('app/pdf-compression');
+
+                    if (
+                        !is_dir($directory) &&
+                        !mkdir($directory, 0775, true) &&
+                        !is_dir($directory)
+                    ) {
+                        throw new RuntimeException(
+                            'Folder preview PDF tidak dapat dibuat.'
+                        );
+                    }
+
+                    $previewPath =
+                        $directory . DIRECTORY_SEPARATOR . 'preview_' . $token . '.pdf';
+
+                    if (!copy($inputPath, $previewPath)) {
+                        throw new RuntimeException(
+                            'Gagal membuat preview PDF asli.'
+                        );
+                    }
+
+                    $fileHash = hash_file('sha256', $inputPath);
+
+                    if (!$fileHash) {
+                        @unlink($previewPath);
+                        throw new RuntimeException(
+                            'Hash file PDF tidak dapat dibuat.'
+                        );
+                    }
+
+                    session()->put(
+                        'surat_keluar_pdf_preview',
+                        [
+                            'token' => $token,
+                            'path' => $previewPath,
+                            'file_hash' => $fileHash,
+                            'original_size' => $originalSize,
+                            'compressed_size' => $originalSize,
+                            'profile' => 'none',
+                            'use_compressed' => false,
+                            'user_id' => (int) Auth::id(),
+                            'created_at' => now()->timestamp,
+                        ]
+                    );
+
+                    return response()->json(
+                        [
+                            'success' => true,
+                            'type' => 'pdf',
+                            'compressed' => false,
+                            'token' => $token,
+                            'preview_url' => route(
+                                'surat-keluar.compression-preview',
+                                ['token' => $token]
+                            ),
+                            'original_size' => $originalSize,
+                            'compressed_size' => $originalSize,
+                            'original_size_text' => $this->formatBytes($originalSize),
+                            'compressed_size_text' => $this->formatBytes($originalSize),
+                            'saving_percent' => 0,
+                            'profile' => 'none',
+                            'message' => 'PDF di bawah 2 MB, sehingga tidak perlu dikompres. File asli akan digunakan.',
+                        ]
+                    );
+                }
+
                 /*
                 |--------------------------------------------------------------------------
                 | HASH
@@ -1229,6 +1304,27 @@ class SuratKeluarController extends Controller
             | IMAGE
             |--------------------------------------------------------------------------
             */
+
+            // Gambar di bawah 2 MB tidak perlu dikompres.
+            if (
+                $originalSize <
+                self::COMPRESSION_THRESHOLD
+            ) {
+                return response()->json(
+                    [
+                        'success' => true,
+                        'type' => 'image',
+                        'compressed' => false,
+                        'original_size' => $originalSize,
+                        'compressed_size' => $originalSize,
+                        'original_size_text' => $this->formatBytes($originalSize),
+                        'compressed_size_text' => $this->formatBytes($originalSize),
+                        'saving_percent' => 0,
+                        'profile' => 'none',
+                        'message' => 'Gambar di bawah 2 MB, sehingga tidak perlu dikompres. File asli akan digunakan.',
+                    ]
+                );
+            }
 
             $result =
                 $this->compressImageToTemporaryFile(
@@ -2590,6 +2686,26 @@ class SuratKeluarController extends Controller
             );
         }
 
+        // Gambar di bawah 2 MB disimpan dalam format aslinya tanpa kompresi.
+        if (
+            $fileSize <
+            self::COMPRESSION_THRESHOLD
+        ) {
+            $contents = file_get_contents($realPath);
+
+            if ($contents === false || $contents === '') {
+                throw new RuntimeException(
+                    'Gagal membaca file gambar asli.'
+                );
+            }
+
+            return $this->storeBinaryFile(
+                $contents,
+                $extension,
+                $actualMime
+            );
+        }
+
         return $this->compressAndStoreImage(
             $file,
             $realPath
@@ -2645,6 +2761,28 @@ class SuratKeluarController extends Controller
         ) {
             throw new RuntimeException(
                 'Ukuran PDF maksimal 10 MB.'
+            );
+        }
+
+        // PDF di bawah 2 MB disimpan apa adanya tanpa Ghostscript.
+        if (
+            $originalSize <
+            self::COMPRESSION_THRESHOLD
+        ) {
+            $originalContents = file_get_contents($inputPath);
+
+            if ($originalContents === false || $originalContents === '') {
+                throw new RuntimeException(
+                    'Gagal membaca PDF asli.'
+                );
+            }
+
+            session()->forget('surat_keluar_pdf_preview');
+
+            return $this->storeBinaryFile(
+                $originalContents,
+                'pdf',
+                'application/pdf'
             );
         }
 

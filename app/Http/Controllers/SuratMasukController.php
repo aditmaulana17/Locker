@@ -58,6 +58,9 @@ class SuratMasukController extends Controller
     private const MAX_FILE_SIZE =
         10 * 1024 * 1024;
 
+    private const COMPRESSION_THRESHOLD =
+        2 * 1024 * 1024;
+
     /*
     |--------------------------------------------------------------------------
     | PDF COMPRESSION
@@ -1069,6 +1072,44 @@ class SuratMasukController extends Controller
             );
         }
 
+        // PDF di bawah 2 MB tidak perlu dikompres.
+        if (
+            $originalSize <
+            self::COMPRESSION_THRESHOLD
+        ) {
+            $token =
+                Str::random(64);
+
+            session()->put(
+                'surat_masuk_pdf_preview',
+                [
+                    'token' => $token,
+                    'file_hash' => hash_file('sha256', $inputPath),
+                    'original_size' => $originalSize,
+                    'compressed_size' => $originalSize,
+                    'profile' => 'none',
+                    'use_compressed' => false,
+                    'user_id' => (int) Auth::id(),
+                    'created_at' => now()->timestamp,
+                ]
+            );
+
+            return response()->json(
+                [
+                    'success' => true,
+                    'compressed' => false,
+                    'token' => $token,
+                    'original_size' => $originalSize,
+                    'compressed_size' => $originalSize,
+                    'saving_percent' => 0,
+                    'profile' => 'none',
+                    'original_size_text' => $this->formatBytes($originalSize),
+                    'compressed_size_text' => $this->formatBytes($originalSize),
+                    'message' => 'PDF di bawah 2 MB, sehingga tidak perlu dikompres. File asli akan digunakan.',
+                ]
+            );
+        }
+
         try {
 
             $fileHash =
@@ -1687,6 +1728,31 @@ class SuratMasukController extends Controller
 
             throw new RuntimeException(
                 'Ukuran PDF maksimal 10 MB.'
+            );
+        }
+
+        // PDF di bawah 2 MB disimpan apa adanya tanpa Ghostscript.
+        if (
+            $originalSize <
+            self::COMPRESSION_THRESHOLD
+        ) {
+            $contents =
+                file_get_contents($inputPath);
+
+            if ($contents === false || $contents === '') {
+                throw new RuntimeException(
+                    'Gagal membaca PDF asli.'
+                );
+            }
+
+            session()->forget('surat_masuk_pdf_preview');
+
+            return $this->storeBinaryFile(
+                $contents,
+                'pdf',
+                'application/pdf',
+                'surat-masuk',
+                $diskName
             );
         }
 
@@ -5019,6 +5085,20 @@ class SuratMasukController extends Controller
 
             throw new RuntimeException(
                 'Jenis file gambar tidak didukung.'
+            );
+        }
+
+        // Gambar di bawah 2 MB disimpan dalam format aslinya tanpa kompresi.
+        if (
+            $fileSize <
+            self::COMPRESSION_THRESHOLD
+        ) {
+            return $this->storeBinaryFile(
+                $contents,
+                $extension,
+                $actualMime,
+                'surat-masuk',
+                $diskName
             );
         }
 
