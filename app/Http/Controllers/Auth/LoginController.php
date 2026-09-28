@@ -45,7 +45,7 @@ class LoginController extends Controller
         if ($user && !$user->isActive()) {
             return back()
                 ->withErrors([
-                    'email' => 'Akun Anda telah dinonaktifkan oleh administrator.',
+                    'email' => 'Akun Anda telah dinonaktifkan oleh admin.',
                 ])
                 ->withInput(
                     $request->only('email')
