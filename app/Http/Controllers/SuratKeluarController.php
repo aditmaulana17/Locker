@@ -688,7 +688,7 @@ class SuratKeluarController extends Controller
             ->orderBy('tanggal_keluar', $sortOrder)
             ->orderBy('created_at', $sortOrder)
             ->orderBy('id', $sortOrder)
-            ->paginate(10)
+            ->paginate(5)
             ->withQueryString();
 
         /*

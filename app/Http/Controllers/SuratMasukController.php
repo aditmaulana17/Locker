@@ -420,7 +420,7 @@ class SuratMasukController extends Controller
                     'id',
                     $sortOrder
                 )
-                ->paginate(10)
+                ->paginate(5)
                 ->withQueryString();
 
 
