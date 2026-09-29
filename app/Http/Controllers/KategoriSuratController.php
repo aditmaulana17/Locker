@@ -13,8 +13,23 @@ class KategoriSuratController extends Controller
      */
     public function index(Request $request)
     {
-        $kategoris = KategoriSurat::withCount(['suratMasuk', 'suratKeluar'])
-            ->when($request->search, fn ($q, $v) => $q->where('nama_kategori', 'like', "%{$v}%")->orWhere('kode', 'like', "%{$v}%"))
+        $kategoris = KategoriSurat::query()
+            ->select([
+                'id',
+                'nama_kategori',
+                'kode',
+                'sifat',
+                'keterangan',
+                'created_at',
+                'updated_at',
+            ])
+            ->withCount(['suratMasuk', 'suratKeluar'])
+            ->when(
+                $request->search,
+                fn ($q, $v) => $q
+                    ->where('nama_kategori', 'like', "%{$v}%")
+                    ->orWhere('kode', 'like', "%{$v}%")
+            )
             ->latest()
             ->paginate(10)
             ->withQueryString();

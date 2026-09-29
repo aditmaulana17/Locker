@@ -1223,18 +1223,27 @@
     font-size:8.5px;
     font-weight:700;
     white-space:nowrap;
+    border:1px solid transparent;
 }
-.category-badge.education{
-    background:#dcf8ee;
-    color:#059669;
+.category-badge.category-normal{
+    background:#eff6ff;
+    color:#2563eb;
+    border-color:#dbeafe;
 }
-.category-badge.invitation{
-    background:#f0e9ff;
+.category-badge.category-important{
+    background:#fff7ed;
+    color:#c2410c;
+    border-color:#fed7aa;
+}
+.category-badge.category-secret{
+    background:#f5f3ff;
     color:#7c3aed;
+    border-color:#ddd6fe;
 }
-.category-badge.report{
-    background:#fff0d7;
-    color:#d97706;
+.category-badge.category-urgent{
+    background:#fff1f2;
+    color:#e11d48;
+    border-color:#fecdd3;
 }
 .status-badge{
     display:inline-flex;
@@ -4017,42 +4026,23 @@
                             | KATEGORI STYLE
                             |--------------------------------------------------------------------------
                             */
-                            $kategoriNama =
-                                strtolower(
+                            $kategoriSifat = strtolower(
+                                trim(
                                     (string) (
                                         $surat
                                             ->kategori
-                                            ?->nama_kategori
+                                            ?->sifat
                                         ?? ''
                                     )
-                                );
-                            $categoryClass =
-                                '';
-                            if (
-                                str_contains(
-                                    $kategoriNama,
-                                    'pendidikan'
                                 )
-                            ) {
-                                $categoryClass =
-                                    'education';
-                            } elseif (
-                                str_contains(
-                                    $kategoriNama,
-                                    'undangan'
-                                )
-                            ) {
-                                $categoryClass =
-                                    'invitation';
-                            } elseif (
-                                str_contains(
-                                    $kategoriNama,
-                                    'laporan'
-                                )
-                            ) {
-                                $categoryClass =
-                                    'report';
-                            }
+                            );
+
+                            $categoryClass = match ($kategoriSifat) {
+                                'penting' => 'category-important',
+                                'rahasia' => 'category-secret',
+                                'segera'  => 'category-urgent',
+                                default   => 'category-normal',
+                            };
                         @endphp
                         <tr>
                             {{-- TANGGAL --}}

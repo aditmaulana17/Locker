@@ -1,4506 +1,3659 @@
 @extends('layouts.app')
-
-@section('title', 'Edit Surat Keluar')
-
+@section('title', 'Surat Keluar')
 @section('content')
-
 @php
     /*
     |--------------------------------------------------------------------------
-    | DATA FORM
+    | USER
     |--------------------------------------------------------------------------
     */
-
-    $currentStatus = strtolower(
+    $user = auth()->user();
+    $userRole = strtolower(
         trim(
-            (string) old(
-                'status',
-                $suratKeluar->status ?? 'draft'
+            (string) (
+                $user->role ??
+                $user->jabatan ??
+                ''
             )
         )
     );
-
-    if ($currentStatus === 'draf') {
-        $currentStatus = 'draft';
+    if ($userRole === 'staf') {
+        $userRole = 'staff';
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | TANGGAL SURAT
-    |--------------------------------------------------------------------------
-    */
-
-    try {
-        $tanggalSurat = old(
-            'tanggal_surat',
-            $suratKeluar->tanggal_surat
-                ? \Illuminate\Support\Carbon::parse(
-                    $suratKeluar->tanggal_surat
-                )->format('Y-m-d')
-                : ''
-        );
-    } catch (\Throwable $e) {
-        $tanggalSurat = old(
-            'tanggal_surat',
-            ''
-        );
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | TANGGAL KELUAR
-    |--------------------------------------------------------------------------
-    */
-
-    try {
-        $tanggalKeluar = old(
-            'tanggal_keluar',
-            $suratKeluar->tanggal_keluar
-                ? \Illuminate\Support\Carbon::parse(
-                    $suratKeluar->tanggal_keluar
-                )->format('Y-m-d')
-                : ''
-        );
-    } catch (\Throwable $e) {
-        $tanggalKeluar = old(
-            'tanggal_keluar',
-            ''
-        );
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | KATEGORI
-    |--------------------------------------------------------------------------
-    */
-
-    $kategoriSuratId = old(
-        'kategori_surat_id',
-        $suratKeluar->kategori_surat_id
+    $canManage = in_array(
+        $userRole,
+        [
+            'admin',
+            'pimpinan',
+        ],
+        true
     );
-
     /*
     |--------------------------------------------------------------------------
-    | LAMPIRAN LAMA
+    | KATEGORI FILTER
     |--------------------------------------------------------------------------
     */
-
-    $currentAttachmentPath = trim(
-        (string) (
-            $suratKeluar->lampiran_file ?? ''
+    $rawKategori = request(
+        'kategori_id',
+        request(
+            'kategori_surat_id',
+            []
         )
     );
-
-    $hasCurrentAttachment =
-        $currentAttachmentPath !== '';
-
-    $currentAttachmentName =
-        $hasCurrentAttachment
-            ? basename($currentAttachmentPath)
-            : null;
-
-    $currentAttachmentExtension =
-        $hasCurrentAttachment
-            ? strtolower(
-                pathinfo(
-                    $currentAttachmentPath,
-                    PATHINFO_EXTENSION
+    if (
+        is_scalar($rawKategori) &&
+        trim((string) $rawKategori) !== ''
+    ) {
+        $rawKategori = [
+            $rawKategori,
+        ];
+    }
+    if (!is_array($rawKategori)) {
+        $rawKategori = [];
+    }
+    $selectedKategori = collect(
+        $rawKategori
+    )
+        ->flatten()
+        ->filter(
+            fn ($id) =>
+                is_scalar($id) &&
+                is_numeric($id) &&
+                (int) $id > 0
+        )
+        ->map(
+            fn ($id) =>
+                (string) ((int) $id)
+        )
+        ->unique()
+        ->values()
+        ->all();
+    /*
+    |--------------------------------------------------------------------------
+    | STATUS
+    |--------------------------------------------------------------------------
+    */
+    $statusOptions = [
+        'draft' =>
+            'Draf',
+        'diproses' =>
+            'Diproses',
+        'disetujui' =>
+            'Disetujui',
+        'dikirim' =>
+            'Dikirim',
+        'diarsipkan' =>
+            'Diarsipkan',
+    ];
+    $rawStatuses = request(
+        'status',
+        []
+    );
+    if (
+        is_scalar($rawStatuses) &&
+        trim((string) $rawStatuses) !== ''
+    ) {
+        $rawStatuses = [
+            $rawStatuses,
+        ];
+    }
+    if (!is_array($rawStatuses)) {
+        $rawStatuses = [];
+    }
+    $selectedStatus = collect(
+        $rawStatuses
+    )
+        ->flatten()
+        ->filter(
+            fn ($status) =>
+                is_scalar($status)
+        )
+        ->map(
+            function ($status) {
+                $status = strtolower(
+                    trim(
+                        (string) $status
+                    )
+                );
+                return $status === 'draf'
+                    ? 'draft'
+                    : $status;
+            }
+        )
+        ->filter(
+            fn ($status) =>
+                array_key_exists(
+                    $status,
+                    $statusOptions
                 )
-            )
-            : '';
-
+        )
+        ->unique()
+        ->values()
+        ->all();
     /*
     |--------------------------------------------------------------------------
-    | INPUT CLASS
+    | STATUS BADGE
     |--------------------------------------------------------------------------
     */
-
-    $inputClass =
-        'block w-full rounded-md border-2 border-slate-400 bg-white px-3 py-2 text-sm text-slate-800 shadow-sm outline-none transition placeholder:text-slate-400 hover:border-slate-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100';
-
-    $errorInputClass =
-        'border-rose-400 bg-rose-50 focus:border-rose-500 focus:ring-rose-100';
-@endphp
-
-<style>
-    .ske-page,
-    .ske-page * {
-        box-sizing: border-box;
+    $statusBadgeClasses = [
+        'draft' =>
+            'bg-slate-50 text-slate-700 border-slate-200',
+        'diproses' =>
+            'bg-amber-50 text-amber-700 border-amber-200',
+        'disetujui' =>
+            'bg-blue-50 text-blue-700 border-blue-200',
+        'dikirim' =>
+            'bg-emerald-50 text-emerald-700 border-emerald-200',
+        'diarsipkan' =>
+            'bg-purple-50 text-purple-700 border-purple-200',
+    ];
+    /*
+    |--------------------------------------------------------------------------
+    | TANGGAL
+    |--------------------------------------------------------------------------
+    */
+    $dariTanggal =
+        request('dari_tanggal');
+    $sampaiTanggal =
+        request('sampai_tanggal');
+    $visibleDateRange = '';
+    try {
+        if (
+            $dariTanggal &&
+            $sampaiTanggal
+        ) {
+            $visibleDateRange =
+                \Illuminate\Support\Carbon::parse(
+                    $dariTanggal
+                )->format('d/m/Y')
+                .
+                ' - '
+                .
+                \Illuminate\Support\Carbon::parse(
+                    $sampaiTanggal
+                )->format('d/m/Y');
+        } elseif ($dariTanggal) {
+            $visibleDateRange =
+                \Illuminate\Support\Carbon::parse(
+                    $dariTanggal
+                )->format('d/m/Y');
+        } elseif ($sampaiTanggal) {
+            $visibleDateRange =
+                \Illuminate\Support\Carbon::parse(
+                    $sampaiTanggal
+                )->format('d/m/Y');
+        }
+    } catch (\Throwable $e) {
+        $visibleDateRange = '';
     }
-
-    .ske-page {
-        width: 100%;
-        max-width: 1180px;
-        margin: 0 auto;
-        padding: 14px 18px 30px;
-        color: #1e293b;
-    }
-
-    /* =========================================================
-       TOPBAR
-    ========================================================== */
-
-    .ske-topbar {
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-        gap: 12px;
-        margin-bottom: 12px;
-    }
-
-    .ske-back {
-        min-height: 35px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-        padding: 0 12px;
-        border: 1px solid #cbd5e1;
-        border-radius: 8px;
-        background: #fff;
-        color: #475569;
-        font-size: 10px;
-        font-weight: 800;
-        text-decoration: none;
-        transition: .15s ease;
-    }
-
-    .ske-back:hover {
-        border-color: #94a3b8;
-        background: #f8fafc;
-        color: #1e293b;
-    }
-
-    /* =========================================================
-       SHELL
-    ========================================================== */
-
-    .ske-shell {
-        overflow: hidden;
-        border: 1.5px solid #94a3b8;
-        border-radius: 14px;
-        background: #fff;
-        box-shadow:
-            0 12px 30px rgba(15, 23, 42, .07),
-            0 2px 6px rgba(15, 23, 42, .04);
-    }
-
-    /* =========================================================
-       HEADER
-    ========================================================== */
-
-    .ske-header {
-        position: relative;
-        overflow: hidden;
-        padding: 18px 20px;
-        background: linear-gradient(
-            135deg,
-            #047857 0%,
-            #059669 45%,
-            #2563eb 100%
+    /*
+    |--------------------------------------------------------------------------
+    | FILTER AKTIF
+    |--------------------------------------------------------------------------
+    */
+    $hasFilters =
+        request()->filled('search')
+        ||
+        !empty($selectedKategori)
+        ||
+        !empty($selectedStatus)
+        ||
+        request()->filled('dari_tanggal')
+        ||
+        request()->filled('sampai_tanggal');
+    /*
+    |--------------------------------------------------------------------------
+    | EXPORT FILTER
+    |--------------------------------------------------------------------------
+    */
+    $exportFilters = [];
+    $searchValue =
+        trim(
+            (string) request(
+                'search',
+                ''
+            )
         );
-        color: #fff;
-    }
-
-    .ske-header::after {
-        content: "";
-        position: absolute;
-        width: 220px;
-        height: 220px;
-        right: -75px;
-        bottom: -90px;
-        border-radius: 50%;
-        background: rgba(255,255,255,.08);
-    }
-
-    .ske-header-inner {
-        position: relative;
-        z-index: 1;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 16px;
-    }
-
-    .ske-header-main {
-        display: flex;
-        align-items: center;
-        gap: 11px;
-        min-width: 0;
-    }
-
-    .ske-header-icon {
-        width: 42px;
-        height: 42px;
-        flex: 0 0 42px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: 1px solid rgba(255,255,255,.30);
-        border-radius: 10px;
-        background: rgba(255,255,255,.13);
-        backdrop-filter: blur(5px);
-    }
-
-    .ske-header-kicker {
-        margin: 0;
-        font-size: 8px;
-        font-weight: 800;
-        letter-spacing: .1em;
-        text-transform: uppercase;
-        color: rgba(255,255,255,.78);
-    }
-
-    .ske-header-title {
-        margin: 2px 0 0;
-        font-size: 19px;
-        line-height: 1.3;
-        font-weight: 850;
-    }
-
-    .ske-header-desc {
-        margin: 3px 0 0;
-        max-width: 700px;
-        font-size: 8.5px;
-        line-height: 1.5;
-        color: rgba(255,255,255,.83);
-    }
-
-    .ske-header-badge {
-        flex-shrink: 0;
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        min-height: 28px;
-        padding: 0 9px;
-        border: 1px solid rgba(255,255,255,.25);
-        border-radius: 999px;
-        background: rgba(255,255,255,.11);
-        font-size: 8px;
-        font-weight: 800;
-        white-space: nowrap;
-    }
-
-    /* =========================================================
-       BODY
-    ========================================================== */
-
-    .ske-body {
-        padding: 16px;
-    }
-
-    .ske-error {
-        margin-bottom: 12px;
-        padding: 11px 13px;
-        border: 1px solid #fecaca;
-        border-radius: 9px;
-        background: #fff7f7;
-        color: #be123c;
-    }
-
-    .ske-error-title {
-        margin: 0;
-        font-size: 10px;
-        font-weight: 800;
-    }
-
-    .ske-error-list {
-        margin: 4px 0 0;
-        padding-left: 16px;
-        font-size: 8px;
-        line-height: 1.55;
-    }
-
-    /* =========================================================
-       SECTION
-    ========================================================== */
-
-    .ske-section + .ske-section {
-        margin-top: 17px;
-        padding-top: 17px;
-        border-top: 1.5px solid #e2e8f0;
-    }
-
-    .ske-section-head {
-        display: flex;
-        align-items: flex-start;
-        gap: 8px;
-        margin-bottom: 10px;
-    }
-
-    .ske-section-marker {
-        width: 4px;
-        min-height: 28px;
-        flex: 0 0 4px;
-        border-radius: 999px;
-        background: #059669;
-    }
-
-    .ske-section-marker-blue {
-        background: #2563eb;
-    }
-
-    .ske-section-title {
-        margin: 0;
-        font-size: 13px;
-        line-height: 1.3;
-        font-weight: 850;
-        color: #1e293b;
-    }
-
-    .ske-section-desc {
-        margin: 3px 0 0;
-        font-size: 8px;
-        line-height: 1.45;
-        color: #64748b;
-    }
-
-    /* =========================================================
-       FIELD TABLE
-    ========================================================== */
-
-    .ske-field-table {
-        overflow: hidden;
-        border: 1.5px solid #94a3b8;
-        border-radius: 10px;
-    }
-
-    .ske-field-grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .ske-field {
-        min-width: 0;
-        padding: 11px;
-        border-right: 1.5px solid #cbd5e1;
-        border-bottom: 1.5px solid #cbd5e1;
-        background: #fff;
-    }
-
-    .ske-field:nth-child(2n) {
-        border-right: 0;
-    }
-
-    .ske-field-full {
-        grid-column: 1 / -1;
-        border-right: 0;
-    }
-
-    .ske-field-label {
-        display: block;
-        margin-bottom: 5px;
-        font-size: 9px;
-        line-height: 1.3;
-        font-weight: 850;
-        color: #475569;
-    }
-
-    .ske-required {
-        color: #dc2626;
-    }
-
-    .ske-control {
-        width: 100%;
-        min-height: 40px;
-        border: 1.5px solid #94a3b8;
-        border-radius: 8px;
-        background: #fff;
-        color: #1e293b;
-        padding: 8px 10px;
-        font-size: 11px;
-        line-height: 1.4;
-        outline: none;
-        transition: .15s ease;
-    }
-
-    input.ske-control,
-    select.ske-control {
-        height: 40px;
-        padding: 0 10px;
-    }
-
-    textarea.ske-control {
-        min-height: 82px;
-        resize: vertical;
-    }
-
-    .ske-control:focus {
-        border-color: #059669;
-        box-shadow: 0 0 0 3px rgba(5,150,105,.08);
-    }
-
-    .ske-control-error {
-        border-color: #ef4444 !important;
-        background: #fff7f7 !important;
-    }
-
-    .ske-field-error {
-        margin: 4px 0 0;
-        font-size: 7.5px;
-        line-height: 1.45;
-        color: #dc2626;
-        font-weight: 700;
-    }
-
-    /* =========================================================
-       ATTACHMENT
-    ========================================================== */
-
-    .ske-attachment-grid {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-        gap: 12px;
-        align-items: stretch;
-    }
-
-    .ske-card {
-        min-width: 0;
-        overflow: hidden;
-        border: 1.5px solid #94a3b8;
-        border-radius: 10px;
-        background: #fff;
-    }
-
-    .ske-card-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 8px;
-        padding: 10px 11px;
-        border-bottom: 1.5px solid #cbd5e1;
-        background: #f8fafc;
-    }
-
-    .ske-card-header-left {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        min-width: 0;
-    }
-
-    .ske-card-icon {
-        width: 32px;
-        height: 32px;
-        flex: 0 0 32px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: 1px solid #bfdbfe;
-        border-radius: 7px;
-        background: #eff6ff;
-        color: #2563eb;
-    }
-
-    .ske-card-icon.green {
-        border-color: #a7f3d0;
-        background: #ecfdf5;
-        color: #059669;
-    }
-
-    .ske-card-title {
-        margin: 0;
-        font-size: 10px;
-        font-weight: 850;
-        color: #1e293b;
-    }
-
-    .ske-card-desc {
-        margin: 2px 0 0;
-        font-size: 7px;
-        color: #64748b;
-    }
-
-    .ske-badge {
-        padding: 4px 7px;
-        border: 1px solid #cbd5e1;
-        border-radius: 999px;
-        background: #fff;
-        color: #64748b;
-        font-size: 6.5px;
-        font-weight: 800;
-        text-transform: uppercase;
-        white-space: nowrap;
-    }
-
-    .ske-badge-green {
-        border-color: #a7f3d0;
-        background: #ecfdf5;
-        color: #047857;
-    }
-
-    .ske-card-body {
-        padding: 11px;
-    }
-
-    /* =========================================================
-       CURRENT FILE
-    ========================================================== */
-
-    .ske-current-file {
-        margin-bottom: 9px;
-        padding: 8px;
-        border: 1px solid #cbd5e1;
-        border-radius: 8px;
-        background: #f8fafc;
-    }
-
-    .ske-current-file-row {
-        display: flex;
-        align-items: flex-start;
-        gap: 7px;
-    }
-
-    .ske-current-file-icon {
-        width: 30px;
-        height: 30px;
-        flex: 0 0 30px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 7px;
-        background: #e2e8f0;
-        color: #64748b;
-    }
-
-    .ske-current-file-content {
-        min-width: 0;
-        flex: 1;
-    }
-
-    .ske-current-file-label {
-        margin: 0;
-        font-size: 7px;
-        font-weight: 800;
-        color: #64748b;
-    }
-
-    .ske-current-file-name {
-        margin: 2px 0 0;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        font-size: 8px;
-        font-weight: 750;
-        color: #334155;
-    }
-
-    .ske-current-file-ext {
-        display: inline-flex;
-        margin-top: 2px;
-        padding: 2px 5px;
-        border: 1px solid #cbd5e1;
-        border-radius: 999px;
-        background: #fff;
-        color: #64748b;
-        font-size: 6px;
-        font-weight: 850;
-    }
-
-    .ske-empty {
-        margin: 0;
-        font-size: 7.5px;
-        color: #64748b;
-    }
-
-    /* =========================================================
-       INFO
-    ========================================================== */
-
-    .ske-info {
-        display: flex;
-        align-items: flex-start;
-        gap: 7px;
-        margin-bottom: 8px;
-        padding: 8px;
-        border: 1px solid #c7d2fe;
-        border-radius: 8px;
-        background: #eef2ff;
-        color: #4338ca;
-    }
-
-    .ske-info svg {
-        width: 13px;
-        height: 13px;
-        flex: 0 0 13px;
-        margin-top: 1px;
-    }
-
-    .ske-info p {
-        margin: 0;
-        font-size: 7px;
-        line-height: 1.55;
-    }
-
-    /* =========================================================
-       VIEW CURRENT
-    ========================================================== */
-
-    .ske-view-current {
-        width: 100%;
-        min-height: 34px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 5px;
-        margin-top: 6px;
-        padding: 0 8px;
-        border: 1px solid #bfdbfe;
-        border-radius: 7px;
-        background: #eff6ff;
-        color: #1d4ed8;
-        text-decoration: none;
-        font-size: 7.5px;
-        font-weight: 850;
-    }
-
-    .ske-view-current:hover {
-        background: #dbeafe;
-    }
-
-    /* =========================================================
-       UPLOAD
-    ========================================================== */
-
-    .ske-upload-box {
-        position: relative;
-        min-height: 130px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 4px;
-        padding: 14px;
-        border: 1.5px dashed #94a3b8;
-        border-radius: 9px;
-        background: #f8fafc;
-        text-align: center;
-        cursor: pointer;
-        transition: .15s ease;
-    }
-
-    .ske-upload-box:hover {
-        border-color: #60a5fa;
-        background: #eff6ff;
-    }
-
-    .ske-upload-box.has-file {
-        border-color: #34d399;
-        background: #ecfdf5;
-    }
-
-    .ske-upload-icon {
-        width: 36px;
-        height: 36px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: 4px;
-        border: 1px solid #bfdbfe;
-        border-radius: 8px;
-        background: #dbeafe;
-        color: #2563eb;
-    }
-
-    .ske-upload-box.has-file .ske-upload-icon {
-        border-color: #a7f3d0;
-        background: #d1fae5;
-        color: #059669;
-    }
-
-    .ske-upload-title {
-        font-size: 8.5px;
-        font-weight: 850;
-        color: #334155;
-    }
-
-    .ske-upload-subtitle {
-        font-size: 7px;
-        color: #64748b;
-    }
-
-    .ske-upload-limit {
-        margin-top: 2px;
-        padding: 3px 7px;
-        border-radius: 999px;
-        background: #dbeafe;
-        color: #2563eb;
-        font-size: 6px;
-        font-weight: 800;
-    }
-
-    .ske-upload-input {
-        position: absolute;
-        inset: 0;
-        width: 100%;
-        height: 100%;
-        opacity: 0;
-        cursor: pointer;
-    }
-
-    /* =========================================================
-       FILE INFO
-    ========================================================== */
-
-    .ske-file-info {
-        display: none;
-        margin-top: 8px;
-        padding: 8px;
-        border: 1px solid #a7f3d0;
-        border-radius: 8px;
-        background: #ecfdf5;
-    }
-
-    .ske-file-info.show {
-        display: block;
-    }
-
-    .ske-file-info-title {
-        margin: 0;
-        font-size: 7.5px;
-        font-weight: 850;
-        color: #047857;
-    }
-
-    .ske-file-info-name {
-        margin: 2px 0 0;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        font-size: 7.5px;
-        font-weight: 750;
-        color: #334155;
-    }
-
-    .ske-file-info-size {
-        margin: 2px 0 0;
-        font-size: 6.8px;
-        color: #64748b;
-    }
-
-    /* =========================================================
-       COMPRESSION
-    ========================================================== */
-
-    .ske-compression {
-        display: none;
-        margin-top: 8px;
-        padding: 8px;
-        border: 1px solid #c7d2fe;
-        border-radius: 8px;
-        background: #eef2ff;
-        color: #4338ca;
-    }
-
-    .ske-compression.show {
-        display: block;
-    }
-
-    .ske-compression.success {
-        border-color: #a7f3d0;
-        background: #ecfdf5;
-        color: #047857;
-    }
-
-    .ske-compression.warning {
-        border-color: #fde68a;
-        background: #fffbeb;
-        color: #a16207;
-    }
-
-    .ske-compression.error {
-        border-color: #fecaca;
-        background: #fff1f2;
-        color: #be123c;
-    }
-
-    .ske-compression.processing {
-        border-color: #bfdbfe;
-        background: #eff6ff;
-        color: #1d4ed8;
-    }
-
-    .ske-compression-title {
-        margin: 0 0 6px;
-        font-size: 7.5px;
-        font-weight: 850;
-    }
-
-    .ske-compression-grid {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 5px;
-    }
-
-    .ske-compression-item {
-        padding: 6px;
-        border: 1px solid rgba(148,163,184,.25);
-        border-radius: 6px;
-        background: rgba(255,255,255,.58);
-    }
-
-    .ske-compression-label {
-        display: block;
-        margin-bottom: 2px;
-        font-size: 5.8px;
-        color: #64748b;
-    }
-
-    .ske-compression-value {
-        font-size: 7px;
-        font-weight: 800;
-        color: #334155;
-    }
-
-    /* =========================================================
-       STATUS
-    ========================================================== */
-
-    .ske-status {
-        display: none;
-        margin-top: 7px;
-        padding: 7px 8px;
-        border: 1px solid #cbd5e1;
-        border-radius: 7px;
-        background: #f8fafc;
-        color: #64748b;
-        font-size: 6.8px;
-        line-height: 1.5;
-    }
-
-    .ske-status.show {
-        display: block;
-    }
-
-    .ske-status.blue {
-        border-color: #bfdbfe;
-        background: #eff6ff;
-        color: #1d4ed8;
-    }
-
-    .ske-status.green {
-        border-color: #a7f3d0;
-        background: #ecfdf5;
-        color: #047857;
-    }
-
-    .ske-status.amber {
-        border-color: #fde68a;
-        background: #fffbeb;
-        color: #a16207;
-    }
-
-    /* =========================================================
-       PREVIEW
-    ========================================================== */
-
-    .ske-preview {
-        display: none;
-        overflow: hidden;
-        margin-top: 8px;
-        border: 1px solid #cbd5e1;
-        border-radius: 8px;
-        background: #0f172a;
-    }
-
-    .ske-preview.show {
-        display: block;
-    }
-
-    .ske-preview-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 6px;
-        padding: 7px 8px;
-        border-bottom: 1px solid #334155;
-        background: #111827;
-        color: #fff;
-    }
-
-    .ske-preview-title {
-        margin: 0;
-        font-size: 7.5px;
-        font-weight: 800;
-    }
-
-    .ske-preview-badge {
-        padding: 3px 6px;
-        border-radius: 999px;
-        background: rgba(255,255,255,.10);
-        color: #cbd5e1;
-        font-size: 5.5px;
-        font-weight: 800;
-        text-transform: uppercase;
-    }
-
-    .ske-preview-image {
-        display: block;
-        width: 100%;
-        max-height: 340px;
-        object-fit: contain;
-        background: #fff;
-    }
-
-    .ske-preview-pdf {
-        display: block;
-        width: 100%;
-        height: 340px;
-        border: 0;
-        background: #fff;
-    }
-
-    .ske-preview-caption {
-        padding: 6px 8px;
-        background: #111827;
-        color: #94a3b8;
-        font-size: 6.5px;
-        line-height: 1.45;
-    }
-
-    .ske-preview-divider {
-        margin: 8px 0;
-        height: 1px;
-        background: #334155;
-    }
-
-    .ske-preview-secondary {
-        padding: 7px 8px;
-        background: #0f172a;
-        color: #cbd5e1;
-        font-size: 6.5px;
-        line-height: 1.45;
-    }
-
-    /* =========================================================
-       SUBMIT PROGRESS
-    ========================================================== */
-
-    .ske-submit-progress {
-        display: none;
-        margin-top: 7px;
-        height: 4px;
-        overflow: hidden;
-        border-radius: 99px;
-        background: #dbeafe;
-    }
-
-    .ske-submit-progress.show {
-        display: block;
-    }
-
-    .ske-submit-progress-bar {
-        width: 35%;
-        height: 100%;
-        border-radius: inherit;
-        background: #2563eb;
-        animation: skeProgress 1.2s ease-in-out infinite;
-    }
-
-    @keyframes skeProgress {
-        0% {
-            transform: translateX(-120%);
+    /*
+    |--------------------------------------------------------------------------
+    | URUTAN DATA
+    |--------------------------------------------------------------------------
+    |
+    | desc = terbaru ke terlama
+    | asc  = terlama ke terbaru
+    |
+    */
+    $sortOrder = strtolower(
+        trim(
+            (string) request()->input('sort', 'desc')
+        )
+    );
+    if (!in_array($sortOrder, ['asc', 'desc'], true)) {
+        $sortOrder = 'desc';
+    }
+    $sortLabel =
+        $sortOrder === 'desc'
+            ? 'Terbaru'
+            : 'Terlama';
+    $nextSortOrder =
+        $sortOrder === 'desc'
+            ? 'asc'
+            : 'desc';
+    $sortUrl = route(
+        'surat-keluar.index',
+        array_merge(
+            request()->except(['sort', 'page']),
+            ['sort' => $nextSortOrder]
+        )
+    );
+    $sortTitle =
+        $sortOrder === 'desc'
+            ? 'Klik untuk menampilkan dari terlama ke terbaru'
+            : 'Klik untuk menampilkan dari terbaru ke terlama';
+    if ($searchValue !== '') {
+        $exportFilters['search'] =
+            $searchValue;
+    }
+    $exportFilters['sort'] = $sortOrder;
+    if (!empty($selectedKategori)) {
+        $exportFilters['kategori_id'] =
+            $selectedKategori;
+    }
+    if (!empty($selectedStatus)) {
+        $exportFilters['status'] =
+            $selectedStatus;
+    }
+    if (
+        is_scalar($dariTanggal) &&
+        preg_match(
+            '/^\d{4}-\d{2}-\d{2}$/',
+            (string) $dariTanggal
+        )
+    ) {
+        $exportFilters['dari_tanggal'] =
+            $dariTanggal;
+    }
+    if (
+        is_scalar($sampaiTanggal) &&
+        preg_match(
+            '/^\d{4}-\d{2}-\d{2}$/',
+            (string) $sampaiTanggal
+        )
+    ) {
+        $exportFilters['sampai_tanggal'] =
+            $sampaiTanggal;
+    }
+    /*
+    |--------------------------------------------------------------------------
+    | SCORECARD
+    |--------------------------------------------------------------------------
+    |
+    | Scorecard dihitung dari seluruh data surat keluar.
+    | Tidak terpengaruh search/filter/pagination.
+    |
+    */
+    $statusCounts = is_array($statusCounts ?? null)
+        ? $statusCounts
+        : [];
+    $suratKeluarStatistics =
+        \App\Models\SuratKeluar::query()
+            ->selectRaw(
+                'COUNT(*) AS total_suratan'
+            )
+            ->selectRaw(
+                "SUM(
+                    CASE
+                        WHEN status IN ('draft', 'draf')
+                        THEN 1
+                        ELSE 0
+                    END
+                ) AS draft_suratan"
+            )
+            ->selectRaw(
+                "SUM(
+                    CASE
+                        WHEN status = 'diproses'
+                        THEN 1
+                        ELSE 0
+                    END
+                ) AS diproses_suratan"
+            )
+            ->selectRaw(
+                "SUM(
+                    CASE
+                        WHEN status = 'dikirim'
+                        THEN 1
+                        ELSE 0
+                    END
+                ) AS dikirim_suratan"
+            )
+            ->first();
+    $totalSuratKeluar =
+        (int) (
+            $suratKeluarStatistics->total_suratan
+            ?? 0
+        );
+    $suratDraft =
+        (int) (
+            $suratKeluarStatistics->draft_suratan
+            ?? 0
+        );
+    $suratDiproses =
+        (int) (
+            $suratKeluarStatistics->diproses_suratan
+            ?? 0
+        );
+    $suratDikirim =
+        (int) (
+            $suratKeluarStatistics->dikirim_suratan
+            ?? 0
+        );
+    $suratDisetujui = (int) (
+        $statusCounts['disetujui']
+        ?? 0
+    );
+    $suratDiarsipkan = (int) (
+        $statusCounts['diarsipkan']
+        ?? 0
+    );
+    $categorySummary = collect();
+    if (isset($categoryCounts)) {
+        $categorySummary = collect($categoryCounts)
+            ->mapWithKeys(function ($item) {
+                $name = trim((string) ($item->kategori?->nama_kategori ?? 'Tanpa Kategori'));
+                return [$name !== '' ? $name : 'Tanpa Kategori' => (int) ($item->total ?? 0)];
+            })
+            ->filter(fn ($jumlah) => $jumlah > 0)
+            ->sortDesc()
+            ->take(5);
+    }
+    if ($categorySummary->isEmpty() && isset($suratKeluars)) {
+        $categoryCollection = method_exists($suratKeluars, 'getCollection')
+            ? collect($suratKeluars->getCollection())
+            : collect($suratKeluars);
+        $categorySummary = $categoryCollection
+            ->map(fn ($item) => trim((string) ($item->kategori?->nama_kategori ?? 'Tanpa Kategori')))
+            ->map(fn ($name) => $name !== '' ? $name : 'Tanpa Kategori')
+            ->countBy()
+            ->sortDesc()
+            ->take(5);
+    }
+    $statusChartData = [
+        'Draf' => ['value' => $suratDraft, 'color' => '#64748b'],
+        'Diproses' => ['value' => $suratDiproses, 'color' => '#d97706'],
+        'Disetujui' => ['value' => $suratDisetujui, 'color' => '#2563eb'],
+        'Dikirim' => ['value' => $suratDikirim, 'color' => '#059669'],
+        'Diarsipkan' => ['value' => $suratDiarsipkan, 'color' => '#7c3aed'],
+    ];
+    $statusChartTotal = array_sum(array_column($statusChartData, 'value'));
+    $statusChartGradient = '#e2e8f0';
+    if ($statusChartTotal > 0) {
+        $segments = [];
+        $cursor = 0;
+        foreach ($statusChartData as $chartItem) {
+            if ((int) $chartItem['value'] <= 0) {
+                continue;
+            }
+            $start = $cursor;
+            $cursor += ((int) $chartItem['value'] / $statusChartTotal) * 360;
+            $segments[] = $chartItem['color'] . ' ' . round($start, 2) . 'deg ' . round($cursor, 2) . 'deg';
         }
-
-        100% {
-            transform: translateX(320%);
-        }
+        $statusChartGradient = 'conic-gradient(' . implode(', ', $segments) . ')';
     }
-
-    /* =========================================================
-       FOOTER
-    ========================================================== */
-
-    .ske-footer {
-        display: flex;
-        justify-content: flex-end;
-        gap: 7px;
-        padding: 10px 13px;
-        border-top: 1.5px solid #cbd5e1;
-        background: #f8fafc;
-    }
-
-    .ske-footer-btn {
-        min-height: 36px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-        padding: 0 13px;
-        border-radius: 8px;
-        font-size: 8px;
-        font-weight: 850;
-        text-decoration: none;
-        cursor: pointer;
-    }
-
-    .ske-cancel {
-        border: 1.5px solid #cbd5e1;
-        background: #fff;
-        color: #475569;
-    }
-
-    .ske-submit {
-        border: 1.5px solid #059669;
-        background: #059669;
-        color: #fff;
-        box-shadow: 0 3px 8px rgba(5,150,105,.14);
-    }
-
-    .ske-submit:hover:not(:disabled) {
-        background: #047857;
-        border-color: #047857;
-    }
-
-    .ske-submit:disabled {
-        opacity: .6;
-        cursor: not-allowed;
-    }
-
-    .ske-hidden {
-        display: none !important;
-    }
-
-    /* =========================================================
-       RESPONSIVE
-    ========================================================== */
-
-    @media (max-width: 900px) {
-        .ske-attachment-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .ske-preview-pdf {
-            height: 360px;
-        }
-
-        .ske-preview-image {
-            max-height: 360px;
-        }
-    }
-
-    @media (max-width: 640px) {
-        .ske-page {
-            padding: 7px 9px 20px;
-        }
-
-        .ske-back {
-            width: 100%;
-        }
-
-        .ske-header-inner {
-            align-items: flex-start;
-            flex-direction: column;
-        }
-
-        .ske-header-badge {
-            align-self: flex-start;
-        }
-
-        .ske-body {
-            padding: 10px;
-        }
-
-        .ske-field-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .ske-field,
-        .ske-field:nth-child(2n) {
-            border-right: 0;
-        }
-
-        .ske-field-full {
-            grid-column: auto;
-        }
-
-        .ske-compression-grid {
-            grid-template-columns: 1fr 1fr;
-        }
-
-        .ske-footer {
-            flex-direction: column-reverse;
-            align-items: stretch;
-        }
-
-        .ske-footer-btn {
-            width: 100%;
-        }
-
-        .ske-preview-pdf {
-            height: 320px;
-        }
-
-        .ske-preview-image {
-            max-height: 320px;
-        }
-    }
-
-    @media (max-width: 420px) {
-        .ske-header {
-            padding: 14px;
-        }
-
-        .ske-header-title {
-            font-size: 16px;
-        }
-
-        .ske-compression-grid {
-            grid-template-columns: 1fr;
-        }
-    }
-</style>
-
-<div class="ske-page">
-
-    {{-- =========================================================
-         TOP ACTION
-    ========================================================== --}}
-
-    <div class="ske-topbar">
-
-        <a
-            href="{{ route('surat-keluar.index') }}"
-            class="ske-back"
-        >
-            <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-            >
-                <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                />
-            </svg>
-
-            Kembali
-        </a>
-
-    </div>
-
-    {{-- =========================================================
-         ERROR
-    ========================================================== --}}
-
-    @if($errors->any())
-
-        <div class="ske-error">
-
-            <p class="ske-error-title">
-                Data belum dapat diperbarui.
-            </p>
-
-            <ul class="ske-error-list">
-
-                @foreach($errors->all() as $error)
-
-                    <li>
-                        {{ $error }}
-                    </li>
-
-                @endforeach
-
-            </ul>
-
+@endphp
+@push('styles')
+<style>
+/* PAGE */
+.surat-page{min-width:0;color:#172033;}
+/* HEADER */
+.surat-page-header{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:18px;}
+.surat-page-header-left{display:flex;align-items:center;gap:14px;min-width:0;}
+.surat-page-icon{display:flex;align-items:center;justify-content:center;width:56px;height:56px;flex:0 0 56px;border-radius:16px;background:linear-gradient(135deg,#dbeafe,#eff6ff);color:#2563eb;}
+.surat-page-title{margin:0;color:#172554;font-size:28px;font-weight:800;line-height:1.1;letter-spacing:-.025em;}
+.surat-page-description{margin-top:4px;color:#64748b;font-size:12px;line-height:1.45;}
+.surat-header-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap;}
+.surat-export-button,.surat-create-button{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:40px;padding:0 13px;border-radius:10px;font-size:11px;font-weight:700;line-height:1;text-decoration:none;transition:.15s ease;}
+.surat-export-button{border:1px solid #dbe4f0;background:#fff;color:#475569;box-shadow:0 2px 8px rgba(15,23,42,.035);}
+.surat-export-button:hover{transform:translateY(-1px);}
+.surat-export-button.excel:hover{border-color:#a7f3d0;background:#ecfdf5;color:#047857;}
+.surat-export-button.pdf:hover{border-color:#fecdd3;background:#fff1f2;color:#be123c;}
+.surat-create-button{border:1px solid #2563eb;background:#2563eb;color:#fff;box-shadow:0 8px 20px rgba(37,99,235,.18);}
+.surat-create-button:hover{border-color:#1d4ed8;background:#1d4ed8;transform:translateY(-1px);box-shadow:0 12px 24px rgba(37,99,235,.23);}
+/* SCORECARD */
+.surat-keluar-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:16px;}
+.surat-keluar-summary-card{position:relative;display:flex;align-items:center;min-width:0;min-height:94px;gap:12px;overflow:hidden;padding:15px 16px;border:1px solid #dbe4f0;border-radius:15px;background:#fff;box-shadow:0 3px 12px rgba(15,23,42,.035);transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease;}
+.surat-keluar-summary-card:hover{transform:translateY(-1px);border-color:#cbd5e1;box-shadow:0 7px 20px rgba(15,23,42,.06);}
+.surat-keluar-summary-card::before{content:'';position:absolute;left:0;top:12px;bottom:12px;width:3px;border-radius:0 6px 6px 0;background:#2563eb;}
+.surat-keluar-summary-card:nth-child(2)::before{background:#64748b;}
+.surat-keluar-summary-card:nth-child(3)::before{background:#d97706;}
+.surat-keluar-summary-card:nth-child(4)::before{background:#059669;}
+.surat-keluar-summary-icon{display:flex;align-items:center;justify-content:center;width:42px;height:42px;flex:0 0 42px;border-radius:11px;}
+.surat-keluar-summary-icon.blue{background:#eff6ff;color:#2563eb;}
+.surat-keluar-summary-icon.slate{background:#f1f5f9;color:#64748b;}
+.surat-keluar-summary-icon.amber{background:#fffbeb;color:#d97706;}
+.surat-keluar-summary-icon.green{background:#ecfdf5;color:#059669;}
+.surat-keluar-summary-icon.purple{background:#f5f3ff;color:#7c3aed;}
+.surat-keluar-summary-content{min-width:0;}
+.surat-keluar-summary-label{margin:0 0 3px;color:#64748b;font-size:10px;font-weight:700;}
+.surat-keluar-summary-value{margin:0;color:#0f172a;font-size:23px;font-weight:800;line-height:1;}
+.surat-keluar-summary-note{margin-top:4px;color:#94a3b8;font-size:8.5px;line-height:1.3;}
+/* WORKSPACE */
+.surat-workspace{display:grid;grid-template-columns:minmax(0,1fr) 292px;gap:16px;align-items:start;}
+.surat-main-card,.surat-side-card{overflow:hidden;border:1px solid #dbe4f0;border-radius:16px;background:#fff;box-shadow:0 3px 14px rgba(15,23,42,.04);}
+.surat-main-card-header,.surat-side-card-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 18px;border-bottom:1px solid #edf2f7;}
+.surat-main-card-title-wrap{display:flex;align-items:center;gap:10px;min-width:0;}
+.surat-main-card-icon,.surat-side-card-icon{display:flex;align-items:center;justify-content:center;width:36px;height:36px;flex:0 0 36px;border-radius:10px;background:#eff6ff;color:#2563eb;}
+.surat-main-card-title{margin:0;color:#172033;font-size:14px;font-weight:800;}
+.surat-main-card-subtitle{margin-top:2px;color:#94a3b8;font-size:9px;line-height:1.4;}
+.surat-sort-badge{display:inline-flex;align-items:center;gap:5px;min-height:30px;padding:0 9px;border:1px solid #dbe4f0;border-radius:9px;background:#fff;color:#475569;font-size:9px;font-weight:700;text-decoration:none;white-space:nowrap;cursor:pointer;transition:.15s ease;}.surat-sort-badge:hover{border-color:#bfdbfe;background:#eff6ff;color:#2563eb;transform:translateY(-1px);box-shadow:0 5px 14px rgba(37,99,235,.10);}
+/* FILTER */
+.surat-filter-card{margin:0;padding:14px 18px 15px;border:0;border-bottom:1px solid #edf2f7;border-radius:0;background:#fff;box-shadow:none;}
+.surat-filter-main{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(270px,320px);gap:9px;align-items:center;}
+.surat-search-wrapper{position:relative;min-width:0;}
+.surat-search-icon{position:absolute;top:50%;left:12px;z-index:2;display:flex;align-items:center;justify-content:center;width:17px;height:17px;color:#64748b;transform:translateY(-50%);pointer-events:none;}
+.surat-search-input,.surat-date-input{width:100%;height:42px;border:1px solid #d6e0ec;border-radius:10px;outline:none;background:#fff;color:#334155;font-size:11px;transition:border-color .15s ease,box-shadow .15s ease;}
+.surat-search-input{padding:0 12px 0 38px;}
+.surat-search-input::placeholder,.surat-date-input::placeholder{color:#94a3b8;}
+.surat-search-input:hover,.surat-date-input:hover{border-color:#b8c5d6;}
+.surat-search-input:focus,.surat-date-input:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.08);}
+.surat-filter-actions{display:flex;align-items:center;justify-content:flex-start;gap:5px;min-width:0;}
+.surat-filter-submit{display:inline-flex;align-items:center;justify-content:center;gap:5px;width:82px;height:42px;min-width:82px;padding:0 10px;border:1px solid #2563eb;border-radius:10px;background:#2563eb;color:#fff;font-size:10px;font-weight:700;cursor:pointer;box-shadow:0 5px 14px rgba(37,99,235,.14);transition:.15s ease;}
+.surat-filter-submit:hover{border-color:#1d4ed8;background:#1d4ed8;box-shadow:0 7px 18px rgba(37,99,235,.18);}
+.surat-filter-submit.has-filter{border-color:#2563eb;background:#2563eb;color:#fff;}
+.surat-filter-reset{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border:1px solid #d6e0ec;border-radius:9px;background:#fff;color:#64748b;text-decoration:none;transition:.15s ease;}
+.surat-filter-reset:hover{border-color:#fecdd3;background:#fff1f2;color:#e11d48;}
+.surat-date-wrapper{position:relative;min-width:0;}
+.surat-date-field{position:relative;}
+.surat-date-input{padding:0 38px 0 38px;cursor:pointer;}
+.surat-date-left-icon{position:absolute;top:50%;left:12px;z-index:2;color:#64748b;transform:translateY(-50%);pointer-events:none;}
+.surat-date-chevron{position:absolute;top:50%;right:11px;z-index:2;color:#64748b;transform:translateY(-50%);pointer-events:none;}
+.surat-date-clear{position:absolute;top:50%;right:28px;z-index:3;display:none;align-items:center;justify-content:center;width:26px;height:26px;border:0;border-radius:7px;background:transparent;color:#94a3b8;cursor:pointer;transform:translateY(-50%);padding:0;}
+.surat-date-clear.is-visible{display:flex;}
+.surat-date-clear:hover{background:#fff1f2;color:#e11d48;}
+.filter-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:8px;}
+.filter-dropdown{position:relative;min-width:0;}
+.filter-dropdown-trigger{display:flex;align-items:center;width:100%;min-height:44px;gap:8px;padding:6px 9px;border:1px solid #d6e0ec;border-radius:10px;background:#fff;color:#334155;text-align:left;cursor:pointer;transition:.15s ease;}
+.filter-dropdown-trigger:hover{border-color:#b8c5d6;background:#f8fafc;}
+.filter-dropdown-trigger[aria-expanded="true"]{border-color:#3b82f6;background:#f8fbff;box-shadow:0 0 0 3px rgba(59,130,246,.08);}
+.filter-dropdown-trigger.status-trigger[aria-expanded="true"]{border-color:#d97706;background:#fffcf0;box-shadow:0 0 0 3px rgba(217,119,6,.08);}
+.filter-dropdown-trigger-content{display:flex;align-items:center;gap:8px;min-width:0;flex:1;}
+.filter-dropdown-icon{display:flex;align-items:center;justify-content:center;width:28px;height:28px;flex:0 0 28px;border-radius:8px;background:#eff6ff;color:#2563eb;}
+.filter-dropdown-icon.status{background:#fffbeb;color:#d97706;}
+.filter-dropdown-text{min-width:0;flex:1;}
+.filter-dropdown-title,.filter-dropdown-subtitle{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.filter-dropdown-title{color:#334155;font-size:10px;font-weight:800;}
+.filter-dropdown-subtitle{margin-top:2px;color:#94a3b8;font-size:8px;}
+.filter-dropdown-count{display:inline-flex;align-items:center;justify-content:center;min-width:54px;min-height:21px;padding:0 6px;border-radius:999px;font-size:7.5px;font-weight:800;white-space:nowrap;}
+.filter-dropdown-count.category{background:#eff6ff;color:#2563eb;}
+.filter-dropdown-count.status{background:#fffbeb;color:#b45309;}
+.filter-dropdown-arrow{flex:0 0 auto;color:#94a3b8;transition:.15s ease;}
+.filter-dropdown-trigger[aria-expanded="true"] .filter-dropdown-arrow{transform:rotate(180deg);color:#2563eb;}
+.filter-dropdown-trigger.status-trigger[aria-expanded="true"] .filter-dropdown-arrow{color:#d97706;}
+.filter-dropdown-menu{position:absolute;top:calc(100% + 7px);left:0;right:0;z-index:10020;display:none;overflow:hidden;border:1px solid #dbe4f0;border-radius:12px;background:#fff;box-shadow:0 20px 45px rgba(15,23,42,.14),0 5px 18px rgba(15,23,42,.08);}
+.filter-dropdown.open .filter-dropdown-menu{display:block;}
+.filter-dropdown-menu-header{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 10px;border-bottom:1px solid #edf2f7;background:#f8fafc;}
+.filter-dropdown-menu-title-wrap{min-width:0;}
+.filter-dropdown-menu-title{display:block;color:#334155;font-size:9px;font-weight:800;}
+.filter-dropdown-menu-description{display:block;margin-top:2px;color:#94a3b8;font-size:7px;}
+.filter-dropdown-actions{display:inline-flex;align-items:center;gap:2px;flex:0 0 auto;}
+.filter-dropdown-action{border:0;border-radius:6px;background:transparent;padding:4px 5px;font-size:7px;font-weight:800;cursor:pointer;}
+.filter-dropdown-action.category{color:#2563eb}.filter-dropdown-action.status{color:#d97706}.filter-dropdown-action.clear{color:#64748b}
+.filter-dropdown-action.category:hover{background:#eff6ff}.filter-dropdown-action.status:hover{background:#fffbeb}.filter-dropdown-action.clear:hover{background:#f1f5f9}
+.filter-dropdown-divider{color:#cbd5e1;font-size:8px;}
+.filter-dropdown-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;max-height:240px;overflow-y:auto;padding:8px;}
+.filter-dropdown-option{display:flex;align-items:center;min-width:0;min-height:36px;gap:6px;padding:6px 7px;border:1px solid #dbe3ed;border-radius:8px;background:#fff;cursor:pointer;transition:.15s ease;}
+.filter-dropdown-option:hover{border-color:#93c5fd;background:#eff6ff;}
+.filter-dropdown-option.status-option:hover{border-color:#fbbf24;background:#fffbeb;}
+.filter-dropdown-option input{width:13px;height:13px;margin:0;cursor:pointer;accent-color:#2563eb;}
+.filter-dropdown-option span{min-width:0;overflow:hidden;color:#475569;font-size:8px;font-weight:600;text-overflow:ellipsis;white-space:nowrap;}
+.filter-dropdown-option:has(input:checked){border-color:#2563eb;background:#eff6ff}.filter-dropdown-option.status-option:has(input:checked){border-color:#d97706;background:#fffbeb}
+.filter-dropdown-menu-footer{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:6px 9px;border-top:1px solid #edf2f7;}
+.filter-dropdown-footer-count,.filter-dropdown-footer-hint{font-size:7px;line-height:1.2;}
+.filter-dropdown-footer-count{color:#64748b;font-weight:700}.filter-dropdown-footer-hint{color:#94a3b8;}
+.filter-dropdown-empty{padding:18px 10px;text-align:center;color:#94a3b8;font-size:8px;}
+/* SIDEBAR */
+.surat-sidebar{display:flex;flex-direction:column;gap:12px;min-width:0;}
+.surat-side-card-header{justify-content:flex-start;}
+.surat-side-card-title{color:#172033;font-size:10px;font-weight:800;}
+.surat-side-card-content{padding:14px;}
+.surat-category-list{display:flex;flex-direction:column;}
+.surat-category-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 0;border-bottom:1px solid #f1f5f9;}
+.surat-category-row:first-child{padding-top:0}.surat-category-row:last-child{border-bottom:0;padding-bottom:0;}
+.surat-category-name{min-width:0;overflow:hidden;color:#475569;font-size:8.5px;font-weight:600;text-overflow:ellipsis;white-space:nowrap;}
+.surat-category-count{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:21px;padding:0 6px;border-radius:999px;background:#eff6ff;color:#2563eb;font-size:8px;font-weight:800;}
+.surat-side-empty{padding:8px 0 2px;color:#94a3b8;font-size:8.5px;}
+.surat-donut{position:relative;display:flex;align-items:center;justify-content:center;width:148px;height:148px;margin:2px auto 14px;border-radius:999px;background:var(--donut);}
+.surat-donut::after{content:'';position:absolute;inset:25px;border-radius:999px;background:#fff;box-shadow:0 0 0 1px rgba(226,232,240,.8);}
+.surat-donut-center{position:relative;z-index:2;text-align:center}.surat-donut-number{color:#172033;font-size:25px;font-weight:800;line-height:1}.surat-donut-label{margin-top:4px;color:#94a3b8;font-size:8px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;}
+.surat-legend{display:flex;flex-direction:column;gap:8px}.surat-legend-row{display:flex;align-items:center;justify-content:space-between;gap:8px}.surat-legend-name{display:flex;align-items:center;gap:7px;min-width:0;color:#64748b;font-size:8.5px;font-weight:600}.surat-legend-dot{width:8px;height:8px;flex:0 0 8px;border-radius:999px}.surat-legend-value{color:#334155;font-size:9px;font-weight:800;}
+/* TABLE */
+.archive-table-wrapper{overflow:hidden;background:#fff;}
+.archive-table-scroll{overflow-x:auto;}
+.archive-table{width:100%;table-layout:fixed;border-collapse:collapse;border-spacing:0;background:#fff;}
+.archive-table thead{background:#f8fafc}.archive-table thead tr{border-bottom:1px solid #e2e8f0}
+.archive-table thead th{padding:11px 12px;color:#64748b;font-size:8px;font-weight:800;letter-spacing:.04em;text-align:left;text-transform:uppercase;white-space:nowrap;}
+.archive-table tbody tr{background:#fff;transition:background-color .15s ease}.archive-table tbody tr:nth-child(even){background:#fbfdff}.archive-table tbody tr:hover{background:#f8fbff}
+.archive-table tbody td{padding:12px;border-bottom:1px solid #edf2f7;color:#475569;font-size:10px;line-height:1.4;vertical-align:middle;}
+.archive-table tbody tr:last-child td{border-bottom:0}.archive-table tbody td:last-child{text-align:center}
+.category-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    min-height:25px;
+    max-width:100%;
+    padding:0 8px;
+    overflow:hidden;
+    border:1px solid transparent;
+    border-radius:999px;
+    font-size:8.5px;
+    font-weight:700;
+    line-height:1;
+    white-space:nowrap;
+    text-overflow:ellipsis;
+}
+.category-badge.category-normal{
+    background:#eff6ff;
+    color:#2563eb;
+    border-color:#dbeafe;
+}
+.category-badge.category-important{
+    background:#fff7ed;
+    color:#c2410c;
+    border-color:#fed7aa;
+}
+.category-badge.category-secret{
+    background:#f5f3ff;
+    color:#7c3aed;
+    border-color:#ddd6fe;
+}
+.category-badge.category-urgent{
+    background:#fff1f2;
+    color:#e11d48;
+    border-color:#fecdd3;
+}
+.archive-table .cell-date{color:#334155;font-weight:700;white-space:nowrap}.archive-table .cell-sender{color:#334155}.archive-table .cell-subject{max-width:100%;overflow:hidden;color:#1e293b;font-weight:700;text-overflow:ellipsis;white-space:nowrap}.archive-table .cell-category{color:#64748b}.archive-table .cell-status{white-space:nowrap}
+.archive-table .sender-badge{display:inline-block;max-width:100%;overflow:hidden;padding:5px 8px;border:0;border-radius:8px;background:#f8fafc;color:#334155;font-weight:700;text-overflow:ellipsis;white-space:nowrap;}
+.archive-table .status-badge{display:inline-flex;align-items:center;gap:5px;border-width:0;border-radius:999px;padding:5px 8px;font-size:8px;font-weight:800;white-space:nowrap;}
+.archive-table .action-cell{width:112px;white-space:nowrap}.archive-table th:nth-child(1),.archive-table td:nth-child(1){width:100px}.archive-table th:nth-child(2),.archive-table td:nth-child(2){width:170px}.archive-table th:nth-child(3),.archive-table td:nth-child(3){width:auto}.archive-table th:nth-child(4),.archive-table td:nth-child(4){width:126px}.archive-table th:nth-child(5),.archive-table td:nth-child(5){width:100px}.archive-table th:nth-child(6),.archive-table td:nth-child(6){width:112px}
+.action-buttons{display:inline-flex;align-items:center;justify-content:center;gap:4px}.archive-table .action-button{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border:1px solid #e2e8f0;border-radius:9px;background:#fff;color:#64748b;transition:.15s ease}.archive-table .action-button:hover{border-color:#bfdbfe;background:#eff6ff;color:#2563eb}.archive-table .action-button.edit:hover{border-color:#fde68a;background:#fffbeb;color:#d97706}.archive-table .action-button.delete:hover{border-color:#fecdd3;background:#fff1f2;color:#e11d48}
+.archive-table-empty{padding:44px 16px!important;text-align:center;}
+.archive-pagination{padding:11px 18px;border-top:1px solid #edf2f7}
+/* DATE PICKER */
+.custom-date-picker,.custom-picker-panel{border:1px solid #cbd5e1;background:#fff;box-shadow:0 24px 70px rgba(15,23,42,.18),0 8px 25px rgba(15,23,42,.08);}
+.custom-date-picker{position:fixed;z-index:999999;width:720px;max-width:calc(100vw - 20px);overflow:hidden;border-radius:14px}.custom-date-picker.hidden,.custom-picker-panel.hidden{display:none!important}
+.custom-date-picker-header{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;border-bottom:1px solid #e2e8f0}.custom-date-picker-title{color:#334155;font-size:12px;font-weight:800}.custom-date-picker-close,.custom-picker-panel-close{display:flex;align-items:center;justify-content:center;border:0;background:#f8fafc;color:#64748b;cursor:pointer}.custom-date-picker-close{width:30px;height:30px;border-radius:8px;font-size:18px}.custom-date-picker-close:hover,.custom-picker-panel-close:hover{background:#f1f5f9;color:#ef4444}
+.custom-date-calendars,.custom-date-picker-calendars{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.custom-calendar{padding:13px 15px 11px}.custom-calendar+.custom-calendar{border-left:1px solid #e2e8f0}.custom-calendar-head{display:flex;align-items:center;justify-content:space-between;gap:5px;min-height:38px;margin-bottom:5px}.custom-calendar-heading{display:flex;align-items:center;justify-content:center;flex:1;gap:4px}.custom-calendar-nav{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border:0;border-radius:8px;background:transparent;color:#64748b;font-size:21px;cursor:pointer}.custom-calendar-nav:hover{background:#eff6ff;color:#2563eb}
+.custom-calendar-month-button,.custom-calendar-year-button{display:inline-flex;align-items:center;justify-content:center;gap:5px;min-height:32px;padding:6px 9px;border:1px solid #dbe3ed;border-radius:8px;background:#f8fafc;color:#334155;font-size:11px;font-weight:800;cursor:pointer}.custom-calendar-month-button:hover,.custom-calendar-year-button:hover{border-color:#93c5fd;background:#eff6ff;color:#2563eb}.custom-calendar-month-button::after,.custom-calendar-year-button::after{content:'';width:6px;height:6px;margin-top:-3px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg)}
+.custom-calendar-weekdays,.custom-calendar-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px}.custom-calendar-weekday{display:flex;align-items:center;justify-content:center;height:26px;color:#94a3b8;font-size:9px;font-weight:800}.custom-calendar-day{display:flex;align-items:center;justify-content:center;height:34px;border:0;border-radius:7px;background:transparent;color:#475569;font-size:10px;font-weight:600;cursor:pointer}.custom-calendar-day:hover{background:#eff6ff;color:#2563eb}.custom-calendar-day.other-month{color:#cbd5e1}.custom-calendar-day.today{box-shadow:inset 0 0 0 1px #93c5fd;color:#2563eb}.custom-calendar-day.in-range{background:#eff6ff;color:#2563eb}.custom-calendar-day.range-start,.custom-calendar-day.range-end{background:#2563eb;color:#fff}.custom-calendar-day.range-start{border-radius:999px 0 0 999px}.custom-calendar-day.range-end{border-radius:0 999px 999px 0}.custom-calendar-day.range-start.range-end{border-radius:999px}
+.custom-date-picker-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-top:1px solid #e2e8f0}.custom-date-picker-selected{min-width:0;color:#64748b;font-size:10px;font-weight:700}.custom-date-picker-actions{display:flex;align-items:center;gap:6px}.custom-date-picker-button{height:34px;border:1px solid #dbe3ed;border-radius:8px;padding:0 12px;background:#f8fafc;color:#475569;font-size:10px;font-weight:700;cursor:pointer}.custom-date-picker-button.apply{border-color:#2563eb;background:#2563eb;color:#fff}
+.custom-picker-panel{position:fixed;z-index:1000000;width:310px;max-width:calc(100vw - 20px);padding:12px;border-radius:12px}.custom-picker-panel-header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;padding-bottom:9px;border-bottom:1px solid #e2e8f0}.custom-picker-panel-title{flex:1;color:#334155;font-size:12px;font-weight:800;text-align:center}.custom-picker-panel-close{width:28px;height:28px;border-radius:7px;font-size:17px}.custom-picker-month-grid,.custom-picker-year-grid,.custom-picker-grid{display:grid;gap:7px}.custom-picker-month-grid{grid-template-columns:repeat(3,1fr)}.custom-picker-year-grid{grid-template-columns:repeat(4,1fr)}.custom-picker-option{display:flex;align-items:center;justify-content:center;min-height:40px;padding:0 6px;border:1px solid #dbe3ed;border-radius:9px;background:#fff;color:#475569;font-size:10px;font-weight:700;cursor:pointer}.custom-picker-option:hover{border-color:#93c5fd;background:#eff6ff;color:#2563eb}.custom-picker-option.active{border-color:#2563eb;background:#2563eb;color:#fff}.custom-picker-option.current:not(.active){box-shadow:inset 0 0 0 1px #93c5fd}
+/* RESPONSIVE */
+@media(max-width:1100px){
+.surat-keluar-summary{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.surat-workspace{grid-template-columns:minmax(0,1fr)}
+.surat-sidebar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+.surat-filter-main{grid-template-columns:minmax(0,1fr) auto}
+.surat-date-wrapper{grid-column:1/-1}
+}
+@media(max-width:767px){
+.surat-page-header{align-items:flex-start;flex-direction:column;gap:12px}
+.surat-page-header-left{width:100%}
+.surat-header-actions{width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+.surat-header-actions .surat-export-button,.surat-header-actions .surat-create-button{width:100%;padding:0 8px;font-size:9px}
+.surat-page-title{font-size:24px}
+.surat-page-description{font-size:11px}
+.surat-keluar-summary{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.surat-keluar-summary-card{min-height:86px;padding:12px;gap:8px}
+.surat-keluar-summary-icon{width:37px;height:37px;flex-basis:37px;border-radius:10px}
+.surat-keluar-summary-value{font-size:20px}
+.surat-keluar-summary-note{font-size:8px}
+.surat-sidebar{display:flex;flex-direction:column}
+.surat-filter-card{padding:12px}
+.surat-filter-main{grid-template-columns:minmax(0,1fr) auto;gap:8px}
+.surat-filter-actions{width:auto}
+.surat-filter-submit{width:82px;min-width:82px}
+.surat-filter-reset{width:34px;flex:0 0 34px}
+.surat-date-wrapper{grid-column:1/-1}
+.filter-row{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.filter-dropdown-menu{position:fixed;top:50%;left:50%;right:auto;width:calc(100vw - 24px);max-width:430px;max-height:80vh;transform:translate(-50%,-50%)}
+.filter-dropdown-options{grid-template-columns:repeat(3,minmax(0,1fr));max-height:calc(80vh - 145px)}
+.filter-dropdown-option span{font-size:8px}
+.archive-table-scroll{overflow:visible}
+.archive-table{min-width:0;table-layout:auto}
+.archive-table thead{display:none}
+.archive-table,.archive-table tbody,.archive-table tr,.archive-table td{display:block;width:100%}
+.archive-table tbody tr{margin:0;padding:10px 12px;border-bottom:1px solid #edf2f7;background:#fff}
+.archive-table tbody td{display:grid;grid-template-columns:82px minmax(0,1fr);gap:10px;align-items:center;padding:6px 0;border:0;font-size:10px}
+.archive-table tbody td::before{content:attr(data-label);color:#94a3b8;font-size:8px;font-weight:800;letter-spacing:.03em;text-transform:uppercase}
+.archive-table tbody td:last-child{display:flex;justify-content:space-between;align-items:center;padding-top:8px;margin-top:4px;border-top:1px solid #f1f5f9;text-align:left}
+.archive-table tbody td:last-child::before{content:attr(data-label)}
+.archive-table .action-buttons{margin-left:auto}
+.archive-table .sender-badge{max-width:none}
+.archive-table .cell-subject{white-space:normal}
+.custom-date-picker{top:50%;left:50%;width:calc(100vw - 16px);max-height:calc(100vh - 16px);overflow-y:auto;transform:translate(-50%,-50%)}
+.custom-date-calendars,.custom-date-picker-calendars{grid-template-columns:1fr}
+.custom-calendar+.custom-calendar{border-top:1px solid #e2e8f0;border-left:0}
+.custom-calendar-day{height:38px}
+.custom-picker-panel{top:50%!important;left:50%!important;width:calc(100vw - 24px);transform:translate(-50%,-50%)}
+body.date-picker-lock{overflow:hidden}
+}
+@media(max-width:480px){
+.surat-keluar-summary{grid-template-columns:1fr}
+.surat-header-actions{grid-template-columns:1fr 1fr}
+.surat-header-actions .surat-create-button{grid-column:1/-1}
+.surat-filter-main{grid-template-columns:1fr auto}
+.surat-filter-actions{justify-content:flex-end}
+.surat-filter-submit{width:78px;min-width:78px;height:40px;font-size:9px}
+.surat-filter-reset{width:32px;height:32px}
+.filter-row{grid-template-columns:1fr}
+.filter-dropdown-options{grid-template-columns:repeat(2,minmax(0,1fr))}
+.filter-dropdown-menu-header{align-items:flex-start}
+.filter-dropdown-actions{margin-top:1px}
+.filter-dropdown-footer-count,.filter-dropdown-footer-hint{font-size:6.5px}
+}</style>
+@endpush
+<div class="surat-page space-y-4">
+    {{-- =====================================================================
+         HEADER
+    ====================================================================== --}}
+    <div class="surat-page-header">
+        <div class="surat-page-header-left">
+            <div class="surat-page-icon">
+                <svg
+                    class="h-7 w-7"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M3 8l9 6 9-6"
+                    />
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                    />
+                </svg>
+            </div>
+            <div class="min-w-0">
+                <h1 class="surat-page-title">
+                    Surat Keluar
+                </h1>
+                <p class="surat-page-description">
+                    Kelola dan pantau seluruh arsip surat keluar organisasi Anda.
+                </p>
+            </div>
         </div>
-
-    @endif
-
-    {{-- =========================================================
-         FORM
-    ========================================================== --}}
-
-    <form
-        id="form-surat-keluar-edit"
-        method="POST"
-        action="{{ route('surat-keluar.update', $suratKeluar) }}"
-        enctype="multipart/form-data"
-        novalidate
-    >
-
-        @csrf
-        @method('PUT')
-
-        <div class="ske-shell">
-
-            {{-- =====================================================
-                 HEADER
-            ====================================================== --}}
-
-            <header class="ske-header">
-
-                <div class="ske-header-inner">
-
-                    <div class="ske-header-main">
-
-                        <div class="ske-header-icon">
-
+        <div class="surat-header-actions">
+            <a
+                href="{{ route('export.surat-keluar.excel', $exportFilters) }}"
+                class="surat-export-button excel"
+                title="Export Excel"
+                aria-label="Export Excel"
+            >
+                <svg
+                    class="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A2 2 0 0120 6.707V19a2 2 0 01-2 2z"
+                    />
+                </svg>
+                Excel
+            </a>
+            <a
+                href="{{ route('export.surat-keluar.pdf', $exportFilters) }}"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="surat-export-button pdf"
+                title="Export PDF"
+                aria-label="Export PDF"
+            >
+                <svg
+                    class="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M7 3h7l4 4v14H7a2 2 0 01-2-2V5a2 2 0 012-2zm7 0v5h5"
+                    />
+                </svg>
+                PDF
+            </a>
+            @if($canManage)
+                <a
+                    href="{{ route('surat-keluar.create') }}"
+                    class="surat-create-button"
+                    title="Tambah Surat Keluar"
+                    aria-label="Tambah Surat Keluar"
+                >
+                    <svg
+                        class="h-4 w-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M12 4v16m8-8H4"
+                        />
+                    </svg>
+                    Surat Keluar
+                </a>
+            @endif
+        </div>
+    </div>
+    {{-- =====================================================
+         SCORECARD
+    ====================================================== --}}
+    <div class="surat-keluar-summary">
+        <div class="surat-keluar-summary-card">
+            <div class="surat-keluar-summary-icon blue">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 7h8M8 11h8M8 15h5M6 3h9l4 4v14H6a2 2 0 01-2-2V5a2 2 0 012-2z"/>
+                </svg>
+            </div>
+            <div class="surat-keluar-summary-content">
+                <p class="surat-keluar-summary-label">Total Surat Keluar</p>
+                <p class="surat-keluar-summary-value">{{ number_format($totalSuratKeluar, 0, ',', '.') }}</p>
+                <div class="surat-keluar-summary-note">Seluruh surat keluar</div>
+            </div>
+        </div>
+        <div class="surat-keluar-summary-card">
+            <div class="surat-keluar-summary-icon slate">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 3h9l3 3v15H6a2 2 0 01-2-2V5a2 2 0 012-2z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M14 3v4h4"/>
+                </svg>
+            </div>
+            <div class="surat-keluar-summary-content">
+                <p class="surat-keluar-summary-label">Draf</p>
+                <p class="surat-keluar-summary-value">{{ number_format($suratDraft, 0, ',', '.') }}</p>
+                <div class="surat-keluar-summary-note">Surat yang masih berupa draf</div>
+            </div>
+        </div>
+        <div class="surat-keluar-summary-card">
+            <div class="surat-keluar-summary-icon amber">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 6v6l4 2"/>
+                    <circle cx="12" cy="12" r="9" stroke-width="1.8"/>
+                </svg>
+            </div>
+            <div class="surat-keluar-summary-content">
+                <p class="surat-keluar-summary-label">Diproses</p>
+                <p class="surat-keluar-summary-value">{{ number_format($suratDiproses, 0, ',', '.') }}</p>
+                <div class="surat-keluar-summary-note">Surat yang sedang diproses</div>
+            </div>
+        </div>
+        <div class="surat-keluar-summary-card">
+            <div class="surat-keluar-summary-icon green">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M22 2L11 13"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M22 2l-7 20-4-9-9-4 20-7z"/>
+                </svg>
+            </div>
+            <div class="surat-keluar-summary-content">
+                <p class="surat-keluar-summary-label">Dikirim</p>
+                <p class="surat-keluar-summary-value">{{ number_format($suratDikirim, 0, ',', '.') }}</p>
+                <div class="surat-keluar-summary-note">Surat yang telah dikirim</div>
+            </div>
+        </div>
+    </div>
+    <div class="surat-workspace">
+        <div class="surat-main-card">
+            <div class="surat-main-card-header">
+                <div class="surat-main-card-title-wrap">
+                    <div class="surat-main-card-icon">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 4h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 9h8M8 13h8M8 17h5"/>
+                        </svg>
+                    </div>
+                    <div class="min-w-0">
+                        <h2 class="surat-main-card-title">Daftar Surat Keluar</h2>
+                        <p class="surat-main-card-subtitle">Menampilkan surat keluar sesuai filter yang dipilih.</p>
+                    </div>
+                </div>
+                <a
+                    href="{{ $sortUrl }}"
+                    class="surat-sort-badge"
+                    title="{{ $sortTitle }}"
+                    aria-label="{{ $sortTitle }}"
+                >
+                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 6h12M8 12h8M8 18h5"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 6v12m0 0l-2-2m2 2l2-2"/>
+                    </svg>
+                    {{ $sortLabel }}
+                </a>
+            </div>
+    {{-- =====================================================
+         FILTER
+    ====================================================== --}}
+    <div class="surat-filter-card">
+        <form id="filterForm" method="GET" action="{{ route('surat-keluar.index') }}">
+            <input type="hidden" name="sort" value="{{ $sortOrder }}">
+            {{-- SEARCH + FILTER + DATE --}}
+            <div class="surat-filter-main">
+                <div class="surat-search-wrapper">
+                    <div class="surat-search-icon" aria-hidden="true">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0a7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+                    <input type="search" id="search" name="search" value="{{ request('search') }}" placeholder="Cari perihal, nomor surat, atau tujuan..." autocomplete="off" class="surat-search-input">
+                </div>
+                <div class="surat-filter-actions">
+                    <button type="submit" class="surat-filter-submit {{ $hasFilters ? 'has-filter' : '' }}" title="Terapkan filter">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707v3.414L9 14V9.707a1 1 0 00-.293-.707L3.293 6.293A1 1 0 013 5.586V4z" />
+                        </svg>
+                        <span>Filter</span>
+                    </button>
+                    @if($hasFilters)
+                        <a href="{{ route('surat-keluar.index') }}" title="Reset Filter" aria-label="Reset Filter" class="surat-filter-reset">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </a>
+                    @endif
+                </div>
+                <div class="surat-date-wrapper">
+                    <div class="surat-date-field">
+                        <div class="surat-date-left-icon" aria-hidden="true">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5v12a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <input type="text" id="date-range" value="{{ $visibleDateRange }}" readonly autocomplete="off" placeholder="Rentang tanggal" class="surat-date-input" aria-label="Pilih rentang tanggal">
+                        <button type="button" id="clearDateRange" class="surat-date-clear {{ $visibleDateRange ? 'is-visible' : '' }}" title="Hapus rentang tanggal" aria-label="Hapus rentang tanggal">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                    <input type="hidden" name="dari_tanggal" id="dari_tanggal" value="{{ $dariTanggal }}">
+                    <input type="hidden" name="sampai_tanggal" id="sampai_tanggal" value="{{ $sampaiTanggal }}">
+                </div>
+            </div>
+        {{-- KATEGORI + STATUS --}}
+            <div class="filter-row">
+                {{-- KATEGORI --}}
+                <div
+                    class="filter-dropdown"
+                    id="kategoriDropdown"
+                >
+                    <button
+                        type="button"
+                        id="kategoriDropdownButton"
+                        class="filter-dropdown-trigger"
+                        aria-expanded="false"
+                        aria-controls="kategoriDropdownMenu"
+                    >
+                        <span class="filter-dropdown-icon">
                             <svg
-                                width="21"
-                                height="21"
-                                viewBox="0 0 24 24"
+                                class="h-5 w-5"
                                 fill="none"
                                 stroke="currentColor"
-                                stroke-width="1.8"
+                                viewBox="0 0 24 24"
                             >
                                 <path
                                     stroke-linecap="round"
                                     stroke-linejoin="round"
-                                    d="M6 3h8l5 5v13H6a2 2 0 01-2-2V5a2 2 0 012-2z"
+                                    stroke-width="2"
+                                    d="M4 6h16M4 12h16M4 18h16"
                                 />
-
+                            </svg>
+                        </span>
+                        <span class="filter-dropdown-trigger-content">
+                            <span class="filter-dropdown-text">
+                                <span class="filter-dropdown-title">
+                                    Kategori Surat
+                                </span>
+                                <span
+                                    class="filter-dropdown-subtitle"
+                                    id="kategoriSummary"
+                                >
+                                    Semua kategori
+                                </span>
+                            </span>
+                            <span
+                                class="filter-dropdown-count category"
+                                id="kategoriCount"
+                            >
+                                {{ count($selectedKategori) }} dipilih
+                            </span>
+                        </span>
+                        <svg
+                            class="filter-dropdown-arrow h-5 w-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M6 9l6 6l6-6"
+                            />
+                        </svg>
+                    </button>
+                    <div
+                        id="kategoriDropdownMenu"
+                        class="filter-dropdown-menu"
+                    >
+                        <div class="filter-dropdown-menu-header">
+                            <div class="filter-dropdown-menu-title-wrap">
+                                <span class="filter-dropdown-menu-title">
+                                    Pilih Kategori
+                                </span>
+                                <span class="filter-dropdown-menu-description">
+                                    Checkbox dapat dipilih lebih dari satu
+                                </span>
+                            </div>
+                            <div class="filter-dropdown-actions">
+                                <button
+                                    type="button"
+                                    id="selectAllKategori"
+                                    class="filter-dropdown-action category"
+                                >
+                                    Pilih Semua
+                                </button>
+                                <span class="filter-dropdown-divider">
+                                    |
+                                </span>
+                                <button
+                                    type="button"
+                                    id="clearAllKategori"
+                                    class="filter-dropdown-action clear"
+                                >
+                                    Batalkan
+                                </button>
+                            </div>
+                        </div>
+                        @if(
+                            isset($kategoris) &&
+                            $kategoris->count()
+                        )
+                            <div class="filter-dropdown-options">
+                                @foreach($kategoris as $kategori)
+                                    <label class="filter-dropdown-option">
+                                        <input
+                                            type="checkbox"
+                                            name="kategori_id[]"
+                                            value="{{ $kategori->id }}"
+                                            class="kategori-checkbox"
+                                            @checked(
+                                                in_array(
+                                                    (string) $kategori->id,
+                                                    $selectedKategori,
+                                                    true
+                                                )
+                                            )
+                                        >
+                                        <span
+                                            title="{{ $kategori->nama_kategori }}"
+                                        >
+                                            {{ $kategori->nama_kategori }}
+                                        </span>
+                                    </label>
+                                @endforeach
+                            </div>
+                        @else
+                            <div class="filter-dropdown-empty">
+                                Belum ada kategori surat.
+                            </div>
+                        @endif
+                        <div class="filter-dropdown-menu-footer">
+                            <span
+                                id="kategoriFooterCount"
+                                class="filter-dropdown-footer-count"
+                            >
+                                {{ count($selectedKategori) }}
+                                kategori dipilih
+                            </span>
+                            <span class="filter-dropdown-footer-hint">
+                                Klik Filter untuk menerapkan
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                {{-- STATUS --}}
+                <div
+                    class="filter-dropdown"
+                    id="statusDropdown"
+                >
+                    <button
+                        type="button"
+                        id="statusDropdownButton"
+                        class="filter-dropdown-trigger status-trigger"
+                        aria-expanded="false"
+                        aria-controls="statusDropdownMenu"
+                    >
+                        <span class="filter-dropdown-icon status">
+                            <svg
+                                class="h-5 w-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
                                 <path
                                     stroke-linecap="round"
                                     stroke-linejoin="round"
-                                    d="M14 3v6h5M8 13h8M8 17h6"
+                                    stroke-width="2"
+                                    d="M9 12l2 2l4-4m6 2a9 9 0 11-18 0a9 9 0 0118 0z"
                                 />
                             </svg>
-
-                        </div>
-
-                        <div>
-
-                            <p class="ske-header-kicker">
-                                Sistem E-Arsip
-                            </p>
-
-                            <h1 class="ske-header-title">
-                                Edit Surat Keluar
-                            </h1>
-
-                            <p class="ske-header-desc">
-                                Perbarui data surat dan lampiran digital.
-                                PDF tetap PDF dan dapat dikompresi di server,
-                                sedangkan JPG/JPEG/PNG dioptimalkan menjadi JPG.
-                            </p>
-
-                        </div>
-
-                    </div>
-
-                    <span class="ske-header-badge">
-                        Arsip Surat Keluar
-                    </span>
-
-                </div>
-
-            </header>
-
-            {{-- =====================================================
-                 BODY
-            ====================================================== --}}
-
-            <div class="ske-body">
-
-                {{-- =================================================
-                     INFORMASI UTAMA
-                ================================================== --}}
-
-                <section class="ske-section">
-
-                    <div class="ske-section-head">
-
-                        <div class="ske-section-marker"></div>
-
-                        <div>
-
-                            <h2 class="ske-section-title">
-                                Informasi Utama Surat
-                            </h2>
-
-                            <p class="ske-section-desc">
-                                Perbarui identitas dan informasi utama surat keluar.
-                            </p>
-
-                        </div>
-
-                    </div>
-
-                    <div class="ske-field-table">
-
-                        <div class="ske-field-grid">
-
-                            {{-- NOMOR SURAT --}}
-
-                            <div class="ske-field">
-
-                                <label
-                                    for="nomor_surat"
-                                    class="ske-field-label"
-                                >
-                                    Nomor Surat
-                                    <span class="ske-required">*</span>
-                                </label>
-
-                                <input
-                                    type="text"
-                                    id="nomor_surat"
-                                    name="nomor_surat"
-                                    value="{{ old('nomor_surat', $suratKeluar->nomor_surat) }}"
-                                    maxlength="255"
-                                    required
-                                    autocomplete="off"
-                                    placeholder="Contoh: 005/SK/I/2026"
-                                    class="ske-control @error('nomor_surat') ske-control-error @enderror"
-                                >
-
-                                @error('nomor_surat')
-
-                                    <p class="ske-field-error">
-                                        {{ $message }}
-                                    </p>
-
-                                @enderror
-
-                            </div>
-
-                            {{-- TUJUAN SURAT --}}
-
-                            <div class="ske-field">
-
-                                <label
-                                    for="pengirim"
-                                    class="ske-field-label"
-                                >
-                                    Tujuan Surat
-                                    <span class="ske-required">*</span>
-                                </label>
-
-                                <input
-                                    type="text"
-                                    id="pengirim"
-                                    name="pengirim"
-                                    value="{{ old('pengirim', $suratKeluar->pengirim) }}"
-                                    maxlength="150"
-                                    required
-                                    autocomplete="organization"
-                                    placeholder="Contoh: PT Maju Takgentar"
-                                    class="ske-control @error('pengirim') ske-control-error @enderror"
-                                >
-
-                                @error('pengirim')
-
-                                    <p class="ske-field-error">
-                                        {{ $message }}
-                                    </p>
-
-                                @enderror
-
-                            </div>
-
-                            {{-- TANGGAL SURAT --}}
-
-                            <div class="ske-field">
-
-                                <label
-                                    for="tanggal_surat"
-                                    class="ske-field-label"
-                                >
-                                    Tanggal Surat
-                                    <span class="ske-required">*</span>
-                                </label>
-
-                                <input
-                                    type="date"
-                                    id="tanggal_surat"
-                                    name="tanggal_surat"
-                                    value="{{ $tanggalSurat }}"
-                                    required
-                                    class="ske-control @error('tanggal_surat') ske-control-error @enderror"
-                                >
-
-                                @error('tanggal_surat')
-
-                                    <p class="ske-field-error">
-                                        {{ $message }}
-                                    </p>
-
-                                @enderror
-
-                            </div>
-
-                            {{-- TANGGAL KELUAR --}}
-
-                            <div class="ske-field">
-
-                                <label
-                                    for="tanggal_keluar"
-                                    class="ske-field-label"
-                                >
-                                    Tanggal Keluar
-                                    <span class="ske-required">*</span>
-                                </label>
-
-                                <input
-                                    type="date"
-                                    id="tanggal_keluar"
-                                    name="tanggal_keluar"
-                                    value="{{ $tanggalKeluar }}"
-                                    required
-                                    class="ske-control @error('tanggal_keluar') ske-control-error @enderror"
-                                >
-
-                                @error('tanggal_keluar')
-
-                                    <p class="ske-field-error">
-                                        {{ $message }}
-                                    </p>
-
-                                @enderror
-
-                            </div>
-
-                            {{-- KATEGORI --}}
-
-                            <div class="ske-field">
-
-                                <label
-                                    for="kategori_surat_id"
-                                    class="ske-field-label"
-                                >
-                                    Kategori Surat
-                                    <span class="ske-required">*</span>
-                                </label>
-
-                                <select
-                                    id="kategori_surat_id"
-                                    name="kategori_surat_id"
-                                    required
-                                    class="ske-control @error('kategori_surat_id') ske-control-error @enderror"
-                                >
-
-                                    <option
-                                        value=""
-                                        disabled
-                                        @selected(!$kategoriSuratId)
-                                    >
-                                        Pilih kategori surat
-                                    </option>
-
-                                    @foreach(($kategoris ?? collect()) as $kategori)
-
-                                        <option
-                                            value="{{ $kategori->id }}"
-                                            @selected(
-                                                (string) $kategoriSuratId ===
-                                                (string) $kategori->id
-                                            )
-                                        >
-                                            {{ $kategori->nama_kategori }}
-
-                                            @if(!empty($kategori->sifat))
-
-                                                ({{ ucfirst($kategori->sifat) }})
-
-                                            @endif
-
-                                        </option>
-
-                                    @endforeach
-
-                                </select>
-
-                                @if(
-                                    !isset($kategoris) ||
-                                    $kategoris->isEmpty()
-                                )
-
-                                    <p
-                                        class="ske-field-error"
-                                        style="color:#a16207;"
-                                    >
-                                        Belum ada kategori surat yang tersedia.
-                                    </p>
-
-                                @endif
-
-                                @error('kategori_surat_id')
-
-                                    <p class="ske-field-error">
-                                        {{ $message }}
-                                    </p>
-
-                                @enderror
-
-                            </div>
-
-                            {{-- STATUS --}}
-
-                            <div class="ske-field">
-
-                                <label
-                                    for="status"
-                                    class="ske-field-label"
-                                >
+                        </span>
+                        <span class="filter-dropdown-trigger-content">
+                            <span class="filter-dropdown-text">
+                                <span class="filter-dropdown-title">
                                     Status Surat
-                                    <span class="ske-required">*</span>
-                                </label>
-
-                                <select
-                                    id="status"
-                                    name="status"
-                                    required
-                                    class="ske-control @error('status') ske-control-error @enderror"
+                                </span>
+                                <span
+                                    class="filter-dropdown-subtitle"
+                                    id="statusSummary"
                                 >
-
-                                    <option
-                                        value="draft"
-                                        @selected($currentStatus === 'draft')
-                                    >
-                                        Draft
-                                    </option>
-
-                                    <option
-                                        value="diproses"
-                                        @selected($currentStatus === 'diproses')
-                                    >
-                                        Diproses
-                                    </option>
-
-                                    <option
-                                        value="disetujui"
-                                        @selected($currentStatus === 'disetujui')
-                                    >
-                                        Disetujui
-                                    </option>
-
-                                    <option
-                                        value="dikirim"
-                                        @selected($currentStatus === 'dikirim')
-                                    >
-                                        Dikirim
-                                    </option>
-
-                                    <option
-                                        value="diarsipkan"
-                                        @selected($currentStatus === 'diarsipkan')
-                                    >
-                                        Diarsipkan
-                                    </option>
-
-                                </select>
-
-                                @error('status')
-
-                                    <p class="ske-field-error">
-                                        {{ $message }}
-                                    </p>
-
-                                @enderror
-
+                                    Semua status
+                                </span>
+                            </span>
+                            <span
+                                class="filter-dropdown-count status"
+                                id="statusCount"
+                            >
+                                {{ count($selectedStatus) }} dipilih
+                            </span>
+                        </span>
+                        <svg
+                            class="filter-dropdown-arrow h-5 w-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M6 9l6 6l6-6"
+                            />
+                        </svg>
+                    </button>
+                    <div
+                        id="statusDropdownMenu"
+                        class="filter-dropdown-menu"
+                    >
+                        <div class="filter-dropdown-menu-header">
+                            <div class="filter-dropdown-menu-title-wrap">
+                                <span class="filter-dropdown-menu-title">
+                                    Pilih Status
+                                </span>
+                                <span class="filter-dropdown-menu-description">
+                                    Checkbox dapat dipilih lebih dari satu
+                                </span>
                             </div>
-
-                            {{-- PERIHAL --}}
-
-                            <div class="ske-field ske-field-full">
-
-                                <label
-                                    for="perihal"
-                                    class="ske-field-label"
+                            <div class="filter-dropdown-actions">
+                                <button
+                                    type="button"
+                                    id="selectAllStatus"
+                                    class="filter-dropdown-action status"
                                 >
-                                    Perihal
-                                    <span class="ske-required">*</span>
-                                </label>
-
-                                <textarea
-                                    id="perihal"
-                                    name="perihal"
-                                    rows="3"
-                                    maxlength="255"
-                                    required
-                                    placeholder="Tuliskan perihal surat..."
-                                    class="ske-control @error('perihal') ske-control-error @enderror"
-                                >{{ old('perihal', $suratKeluar->perihal) }}</textarea>
-
-                                @error('perihal')
-
-                                    <p class="ske-field-error">
-                                        {{ $message }}
-                                    </p>
-
-                                @enderror
-
+                                    Pilih Semua
+                                </button>
+                                <span class="filter-dropdown-divider">
+                                    |
+                                </span>
+                                <button
+                                    type="button"
+                                    id="clearAllStatus"
+                                    class="filter-dropdown-action clear"
+                                >
+                                    Batalkan
+                                </button>
                             </div>
-
                         </div>
-
-                    </div>
-
-                </section>
-
-                {{-- =================================================
-                     LAMPIRAN
-                ================================================== --}}
-
-                <section class="ske-section">
-
-                    <div class="ske-section-head">
-
-                        <div class="ske-section-marker ske-section-marker-blue"></div>
-
-                        <div>
-
-                            <h2 class="ske-section-title">
-                                Lampiran Dokumen Surat
-                            </h2>
-
-                            <p class="ske-section-desc">
-                                Lihat lampiran saat ini atau upload file pengganti.
-                                Hasil compression akan ditampilkan sebelum update.
-                            </p>
-
+                        <div class="filter-dropdown-options">
+                            @foreach(
+                                $statusOptions
+                                as $value => $label
+                            )
+                                <label class="filter-dropdown-option status-option">
+                                    <input
+                                        type="checkbox"
+                                        name="status[]"
+                                        value="{{ $value }}"
+                                        class="status-checkbox"
+                                        @checked(
+                                            in_array(
+                                                $value,
+                                                $selectedStatus,
+                                                true
+                                            )
+                                        )
+                                    >
+                                    <span>
+                                        {{ $label }}
+                                    </span>
+                                </label>
+                            @endforeach
                         </div>
-
+                        <div class="filter-dropdown-menu-footer">
+                            <span
+                                id="statusFooterCount"
+                                class="filter-dropdown-footer-count"
+                            >
+                                {{ count($selectedStatus) }}
+                                status dipilih
+                            </span>
+                            <span class="filter-dropdown-footer-hint">
+                                Klik Filter untuk menerapkan
+                            </span>
+                        </div>
                     </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    {{-- =====================================================
+         TABLE
+    ====================================================== --}}
+    <div class="archive-table-wrapper">
+        <div class="archive-table-scroll">
+            <table class="archive-table">
+                <thead>
+                    <tr>
+                        <th>
+                            Tanggal Keluar
+                        </th>
+                        <th>
+                            Tujuan Surat
+                        </th>
+                        <th>
+                            Perihal
+                        </th>
+                        <th>
+                            Kategori
+                        </th>
+                        <th>
+                            Status
+                        </th>
+                        <th class="action-cell">
+                            Aksi
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse(
+                        ($suratKeluars ?? collect())
+                        as $s
+                    )
+                        @php
+                            /*
+                            |------------------------------------------------------
+                            | STATUS
+                            |------------------------------------------------------
+                            */
+                            $status = strtolower(
+                                trim(
+                                    (string) (
+                                        $s->status ??
+                                        'draft'
+                                    )
+                                )
+                            );
+                            if ($status === 'draf') {
+                                $status = 'draft';
+                            }
+                            $statusLabel =
+                                $statusOptions[$status]
+                                ??
+                                ucfirst($status);
+                            $badgeClass =
+                                $statusBadgeClasses[$status]
+                                ??
+                                'bg-slate-100 text-slate-600 border-slate-200';
+                            /*
+                            |------------------------------------------------------
+                            | TUJUAN
+                            |------------------------------------------------------
+                            */
+                            $tujuan =
+                                trim(
+                                    (string) (
+                                        $s->tujuan_surat ??
+                                        $s->pengirim ??
+                                        ''
+                                    )
+                                );
+                            $tujuan =
+                                $tujuan !== ''
+                                    ? $tujuan
+                                    : '-';
+                            /*
+                            |------------------------------------------------------
+                            | TANGGAL
+                            |------------------------------------------------------
+                            */
+                            $tanggalRaw =
+                                $s->tanggal_keluar
+                                ??
+                                $s->tanggal_surat
+                                ??
+                                null;
+                            $tanggalKeluar = '-';
+                            if ($tanggalRaw) {
+                                try {
+                                    $tanggalKeluar =
+                                        \Illuminate\Support\Carbon::parse(
+                                            $tanggalRaw
+                                        )->format(
+                                            'd/m/Y'
+                                        );
+                                } catch (\Throwable $e) {
+                                    $tanggalKeluar = '-';
+                                }
+                            }
+                            /*
+                            |------------------------------------------------------
+                            | PERIHAL
+                            |------------------------------------------------------
+                            */
+                            $perihal =
+                                trim(
+                                    (string) (
+                                        $s->perihal ??
+                                        ''
+                                    )
+                                );
+                            $perihal =
+                                $perihal !== ''
+                                    ? $perihal
+                                    : '-';
+                            /*
+                            |------------------------------------------------------
+                            | KATEGORI
+                            |------------------------------------------------------
+                            */
+                            $kategoriNama =
+                                $s->kategori?->nama_kategori
+                                ??
+                                '-';
 
-                    <div class="ske-attachment-grid">
+                            $kategoriSifat = strtolower(
+                                trim(
+                                    (string) (
+                                        $s->kategori?->sifat
+                                        ?? ''
+                                    )
+                                )
+                            );
 
-                        {{-- =================================================
-                             LAMPIRAN SAAT INI
-                        ================================================== --}}
-
-                        <div class="ske-card">
-
-                            <div class="ske-card-header">
-
-                                <div class="ske-card-header-left">
-
-                                    <div class="ske-card-icon green">
-
+                            $categoryClass = match ($kategoriSifat) {
+                                'penting' => 'category-important',
+                                'rahasia' => 'category-secret',
+                                'segera'  => 'category-urgent',
+                                default   => 'category-normal',
+                            };
+                        @endphp
+                        <tr>
+                            <td class="cell-date" data-label="Tanggal Keluar">
+                                {{ $tanggalKeluar }}
+                            </td>
+                            <td class="cell-sender" data-label="Tujuan Surat">
+                                <span
+                                    class="sender-badge"
+                                    title="{{ $tujuan }}"
+                                >
+                                    {{ $tujuan }}
+                                </span>
+                            </td>
+                            <td
+                                data-label="Perihal"
+                                class="cell-subject max-w-xs truncate"
+                                title="{{ $perihal }}"
+                            >
+                                {{ $perihal }}
+                            </td>
+                            <td class="cell-category" data-label="Kategori">
+                                <span
+                                    class="category-badge {{ $categoryClass }}"
+                                    title="{{ $kategoriNama }}"
+                                >
+                                    <svg
+                                        class="h-3.5 w-3.5"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                        aria-hidden="true"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M7 7h10M7 12h10M7 17h6"
+                                        />
+                                    </svg>
+                                    {{ $kategoriNama }}
+                                </span>
+                            </td>
+                            <td class="cell-status" data-label="Status">
+                                <span
+                                    class="status-badge {{ $badgeClass }}"
+                                >
+                                    {{ $statusLabel }}
+                                </span>
+                            </td>
+                            <td class="action-cell" data-label="Aksi">
+                                <div class="action-buttons">
+                                    {{-- DETAIL --}}
+                                    <a
+                                        href="{{ route('surat-keluar.show', $s) }}"
+                                        class="action-button detail"
+                                        title="Lihat Detail"
+                                        aria-label="Lihat detail surat"
+                                    >
                                         <svg
-                                            width="16"
-                                            height="16"
-                                            viewBox="0 0 24 24"
+                                            class="h-4 w-4"
                                             fill="none"
                                             stroke="currentColor"
-                                            stroke-width="1.8"
+                                            viewBox="0 0 24 24"
                                         >
                                             <path
                                                 stroke-linecap="round"
                                                 stroke-linejoin="round"
-                                                d="M7 3h7l4 4v14H7a2 2 0 01-2-2V5a2 2 0 012-2z"
+                                                stroke-width="2"
+                                                d="M15 12a3 3 0 11-6 0a3 3 0 006 0z"
                                             />
-
                                             <path
                                                 stroke-linecap="round"
                                                 stroke-linejoin="round"
-                                                d="M14 3v5h5"
+                                                stroke-width="2"
+                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7z"
                                             />
                                         </svg>
-
-                                    </div>
-
-                                    <div>
-
-                                        <h3 class="ske-card-title">
-                                            Lampiran Saat Ini
-                                        </h3>
-
-                                        <p class="ske-card-desc">
-                                            Dokumen yang sedang tersimpan.
-                                        </p>
-
-                                    </div>
-
-                                </div>
-
-                                <span class="ske-badge ske-badge-green">
-                                    Tersimpan
-                                </span>
-
-                            </div>
-
-                            <div class="ske-card-body">
-
-                                @if($hasCurrentAttachment)
-
-                                    <div class="ske-current-file">
-
-                                        <div class="ske-current-file-row">
-
-                                            <div class="ske-current-file-icon">
-
+                                    </a>
+                                    {{-- EDIT + DELETE --}}
+                                    @if($canManage)
+                                        <a
+                                            href="{{ route('surat-keluar.edit', $s) }}"
+                                            class="action-button edit"
+                                            title="Ubah Data"
+                                            aria-label="Ubah data surat"
+                                        >
+                                            <svg
+                                                class="h-4 w-4"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5"
+                                                />
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    d="M18.5 2.5a2.121 2.121 0 013 3L11.828 15H9v-2.828l9.5-9.5z"
+                                                />
+                                            </svg>
+                                        </a>
+                                        <form
+                                            action="{{ route('surat-keluar.destroy', $s) }}"
+                                            method="POST"
+                                            class="delete-form inline"
+                                        >
+                                            @csrf
+                                            @method('DELETE')
+                                            <button
+                                                type="button"
+                                                class="action-button delete delete-btn"
+                                                title="Hapus Surat"
+                                                aria-label="Hapus surat"
+                                            >
                                                 <svg
-                                                    width="15"
-                                                    height="15"
-                                                    viewBox="0 0 24 24"
+                                                    class="h-4 w-4"
                                                     fill="none"
                                                     stroke="currentColor"
-                                                    stroke-width="1.8"
+                                                    viewBox="0 0 24 24"
                                                 >
                                                     <path
                                                         stroke-linecap="round"
                                                         stroke-linejoin="round"
-                                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586A1.5 1.5 0 0118 8.5V19a2 2 0 01-2 2z"
+                                                        stroke-width="2"
+                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7"
+                                                    />
+                                                    <path
+                                                        stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M10 11v6m4-6v6"
+                                                    />
+                                                    <path
+                                                        stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M4 7h16m-5-3H9a1 1 0 01-1 1v2h8V5a1 1 0 01-1-1z"
                                                     />
                                                 </svg>
-
-                                            </div>
-
-                                            <div class="ske-current-file-content">
-
-                                                <p class="ske-current-file-label">
-                                                    File tersimpan
-                                                </p>
-
-                                                <p
-                                                    class="ske-current-file-name"
-                                                    title="{{ $currentAttachmentName }}"
-                                                >
-                                                    {{ $currentAttachmentName }}
-                                                </p>
-
-                                                @if($currentAttachmentExtension)
-
-                                                    <span class="ske-current-file-ext">
-                                                        .{{ $currentAttachmentExtension }}
-                                                    </span>
-
-                                                @endif
-
-                                            </div>
-
-                                        </div>
-
-                                    </div>
-
-                                    <a
-                                        href="{{ route('surat-keluar.preview-lampiran', $suratKeluar) }}"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        class="ske-view-current"
-                                    >
-
+                                            </button>
+                                        </form>
+                                    @endif
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td
+                                colspan="6"
+                                class="archive-table-empty"
+                            >
+                                <div class="flex flex-col items-center justify-center">
+                                    <div class="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
                                         <svg
-                                            width="13"
-                                            height="13"
-                                            viewBox="0 0 24 24"
+                                            class="h-6 w-6"
                                             fill="none"
                                             stroke="currentColor"
-                                            stroke-width="2"
+                                            viewBox="0 0 24 24"
                                         >
                                             <path
                                                 stroke-linecap="round"
                                                 stroke-linejoin="round"
-                                                d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6z"
-                                            />
-
-                                            <circle
-                                                cx="12"
-                                                cy="12"
-                                                r="2.8"
+                                                stroke-width="2"
+                                                d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-1.414 0l-2.414-2.414A1 1 0 006.586 13H4"
                                             />
                                         </svg>
-
-                                        Buka Preview Lampiran
-
-                                    </a>
-
-                                @else
-
-                                    <div class="ske-current-file">
-
-                                        <p class="ske-empty">
-                                            Belum ada lampiran tersimpan.
-                                        </p>
-
                                     </div>
-
-                                @endif
-
-                            </div>
-
-                        </div>
-
-                        {{-- =================================================
-                             FILE BARU
-                        ================================================== --}}
-
-                        <div class="ske-card">
-
-                            <div class="ske-card-header">
-
-                                <div class="ske-card-header-left">
-
-                                    <div class="ske-card-icon">
-
-                                        <svg
-                                            width="16"
-                                            height="16"
-                                            viewBox="0 0 24 24"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            stroke-width="1.8"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                d="M12 16V4m0 0L8 8m4-4l4 4M5 15v2a2 2 0 002 2h10a2 2 0 002-2v-2"
-                                            />
-                                        </svg>
-
-                                    </div>
-
-                                    <div>
-
-                                        <h3 class="ske-card-title">
-                                            Upload File Baru
-                                        </h3>
-
-                                        <p class="ske-card-desc">
-                                            File baru akan menggantikan lampiran lama.
-                                        </p>
-
-                                    </div>
-
-                                </div>
-
-                                <span class="ske-badge">
-                                    Opsional
-                                </span>
-
-                            </div>
-
-                            <div class="ske-card-body">
-
-                                <div class="ske-info">
-
-                                    <svg
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <circle
-                                            cx="12"
-                                            cy="12"
-                                            r="9"
-                                        />
-
-                                        <path
-                                            stroke-linecap="round"
-                                            d="M12 10v6M12 7h.01"
-                                        />
-                                    </svg>
-
-                                    <p>
-                                        <strong>PDF:</strong>
-                                        tetap PDF dan dikompresi oleh server
-                                        menggunakan Ghostscript.
-                                        <br>
-                                        <strong>JPG/JPEG/PNG:</strong>
-                                        dikompresi di browser dan dikonversi menjadi JPG.
-                                        <br>
-                                        Maksimal file: <strong>10 MB</strong>.
+                                    <p class="text-sm font-semibold text-slate-700 sm:text-base">
+                                        Belum ada data surat keluar
                                     </p>
-
-                                </div>
-
-                                <label
-                                    id="ske-upload-box"
-                                    for="lampiran_file"
-                                    class="ske-upload-box"
-                                >
-
-                                    <div
-                                        id="ske-upload-icon"
-                                        class="ske-upload-icon"
-                                    >
-
-                                        <svg
-                                            width="18"
-                                            height="18"
-                                            viewBox="0 0 24 24"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            stroke-width="1.8"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                d="M12 16V4m0 0L8 8m4-4l4 4M5 15v2a2 2 0 002 2h10a2 2 0 002-2v-2"
-                                            />
-                                        </svg>
-
-                                    </div>
-
-                                    <span
-                                        id="ske-upload-title"
-                                        class="ske-upload-title"
-                                    >
-                                        Klik untuk memilih file baru
-                                    </span>
-
-                                    <span
-                                        id="ske-upload-subtitle"
-                                        class="ske-upload-subtitle"
-                                    >
-                                        PDF, JPG, JPEG, PNG
-                                    </span>
-
-                                    <span class="ske-upload-limit">
-                                        Maksimal 10 MB
-                                    </span>
-
-                                    <input
-                                        id="lampiran_file"
-                                        name="lampiran_file"
-                                        type="file"
-                                        accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
-                                        class="ske-upload-input"
-                                    >
-
-                                </label>
-
-                                {{-- FILE INFO --}}
-
-                                <div
-                                    id="ske-file-info"
-                                    class="ske-file-info"
-                                >
-
-                                    <p
-                                        id="ske-file-info-title"
-                                        class="ske-file-info-title"
-                                    >
-                                        File siap digunakan
+                                    <p class="mt-0.5 max-w-md px-4 text-center text-[11px] text-slate-400 sm:text-xs">
+                                        @if($hasFilters)
+                                            Tidak ada surat yang sesuai dengan filter yang digunakan.
+                                        @else
+                                            Belum ada data surat keluar yang tersimpan.
+                                        @endif
                                     </p>
-
-                                    <p
-                                        id="ske-file-info-name"
-                                        class="ske-file-info-name"
-                                    ></p>
-
-                                    <p
-                                        id="ske-file-info-size"
-                                        class="ske-file-info-size"
-                                    ></p>
-
-                                </div>
-
-                                {{-- COMPRESSION --}}
-
-                                <div
-                                    id="ske-compression"
-                                    class="ske-compression"
-                                >
-
-                                    <p
-                                        id="ske-compression-title"
-                                        class="ske-compression-title"
-                                    >
-                                        Informasi Compression
-                                    </p>
-
-                                    <div class="ske-compression-grid">
-
-                                        <div class="ske-compression-item">
-
-                                            <span class="ske-compression-label">
-                                                Format Asli
-                                            </span>
-
-                                            <span
-                                                id="ske-original-format"
-                                                class="ske-compression-value"
-                                            >
-                                                -
-                                            </span>
-
-                                        </div>
-
-                                        <div class="ske-compression-item">
-
-                                            <span class="ske-compression-label">
-                                                Format Akhir
-                                            </span>
-
-                                            <span
-                                                id="ske-final-format"
-                                                class="ske-compression-value"
-                                            >
-                                                -
-                                            </span>
-
-                                        </div>
-
-                                        <div class="ske-compression-item">
-
-                                            <span class="ske-compression-label">
-                                                Ukuran Asli
-                                            </span>
-
-                                            <span
-                                                id="ske-original-size"
-                                                class="ske-compression-value"
-                                            >
-                                                -
-                                            </span>
-
-                                        </div>
-
-                                        <div class="ske-compression-item">
-
-                                            <span class="ske-compression-label">
-                                                Ukuran Hasil
-                                            </span>
-
-                                            <span
-                                                id="ske-final-size"
-                                                class="ske-compression-value"
-                                            >
-                                                -
-                                            </span>
-
-                                        </div>
-
-                                    </div>
-
-                                    <div
-                                        id="ske-compression-message"
-                                        style="margin-top:6px;font-size:6.8px;line-height:1.5;"
-                                    ></div>
-
-                                </div>
-
-                                {{-- STATUS --}}
-
-                                <div
-                                    id="ske-status"
-                                    class="ske-status"
-                                ></div>
-
-                                {{-- PROGRESS --}}
-
-                                <div
-                                    id="ske-submit-progress"
-                                    class="ske-submit-progress"
-                                >
-
-                                    <div class="ske-submit-progress-bar"></div>
-
-                                </div>
-
-                                {{-- PREVIEW --}}
-
-                                <div
-                                    id="ske-preview"
-                                    class="ske-preview"
-                                >
-
-                                    <div class="ske-preview-header">
-
-                                        <p
-                                            id="ske-preview-title"
-                                            class="ske-preview-title"
+                                    @if($hasFilters)
+                                        <a
+                                            href="{{ route('surat-keluar.index') }}"
+                                            class="mt-3 inline-flex items-center rounded-lg bg-slate-900 px-3 py-2 text-[11px] font-semibold text-white transition hover:bg-slate-800"
                                         >
-                                            Preview Dokumen
-                                        </p>
-
-                                        <span
-                                            id="ske-preview-badge"
-                                            class="ske-preview-badge"
+                                            Reset Filter
+                                        </a>
+                                    @elseif($canManage)
+                                        <a
+                                            href="{{ route('surat-keluar.create') }}"
+                                            class="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-2 text-[11px] font-semibold text-white transition hover:bg-blue-700"
                                         >
-                                            Preview
-                                        </span>
-
-                                    </div>
-
-                                    <img
-                                        id="ske-preview-image"
-                                        src=""
-                                        alt="Preview dokumen"
-                                        class="ske-preview-image"
-                                        style="display:none;"
-                                    >
-
-                                    <iframe
-                                        id="ske-preview-pdf"
-                                        title="Preview PDF"
-                                        class="ske-preview-pdf"
-                                        style="display:none;"
-                                    ></iframe>
-
-                                    <div
-                                        id="ske-preview-caption"
-                                        class="ske-preview-caption"
-                                    >
-                                        Preview akan tampil setelah memilih file.
-                                    </div>
-
-                                    <div
-                                        id="ske-preview-secondary"
-                                        class="ske-preview-secondary ske-hidden"
-                                    ></div>
-
+                                            <svg
+                                                class="h-3.5 w-3.5"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    d="M12 4v16m8-8H4"
+                                                />
+                                            </svg>
+                                            Tambah Surat Keluar
+                                        </a>
+                                    @endif
                                 </div>
-
-                                @error('lampiran_file')
-
-                                    <p class="ske-field-error">
-                                        {{ $message }}
-                                    </p>
-
-                                @enderror
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </section>
-
-            </div>
-
-            {{-- =====================================================
-                 FOOTER
-            ====================================================== --}}
-
-            <div class="ske-footer">
-
-                <a
-                    href="{{ route('surat-keluar.index') }}"
-                    class="ske-footer-btn ske-cancel"
-                >
-
-                    <svg
-                        width="14"
-                        height="14"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M6 18L18 6M6 6l12 12"
-                        />
-                    </svg>
-
-                    Batal
-
-                </a>
-
-                <button
-                    type="submit"
-                    id="ske-submit"
-                    class="ske-footer-btn ske-submit"
-                >
-
-                    <svg
-                        id="ske-submit-icon"
-                        width="14"
-                        height="14"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M5 13l4 4L19 7"
-                        />
-                    </svg>
-
-                    <svg
-                        id="ske-submit-loading"
-                        class="ske-hidden"
-                        width="14"
-                        height="14"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                    >
-                        <circle
-                            cx="12"
-                            cy="12"
-                            r="9"
-                            stroke="currentColor"
-                            stroke-width="3"
-                            opacity=".30"
-                        />
-
-                        <path
-                            d="M21 12a9 9 0 00-9-9"
-                            stroke="currentColor"
-                            stroke-width="3"
-                            stroke-linecap="round"
-                        />
-                    </svg>
-
-                    <span id="ske-submit-text">
-                        Perbarui Surat Keluar
-                    </span>
-
-                </button>
-
-            </div>
-
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
-
-    </form>
-
+        {{-- =====================================================
+             PAGINATION
+        ====================================================== --}}
+        @if(
+            isset($suratKeluars) &&
+            method_exists(
+                $suratKeluars,
+                'hasPages'
+            ) &&
+            $suratKeluars->hasPages()
+        )
+            <div class="border-t border-slate-200 px-4 py-3 sm:px-6 sm:py-4">
+                {{ $suratKeluars->withQueryString()->links() }}
+            </div>
+        @endif
+    </div>
+        </div>
+        <aside class="surat-sidebar">
+            <div class="surat-side-card">
+                <div class="surat-side-card-header">
+                    <div class="surat-side-card-icon">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 6h16M4 12h16M4 18h10"/>
+                        </svg>
+                    </div>
+                    <div class="surat-side-card-title">Kategori Surat</div>
+                </div>
+                <div class="surat-side-card-content">
+                    @if($categorySummary->isNotEmpty())
+                        <div class="surat-category-list">
+                            @foreach($categorySummary as $name => $jumlah)
+                                <div class="surat-category-row">
+                                    <span class="surat-category-name" title="{{ $name }}">{{ $name }}</span>
+                                    <span class="surat-category-count">{{ $jumlah }}</span>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="surat-side-empty">Belum ada kategori surat.</div>
+                    @endif
+                </div>
+            </div>
+            <div class="surat-side-card">
+                <div class="surat-side-card-header">
+                    <div class="surat-side-card-icon">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 17V7l5-4 5 4v10l-5 4-5-4z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M14 7l5-3 1 1v12l-5 3-1-1V7z"/>
+                        </svg>
+                    </div>
+                    <div class="surat-side-card-title">Ringkasan Status</div>
+                </div>
+                <div class="surat-side-card-content">
+                    <div class="surat-donut" style="--donut:{{ $statusChartGradient }};">
+                        <div class="surat-donut-center">
+                            <div class="surat-donut-number">{{ number_format($statusChartTotal, 0, ',', '.') }}</div>
+                            <div class="surat-donut-label">Surat</div>
+                        </div>
+                    </div>
+                    <div class="surat-legend">
+                        @foreach($statusChartData as $label => $item)
+                            <div class="surat-legend-row">
+                                <span class="surat-legend-name">
+                                    <span class="surat-legend-dot" style="background:{{ $item['color'] }};"></span>
+                                    {{ $label }}
+                                </span>
+                                <span class="surat-legend-value">{{ number_format($item['value'], 0, ',', '.') }}</span>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
 </div>
-
+{{-- =========================================================
+     DATE PICKER
+========================================================= --}}
+<div
+    id="customDatePicker"
+    class="custom-date-picker hidden"
+>
+    <div class="custom-date-picker-header">
+        <div class="custom-date-picker-title">
+            Pilih Rentang Tanggal
+        </div>
+        <button
+            type="button"
+            id="datePickerClose"
+            class="custom-date-picker-close"
+            aria-label="Tutup"
+        >
+            &times;
+        </button>
+    </div>
+    <div
+        id="customDateCalendars"
+        class="custom-date-calendars custom-date-picker-calendars"
+    ></div>
+    <div class="custom-date-picker-footer">
+        <div
+            id="datePickerSelected"
+            class="custom-date-picker-selected"
+        >
+            Pilih tanggal awal
+        </div>
+        <div class="custom-date-picker-actions">
+            <button
+                type="button"
+                id="datePickerClear"
+                class="custom-date-picker-button"
+            >
+                Bersihkan
+            </button>
+            <button
+                type="button"
+                id="datePickerApply"
+                class="custom-date-picker-button apply"
+            >
+                Terapkan
+            </button>
+        </div>
+    </div>
+</div>
+{{-- =========================================================
+     MONTH / YEAR PANEL
+========================================================= --}}
+<div
+    id="customPickerPanel"
+    class="custom-picker-panel hidden"
+></div>
 @push('scripts')
-
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 <script>
-document.addEventListener(
-    'DOMContentLoaded',
-    function () {
-
-        'use strict';
-
-        /*
-        |--------------------------------------------------------------------------
-        | ELEMENT
-        |--------------------------------------------------------------------------
-        */
-
-        const form =
-            document.getElementById(
-                'form-surat-keluar-edit'
+(function () {
+    'use strict';
+    /* =========================================================
+       CONSTANT
+    ========================================================= */
+    const MONTHS = [
+        'Januari',
+        'Februari',
+        'Maret',
+        'April',
+        'Mei',
+        'Juni',
+        'Juli',
+        'Agustus',
+        'September',
+        'Oktober',
+        'November',
+        'Desember'
+    ];
+    const WEEKDAYS = [
+        'Sn',
+        'Sl',
+        'Rb',
+        'Km',
+        'Jm',
+        'Sb',
+        'Mg'
+    ];
+    const MIN_YEAR = 2000;
+    const MAX_YEAR =
+        new Date().getFullYear() + 20;
+    /* =========================================================
+       ELEMENT
+    ========================================================= */
+    const dateInput =
+        document.getElementById(
+            'date-range'
+        );
+    const dariInput =
+        document.getElementById(
+            'dari_tanggal'
+        );
+    const sampaiInput =
+        document.getElementById(
+            'sampai_tanggal'
+        );
+    const clearDateButton =
+        document.getElementById(
+            'clearDateRange'
+        );
+    const datePicker =
+        document.getElementById(
+            'customDatePicker'
+        );
+    const calendars =
+        document.getElementById(
+            'customDateCalendars'
+        );
+    const pickerPanel =
+        document.getElementById(
+            'customPickerPanel'
+        );
+    const closeDatePickerButton =
+        document.getElementById(
+            'datePickerClose'
+        );
+    const clearPickerButton =
+        document.getElementById(
+            'datePickerClear'
+        );
+    const applyPickerButton =
+        document.getElementById(
+            'datePickerApply'
+        );
+    const selectedLabel =
+        document.getElementById(
+            'datePickerSelected'
+        );
+    /* =========================================================
+       STATE
+    ========================================================= */
+    let selectedStart =
+        parseDate(
+            dariInput?.value || ''
+        );
+    let selectedEnd =
+        parseDate(
+            sampaiInput?.value || ''
+        );
+    let tempStart =
+        selectedStart
+            ? cloneDate(selectedStart)
+            : null;
+    let tempEnd =
+        selectedEnd
+            ? cloneDate(selectedEnd)
+            : null;
+    let viewMonth =
+        selectedStart
+            ? new Date(
+                selectedStart.getFullYear(),
+                selectedStart.getMonth(),
+                1
+            )
+            : new Date();
+    let activePanelSide =
+        'left';
+    let activePanelYear =
+        new Date().getFullYear();
+    viewMonth.setDate(1);
+    /* =========================================================
+       HELPER
+    ========================================================= */
+    function cloneDate(date) {
+        return new Date(
+            date.getFullYear(),
+            date.getMonth(),
+            date.getDate()
+        );
+    }
+    function parseDate(value) {
+        if (!value) {
+            return null;
+        }
+        const match =
+            String(value).match(
+                /^(\d{4})-(\d{2})-(\d{2})$/
             );
-
-        const fileInput =
-            document.getElementById(
-                'lampiran_file'
+        if (!match) {
+            return null;
+        }
+        const year =
+            Number(match[1]);
+        const month =
+            Number(match[2]) - 1;
+        const day =
+            Number(match[3]);
+        const date =
+            new Date(
+                year,
+                month,
+                day
             );
-
-        const uploadBox =
-            document.getElementById(
-                'ske-upload-box'
-            );
-
-        const uploadTitle =
-            document.getElementById(
-                'ske-upload-title'
-            );
-
-        const uploadSubtitle =
-            document.getElementById(
-                'ske-upload-subtitle'
-            );
-
-        const fileInfo =
-            document.getElementById(
-                'ske-file-info'
-            );
-
-        const fileInfoTitle =
-            document.getElementById(
-                'ske-file-info-title'
-            );
-
-        const fileInfoName =
-            document.getElementById(
-                'ske-file-info-name'
-            );
-
-        const fileInfoSize =
-            document.getElementById(
-                'ske-file-info-size'
-            );
-
-        const compression =
-            document.getElementById(
-                'ske-compression'
-            );
-
-        const compressionTitle =
-            document.getElementById(
-                'ske-compression-title'
-            );
-
-        const compressionMessage =
-            document.getElementById(
-                'ske-compression-message'
-            );
-
-        const originalFormat =
-            document.getElementById(
-                'ske-original-format'
-            );
-
-        const finalFormat =
-            document.getElementById(
-                'ske-final-format'
-            );
-
-        const originalSize =
-            document.getElementById(
-                'ske-original-size'
-            );
-
-        const finalSize =
-            document.getElementById(
-                'ske-final-size'
-            );
-
-        const statusBox =
-            document.getElementById(
-                'ske-status'
-            );
-
-        const submitProgress =
-            document.getElementById(
-                'ske-submit-progress'
-            );
-
-        const preview =
-            document.getElementById(
-                'ske-preview'
-            );
-
-        const previewTitle =
-            document.getElementById(
-                'ske-preview-title'
-            );
-
-        const previewBadge =
-            document.getElementById(
-                'ske-preview-badge'
-            );
-
-        const previewImage =
-            document.getElementById(
-                'ske-preview-image'
-            );
-
-        const previewPdf =
-            document.getElementById(
-                'ske-preview-pdf'
-            );
-
-        const previewCaption =
-            document.getElementById(
-                'ske-preview-caption'
-            );
-
-        const previewSecondary =
-            document.getElementById(
-                'ske-preview-secondary'
-            );
-
-        const tanggalSurat =
-            document.getElementById(
-                'tanggal_surat'
-            );
-
-        const tanggalKeluar =
-            document.getElementById(
-                'tanggal_keluar'
-            );
-
-        const submitButton =
-            document.getElementById(
-                'ske-submit'
-            );
-
-        const submitIcon =
-            document.getElementById(
-                'ske-submit-icon'
-            );
-
-        const submitLoading =
-            document.getElementById(
-                'ske-submit-loading'
-            );
-
-        const submitText =
-            document.getElementById(
-                'ske-submit-text'
-            );
-
+        return (
+            date.getFullYear() === year &&
+            date.getMonth() === month &&
+            date.getDate() === day
+        )
+            ? date
+            : null;
+    }
+    function pad(value) {
+        return String(
+            value
+        ).padStart(
+            2,
+            '0'
+        );
+    }
+    function toISO(date) {
+        if (!date) {
+            return '';
+        }
+        return [
+            date.getFullYear(),
+            pad(
+                date.getMonth() + 1
+            ),
+            pad(
+                date.getDate()
+            )
+        ].join('-');
+    }
+    function formatDate(date) {
+        if (!date) {
+            return '';
+        }
+        return [
+            pad(
+                date.getDate()
+            ),
+            pad(
+                date.getMonth() + 1
+            ),
+            date.getFullYear()
+        ].join('/');
+    }
+    function sameDate(a, b) {
+        return !!(
+            a &&
+            b &&
+            a.getFullYear() ===
+                b.getFullYear() &&
+            a.getMonth() ===
+                b.getMonth() &&
+            a.getDate() ===
+                b.getDate()
+        );
+    }
+    function addMonths(date, amount) {
+        return new Date(
+            date.getFullYear(),
+            date.getMonth() + amount,
+            1
+        );
+    }
+    function isBetween(date, start, end) {
         if (
-            !form ||
-            !fileInput
+            !date ||
+            !start ||
+            !end
+        ) {
+            return false;
+        }
+        const value =
+            toISO(date);
+        return (
+            value > toISO(start) &&
+            value < toISO(end)
+        );
+    }
+    /* =========================================================
+       CALENDAR RENDER
+    ========================================================= */
+    function renderCalendars() {
+        if (!calendars) {
+            return;
+        }
+        calendars.innerHTML = '';
+        const leftDate =
+            new Date(
+                viewMonth.getFullYear(),
+                viewMonth.getMonth(),
+                1
+            );
+        const rightDate =
+            addMonths(
+                leftDate,
+                1
+            );
+        calendars.appendChild(
+            createCalendar(
+                leftDate,
+                'left'
+            )
+        );
+        calendars.appendChild(
+            createCalendar(
+                rightDate,
+                'right'
+            )
+        );
+        updateSelectedLabel();
+        requestAnimationFrame(
+            positionDatePicker
+        );
+    }
+    function createCalendar(date, side) {
+        const calendar =
+            document.createElement(
+                'div'
+            );
+        calendar.className =
+            'custom-calendar';
+        const header =
+            document.createElement(
+                'div'
+            );
+        header.className =
+            'custom-calendar-head';
+        const previous =
+            document.createElement(
+                'button'
+            );
+        previous.type =
+            'button';
+        previous.className =
+            'custom-calendar-nav';
+        previous.innerHTML =
+            '&#8249;';
+        const heading =
+            document.createElement(
+                'div'
+            );
+        heading.className =
+            'custom-calendar-heading';
+        const monthButton =
+            document.createElement(
+                'button'
+            );
+        monthButton.type =
+            'button';
+        monthButton.className =
+            'custom-calendar-month-button';
+        monthButton.textContent =
+            MONTHS[
+                date.getMonth()
+            ];
+        const yearButton =
+            document.createElement(
+                'button'
+            );
+        yearButton.type =
+            'button';
+        yearButton.className =
+            'custom-calendar-year-button';
+        yearButton.textContent =
+            String(
+                date.getFullYear()
+            );
+        heading.append(
+            monthButton,
+            yearButton
+        );
+        const next =
+            document.createElement(
+                'button'
+            );
+        next.type =
+            'button';
+        next.className =
+            'custom-calendar-nav';
+        next.innerHTML =
+            '&#8250;';
+        header.append(
+            previous,
+            heading,
+            next
+        );
+        calendar.appendChild(
+            header
+        );
+        monthButton.addEventListener(
+            'click',
+            function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+                showMonthPanel(
+                    date,
+                    monthButton,
+                    side
+                );
+            }
+        );
+        yearButton.addEventListener(
+            'click',
+            function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+                showYearPanel(
+                    date,
+                    yearButton,
+                    side
+                );
+            }
+        );
+        previous.addEventListener(
+            'click',
+            function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+                viewMonth =
+                    addMonths(
+                        viewMonth,
+                        -1
+                    );
+                renderCalendars();
+            }
+        );
+        next.addEventListener(
+            'click',
+            function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+                viewMonth =
+                    addMonths(
+                        viewMonth,
+                        1
+                    );
+                renderCalendars();
+            }
+        );
+        const weekdays =
+            document.createElement(
+                'div'
+            );
+        weekdays.className =
+            'custom-calendar-weekdays';
+        WEEKDAYS.forEach(
+            function (day) {
+                const element =
+                    document.createElement(
+                        'div'
+                    );
+                element.className =
+                    'custom-calendar-weekday';
+                element.textContent =
+                    day;
+                weekdays.appendChild(
+                    element
+                );
+            }
+        );
+        calendar.appendChild(
+            weekdays
+        );
+        const days =
+            document.createElement(
+                'div'
+            );
+        days.className =
+            'custom-calendar-days';
+        const year =
+            date.getFullYear();
+        const month =
+            date.getMonth();
+        const firstDay =
+            new Date(
+                year,
+                month,
+                1
+            ).getDay();
+        const mondayOffset =
+            firstDay === 0
+                ? 6
+                : firstDay - 1;
+        const daysInMonth =
+            new Date(
+                year,
+                month + 1,
+                0
+            ).getDate();
+        const daysInPreviousMonth =
+            new Date(
+                year,
+                month,
+                0
+            ).getDate();
+        for (
+            let index = 0;
+            index < 42;
+            index++
+        ) {
+            let dayNumber;
+            let cellDate;
+            let otherMonth = false;
+            if (
+                index < mondayOffset
+            ) {
+                dayNumber =
+                    daysInPreviousMonth -
+                    mondayOffset +
+                    index +
+                    1;
+                cellDate =
+                    new Date(
+                        year,
+                        month - 1,
+                        dayNumber
+                    );
+                otherMonth = true;
+            }
+            else if (
+                index >=
+                mondayOffset +
+                daysInMonth
+            ) {
+                dayNumber =
+                    index -
+                    mondayOffset -
+                    daysInMonth +
+                    1;
+                cellDate =
+                    new Date(
+                        year,
+                        month + 1,
+                        dayNumber
+                    );
+                otherMonth = true;
+            }
+            else {
+                dayNumber =
+                    index -
+                    mondayOffset +
+                    1;
+                cellDate =
+                    new Date(
+                        year,
+                        month,
+                        dayNumber
+                    );
+            }
+            const button =
+                document.createElement(
+                    'button'
+                );
+            button.type =
+                'button';
+            button.className =
+                'custom-calendar-day';
+            button.textContent =
+                String(dayNumber);
+            if (otherMonth) {
+                button.classList.add(
+                    'other-month'
+                );
+            }
+            if (
+                sameDate(
+                    cellDate,
+                    new Date()
+                )
+            ) {
+                button.classList.add(
+                    'today'
+                );
+            }
+            if (
+                tempStart &&
+                tempEnd &&
+                isBetween(
+                    cellDate,
+                    tempStart,
+                    tempEnd
+                )
+            ) {
+                button.classList.add(
+                    'in-range'
+                );
+            }
+            if (
+                tempStart &&
+                sameDate(
+                    cellDate,
+                    tempStart
+                )
+            ) {
+                button.classList.add(
+                    'range-start'
+                );
+            }
+            if (
+                tempEnd &&
+                sameDate(
+                    cellDate,
+                    tempEnd
+                )
+            ) {
+                button.classList.add(
+                    'range-end'
+                );
+            }
+            button.addEventListener(
+                'click',
+                function (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    selectDate(
+                        cellDate
+                    );
+                }
+            );
+            days.appendChild(
+                button
+            );
+        }
+        calendar.appendChild(
+            days
+        );
+        return calendar;
+    }
+    function selectDate(date) {
+        const chosen =
+            cloneDate(date);
+        if (
+            !tempStart ||
+            tempEnd
+        ) {
+            tempStart =
+                chosen;
+            tempEnd =
+                null;
+        }
+        else if (
+            toISO(chosen) <
+            toISO(tempStart)
+        ) {
+            tempEnd =
+                cloneDate(
+                    tempStart
+                );
+            tempStart =
+                chosen;
+        }
+        else {
+            tempEnd =
+                chosen;
+        }
+        renderCalendars();
+    }
+    function updateSelectedLabel() {
+        if (!selectedLabel) {
+            return;
+        }
+        if (
+            tempStart &&
+            tempEnd
+        ) {
+            selectedLabel.textContent =
+                formatDate(
+                    tempStart
+                )
+                +
+                ' - '
+                +
+                formatDate(
+                    tempEnd
+                );
+        }
+        else if (tempStart) {
+            selectedLabel.textContent =
+                formatDate(
+                    tempStart
+                )
+                +
+                ' - pilih tanggal akhir';
+        }
+        else {
+            selectedLabel.textContent =
+                'Pilih tanggal awal';
+        }
+    }
+    /* =========================================================
+       DATE PICKER POSITION
+    ========================================================= */
+    function positionDatePicker() {
+        if (
+            !datePicker ||
+            !dateInput ||
+            window.innerWidth <= 767
         ) {
             return;
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | KONFIGURASI
-        |--------------------------------------------------------------------------
-        */
-
-        const MAX_FILE_SIZE =
-            10 *
-            1024 *
-            1024;
-
-        const IMAGE_TARGET_SIZE =
-            2.5 *
-            1024 *
-            1024;
-
-        const IMAGE_HARD_LIMIT =
-            9.5 *
-            1024 *
-            1024;
-
-        const IMAGE_MAX_DIMENSION =
-            2500;
-
-        const IMAGE_MIN_DIMENSION =
-            1000;
-
-        const JPEG_QUALITIES = [
-            0.90,
-            0.86,
-            0.82,
-            0.78,
-            0.74,
-            0.70,
-            0.66,
-            0.62,
-            0.58,
-            0.54,
-            0.50,
-            0.46,
-            0.42,
-            0.38
-        ];
-
-        const ALLOWED_EXTENSIONS = [
-            'pdf',
-            'jpg',
-            'jpeg',
-            'png'
-        ];
-
-        const IMAGE_EXTENSIONS = [
-            'jpg',
-            'jpeg',
-            'png'
-        ];
-
-        /*
-        |--------------------------------------------------------------------------
-        | STATE
-        |--------------------------------------------------------------------------
-        */
-
-        let submitting =
-            false;
-
-        let processingToken =
-            0;
-
-        let previewObjectUrl =
-            null;
-
-        let pdfCompressionReady =
-            false;
-
-        let pdfCompressionToken =
-            null;
-
-        let pdfOriginalHashToken =
-            null;
-
-        /*
-        |--------------------------------------------------------------------------
-        | UTIL
-        |--------------------------------------------------------------------------
-        */
-
-        function formatFileSize(
-            bytes
+        const rect =
+            dateInput.getBoundingClientRect();
+        const width =
+            datePicker.offsetWidth ||
+            720;
+        const height =
+            datePicker.offsetHeight ||
+            500;
+        let left =
+            rect.left +
+            rect.width / 2 -
+            width / 2;
+        let top =
+            rect.bottom +
+            8;
+        if (
+            left + width >
+            window.innerWidth - 10
         ) {
-
-            if (
-                !Number.isFinite(bytes) ||
-                bytes <= 0
-            ) {
-                return '0 KB';
-            }
-
-            if (
-                bytes < 1024
-            ) {
-                return bytes + ' B';
-            }
-
-            if (
-                bytes < 1024 * 1024
-            ) {
-                return (
-                    (
-                        bytes /
-                        1024
-                    ).toFixed(1) +
-                    ' KB'
-                );
-            }
-
-            return (
-                (
-                    bytes /
-                    1024 /
-                    1024
-                ).toFixed(2) +
-                ' MB'
-            );
+            left =
+                window.innerWidth -
+                width -
+                10;
         }
-
-        function getExtension(
-            file
-        ) {
-
-            return String(
-                file?.name || ''
-            )
-                .split('.')
-                .pop()
-                .toLowerCase();
+        if (left < 10) {
+            left = 10;
         }
-
-        function isAllowedExtension(
-            extension
+        if (
+            top + height >
+            window.innerHeight - 10
         ) {
-
-            return ALLOWED_EXTENSIONS.includes(
-                extension
-            );
+            top =
+                rect.top -
+                height -
+                8;
         }
-
-        function isImageExtension(
-            extension
-        ) {
-
-            return IMAGE_EXTENSIONS.includes(
-                extension
-            );
+        if (top < 10) {
+            top = 10;
         }
-
-        function getReductionPercent(
-            original,
-            final
-        ) {
-
-            if (
-                !original ||
-                original <= 0
-            ) {
-                return 0;
-            }
-
-            return Math.max(
-                0,
-                Math.round(
-                    (
-                        1 -
-                        (
-                            final /
-                            original
-                        )
-                    ) *
-                    100
-                )
-            );
+        datePicker.style.left =
+            left + 'px';
+        datePicker.style.top =
+            top + 'px';
+    }
+    /* =========================================================
+       SHOW / HIDE
+    ========================================================= */
+    function showDatePicker() {
+        if (!datePicker) {
+            return;
         }
-
-        function escapeHtml(
-            value
-        ) {
-
-            return String(
-                value ?? ''
-            )
-                .replace(
-                    /&/g,
-                    '&amp;'
-                )
-                .replace(
-                    /</g,
-                    '&lt;'
-                )
-                .replace(
-                    />/g,
-                    '&gt;'
-                )
-                .replace(
-                    /"/g,
-                    '&quot;'
-                )
-                .replace(
-                    /'/g,
-                    '&#039;'
+        closePickerPanel();
+        tempStart =
+            selectedStart
+                ? cloneDate(selectedStart)
+                : null;
+        tempEnd =
+            selectedEnd
+                ? cloneDate(selectedEnd)
+                : null;
+        if (tempStart) {
+            viewMonth =
+                new Date(
+                    tempStart.getFullYear(),
+                    tempStart.getMonth(),
+                    1
                 );
         }
-
-        function showAlert(
-            icon,
+        renderCalendars();
+        datePicker.classList.remove(
+            'hidden'
+        );
+        document.body.classList.add(
+            'date-picker-lock'
+        );
+        requestAnimationFrame(
+            positionDatePicker
+        );
+    }
+    function hideDatePicker() {
+        if (!datePicker) {
+            return;
+        }
+        datePicker.classList.add(
+            'hidden'
+        );
+        closePickerPanel();
+        document.body.classList.remove(
+            'date-picker-lock'
+        );
+    }
+    /* =========================================================
+       MONTH PANEL
+    ========================================================= */
+    function showMonthPanel(
+        calendarDate,
+        anchor,
+        side
+    ) {
+        if (!pickerPanel) {
+            return;
+        }
+        activePanelSide =
+            side;
+        activePanelYear =
+            calendarDate.getFullYear();
+        pickerPanel.innerHTML =
+            '';
+        pickerPanel.classList.remove(
+            'hidden'
+        );
+        const header =
+            document.createElement(
+                'div'
+            );
+        header.className =
+            'custom-picker-panel-header';
+        const previous =
+            document.createElement(
+                'button'
+            );
+        previous.type =
+            'button';
+        previous.className =
+            'custom-picker-panel-nav';
+        previous.innerHTML =
+            '&#8249;';
+        const title =
+            document.createElement(
+                'div'
+            );
+        title.className =
+            'custom-picker-panel-title';
+        const next =
+            document.createElement(
+                'button'
+            );
+        next.type =
+            'button';
+        next.className =
+            'custom-picker-panel-nav';
+        next.innerHTML =
+            '&#8250;';
+        const close =
+            document.createElement(
+                'button'
+            );
+        close.type =
+            'button';
+        close.className =
+            'custom-picker-panel-close';
+        close.innerHTML =
+            '&times;';
+        header.append(
+            previous,
             title,
-            text
+            next,
+            close
+        );
+        pickerPanel.appendChild(
+            header
+        );
+        const grid =
+            document.createElement(
+                'div'
+            );
+        grid.className =
+            'custom-picker-grid';
+        pickerPanel.appendChild(
+            grid
+        );
+        function renderMonths() {
+            title.textContent =
+                String(
+                    activePanelYear
+                );
+            grid.innerHTML =
+                '';
+            MONTHS.forEach(
+                function (
+                    monthName,
+                    monthIndex
+                ) {
+                    const button =
+                        document.createElement(
+                            'button'
+                        );
+                    button.type =
+                        'button';
+                    button.className =
+                        'custom-picker-option';
+                    button.textContent =
+                        monthName;
+                    if (
+                        activePanelYear ===
+                            calendarDate.getFullYear() &&
+                        monthIndex ===
+                            calendarDate.getMonth()
+                    ) {
+                        button.classList.add(
+                            'active'
+                        );
+                    }
+                    button.addEventListener(
+                        'click',
+                        function (event) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            const target =
+                                new Date(
+                                    activePanelYear,
+                                    monthIndex,
+                                    1
+                                );
+                            viewMonth =
+                                activePanelSide ===
+                                    'left'
+                                    ? target
+                                    : addMonths(
+                                        target,
+                                        -1
+                                    );
+                            closePickerPanel();
+                            renderCalendars();
+                        }
+                    );
+                    grid.appendChild(
+                        button
+                    );
+                }
+            );
+            positionPickerPanel(
+                pickerPanel,
+                anchor
+            );
+        }
+        previous.addEventListener(
+            'click',
+            function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+                activePanelYear =
+                    Math.max(
+                        MIN_YEAR,
+                        activePanelYear - 1
+                    );
+                renderMonths();
+            }
+        );
+        next.addEventListener(
+            'click',
+            function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+                activePanelYear =
+                    Math.min(
+                        MAX_YEAR,
+                        activePanelYear + 1
+                    );
+                renderMonths();
+            }
+        );
+        close.addEventListener(
+            'click',
+            closePickerPanel
+        );
+        renderMonths();
+    }
+    /* =========================================================
+       YEAR PANEL
+    ========================================================= */
+    function showYearPanel(
+        calendarDate,
+        anchor,
+        side
+    ) {
+        if (!pickerPanel) {
+            return;
+        }
+        activePanelSide =
+            side;
+        let startYear =
+            Math.floor(
+                calendarDate.getFullYear() /
+                12
+            ) * 12;
+        startYear =
+            Math.max(
+                MIN_YEAR,
+                startYear
+            );
+        renderYearPanel(
+            calendarDate,
+            anchor,
+            startYear
+        );
+    }
+    function renderYearPanel(
+        calendarDate,
+        anchor,
+        startYear
+    ) {
+        pickerPanel.innerHTML =
+            '';
+        pickerPanel.classList.remove(
+            'hidden'
+        );
+        const header =
+            document.createElement(
+                'div'
+            );
+        header.className =
+            'custom-picker-panel-header';
+        const previous =
+            document.createElement(
+                'button'
+            );
+        previous.type =
+            'button';
+        previous.className =
+            'custom-picker-panel-nav';
+        previous.innerHTML =
+            '&#8249;';
+        const title =
+            document.createElement(
+                'div'
+            );
+        title.className =
+            'custom-picker-panel-title';
+        const next =
+            document.createElement(
+                'button'
+            );
+        next.type =
+            'button';
+        next.className =
+            'custom-picker-panel-nav';
+        next.innerHTML =
+            '&#8250;';
+        const close =
+            document.createElement(
+                'button'
+            );
+        close.type =
+            'button';
+        close.className =
+            'custom-picker-panel-close';
+        close.innerHTML =
+            '&times;';
+        header.append(
+            previous,
+            title,
+            next,
+            close
+        );
+        pickerPanel.appendChild(
+            header
+        );
+        const grid =
+            document.createElement(
+                'div'
+            );
+        grid.className =
+            'custom-picker-grid';
+        pickerPanel.appendChild(
+            grid
+        );
+        function renderYears() {
+            title.textContent =
+                startYear +
+                ' - ' +
+                (
+                    startYear + 11
+                );
+            grid.innerHTML =
+                '';
+            for (
+                let index = 0;
+                index < 12;
+                index++
+            ) {
+                const year =
+                    startYear +
+                    index;
+                const button =
+                    document.createElement(
+                        'button'
+                    );
+                button.type =
+                    'button';
+                button.className =
+                    'custom-picker-option';
+                button.textContent =
+                    String(
+                        year
+                    );
+                if (
+                    year ===
+                    calendarDate.getFullYear()
+                ) {
+                    button.classList.add(
+                        'active'
+                    );
+                }
+                if (
+                    year ===
+                    new Date().getFullYear()
+                ) {
+                    button.classList.add(
+                        'current'
+                    );
+                }
+                button.addEventListener(
+                    'click',
+                    function (event) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        const month =
+                            calendarDate.getMonth();
+                        viewMonth =
+                            activePanelSide ===
+                                'left'
+                                ? new Date(
+                                    year,
+                                    month,
+                                    1
+                                )
+                                : new Date(
+                                    year,
+                                    month - 1,
+                                    1
+                                );
+                        closePickerPanel();
+                        renderCalendars();
+                    }
+                );
+                grid.appendChild(
+                    button
+                );
+            }
+            positionPickerPanel(
+                pickerPanel,
+                anchor
+            );
+        }
+        previous.addEventListener(
+            'click',
+            function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+                startYear =
+                    Math.max(
+                        MIN_YEAR,
+                        startYear - 12
+                    );
+                renderYears();
+            }
+        );
+        next.addEventListener(
+            'click',
+            function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+                const maxStart =
+                    Math.floor(
+                        MAX_YEAR / 12
+                    ) * 12;
+                startYear =
+                    Math.min(
+                        maxStart,
+                        startYear + 12
+                    );
+                renderYears();
+            }
+        );
+        close.addEventListener(
+            'click',
+            closePickerPanel
+        );
+        renderYears();
+    }
+    /* =========================================================
+       PANEL POSITION
+    ========================================================= */
+    function positionPickerPanel(
+        element,
+        anchor
+    ) {
+        if (
+            !element ||
+            !anchor
         ) {
-
+            return;
+        }
+        if (
+            window.innerWidth <= 767
+        ) {
+            element.style.left =
+                '50%';
+            element.style.top =
+                '50%';
+            return;
+        }
+        const rect =
+            anchor.getBoundingClientRect();
+        const width =
+            element.offsetWidth ||
+            320;
+        const height =
+            element.offsetHeight ||
+            280;
+        let left =
+            rect.left;
+        let top =
+            rect.bottom +
+            8;
+        if (
+            left + width >
+            window.innerWidth - 10
+        ) {
+            left =
+                window.innerWidth -
+                width -
+                10;
+        }
+        if (left < 10) {
+            left = 10;
+        }
+        if (
+            top + height >
+            window.innerHeight - 10
+        ) {
+            top =
+                rect.top -
+                height -
+                8;
+        }
+        if (top < 10) {
+            top = 10;
+        }
+        element.style.left =
+            left + 'px';
+        element.style.top =
+            top + 'px';
+    }
+    function closePickerPanel() {
+        if (!pickerPanel) {
+            return;
+        }
+        pickerPanel.classList.add(
+            'hidden'
+        );
+        pickerPanel.innerHTML =
+            '';
+    }
+    /* =========================================================
+       APPLY DATE
+    ========================================================= */
+    function applyDateRange() {
+        if (
+            !tempStart ||
+            !tempEnd
+        ) {
             if (
                 typeof window.Swal !==
                 'undefined'
             ) {
-
                 window.Swal.fire({
-                    icon,
-                    title,
+                    icon:
+                        'info',
+                    title:
+                        'Pilih rentang tanggal',
                     text:
-                        String(
-                            text ?? ''
-                        ),
+                        'Silakan pilih tanggal awal dan tanggal akhir terlebih dahulu.',
                     confirmButtonText:
                         'Mengerti',
                     confirmButtonColor:
-                        '#059669'
+                        '#2563eb'
                 });
-
-                return;
+            } else {
+                window.alert(
+                    'Silakan pilih tanggal awal dan tanggal akhir terlebih dahulu.'
+                );
             }
-
-            window.alert(
-                String(
-                    text ?? ''
+            return;
+        }
+        selectedStart =
+            cloneDate(
+                tempStart
+            );
+        selectedEnd =
+            cloneDate(
+                tempEnd
+            );
+        if (dariInput) {
+            dariInput.value =
+                toISO(
+                    selectedStart
+                );
+        }
+        if (sampaiInput) {
+            sampaiInput.value =
+                toISO(
+                    selectedEnd
+                );
+        }
+        if (dateInput) {
+            dateInput.value =
+                formatDate(
+                    selectedStart
                 )
-            );
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | PDF COMPRESSION URL
-        |--------------------------------------------------------------------------
-        */
-
-        function getPdfCompressionUrl() {
-
-            return @json(
-                route(
-                    'surat-keluar.preview-compression'
-                )
-            );
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | PREVIEW URL
-        |--------------------------------------------------------------------------
-        */
-
-        function getPdfTemporaryPreviewUrl(
-            token
-        ) {
-
-            const baseUrl =
-                @json(
-                    url(
-                        'surat-keluar/pdf-preview'
-                    )
+                +
+                ' - '
+                +
+                formatDate(
+                    selectedEnd
                 );
-
-            return (
-                baseUrl +
-                '/' +
-                encodeURIComponent(
-                    token
-                )
+        }
+        if (clearDateButton) {
+            clearDateButton.classList.remove(
+                'hidden'
+            );
+            clearDateButton.classList.add(
+                'flex'
             );
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | PREVIEW
-        |--------------------------------------------------------------------------
-        */
-
-        function revokePreviewUrl() {
-
-            if (
-                previewObjectUrl
-            ) {
-
-                URL.revokeObjectURL(
-                    previewObjectUrl
-                );
-
-                previewObjectUrl =
-                    null;
-            }
+        hideDatePicker();
+    }
+    /* =========================================================
+       CLEAR DATE
+    ========================================================= */
+    function clearDateRange() {
+        selectedStart =
+            null;
+        selectedEnd =
+            null;
+        tempStart =
+            null;
+        tempEnd =
+            null;
+        if (dariInput) {
+            dariInput.value = '';
         }
-
-        function resetPreview() {
-
-            if (!preview) {
-                return;
-            }
-
-            preview.classList.remove(
-                'show'
-            );
-
-            previewTitle.textContent =
-                'Preview Dokumen';
-
-            previewBadge.textContent =
-                'Preview';
-
-            previewCaption.textContent =
-                'Preview akan tampil setelah memilih file.';
-
-            previewImage.style.display =
-                'none';
-
-            previewPdf.style.display =
-                'none';
-
-            previewImage.removeAttribute(
-                'src'
-            );
-
-            previewPdf.removeAttribute(
-                'src'
-            );
-
-            previewSecondary.classList.add(
-                'ske-hidden'
-            );
-
-            previewSecondary.innerHTML =
-                '';
-
-            revokePreviewUrl();
+        if (sampaiInput) {
+            sampaiInput.value = '';
         }
-
-        function showImagePreview(
-            file,
-            title = 'Preview Gambar'
-        ) {
-
-            resetPreview();
-
-            preview.classList.add(
-                'show'
-            );
-
-            previewTitle.textContent =
-                title;
-
-            previewBadge.textContent =
-                'IMAGE';
-
-            previewImage.style.display =
-                'block';
-
-            previewObjectUrl =
-                URL.createObjectURL(
-                    file
-                );
-
-            previewImage.src =
-                previewObjectUrl;
-
-            previewCaption.textContent =
-                'Preview file gambar yang telah diproses browser.';
+        if (dateInput) {
+            dateInput.value = '';
         }
-
-        function showOriginalPdfPreview(
-            file
-        ) {
-
-            resetPreview();
-
-            preview.classList.add(
-                'show'
+        if (clearDateButton) {
+            clearDateButton.classList.remove(
+                'flex'
             );
-
-            previewTitle.textContent =
-                'Preview PDF Asli';
-
-            previewBadge.textContent =
-                'PDF ASLI';
-
-            previewPdf.style.display =
-                'block';
-
-            previewObjectUrl =
-                URL.createObjectURL(
-                    file
-                );
-
-            previewPdf.src =
-                previewObjectUrl;
-
-            previewCaption.textContent =
-                'Ini adalah preview PDF asli yang dipilih. Server sedang menyiapkan hasil compression.';
-
-            previewSecondary.classList.remove(
-                'ske-hidden'
-            );
-
-            previewSecondary.innerHTML =
-                '<strong>Proses berikutnya:</strong> ' +
-                'PDF akan diproses Ghostscript di server dan preview hasil compression akan ditampilkan di sini.';
-        }
-
-        function showCompressedPdfPreview(
-            token,
-            profile
-        ) {
-
-            if (
-                !token
-            ) {
-                return;
-            }
-
-            resetPreview();
-
-            preview.classList.add(
-                'show'
-            );
-
-            previewTitle.textContent =
-                'Preview PDF Hasil Compression';
-
-            previewBadge.textContent =
-                'PDF COMPRESSED';
-
-            previewPdf.style.display =
-                'block';
-
-            const previewUrl =
-                getPdfTemporaryPreviewUrl(
-                    token
-                );
-
-            previewPdf.src =
-                previewUrl;
-
-            previewCaption.textContent =
-                'Ini adalah hasil PDF setelah diproses Ghostscript oleh server.';
-
-            if (
-                profile
-            ) {
-
-                previewSecondary.classList.remove(
-                    'ske-hidden'
-                );
-
-                previewSecondary.innerHTML =
-                    'Profile Ghostscript: <strong>' +
-                    escapeHtml(
-                        profile
-                    ) +
-                    '</strong>';
-            }
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | COMPRESSION UI
-        |--------------------------------------------------------------------------
-        */
-
-        function resetCompression() {
-
-            if (!compression) {
-                return;
-            }
-
-            compression.style.display =
-                'none';
-
-            compression.classList.remove(
-                'success',
-                'warning',
-                'error',
-                'processing'
-            );
-
-            compressionTitle.textContent =
-                'Informasi Compression';
-
-            compressionMessage.innerHTML =
-                '';
-
-            originalFormat.textContent =
-                '-';
-
-            finalFormat.textContent =
-                '-';
-
-            originalSize.textContent =
-                '-';
-
-            finalSize.textContent =
-                '-';
-        }
-
-        function showCompression(
-            data,
-            type = ''
-        ) {
-
-            compression.style.display =
-                'block';
-
-            compression.classList.remove(
-                'success',
-                'warning',
-                'error',
-                'processing'
-            );
-
-            if (
-                type
-            ) {
-
-                compression.classList.add(
-                    type
-                );
-            }
-
-            compressionTitle.textContent =
-                data.title ||
-                'Informasi Compression';
-
-            originalFormat.textContent =
-                data.originalFormat ||
-                '-';
-
-            finalFormat.textContent =
-                data.finalFormat ||
-                '-';
-
-            originalSize.textContent =
-                data.originalSize ||
-                '-';
-
-            finalSize.textContent =
-                data.finalSize ||
-                '-';
-
-            compressionMessage.innerHTML =
-                data.message ||
-                '';
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | STATUS
-        |--------------------------------------------------------------------------
-        */
-
-        function resetStatus() {
-
-            if (!statusBox) {
-                return;
-            }
-
-            statusBox.textContent =
-                '';
-
-            statusBox.classList.remove(
-                'show',
-                'blue',
-                'green',
-                'amber'
+            clearDateButton.classList.add(
+                'hidden'
             );
         }
-
-        function showStatus(
-            message,
-            type = 'blue'
-        ) {
-
-            if (!statusBox) {
-                return;
-            }
-
-            statusBox.textContent =
-                message;
-
-            statusBox.classList.remove(
-                'show',
-                'blue',
-                'green',
-                'amber'
-            );
-
-            statusBox.classList.add(
-                'show',
-                type
-            );
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | VISUAL FILE
-        |--------------------------------------------------------------------------
-        */
-
-        function resetFileVisual() {
-
-            uploadBox?.classList.remove(
-                'has-file'
-            );
-
-            uploadTitle.textContent =
-                'Klik untuk memilih file baru';
-
-            uploadSubtitle.textContent =
-                'PDF, JPG, JPEG, PNG';
-
-            fileInfo.classList.remove(
-                'show'
-            );
-
-            fileInfoTitle.textContent =
-                'File siap digunakan';
-
-            fileInfoName.textContent =
-                '';
-
-            fileInfoSize.textContent =
-                '';
-
-            resetCompression();
-            resetStatus();
-            resetPreview();
-
-            pdfCompressionReady =
-                false;
-
-            pdfCompressionToken =
-                null;
-
-            pdfOriginalHashToken =
-                null;
-        }
-
-        function showFileVisual(
-            file,
-            title = 'File siap digunakan'
-        ) {
-
-            uploadBox.classList.add(
-                'has-file'
-            );
-
-            uploadTitle.textContent =
-                'File siap digunakan';
-
-            fileInfo.classList.add(
-                'show'
-            );
-
-            fileInfoName.textContent =
-                file.name;
-
-            fileInfoSize.textContent =
-                formatFileSize(
-                    file.size
-                );
-
-            fileInfoTitle.textContent =
-                title;
-        }
-
-        function clearFileSelection() {
-
-            processingToken++;
-
-            fileInput.value =
-                '';
-
-            resetFileVisual();
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | LOAD IMAGE
-        |--------------------------------------------------------------------------
-        */
-
-        function loadImage(
-            file
-        ) {
-
-            return new Promise(
-                function (
-                    resolve,
-                    reject
-                ) {
-
-                    const objectUrl =
-                        URL.createObjectURL(
-                            file
-                        );
-
-                    const image =
-                        new Image();
-
-                    image.onload =
-                        function () {
-
-                            URL.revokeObjectURL(
-                                objectUrl
-                            );
-
-                            resolve(
-                                image
-                            );
-                        };
-
-                    image.onerror =
-                        function () {
-
-                            URL.revokeObjectURL(
-                                objectUrl
-                            );
-
-                            reject(
-                                new Error(
-                                    'Gambar tidak dapat dibaca oleh browser.'
-                                )
-                            );
-                        };
-
-                    image.src =
-                        objectUrl;
-                }
-            );
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | IMAGE DIMENSION
-        |--------------------------------------------------------------------------
-        */
-
-        function calculateDimensions(
-            width,
-            height,
-            maxDimension
-        ) {
-
-            if (
-                width <= maxDimension &&
-                height <= maxDimension
-            ) {
-
-                return {
-                    width,
-                    height
-                };
-            }
-
-            const scale =
-                Math.min(
-                    maxDimension /
-                        width,
-
-                    maxDimension /
-                        height
-                );
-
-            return {
-                width:
-                    Math.max(
-                        1,
-                        Math.round(
-                            width *
-                            scale
-                        )
-                    ),
-
-                height:
-                    Math.max(
-                        1,
-                        Math.round(
-                            height *
-                            scale
-                        )
-                    )
-            };
-        }
-
-        function buildDimensionList(
-            width,
-            height
-        ) {
-
-            const maxDimensions = [
-                IMAGE_MAX_DIMENSION,
-                2200,
-                2000,
-                1800,
-                1600,
-                1400,
-                1200,
-                IMAGE_MIN_DIMENSION
-            ];
-
-            const result =
-                [];
-
-            maxDimensions.forEach(
-                function (
-                    maxDimension
-                ) {
-
-                    const dimensions =
-                        calculateDimensions(
-                            width,
-                            height,
-                            maxDimension
-                        );
-
-                    if (
-                        dimensions.width <
-                            IMAGE_MIN_DIMENSION &&
-                        dimensions.height <
-                            IMAGE_MIN_DIMENSION
-                    ) {
-
-                        return;
-                    }
-
-                    const duplicate =
-                        result.some(
-                            function (
-                                item
-                            ) {
-
-                                return (
-                                    item.width ===
-                                        dimensions.width &&
-                                    item.height ===
-                                        dimensions.height
-                                );
-                            }
-                        );
-
-                    if (
-                        !duplicate
-                    ) {
-
-                        result.push(
-                            dimensions
-                        );
-                    }
-                }
-            );
-
-            return result;
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | CANVAS TO FILE
-        |--------------------------------------------------------------------------
-        */
-
-        function canvasToFile(
-            image,
-            width,
-            height,
-            quality,
-            originalName
-        ) {
-
-            return new Promise(
-                function (
-                    resolve,
-                    reject
-                ) {
-
-                    const canvas =
-                        document.createElement(
-                            'canvas'
-                        );
-
-                    canvas.width =
-                        width;
-
-                    canvas.height =
-                        height;
-
-                    const context =
-                        canvas.getContext(
-                            '2d',
-                            {
-                                alpha:
-                                    false
-                            }
-                        );
-
-                    if (
-                        !context
-                    ) {
-
-                        reject(
-                            new Error(
-                                'Browser tidak mendukung pemrosesan gambar.'
-                            )
-                        );
-
-                        return;
-                    }
-
-                    context.fillStyle =
-                        '#ffffff';
-
-                    context.fillRect(
-                        0,
-                        0,
-                        width,
-                        height
-                    );
-
-                    context.imageSmoothingEnabled =
-                        true;
-
-                    context.imageSmoothingQuality =
-                        'high';
-
-                    context.drawImage(
-                        image,
-                        0,
-                        0,
-                        width,
-                        height
-                    );
-
-                    canvas.toBlob(
-                        function (
-                            blob
-                        ) {
-
-                            if (
-                                !blob
-                            ) {
-
-                                reject(
-                                    new Error(
-                                        'Browser gagal membuat JPG.'
-                                    )
-                                );
-
-                                return;
-                            }
-
-                            const baseName =
-                                String(
-                                    originalName ||
-                                    'surat_keluar'
-                                )
-                                    .replace(
-                                        /\.[^/.]+$/,
-                                        ''
-                                    )
-                                    .replace(
-                                        /[^a-zA-Z0-9_-]/g,
-                                        '_'
-                                    );
-
-                            const fileName =
-                                (
-                                    baseName ||
-                                    'surat_keluar'
-                                ) +
-                                '_compressed.jpg';
-
-                            resolve(
-                                new File(
-                                    [blob],
-                                    fileName,
-                                    {
-                                        type:
-                                            'image/jpeg',
-
-                                        lastModified:
-                                            Date.now()
-                                    }
-                                )
-                            );
-
-                        },
-                        'image/jpeg',
-                        quality
-                    );
-
-                }
-            );
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | COMPRESS IMAGE
-        |--------------------------------------------------------------------------
-        */
-
-        async function compressImageFile(
-            file
-        ) {
-
-            const image =
-                await loadImage(
-                    file
-                );
-
-            const width =
-                image.naturalWidth ||
-                image.width;
-
-            const height =
-                image.naturalHeight ||
-                image.height;
-
-            if (
-                width <= 0 ||
-                height <= 0
-            ) {
-
-                throw new Error(
-                    'Dimensi gambar tidak valid.'
-                );
-            }
-
-            const dimensions =
-                buildDimensionList(
-                    width,
-                    height
-                );
-
-            let bestFile =
-                null;
-
-            for (
-                const dimension
-                of dimensions
-            ) {
-
-                for (
-                    const quality
-                    of JPEG_QUALITIES
-                ) {
-
-                    const result =
-                        await canvasToFile(
-                            image,
-                            dimension.width,
-                            dimension.height,
-                            quality,
-                            file.name
-                        );
-
-                    if (
-                        !bestFile ||
-                        result.size <
-                            bestFile.size
-                    ) {
-
-                        bestFile =
-                            result;
-                    }
-
-                    if (
-                        result.size <=
-                        IMAGE_TARGET_SIZE
-                    ) {
-
-                        return result;
-                    }
-                }
-            }
-
-            if (
-                bestFile &&
-                bestFile.size <=
-                    IMAGE_HARD_LIMIT
-            ) {
-
-                return bestFile;
-            }
-
-            throw new Error(
-                'Hasil kompresi gambar masih terlalu besar.'
-            );
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | FILE SIGNATURE
-        |--------------------------------------------------------------------------
-        */
-
-        async function detectPdfSignature(
-            file
-        ) {
-
-            try {
-
-                const buffer =
-                    await file
-                        .slice(
-                            0,
-                            5
-                        )
-                        .arrayBuffer();
-
-                const bytes =
-                    new Uint8Array(
-                        buffer
-                    );
-
-                const header =
-                    new TextDecoder()
-                        .decode(
-                            bytes
-                        );
-
-                return header ===
-                    '%PDF-';
-
-            } catch (
-                error
-            ) {
-
-                return false;
-            }
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | COMPRESS PDF SERVER
-        |--------------------------------------------------------------------------
-        */
-
-        async function compressPdfOnServer(
-            file,
-            token
-        ) {
-
-            const formData =
-                new FormData();
-
-            formData.append(
-                'lampiran_file',
-                file
-            );
-
-            formData.append(
-                '_token',
-                @json(csrf_token())
-            );
-
-            showCompression(
-                {
-                    title:
-                        '⏳ Memproses PDF di server',
-
-                    originalFormat:
-                        'PDF',
-
-                    finalFormat:
-                        'PDF',
-
-                    originalSize:
-                        formatFileSize(
-                            file.size
-                        ),
-
-                    finalSize:
-                        'Memproses...',
-
-                    message:
-                        '<strong>Ghostscript sedang memproses PDF.</strong><br>' +
-                        'Server sedang membuat beberapa profile compression ' +
-                        'dan memilih hasil PDF dengan ukuran paling kecil.'
-                },
-                'processing'
-            );
-
-            showStatus(
-                'Sedang mengompres PDF di server. Jangan tutup halaman.',
-                'blue'
-            );
-
-            try {
-
-                const response =
-                    await fetch(
-                        getPdfCompressionUrl(),
-                        {
-                            method:
-                                'POST',
-
-                            body:
-                                formData,
-
-                            headers: {
-                                'Accept':
-                                    'application/json',
-
-                                'X-Requested-With':
-                                    'XMLHttpRequest'
-                            },
-
-                            credentials:
-                                'same-origin'
-                        }
-                    );
-
-                let data =
-                    null;
-
-                try {
-
-                    data =
-                        await response.json();
-
-                } catch (
-                    error
-                ) {
-
-                    throw new Error(
-                        'Server mengembalikan response yang tidak valid.'
-                    );
-                }
-
+        viewMonth =
+            new Date();
+        viewMonth.setDate(
+            1
+        );
+        hideDatePicker();
+    }
+    /* =========================================================
+       DATE EVENT
+    ========================================================= */
+    if (
+        dateInput &&
+        datePicker
+    ) {
+        dateInput.addEventListener(
+            'click',
+            function (event) {
+                event.preventDefault();
+                event.stopPropagation();
                 if (
-                    token !==
-                    processingToken
-                ) {
-                    return;
-                }
-
-                if (
-                    !response.ok ||
-                    !data?.success
-                ) {
-
-                    throw new Error(
-                        data?.message ||
-                        'Compression PDF gagal diproses server.'
-                    );
-                }
-
-                pdfCompressionReady =
-                    true;
-
-                pdfCompressionToken =
-                    data.token ||
-                    null;
-
-                /*
-                |--------------------------------------------------------------------------
-                | PDF TIDAK LEBIH KECIL
-                |--------------------------------------------------------------------------
-                */
-
-                if (
-                    data.compressed === false
-                ) {
-
-                    pdfOriginalHashToken =
-                        data.token ||
-                        null;
-
-                    showCompression(
-                        {
-                            title:
-                                '✓ PDF sudah optimal',
-
-                            originalFormat:
-                                'PDF',
-
-                            finalFormat:
-                                'PDF',
-
-                            originalSize:
-                                data.original_size_text ||
-                                formatFileSize(
-                                    file.size
-                                ),
-
-                            finalSize:
-                                data.compressed_size_text ||
-                                formatFileSize(
-                                    file.size
-                                ),
-
-                            message:
-                                'Hasil compression server tidak lebih kecil daripada file asli. ' +
-                                '<strong>File asli akan dipertahankan</strong> saat update.',
-                        },
-                        'warning'
-                    );
-
-                    showStatus(
-                        'PDF tidak menjadi lebih kecil. File asli akan digunakan.',
-                        'amber'
-                    );
-
-                    showOriginalPdfPreview(
-                        file
-                    );
-
-                    return data;
-                }
-
-                /*
-                |--------------------------------------------------------------------------
-                | PDF BERHASIL
-                |--------------------------------------------------------------------------
-                */
-
-                showCompression(
-                    {
-                        title:
-                            '✓ PDF berhasil dikompresi',
-
-                        originalFormat:
-                            'PDF',
-
-                        finalFormat:
-                            'PDF',
-
-                        originalSize:
-                            data.original_size_text ||
-                            formatFileSize(
-                                file.size
-                            ),
-
-                        finalSize:
-                            data.compressed_size_text ||
-                            '-',
-
-                        message:
-                            'Penghematan sekitar <strong>' +
-                            (
-                                Number(
-                                    data.saving_percent ||
-                                    0
-                                )
-                            ).toFixed(2) +
-                            '%</strong>.' +
-                            (
-                                data.profile
-                                    ? '<br>Profile: <strong>' +
-                                      escapeHtml(
-                                          data.profile
-                                      ) +
-                                      '</strong>'
-                                    : ''
-                            ),
-                    },
-                    'success'
-                );
-
-                showStatus(
-                    'PDF hasil compression siap digunakan. Preview hasil compression ditampilkan di bawah.',
-                    'green'
-                );
-
-                showCompressedPdfPreview(
-                    data.token,
-                    data.profile
-                );
-
-                return data;
-
-            } catch (
-                error
-            ) {
-
-                if (
-                    token !==
-                    processingToken
-                ) {
-                    return null;
-                }
-
-                pdfCompressionReady =
-                    false;
-
-                pdfCompressionToken =
-                    null;
-
-                showCompression(
-                    {
-                        title:
-                            '✕ Compression PDF gagal',
-
-                        originalFormat:
-                            'PDF',
-
-                        finalFormat:
-                            'PDF',
-
-                        originalSize:
-                            formatFileSize(
-                                file.size
-                            ),
-
-                        finalSize:
-                            '-',
-
-                        message:
-                            escapeHtml(
-                                error?.message ||
-                                'Compression PDF gagal.'
-                            )
-                    },
-                    'error'
-                );
-
-                showStatus(
-                    'PDF belum siap disimpan karena proses compression server gagal.',
-                    'amber'
-                );
-
-                showAlert(
-                    'error',
-                    'Compression PDF gagal',
-                    error?.message ||
-                    'Server gagal memproses PDF.'
-                );
-
-                return null;
-            }
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | FILE CHANGE
-        |--------------------------------------------------------------------------
-        */
-
-        fileInput.addEventListener(
-            'change',
-            async function () {
-
-                const file =
-                    fileInput.files?.[0];
-
-                if (
-                    !file
-                ) {
-
-                    resetFileVisual();
-
-                    return;
-                }
-
-                const token =
-                    ++processingToken;
-
-                pdfCompressionReady =
-                    false;
-
-                pdfCompressionToken =
-                    null;
-
-                pdfOriginalHashToken =
-                    null;
-
-                resetCompression();
-                resetStatus();
-                resetPreview();
-
-                /*
-                |--------------------------------------------------------------------------
-                | FORMAT
-                |--------------------------------------------------------------------------
-                */
-
-                const extension =
-                    getExtension(
-                        file
-                    );
-
-                if (
-                    !isAllowedExtension(
-                        extension
+                    datePicker.classList.contains(
+                        'hidden'
                     )
                 ) {
-
-                    clearFileSelection();
-
-                    showAlert(
-                        'warning',
-                        'Format tidak didukung',
-                        'Gunakan PDF, JPG, JPEG, atau PNG.'
-                    );
-
-                    return;
+                    showDatePicker();
+                } else {
+                    hideDatePicker();
                 }
-
-                /*
-                |--------------------------------------------------------------------------
-                | UKURAN
-                |--------------------------------------------------------------------------
-                */
-
-                if (
-                    file.size <= 0
-                ) {
-
-                    clearFileSelection();
-
-                    showAlert(
-                        'warning',
-                        'File tidak valid',
-                        'File yang dipilih kosong.'
-                    );
-
-                    return;
-                }
-
-                if (
-                    file.size >
-                    MAX_FILE_SIZE
-                ) {
-
-                    clearFileSelection();
-
-                    showAlert(
-                        'warning',
-                        'File terlalu besar',
-                        'Ukuran file asli maksimal 10 MB.'
-                    );
-
-                    return;
-                }
-
-                showFileVisual(
-                    file
-                );
-
-                /*
-                |--------------------------------------------------------------------------
-                | PDF
-                |--------------------------------------------------------------------------
-                */
-
-                if (
-                    extension === 'pdf'
-                ) {
-
-                    uploadSubtitle.textContent =
-                        'PDF • akan dikompresi oleh server';
-
-                    showOriginalPdfPreview(
-                        file
-                    );
-
-                    showCompression(
-                        {
-                            title:
-                                '⏳ Menyiapkan PDF',
-
-                            originalFormat:
-                                'PDF',
-
-                            finalFormat:
-                                'PDF',
-
-                            originalSize:
-                                formatFileSize(
-                                    file.size
-                                ),
-
-                            finalSize:
-                                'Menunggu server...',
-
-                            message:
-                                'PDF asli sudah terdeteksi. Sistem sedang mengirim PDF ke server untuk proses Ghostscript.'
-                        },
-                        'processing'
-                    );
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | SIGNATURE CLIENT
-                    |--------------------------------------------------------------------------
-                    */
-
-                    const validPdf =
-                        await detectPdfSignature(
-                            file
-                        );
-
-                    if (
-                        token !==
-                        processingToken
-                    ) {
-                        return;
-                    }
-
-                    if (
-                        !validPdf
-                    ) {
-
-                        clearFileSelection();
-
-                        showAlert(
-                            'error',
-                            'PDF tidak valid',
-                            'File berekstensi PDF tetapi isi file tidak terdeteksi sebagai PDF.'
-                        );
-
-                        return;
-                    }
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | SERVER COMPRESSION
-                    |--------------------------------------------------------------------------
-                    */
-
-                    await compressPdfOnServer(
-                        file,
-                        token
-                    );
-
-                    return;
-                }
-
-                /*
-                |--------------------------------------------------------------------------
-                | IMAGE
-                |--------------------------------------------------------------------------
-                */
-
-                if (
-                    !isImageExtension(
-                        extension
-                    )
-                ) {
-
-                    return;
-                }
-
-                uploadSubtitle.textContent =
-                    'Gambar • dikonversi menjadi JPG';
-
-                showImagePreview(
-                    file
-                );
-
-                showCompression(
-                    {
-                        title:
-                            '⏳ Memproses gambar',
-
-                        originalFormat:
-                            extension.toUpperCase(),
-
-                        finalFormat:
-                            'JPG',
-
-                        originalSize:
-                            formatFileSize(
-                                file.size
-                            ),
-
-                        finalSize:
-                            'Menghitung...',
-
-                        message:
-                            'Browser sedang melakukan resize dan kompresi gambar.'
-                    },
-                    'processing'
-                );
-
-                showStatus(
-                    'Sedang mengompres gambar sebelum file dikirim.',
-                    'blue'
-                );
-
-                try {
-
-                    const compressed =
-                        await compressImageFile(
-                            file
-                        );
-
-                    if (
-                        token !==
-                        processingToken
-                    ) {
-                        return;
-                    }
-
-                    if (
-                        compressed.size >
-                        MAX_FILE_SIZE
-                    ) {
-
-                        throw new Error(
-                            'Ukuran hasil gambar masih melebihi 10 MB.'
-                        );
-                    }
-
-                    const transfer =
-                        new DataTransfer();
-
-                    transfer.items.add(
-                        compressed
-                    );
-
-                    fileInput.files =
-                        transfer.files;
-
-                    const reduction =
-                        getReductionPercent(
-                            file.size,
-                            compressed.size
-                        );
-
-                    showFileVisual(
-                        compressed,
-                        'Hasil kompresi siap'
-                    );
-
-                    fileInfoName.textContent =
-                        compressed.name;
-
-                    fileInfoSize.textContent =
-                        formatFileSize(
-                            compressed.size
-                        );
-
-                    uploadSubtitle.textContent =
-                        'JPG • hasil kompresi browser';
-
-                    showImagePreview(
-                        compressed,
-                        'Preview JPG Hasil Compression'
-                    );
-
-                    showCompression(
-                        {
-                            title:
-                                '✓ Kompresi gambar berhasil',
-
-                            originalFormat:
-                                extension.toUpperCase(),
-
-                            finalFormat:
-                                'JPG',
-
-                            originalSize:
-                                formatFileSize(
-                                    file.size
-                                ),
-
-                            finalSize:
-                                formatFileSize(
-                                    compressed.size
-                                ),
-
-                            message:
-                                'Penghematan sekitar <strong>' +
-                                reduction +
-                                '%</strong>.' +
-                                '<br>File final yang akan dikirim adalah JPG.'
-                        },
-                        'success'
-                    );
-
-                    showStatus(
-                        'Gambar sudah dioptimalkan dan siap disimpan sebagai lampiran baru.',
-                        'green'
-                    );
-
-                } catch (
-                    error
-                ) {
-
-                    console.error(
-                        'Compression error:',
-                        error
-                    );
-
-                    if (
-                        token !==
-                        processingToken
-                    ) {
-                        return;
-                    }
-
-                    clearFileSelection();
-
-                    showAlert(
-                        'error',
-                        'Gagal memproses gambar',
-                        error?.message ||
-                        'Browser gagal mengompres gambar.'
-                    );
-                }
-
             }
         );
-
-        /*
-        |--------------------------------------------------------------------------
-        | SUBMIT
-        |--------------------------------------------------------------------------
-        */
-
-        form.addEventListener(
-            'submit',
-            function (
-                event
+        dateInput.addEventListener(
+            'focus',
+            function () {
+                if (
+                    datePicker.classList.contains(
+                        'hidden'
+                    )
+                ) {
+                    showDatePicker();
+                }
+            }
+        );
+        closeDatePickerButton?.addEventListener(
+            'click',
+            function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+                hideDatePicker();
+            }
+        );
+        clearPickerButton?.addEventListener(
+            'click',
+            function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+                clearDateRange();
+            }
+        );
+        applyPickerButton?.addEventListener(
+            'click',
+            function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+                applyDateRange();
+            }
+        );
+        clearDateButton?.addEventListener(
+            'click',
+            function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+                clearDateRange();
+            }
+        );
+        document.addEventListener(
+            'mousedown',
+            function (event) {
+                if (
+                    datePicker.classList.contains(
+                        'hidden'
+                    )
+                ) {
+                    return;
+                }
+                if (
+                    datePicker.contains(
+                        event.target
+                    )
+                ) {
+                    return;
+                }
+                if (
+                    pickerPanel &&
+                    pickerPanel.contains(
+                        event.target
+                    )
+                ) {
+                    return;
+                }
+                if (
+                    dateInput.contains(
+                        event.target
+                    )
+                ) {
+                    return;
+                }
+                if (
+                    clearDateButton &&
+                    clearDateButton.contains(
+                        event.target
+                    )
+                ) {
+                    return;
+                }
+                hideDatePicker();
+            }
+        );
+    }
+    /* =========================================================
+       WINDOW
+    ========================================================= */
+    window.addEventListener(
+        'resize',
+        function () {
+            if (
+                datePicker &&
+                !datePicker.classList.contains(
+                    'hidden'
+                )
             ) {
-
-                if (
-                    submitting
-                ) {
-
-                    event.preventDefault();
-
-                    return;
-                }
-
-                /*
-                |--------------------------------------------------------------------------
-                | TANGGAL
-                |--------------------------------------------------------------------------
-                */
-
-                const suratDate =
-                    tanggalSurat?.value ||
-                    '';
-
-                const keluarDate =
-                    tanggalKeluar?.value ||
-                    '';
-
-                if (
-                    suratDate &&
-                    keluarDate &&
-                    keluarDate <
-                        suratDate
-                ) {
-
-                    event.preventDefault();
-
-                    showAlert(
-                        'warning',
-                        'Tanggal tidak valid',
-                        'Tanggal keluar tidak boleh lebih awal dari tanggal surat.'
+                positionDatePicker();
+            }
+            if (
+                pickerPanel &&
+                !pickerPanel.classList.contains(
+                    'hidden'
+                )
+            ) {
+                closePickerPanel();
+            }
+        }
+    );
+    window.addEventListener(
+        'scroll',
+        function () {
+            if (
+                datePicker &&
+                !datePicker.classList.contains(
+                    'hidden'
+                ) &&
+                window.innerWidth > 767
+            ) {
+                positionDatePicker();
+            }
+        },
+        true
+    );
+    /* =========================================================
+       DROPDOWN
+    ========================================================= */
+    const kategoriDropdown =
+        document.getElementById(
+            'kategoriDropdown'
+        );
+    const statusDropdown =
+        document.getElementById(
+            'statusDropdown'
+        );
+    const kategoriButton =
+        document.getElementById(
+            'kategoriDropdownButton'
+        );
+    const statusButton =
+        document.getElementById(
+            'statusDropdownButton'
+        );
+    const kategoriCount =
+        document.getElementById(
+            'kategoriCount'
+        );
+    const statusCount =
+        document.getElementById(
+            'statusCount'
+        );
+    const kategoriSummary =
+        document.getElementById(
+            'kategoriSummary'
+        );
+    const statusSummary =
+        document.getElementById(
+            'statusSummary'
+        );
+    const kategoriFooterCount =
+        document.getElementById(
+            'kategoriFooterCount'
+        );
+    const statusFooterCount =
+        document.getElementById(
+            'statusFooterCount'
+        );
+    const kategoriCheckboxes =
+        document.querySelectorAll(
+            '.kategori-checkbox'
+        );
+    const statusCheckboxes =
+        document.querySelectorAll(
+            '.status-checkbox'
+        );
+    function closeDropdown(dropdown) {
+        if (!dropdown) {
+            return;
+        }
+        dropdown.classList.remove(
+            'open'
+        );
+        const button =
+            dropdown.querySelector(
+                '.filter-dropdown-trigger'
+            );
+        if (button) {
+            button.setAttribute(
+                'aria-expanded',
+                'false'
+            );
+        }
+    }
+    function closeAllDropdowns() {
+        closeDropdown(
+            kategoriDropdown
+        );
+        closeDropdown(
+            statusDropdown
+        );
+    }
+    function openDropdown(dropdown) {
+        if (!dropdown) {
+            return;
+        }
+        if (
+            dropdown ===
+            kategoriDropdown
+        ) {
+            closeDropdown(
+                statusDropdown
+            );
+        }
+        if (
+            dropdown ===
+            statusDropdown
+        ) {
+            closeDropdown(
+                kategoriDropdown
+            );
+        }
+        dropdown.classList.add(
+            'open'
+        );
+        const button =
+            dropdown.querySelector(
+                '.filter-dropdown-trigger'
+            );
+        if (button) {
+            button.setAttribute(
+                'aria-expanded',
+                'true'
+            );
+        }
+    }
+    function getCheckedLabels(
+        selector
+    ) {
+        return Array.from(
+            document.querySelectorAll(
+                selector +
+                ':checked'
+            )
+        )
+        .map(
+            function (checkbox) {
+                const label =
+                    checkbox.closest(
+                        'label'
                     );
-
-                    return;
-                }
-
-                /*
-                |--------------------------------------------------------------------------
-                | FILE
-                |--------------------------------------------------------------------------
-                */
-
-                const file =
-                    fileInput.files?.[0] ||
-                    null;
-
+                const span =
+                    label?.querySelector(
+                        'span'
+                    );
+                return (
+                    span?.textContent
+                        .trim() ||
+                    ''
+                );
+            }
+        )
+        .filter(Boolean);
+    }
+    function updateKategoriFilter() {
+        const checked =
+            document.querySelectorAll(
+                '.kategori-checkbox:checked'
+            );
+        const count =
+            checked.length;
+        if (kategoriCount) {
+            kategoriCount.textContent =
+                count +
+                ' dipilih';
+        }
+        if (kategoriFooterCount) {
+            kategoriFooterCount.textContent =
+                count +
+                ' kategori dipilih';
+        }
+        if (kategoriSummary) {
+            const labels =
+                getCheckedLabels(
+                    '.kategori-checkbox'
+                );
+            if (!labels.length) {
+                kategoriSummary.textContent =
+                    'Semua kategori';
+            }
+            else if (
+                labels.length <= 2
+            ) {
+                kategoriSummary.textContent =
+                    labels.join(', ');
+            }
+            else {
+                kategoriSummary.textContent =
+                    labels.length +
+                    ' kategori dipilih';
+            }
+        }
+    }
+    function updateStatusFilter() {
+        const checked =
+            document.querySelectorAll(
+                '.status-checkbox:checked'
+            );
+        const count =
+            checked.length;
+        if (statusCount) {
+            statusCount.textContent =
+                count +
+                ' dipilih';
+        }
+        if (statusFooterCount) {
+            statusFooterCount.textContent =
+                count +
+                ' status dipilih';
+        }
+        if (statusSummary) {
+            const labels =
+                getCheckedLabels(
+                    '.status-checkbox'
+                );
+            if (!labels.length) {
+                statusSummary.textContent =
+                    'Semua status';
+            }
+            else if (
+                labels.length <= 2
+            ) {
+                statusSummary.textContent =
+                    labels.join(', ');
+            }
+            else {
+                statusSummary.textContent =
+                    labels.length +
+                    ' status dipilih';
+            }
+        }
+    }
+    kategoriButton?.addEventListener(
+        'click',
+        function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            if (
+                kategoriDropdown?.classList.contains(
+                    'open'
+                )
+            ) {
+                closeDropdown(
+                    kategoriDropdown
+                );
+            }
+            else {
+                openDropdown(
+                    kategoriDropdown
+                );
+            }
+        }
+    );
+    statusButton?.addEventListener(
+        'click',
+        function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            if (
+                statusDropdown?.classList.contains(
+                    'open'
+                )
+            ) {
+                closeDropdown(
+                    statusDropdown
+                );
+            }
+            else {
+                openDropdown(
+                    statusDropdown
+                );
+            }
+        }
+    );
+    kategoriCheckboxes.forEach(
+        function (checkbox) {
+            checkbox.addEventListener(
+                'change',
+                updateKategoriFilter
+            );
+        }
+    );
+    statusCheckboxes.forEach(
+        function (checkbox) {
+            checkbox.addEventListener(
+                'change',
+                updateStatusFilter
+            );
+        }
+    );
+    document
+        .getElementById(
+            'selectAllKategori'
+        )
+        ?.addEventListener(
+            'click',
+            function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+                kategoriCheckboxes.forEach(
+                    function (checkbox) {
+                        checkbox.checked =
+                            true;
+                    }
+                );
+                updateKategoriFilter();
+            }
+        );
+    document
+        .getElementById(
+            'clearAllKategori'
+        )
+        ?.addEventListener(
+            'click',
+            function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+                kategoriCheckboxes.forEach(
+                    function (checkbox) {
+                        checkbox.checked =
+                            false;
+                    }
+                );
+                updateKategoriFilter();
+            }
+        );
+    document
+        .getElementById(
+            'selectAllStatus'
+        )
+        ?.addEventListener(
+            'click',
+            function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+                statusCheckboxes.forEach(
+                    function (checkbox) {
+                        checkbox.checked =
+                            true;
+                    }
+                );
+                updateStatusFilter();
+            }
+        );
+    document
+        .getElementById(
+            'clearAllStatus'
+        )
+        ?.addEventListener(
+            'click',
+            function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+                statusCheckboxes.forEach(
+                    function (checkbox) {
+                        checkbox.checked =
+                            false;
+                    }
+                );
+                updateStatusFilter();
+            }
+        );
+    document.addEventListener(
+        'click',
+        function (event) {
+            const target =
+                event.target;
+            if (
+                !(target instanceof Element)
+            ) {
+                return;
+            }
+            if (
+                !target.closest(
+                    '.filter-dropdown'
+                )
+            ) {
+                closeAllDropdowns();
+            }
+        }
+    );
+    /* =========================================================
+       ESC
+    ========================================================= */
+    document.addEventListener(
+        'keydown',
+        function (event) {
+            if (
+                event.key !==
+                'Escape'
+            ) {
+                return;
+            }
+            closeAllDropdowns();
+            if (
+                datePicker &&
+                !datePicker.classList.contains(
+                    'hidden'
+                )
+            ) {
+                hideDatePicker();
+            }
+        }
+    );
+    /* =========================================================
+       FILTER VALIDATION
+    ========================================================= */
+    const filterForm =
+        document.getElementById(
+            'filterForm'
+        );
+    filterForm?.addEventListener(
+        'submit',
+        function (event) {
+            const start =
+                dariInput?.value ||
+                '';
+            const end =
+                sampaiInput?.value ||
+                '';
+            if (
+                start &&
+                end &&
+                start > end
+            ) {
+                event.preventDefault();
                 if (
-                    file
+                    typeof window.Swal !==
+                    'undefined'
                 ) {
-
-                    const extension =
-                        getExtension(
-                            file
-                        );
-
-                    if (
-                        !isAllowedExtension(
-                            extension
-                        )
-                    ) {
-
-                        event.preventDefault();
-
-                        showAlert(
+                    window.Swal.fire({
+                        icon:
                             'warning',
-                            'Format file tidak valid',
-                            'Gunakan PDF, JPG, JPEG, atau PNG.'
-                        );
-
-                        return;
-                    }
-
-                    if (
-                        file.size <= 0
-                    ) {
-
-                        event.preventDefault();
-
-                        showAlert(
-                            'warning',
-                            'File tidak valid',
-                            'File yang dipilih kosong.'
-                        );
-
-                        return;
-                    }
-
-                    if (
-                        file.size >
-                        MAX_FILE_SIZE
-                    ) {
-
-                        event.preventDefault();
-
-                        showAlert(
-                            'warning',
-                            'File terlalu besar',
-                            'Ukuran file maksimal 10 MB.'
-                        );
-
-                        return;
-                    }
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | PDF HARUS SUDAH DI-COMPRESS / DIPROSES
-                    |--------------------------------------------------------------------------
-                    */
-
-                    if (
-                        extension ===
-                        'pdf'
-                    ) {
-
-                        if (
-                            !pdfCompressionReady
-                        ) {
-
-                            event.preventDefault();
-
-                            showAlert(
-                                'warning',
-                                'PDF belum siap',
-                                'Tunggu sampai proses compression PDF selesai.'
+                        title:
+                            'Rentang tanggal tidak valid',
+                        text:
+                            'Tanggal mulai tidak boleh lebih besar dari tanggal akhir.',
+                        confirmButtonText:
+                            'Mengerti',
+                        confirmButtonColor:
+                            '#2563eb'
+                    });
+                }
+                else {
+                    window.alert(
+                        'Tanggal mulai tidak boleh lebih besar dari tanggal akhir.'
+                    );
+                }
+            }
+        }
+    );
+    /* =========================================================
+       DELETE
+    ========================================================= */
+    document
+        .querySelectorAll(
+            '.delete-btn'
+        )
+        .forEach(
+            function (button) {
+                button.addEventListener(
+                    'click',
+                    function () {
+                        const form =
+                            this.closest(
+                                '.delete-form'
                             );
-
-                            showStatus(
-                                'PDF masih diproses oleh server.',
-                                'blue'
-                            );
-
+                        if (!form) {
                             return;
                         }
-
-                        showStatus(
-                            pdfOriginalHashToken
-                                ? 'PDF tidak lebih kecil. File asli akan digunakan saat update.'
-                                : 'PDF hasil compression siap dikirim ke server.',
-                            pdfOriginalHashToken
-                                ? 'amber'
-                                : 'green'
-                        );
+                        if (
+                            typeof window.Swal !==
+                            'undefined'
+                        ) {
+                            window.Swal.fire({
+                                title:
+                                    'Hapus Surat Keluar?',
+                                text:
+                                    'Data yang dihapus akan dipindahkan ke tempat sampah.',
+                                icon:
+                                    'warning',
+                                showCancelButton:
+                                    true,
+                                confirmButtonColor:
+                                    '#ef4444',
+                                cancelButtonColor:
+                                    '#64748b',
+                                confirmButtonText:
+                                    'Ya, Hapus!',
+                                cancelButtonText:
+                                    'Batal',
+                                reverseButtons:
+                                    true
+                            })
+                            .then(
+                                function (result) {
+                                    if (
+                                        result.isConfirmed
+                                    ) {
+                                        form.submit();
+                                    }
+                                }
+                            );
+                        }
+                        else {
+                            if (
+                                window.confirm(
+                                    'Yakin ingin menghapus surat keluar ini?'
+                                )
+                            ) {
+                                form.submit();
+                            }
+                        }
                     }
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | IMAGE
-                    |--------------------------------------------------------------------------
-                    */
-
-                    if (
-                        isImageExtension(
-                            extension
-                        )
-                    ) {
-
-                        showStatus(
-                            'File gambar hasil compression siap dikirim. Lampiran lama akan diganti setelah update berhasil.',
-                            'amber'
-                        );
-                    }
-                }
-
-                /*
-                |--------------------------------------------------------------------------
-                | LOCK SUBMIT
-                |--------------------------------------------------------------------------
-                */
-
-                submitting =
-                    true;
-
-                submitButton.disabled =
-                    true;
-
-                submitIcon.classList.add(
-                    'ske-hidden'
                 );
-
-                submitLoading.classList.remove(
-                    'ske-hidden'
-                );
-
-                submitProgress.classList.add(
-                    'show'
-                );
-
-                if (
-                    file &&
-                    getExtension(file) ===
-                        'pdf'
-                ) {
-
-                    submitText.textContent =
-                        'Memperbarui dengan PDF...';
-
-                } else if (
-                    file
-                ) {
-
-                    submitText.textContent =
-                        'Menyimpan lampiran...';
-
-                } else {
-
-                    submitText.textContent =
-                        'Memperbarui...';
-                }
-
             }
         );
-
-        /*
-        |--------------------------------------------------------------------------
-        | BEFORE UNLOAD
-        |--------------------------------------------------------------------------
-        */
-
-        window.addEventListener(
-            'beforeunload',
-            function () {
-
-                revokePreviewUrl();
-
-            }
+    /* =========================================================
+       INITIALIZE
+    ========================================================= */
+    updateKategoriFilter();
+    updateStatusFilter();
+    if (
+        selectedStart &&
+        selectedEnd &&
+        dateInput &&
+        clearDateButton
+    ) {
+        dateInput.value =
+            formatDate(
+                selectedStart
+            )
+            +
+            ' - '
+            +
+            formatDate(
+                selectedEnd
+            );
+        clearDateButton.classList.remove(
+            'hidden'
         );
-
+        clearDateButton.classList.add(
+            'flex'
+        );
     }
-);
+})();
 </script>
-
+<script
+    src="https://cdn.jsdelivr.net/npm/sweetalert2@11"
+    defer
+></script>
 @endpush
-
 @endsection
