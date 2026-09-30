@@ -3588,50 +3588,119 @@ body.date-picker-lock{overflow:hidden}
 @endsection
 
 <style>
-/* ==========================================================================
-   PAGINATION - COMPACT
-   ========================================================================== */
+/* ============================================================================
+   PAGINATION - RAPIH & COMPACT
+   ============================================================================ */
 .archive-pagination{
     padding:8px 16px 9px !important;
     border-top:1px solid #edf2f7 !important;
     background:#fff !important;
 }
+
+/* Baris pagination */
+.archive-pagination nav{
+    font-size:10px !important;
+}
+
 .archive-pagination nav p{
     margin:0 !important;
-    font-size:9px !important;
-    line-height:1.2 !important;
     color:#94a3b8 !important;
+    font-size:10px !important;
+    line-height:1.2 !important;
 }
-.archive-pagination nav{font-size:9px !important;}
+
+/* Pastikan area nomor halaman rapat dan sejajar */
+.archive-pagination nav > div:last-child{
+    display:flex !important;
+    align-items:center !important;
+    gap:4px !important;
+}
+
+.archive-pagination nav > div:last-child > div:last-child{
+    display:flex !important;
+    align-items:center !important;
+    gap:4px !important;
+}
+
+/* Hilangkan jarak/margin bawaan Tailwind pada pembungkus tombol */
+.archive-pagination nav > div:last-child > div:last-child > span,
+.archive-pagination nav > div:last-child > div:last-child > a{
+    margin:0 !important;
+}
+
+/* Wrapper tombol Laravel/Tailwind */
+.archive-pagination nav .relative.z-0.inline-flex{
+    display:inline-flex !important;
+    align-items:center !important;
+    gap:4px !important;
+    box-shadow:none !important;
+    border-radius:8px !important;
+}
+
+/* Tombol Previous / Next dan nomor halaman */
 .archive-pagination nav a,
 .archive-pagination nav span{
-    min-width:26px !important;
-    height:26px !important;
-    padding:0 6px !important;
-    font-size:9px !important;
-    line-height:24px !important;
-    border-radius:6px !important;
+    box-sizing:border-box !important;
 }
-.archive-pagination nav svg{
-    width:11px !important;
-    height:11px !important;
+
+.archive-pagination nav .relative.z-0.inline-flex > a,
+.archive-pagination nav .relative.z-0.inline-flex > span{
+    display:inline-flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    min-width:32px !important;
+    width:32px !important;
+    height:32px !important;
+    margin:0 !important;
+    padding:0 !important;
+    border:1px solid #dbe4f0 !important;
+    border-radius:7px !important;
+    font-size:10px !important;
+    line-height:1 !important;
+    box-shadow:none !important;
 }
-.archive-pagination nav span[aria-current="page"]{font-size:9px !important;}
-.archive-pagination nav > div > span,
-.archive-pagination nav > div > a{margin:0 !important;}
-.archive-pagination nav > div{gap:3px !important;}
+
+/* Ikon panah */
+.archive-pagination nav .relative.z-0.inline-flex svg{
+    width:13px !important;
+    height:13px !important;
+}
+
+/* Nomor halaman aktif */
+.archive-pagination nav .relative.z-0.inline-flex span[aria-current="page"]{
+    min-width:32px !important;
+    width:32px !important;
+    height:32px !important;
+    font-size:10px !important;
+}
+
+/* Mobile */
 @media (max-width:640px){
-    .archive-pagination{padding:7px 10px 8px !important;}
-    .archive-pagination nav p{font-size:8px !important;}
-    .archive-pagination nav a,
-    .archive-pagination nav span{
-        min-width:24px !important;
-        height:24px !important;
-        padding:0 5px !important;
-        font-size:8px !important;
-        line-height:22px !important;
-        border-radius:5px !important;
+    .archive-pagination{
+        padding:7px 10px 8px !important;
     }
-    .archive-pagination nav svg{width:10px !important;height:10px !important;}
+
+    .archive-pagination nav p{
+        font-size:8px !important;
+    }
+
+    .archive-pagination nav .relative.z-0.inline-flex{
+        gap:3px !important;
+    }
+
+    .archive-pagination nav .relative.z-0.inline-flex > a,
+    .archive-pagination nav .relative.z-0.inline-flex > span,
+    .archive-pagination nav .relative.z-0.inline-flex span[aria-current="page"]{
+        min-width:29px !important;
+        width:29px !important;
+        height:29px !important;
+        border-radius:6px !important;
+        font-size:9px !important;
+    }
+
+    .archive-pagination nav .relative.z-0.inline-flex svg{
+        width:11px !important;
+        height:11px !important;
+    }
 }
 </style>
