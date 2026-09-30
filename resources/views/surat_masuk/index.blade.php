@@ -6444,12 +6444,12 @@
 /* Tombol Previous / Next dan nomor halaman */
 .archive-pagination nav a,
 .archive-pagination nav span{
-    min-width:26px !important;
-    height:26px !important;
-    padding:0 6px !important;
-    font-size:9px !important;
-    line-height:24px !important;
-    border-radius:6px !important;
+    min-width:30px !important;
+    height:30px !important;
+    padding:0 8px !important;
+    font-size:10px !important;
+    line-height:30px !important;
+    border-radius:7px !important;
 }
 
 /* Ikon panah */
