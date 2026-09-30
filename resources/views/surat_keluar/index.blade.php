@@ -1469,7 +1469,7 @@ body.date-picker-lock{overflow:hidden}
             ) &&
             $suratKeluars->hasPages()
         )
-            <div class="border-t border-slate-200 px-4 py-3 sm:px-6 sm:py-4">
+            <div class="archive-pagination">
                 {{ $suratKeluars->withQueryString()->links() }}
             </div>
         @endif
@@ -3586,3 +3586,52 @@ body.date-picker-lock{overflow:hidden}
 ></script>
 @endpush
 @endsection
+
+<style>
+/* ==========================================================================
+   PAGINATION - COMPACT
+   ========================================================================== */
+.archive-pagination{
+    padding:8px 16px 9px !important;
+    border-top:1px solid #edf2f7 !important;
+    background:#fff !important;
+}
+.archive-pagination nav p{
+    margin:0 !important;
+    font-size:9px !important;
+    line-height:1.2 !important;
+    color:#94a3b8 !important;
+}
+.archive-pagination nav{font-size:9px !important;}
+.archive-pagination nav a,
+.archive-pagination nav span{
+    min-width:26px !important;
+    height:26px !important;
+    padding:0 6px !important;
+    font-size:9px !important;
+    line-height:24px !important;
+    border-radius:6px !important;
+}
+.archive-pagination nav svg{
+    width:11px !important;
+    height:11px !important;
+}
+.archive-pagination nav span[aria-current="page"]{font-size:9px !important;}
+.archive-pagination nav > div > span,
+.archive-pagination nav > div > a{margin:0 !important;}
+.archive-pagination nav > div{gap:3px !important;}
+@media (max-width:640px){
+    .archive-pagination{padding:7px 10px 8px !important;}
+    .archive-pagination nav p{font-size:8px !important;}
+    .archive-pagination nav a,
+    .archive-pagination nav span{
+        min-width:24px !important;
+        height:24px !important;
+        padding:0 5px !important;
+        font-size:8px !important;
+        line-height:22px !important;
+        border-radius:5px !important;
+    }
+    .archive-pagination nav svg{width:10px !important;height:10px !important;}
+}
+</style>

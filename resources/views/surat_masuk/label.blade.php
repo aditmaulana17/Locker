@@ -159,7 +159,7 @@
         <!-- Header -->
         <div class="label-header">
             <div>
-                <p class="brand-title">E-ARSIP DIGITAL</p>
+                <p class="brand-title">Locker</p>
                 <h1 class="label-title">LABEL SURAT MASUK</h1>
             </div>
             <div class="agenda-badge">
