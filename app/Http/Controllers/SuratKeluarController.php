@@ -54,7 +54,7 @@ class SuratKeluarController extends Controller
     ];
 
     private const MAX_FILE_SIZE =
-        10 * 1024 * 1024;
+        20 * 1024 * 1024;
 
     private const COMPRESSION_THRESHOLD =
         2 * 1024 * 1024;
@@ -110,7 +110,7 @@ class SuratKeluarController extends Controller
         2500;
 
     private const MAX_COMPRESSED_IMAGE_SIZE =
-        9 * 1024 * 1024;
+        20 * 1024 * 1024;
 
     private const JPEG_QUALITY =
         82;
@@ -776,7 +776,7 @@ class SuratKeluarController extends Controller
                     'required',
                     'file',
                     'mimes:pdf,jpg,jpeg,png',
-                    'max:10240',
+                    'max:20480',
                 ],
             ],
             [
@@ -790,7 +790,7 @@ class SuratKeluarController extends Controller
                     'Gunakan PDF, JPG, JPEG, atau PNG.',
 
                 'lampiran_file.max' =>
-                    'Ukuran file maksimal 10 MB.',
+                    'Ukuran file maksimal 20 MB.',
             ]
         );
 
@@ -2485,7 +2485,7 @@ class SuratKeluarController extends Controller
             self::MAX_FILE_SIZE
         ) {
             throw new RuntimeException(
-                'Ukuran file lampiran maksimal 10 MB.'
+                'Ukuran file lampiran maksimal 20 MB.'
             );
         }
 
@@ -2760,7 +2760,7 @@ class SuratKeluarController extends Controller
             self::MAX_FILE_SIZE
         ) {
             throw new RuntimeException(
-                'Ukuran PDF maksimal 10 MB.'
+                'Ukuran PDF maksimal 20 MB.'
             );
         }
 
@@ -2900,7 +2900,7 @@ class SuratKeluarController extends Controller
                     self::MAX_FILE_SIZE
                 ) {
                     throw new RuntimeException(
-                        'PDF hasil compression melebihi batas 10 MB.'
+                        'PDF hasil compression melebihi batas 20 MB.'
                     );
                 }
 
@@ -3038,7 +3038,7 @@ class SuratKeluarController extends Controller
             self::MAX_FILE_SIZE
         ) {
             throw new RuntimeException(
-                'Ukuran PDF maksimal 10 MB.'
+                'Ukuran PDF maksimal 20 MB.'
             );
         }
 
@@ -3132,7 +3132,7 @@ class SuratKeluarController extends Controller
                 self::MAX_FILE_SIZE
             ) {
                 throw new RuntimeException(
-                    'PDF hasil compression masih melebihi batas 10 MB.'
+                    'PDF hasil compression masih melebihi batas 20 MB.'
                 );
             }
 
@@ -3475,7 +3475,7 @@ class SuratKeluarController extends Controller
             );
 
             throw new RuntimeException(
-                'PDF hasil compression masih melebihi batas 10 MB.'
+                'PDF hasil compression masih melebihi batas 20 MB.'
             );
         }
 
@@ -3529,7 +3529,7 @@ class SuratKeluarController extends Controller
                 self::MAX_FILE_SIZE
             ) {
                 throw new RuntimeException(
-                    'Gambar hasil compression masih melebihi batas 10 MB.'
+                    'Gambar hasil compression masih melebihi batas 20 MB.'
                 );
             }
 
@@ -3864,7 +3864,7 @@ class SuratKeluarController extends Controller
                 );
 
                 throw new RuntimeException(
-                    'Gambar hasil compression masih lebih besar dari 10 MB.'
+                    'Gambar hasil compression masih lebih besar dari 20 MB.'
                 );
             }
 
@@ -3964,7 +3964,7 @@ class SuratKeluarController extends Controller
             self::MAX_FILE_SIZE
         ) {
             throw new RuntimeException(
-                'Ukuran hasil scan kamera maksimal 10 MB.'
+                'Ukuran hasil scan kamera maksimal 20 MB.'
             );
         }
 
@@ -4082,7 +4082,7 @@ class SuratKeluarController extends Controller
             self::MAX_FILE_SIZE
         ) {
             throw new RuntimeException(
-                'Data file melebihi batas 10 MB.'
+                'Data file melebihi batas 20 MB.'
             );
         }
 

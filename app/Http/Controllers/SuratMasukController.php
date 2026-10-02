@@ -56,7 +56,7 @@ class SuratMasukController extends Controller
     ];
 
     private const MAX_FILE_SIZE =
-        10 * 1024 * 1024;
+        20 * 1024 * 1024;
 
     private const COMPRESSION_THRESHOLD =
         2 * 1024 * 1024;
@@ -142,7 +142,7 @@ class SuratMasukController extends Controller
     */
 
     private const MAX_COMPRESSED_IMAGE_SIZE =
-        9 * 1024 * 1024;
+        20 * 1024 * 1024;
 
     private const MAX_IMAGE_WIDTH =
         2500;
@@ -927,7 +927,7 @@ class SuratMasukController extends Controller
                     'required',
                     'file',
                     'mimes:pdf',
-                    'max:10240',
+                    'max:20480',
                 ],
             ],
             [
@@ -941,7 +941,7 @@ class SuratMasukController extends Controller
                     'File harus berformat PDF.',
 
                 'lampiran_file.max' =>
-                    'Ukuran PDF maksimal 10 MB.',
+                    'Ukuran PDF maksimal 20 MB.',
             ]
         );
 
@@ -1066,7 +1066,7 @@ class SuratMasukController extends Controller
                         false,
 
                     'message' =>
-                        'Ukuran PDF maksimal 10 MB.',
+                        'Ukuran PDF maksimal 20 MB.',
                 ],
                 422
             );
@@ -1727,7 +1727,7 @@ class SuratMasukController extends Controller
         ) {
 
             throw new RuntimeException(
-                'Ukuran PDF maksimal 10 MB.'
+                'Ukuran PDF maksimal 20 MB.'
             );
         }
 
@@ -1889,7 +1889,7 @@ class SuratMasukController extends Controller
                 ) {
 
                     throw new RuntimeException(
-                        'PDF hasil compression melebihi batas 10 MB.'
+                        'PDF hasil compression melebihi batas 20 MB.'
                     );
                 }
 
@@ -2318,7 +2318,7 @@ class SuratMasukController extends Controller
 
 
             throw new RuntimeException(
-                'PDF hasil compression masih melebihi batas 10 MB.'
+                'PDF hasil compression masih melebihi batas 20 MB.'
             );
         }
 
@@ -2380,7 +2380,7 @@ class SuratMasukController extends Controller
         ) {
 
             throw new RuntimeException(
-                'Ukuran PDF maksimal 10 MB.'
+                'Ukuran PDF maksimal 20 MB.'
             );
         }
 
@@ -2487,7 +2487,7 @@ class SuratMasukController extends Controller
             ) {
 
                 throw new RuntimeException(
-                    'PDF hasil compression masih melebihi batas 10 MB.'
+                    'PDF hasil compression masih melebihi batas 20 MB.'
                 );
             }
 
@@ -2640,7 +2640,7 @@ class SuratMasukController extends Controller
         ) {
 
             throw new RuntimeException(
-                'Ukuran hasil scan kamera maksimal 10 MB.'
+                'Ukuran hasil scan kamera maksimal 20 MB.'
             );
         }
 
@@ -3186,7 +3186,7 @@ class SuratMasukController extends Controller
         ) {
 
             throw new RuntimeException(
-                'Gambar masih melebihi batas 10 MB setelah compression.'
+                'Gambar masih melebihi batas 20 MB setelah compression.'
             );
         }
 
@@ -3232,7 +3232,7 @@ class SuratMasukController extends Controller
         ) {
 
             throw new RuntimeException(
-                'Data file melebihi batas 10 MB.'
+                'Data file melebihi batas 20 MB.'
             );
         }
 
@@ -4362,7 +4362,7 @@ class SuratMasukController extends Controller
                 ) {
 
                     throw new RuntimeException(
-                        'Ukuran file lampiran maksimal 10 MB.'
+                        'Ukuran file lampiran maksimal 20 MB.'
                     );
                 }
 
@@ -4939,7 +4939,7 @@ class SuratMasukController extends Controller
         ) {
 
             throw new RuntimeException(
-                'Ukuran file lampiran maksimal 10 MB.'
+                'Ukuran file lampiran maksimal 20 MB.'
             );
         }
 
