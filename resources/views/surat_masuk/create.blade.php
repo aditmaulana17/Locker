@@ -1442,7 +1442,7 @@ textarea.sm-control {
                                             Berkas Digital
                                         </h3>
                                         <p class="sm-card-desc">
-                                            PDF, JPG, JPEG, PNG · maksimal 10 MB
+                                            PDF, JPG, JPEG, PNG · maksimal 20 MB
                                         </p>
                                     </div>
                                 </div>
@@ -1565,7 +1565,7 @@ textarea.sm-control {
                                             PDF, JPG, JPEG, PNG
                                         </span>
                                         <span class="sm-upload-limit">
-                                            Maksimal 10 MB
+                                            Maksimal 20 MB
                                         </span>
                                         <input
                                             id="lampiran_file"
@@ -2089,7 +2089,7 @@ document.addEventListener(
             return;
         }
         const MAX_FILE_SIZE =
-            10 *
+            20 *
             1024 *
             1024;
         const IMAGE_TARGET_SIZE =
@@ -3152,7 +3152,7 @@ document.addEventListener(
                     showAlert(
                         'warning',
                         'File terlalu besar',
-                        'Ukuran file asli maksimal 10 MB.'
+                        'Ukuran file asli maksimal 20 MB.'
                     );
                     return;
                 }
@@ -3248,7 +3248,7 @@ document.addEventListener(
                         MAX_FILE_SIZE
                     ) {
                         throw new Error(
-                            'Ukuran hasil compression masih lebih dari 10 MB.'
+                            'Ukuran hasil compression masih lebih dari 20 MB.'
                         );
                     }
                     const transfer =
@@ -4019,7 +4019,7 @@ document.addEventListener(
                         showAlert(
                             'warning',
                             'File terlalu besar',
-                            'Ukuran file maksimal 10 MB.'
+                            'Ukuran file maksimal 20 MB.'
                         );
                         return;
                     }

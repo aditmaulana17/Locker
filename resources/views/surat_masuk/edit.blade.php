@@ -1672,7 +1672,7 @@ textarea.sme-control {
                                         </h3>
 
                                         <p class="sme-attachment-description">
-                                            PDF, JPG, JPEG, PNG · Maksimal 10 MB
+                                            PDF, JPG, JPEG, PNG · Maksimal 20 MB
                                         </p>
                                     </div>
 
@@ -1835,7 +1835,7 @@ textarea.sme-control {
                                         </span>
 
                                         <span class="sme-upload-limit">
-                                            Maksimal 10 MB
+                                            Maksimal 20 MB
                                         </span>
 
                                         <input
@@ -2412,7 +2412,7 @@ document.addEventListener(
         ================================================================ */
 
         const MAX_FILE_SIZE =
-            10 *
+            20 *
             1024 *
             1024;
 
@@ -4016,7 +4016,7 @@ document.addEventListener(
                     ) {
 
                         throw new Error(
-                            'Ukuran hasil masih lebih dari 10 MB.'
+                            'Ukuran hasil masih lebih dari 20 MB.'
                         );
                     }
 
@@ -4758,7 +4758,7 @@ document.addEventListener(
                         showAlert(
                             'warning',
                             'File terlalu besar',
-                            'Ukuran file maksimal 10 MB.'
+                            'Ukuran file maksimal 20 MB.'
                         );
 
                         return;
