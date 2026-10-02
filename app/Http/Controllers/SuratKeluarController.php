@@ -53,6 +53,9 @@ class SuratKeluarController extends Controller
         'image/png',
     ];
 
+    private const MAX_FILE_SIZE_KB =
+        20480;
+
     private const MAX_FILE_SIZE =
         20 * 1024 * 1024;
 
@@ -776,7 +779,7 @@ class SuratKeluarController extends Controller
                     'required',
                     'file',
                     'mimes:pdf,jpg,jpeg,png',
-                    'max:20480',
+                    'max:' . self::MAX_FILE_SIZE_KB,
                 ],
             ],
             [
@@ -4001,6 +4004,23 @@ class SuratKeluarController extends Controller
         ) {
             throw new RuntimeException(
                 'Jenis gambar hasil scan tidak didukung.'
+            );
+        }
+
+        // Gambar hasil scan di bawah 2 MB disimpan apa adanya tanpa kompresi.
+        if (
+            strlen($decoded) <
+            self::COMPRESSION_THRESHOLD
+        ) {
+            $extension =
+                $mime === 'image/png'
+                    ? 'png'
+                    : 'jpg';
+
+            return $this->storeBinaryFile(
+                $decoded,
+                $extension,
+                $mime
             );
         }
 

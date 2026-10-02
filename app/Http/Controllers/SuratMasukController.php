@@ -55,6 +55,9 @@ class SuratMasukController extends Controller
         'image/png',
     ];
 
+    private const MAX_FILE_SIZE_KB =
+        20480;
+
     private const MAX_FILE_SIZE =
         20 * 1024 * 1024;
 
@@ -927,7 +930,7 @@ class SuratMasukController extends Controller
                     'required',
                     'file',
                     'mimes:pdf',
-                    'max:20480',
+                    'max:' . self::MAX_FILE_SIZE_KB,
                 ],
             ],
             [
@@ -2693,6 +2696,45 @@ class SuratMasukController extends Controller
             );
         }
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | SCAN DI BAWAH 2 MB
+        |--------------------------------------------------------------------------
+        |
+        | Sama seperti upload file biasa, scan kamera di bawah 2 MB
+        | tidak dikompres. File disimpan dalam bentuk aslinya.
+        |
+        */
+
+        if (
+            strlen(
+                $decodedData
+            ) <
+            self::COMPRESSION_THRESHOLD
+        ) {
+
+            $extension =
+                $actualMime ===
+                'image/png'
+                    ? 'png'
+                    : 'jpg';
+
+            return $this->storeBinaryFile(
+                $decodedData,
+                $extension,
+                $actualMime,
+                'scan',
+                $diskName
+            );
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | SCAN 2-20 MB
+        |--------------------------------------------------------------------------
+        */
 
         return $this->storeCompressedImage(
             $decodedData,
