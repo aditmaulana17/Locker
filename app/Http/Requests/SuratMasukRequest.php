@@ -17,23 +17,23 @@ class SuratMasukRequest extends FormRequest
 
     /**
      * Maksimal ukuran file asli:
-     * 10 MB = 10240 KB.
+     * 20 MB = 20480 KB.
      */
     private const MAX_FILE_SIZE_KB =
-        10240;
+        20480;
 
     /**
      * Maksimal ukuran file dalam byte.
      */
     private const MAX_FILE_SIZE_BYTES =
-        10 * 1024 * 1024;
+        20 * 1024 * 1024;
 
     /**
      * Maksimal ukuran hasil kamera
      * setelah Base64 di-decode.
      */
     private const MAX_CAMERA_SIZE_BYTES =
-        10 * 1024 * 1024;
+        20 * 1024 * 1024;
 
     /**
      * Role yang boleh membuat/mengubah
@@ -311,6 +311,9 @@ class SuratMasukRequest extends FormRequest
             | EDIT:
             |   boleh kosong karena file lama dapat dipertahankan.
             |
+            | Batas maksimal file:
+            |   20 MB.
+            |
             */
 
             'lampiran_file' => [
@@ -574,7 +577,7 @@ class SuratMasukRequest extends FormRequest
                 ->errors()
                 ->add(
                     'lampiran_file',
-                    'Ukuran file maksimal 10 MB.'
+                    'Ukuran file maksimal 20 MB.'
                 );
 
             return;
@@ -1023,7 +1026,7 @@ class SuratMasukRequest extends FormRequest
                 ->errors()
                 ->add(
                     'captured_image',
-                    'Ukuran hasil scan kamera maksimal 10 MB.'
+                    'Ukuran hasil scan kamera maksimal 20 MB.'
                 );
 
             return;
@@ -1523,7 +1526,7 @@ class SuratMasukRequest extends FormRequest
                 ':attribute harus berformat PDF, JPG, JPEG, atau PNG.',
 
             'lampiran_file.max' =>
-                ':attribute maksimal berukuran 10 MB.',
+                ':attribute maksimal berukuran 20 MB.',
 
             /*
             |--------------------------------------------------------------------------

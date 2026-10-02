@@ -17,15 +17,15 @@ class SuratKeluarRequest extends FormRequest
 
     /**
      * Maksimal ukuran upload:
-     * 10 MB.
+     * 20 MB.
      */
-    private const MAX_FILE_SIZE_KB = 10240;
+    private const MAX_FILE_SIZE_KB = 20480;
 
     /**
      * Maksimal ukuran upload dalam byte.
      */
     private const MAX_FILE_SIZE_BYTES =
-        10 * 1024 * 1024;
+        20 * 1024 * 1024;
 
     /**
      * Extension yang diperbolehkan.
@@ -290,12 +290,12 @@ class SuratKeluarRequest extends FormRequest
             |--------------------------------------------------------------------------
             |
             | PDF:
-            | - maksimal 10 MB
+            | - maksimal 20 MB
             | - tetap PDF
             | - compression dilakukan controller
             |
             | JPG/JPEG/PNG:
-            | - maksimal 10 MB
+            | - maksimal 20 MB
             | - dapat dikompresi controller
             | - hasil akhir dapat menjadi JPG
             |
@@ -546,7 +546,7 @@ class SuratKeluarRequest extends FormRequest
                 ->errors()
                 ->add(
                     'lampiran_file',
-                    'Ukuran file lampiran maksimal 10 MB.'
+                    'Ukuran file lampiran maksimal 20 MB.'
                 );
 
             return;
@@ -1074,7 +1074,7 @@ class SuratKeluarRequest extends FormRequest
                 ->errors()
                 ->add(
                     'captured_image',
-                    'Ukuran hasil scan kamera maksimal 10 MB.'
+                    'Ukuran hasil scan kamera maksimal 20 MB.'
                 );
 
             return;
@@ -1453,7 +1453,7 @@ class SuratKeluarRequest extends FormRequest
                 'Berkas hanya boleh berupa PDF, JPG, JPEG, atau PNG.',
 
             'lampiran_file.max' =>
-                'Ukuran berkas lampiran maksimal 10 MB.',
+                'Ukuran berkas lampiran maksimal 20 MB.',
 
             'captured_image.string' =>
                 'Data hasil scan kamera tidak valid.',
