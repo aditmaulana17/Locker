@@ -3705,7 +3705,7 @@ document.addEventListener(
             ) {
 
                 throw new Error(
-                    'PDF hasil kompresi masih melebihi 10 MB.'
+                    'PDF hasil kompresi masih melebihi 20 MB.'
                 );
             }
 
@@ -3833,7 +3833,7 @@ document.addEventListener(
                     showAlert(
                         'warning',
                         'File terlalu besar',
-                        'Ukuran file asli maksimal 10 MB.'
+                        'Ukuran file asli maksimal 20 MB.'
                     );
 
                     return;
