@@ -4278,11 +4278,17 @@ class SuratMasukController extends Controller
                 ->get();
 
 
+        $fileUrl =
+            $this->getFileUrl(
+                $suratMasuk->lampiran_file
+            );
+
         return view(
             'surat_masuk.edit',
             compact(
                 'suratMasuk',
-                'kategoris'
+                'kategoris',
+                'fileUrl'
             )
         );
     }

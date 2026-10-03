@@ -1816,10 +1816,16 @@ class SuratKeluarController extends Controller
             ]
         );
 
+        $fileUrl =
+            $this->getFileUrl(
+                $suratKeluar->lampiran_file
+            );
+
         return view(
             'surat_keluar.show',
             compact(
-                'suratKeluar'
+                'suratKeluar',
+                'fileUrl'
             )
         );
     }
@@ -1855,12 +1861,18 @@ class SuratKeluarController extends Controller
                 )
                 ->get();
 
+        $fileUrl =
+            $this->getFileUrl(
+                $suratKeluar->lampiran_file
+            );
+
         return view(
             'surat_keluar.edit',
             compact(
                 'suratKeluar',
                 'kategoris',
-                'users'
+                'users',
+                'fileUrl'
             )
         );
     }
@@ -4380,6 +4392,82 @@ class SuratKeluarController extends Controller
             default =>
                 'application/octet-stream',
         };
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | FILE URL
+    |--------------------------------------------------------------------------
+    */
+
+    private function getFileUrl(
+        ?string $file
+    ): ?string {
+        if (!$file) {
+            return null;
+        }
+
+        if (
+            filter_var(
+                $file,
+                FILTER_VALIDATE_URL
+            )
+        ) {
+            return $file;
+        }
+
+        try {
+            $disk =
+                $this->storage();
+
+            if (
+                !method_exists(
+                    $disk,
+                    'temporaryUrl'
+                )
+            ) {
+                return null;
+            }
+
+            $mimeType =
+                $this->getMimeTypeFromPath(
+                    $file
+                );
+
+            $url =
+                $disk->temporaryUrl(
+                    $file,
+                    now()->addMinutes(30),
+                    [
+                        'ResponseContentType' =>
+                            $mimeType,
+
+                        'ResponseContentDisposition' =>
+                            'inline; filename="' .
+                            basename($file) .
+                            '"',
+                    ]
+                );
+
+            return $url ?: null;
+
+        } catch (Throwable $e) {
+            Log::warning(
+                'Gagal membuat URL lampiran Surat Keluar.',
+                [
+                    'message' =>
+                        $e->getMessage(),
+
+                    'file' =>
+                        $file,
+
+                    'disk' =>
+                        $this->getStorageDisk(),
+                ]
+            );
+
+            return null;
+        }
     }
 
     /*
